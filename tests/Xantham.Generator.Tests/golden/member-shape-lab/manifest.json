@@ -17,8 +17,8 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 2,
-      "ergonomic": 2
+      "total": 10,
+      "ergonomic": 10
     }
   ],
   "symbols": [
@@ -103,6 +103,34 @@
           "tier": "escape",
           "symbol": "Deferred.then(onrejected)(reason)",
           "message": "any maps to obj"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Deferred",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Deferred.catch",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Deferred.finally",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Deferred.then",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         }
       ]
     },
@@ -187,6 +215,34 @@
           "tier": "widened",
           "symbol": "Recorder.removeEventListener(options)",
           "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Recorder",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Recorder.addEventListener",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Recorder.dispatchEvent",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Recorder.removeEventListener",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         }
       ]
     },

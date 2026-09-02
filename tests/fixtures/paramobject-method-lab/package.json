@@ -1,0 +1,7 @@
+{
+    "name": "paramobject-method-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "main": "index.js",
+    "description": "Hand-authored fixture for wave four lane O: an interface carrying a method still gains a ParamObject Create, binding the method to a delegate-typed parameter, and the four shapes that still get none - an index signature, a construct signature, an overloaded method, and more members than the Create parameter budget."
+}

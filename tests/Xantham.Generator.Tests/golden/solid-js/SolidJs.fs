@@ -145,8 +145,11 @@ type ObservableObserver2<'T> =
     [<ParamObject; Emit("$0")>]
     static member Create (?next: Action<'T>, ?error: Action<obj>, ?complete: Action<bool>) : ObservableObserver2<'T> = jsNative
 
+[<Interface>]
 type Observable<'T> =
     abstract subscribe: observer: U2<Action<'T>, ObservableSubscribeObserver<'T>> -> ObservableSubscribeResult
+    [<ParamObject; Emit("$0")>]
+    static member Create (subscribe: Func<U2<Action<'T>, ObservableSubscribeObserver<'T>>, ObservableSubscribeResult>) : Observable<'T> = jsNative
 
 [<Interface>]
 type ObservableSubscribeObserver<'T> =
@@ -156,8 +159,11 @@ type ObservableSubscribeObserver<'T> =
     [<ParamObject; Emit("$0")>]
     static member Create (?next: Action<'T>, ?error: Action<obj>, ?complete: Action<bool>) : ObservableSubscribeObserver<'T> = jsNative
 
+[<Interface>]
 type ObservableSubscribeResult =
     abstract unsubscribe: unit -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (unsubscribe: Action) : ObservableSubscribeResult = jsNative
 
 [<Interface>]
 type FromProducer<'T> =
@@ -749,6 +755,7 @@ type ErrorBoundaryProps =
     [<ParamObject; Emit("$0")>]
     static member Create (?fallback: obj, ?children: JSXElement) : ErrorBoundaryProps = jsNative
 
+[<Interface>]
 type SharedConfig =
     abstract context: SharedConfigContext option with get, set
     abstract resources: SharedConfigResources option with get, set
@@ -761,6 +768,8 @@ type SharedConfig =
     abstract effects: Computation<obj, obj>[] option with get, set
     abstract getContextId: unit -> string
     abstract getNextContextId: unit -> string
+    [<ParamObject; Emit("$0")>]
+    static member Create (getContextId: Func<string>, getNextContextId: Func<string>, ?context: SharedConfigContext, ?resources: SharedConfigResources, ?load: Func<string, obj>, ?has: Func<string, bool>, ?gather: Action<string>, ?registry: JS.Map<string, Browser.Types.Element>, ?``done``: bool, ?count: float, ?effects: Computation<obj, obj>[]) : SharedConfig = jsNative
 
 [<Interface>]
 type SharedConfigContext =

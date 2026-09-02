@@ -382,6 +382,18 @@ let private workarounds () =
         """{"name":"lit"}|name,notify|lit:1"""
         (FableWorkaroundLab.Exports.invite viaLiteral)
 
+    // Wave four lane O: `Listener.notify` is carried into Create as a delegate parameter, so the
+    // literal above is reached under the typechecker rather than through the unchecked cast.
+    let viaCreate =
+        FableWorkaroundLab.Listener.Create("cr", System.Func<float, string>(fun count -> $"cr:{count}"))
+
+    equal
+        "a Create carrying a method is that same plain object, type-checked"
+        """{"name":"cr"}|name,notify|cr:1"""
+        (FableWorkaroundLab.Exports.invite viaCreate)
+
+    equal "and the delegate is reachable as the method it stands for" "cr:2" (viaCreate.notify 2.0)
+
     // 6. Equality. `=` on a generated interface is Fable's structural `equals`, which walks the
     // JavaScript object.
     let first = FableWorkaroundLab.Exports.fresh ()

@@ -58,6 +58,7 @@ type Nonce
 [<Measure>]
 type Mode
 
+[<Interface>]
 type Store =
     /// <summary>
     /// A brand in a parameter and a plain primitive as the return.
@@ -79,6 +80,8 @@ type Store =
     /// A branded property.
     /// </summary>
     abstract owner: string<UserId>
+    [<ParamObject; Emit("$0")>]
+    static member Create (get: Func<string<UserId>, string>, put: Action<string<UserId>, float<Millis>>, ids: Func<string<UserId>[]>, find: Func<string<SessionId> option, string<UserId> option>, owner: string<UserId>) : Store = jsNative
 
 /// <summary>
 /// An intersection of two object types: a real shape, not a brand.

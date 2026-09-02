@@ -29,6 +29,8 @@ type Widget =
 type Gadget =
     abstract widget: Widget
     abstract spin: turns: float -> Gadget
+    [<ParamObject; Emit("$0")>]
+    static member Create (widget: Widget, spin: Func<float, Gadget>) : Gadget = jsNative
     /// <summary>
     /// A static on a global class: the selector is dotted off the global name, not imported.
     /// </summary>

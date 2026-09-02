@@ -2,8 +2,8 @@
   "package": "flags-lab",
   "module": "FlagsLab",
   "counts": {
-    "exact": 5,
-    "ergonomic": 0,
+    "exact": 4,
+    "ergonomic": 1,
     "widened": 12,
     "escape": 0
   },
@@ -26,8 +26,8 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 3,
-      "ergonomic": 3
+      "total": 7,
+      "ergonomic": 7
     }
   ],
   "symbols": [
@@ -77,6 +77,20 @@
           "tier": "widened",
           "symbol": "Emitter.resolve(scope)",
           "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Emitter",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Emitter.resolve",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         }
       ]
     },
@@ -123,8 +137,23 @@
     {
       "name": "Ledger",
       "file": "index.d.ts",
-      "tier": "exact",
-      "findings": []
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Ledger",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Ledger.credit",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        }
+      ]
     },
     {
       "name": "Two",

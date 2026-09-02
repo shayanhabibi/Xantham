@@ -3,8 +3,8 @@
   "module": "KeyofLab",
   "counts": {
     "exact": 5,
-    "ergonomic": 13,
-    "widened": 7,
+    "ergonomic": 9,
+    "widened": 11,
     "escape": 0
   },
   "passes": [
@@ -27,8 +27,9 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 6,
-      "ergonomic": 6
+      "total": 13,
+      "ergonomic": 9,
+      "widened": 4
     }
   ],
   "symbols": [
@@ -96,13 +97,34 @@
           "tier": "ergonomic",
           "symbol": "Accessor.read",
           "message": "key over \u0027T\u0027 with its indexed access reads as typekeyof\u003C\u0027T,\u0027R\u003E (\u00A74.10)"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Accessor",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Accessor.all",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Accessor.read",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         }
       ]
     },
     {
       "name": "Bag",
       "file": "index.d.ts",
-      "tier": "ergonomic",
+      "tier": "widened",
       "findings": [
         {
           "key": "MB004",
@@ -110,13 +132,20 @@
           "tier": "ergonomic",
           "symbol": "Bag.[]",
           "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        },
+        {
+          "key": "SP003",
+          "pass": "synthesize-paramobjects",
+          "tier": "widened",
+          "symbol": "Bag",
+          "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
       ]
     },
     {
       "name": "Slots",
       "file": "index.d.ts",
-      "tier": "ergonomic",
+      "tier": "widened",
       "findings": [
         {
           "key": "MB004",
@@ -124,13 +153,20 @@
           "tier": "ergonomic",
           "symbol": "Slots.[]",
           "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        },
+        {
+          "key": "SP003",
+          "pass": "synthesize-paramobjects",
+          "tier": "widened",
+          "symbol": "Slots",
+          "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
       ]
     },
     {
       "name": "Registry",
       "file": "index.d.ts",
-      "tier": "ergonomic",
+      "tier": "widened",
       "findings": [
         {
           "key": "MB004",
@@ -138,13 +174,20 @@
           "tier": "ergonomic",
           "symbol": "Registry.[]",
           "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        },
+        {
+          "key": "SP003",
+          "pass": "synthesize-paramobjects",
+          "tier": "widened",
+          "symbol": "Registry",
+          "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
       ]
     },
     {
       "name": "FrozenBag",
       "file": "index.d.ts",
-      "tier": "ergonomic",
+      "tier": "widened",
       "findings": [
         {
           "key": "MB004",
@@ -152,6 +195,13 @@
           "tier": "ergonomic",
           "symbol": "FrozenBag.[]",
           "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        },
+        {
+          "key": "SP003",
+          "pass": "synthesize-paramobjects",
+          "tier": "widened",
+          "symbol": "FrozenBag",
+          "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
       ]
     },

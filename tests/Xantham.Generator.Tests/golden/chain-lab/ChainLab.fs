@@ -41,9 +41,12 @@ type VarNode<'TNodeType, 'TNode> =
     [<ParamObject; Emit("$0")>]
     static member Create (isNode: bool, toVar: Func<string option, VarNode<'TNodeType, VarNode<'TNodeType, 'TNode>>>, node: 'TNode, isVarNode: bool) : VarNode<'TNodeType, 'TNode> = jsNative
 
+[<Interface>]
 type Plain<'TValue> =
     abstract wrap: value: 'TValue -> VarNodeInterface<'TValue>
     abstract self: unit -> Plain<'TValue>
+    [<ParamObject; Emit("$0")>]
+    static member Create (wrap: Func<'TValue, VarNodeInterface<'TValue>>, self: Func<Plain<'TValue>>) : Plain<'TValue> = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

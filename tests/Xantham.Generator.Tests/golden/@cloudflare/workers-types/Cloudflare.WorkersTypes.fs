@@ -130,9 +130,12 @@ type ReadableStreamDefaultReaderReadResultItem2 =
     [<ParamObject; Emit("$0")>]
     static member Create (``done``: bool, ?value: unit) : ReadableStreamDefaultReaderReadResultItem2 = jsNative
 
+[<Interface>]
 type RequestFetcher =
     abstract fetch: input: U3<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, URL> * ?init: RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> -> JS.Promise<Response>
     abstract connect: address: U2<string, SocketAddress> * ?options: SocketOptions -> Socket
+    [<ParamObject; Emit("$0")>]
+    static member Create (fetch: Func<U3<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, URL>, RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option, JS.Promise<Response>>, connect: Func<U2<string, SocketAddress>, SocketOptions option, Socket>) : RequestFetcher = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type RequestInitCache =
@@ -285,6 +288,7 @@ type EventTargetConstructor =
     [<EmitConstructor>]
     abstract Create<'EventMap when 'EventMap :> EventCurrentTargetItem>: unit -> EventTarget<'EventMap>
 
+[<Interface>]
 type WorkerGlobalScope =
     inherit EventTarget<EventCurrentTargetItem>
     abstract EventTarget: EventTargetConstructor with get, set
@@ -306,7 +310,10 @@ type WorkerGlobalScope =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent)
     /// </summary>
     abstract dispatchEvent: ``event``: U4<FetchEvent, PromiseRejectionEvent, QueueEvent<obj>, ScheduledEvent> -> bool
+    [<ParamObject; Emit("$0")>]
+    static member Create (EventTarget: EventTargetConstructor, addEventListener: Action<'Type, U2<Action<obj>, EventListenerObject<Event>>, U2<bool, EventTargetAddEventListenerOptions> option>, removeEventListener: Action<'Type, U2<Action<obj>, EventListenerObject<Event>>, U2<bool, EventTargetEventListenerOptions> option>, dispatchEvent: Func<U4<FetchEvent, PromiseRejectionEvent, QueueEvent<obj>, ScheduledEvent>, bool>) : WorkerGlobalScope = jsNative
 
+[<Interface>]
 type Console =
     abstract ``assert``: condition: bool option * [<ParamArray>] data: obj[] -> unit
     /// <summary>
@@ -418,6 +425,8 @@ type Console =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/console/warn_static)
     /// </summary>
     abstract warn: [<ParamArray>] data: obj[] -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (``assert``: Action<bool option, obj[]>, clear: Action, count: Action<string option>, countReset: Action<string option>, debug: Action<obj[]>, dir: Action<obj, obj>, dirxml: Action<obj[]>, error: Action<obj[]>, group: Action<obj[]>, groupCollapsed: Action<obj[]>, groupEnd: Action, info: Action<obj[]>, log: Action<obj[]>, table: Action<obj, string[] option>, time: Action<string option>, timeEnd: Action<string option>, timeLog: Action<string option, obj[]>, timeStamp: Action<string option>, trace: Action<obj[]>, warn: Action<obj[]>) : Console = jsNative
 
 type BufferSource = U2<JS.ArrayBuffer, JS.ArrayBufferView>
 
@@ -440,9 +449,12 @@ type CompileErrorConstructor =
     [<EmitConstructor>]
     abstract Create: ?message: string -> CompileError
 
+[<Interface>]
 type Global =
     abstract value: obj with get, set
     abstract valueOf: unit -> obj
+    [<ParamObject; Emit("$0")>]
+    static member Create (value: obj, valueOf: Func<obj>) : Global = jsNative
 
 type GlobalConstructor =
     [<EmitConstructor>]
@@ -479,9 +491,12 @@ type InstanceExports =
     [<EmitIndexer>]
     abstract Item: string -> U4<JS.Function, Global, Memory, Table> with get, set
 
+[<Interface>]
 type Memory =
     abstract buffer: JS.ArrayBuffer
     abstract grow: delta: float -> float
+    [<ParamObject; Emit("$0")>]
+    static member Create (buffer: JS.ArrayBuffer, grow: Func<float, float>) : Memory = jsNative
 
 type MemoryConstructor =
     [<EmitConstructor>]
@@ -541,11 +556,14 @@ type RuntimeErrorConstructor =
     [<EmitConstructor>]
     abstract Create: ?message: string -> RuntimeError
 
+[<Interface>]
 type Table =
     abstract length: float
     abstract get: index: float -> obj
     abstract grow: delta: float * value: obj -> float
     abstract set: index: float * value: obj -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (length: float, get: Func<float, obj>, grow: Func<float, obj, float>, set: Action<float, obj>) : Table = jsNative
 
 type TableConstructor =
     [<EmitConstructor>]
@@ -1110,6 +1128,7 @@ type CloudflareAccessIdentityIdp =
     [<ParamObject; Emit("$0")>]
     static member Create (id: string, ``type``: string) : CloudflareAccessIdentityIdp = jsNative
 
+[<Interface>]
 type ExecutionContext<'Props> =
     abstract waitUntil: promise: JS.Promise<obj> -> unit
     abstract passThroughOnException: unit -> unit
@@ -1119,6 +1138,8 @@ type ExecutionContext<'Props> =
     abstract access: CloudflareAccessContext option
     abstract tracing: Tracing with get, set
     abstract abort: reason: obj -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (waitUntil: Action<JS.Promise<obj>>, passThroughOnException: Action, exports: obj, props: 'Props, tracing: Tracing, abort: Action<obj>, ?cache: CacheContext, ?access: CloudflareAccessContext) : ExecutionContext<'Props> = jsNative
 
 type SpanSetAttributesAttributes =
     [<EmitIndexer>]
@@ -1482,6 +1503,7 @@ type StructuredSerializeOptions =
     [<ParamObject; Emit("$0")>]
     static member Create (?transfer: obj[]) : StructuredSerializeOptions = jsNative
 
+[<Interface>]
 type Navigator =
     abstract sendBeacon: url: string * ?body: BodyInit -> bool
     abstract userAgent: string
@@ -1489,6 +1511,8 @@ type Navigator =
     abstract platform: string
     abstract language: string
     abstract languages: string[]
+    [<ParamObject; Emit("$0")>]
+    static member Create (sendBeacon: Func<string, BodyInit option, bool>, userAgent: string, hardwareConcurrency: float, platform: string, language: string, languages: string[]) : Navigator = jsNative
 
 [<Interface>]
 type AlarmInvocationInfo =
@@ -1498,10 +1522,13 @@ type AlarmInvocationInfo =
     [<ParamObject; Emit("$0")>]
     static member Create (isRetry: bool, retryCount: float, scheduledTime: float) : AlarmInvocationInfo = jsNative
 
+[<Interface>]
 type Immediate =
     abstract ref: unit -> unit
     abstract unref: unit -> unit
     abstract hasRef: unit -> bool
+    [<ParamObject; Emit("$0")>]
+    static member Create (ref: Action, unref: Action, hasRef: Func<bool>) : Immediate = jsNative
 
 [<Interface>]
 type CachePurgeError =
@@ -1525,16 +1552,26 @@ type CachePurgeOptions =
     [<ParamObject; Emit("$0")>]
     static member Create (?tags: string[], ?pathPrefixes: string[], ?purgeEverything: bool) : CachePurgeOptions = jsNative
 
+[<Interface>]
 type CacheContext =
     abstract purge: options: CachePurgeOptions -> JS.Promise<CachePurgeResult>
+    [<ParamObject; Emit("$0")>]
+    static member Create (purge: Func<CachePurgeOptions, JS.Promise<CachePurgeResult>>) : CacheContext = jsNative
 
+[<Interface>]
 type CloudflareAccessContext =
     abstract aud: string
     abstract getIdentity: unit -> JS.Promise<CloudflareAccessIdentity option>
+    [<ParamObject; Emit("$0")>]
+    static member Create (aud: string, getIdentity: Func<JS.Promise<CloudflareAccessIdentity option>>) : CloudflareAccessContext = jsNative
 
+[<Interface>]
 type ColoLocalActorNamespace =
     abstract get: actorId: string -> RequestFetcher
+    [<ParamObject; Emit("$0")>]
+    static member Create (get: Func<string, RequestFetcher>) : ColoLocalActorNamespace = jsNative
 
+[<Interface>]
 type DurableObject =
     abstract fetch: request: Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> -> U2<JS.Promise<Response>, Response>
     abstract connect: Func<Socket, JS.Promise<unit> option> option with get, set
@@ -1542,16 +1579,22 @@ type DurableObject =
     abstract webSocketMessage: Func<WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option> option with get, set
     abstract webSocketClose: Func<WebSocket, float, string, bool, JS.Promise<unit> option> option with get, set
     abstract webSocketError: Func<WebSocket, obj, JS.Promise<unit> option> option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (fetch: Func<Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, U2<JS.Promise<Response>, Response>>, ?connect: Func<Socket, JS.Promise<unit> option>, ?alarm: Func<AlarmInvocationInfo option, JS.Promise<unit> option>, ?webSocketMessage: Func<WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option>, ?webSocketClose: Func<WebSocket, float, string, bool, JS.Promise<unit> option>, ?webSocketError: Func<WebSocket, obj, JS.Promise<unit> option>) : DurableObject = jsNative
 
 [<Erase>]
 type DurableObjectStub<'T> = private DurableObjectStub__ of obj
 
+[<Interface>]
 type DurableObjectId =
     abstract toString: unit -> string
     abstract equals: other: DurableObjectId -> bool
     abstract name: string option
     abstract jurisdiction: string option
+    [<ParamObject; Emit("$0")>]
+    static member Create (toString: Func<string>, equals: Func<DurableObjectId, bool>, ?name: string, ?jurisdiction: string) : DurableObjectId = jsNative
 
+[<Interface>]
 type DurableObjectNamespace<'T> =
     abstract newUniqueId: ?options: DurableObjectNamespaceNewUniqueIdOptions -> DurableObjectId
     abstract idFromName: name: string -> DurableObjectId
@@ -1559,6 +1602,8 @@ type DurableObjectNamespace<'T> =
     abstract get: id: DurableObjectId * ?options: DurableObjectNamespaceGetDurableObjectOptions -> obj
     abstract getByName: name: string * ?options: DurableObjectNamespaceGetDurableObjectOptions -> obj
     abstract jurisdiction: jurisdiction: DurableObjectJurisdiction -> DurableObjectNamespace<'T>
+    [<ParamObject; Emit("$0")>]
+    static member Create (newUniqueId: Func<DurableObjectNamespaceNewUniqueIdOptions option, DurableObjectId>, idFromName: Func<string, DurableObjectId>, idFromString: Func<string, DurableObjectId>, get: Func<DurableObjectId, DurableObjectNamespaceGetDurableObjectOptions option, obj>, getByName: Func<string, DurableObjectNamespaceGetDurableObjectOptions option, obj>, jurisdiction: Func<DurableObjectJurisdiction, DurableObjectNamespace<'T>>) : DurableObjectNamespace<'T> = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type DurableObjectJurisdiction =
@@ -1650,6 +1695,7 @@ type ContainerStartOptions2 =
     [<ParamObject; Emit("$0")>]
     static member Create (enableInternet: bool, ?entrypoint: string[], ?env: RequestInitHeaders, ?instance: U2<string, ContainerStartResources>, ?labels: RequestInitHeaders, ?directorySnapshots: ContainerDirectorySnapshotRestoreParams[], ?image: unit, ?containerSnapshot: ContainerSnapshotRestoreParams) : ContainerStartOptions2 = jsNative
 
+[<Interface>]
 type DurableObjectState<'Props> =
     abstract waitUntil: promise: JS.Promise<obj> -> unit
     abstract exports: obj
@@ -1668,6 +1714,8 @@ type DurableObjectState<'Props> =
     abstract getHibernatableWebSocketEventTimeout: unit -> float option
     abstract getTags: ws: WebSocket -> string[]
     abstract abort: ?reason: string * ?options: DurableObjectAbortOptions -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (waitUntil: Action<JS.Promise<obj>>, exports: obj, props: 'Props, id: DurableObjectId, storage: DurableObjectStorage, facets: DurableObjectFacets, blockConcurrencyWhile: Func<Func<JS.Promise<'T>>, JS.Promise<'T>>, acceptWebSocket: Action<WebSocket, string[] option>, getWebSockets: Func<string option, WebSocket[]>, setWebSocketAutoResponse: Action<WebSocketRequestResponsePair option>, getWebSocketAutoResponse: Func<WebSocketRequestResponsePair option>, getWebSocketAutoResponseTimestamp: Func<WebSocket, JS.Date option>, setHibernatableWebSocketEventTimeout: Action<float option>, getHibernatableWebSocketEventTimeout: Func<float option>, getTags: Func<WebSocket, string[]>, abort: Action<string option, DurableObjectAbortOptions option>, ?container: Container) : DurableObjectState<'Props> = jsNative
 
 type DurableObjectStoragePutEntries<'T> =
     [<EmitIndexer>]
@@ -1779,11 +1827,14 @@ type WebSocketRequestResponsePair =
     [<ParamObject; Emit("$0")>]
     static member Create (request: string, response: string) : WebSocketRequestResponsePair = jsNative
 
+[<Interface>]
 type DurableObjectFacets =
     abstract get<'T>: name: string * getStartupOptions: Func<U2<FacetStartupOptions<'T>, JS.Promise<FacetStartupOptions<'T>>>> -> obj
     abstract abort: name: string * reason: obj -> unit
     abstract delete: name: string -> unit
     abstract clone: src: string * dst: string -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (get: Func<string, Func<U2<FacetStartupOptions<'T>, JS.Promise<FacetStartupOptions<'T>>>>, obj>, abort: Action<string, obj>, delete: Action<string>, clone: Action<string, string>) : DurableObjectFacets = jsNative
 
 [<Interface>]
 type FacetStartupOptions<'T> =
@@ -1792,8 +1843,11 @@ type FacetStartupOptions<'T> =
     [<ParamObject; Emit("$0")>]
     static member Create (``class``: DurableObjectClass<'T>, ?id: U2<string, DurableObjectId>) : FacetStartupOptions<'T> = jsNative
 
+[<Interface>]
 type AnalyticsEngineDataset =
     abstract writeDataPoint: ?``event``: AnalyticsEngineDataPoint -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (writeDataPoint: Action<AnalyticsEngineDataPoint option>) : AnalyticsEngineDataset = jsNative
 
 [<Interface>]
 type AnalyticsEngineDataPoint =
@@ -1910,6 +1964,8 @@ type Event =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
     /// </summary>
     abstract composedPath: unit -> EventTarget<EventCurrentTargetItem>[]
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: Action, preventDefault: Action, stopPropagation: Action, composedPath: Func<EventTarget<EventCurrentTargetItem>[]>, ?currentTarget: EventTarget<EventCurrentTargetItem>, ?target: EventTarget<EventCurrentTargetItem>, ?srcElement: EventTarget<EventCurrentTargetItem>) : Event = jsNative
     [<Global("Event.NONE")>]
     static member NONE: float = jsNative
     [<Global("Event.CAPTURING_PHASE")>]
@@ -1929,8 +1985,11 @@ type EventInit =
 
 type EventListener<'EventType when 'EventType :> Event> = Action<'EventType>
 
+[<Interface>]
 type EventListenerObject<'EventType when 'EventType :> Event> =
     abstract handleEvent: ``event``: 'EventType -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (handleEvent: Action<'EventType>) : EventListenerObject<'EventType> = jsNative
 
 type EventListenerOrEventListenerObject<'EventType when 'EventType :> Event> = U2<Action<'EventType>, EventListenerObject<'EventType>>
 
@@ -1939,6 +1998,7 @@ type EventListenerOrEventListenerObject<'EventType when 'EventType :> Event> = U
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget)
 /// </summary>
+[<Interface>]
 type EventTarget<'EventMap when 'EventMap :> EventCurrentTargetItem> =
     /// <summary>
     /// The **<c>addEventListener()</c>** method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -1958,6 +2018,8 @@ type EventTarget<'EventMap when 'EventMap :> EventCurrentTargetItem> =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent)
     /// </summary>
     abstract dispatchEvent: ``event``: obj -> bool
+    [<ParamObject; Emit("$0")>]
+    static member Create (addEventListener: Action<typekeyof<'EventMap, 'R>, U2<Action<'R>, EventListenerObject<Event>>, U2<bool, EventTargetAddEventListenerOptions> option>, removeEventListener: Action<typekeyof<'EventMap, 'R>, U2<Action<'R>, EventListenerObject<Event>>, U2<bool, EventTargetEventListenerOptions> option>, dispatchEvent: Func<obj, bool>) : EventTarget<'EventMap> = jsNative
 
 [<Interface>]
 type EventTargetEventListenerOptions =
@@ -1985,6 +2047,7 @@ type EventTargetHandlerObject =
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/AbortController)
 /// </summary>
+[<Interface>]
 type AbortController =
     /// <summary>
     /// The **<c>signal</c>** read-only property of the AbortController interface returns an AbortSignal object instance, which can be used to communicate with/abort an asynchronous operation as desired.
@@ -1998,6 +2061,8 @@ type AbortController =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/AbortController/abort)
     /// </summary>
     abstract abort: reason: obj -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (signal: AbortSignal, abort: Action<obj>) : AbortController = jsNative
 
 /// <summary>
 /// The **<c>AbortSignal</c>** interface represents a signal object that allows you to communicate with an asynchronous operation (such as a fetch request) and abort it if required via an AbortController object.
@@ -2044,6 +2109,8 @@ type AbortSignal =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent)
     /// </summary>
     abstract dispatchEvent: ``event``: Event -> bool
+    [<ParamObject; Emit("$0")>]
+    static member Create (aborted: bool, reason: obj, onabort: obj, throwIfAborted: Action, addEventListener: Action<'Type, U2<Action<Event>, EventListenerObject<Event>>, U2<bool, EventTargetAddEventListenerOptions> option>, removeEventListener: Action<'Type, U2<Action<Event>, EventListenerObject<Event>>, U2<bool, EventTargetEventListenerOptions> option>, dispatchEvent: Func<Event, bool>) : AbortSignal = jsNative
     /// <summary>
     /// The **<c>AbortSignal.abort()</c>** static method returns an AbortSignal that is already set as aborted (and which does not trigger an abort event).
     ///
@@ -2071,8 +2138,11 @@ type AbortSignal =
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Scheduler)
 /// </summary>
+[<Interface>]
 type Scheduler =
     abstract wait: delay: float * ?maybeOptions: SchedulerWaitOptions -> JS.Promise<unit>
+    [<ParamObject; Emit("$0")>]
+    static member Create (wait: Func<float, SchedulerWaitOptions option, JS.Promise<unit>>) : Scheduler = jsNative
 
 [<Interface>]
 type SchedulerWaitOptions =
@@ -2194,6 +2264,8 @@ type ExtendableEvent =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
     /// </summary>
     abstract composedPath: unit -> EventTarget<EventCurrentTargetItem>[]
+    [<ParamObject; Emit("$0")>]
+    static member Create (waitUntil: Action<JS.Promise<obj>>, ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: Action, preventDefault: Action, stopPropagation: Action, composedPath: Func<EventTarget<EventCurrentTargetItem>[]>, ?currentTarget: EventTarget<EventCurrentTargetItem>, ?target: EventTarget<EventCurrentTargetItem>, ?srcElement: EventTarget<EventCurrentTargetItem>) : ExtendableEvent = jsNative
     [<Global("ExtendableEvent.NONE")>]
     static member NONE: float = jsNative
     [<Global("ExtendableEvent.CAPTURING_PHASE")>]
@@ -2317,6 +2389,8 @@ type CustomEvent<'T> =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
     /// </summary>
     abstract composedPath: unit -> EventTarget<EventCurrentTargetItem>[]
+    [<ParamObject; Emit("$0")>]
+    static member Create (detail: 'T, ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: Action, preventDefault: Action, stopPropagation: Action, composedPath: Func<EventTarget<EventCurrentTargetItem>[]>, ?currentTarget: EventTarget<EventCurrentTargetItem>, ?target: EventTarget<EventCurrentTargetItem>, ?srcElement: EventTarget<EventCurrentTargetItem>) : CustomEvent<'T> = jsNative
     [<Global("CustomEvent.NONE")>]
     static member NONE: float = jsNative
     [<Global("CustomEvent.CAPTURING_PHASE")>]
@@ -2340,6 +2414,7 @@ type CustomEventCustomEventInit =
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Blob)
 /// </summary>
+[<Interface>]
 type Blob =
     /// <summary>
     /// The **<c>size</c>** read-only property of the Blob interface returns the size of the Blob or File in bytes.
@@ -2383,6 +2458,8 @@ type Blob =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Blob/stream)
     /// </summary>
     abstract stream: unit -> ReadableStream<obj>
+    [<ParamObject; Emit("$0")>]
+    static member Create (size: float, ``type``: string, slice: Func<float option, float option, string option, Blob>, arrayBuffer: Func<JS.Promise<JS.ArrayBuffer>>, bytes: Func<JS.Promise<JS.Uint8Array>>, text: Func<JS.Promise<string>>, stream: Func<ReadableStream<obj>>) : Blob = jsNative
 
 [<Interface>]
 type BlobOptions =
@@ -2395,6 +2472,7 @@ type BlobOptions =
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/File)
 /// </summary>
+[<Interface>]
 type File =
     inherit Blob
     /// <summary>
@@ -2451,6 +2529,8 @@ type File =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Blob/stream)
     /// </summary>
     abstract stream: unit -> ReadableStream<obj>
+    [<ParamObject; Emit("$0")>]
+    static member Create (name: string, lastModified: float, size: float, ``type``: string, slice: Func<float option, float option, string option, Blob>, arrayBuffer: Func<JS.Promise<JS.ArrayBuffer>>, bytes: Func<JS.Promise<JS.Uint8Array>>, text: Func<JS.Promise<string>>, stream: Func<ReadableStream<obj>>) : File = jsNative
 
 [<Interface>]
 type FileOptions =
@@ -2464,6 +2544,7 @@ type FileOptions =
 ///
 /// [Cloudflare Docs Reference](https://developers.cloudflare.com/workers/runtime-apis/cache/)
 /// </summary>
+[<Interface>]
 type CacheStorage =
     /// <summary>
     /// The **<c>open()</c>** method of the CacheStorage interface returns a Promise that resolves to the Cache object matching the cacheName.
@@ -2472,16 +2553,21 @@ type CacheStorage =
     /// </summary>
     abstract ``open``: cacheName: string -> JS.Promise<Cache>
     abstract ``default``: Cache
+    [<ParamObject; Emit("$0")>]
+    static member Create (``open``: Func<string, JS.Promise<Cache>>, ``default``: Cache) : CacheStorage = jsNative
 
 /// <summary>
 /// The Cache API allows fine grained control of reading and writing from the Cloudflare global network cache.
 ///
 /// [Cloudflare Docs Reference](https://developers.cloudflare.com/workers/runtime-apis/cache/)
 /// </summary>
+[<Interface>]
 type Cache =
     abstract delete: request: U3<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, URL> * ?options: CacheQueryOptions -> JS.Promise<bool>
     abstract ``match``: request: U3<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, URL> * ?options: CacheQueryOptions -> JS.Promise<Response option>
     abstract put: request: U3<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, URL> * response: Response -> JS.Promise<unit>
+    [<ParamObject; Emit("$0")>]
+    static member Create (delete: Func<U3<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, URL>, CacheQueryOptions option, JS.Promise<bool>>, ``match``: Func<U3<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, URL>, CacheQueryOptions option, JS.Promise<Response option>>, put: Func<U3<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, URL>, Response, JS.Promise<unit>>) : Cache = jsNative
 
 [<Interface>]
 type CacheQueryOptions =
@@ -2497,6 +2583,7 @@ type CacheQueryOptions =
 ///
 /// [Cloudflare Docs Reference](https://developers.cloudflare.com/workers/runtime-apis/web-crypto/)
 /// </summary>
+[<Interface>]
 type Crypto =
     /// <summary>
     /// The **<c>Crypto.subtle</c>** read-only property returns a SubtleCrypto which can then be used to perform low-level cryptographic operations.
@@ -2519,6 +2606,8 @@ type Crypto =
     /// </summary>
     abstract randomUUID: unit -> string
     abstract DigestStream: DigestStreamConstructor with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (subtle: SubtleCrypto, getRandomValues: Func<'T, 'T>, randomUUID: Func<string>, DigestStream: DigestStreamConstructor) : Crypto = jsNative
 
 type DigestStreamConstructor =
     [<EmitConstructor>]
@@ -2530,6 +2619,7 @@ type DigestStreamConstructor =
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SubtleCrypto)
 /// </summary>
+[<Interface>]
 type SubtleCrypto =
     /// <summary>
     /// The **<c>encrypt()</c>** method of the SubtleCrypto interface encrypts data.
@@ -2604,6 +2694,8 @@ type SubtleCrypto =
     /// </summary>
     abstract unwrapKey: format: string * wrappedKey: U2<JS.ArrayBuffer, JS.ArrayBufferView> * unwrappingKey: CryptoKey * unwrapAlgorithm: U2<string, SubtleCryptoEncryptAlgorithm> * unwrappedKeyAlgorithm: U2<string, SubtleCryptoImportKeyAlgorithm> * extractable: bool * keyUsages: string[] -> JS.Promise<CryptoKey>
     abstract timingSafeEqual: a: U2<JS.ArrayBuffer, JS.ArrayBufferView> * b: U2<JS.ArrayBuffer, JS.ArrayBufferView> -> bool
+    [<ParamObject; Emit("$0")>]
+    static member Create (encrypt: Func<U2<string, SubtleCryptoEncryptAlgorithm>, CryptoKey, U2<JS.ArrayBuffer, JS.ArrayBufferView>, JS.Promise<JS.ArrayBuffer>>, decrypt: Func<U2<string, SubtleCryptoEncryptAlgorithm>, CryptoKey, U2<JS.ArrayBuffer, JS.ArrayBufferView>, JS.Promise<JS.ArrayBuffer>>, sign: Func<U2<string, SubtleCryptoSignAlgorithm>, CryptoKey, U2<JS.ArrayBuffer, JS.ArrayBufferView>, JS.Promise<JS.ArrayBuffer>>, verify: Func<U2<string, SubtleCryptoSignAlgorithm>, CryptoKey, U2<JS.ArrayBuffer, JS.ArrayBufferView>, U2<JS.ArrayBuffer, JS.ArrayBufferView>, JS.Promise<bool>>, digest: Func<U2<string, SubtleCryptoHashAlgorithm>, U2<JS.ArrayBuffer, JS.ArrayBufferView>, JS.Promise<JS.ArrayBuffer>>, generateKey: Func<U2<string, SubtleCryptoGenerateKeyAlgorithm>, bool, string[], JS.Promise<U2<CryptoKey, CryptoKeyPair>>>, deriveKey: Func<U2<string, SubtleCryptoDeriveKeyAlgorithm>, CryptoKey, U2<string, SubtleCryptoImportKeyAlgorithm>, bool, string[], JS.Promise<CryptoKey>>, deriveBits: Func<U2<string, SubtleCryptoDeriveKeyAlgorithm>, CryptoKey, float option, JS.Promise<JS.ArrayBuffer>>, importKey: Func<string, U3<JS.ArrayBuffer, JS.ArrayBufferView, JsonWebKey>, U2<string, SubtleCryptoImportKeyAlgorithm>, bool, string[], JS.Promise<CryptoKey>>, exportKey: Func<string, CryptoKey, JS.Promise<U2<JS.ArrayBuffer, JsonWebKey>>>, wrapKey: Func<string, CryptoKey, CryptoKey, U2<string, SubtleCryptoEncryptAlgorithm>, JS.Promise<JS.ArrayBuffer>>, unwrapKey: Func<string, U2<JS.ArrayBuffer, JS.ArrayBufferView>, CryptoKey, U2<string, SubtleCryptoEncryptAlgorithm>, U2<string, SubtleCryptoImportKeyAlgorithm>, bool, string[], JS.Promise<CryptoKey>>, timingSafeEqual: Func<U2<JS.ArrayBuffer, JS.ArrayBufferView>, U2<JS.ArrayBuffer, JS.ArrayBufferView>, bool>) : SubtleCrypto = jsNative
 
 /// <summary>
 /// The **<c>CryptoKey</c>** interface of the Web Crypto API represents a cryptographic key obtained from one of the SubtleCrypto methods generateKey(), deriveKey(), importKey(), or unwrapKey().
@@ -2783,6 +2875,7 @@ type CryptoKeyArbitraryKeyAlgorithm =
     [<ParamObject; Emit("$0")>]
     static member Create (name: string, ?hash: CryptoKeyKeyAlgorithm, ?namedCurve: string, ?length: float) : CryptoKeyArbitraryKeyAlgorithm = jsNative
 
+[<Interface>]
 type DigestStream =
     inherit WritableStream<U2<JS.ArrayBuffer, JS.ArrayBufferView>>
     abstract digest: JS.Promise<JS.ArrayBuffer>
@@ -2811,6 +2904,8 @@ type DigestStream =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStream/getWriter)
     /// </summary>
     abstract getWriter: unit -> WritableStreamDefaultWriter<U2<JS.ArrayBuffer, JS.ArrayBufferView>>
+    [<ParamObject; Emit("$0")>]
+    static member Create (digest: JS.Promise<JS.ArrayBuffer>, bytesWritten: U2<float, bigint>, locked: bool, abort: Func<obj, JS.Promise<unit>>, close: Func<JS.Promise<unit>>, getWriter: Func<WritableStreamDefaultWriter<U2<JS.ArrayBuffer, JS.ArrayBufferView>>>) : DigestStream = jsNative
 
 [<Interface>]
 type DigestStreamOptions =
@@ -2823,6 +2918,7 @@ type DigestStreamOptions =
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TextDecoder)
 /// </summary>
+[<Interface>]
 type TextDecoder =
     /// <summary>
     /// The **<c>TextDecoder.decode()</c>** method returns a string containing text decoded from the buffer passed as a parameter.
@@ -2833,12 +2929,15 @@ type TextDecoder =
     abstract encoding: string
     abstract fatal: bool
     abstract ignoreBOM: bool
+    [<ParamObject; Emit("$0")>]
+    static member Create (decode: Func<U2<JS.ArrayBuffer, JS.ArrayBufferView> option, TextDecoderDecodeOptions option, string>, encoding: string, fatal: bool, ignoreBOM: bool) : TextDecoder = jsNative
 
 /// <summary>
 /// The **<c>TextEncoder</c>** interface enables you to encode a JavaScript string using UTF-8.
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TextEncoder)
 /// </summary>
+[<Interface>]
 type TextEncoder =
     /// <summary>
     /// The **<c>TextEncoder.encode()</c>** method takes a string as input, and returns a Uint8Array containing the string encoded using UTF-8.
@@ -2853,6 +2952,8 @@ type TextEncoder =
     /// </summary>
     abstract encodeInto: input: string * buffer: JS.Uint8Array -> TextEncoderEncodeIntoResult
     abstract encoding: string
+    [<ParamObject; Emit("$0")>]
+    static member Create (encode: Func<string option, JS.Uint8Array>, encodeInto: Func<string, JS.Uint8Array, TextEncoderEncodeIntoResult>, encoding: string) : TextEncoder = jsNative
 
 [<Interface>]
 type TextDecoderConstructorOptions =
@@ -3012,6 +3113,8 @@ type ErrorEvent =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
     /// </summary>
     abstract composedPath: unit -> EventTarget<EventCurrentTargetItem>[]
+    [<ParamObject; Emit("$0")>]
+    static member Create (filename: string, message: string, lineno: float, colno: float, error: obj, ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: Action, preventDefault: Action, stopPropagation: Action, composedPath: Func<EventTarget<EventCurrentTargetItem>[]>, ?currentTarget: EventTarget<EventCurrentTargetItem>, ?target: EventTarget<EventCurrentTargetItem>, ?srcElement: EventTarget<EventCurrentTargetItem>) : ErrorEvent = jsNative
     [<Global("ErrorEvent.NONE")>]
     static member NONE: float = jsNative
     [<Global("ErrorEvent.CAPTURING_PHASE")>]
@@ -3172,6 +3275,8 @@ type MessageEvent =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
     /// </summary>
     abstract composedPath: unit -> EventTarget<EventCurrentTargetItem>[]
+    [<ParamObject; Emit("$0")>]
+    static member Create (data: obj, lastEventId: string, ports: MessagePort[], ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: Action, preventDefault: Action, stopPropagation: Action, composedPath: Func<EventTarget<EventCurrentTargetItem>[]>, ?origin: string, ?source: MessagePort, ?currentTarget: EventTarget<EventCurrentTargetItem>, ?target: EventTarget<EventCurrentTargetItem>, ?srcElement: EventTarget<EventCurrentTargetItem>) : MessageEvent = jsNative
     [<Global("MessageEvent.NONE")>]
     static member NONE: float = jsNative
     [<Global("MessageEvent.CAPTURING_PHASE")>]
@@ -3314,6 +3419,8 @@ type PromiseRejectionEvent =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
     /// </summary>
     abstract composedPath: unit -> EventTarget<EventCurrentTargetItem>[]
+    [<ParamObject; Emit("$0")>]
+    static member Create (promise: JS.Promise<obj>, reason: obj, ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: Action, preventDefault: Action, stopPropagation: Action, composedPath: Func<EventTarget<EventCurrentTargetItem>[]>, ?currentTarget: EventTarget<EventCurrentTargetItem>, ?target: EventTarget<EventCurrentTargetItem>, ?srcElement: EventTarget<EventCurrentTargetItem>) : PromiseRejectionEvent = jsNative
     [<Global("PromiseRejectionEvent.NONE")>]
     static member NONE: float = jsNative
     [<Global("PromiseRejectionEvent.CAPTURING_PHASE")>]
@@ -3400,10 +3507,13 @@ type ContentOptions =
     [<ParamObject; Emit("$0")>]
     static member Create (?html: bool) : ContentOptions = jsNative
 
+[<Interface>]
 type HTMLRewriter =
     abstract on: selector: string * handlers: HTMLRewriterElementContentHandlers -> HTMLRewriter
     abstract onDocument: handlers: HTMLRewriterDocumentContentHandlers -> HTMLRewriter
     abstract transform: response: Response -> Response
+    [<ParamObject; Emit("$0")>]
+    static member Create (on: Func<string, HTMLRewriterElementContentHandlers, HTMLRewriter>, onDocument: Func<HTMLRewriterDocumentContentHandlers, HTMLRewriter>, transform: Func<Response, Response>) : HTMLRewriter = jsNative
 
 [<Interface>]
 type HTMLRewriterElementContentHandlers =
@@ -3430,6 +3540,7 @@ type Doctype =
     [<ParamObject; Emit("$0")>]
     static member Create (?name: string, ?publicId: string, ?systemId: string) : Doctype = jsNative
 
+[<Interface>]
 type Element =
     abstract tagName: string with get, set
     abstract attributes: obj
@@ -3448,13 +3559,19 @@ type Element =
     abstract removeAndKeepContent: unit -> Element
     abstract setInnerContent: content: U3<string, ReadableStream<obj>, Response> * ?options: ContentOptions -> Element
     abstract onEndTag: handler: Func<EndTag, JS.Promise<unit> option> -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (tagName: string, attributes: obj, removed: bool, namespaceURI: string, getAttribute: Func<string, string option>, hasAttribute: Func<string, bool>, setAttribute: Func<string, string, Element>, removeAttribute: Func<string, Element>, before: Func<U3<string, ReadableStream<obj>, Response>, ContentOptions option, Element>, after: Func<U3<string, ReadableStream<obj>, Response>, ContentOptions option, Element>, prepend: Func<U3<string, ReadableStream<obj>, Response>, ContentOptions option, Element>, append: Func<U3<string, ReadableStream<obj>, Response>, ContentOptions option, Element>, replace: Func<U3<string, ReadableStream<obj>, Response>, ContentOptions option, Element>, remove: Func<Element>, removeAndKeepContent: Func<Element>, setInnerContent: Func<U3<string, ReadableStream<obj>, Response>, ContentOptions option, Element>, onEndTag: Action<Func<EndTag, JS.Promise<unit> option>>) : Element = jsNative
 
+[<Interface>]
 type EndTag =
     abstract name: string with get, set
     abstract before: content: U3<string, ReadableStream<obj>, Response> * ?options: ContentOptions -> EndTag
     abstract after: content: U3<string, ReadableStream<obj>, Response> * ?options: ContentOptions -> EndTag
     abstract remove: unit -> EndTag
+    [<ParamObject; Emit("$0")>]
+    static member Create (name: string, before: Func<U3<string, ReadableStream<obj>, Response>, ContentOptions option, EndTag>, after: Func<U3<string, ReadableStream<obj>, Response>, ContentOptions option, EndTag>, remove: Func<EndTag>) : EndTag = jsNative
 
+[<Interface>]
 type Comment =
     abstract text: string with get, set
     abstract removed: bool
@@ -3462,7 +3579,10 @@ type Comment =
     abstract after: content: string * ?options: ContentOptions -> Comment
     abstract replace: content: string * ?options: ContentOptions -> Comment
     abstract remove: unit -> Comment
+    [<ParamObject; Emit("$0")>]
+    static member Create (text: string, removed: bool, before: Func<string, ContentOptions option, Comment>, after: Func<string, ContentOptions option, Comment>, replace: Func<string, ContentOptions option, Comment>, remove: Func<Comment>) : Comment = jsNative
 
+[<Interface>]
 type Text =
     abstract text: string
     abstract lastInTextNode: bool
@@ -3471,9 +3591,14 @@ type Text =
     abstract after: content: U3<string, ReadableStream<obj>, Response> * ?options: ContentOptions -> Text
     abstract replace: content: U3<string, ReadableStream<obj>, Response> * ?options: ContentOptions -> Text
     abstract remove: unit -> Text
+    [<ParamObject; Emit("$0")>]
+    static member Create (text: string, lastInTextNode: bool, removed: bool, before: Func<U3<string, ReadableStream<obj>, Response>, ContentOptions option, Text>, after: Func<U3<string, ReadableStream<obj>, Response>, ContentOptions option, Text>, replace: Func<U3<string, ReadableStream<obj>, Response>, ContentOptions option, Text>, remove: Func<Text>) : Text = jsNative
 
+[<Interface>]
 type DocumentEnd =
     abstract append: content: string * ?options: ContentOptions -> DocumentEnd
+    [<ParamObject; Emit("$0")>]
+    static member Create (append: Func<string, ContentOptions option, DocumentEnd>) : DocumentEnd = jsNative
 
 /// <summary>
 /// This is the event type for fetch events dispatched on the service worker global scope. It contains information about the fetch, including the request and how the receiver will treat the response. It provides the event.respondWith() method, which allows us to provide a response to this fetch.
@@ -3602,6 +3727,8 @@ type FetchEvent =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ExtendableEvent/waitUntil)
     /// </summary>
     abstract waitUntil: promise: JS.Promise<obj> -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (request: Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, respondWith: Action<U2<JS.Promise<Response>, Response>>, passThroughOnException: Action, ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: Action, preventDefault: Action, stopPropagation: Action, composedPath: Func<EventTarget<EventCurrentTargetItem>[]>, waitUntil: Action<JS.Promise<obj>>, ?currentTarget: EventTarget<EventCurrentTargetItem>, ?target: EventTarget<EventCurrentTargetItem>, ?srcElement: EventTarget<EventCurrentTargetItem>) : FetchEvent = jsNative
     [<Global("FetchEvent.NONE")>]
     static member NONE: float = jsNative
     [<Global("FetchEvent.CAPTURING_PHASE")>]
@@ -3618,6 +3745,7 @@ type HeadersInit = obj
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers)
 /// </summary>
+[<Interface>]
 type Headers =
     /// <summary>
     /// The **<c>get()</c>** method of the Headers interface returns a byte string of all the values of a header within a Headers object with a given name. If the requested header doesn't exist in the Headers object, it returns null.
@@ -3660,9 +3788,12 @@ type Headers =
     abstract entries: unit -> obj
     abstract keys: unit -> obj
     abstract values: unit -> obj
+    [<ParamObject; Emit("$0")>]
+    static member Create (get: Func<string, string option>, getAll: Func<string, string[]>, getSetCookie: Func<string[]>, has: Func<string, bool>, set: Action<string, string>, append: Action<string, string>, delete: Action<string>, forEach: Action<Action<string, string, Headers>, 'This option>, entries: Func<obj>, keys: Func<obj>, values: Func<obj>) : Headers = jsNative
 
 type BodyInit = obj
 
+[<Interface>]
 type Body =
     abstract body: ReadableStream<obj> option
     abstract bodyUsed: bool
@@ -3672,12 +3803,15 @@ type Body =
     abstract json<'T>: unit -> JS.Promise<'T>
     abstract formData: unit -> JS.Promise<FormData>
     abstract blob: unit -> JS.Promise<Blob>
+    [<ParamObject; Emit("$0")>]
+    static member Create (bodyUsed: bool, arrayBuffer: Func<JS.Promise<JS.ArrayBuffer>>, bytes: Func<JS.Promise<JS.Uint8Array>>, text: Func<JS.Promise<string>>, json: Func<JS.Promise<'T>>, formData: Func<JS.Promise<FormData>>, blob: Func<JS.Promise<Blob>>, ?body: ReadableStream<obj>) : Body = jsNative
 
 /// <summary>
 /// The **<c>Response</c>** interface of the Fetch API represents the response to a request.
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Response)
 /// </summary>
+[<Interface>]
 type Response =
     inherit Body
     /// <summary>
@@ -3738,6 +3872,8 @@ type Response =
     abstract json<'T>: unit -> JS.Promise<'T>
     abstract formData: unit -> JS.Promise<FormData>
     abstract blob: unit -> JS.Promise<Blob>
+    [<ParamObject; Emit("$0")>]
+    static member Create (clone: Func<Response>, status: float, statusText: string, headers: Headers, ok: bool, redirected: bool, url: string, cf: obj, ``type``: ResponseType, bodyUsed: bool, arrayBuffer: Func<JS.Promise<JS.ArrayBuffer>>, bytes: Func<JS.Promise<JS.Uint8Array>>, text: Func<JS.Promise<string>>, json: Func<JS.Promise<'T>>, formData: Func<JS.Promise<FormData>>, blob: Func<JS.Promise<Blob>>, ?webSocket: WebSocket, ?body: ReadableStream<obj>) : Response = jsNative
 
 type ResponseConstructor =
     abstract error: unit -> Response
@@ -3764,6 +3900,7 @@ type RequestInfo<'CfHostMetadata, 'Cf> = U2<string, Request<'CfHostMetadata, 'Cf
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Request)
 /// </summary>
+[<Interface>]
 type Request<'CfHostMetadata, 'Cf> =
     inherit Body
     /// <summary>
@@ -3830,6 +3967,8 @@ type Request<'CfHostMetadata, 'Cf> =
     abstract json<'T>: unit -> JS.Promise<'T>
     abstract formData: unit -> JS.Promise<FormData>
     abstract blob: unit -> JS.Promise<Blob>
+    [<ParamObject; Emit("$0")>]
+    static member Create (clone: Func<Request<'CfHostMetadata, 'Cf>>, ``method``: string, url: string, headers: Headers, redirect: string, signal: AbortSignal, integrity: string, keepalive: bool, bodyUsed: bool, arrayBuffer: Func<JS.Promise<JS.ArrayBuffer>>, bytes: Func<JS.Promise<JS.Uint8Array>>, text: Func<JS.Promise<string>>, json: Func<JS.Promise<'T>>, formData: Func<JS.Promise<FormData>>, blob: Func<JS.Promise<Blob>>, ?fetcher: RequestFetcher, ?cf: 'Cf, ?cache: RequestInitCache, ?body: ReadableStream<obj>) : Request<'CfHostMetadata, 'Cf> = jsNative
 
 type RequestConstructor =
     [<EmitConstructor>]
@@ -3962,10 +4101,13 @@ type QueueContentType =
     | [<CompiledName("text")>] Text
     | [<CompiledName("v8")>] V8
 
+[<Interface>]
 type Queue<'Body> =
     abstract metrics: unit -> JS.Promise<QueueMetrics>
     abstract send: message: 'Body * ?options: QueueSendOptions -> JS.Promise<QueueSendResponse>
     abstract sendBatch: messages: obj * ?options: QueueSendBatchOptions -> JS.Promise<QueueSendBatchResponse>
+    [<ParamObject; Emit("$0")>]
+    static member Create (metrics: Func<JS.Promise<QueueMetrics>>, send: Func<'Body, QueueSendOptions option, JS.Promise<QueueSendResponse>>, sendBatch: Func<obj, QueueSendBatchOptions option, JS.Promise<QueueSendBatchResponse>>) : Queue<'Body> = jsNative
 
 [<Interface>]
 type QueueSendMetrics =
@@ -4056,6 +4198,7 @@ type QueueRetryOptions =
     [<ParamObject; Emit("$0")>]
     static member Create (?delaySeconds: float) : QueueRetryOptions = jsNative
 
+[<Interface>]
 type Message<'Body> =
     abstract id: string
     abstract timestamp: JS.Date
@@ -4063,7 +4206,10 @@ type Message<'Body> =
     abstract attempts: float
     abstract retry: ?options: QueueRetryOptions -> unit
     abstract ack: unit -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (id: string, timestamp: JS.Date, body: 'Body, attempts: float, retry: Action<QueueRetryOptions option>, ack: Action) : Message<'Body> = jsNative
 
+[<Interface>]
 type QueueEvent<'Body> =
     inherit ExtendableEvent
     abstract messages: Message<'Body>[]
@@ -4177,13 +4323,18 @@ type QueueEvent<'Body> =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ExtendableEvent/waitUntil)
     /// </summary>
     abstract waitUntil: promise: JS.Promise<obj> -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (messages: Message<'Body>[], queue: string, metadata: MessageBatchMetadata, retryAll: Action<QueueRetryOptions option>, ackAll: Action, ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: Action, preventDefault: Action, stopPropagation: Action, composedPath: Func<EventTarget<EventCurrentTargetItem>[]>, waitUntil: Action<JS.Promise<obj>>, ?currentTarget: EventTarget<EventCurrentTargetItem>, ?target: EventTarget<EventCurrentTargetItem>, ?srcElement: EventTarget<EventCurrentTargetItem>) : QueueEvent<'Body> = jsNative
 
+[<Interface>]
 type MessageBatch<'Body> =
     abstract messages: Message<'Body>[]
     abstract queue: string
     abstract metadata: MessageBatchMetadata
     abstract retryAll: ?options: QueueRetryOptions -> unit
     abstract ackAll: unit -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (messages: Message<'Body>[], queue: string, metadata: MessageBatchMetadata, retryAll: Action<QueueRetryOptions option>, ackAll: Action) : MessageBatch<'Body> = jsNative
 
 [<Interface>]
 type R2Error =
@@ -4232,6 +4383,7 @@ type R2BucketGetOptions =
     [<ParamObject; Emit("$0")>]
     static member Create (onlyIf: U4<Headers, R2Conditional, R2BucketGetOptionsOnlyIf, R2BucketGetOptionsOnlyIf2>, ?range: U4<Headers, R2ObjectRange, R2ObjectRange2, R2ObjectRange3>, ?ssecKey: U2<string, JS.ArrayBuffer>) : R2BucketGetOptions = jsNative
 
+[<Interface>]
 type R2BucketGetOptionsOnlyIf =
     inherit Headers
     inherit R2Conditional
@@ -4281,7 +4433,10 @@ type R2BucketGetOptionsOnlyIf =
     abstract uploadedBefore: JS.Date option with get, set
     abstract uploadedAfter: JS.Date option with get, set
     abstract secondsGranularity: bool option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (get: Func<string, string option>, getAll: Func<string, string[]>, getSetCookie: Func<string[]>, has: Func<string, bool>, set: Action<string, string>, append: Action<string, string>, delete: Action<string>, forEach: Action<Action<string, string, Headers>, 'This option>, entries: Func<obj>, keys: Func<obj>, values: Func<obj>, ?etagMatches: string, ?etagDoesNotMatch: string, ?uploadedBefore: JS.Date, ?uploadedAfter: JS.Date, ?secondsGranularity: bool) : R2BucketGetOptionsOnlyIf = jsNative
 
+[<Interface>]
 type R2BucketGetOptionsOnlyIf2 =
     inherit R2Conditional
     inherit Headers
@@ -4331,6 +4486,8 @@ type R2BucketGetOptionsOnlyIf2 =
     abstract entries: unit -> obj
     abstract keys: unit -> obj
     abstract values: unit -> obj
+    [<ParamObject; Emit("$0")>]
+    static member Create (get: Func<string, string option>, getAll: Func<string, string[]>, getSetCookie: Func<string[]>, has: Func<string, bool>, set: Action<string, string>, append: Action<string, string>, delete: Action<string>, forEach: Action<Action<string, string, Headers>, 'This option>, entries: Func<obj>, keys: Func<obj>, values: Func<obj>, ?etagMatches: string, ?etagDoesNotMatch: string, ?uploadedBefore: JS.Date, ?uploadedAfter: JS.Date, ?secondsGranularity: bool) : R2BucketGetOptionsOnlyIf2 = jsNative
 
 [<Interface>]
 type R2BucketPutOptions =
@@ -4385,12 +4542,15 @@ type R2Objects3 =
     [<ParamObject; Emit("$0")>]
     static member Create (objects: R2Object[], delimitedPrefixes: string[], truncated: bool) : R2Objects3 = jsNative
 
+[<Interface>]
 type R2MultipartUpload =
     abstract key: string
     abstract uploadId: string
     abstract uploadPart: partNumber: float * value: obj * ?options: R2UploadPartOptions -> JS.Promise<R2UploadedPart>
     abstract abort: unit -> JS.Promise<unit>
     abstract complete: uploadedParts: R2UploadedPart[] -> JS.Promise<R2Object>
+    [<ParamObject; Emit("$0")>]
+    static member Create (key: string, uploadId: string, uploadPart: Func<float, obj, R2UploadPartOptions option, JS.Promise<R2UploadedPart>>, abort: Func<JS.Promise<unit>>, complete: Func<R2UploadedPart[], JS.Promise<R2Object>>) : R2MultipartUpload = jsNative
 
 [<Interface>]
 type R2UploadedPart =
@@ -4399,6 +4559,7 @@ type R2UploadedPart =
     [<ParamObject; Emit("$0")>]
     static member Create (partNumber: float, etag: string) : R2UploadedPart = jsNative
 
+[<Interface>]
 type R2Object =
     abstract key: string
     abstract version: string
@@ -4413,7 +4574,10 @@ type R2Object =
     abstract storageClass: string
     abstract ssecKeyMd5: string option
     abstract writeHttpMetadata: headers: Headers -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (key: string, version: string, size: float, etag: string, httpEtag: string, checksums: R2Checksums, uploaded: JS.Date, storageClass: string, writeHttpMetadata: Action<Headers>, ?httpMetadata: R2HTTPMetadata, ?customMetadata: RequestInitHeaders, ?range: R2Range, ?ssecKeyMd5: string) : R2Object = jsNative
 
+[<Interface>]
 type R2ObjectBody =
     inherit R2Object
     abstract body: ReadableStream<obj>
@@ -4436,6 +4600,8 @@ type R2ObjectBody =
     abstract storageClass: string
     abstract ssecKeyMd5: string option
     abstract writeHttpMetadata: headers: Headers -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (body: ReadableStream<obj>, bodyUsed: bool, arrayBuffer: Func<JS.Promise<JS.ArrayBuffer>>, bytes: Func<JS.Promise<JS.Uint8Array>>, text: Func<JS.Promise<string>>, json: Func<JS.Promise<'T>>, blob: Func<JS.Promise<Blob>>, key: string, version: string, size: float, etag: string, httpEtag: string, checksums: R2Checksums, uploaded: JS.Date, storageClass: string, writeHttpMetadata: Action<Headers>, ?httpMetadata: R2HTTPMetadata, ?customMetadata: RequestInitHeaders, ?range: R2Range, ?ssecKeyMd5: string) : R2ObjectBody = jsNative
 
 type R2Range = U3<R2ObjectRange, R2ObjectRange2, R2ObjectRange3>
 
@@ -4481,6 +4647,7 @@ type R2MultipartOptions =
     [<ParamObject; Emit("$0")>]
     static member Create (?httpMetadata: U2<Headers, R2HTTPMetadata>, ?customMetadata: RequestInitHeaders, ?storageClass: string, ?ssecKey: U2<string, JS.ArrayBuffer>) : R2MultipartOptions = jsNative
 
+[<Interface>]
 type R2Checksums =
     abstract md5: JS.ArrayBuffer option
     abstract sha1: JS.ArrayBuffer option
@@ -4488,6 +4655,8 @@ type R2Checksums =
     abstract sha384: JS.ArrayBuffer option
     abstract sha512: JS.ArrayBuffer option
     abstract toJSON: unit -> R2StringChecksums
+    [<ParamObject; Emit("$0")>]
+    static member Create (toJSON: Func<R2StringChecksums>, ?md5: JS.ArrayBuffer, ?sha1: JS.ArrayBuffer, ?sha256: JS.ArrayBuffer, ?sha384: JS.ArrayBuffer, ?sha512: JS.ArrayBuffer) : R2Checksums = jsNative
 
 [<Interface>]
 type R2StringChecksums =
@@ -4630,6 +4799,8 @@ type ScheduledEvent =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ExtendableEvent/waitUntil)
     /// </summary>
     abstract waitUntil: promise: JS.Promise<obj> -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (scheduledTime: float, cron: string, noRetry: Action, ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: Action, preventDefault: Action, stopPropagation: Action, composedPath: Func<EventTarget<EventCurrentTargetItem>[]>, waitUntil: Action<JS.Promise<obj>>, ?currentTarget: EventTarget<EventCurrentTargetItem>, ?target: EventTarget<EventCurrentTargetItem>, ?srcElement: EventTarget<EventCurrentTargetItem>) : ScheduledEvent = jsNative
     [<Global("ScheduledEvent.NONE")>]
     static member NONE: float = jsNative
     [<Global("ScheduledEvent.CAPTURING_PHASE")>]
@@ -4639,10 +4810,13 @@ type ScheduledEvent =
     [<Global("ScheduledEvent.BUBBLING_PHASE")>]
     static member BUBBLING_PHASE: float = jsNative
 
+[<Interface>]
 type ScheduledController =
     abstract scheduledTime: float
     abstract cron: string
     abstract noRetry: unit -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (scheduledTime: float, cron: string, noRetry: Action) : ScheduledController = jsNative
 
 [<Interface>]
 type QueuingStrategy<'T> =
@@ -4789,6 +4963,7 @@ type ReadableStreamConstructor =
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStreamDefaultReader)
 /// </summary>
+[<Interface>]
 type ReadableStreamDefaultReader<'R> =
     abstract closed: JS.Promise<unit>
     abstract cancel: reason: obj -> JS.Promise<unit>
@@ -4804,12 +4979,15 @@ type ReadableStreamDefaultReader<'R> =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStreamDefaultReader/releaseLock)
     /// </summary>
     abstract releaseLock: unit -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (closed: JS.Promise<unit>, cancel: Func<obj, JS.Promise<unit>>, read: Func<JS.Promise<U2<ReadableStreamDefaultReaderReadResultItem<'R>, ReadableStreamDefaultReaderReadResultItem2>>>, releaseLock: Action) : ReadableStreamDefaultReader<'R> = jsNative
 
 /// <summary>
 /// The **<c>ReadableStreamBYOBReader</c>** interface of the Streams API defines a reader for a ReadableStream that supports zero-copy reading from an underlying byte source. It is used for efficient copying from underlying sources where the data is delivered as an "anonymous" sequence of bytes, such as files.
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStreamBYOBReader)
 /// </summary>
+[<Interface>]
 type ReadableStreamBYOBReader =
     abstract closed: JS.Promise<unit>
     abstract cancel: reason: obj -> JS.Promise<unit>
@@ -4826,6 +5004,8 @@ type ReadableStreamBYOBReader =
     /// </summary>
     abstract releaseLock: unit -> unit
     abstract readAtLeast<'T when 'T :> JS.ArrayBufferView>: minElements: float * view: 'T -> JS.Promise<U2<ReadableStreamBYOBReaderReadAtLeastResultItem<'T>, ReadableStreamDefaultReaderReadResultItem2>>
+    [<ParamObject; Emit("$0")>]
+    static member Create (closed: JS.Promise<unit>, cancel: Func<obj, JS.Promise<unit>>, read: Func<'T, JS.Promise<U2<ReadableStreamBYOBReaderReadResultItem<'T>, ReadableStreamDefaultReaderReadResultItem2>>>, releaseLock: Action, readAtLeast: Func<float, 'T, JS.Promise<U2<ReadableStreamBYOBReaderReadAtLeastResultItem<'T>, ReadableStreamDefaultReaderReadResultItem2>>>) : ReadableStreamBYOBReader = jsNative
 
 [<Interface>]
 type ReadableStreamBYOBReaderReadableStreamBYOBReaderReadOptions =
@@ -4849,6 +5029,7 @@ type ReadableStreamGetReaderOptions =
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStreamBYOBRequest)
 /// </summary>
+[<Interface>]
 type ReadableStreamBYOBRequest =
     /// <summary>
     /// The **<c>view</c>** getter property of the ReadableStreamBYOBRequest interface returns the current view.
@@ -4869,12 +5050,15 @@ type ReadableStreamBYOBRequest =
     /// </summary>
     abstract respondWithNewView: view: U2<JS.ArrayBuffer, JS.ArrayBufferView> -> unit
     abstract atLeast: float option
+    [<ParamObject; Emit("$0")>]
+    static member Create (respond: Action<float>, respondWithNewView: Action<U2<JS.ArrayBuffer, JS.ArrayBufferView>>, ?view: JS.Uint8Array, ?atLeast: float) : ReadableStreamBYOBRequest = jsNative
 
 /// <summary>
 /// The **<c>ReadableStreamDefaultController</c>** interface of the Streams API represents a controller allowing control of a ReadableStream's state and internal queue. Default controllers are for streams that are not byte streams.
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStreamDefaultController)
 /// </summary>
+[<Interface>]
 type ReadableStreamDefaultController<'R> =
     /// <summary>
     /// The **<c>desiredSize</c>** read-only property of the ReadableStreamDefaultController interface returns the desired size required to fill the stream's internal queue.
@@ -4900,12 +5084,15 @@ type ReadableStreamDefaultController<'R> =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStreamDefaultController/error)
     /// </summary>
     abstract error: reason: obj -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (close: Action, enqueue: Action<'R option>, error: Action<obj>, ?desiredSize: float) : ReadableStreamDefaultController<'R> = jsNative
 
 /// <summary>
 /// The **<c>ReadableByteStreamController</c>** interface of the Streams API represents a controller for a readable byte stream. It allows control of the state and internal queue of a ReadableStream with an underlying byte source, and enables efficient zero-copy transfer of data from the underlying source to a consumer when the stream's internal queue is empty.
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableByteStreamController)
 /// </summary>
+[<Interface>]
 type ReadableByteStreamController =
     /// <summary>
     /// The **<c>byobRequest</c>** read-only property of the ReadableByteStreamController interface returns the current BYOB request, or null if there are no pending requests.
@@ -4937,12 +5124,15 @@ type ReadableByteStreamController =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableByteStreamController/error)
     /// </summary>
     abstract error: reason: obj -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (close: Action, enqueue: Action<U2<JS.ArrayBuffer, JS.ArrayBufferView>>, error: Action<obj>, ?byobRequest: ReadableStreamBYOBRequest, ?desiredSize: float) : ReadableByteStreamController = jsNative
 
 /// <summary>
 /// The **<c>WritableStreamDefaultController</c>** interface of the Streams API represents a controller allowing control of a WritableStream's state. When constructing a WritableStream, the underlying sink is given a corresponding WritableStreamDefaultController instance to manipulate.
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultController)
 /// </summary>
+[<Interface>]
 type WritableStreamDefaultController =
     /// <summary>
     /// The read-only **<c>signal</c>** property of the WritableStreamDefaultController interface returns the AbortSignal associated with the controller.
@@ -4956,12 +5146,15 @@ type WritableStreamDefaultController =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultController/error)
     /// </summary>
     abstract error: reason: obj -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (signal: AbortSignal, error: Action<obj>) : WritableStreamDefaultController = jsNative
 
 /// <summary>
 /// The **<c>TransformStreamDefaultController</c>** interface of the Streams API provides methods to manipulate the associated ReadableStream and WritableStream.
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TransformStreamDefaultController)
 /// </summary>
+[<Interface>]
 type TransformStreamDefaultController<'O> =
     /// <summary>
     /// The **<c>desiredSize</c>** read-only property of the TransformStreamDefaultController interface returns the desired size to fill the queue of the associated ReadableStream.
@@ -4987,6 +5180,8 @@ type TransformStreamDefaultController<'O> =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TransformStreamDefaultController/terminate)
     /// </summary>
     abstract terminate: unit -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (enqueue: Action<'O option>, error: Action<obj>, terminate: Action, ?desiredSize: float) : TransformStreamDefaultController<'O> = jsNative
 
 [<Interface>]
 type ReadableWritablePair<'R, 'W> =
@@ -5005,6 +5200,7 @@ type ReadableWritablePair<'R, 'W> =
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStream)
 /// </summary>
+[<Interface>]
 type WritableStream<'W> =
     /// <summary>
     /// The **<c>locked</c>** read-only property of the WritableStream interface returns a boolean indicating whether the WritableStream is locked to a writer.
@@ -5030,12 +5226,15 @@ type WritableStream<'W> =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStream/getWriter)
     /// </summary>
     abstract getWriter: unit -> WritableStreamDefaultWriter<'W>
+    [<ParamObject; Emit("$0")>]
+    static member Create (locked: bool, abort: Func<obj, JS.Promise<unit>>, close: Func<JS.Promise<unit>>, getWriter: Func<WritableStreamDefaultWriter<'W>>) : WritableStream<'W> = jsNative
 
 /// <summary>
 /// The **<c>WritableStreamDefaultWriter</c>** interface of the Streams API is the object returned by WritableStream.getWriter() and once created locks the writer to the WritableStream ensuring that no other streams can write to the underlying sink.
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultWriter)
 /// </summary>
+[<Interface>]
 type WritableStreamDefaultWriter<'W> =
     /// <summary>
     /// The **<c>closed</c>** read-only property of the WritableStreamDefaultWriter interface returns a Promise that fulfills if the stream becomes closed, or rejects if the stream errors or the writer's lock is released.
@@ -5079,6 +5278,8 @@ type WritableStreamDefaultWriter<'W> =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultWriter/releaseLock)
     /// </summary>
     abstract releaseLock: unit -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (closed: JS.Promise<unit>, ready: JS.Promise<unit>, abort: Func<obj, JS.Promise<unit>>, close: Func<JS.Promise<unit>>, write: Func<'W option, JS.Promise<unit>>, releaseLock: Action, ?desiredSize: float) : WritableStreamDefaultWriter<'W> = jsNative
 
 /// <summary>
 /// The **<c>TransformStream</c>** interface of the Streams API represents a concrete implementation of the pipe chain transform stream concept.
@@ -5425,6 +5626,8 @@ type TailEvent =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ExtendableEvent/waitUntil)
     /// </summary>
     abstract waitUntil: promise: JS.Promise<obj> -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (events: TraceItem[], traces: TraceItem[], ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: Action, preventDefault: Action, stopPropagation: Action, composedPath: Func<EventTarget<EventCurrentTargetItem>[]>, waitUntil: Action<JS.Promise<obj>>, ?currentTarget: EventTarget<EventCurrentTargetItem>, ?target: EventTarget<EventCurrentTargetItem>, ?srcElement: EventTarget<EventCurrentTargetItem>) : TailEvent = jsNative
     [<Global("TailEvent.NONE")>]
     static member NONE: float = jsNative
     [<Global("TailEvent.CAPTURING_PHASE")>]
@@ -5508,12 +5711,15 @@ type TraceItemFetchEventInfo =
     [<ParamObject; Emit("$0")>]
     static member Create (request: TraceItemFetchEventInfoRequest, ?response: TraceItemFetchEventInfoResponse) : TraceItemFetchEventInfo = jsNative
 
+[<Interface>]
 type TraceItemFetchEventInfoRequest =
     abstract cf: obj option
     abstract headers: RequestInitHeaders
     abstract ``method``: string
     abstract url: string
     abstract getUnredacted: unit -> TraceItemFetchEventInfoRequest
+    [<ParamObject; Emit("$0")>]
+    static member Create (headers: RequestInitHeaders, ``method``: string, url: string, getUnredacted: Func<TraceItemFetchEventInfoRequest>, ?cf: obj) : TraceItemFetchEventInfoRequest = jsNative
 
 [<Interface>]
 type TraceItemFetchEventInfoResponse =
@@ -5594,8 +5800,11 @@ type TraceMetrics =
     [<ParamObject; Emit("$0")>]
     static member Create (cpuTime: float, wallTime: float) : TraceMetrics = jsNative
 
+[<Interface>]
 type UnsafeTraceMetrics =
     abstract fromTrace: item: TraceItem -> TraceMetrics
+    [<ParamObject; Emit("$0")>]
+    static member Create (fromTrace: Func<TraceItem, TraceMetrics>) : UnsafeTraceMetrics = jsNative
 
 /// <summary>
 /// The **<c>URL</c>** interface is used to parse, construct, normalize, and encode URLs. It works by providing properties which allow you to easily read and modify the components of a URL.
@@ -5683,6 +5892,8 @@ type URL =
     /// </summary>
     abstract toJSON: unit -> string
     abstract toString: unit -> string
+    [<ParamObject; Emit("$0")>]
+    static member Create (origin: string, href: string, protocol: string, username: string, password: string, host: string, hostname: string, port: string, pathname: string, search: string, hash: string, searchParams: URLSearchParams, toJSON: Func<string>, toString: Func<string>) : URL = jsNative
     /// <summary>
     /// The **<c>URL.canParse()</c>** static method of the URL interface returns a boolean indicating whether or not an absolute URL, or a relative URL combined with a base URL, are parsable and valid.
     ///
@@ -5717,6 +5928,7 @@ type URL =
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URLSearchParams)
 /// </summary>
+[<Interface>]
 type URLSearchParams =
     /// <summary>
     /// The **<c>size</c>** read-only property of the URLSearchParams interface indicates the total number of search parameter entries.
@@ -5771,12 +5983,15 @@ type URLSearchParams =
     abstract values: unit -> obj
     abstract forEach<'This>: callback: Action<string, string, URLSearchParams> * ?thisArg: 'This -> unit
     abstract toString: unit -> string
+    [<ParamObject; Emit("$0")>]
+    static member Create (size: float, append: Action<string, string>, delete: Action<string, string option>, get: Func<string, string option>, getAll: Func<string, string[]>, has: Func<string, string option, bool>, set: Action<string, string>, sort: Action, entries: Func<obj>, keys: Func<obj>, values: Func<obj>, forEach: Action<Action<string, string, URLSearchParams>, 'This option>, toString: Func<string>) : URLSearchParams = jsNative
 
 /// <summary>
 /// The **<c>URLPattern</c>** interface of the URL Pattern API matches URLs or parts of URLs against a pattern. The pattern can contain capturing groups that extract parts of the matched URL.
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URLPattern)
 /// </summary>
+[<Interface>]
 type URLPattern =
     /// <summary>
     /// The **<c>protocol</c>** read-only property of the URLPattern interface is a string containing the pattern used to match the protocol part of a URL.
@@ -5844,6 +6059,8 @@ type URLPattern =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URLPattern/exec)
     /// </summary>
     abstract exec: ?input: U2<string, URLPatternInit> * ?baseURL: string -> URLPatternResult option
+    [<ParamObject; Emit("$0")>]
+    static member Create (protocol: string, username: string, password: string, hostname: string, port: string, pathname: string, search: string, hash: string, hasRegExpGroups: bool, test: Func<U2<string, URLPatternInit> option, string option, bool>, exec: Func<U2<string, URLPatternInit> option, string option, URLPatternResult option>) : URLPattern = jsNative
 
 [<Interface>]
 type URLPatternInit =
@@ -6012,6 +6229,8 @@ type CloseEvent =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
     /// </summary>
     abstract composedPath: unit -> EventTarget<EventCurrentTargetItem>[]
+    [<ParamObject; Emit("$0")>]
+    static member Create (code: float, reason: string, wasClean: bool, ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: Action, preventDefault: Action, stopPropagation: Action, composedPath: Func<EventTarget<EventCurrentTargetItem>[]>, ?currentTarget: EventTarget<EventCurrentTargetItem>, ?target: EventTarget<EventCurrentTargetItem>, ?srcElement: EventTarget<EventCurrentTargetItem>) : CloseEvent = jsNative
     [<Global("CloseEvent.NONE")>]
     static member NONE: float = jsNative
     [<Global("CloseEvent.CAPTURING_PHASE")>]
@@ -6046,6 +6265,7 @@ type WebSocketEventMap =
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WebSocket)
 /// </summary>
+[<Interface>]
 type WebSocket =
     inherit EventTarget<EventCurrentTargetItem>
     abstract accept: ?options: WebSocketAcceptOptions -> unit
@@ -6111,6 +6331,8 @@ type WebSocket =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent)
     /// </summary>
     abstract dispatchEvent: ``event``: U4<CloseEvent, ErrorEvent, Event, MessageEvent> -> bool
+    [<ParamObject; Emit("$0")>]
+    static member Create (accept: Action<WebSocketAcceptOptions option>, send: Action<U3<string, JS.ArrayBuffer, JS.ArrayBufferView>>, close: Action<float option, string option>, serializeAttachment: Action<obj>, deserializeAttachment: Func<obj>, readyState: float, binaryType: WebSocketBinaryType, addEventListener: Action<'Type, U2<Action<obj>, EventListenerObject<Event>>, U2<bool, EventTargetAddEventListenerOptions> option>, removeEventListener: Action<'Type, U2<Action<obj>, EventListenerObject<Event>>, U2<bool, EventTargetEventListenerOptions> option>, dispatchEvent: Func<U4<CloseEvent, ErrorEvent, Event, MessageEvent>, bool>, ?url: string, ?protocol: string, ?extensions: string) : WebSocket = jsNative
 
 type WebSocketConstructor =
     abstract READY_STATE_CONNECTING: float
@@ -6141,11 +6363,14 @@ type WebSocketPairConstructor =
     [<EmitConstructor>]
     abstract Create: unit -> ServiceWorkerGlobalScopeWebSocketPairResult
 
+[<Interface>]
 type SqlStorage =
     abstract exec<'T>: query: string * [<ParamArray>] bindings: obj[] -> SqlStorageCursor<'T>
     abstract databaseSize: float
     abstract Cursor: SqlStorageCursorConstructor with get, set
     abstract Statement: SqlStorageStatementConstructor with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (exec: Func<string, obj[], SqlStorageCursor<'T>>, databaseSize: float, Cursor: SqlStorageCursorConstructor, Statement: SqlStorageStatementConstructor) : SqlStorage = jsNative
 
 type SqlStorageCursorConstructor =
     [<EmitConstructor>]
@@ -6159,6 +6384,7 @@ type SqlStorageStatement = obj
 
 type SqlStorageValue = U3<string, float, JS.ArrayBuffer> option
 
+[<Interface>]
 type SqlStorageCursor<'T> =
     abstract next: unit -> U2<SqlStorageCursorNextResult<'T>, SqlStorageCursorNextResult2>
     abstract toArray: unit -> 'T[]
@@ -6167,7 +6393,10 @@ type SqlStorageCursor<'T> =
     abstract columnNames: string[] with get, set
     abstract rowsRead: float
     abstract rowsWritten: float
+    [<ParamObject; Emit("$0")>]
+    static member Create (next: Func<U2<SqlStorageCursorNextResult<'T>, SqlStorageCursorNextResult2>>, toArray: Func<'T[]>, one: Func<'T>, raw: Func<obj>, columnNames: string[], rowsRead: float, rowsWritten: float) : SqlStorageCursor<'T> = jsNative
 
+[<Interface>]
 type Socket =
     abstract readable: ReadableStream<obj>
     abstract writable: WritableStream<obj>
@@ -6177,6 +6406,8 @@ type Socket =
     abstract secureTransport: SocketSecureTransport
     abstract close: unit -> JS.Promise<unit>
     abstract startTls: ?options: TlsOptions -> Socket
+    [<ParamObject; Emit("$0")>]
+    static member Create (readable: ReadableStream<obj>, writable: WritableStream<obj>, closed: JS.Promise<unit>, opened: JS.Promise<SocketInfo>, upgraded: bool, secureTransport: SocketSecureTransport, close: Func<JS.Promise<unit>>, startTls: Func<TlsOptions option, Socket>) : Socket = jsNative
 
 [<Interface>]
 type SocketOptions =
@@ -6259,6 +6490,8 @@ type EventSource =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent)
     /// </summary>
     abstract dispatchEvent: ``event``: Event -> bool
+    [<ParamObject; Emit("$0")>]
+    static member Create (close: Action, url: string, withCredentials: bool, readyState: float, onopen: obj, onmessage: obj, onerror: obj, addEventListener: Action<'Type, U2<Action<Event>, EventListenerObject<Event>>, U2<bool, EventTargetAddEventListenerOptions> option>, removeEventListener: Action<'Type, U2<Action<Event>, EventListenerObject<Event>>, U2<bool, EventTargetEventListenerOptions> option>, dispatchEvent: Func<Event, bool>) : EventSource = jsNative
     [<Global("EventSource.CONNECTING")>]
     static member CONNECTING: float = jsNative
     [<Global("EventSource.OPEN")>]
@@ -6303,6 +6536,7 @@ type ContainerExecPtyOptions =
     [<ParamObject; Emit("$0")>]
     static member Create (?cols: float, ?rows: float) : ContainerExecPtyOptions = jsNative
 
+[<Interface>]
 type ExecProcess =
     abstract stdin: WritableStream<obj> option
     abstract stdout: ReadableStream<obj> option
@@ -6313,7 +6547,10 @@ type ExecProcess =
     abstract output: unit -> JS.Promise<ExecOutput>
     abstract kill: ?signal: float -> unit
     abstract resize: cols: float * rows: float -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (pid: float, isPty: bool, exitCode: JS.Promise<float>, output: Func<JS.Promise<ExecOutput>>, kill: Action<float option>, resize: Action<float, float>, ?stdin: WritableStream<obj>, ?stdout: ReadableStream<obj>, ?stderr: ReadableStream<obj>) : ExecProcess = jsNative
 
+[<Interface>]
 type Container =
     abstract running: bool
     abstract start: ?options: ContainerStartupOptions -> unit
@@ -6328,6 +6565,8 @@ type Container =
     abstract snapshotContainer: options: ContainerSnapshotOptions -> JS.Promise<ContainerSnapshot>
     abstract interceptOutboundHttps: addr: string * binding: RequestFetcher -> JS.Promise<unit>
     abstract exec: cmd: string[] * ?options: ContainerExecOptions -> JS.Promise<ExecProcess>
+    [<ParamObject; Emit("$0")>]
+    static member Create (running: bool, start: Action<ContainerStartupOptions option>, monitor: Func<JS.Promise<unit>>, destroy: Func<obj, JS.Promise<unit>>, signal: Action<float>, getTcpPort: Func<float, RequestFetcher>, setInactivityTimeout: Func<U2<float, bigint>, JS.Promise<unit>>, interceptOutboundHttp: Func<string, RequestFetcher, JS.Promise<unit>>, interceptAllOutboundHttp: Func<RequestFetcher, JS.Promise<unit>>, snapshotDirectory: Func<ContainerDirectorySnapshotOptions, JS.Promise<ContainerDirectorySnapshot>>, snapshotContainer: Func<ContainerSnapshotOptions, JS.Promise<ContainerSnapshot>>, interceptOutboundHttps: Func<string, RequestFetcher, JS.Promise<unit>>, exec: Func<string[], ContainerExecOptions option, JS.Promise<ExecProcess>>) : Container = jsNative
 
 [<Interface>]
 type ContainerDirectorySnapshot =
@@ -6382,6 +6621,7 @@ type ContainerStartResources =
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/MessagePort)
 /// </summary>
+[<Interface>]
 type MessagePort =
     inherit EventTarget<EventCurrentTargetItem>
     /// <summary>
@@ -6421,6 +6661,8 @@ type MessagePort =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent)
     /// </summary>
     abstract dispatchEvent: ``event``: Event -> bool
+    [<ParamObject; Emit("$0")>]
+    static member Create (postMessage: Action<obj, U2<obj[], MessagePortPostMessageOptions> option>, close: Action, start: Action, onmessage: obj, addEventListener: Action<'Type, U2<Action<Event>, EventListenerObject<Event>>, U2<bool, EventTargetAddEventListenerOptions> option>, removeEventListener: Action<'Type, U2<Action<Event>, EventListenerObject<Event>>, U2<bool, EventTargetEventListenerOptions> option>, dispatchEvent: Func<Event, bool>) : MessagePort = jsNative
 
 /// <summary>
 /// The **<c>MessageChannel</c>** interface of the Channel Messaging API allows us to create a new message channel and send data through it via its two MessagePort properties.
@@ -6459,6 +6701,7 @@ type LoopbackServiceStub<'T> = private LoopbackServiceStub__ of obj
 [<Erase>]
 type LoopbackDurableObjectClass<'T> = private LoopbackDurableObjectClass__ of obj
 
+[<Interface>]
 type LoopbackDurableObjectNamespace =
     inherit DurableObjectNamespace<unit>
     abstract newUniqueId: ?options: DurableObjectNamespaceNewUniqueIdOptions -> DurableObjectId
@@ -6467,16 +6710,24 @@ type LoopbackDurableObjectNamespace =
     abstract get: id: DurableObjectId * ?options: DurableObjectNamespaceGetDurableObjectOptions -> obj
     abstract getByName: name: string * ?options: DurableObjectNamespaceGetDurableObjectOptions -> obj
     abstract jurisdiction: jurisdiction: DurableObjectJurisdiction -> DurableObjectNamespace<unit>
+    [<ParamObject; Emit("$0")>]
+    static member Create (newUniqueId: Func<DurableObjectNamespaceNewUniqueIdOptions option, DurableObjectId>, idFromName: Func<string, DurableObjectId>, idFromString: Func<string, DurableObjectId>, get: Func<DurableObjectId, DurableObjectNamespaceGetDurableObjectOptions option, obj>, getByName: Func<string, DurableObjectNamespaceGetDurableObjectOptions option, obj>, jurisdiction: Func<DurableObjectJurisdiction, DurableObjectNamespace<unit>>) : LoopbackDurableObjectNamespace = jsNative
 
+[<Interface>]
 type LoopbackColoLocalActorNamespace =
     inherit ColoLocalActorNamespace
     abstract get: actorId: string -> RequestFetcher
+    [<ParamObject; Emit("$0")>]
+    static member Create (get: Func<string, RequestFetcher>) : LoopbackColoLocalActorNamespace = jsNative
 
+[<Interface>]
 type SyncKvStorage =
     abstract get<'T>: key: string -> 'T option
     abstract list: ?options: SyncKvListOptions -> obj
     abstract put<'T>: key: string * value: 'T -> unit
     abstract delete: key: string -> bool
+    [<ParamObject; Emit("$0")>]
+    static member Create (get: Func<string, 'T option>, list: Func<SyncKvListOptions option, obj>, put: Action<string, 'T>, delete: Func<string, bool>) : SyncKvStorage = jsNative
 
 [<Interface>]
 type SyncKvListOptions =
@@ -6489,9 +6740,12 @@ type SyncKvListOptions =
     [<ParamObject; Emit("$0")>]
     static member Create (?start: string, ?startAfter: string, ?``end``: string, ?prefix: string, ?reverse: bool, ?limit: float) : SyncKvListOptions = jsNative
 
+[<Interface>]
 type WorkerStub =
     abstract getEntrypoint: ?name: string * ?options: WorkerStubEntrypointOptions -> obj
     abstract getDurableObjectClass<'T>: ?name: string * ?options: WorkerStubEntrypointOptions -> DurableObjectClass<'T>
+    [<ParamObject; Emit("$0")>]
+    static member Create (getEntrypoint: Func<string option, WorkerStubEntrypointOptions option, obj>, getDurableObjectClass: Func<string option, WorkerStubEntrypointOptions option, DurableObjectClass<'T>>) : WorkerStub = jsNative
 
 [<Interface>]
 type WorkerStubEntrypointOptions =
@@ -6500,9 +6754,12 @@ type WorkerStubEntrypointOptions =
     [<ParamObject; Emit("$0")>]
     static member Create (?props: obj, ?limits: workerdResourceLimits) : WorkerStubEntrypointOptions = jsNative
 
+[<Interface>]
 type WorkerLoader =
     abstract get: name: string option * getCode: Func<U2<JS.Promise<WorkerLoaderWorkerCode>, WorkerLoaderWorkerCode>> -> WorkerStub
     abstract load: code: WorkerLoaderWorkerCode -> WorkerStub
+    [<ParamObject; Emit("$0")>]
+    static member Create (get: Func<string option, Func<U2<JS.Promise<WorkerLoaderWorkerCode>, WorkerLoaderWorkerCode>>, WorkerStub>, load: Func<WorkerLoaderWorkerCode, WorkerStub>) : WorkerLoader = jsNative
 
 type WorkerLoaderWorkerCodeModules =
     [<EmitIndexer>]
@@ -6548,6 +6805,7 @@ type workerdResourceLimits =
 ///
 /// [Cloudflare Docs Reference](https://developers.cloudflare.com/workers/runtime-apis/performance/)
 /// </summary>
+[<Interface>]
 type Performance =
     inherit EventTarget<EventCurrentTargetItem>
     abstract timeOrigin: float
@@ -6635,6 +6893,8 @@ type Performance =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent)
     /// </summary>
     abstract dispatchEvent: ``event``: Event -> bool
+    [<ParamObject; Emit("$0")>]
+    static member Create (timeOrigin: float, now: Func<float>, eventCounts: EventCounts, clearMarks: Action<string option>, clearMeasures: Action<string option>, clearResourceTimings: Action, getEntries: Func<PerformanceEntry[]>, getEntriesByName: Func<string, string option, PerformanceEntry[]>, getEntriesByType: Func<string, PerformanceEntry[]>, mark: Func<string, PerformanceMarkOptions option, PerformanceMark>, measure: Func<string, U2<string, PerformanceMeasureOptions> option, string option, PerformanceMeasure>, setResourceTimingBufferSize: Action<float>, toJSON: Func<obj>, nodeTiming: PerformanceNodeTiming, eventLoopUtilization: Func<PerformanceEventLoopUtilization>, markResourceTiming: Action, timerify: Func<Action, Action>, addEventListener: Action<'Type, U2<Action<Event>, EventListenerObject<Event>>, U2<bool, EventTargetAddEventListenerOptions> option>, removeEventListener: Action<'Type, U2<Action<Event>, EventListenerObject<Event>>, U2<bool, EventTargetEventListenerOptions> option>, dispatchEvent: Func<Event, bool>) : Performance = jsNative
 
 [<Interface>]
 type PerformanceEventLoopUtilization =
@@ -6644,6 +6904,7 @@ type PerformanceEventLoopUtilization =
     [<ParamObject; Emit("$0")>]
     static member Create (idle: float, active: float, utilization: float) : PerformanceEventLoopUtilization = jsNative
 
+[<Interface>]
 type PerformanceNodeTiming =
     inherit PerformanceEntry
     abstract nodeStart: float
@@ -6684,6 +6945,8 @@ type PerformanceNodeTiming =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/duration)
     /// </summary>
     abstract duration: float
+    [<ParamObject; Emit("$0")>]
+    static member Create (nodeStart: float, v8Start: float, bootstrapComplete: float, environment: float, loopStart: float, loopExit: float, idleTime: float, uvMetricsInfo: UvMetricsInfo, toJSON: Func<obj>, name: string, entryType: string, startTime: float, duration: float) : PerformanceNodeTiming = jsNative
 
 [<Interface>]
 type UvMetricsInfo =
@@ -6698,6 +6961,7 @@ type UvMetricsInfo =
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceMark)
 /// </summary>
+[<Interface>]
 type PerformanceMark =
     inherit PerformanceEntry
     /// <summary>
@@ -6736,12 +7000,15 @@ type PerformanceMark =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/duration)
     /// </summary>
     abstract duration: float
+    [<ParamObject; Emit("$0")>]
+    static member Create (detail: obj, toJSON: Func<obj>, name: string, entryType: string, startTime: float, duration: float) : PerformanceMark = jsNative
 
 /// <summary>
 /// **<c>PerformanceMeasure</c>** is an abstract interface for PerformanceEntry objects with an entryType of "measure". Entries of this type are created by calling performance.measure() to add a named DOMHighResTimeStamp (the measure) between two marks to the browser's performance timeline.
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceMeasure)
 /// </summary>
+[<Interface>]
 type PerformanceMeasure =
     inherit PerformanceEntry
     /// <summary>
@@ -6780,6 +7047,8 @@ type PerformanceMeasure =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/duration)
     /// </summary>
     abstract duration: float
+    [<ParamObject; Emit("$0")>]
+    static member Create (detail: obj, toJSON: Func<obj>, name: string, entryType: string, startTime: float, duration: float) : PerformanceMeasure = jsNative
 
 [<Interface>]
 type PerformanceMarkOptions =
@@ -6802,6 +7071,7 @@ type PerformanceMeasureOptions =
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceObserverEntryList)
 /// </summary>
+[<Interface>]
 type PerformanceObserverEntryList =
     /// <summary>
     /// The **<c>getEntries()</c>** method of the PerformanceObserverEntryList interface returns a list of explicitly observed performance entry objects. The list's members are determined by the set of entry types specified in the call to the observe() method. The list is available in the observer's callback function (as the first parameter in the callback).
@@ -6821,12 +7091,15 @@ type PerformanceObserverEntryList =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceObserverEntryList/getEntriesByName)
     /// </summary>
     abstract getEntriesByName: name: string * ?``type``: string -> PerformanceEntry[]
+    [<ParamObject; Emit("$0")>]
+    static member Create (getEntries: Func<PerformanceEntry[]>, getEntriesByType: Func<string, PerformanceEntry[]>, getEntriesByName: Func<string, string option, PerformanceEntry[]>) : PerformanceObserverEntryList = jsNative
 
 /// <summary>
 /// The **<c>PerformanceEntry</c>** object encapsulates a single performance metric that is part of the browser's performance timeline.
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry)
 /// </summary>
+[<Interface>]
 type PerformanceEntry =
     /// <summary>
     /// The read-only **<c>name</c>** property of the PerformanceEntry interface is a string representing the name for a performance entry. It acts as an identifier, but it does not have to be unique. The value depends on the subclass.
@@ -6858,12 +7131,15 @@ type PerformanceEntry =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/toJSON)
     /// </summary>
     abstract toJSON: unit -> obj
+    [<ParamObject; Emit("$0")>]
+    static member Create (name: string, entryType: string, startTime: float, duration: float, toJSON: Func<obj>) : PerformanceEntry = jsNative
 
 /// <summary>
 /// The **<c>PerformanceResourceTiming</c>** interface enables retrieval and analysis of detailed network timing data regarding the loading of an application's resources. An application can use the timing metrics to determine, for example, the length of time it takes to fetch a specific resource, such as an XMLHttpRequest, &lt;SVG&gt;, image, or script.
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming)
 /// </summary>
+[<Interface>]
 type PerformanceResourceTiming =
     inherit PerformanceEntry
     /// <summary>
@@ -7004,12 +7280,15 @@ type PerformanceResourceTiming =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/toJSON)
     /// </summary>
     abstract toJSON: unit -> obj
+    [<ParamObject; Emit("$0")>]
+    static member Create (connectEnd: float, connectStart: float, decodedBodySize: float, domainLookupEnd: float, domainLookupStart: float, encodedBodySize: float, fetchStart: float, initiatorType: string, nextHopProtocol: string, redirectEnd: float, redirectStart: float, requestStart: float, responseEnd: float, responseStart: float, responseStatus: float, transferSize: float, workerStart: float, name: string, entryType: string, startTime: float, duration: float, toJSON: Func<obj>, ?secureConnectionStart: float) : PerformanceResourceTiming = jsNative
 
 /// <summary>
 /// The **<c>PerformanceObserver</c>** interface is used to observe performance measurement events and be notified of new performance entries as they are recorded in the browser's performance timeline.
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceObserver)
 /// </summary>
+[<Interface>]
 type PerformanceObserver =
     /// <summary>
     /// The **<c>disconnect()</c>** method of the PerformanceObserver interface is used to stop the performance observer from receiving any performance entry events.
@@ -7030,6 +7309,8 @@ type PerformanceObserver =
     /// </summary>
     abstract takeRecords: unit -> PerformanceEntry[]
     abstract supportedEntryTypes: string[]
+    [<ParamObject; Emit("$0")>]
+    static member Create (disconnect: Action, observe: Action<PerformanceObserverObserveOptions option>, takeRecords: Func<PerformanceEntry[]>, supportedEntryTypes: string[]) : PerformanceObserver = jsNative
 
 [<Interface>]
 type PerformanceObserverObserveOptions =
@@ -7040,6 +7321,7 @@ type PerformanceObserverObserveOptions =
     [<ParamObject; Emit("$0")>]
     static member Create (?buffered: bool, ?durationThreshold: float, ?entryTypes: string[], ?``type``: string) : PerformanceObserverObserveOptions = jsNative
 
+[<Interface>]
 type EventCounts =
     abstract size: float
     abstract get: eventType: string -> float option
@@ -7048,22 +7330,30 @@ type EventCounts =
     abstract keys: unit -> obj
     abstract values: unit -> obj
     abstract forEach: param1: Action<float, string, EventCounts> * param2: obj -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (size: float, get: Func<string, float option>, has: Func<string, bool>, entries: Func<obj>, keys: Func<obj>, values: Func<obj>, forEach: Action<Action<float, string, EventCounts>, obj>) : EventCounts = jsNative
 
 type SpanConstructor =
     [<EmitConstructor>]
     abstract Create: unit -> Span
 
+[<Interface>]
 type Tracing =
     abstract enterSpan<'T, 'A>: name: string * callback: Func<Span, 'A, 'T> * [<ParamArray>] args: 'A -> 'T
     abstract startActiveSpan<'T, 'A>: name: string * callback: Func<Span, 'A, 'T> * [<ParamArray>] args: 'A -> 'T
     abstract startSpan: name: string -> Span
     abstract Span: SpanConstructor with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (enterSpan: Func<string, Func<Span, 'A, 'T>, 'A, 'T>, startActiveSpan: Func<string, Func<Span, 'A, 'T>, 'A, 'T>, startSpan: Func<string, Span>, Span: SpanConstructor) : Tracing = jsNative
 
+[<Interface>]
 type Span =
     abstract isTraced: bool
     abstract setAttribute: key: string * value: U3<string, float, bool> -> Span
     abstract setAttributes: attributes: SpanSetAttributesAttributes -> Span
     abstract ``end``: unit -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (isTraced: bool, setAttribute: Func<string, U3<string, float, bool>, Span>, setAttributes: Func<SpanSetAttributesAttributes, Span>, ``end``: Action) : Span = jsNative
 
 /// <summary>
 /// Represents the identity of a user authenticated via Cloudflare Access.
@@ -7404,6 +7694,7 @@ type AgentMemoryListMemoriesResult =
 ///
 /// Returned by AgentMemoryNamespace.getProfile.
 /// </summary>
+[<Interface>]
 type AgentMemoryProfile =
     /// <summary>
     /// Retrieve a memory by ID.
@@ -7461,6 +7752,8 @@ type AgentMemoryProfile =
     /// </summary>
     /// <remarks>@param sessionId - Session to delete.</remarks>
     abstract deleteSession: sessionId: string -> JS.Promise<unit>
+    [<ParamObject; Emit("$0")>]
+    static member Create (get: Func<string, JS.Promise<AgentMemoryMemory>>, delete: Func<string, JS.Promise<AgentMemoryMemory>>, remember: Func<AgentMemoryIncomingMemory, JS.Promise<AgentMemoryMemory>>, ingest: Func<obj, AgentMemoryIngestOptions option, JS.Promise<unit>>, getSummary: Func<AgentMemoryGetSummaryOptions option, JS.Promise<AgentMemoryGetSummaryResponse>>, recall: Func<string, AgentMemoryRecallOptions option, JS.Promise<AgentMemoryRecallResult>>, list: Func<AgentMemoryListMemoriesOptions option, JS.Promise<AgentMemoryListMemoriesResult>>, deleteSession: Func<string, JS.Promise<unit>>) : AgentMemoryProfile = jsNative
 
 /// <summary>
 /// Namespace-level Agent Memory binding.
@@ -7480,6 +7773,7 @@ type AgentMemoryProfile =
 /// };
 /// </code>
 /// </remarks>
+[<Interface>]
 type AgentMemoryNamespace =
     /// <summary>
     /// Get a memory profile by name. Profiles are isolated by namespace and
@@ -7494,6 +7788,8 @@ type AgentMemoryNamespace =
     /// </summary>
     /// <remarks>@param profileName - Name of the profile to delete.</remarks>
     abstract deleteProfile: profileName: string -> JS.Promise<unit>
+    [<ParamObject; Emit("$0")>]
+    static member Create (getProfile: Func<string, JS.Promise<AgentMemoryProfile>>, deleteProfile: Func<string, JS.Promise<unit>>) : AgentMemoryNamespace = jsNative
 
 [<Interface>]
 type AiSearchInternalError =
@@ -8449,6 +8745,7 @@ type AiSearchJobLogsResponseResultInfo =
 /// Single item service for an AI Search instance.
 /// Provides info, download, sync, logs, and chunks operations on a specific item.
 /// </summary>
+[<Interface>]
 type AiSearchItem =
     /// <summary>
     /// Get metadata about this item.
@@ -8476,11 +8773,14 @@ type AiSearchItem =
     /// <remarks>@param params Optional pagination parameters (limit, offset).</remarks>
     /// <remarks>@returns Paginated chunk entries for this item.</remarks>
     abstract chunks: ?``params``: AiSearchItemChunksParams -> JS.Promise<AiSearchItemChunksResponse>
+    [<ParamObject; Emit("$0")>]
+    static member Create (info: Func<JS.Promise<AiSearchItemInfo>>, download: Func<JS.Promise<AiSearchItemContentResult>>, sync: Func<JS.Promise<AiSearchItemInfo>>, logs: Func<AiSearchItemLogsParams option, JS.Promise<AiSearchItemLogsResponse>>, chunks: Func<AiSearchItemChunksParams option, JS.Promise<AiSearchItemChunksResponse>>) : AiSearchItem = jsNative
 
 /// <summary>
 /// Items collection service for an AI Search instance.
 /// Provides list, upload, and access to individual items.
 /// </summary>
+[<Interface>]
 type AiSearchItems =
     /// <summary>
     /// List items in this instance.
@@ -8516,6 +8816,8 @@ type AiSearchItems =
     /// </summary>
     /// <remarks>@param itemId The item identifier.</remarks>
     abstract delete: itemId: string -> JS.Promise<unit>
+    [<ParamObject; Emit("$0")>]
+    static member Create (list: Func<AiSearchListItemsParams option, JS.Promise<AiSearchListItemsResponse>>, upload: Func<string, U3<string, Blob, ReadableStream<obj>>, AiSearchUploadItemOptions option, JS.Promise<AiSearchItemInfo>>, uploadAndPoll: Func<string, U3<string, Blob, ReadableStream<obj>>, AiSearchItemsUploadAndPollOptions option, JS.Promise<AiSearchItemInfo>>, get: Func<string, AiSearchItem>, delete: Func<string, JS.Promise<unit>>) : AiSearchItems = jsNative
 
 [<Interface>]
 type AiSearchItemsUploadAndPollOptions =
@@ -8536,6 +8838,7 @@ type AiSearchItemsUploadAndPollOptions =
 /// Single job service for an AI Search instance.
 /// Provides info, logs, and cancel operations for a specific job.
 /// </summary>
+[<Interface>]
 type AiSearchJob =
     /// <summary>
     /// Get metadata about this job.
@@ -8551,11 +8854,14 @@ type AiSearchJob =
     /// <remarks>@returns The updated job info.</remarks>
     /// <remarks>@throws AiSearchNotFoundError if the job does not exist.</remarks>
     abstract cancel: unit -> JS.Promise<AiSearchJobInfo>
+    [<ParamObject; Emit("$0")>]
+    static member Create (info: Func<JS.Promise<AiSearchJobInfo>>, logs: Func<AiSearchJobLogsParams option, JS.Promise<AiSearchJobLogsResponse>>, cancel: Func<JS.Promise<AiSearchJobInfo>>) : AiSearchJob = jsNative
 
 /// <summary>
 /// Jobs collection service for an AI Search instance.
 /// Provides list, create, and access to individual jobs.
 /// </summary>
+[<Interface>]
 type AiSearchJobs =
     /// <summary>
     /// List jobs for this instance.
@@ -8573,6 +8879,8 @@ type AiSearchJobs =
     /// <remarks>@param jobId The job identifier.</remarks>
     /// <remarks>@returns Job service for info, logs, and cancel operations.</remarks>
     abstract get: jobId: string -> AiSearchJob
+    [<ParamObject; Emit("$0")>]
+    static member Create (list: Func<AiSearchListJobsParams option, JS.Promise<AiSearchListJobsResponse>>, create: Func<AiSearchCreateJobParams option, JS.Promise<AiSearchJobInfo>>, get: Func<string, AiSearchJob>) : AiSearchJobs = jsNative
 
 /// <summary>
 /// Instance-level AI Search service.
@@ -17763,11 +18071,14 @@ type AiGatewayLogNotFound =
     [<ParamObject; Emit("$0")>]
     static member Create (name: string, message: string, ?stack: string, ?cause: obj) : AiGatewayLogNotFound = jsNative
 
+[<Interface>]
 type AiGateway =
     abstract patchLog: logId: string * data: AiGatewayPatchLog -> JS.Promise<unit>
     abstract getLog: logId: string -> JS.Promise<AiGatewayLog>
     abstract run: data: U2<AIGatewayUniversalRequest, AIGatewayUniversalRequest[]> * ?options: AiGatewayRunOptions -> JS.Promise<Response>
     abstract getUrl: ?provider: string -> JS.Promise<string>
+    [<ParamObject; Emit("$0")>]
+    static member Create (patchLog: Func<string, AiGatewayPatchLog, JS.Promise<unit>>, getLog: Func<string, JS.Promise<AiGatewayLog>>, run: Func<U2<AIGatewayUniversalRequest, AIGatewayUniversalRequest[]>, AiGatewayRunOptions option, JS.Promise<Response>>, getUrl: Func<string option, JS.Promise<string>>) : AiGateway = jsNative
 
 /// <summary>
 /// Information about a repository.
@@ -17998,6 +18309,7 @@ type ArtifactsTokenListResult =
 ///
 /// Methods may throw <c>ArtifactsError</c> with code <c>INTERNAL_ERROR</c> if an unexpected service error occurs.
 /// </summary>
+[<Interface>]
 type ArtifactsRepo =
     inherit ArtifactsRepoInfo
     /// <summary>
@@ -18067,6 +18379,8 @@ type ArtifactsRepo =
     /// HTTPS git remote URL.
     /// </summary>
     abstract remote: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (createToken: Func<ArtifactsCreateTokenResultScope option, float option, JS.Promise<ArtifactsCreateTokenResult>>, listTokens: Func<JS.Promise<ArtifactsTokenListResult>>, revokeToken: Func<string, JS.Promise<bool>>, fork: Func<string, ArtifactsRepoForkOpts option, JS.Promise<ArtifactsCreateRepoResult>>, id: string, name: string, defaultBranch: string, createdAt: string, updatedAt: string, readOnly: bool, remote: string, ?description: string, ?lastPushAt: string, ?source: string) : ArtifactsRepo = jsNative
 
 [<Interface>]
 type ArtifactsRepoForkOpts =
@@ -18120,6 +18434,7 @@ type ArtifactsError =
 ///
 /// Methods may throw <c>ArtifactsError</c> with code <c>INTERNAL_ERROR</c> if an unexpected service error occurs.
 /// </summary>
+[<Interface>]
 type Artifacts =
     /// <summary>
     /// Create a new repository with an initial access token.
@@ -18165,6 +18480,8 @@ type Artifacts =
     /// <remarks>@returns true if deleted, false if not found.</remarks>
     /// <remarks>@throws {ArtifactsError} with code <c>INVALID_REPO_NAME</c> if name is invalid.</remarks>
     abstract delete: name: string -> JS.Promise<bool>
+    [<ParamObject; Emit("$0")>]
+    static member Create (create: Func<string, ArtifactsCreateOpts option, JS.Promise<ArtifactsCreateRepoResult>>, get: Func<string, JS.Promise<ArtifactsRepo>>, import: Func<ArtifactsImportParams, JS.Promise<ArtifactsCreateRepoResult>>, list: Func<ArtifactsListOpts option, JS.Promise<ArtifactsRepoListResult>>, delete: Func<string, JS.Promise<bool>>) : Artifacts = jsNative
 
 [<Interface>]
 type ArtifactsCreateOpts =
@@ -24675,6 +24992,7 @@ type D1SessionConstraint =
 
 type D1SessionBookmark = Ai_Cf_Leonardo_Phoenix_1_0_Output
 
+[<Interface>]
 type D1Database =
     abstract prepare: query: string -> D1PreparedStatement
     abstract batch<'T>: statements: D1PreparedStatement[] -> JS.Promise<D1Result<'T>[]>
@@ -24688,6 +25006,8 @@ type D1Database =
     abstract withSession: ?constraintOrBookmark: string -> D1DatabaseSession
     /// <remarks>@deprecated dump() will be removed soon, only applies to deprecated alpha v1 databases.</remarks>
     abstract dump: unit -> JS.Promise<JS.ArrayBuffer>
+    [<ParamObject; Emit("$0")>]
+    static member Create (prepare: Func<string, D1PreparedStatement>, batch: Func<D1PreparedStatement[], JS.Promise<D1Result<'T>[]>>, exec: Func<string, JS.Promise<D1ExecResult>>, withSession: Func<string option, D1DatabaseSession>, dump: Func<JS.Promise<JS.ArrayBuffer>>) : D1Database = jsNative
 
 [<Interface>]
 type D1PreparedStatementRawOptions =
@@ -24701,6 +25021,7 @@ type D1PreparedStatementRawOptions2 =
     [<ParamObject; Emit("$0")>]
     static member Create (?columnNames: bool) : D1PreparedStatementRawOptions2 = jsNative
 
+[<Interface>]
 type D1DatabaseSession =
     abstract prepare: query: string -> D1PreparedStatement
     abstract batch<'T>: statements: D1PreparedStatement[] -> JS.Promise<D1Result<'T>[]>
@@ -24710,6 +25031,8 @@ type D1DatabaseSession =
     /// If no query has been executed yet, <c>null</c> is returned.
     /// </remarks>
     abstract getBookmark: unit -> string option
+    [<ParamObject; Emit("$0")>]
+    static member Create (prepare: Func<string, D1PreparedStatement>, batch: Func<D1PreparedStatement[], JS.Promise<D1Result<'T>[]>>, getBookmark: Func<string option>) : D1DatabaseSession = jsNative
 
 type D1PreparedStatement =
     abstract bind: [<ParamArray>] values: obj[] -> D1PreparedStatement
@@ -25040,6 +25363,8 @@ type EmailEvent =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ExtendableEvent/waitUntil)
     /// </summary>
     abstract waitUntil: promise: JS.Promise<obj> -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (message: ForwardableEmailMessage, ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: Action, preventDefault: Action, stopPropagation: Action, composedPath: Func<EventTarget<EventCurrentTargetItem>[]>, waitUntil: Action<JS.Promise<obj>>, ?currentTarget: EventTarget<EventCurrentTargetItem>, ?target: EventTarget<EventCurrentTargetItem>, ?srcElement: EventTarget<EventCurrentTargetItem>) : EmailEvent = jsNative
     [<Global("EmailEvent.NONE")>]
     static member NONE: float = jsNative
     [<Global("EmailEvent.CAPTURING_PHASE")>]
@@ -25099,6 +25424,7 @@ type FlagshipEvaluationError =
 /// console.log(details.variant, details.reason);
 /// </code>
 /// </remarks>
+[<Interface>]
 type Flagship =
     /// <summary>
     /// Get a flag value without type checking.
@@ -25163,10 +25489,13 @@ type Flagship =
     /// <remarks>@param defaultValue Default value returned when evaluation fails or the flag type does not match.</remarks>
     /// <remarks>@param context Optional evaluation context for targeting rules.</remarks>
     abstract getObjectDetails<'T>: flagKey: string * defaultValue: 'T * ?context: FlagshipEvaluationContext -> JS.Promise<FlagshipEvaluationDetails<'T>>
+    [<ParamObject; Emit("$0")>]
+    static member Create (get: Func<string, obj, FlagshipEvaluationContext option, JS.Promise<obj>>, getBooleanValue: Func<string, bool, FlagshipEvaluationContext option, JS.Promise<bool>>, getStringValue: Func<string, string, FlagshipEvaluationContext option, JS.Promise<string>>, getNumberValue: Func<string, float, FlagshipEvaluationContext option, JS.Promise<float>>, getObjectValue: Func<string, 'T, FlagshipEvaluationContext option, JS.Promise<'T>>, getBooleanDetails: Func<string, bool, FlagshipEvaluationContext option, JS.Promise<FlagshipEvaluationDetails<bool>>>, getStringDetails: Func<string, string, FlagshipEvaluationContext option, JS.Promise<FlagshipEvaluationDetails<string>>>, getNumberDetails: Func<string, float, FlagshipEvaluationContext option, JS.Promise<FlagshipEvaluationDetails<float>>>, getObjectDetails: Func<string, 'T, FlagshipEvaluationContext option, JS.Promise<FlagshipEvaluationDetails<'T>>>) : Flagship = jsNative
 
 /// <summary>
 /// Hello World binding to serve as an explanatory example. DO NOT USE
 /// </summary>
+[<Interface>]
 type HelloWorldBinding =
     /// <summary>
     /// Retrieve the current stored value
@@ -25176,6 +25505,8 @@ type HelloWorldBinding =
     /// Set a new stored value
     /// </summary>
     abstract set: value: string -> JS.Promise<unit>
+    [<ParamObject; Emit("$0")>]
+    static member Create (get: Func<JS.Promise<HelloWorldBindingGetResultItem>>, set: Func<string, JS.Promise<unit>>) : HelloWorldBinding = jsNative
 
 [<Interface>]
 type HelloWorldBindingGetResultItem =
@@ -25184,6 +25515,7 @@ type HelloWorldBindingGetResultItem =
     [<ParamObject; Emit("$0")>]
     static member Create (value: string, ?ms: float) : HelloWorldBindingGetResultItem = jsNative
 
+[<Interface>]
 type Hyperdrive =
     /// <summary>
     /// Connect directly to Hyperdrive as if it's your database, returning a TCP socket.
@@ -25209,11 +25541,14 @@ type Hyperdrive =
     abstract user: string
     abstract password: string
     abstract database: string
+    [<ParamObject; Emit("$0")>]
+    static member Create (connect: Func<Socket>, connectionString: string, host: string, ip: string, port: float, user: string, password: string, database: string) : Hyperdrive = jsNative
 
 /// <summary>
 /// A handle to a dynamically-provisioned Hyperdrive connection, returned by
 /// <c>HyperdriveApi.get()</c>.
 /// </summary>
+[<Interface>]
 type HyperdriveDynamic =
     /// <summary>
     /// The database name to use when connecting through this Hyperdrive.
@@ -25225,11 +25560,14 @@ type HyperdriveDynamic =
     /// Open a TCP socket to the target database through this Hyperdrive.
     /// </summary>
     abstract connect: unit -> JS.Promise<Socket>
+    [<ParamObject; Emit("$0")>]
+    static member Create (database: JS.Promise<string>, user: JS.Promise<string>, password: JS.Promise<string>, connect: Func<JS.Promise<Socket>>) : HyperdriveDynamic = jsNative
 
 /// <summary>
 /// Binding that provisions Hyperdrive connections at request time, rather than
 /// from static configuration.
 /// </summary>
+[<Interface>]
 type HyperdriveDynamicApi =
     /// <summary>
     /// Provision a connection for the database described by <c>args</c>.
@@ -25239,6 +25577,8 @@ type HyperdriveDynamicApi =
     /// Get a pre-generated connection string used for connecting to dynamic Hyperdrive.
     /// </summary>
     abstract getHyperdriveConnectionString: connectionString: string -> JS.Promise<string>
+    [<ParamObject; Emit("$0")>]
+    static member Create (get: Func<HyperdriveDynamicConfig, JS.Promise<HyperdriveDynamic>>, getHyperdriveConnectionString: Func<string, JS.Promise<string>>) : HyperdriveDynamicApi = jsNative
 
 /// <summary>
 /// Parameters identifying the database that a dynamically-provisioned
@@ -25562,6 +25902,7 @@ type ImageList =
     [<ParamObject; Emit("$0")>]
     static member Create (images: ImageMetadata[], listComplete: bool, ?cursor: string) : ImageList = jsNative
 
+[<Interface>]
 type ImageHandle =
     /// <summary>
     /// Get metadata for a hosted image
@@ -25594,7 +25935,10 @@ type ImageHandle =
     /// </summary>
     /// <remarks>@returns True if deleted, false if not found</remarks>
     abstract delete: unit -> JS.Promise<bool>
+    [<ParamObject; Emit("$0")>]
+    static member Create (details: Func<JS.Promise<ImageMetadata option>>, bytes: Func<JS.Promise<ReadableStream<JS.Uint8Array> option>>, signedUrl: Func<ImageSignedUrlOptions, JS.Promise<string>>, update: Func<ImageUpdateOptions, JS.Promise<ImageMetadata>>, delete: Func<JS.Promise<bool>>) : ImageHandle = jsNative
 
+[<Interface>]
 type HostedImagesBinding =
     /// <summary>
     /// Get a handle for a hosted image
@@ -25628,7 +25972,10 @@ type HostedImagesBinding =
     /// <remarks>@throws {</remarks>
     /// <remarks>@link ImagesError} if creation fails</remarks>
     abstract createDirectUpload: ?options: ImageDirectUploadOptions -> JS.Promise<ImageDirectUploadResult>
+    [<ParamObject; Emit("$0")>]
+    static member Create (image: Func<string, ImageHandle>, upload: Func<U2<JS.ArrayBuffer, ReadableStream<JS.Uint8Array>>, ImageUploadOptions option, JS.Promise<ImageMetadata>>, list: Func<ImageListOptions option, JS.Promise<ImageList>>, createDirectUpload: Func<ImageDirectUploadOptions option, JS.Promise<ImageDirectUploadResult>>) : HostedImagesBinding = jsNative
 
+[<Interface>]
 type ImagesBinding =
     /// <summary>
     /// Get image metadata (type, width and height)
@@ -25654,7 +26001,10 @@ type ImagesBinding =
     /// Access hosted images CRUD operations
     /// </summary>
     abstract hosted: HostedImagesBinding
+    [<ParamObject; Emit("$0")>]
+    static member Create (info: Func<ReadableStream<JS.Uint8Array>, ImageInputOptions option, JS.Promise<ImageInfoResponse>>, input: Func<ReadableStream<JS.Uint8Array>, ImageInputOptions option, ImageTransformer>, text: Func<string, TextOptions, ImageTransformer>, hosted: HostedImagesBinding) : ImagesBinding = jsNative
 
+[<Interface>]
 type ImageTransformer =
     /// <summary>
     /// Apply transform next, returning a transform handle.
@@ -25675,6 +26025,8 @@ type ImageTransformer =
     /// </summary>
     /// <remarks>@param options Options that apply to the output e.g. output format</remarks>
     abstract output: options: ImageOutputOptions -> JS.Promise<ImageTransformationResult>
+    [<ParamObject; Emit("$0")>]
+    static member Create (transform: Func<ImageTransform, ImageTransformer>, draw: Func<U2<ImageTransformer, ReadableStream<JS.Uint8Array>>, ImageDrawOptions option, ImageTransformer>, output: Func<ImageOutputOptions, JS.Promise<ImageTransformationResult>>) : ImageTransformer = jsNative
 
 [<Interface>]
 type ImageTransformationOutputOptions =
@@ -25688,6 +26040,7 @@ type ImageTransformationResponseOptions =
     [<ParamObject; Emit("$0")>]
     static member Create (?headers: HeadersInit) : ImageTransformationResponseOptions = jsNative
 
+[<Interface>]
 type ImageTransformationResult =
     /// <summary>
     /// The image as a response, ready to store in cache or return to users
@@ -25702,6 +26055,8 @@ type ImageTransformationResult =
     /// The bytes of the response
     /// </summary>
     abstract image: ?options: ImageTransformationOutputOptions -> ReadableStream<JS.Uint8Array>
+    [<ParamObject; Emit("$0")>]
+    static member Create (response: Func<ImageTransformationResponseOptions option, Response>, contentType: Func<string>, image: Func<ImageTransformationOutputOptions option, ReadableStream<JS.Uint8Array>>) : ImageTransformationResult = jsNative
 
 [<Interface>]
 type ImagesError =
@@ -25717,6 +26072,7 @@ type ImagesError =
 /// Media binding for transforming media streams.
 /// Provides the entry point for media transformation operations.
 /// </summary>
+[<Interface>]
 type MediaBinding =
     /// <summary>
     /// Creates a media transformer from an input stream.
@@ -25724,6 +26080,8 @@ type MediaBinding =
     /// <remarks>@param media - The input media bytes</remarks>
     /// <remarks>@returns A MediaTransformer instance for applying transformations</remarks>
     abstract input: media: ReadableStream<JS.Uint8Array> -> MediaTransformer
+    [<ParamObject; Emit("$0")>]
+    static member Create (input: Func<ReadableStream<JS.Uint8Array>, MediaTransformer>) : MediaBinding = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type MediaTransformationInputOptionsFit =
@@ -25748,6 +26106,7 @@ type MediaTransformationOutputOptionsMode =
 /// Media transformer for applying transformation operations to media content.
 /// Handles sizing, fitting, and other input transformation parameters.
 /// </summary>
+[<Interface>]
 type MediaTransformer =
     /// <summary>
     /// Applies transformation options to the media content.
@@ -25761,11 +26120,14 @@ type MediaTransformer =
     /// <remarks>@param output - Configuration for the output format and parameters</remarks>
     /// <remarks>@returns The final transformation result containing the transformed media</remarks>
     abstract output: ?output: MediaTransformationOutputOptions -> MediaTransformationResult
+    [<ParamObject; Emit("$0")>]
+    static member Create (transform: Func<MediaTransformationInputOptions option, MediaTransformationGenerator>, output: Func<MediaTransformationOutputOptions option, MediaTransformationResult>) : MediaTransformer = jsNative
 
 /// <summary>
 /// Generator for producing media transformation results.
 /// Configures the output format and parameters for the transformed media.
 /// </summary>
+[<Interface>]
 type MediaTransformationGenerator =
     /// <summary>
     /// Generates the final media output with specified options.
@@ -25773,11 +26135,14 @@ type MediaTransformationGenerator =
     /// <remarks>@param output - Configuration for the output format and parameters</remarks>
     /// <remarks>@returns The final transformation result containing the transformed media</remarks>
     abstract output: ?output: MediaTransformationOutputOptions -> MediaTransformationResult
+    [<ParamObject; Emit("$0")>]
+    static member Create (output: Func<MediaTransformationOutputOptions option, MediaTransformationResult>) : MediaTransformationGenerator = jsNative
 
 /// <summary>
 /// Result of a media transformation operation.
 /// Provides multiple ways to access the transformed media content.
 /// </summary>
+[<Interface>]
 type MediaTransformationResult =
     /// <summary>
     /// Returns the transformed media as a readable stream of bytes.
@@ -25794,6 +26159,8 @@ type MediaTransformationResult =
     /// </summary>
     /// <remarks>@returns A promise containing the content type string (e.g., 'image/jpeg', 'video/mp4')</remarks>
     abstract contentType: unit -> JS.Promise<string>
+    [<ParamObject; Emit("$0")>]
+    static member Create (media: Func<JS.Promise<ReadableStream<JS.Uint8Array>>>, response: Func<JS.Promise<Response>>, contentType: Func<JS.Promise<string>>) : MediaTransformationResult = jsNative
 
 /// <summary>
 /// Configuration options for transforming media input.
@@ -25977,6 +26344,7 @@ type RateLimitOutcome =
     [<ParamObject; Emit("$0")>]
     static member Create (success: bool) : RateLimitOutcome = jsNative
 
+[<Interface>]
 type RateLimit =
     /// <summary>
     /// Rate limit a request based on the provided options.
@@ -25984,6 +26352,8 @@ type RateLimit =
     /// <remarks>@see https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/</remarks>
     /// <remarks>@returns A promise that resolves with the outcome of the rate limit.</remarks>
     abstract limit: options: RateLimitOptions -> JS.Promise<RateLimitOutcome>
+    [<ParamObject; Emit("$0")>]
+    static member Create (limit: Func<RateLimitOptions, JS.Promise<RateLimitOutcome>>) : RateLimit = jsNative
 
 [<Interface>]
 type Rpc =
@@ -26067,11 +26437,14 @@ type WorkerEntrypointConstructor =
     [<EmitConstructor>]
     abstract Create<'Env, 'Props>: ctx: ExecutionContext<obj> * env: 'Env -> WorkerEntrypoint<'Env, 'Props>
 
+[<Interface>]
 type WorkflowEntrypoint<'Env, 'T> =
     abstract __WORKFLOW_ENTRYPOINT_BRAND: unit
     abstract ctx: ExecutionContext<obj> with get, set
     abstract env: 'Env with get, set
     abstract run: ``event``: WorkflowEntrypointRunEvent * step: WorkflowStep -> JS.Promise<obj>
+    [<ParamObject; Emit("$0")>]
+    static member Create (ctx: ExecutionContext<obj>, env: 'Env, run: Func<WorkflowEntrypointRunEvent, WorkflowStep, JS.Promise<obj>>) : WorkflowEntrypoint<'Env, 'T> = jsNative
 
 type WorkflowEntrypointConstructor =
     [<EmitConstructor>]
@@ -26314,12 +26687,15 @@ type WorkflowStepWaitForEventResultItem<'T> =
     [<ParamObject; Emit("$0")>]
     static member Create (payload: obj, timestamp: JS.Date, ``type``: string, ?sensitive: string) : WorkflowStepWaitForEventResultItem<'T> = jsNative
 
+[<Interface>]
 type SecretsStoreSecret =
     /// <summary>
     /// Get a secret from the Secrets Store, returning a string of the secret value
     /// if it exists, or throws an error if it does not exist
     /// </summary>
     abstract get: unit -> JS.Promise<string>
+    [<ParamObject; Emit("$0")>]
+    static member Create (get: Func<JS.Promise<string>>) : SecretsStoreSecret = jsNative
 
 /// <summary>
 /// Binding entrypoint for Cloudflare Stream.
@@ -26343,6 +26719,7 @@ type SecretsStoreSecret =
 /// const videoDetails = video.details()
 /// </code>
 /// </summary>
+[<Interface>]
 type StreamBinding =
     /// <summary>
     /// Returns a handle scoped to a single video for per-video operations.
@@ -26374,10 +26751,13 @@ type StreamBinding =
     abstract createDirectUpload: ``params``: StreamDirectUploadCreateParams -> JS.Promise<StreamDirectUpload>
     abstract videos: StreamVideos with get, set
     abstract watermarks: StreamWatermarks with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (video: Func<string, StreamVideoHandle>, upload: Func<string, StreamUrlUploadParams option, JS.Promise<StreamVideo>>, createDirectUpload: Func<StreamDirectUploadCreateParams, JS.Promise<StreamDirectUpload>>, videos: StreamVideos, watermarks: StreamWatermarks) : StreamBinding = jsNative
 
 /// <summary>
 /// Handle for operations scoped to a single Stream video.
 /// </summary>
+[<Interface>]
 type StreamVideoHandle =
     /// <summary>
     /// The unique identifier for the video.
@@ -26414,6 +26794,8 @@ type StreamVideoHandle =
     abstract generateToken: unit -> JS.Promise<string>
     abstract downloads: StreamScopedDownloads with get, set
     abstract captions: StreamScopedCaptions with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (id: string, details: Func<JS.Promise<StreamVideo>>, update: Func<StreamUpdateVideoParams, JS.Promise<StreamVideo>>, delete: Func<JS.Promise<unit>>, generateToken: Func<JS.Promise<string>>, downloads: StreamScopedDownloads, captions: StreamScopedCaptions) : StreamVideoHandle = jsNative
 
 type StreamVideo =
     /// <summary>
@@ -26700,6 +27082,7 @@ type StreamUrlUploadParams =
     [<ParamObject; Emit("$0")>]
     static member Create (?allowedOrigins: string[], ?creator: string, ?meta: RequestInitHeaders, ?requireSignedURLs: bool, ?scheduledDeletion: string, ?thumbnailTimestampPct: float, ?watermarkId: string) : StreamUrlUploadParams = jsNative
 
+[<Interface>]
 type StreamScopedCaptions =
     /// <summary>
     /// Uploads the caption or subtitle file to the endpoint for a specific BCP47 language.
@@ -26742,7 +27125,10 @@ type StreamScopedCaptions =
     /// <remarks>@throws {NotFoundError} if the video or caption is not found</remarks>
     /// <remarks>@throws {InternalError} if an unexpected error occurs</remarks>
     abstract delete: language: string -> JS.Promise<unit>
+    [<ParamObject; Emit("$0")>]
+    static member Create (upload: Func<string, ReadableStream<obj>, JS.Promise<StreamCaption>>, generate: Func<string, JS.Promise<StreamCaption>>, list: Func<string option, JS.Promise<StreamCaption[]>>, delete: Func<string, JS.Promise<unit>>) : StreamScopedCaptions = jsNative
 
+[<Interface>]
 type StreamScopedDownloads =
     /// <summary>
     /// Generates a download for a video when a video is ready to view. Available
@@ -26772,7 +27158,10 @@ type StreamScopedDownloads =
     /// <remarks>@throws {NotFoundError} if the video or downloads are not found</remarks>
     /// <remarks>@throws {InternalError} if an unexpected error occurs</remarks>
     abstract delete: ?downloadType: StreamDownloadType -> JS.Promise<unit>
+    [<ParamObject; Emit("$0")>]
+    static member Create (generate: Func<StreamDownloadType option, JS.Promise<StreamDownloadGetResponse>>, get: Func<JS.Promise<StreamDownloadGetResponse>>, delete: Func<StreamDownloadType option, JS.Promise<unit>>) : StreamScopedDownloads = jsNative
 
+[<Interface>]
 type StreamVideos =
     /// <summary>
     /// Lists all videos in a users account.
@@ -26781,6 +27170,8 @@ type StreamVideos =
     /// <remarks>@throws {BadRequestError} if the parameters are invalid</remarks>
     /// <remarks>@throws {InternalError} if an unexpected error occurs</remarks>
     abstract list: ?``params``: StreamVideosListParams -> JS.Promise<StreamVideo[]>
+    [<ParamObject; Emit("$0")>]
+    static member Create (list: Func<StreamVideosListParams option, JS.Promise<StreamVideo[]>>) : StreamVideos = jsNative
 
 type StreamWatermarks =
     /// <summary>
@@ -27538,6 +27929,7 @@ type VectorizeAsyncMutation =
 /// This type is exclusively for the Vectorize **beta** and will be deprecated once Vectorize RC is released.
 /// See Vectorize for its new implementation.
 /// </summary>
+[<Interface>]
 type VectorizeIndex =
     /// <summary>
     /// Get information about the currently bound index.
@@ -27575,12 +27967,15 @@ type VectorizeIndex =
     /// <remarks>@param ids List of vector ids that should be returned.</remarks>
     /// <remarks>@returns A promise that resolves with the raw unscored vectors matching the id set.</remarks>
     abstract getByIds: ids: string[] -> JS.Promise<VectorizeVector[]>
+    [<ParamObject; Emit("$0")>]
+    static member Create (describe: Func<JS.Promise<VectorizeIndexDetails>>, query: Func<U3<float[], JS.Float32Array, JS.Float64Array>, VectorizeQueryOptions option, JS.Promise<VectorizeMatches>>, insert: Func<VectorizeVector[], JS.Promise<VectorizeVectorMutation>>, upsert: Func<VectorizeVector[], JS.Promise<VectorizeVectorMutation>>, deleteByIds: Func<string[], JS.Promise<VectorizeVectorMutation>>, getByIds: Func<string[], JS.Promise<VectorizeVector[]>>) : VectorizeIndex = jsNative
 
 /// <summary>
 /// A Vectorize Vector Search Index for querying vectors/embeddings.
 ///
 /// Mutations in this version are async, returning a mutation id.
 /// </summary>
+[<Interface>]
 type Vectorize =
     /// <summary>
     /// Get information about the currently bound index.
@@ -27625,6 +28020,8 @@ type Vectorize =
     /// <remarks>@param ids List of vector ids that should be returned.</remarks>
     /// <remarks>@returns A promise that resolves with the raw unscored vectors matching the id set.</remarks>
     abstract getByIds: ids: string[] -> JS.Promise<VectorizeVector[]>
+    [<ParamObject; Emit("$0")>]
+    static member Create (describe: Func<JS.Promise<VectorizeIndexInfo>>, query: Func<U3<float[], JS.Float32Array, JS.Float64Array>, VectorizeQueryOptions option, JS.Promise<VectorizeMatches>>, queryById: Func<string, VectorizeQueryOptions option, JS.Promise<VectorizeMatches>>, insert: Func<VectorizeVector[], JS.Promise<VectorizeAsyncMutation>>, upsert: Func<VectorizeVector[], JS.Promise<VectorizeAsyncMutation>>, deleteByIds: Func<string[], JS.Promise<VectorizeAsyncMutation>>, getByIds: Func<string[], JS.Promise<VectorizeVector[]>>) : Vectorize = jsNative
 
 /// <summary>
 /// The interface for "version_metadata" binding
@@ -27762,6 +28159,7 @@ type WebSearchSearchResponse =
 /// const page = await fetch(top.url);
 /// </code>
 /// </remarks>
+[<Interface>]
 type WebSearch =
     /// <summary>
     /// Run a Web Search query.
@@ -27769,6 +28167,8 @@ type WebSearch =
     /// <remarks>@param options Search options. Only <c>query</c> is required.</remarks>
     /// <remarks>@returns The matching results plus per-response metadata.</remarks>
     abstract search: options: WebSearchSearchOptions -> JS.Promise<WebSearchSearchResponse>
+    [<ParamObject; Emit("$0")>]
+    static member Create (search: Func<WebSearchSearchOptions, JS.Promise<WebSearchSearchResponse>>) : WebSearch = jsNative
 
 [<Interface>]
 type DynamicDispatchLimits =
@@ -27800,6 +28200,7 @@ type DynamicDispatchOptionsOutbound =
     [<EmitIndexer>]
     abstract Item: string -> obj with get, set
 
+[<Interface>]
 type DispatchNamespace =
     /// <remarks>@param name Name of the Worker script.</remarks>
     /// <remarks>@param args Arguments to Worker script.</remarks>
@@ -27807,6 +28208,8 @@ type DispatchNamespace =
     /// <remarks>@returns A Fetcher object that allows you to send requests to the Worker script.</remarks>
     /// <remarks>@throws If the Worker script does not exist in this dispatch namespace, an error will be thrown.</remarks>
     abstract get: name: string * ?args: DispatchNamespaceGetArgs * ?options: DynamicDispatchOptions -> RequestFetcher
+    [<ParamObject; Emit("$0")>]
+    static member Create (get: Func<string, DispatchNamespaceGetArgs option, DynamicDispatchOptions option, RequestFetcher>) : DispatchNamespace = jsNative
 
 type DispatchNamespaceGetArgs =
     [<EmitIndexer>]
@@ -27831,6 +28234,7 @@ type InstanceStatusStatus =
     | [<CompiledName("waiting")>] Waiting
     | [<CompiledName("waitingForPause")>] WaitingForPause
 
+[<Interface>]
 type Workflow<'PARAMS> =
     /// <summary>
     /// Get a handle to an existing instance of the Workflow.
@@ -27859,6 +28263,8 @@ type Workflow<'PARAMS> =
     /// <remarks>@param instanceIds IDs of the Workflow instances to delete</remarks>
     /// <remarks>@returns A promise that resolves with the successfully deleted instances and any per-instance errors.</remarks>
     abstract deleteBatch: instanceIds: string[] -> JS.Promise<WorkflowBatchDeleteResult>
+    [<ParamObject; Emit("$0")>]
+    static member Create (get: Func<string, JS.Promise<WorkflowInstance>>, create: Func<WorkflowInstanceCreateOptions<'PARAMS> option, JS.Promise<WorkflowInstance>>, createBatch: Func<WorkflowInstanceCreateOptions<'PARAMS>[], JS.Promise<WorkflowInstance[]>>, deleteBatch: Func<string[], JS.Promise<WorkflowBatchDeleteResult>>) : Workflow<'PARAMS> = jsNative
 
 [<Interface>]
 type WorkflowBatchDeleteResultDeletedItem =
@@ -28005,6 +28411,7 @@ type WorkflowInstanceRestartOptions =
     [<ParamObject; Emit("$0")>]
     static member Create (?from: WorkflowInstanceRestartOptionsFrom) : WorkflowInstanceRestartOptions = jsNative
 
+[<Interface>]
 type WorkflowInstance =
     abstract id: string with get, set
     /// <summary>
@@ -28038,6 +28445,8 @@ type WorkflowInstance =
     /// Send an event to this instance.
     /// </summary>
     abstract sendEvent: __0: WorkflowInstanceSendEvent0 -> JS.Promise<unit>
+    [<ParamObject; Emit("$0")>]
+    static member Create (id: string, pause: Func<JS.Promise<unit>>, resume: Func<JS.Promise<unit>>, terminate: Func<WorkflowInstanceTerminateOptions option, JS.Promise<unit>>, restart: Func<WorkflowInstanceRestartOptions option, JS.Promise<unit>>, delete: Func<JS.Promise<unit>>, status: Func<JS.Promise<InstanceStatus>>, sendEvent: Func<WorkflowInstanceSendEvent0, JS.Promise<unit>>) : WorkflowInstance = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

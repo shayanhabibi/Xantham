@@ -2,8 +2,8 @@
   "package": "chain-lab",
   "module": "ChainLab",
   "counts": {
-    "exact": 6,
-    "ergonomic": 4,
+    "exact": 5,
+    "ergonomic": 5,
     "widened": 1,
     "escape": 0
   },
@@ -25,8 +25,8 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 4,
-      "ergonomic": 4
+      "total": 7,
+      "ergonomic": 7
     }
   ],
   "symbols": [
@@ -124,8 +124,30 @@
     {
       "name": "Plain",
       "file": "index.d.ts",
-      "tier": "exact",
-      "findings": []
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Plain",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Plain.self",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Plain.wrap",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        }
+      ]
     },
     {
       "name": "seed",

@@ -14,6 +14,7 @@ open Xantham.Fable.Core
 /// </summary>
 type EventName = string
 
+[<Interface>]
 type Emitter =
     /// <summary>
     /// Member position, through the alias.
@@ -27,6 +28,8 @@ type Emitter =
     /// Parameter position on a member, returning one through the alias.
     /// </summary>
     abstract resolve: scope: string -> string
+    [<ParamObject; Emit("$0")>]
+    static member Create (``event``: string, channel: string, resolve: Func<string, string>) : Emitter = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type Mode =
@@ -46,12 +49,15 @@ type ModeEvent =
 [<Erase>]
 type Tagged<'T> = private Tagged__ of string
 
+[<Interface>]
 type Ledger =
     /// <summary>
     /// A member of bigint type, and a method taking and returning one.
     /// </summary>
     abstract balance: bigint with get, set
     abstract credit: amount: bigint -> bigint
+    [<ParamObject; Emit("$0")>]
+    static member Create (balance: bigint, credit: Func<bigint, bigint>) : Ledger = jsNative
 
 /// <summary>
 /// A bigint *literal* type is the widening its string and number counterparts already are.

@@ -61,9 +61,12 @@ type EachProps<'T, 'U> =
 /// </summary>
 type Handle<'T> = Func<'T> * HandleItem<'T>
 
+[<Interface>]
 type HandleItem<'T> =
     abstract set: Action<'T> with get, set
     abstract reset: unit -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (set: Action<'T>, reset: Action) : HandleItem<'T> = jsNative
 
 /// <summary>
 /// A named bound: the only kind of constraint F# can state.
@@ -87,8 +90,11 @@ type Labelled<'T, 'U when 'T :> Named> =
 /// <summary>
 /// An application of a constrained generic whose argument is a <c>typekeyof</c> result: the argument is written as the constraint.
 /// </summary>
+[<Interface>]
 type Registry<'M> =
     abstract pick<'R>: key: typekeyof<'M, 'R> -> Labelled<Named, typekeyof<'M, 'R>>
+    [<ParamObject; Emit("$0")>]
+    static member Create (pick: Func<typekeyof<'M, 'R>, Labelled<Named, typekeyof<'M, 'R>>>) : Registry<'M> = jsNative
 
 /// <summary>
 /// An index-only anonymous object, written in the compiler lib: an interface of one indexer, not <c>obj</c>.

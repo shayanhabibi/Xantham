@@ -2,8 +2,8 @@
   "package": "ctor-lab",
   "module": "CtorLab",
   "counts": {
-    "exact": 5,
-    "ergonomic": 7,
+    "exact": 3,
+    "ergonomic": 9,
     "widened": 0,
     "escape": 0
   },
@@ -15,16 +15,31 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 4,
-      "ergonomic": 4
+      "total": 8,
+      "ergonomic": 8
     }
   ],
   "symbols": [
     {
       "name": "Widget",
       "file": "index.d.ts",
-      "tier": "exact",
-      "findings": []
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Widget",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Widget.resize",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        }
+      ]
     },
     {
       "name": "WidgetConstructor",
@@ -113,8 +128,23 @@
     {
       "name": "Solo",
       "file": "index.d.ts",
-      "tier": "exact",
-      "findings": []
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Solo",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Solo.tag",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        }
+      ]
     },
     {
       "name": "Meta",

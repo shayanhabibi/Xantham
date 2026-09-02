@@ -12,6 +12,7 @@ open Xantham.Fable.Core
 /// <summary>
 /// A generated interface whose members are lib types throughout.
 /// </summary>
+[<Interface>]
 type Store =
     /// <summary>
     /// A promise-returning member, which is what the group's widening used to cost most.
@@ -33,6 +34,8 @@ type Store =
     /// A property whose type is a lib collection.
     /// </summary>
     abstract index: JS.Map<string, JS.ArrayBuffer> with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (load: Func<string, JS.Promise<JS.Uint8Array>>, all: Func<JS.Promise<string>[]>, boxed: Box<JS.Date>, index: JS.Map<string, JS.ArrayBuffer>, ?pending: JS.Promise<unit>) : Store = jsNative
 
 /// <summary>
 /// A generic of our own, so a lib type can be seen passing through one.

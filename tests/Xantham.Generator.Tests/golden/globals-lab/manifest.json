@@ -2,9 +2,9 @@
   "package": "globals-lab",
   "module": "GlobalsLab",
   "counts": {
-    "exact": 3,
-    "ergonomic": 6,
-    "widened": 0,
+    "exact": 2,
+    "ergonomic": 5,
+    "widened": 2,
     "escape": 1
   },
   "passes": [
@@ -25,8 +25,9 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 3,
-      "ergonomic": 3
+      "total": 7,
+      "ergonomic": 5,
+      "widened": 2
     },
     {
       "pass": "RA - repair-arity",
@@ -66,8 +67,23 @@
     {
       "name": "Gadget",
       "file": "index.d.ts",
-      "tier": "exact",
-      "findings": []
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Gadget",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Gadget.spin",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        }
+      ]
     },
     {
       "name": "Branded",
@@ -93,7 +109,7 @@
     {
       "name": "Loose",
       "file": "index.d.ts",
-      "tier": "ergonomic",
+      "tier": "widened",
       "findings": [
         {
           "key": "MB004",
@@ -101,6 +117,13 @@
           "tier": "ergonomic",
           "symbol": "Loose.[]",
           "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        },
+        {
+          "key": "SP003",
+          "pass": "synthesize-paramobjects",
+          "tier": "widened",
+          "symbol": "Loose",
+          "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
       ]
     },
@@ -121,7 +144,7 @@
     {
       "name": "BagLoose",
       "file": "index.d.ts",
-      "tier": "ergonomic",
+      "tier": "widened",
       "findings": [
         {
           "key": "MB004",
@@ -129,6 +152,13 @@
           "tier": "ergonomic",
           "symbol": "BagLoose.[]",
           "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        },
+        {
+          "key": "SP003",
+          "pass": "synthesize-paramobjects",
+          "tier": "widened",
+          "symbol": "BagLoose",
+          "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
       ]
     },

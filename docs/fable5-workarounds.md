@@ -160,8 +160,10 @@ the collection operation.
 ## 3. An interface you implement in F# is a class instance, not a plain object
 
 **Incidence: 1,245 abstract members with a function type**, across the 1,397 interface types in
-the goldens. An interface declaring one of them is not plain data, so it gets no `[<ParamObject>]`
-`Create` and has to be built by hand.
+the goldens. Wave four lane O carries a method into the `[<ParamObject>]` `Create` as a
+delegate-typed parameter, which gains 176 declarations a `Create` they had none of; 190 still get
+none, each reported under `SP003`. The rest of this section holds for those 190, and the cost
+below is what the `Create` inherits.
 
 ### What TypeScript declares
 
@@ -210,6 +212,25 @@ let listener: FableWorkaroundLab.Listener =
 missing member, a misspelled one, or a wrong argument count is a runtime `undefined is not a
 function`. A method becomes a function-valued property, which loses `this` - write the record's
 own fields into the closure rather than reading `this` inside `notify`.
+
+### What wave four changed
+
+`Create` carries a method as the delegate a function-valued property of the same signature
+already carried, so the record above is reached under the typechecker rather than past it:
+
+```fsharp
+let listener =
+    FableWorkaroundLab.Listener.Create("lit", System.Func<float, string>(fun count -> $"lit:{count}"))
+```
+
+`invite listener` reports the same three values, and a missing or mistyped member is now a
+compile error. `SP002` reports every method carried in. The delegate still receives no `this`,
+and a method that binds type parameters of its own generalises them onto `Create`, so one call
+picks one instantiation - both left for a later wave.
+
+The cast stays the route for the 190 declarations `SP003` reports: an index signature (132),
+more members than the 24-parameter `Create` budget (32), an overloaded method (25), or no
+members of its own (1).
 
 ---
 

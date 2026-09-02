@@ -2,8 +2,8 @@
   "package": "solid-js",
   "module": "SolidJs",
   "counts": {
-    "exact": 20,
-    "ergonomic": 60,
+    "exact": 19,
+    "ergonomic": 61,
     "widened": 74,
     "escape": 19
   },
@@ -48,8 +48,9 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 76,
-      "ergonomic": 76
+      "total": 85,
+      "ergonomic": 83,
+      "widened": 2
     },
     {
       "pass": "RA - repair-arity",
@@ -1083,6 +1084,20 @@
           "tier": "widened",
           "symbol": "Observable.__@observable",
           "message": "symbol-keyed member dropped (unrepresentable in F#)"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Observable",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Observable.subscribe",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         }
       ]
     },
@@ -1152,8 +1167,23 @@
     {
       "name": "ObservableSubscribeResult",
       "file": "types/reactive/observable.d.ts",
-      "tier": "exact",
-      "findings": []
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "ObservableSubscribeResult",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "ObservableSubscribeResult.unsubscribe",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        }
+      ]
     },
     {
       "name": "FromProducer",
@@ -6035,6 +6065,13 @@
           "tier": "widened",
           "symbol": "SplitPropsResultItemItem.[]",
           "message": "indexed access has no F# form here; widened to obj"
+        },
+        {
+          "key": "SP003",
+          "pass": "synthesize-paramobjects",
+          "tier": "widened",
+          "symbol": "SplitPropsResultItemItem",
+          "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
       ]
     },
@@ -6819,6 +6856,27 @@
           "tier": "ergonomic",
           "symbol": "SharedConfig.resources",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "SharedConfig",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "SharedConfig.getContextId",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "SharedConfig.getNextContextId",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         }
       ]
     },
@@ -6854,6 +6912,13 @@
           "tier": "escape",
           "symbol": "SharedConfigResources.[]",
           "message": "any maps to obj"
+        },
+        {
+          "key": "SP003",
+          "pass": "synthesize-paramobjects",
+          "tier": "widened",
+          "symbol": "SharedConfigResources",
+          "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
       ]
     },
