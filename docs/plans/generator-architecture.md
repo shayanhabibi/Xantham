@@ -925,6 +925,38 @@ Phases — each ends with the compile gate green on its fixtures:
     (`inherit EventTarget<EventCurrentTargetItem>`, not `<WorkerGlobalScopeEventMap>`), which
     is honest but is the one place the emitted relation is weaker than the source's.
 
+- **Phase E — a conditional type is mapped by the branch the checker can prove (`conditional-lab`).**
+  `TR014 TypeFlagsNotMapped` was 227 sites, every one of them a conditional reaching the flag
+  dispatch and falling through to `obj` under a name that described the pass rather than the
+  type. It is now zero, and the sites are split by what the run can establish.
+
+  Where the branch is decided — the head's bound settles the condition
+  (`isTypeAssignableTo(check, extends)`), or one branch is `never` — the branch is mapped
+  through the ordinary `typeRef` path, so nesting costs nothing and the branch carries its own
+  findings. That is `TR046 ConditionalResolvedToBranch` (Ergonomic), 61 sites. Where two
+  inhabited branches share no F# form, the reference stays `obj` under `TR045
+  ConditionalTypeDeferred` (Widened), 187 sites. `ConditionalFacts` on `TypeFacts` carries the
+  branch taken, and the resolver frontier admits that branch alone.
+
+  Rejected: dropping an `undefined` or `void` branch, which narrows rather than widens, since
+  `never` is the only uninhabited one; and unioning both branches, which reads as precision
+  where the deferral is the honest answer.
+
+  `isTypeAssignableTo` reads a type parameter through its bound, and the reading is
+  directional. With a parameter as the *target*, `undefined extends T ? [] : [value: T]`
+  resolved true through `T`'s `unknown` bound and `Ai.run`'s model name rendered `unit`. A
+  target-is-`TypeParameter` guard, plus refusing a `never` true branch, returns those 3 sites
+  to `TR045` and leaves `@cloudflare/workers-types` byte-identical. 248 conditional findings
+  against 227 old sites: 21 are nested conditionals sitting behind a branch nothing previously
+  reached. `type-fest` 11955 -> 11857 lines, widened 215 -> 203, ergonomic 59 -> 69.
+
+  Two interactions were measured and left: `ExcludeStrict` and `ExtractStrict` in `type-fest`
+  move Widened -> Escape, because a resolved right side uses fewer parameters than its head and
+  `RA001` drops an alias it used to keep as a phantom - the repair belongs to the arity pass,
+  where it would move 9 pre-existing sites; and `solid-js`'s `Setter` renders `Action<obj[]>`
+  where it rendered `Func<obj, obj>`, the `obj[]` being section 4.12's widening of an
+  empty-tuple rest parameter rather than section 4.11's call.
+
 - **Phase E — a DefinitelyTyped package is named for the library it describes.**
   `Naming.packageModule` takes its name from the runtime package, so `@types/three` binds as
   `Three` and `@types/babel__core` as `Babel.Core`. `@types/` is a TypeScript-side convention for
@@ -943,6 +975,22 @@ Phases — each ends with the compile gate green on its fixtures:
   recording `@types/types-only-lab`; `runtime` in `xantham.json` still overrides the import
   specifier and leaves the module name alone; and a real scope keeps its segment, with
   `@cloudflare/workers-types` staying `Cloudflare.WorkersTypes`.
+
+**Wave two, closed (2026-09-02).** Five lanes over `docs/plans/generator-wave-two.md`, dispatched
+as three concurrent lanes on disjoint pass files and then two sequenced through `Shape/Spec.fs`.
+Every finding case the wave needed was appended in one pre-dispatch commit, so no branch edited
+`Findings.fs` and the positional-renumbering conflict did not arise; two case wordings that did
+not match the condition an agent ended up guarding were corrected on the integration branch
+rather than in the lane. The corpus stands at 21 fixtures. `TR014` closed to zero, and the three
+largest keys (`TR032`, `MB003`, `SP001`) are working as designed and were left alone. `TR006`
+(1,212, a string literal type widened to `string`) is **still open**: the plan asked whether it
+records intent or a defect and no lane took the question up, so it is unmoved and undecided.
+
+The recon that scoped the wave had run against a commit predating `c592092`, so blocker 3's 328
+`FS0001` were already unreachable when lane C opened it - but they were being paid for by
+widening every argument at those sites, which is the finding that mattered and would have been
+missed by taking the recon's count on trust. `@types/three` stays out of the corpus; the four
+reasons in `generator-three-rung.md` for holding it back are unchanged by this wave.
 
 ## 7. Decisions (2026-09-01)
 
