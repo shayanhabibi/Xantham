@@ -7,16 +7,30 @@
 // fixture package name at its tracked runtime instead, so the gate needs no install step.
 import { registerHooks } from "node:module";
 import { pathToFileURL } from "node:url";
+import fs from "node:fs";
 import path from "node:path";
 
 const fixtures = path.resolve(import.meta.dirname, "..", "fixtures");
-const packages = new Map([
-    ["phase-b-lab", path.join(fixtures, "lab", "index.js")],
-    ["statics-lab", path.join(fixtures, "statics-lab", "index.js")],
-    ["flags-lab", path.join(fixtures, "flags-lab", "index.js")],
-    ["ctor-lab", path.join(fixtures, "ctor-lab", "index.js")],
-    ["inherit-lab", path.join(fixtures, "inherit-lab", "index.js")],
-]);
+
+// Discovered rather than listed. A lab fixture is its own npm package - a directory with a
+// `package.json` and, where the gate runs it, a hand-written `index.js` - so the package name
+// to resolve and the runtime to resolve it to are both already on disk, and reading them is
+// exact where a second copy of the mapping can only drift from it. The literal map this
+// replaces was one of the handful of append-only lists that every parallel branch edited and
+// so every merge conflicted in; a lab added now is picked up with no edit here at all.
+const packages = new Map(
+    fs
+        .readdirSync(fixtures, { withFileTypes: true })
+        .filter((entry) => entry.isDirectory())
+        .flatMap((entry) => {
+            const dir = path.join(fixtures, entry.name);
+            const runtime = path.join(dir, "index.js");
+            const manifest = path.join(dir, "package.json");
+            if (!fs.existsSync(runtime) || !fs.existsSync(manifest)) return [];
+            const { name } = JSON.parse(fs.readFileSync(manifest, "utf8"));
+            return name ? [[name, runtime]] : [];
+        }),
+);
 
 registerHooks({
     resolve(specifier, context, nextResolve) {
@@ -27,4 +41,6 @@ registerHooks({
     },
 });
 
+// Imported for effect, not resolved on demand like the above: the globals lab's runtime assigns
+// the ambient globals its `[<Global>]` bindings read, and nothing imports it to trigger that.
 await import(pathToFileURL(path.join(fixtures, "globals-lab", "index.js")).href);
