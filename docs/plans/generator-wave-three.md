@@ -143,6 +143,27 @@ converts some sites into a different finding rather than into exact.
 [ J | K | L ]  →  merge  →  wave record
 ```
 
+## Batch 2 — landed
+
+| lane | result |
+|---|---|
+| J | `three` 482,805 → 112,054 lines; runaway 70.6% → 0.1%; `TR002` 5,698 → 4, `TP001` 162 → 2. Two gates rejected the reproducer, not one. Rung still refused, on size. |
+| K | `TR044`'s hole is real — the lab compiled to three `FS0001`. FS0037 head repaired at source under `TP009`. One golden line moves in the whole corpus. |
+| L | `TR023` 182 → 143, cause 1 closed. 41 of the 86 returned as cause 2, which is the recon's risk 2 landing. `TR018` re-priced as a distinct defect. |
+| M | `docs/fable5-workarounds.md`: six Fable-5-attributable losses, each proven by the run gate (78 → 90 checks). |
+
+Corpus 15,278 → 14,803 findings over 28 fixtures. `TR023` 727 → 143, escape 200 → 192.
+
+One interaction, found by regenerating over the composed tree: lane K's `setter-lab`, which lane L never saw, crosses `FollowDepth` 12 under lane L's resolution and gains an `RT001`. The rendered binding is unchanged.
+
+## What wave four should weigh
+
+1. **The depth cutoff.** `RT001` on `@cloudflare/workers-types` is 261 → 1,772 truncated types. Nothing is wrong today; the headroom is thin. Raising `FollowDepth` is corpus-wide and needs a wave that measures it.
+2. **`alignOperands`.** `SY002` 45 against `SY001` 4 on `three`. Tightening it lifts sites from widened to named and cuts the 4,461 `TR019`. This is what decides the rung.
+3. **`TR018`**, 194 sites over four causes, in `docs/plans/generator-tr018-recon.md`. Order is D, then C, then A's identical-operand slice. Floor is 39, a designed refusal.
+4. **`MB002`**, 12 sites. Lane M verified an `Emit` attribute reads and calls a well-known symbol member against these pins, so they are recoverable cheaply.
+5. **`TR023`'s remaining 143** is mostly cause 2 — a binding gap in the pinned `Fable.Browser.*` surface, not a mapping one. The recon says not to send an agent at it.
+
 ## Deliberately not in this wave
 
 - **`TP007` and `SY002`, which fire zero on the corpus.** Both were declared for blockers measured

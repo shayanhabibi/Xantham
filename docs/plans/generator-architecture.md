@@ -992,6 +992,16 @@ widening every argument at those sites, which is the finding that mattered and w
 missed by taking the recon's count on trust. `@types/three` stays out of the corpus; the four
 reasons in `generator-three-rung.md` for holding it back are unchanged by this wave.
 
+**Wave three, closed (2026-09-02).** Seven lanes over `docs/plans/generator-wave-three.md`, in two batches of concurrent lanes on disjoint pass files. The corpus stands at 28 fixtures and 14,803 findings, from 21 and 15,278. `TR023` fell 727 to 143 and its cause 1 is closed: every site remaining names a type rather than a member. Escape fell 200 to 192.
+
+The wave was scoped by a measurement rather than by a plan. Lane G re-ran the `@types/three` harness against wave two's HEAD and found one of four criteria met - the 128 MB file compiles clean where it had 666 errors - and the instantiation runaway unmoved to the digit. It reduced the reason to twelve lines, and lane J closed it: `three` renders 112,054 lines against 482,805, the runaway falls from 70.6% of the file to 0.1%, `TR002` 5,698 to 4, `TP001` 162 to 2. The rung is still refused, now on size alone at 112k against ~50k, and `TR019` 0 to 4,461 is the price a memberless phantom declaration charges. Blocker 1 had been open since the rung was first reconnoitred.
+
+Three things the wave learned that outlive it. `TR044`'s absence was not evidence of a closed hole: lane K's lab compiled to three `FS0001`, so a primitive, tuple or array argument against a written constraint had been falling through all along. `TR018` is a distinct defect rather than `TR023`'s residue - it moved by zero under lane L, refuting the hypothesis in the `TR023` recon's §9 - and is re-priced in `docs/plans/generator-tr018-recon.md` at 194 sites over four causes. And `RA001` had been masking a malformed type-parameter list, which is what a drop does: it hides the thing it drops.
+
+`TP007` is constructed nowhere in `src/` and is retained rather than retired, because removing it renumbers `TP008`, which is quoted by four source files and by measurements two plan documents record. The case says so.
+
+The measurement handed up rather than acted on: `RT001` says `@cloudflare/workers-types` now truncates 1,772 types at `FollowDepth` 12 against 261 before, and a five-symbol lab from another lane crossed the cutoff during composition. No output is wrong today. Raising the cutoff is a corpus-wide behaviour change and belongs to a wave that measures it deliberately.
+
 ## 7. Decisions (2026-09-01)
 
 All six original open questions were resolved in review; each is also inlined at its

@@ -781,6 +781,25 @@ running somewhere other than every build.
 
 ---
 
+## 12. After lane J (2026-09-02)
+
+§11.4 named the blocker and lane J closed it. Measured on the wave three integration branch, against the same `@types/three@0.185.4`:
+
+| criterion | threshold | §11 | after lane J | |
+|---|---|---:|---:|---|
+| rendered size | under ~50k lines | 482,801 | **112,054** | fail |
+| determinism | byte-identical over two runs | 162 differing lines | not re-measured | open |
+| compiler errors | zero | 0 | not re-measured | open |
+| gate compile time | under ~30 s | 3 m 47 s | not re-measured | open |
+
+Declaration blocks 1,255 to 754; blocks named `…Result` 518 to 17, and the lines in them 369,112 to 108 - 76.5% of the file to 0.1%. The longest symbol name is 57 characters against 1,689. Generation takes 32 s against 145 s. `TR002` 5,698 to 4, `TR036` 4,626 to 4, `TP001` 162 to 2, which carries most of blocker 2 with it.
+
+`TR019` 0 to 4,461 is what the recogniser charges: a `Node`-family member widens to `obj` where the declaration is a memberless phantom, concentrated on five interfaces. Widened symbols still fall 1,040 to 583, and the report is loud rather than silent.
+
+**The rung stays refused, on size.** 112k lines is 2.2x the threshold rather than 9.7x, so the next question is whether the remaining bulk is another recogniser gap or the package's real surface - and that is a measurement, not a guess. `SY002` fires 45 times against `SY001`'s 4: most applications reach the recogniser and fail to yield arguments, because `alignOperands` drops every deferred operand when the counts mismatch. Tightening it is the named next step, and it would also cut the `TR019` bill.
+
+Determinism, compile errors and gate time were not re-measured after lane J. They were measured in §11 on an output five times larger, so they are stale rather than unknown, and re-taking them is cheap.
+
 ## Appendix A — how each number was taken
 
 Per `.claude/rules/generator-fixtures.md`: run everything, read almost none of it. No rendered file
