@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
@@ -14,7 +14,28 @@
         <Compile Include="Bootstrap.fs" />
         <Compile Include="Harvest.fs" />
         <Compile Include="Resolve.fs" />
-        <Compile Include="Shape.fs" />
+        <!-- Tier 3 - Shape. `Spec.fs` first: it is what every pass is written against.
+             The passes then follow in execution order, which is also the order they may
+             refer to one another in, and `Passes.fs` closes the folder with the list the
+             pipeline runs. -->
+        <Compile Include="Shape\Spec.fs" />
+        <Compile Include="Shape\ExportNames.fs" />
+        <Compile Include="Shape\Anonymous.fs" />
+        <Compile Include="Shape\ConstructorObjects.fs" />
+        <Compile Include="Shape\FreeTypeParams.fs" />
+        <Compile Include="Shape\LiteralUnions.fs" />
+        <Compile Include="Shape\TaggedUnions.fs" />
+        <Compile Include="Shape\Callbacks.fs" />
+        <Compile Include="Shape\Interfaces.fs" />
+        <Compile Include="Shape\Aliases.fs" />
+        <Compile Include="Shape\Classes.fs" />
+        <Compile Include="Shape\Exports.fs" />
+        <Compile Include="Shape\ParamObjects.fs" />
+        <Compile Include="Shape\Overloads.fs" />
+        <Compile Include="Shape\Arity.fs" />
+        <Compile Include="Shape\Ordering.fs" />
+        <Compile Include="Shape\Coverage.fs" />
+        <Compile Include="Shape\Passes.fs" />
         <Compile Include="Render.fs" />
         <Compile Include="Pipeline.fs" />
     </ItemGroup>

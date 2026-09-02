@@ -77,7 +77,7 @@ let generate (config: GeneratorConfig) (packageDir: string) : Async<RenderModel>
 
         let! harvest, harvestFindings = runTier ctx Harvest.passes HarvestModel.Empty
         let! resolve, resolveFindings = runTier ctx Resolve.passes (toResolve harvest)
-        let! shape, shapeFindings = runTier ctx Shape.passes (toShape resolve)
+        let! shape, shapeFindings = runTier ctx Shape.Passes.passes (toShape resolve)
 
         let render = toRender ctx shape (harvestFindings @ resolveFindings @ shapeFindings)
         let! rendered, renderFindings = runTier ctx Render.passes render
