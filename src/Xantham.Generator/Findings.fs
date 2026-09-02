@@ -226,6 +226,13 @@ type TypeReference =
     /// Wave two, lane E. The negative of the above: the checker resolved the condition itself,
     /// so a branch is known and the mapping is the branch rather than `obj`.
     | [<Ergonomic>] ConditionalResolvedToBranch of conditional: string * branch: string
+    /// Wave three, lane H. An object type declaring no members. `obj` admits everything the
+    /// type does, so the reference is exact in surface and widened only in name. Distinct from
+    /// `TR023`, which reports a declaration the run was expected to generate and did not.
+    | [<Widened>] ObjectWithoutMembers
+    /// Wave three, lane H. An intersection whose operands include an array shape maps to the
+    /// element array; members contributed by the other operands have no F# form on an array.
+    | [<Widened>] ArrayIntersectionMembersDropped of dropped: int
 
     interface IFindingKind with
         member this.Message =
@@ -292,6 +299,9 @@ type TypeReference =
                 $"{conditional} is a conditional type: the branch is not chosen until it is applied, and F# defers no type (§4.11)"
             | ConditionalResolvedToBranch(conditional, branch) ->
                 $"{conditional} resolved to its {branch} branch; the condition itself is not carried (§4.11)"
+            | ObjectWithoutMembers -> "object type declares no members; obj admits the same values"
+            | ArrayIntersectionMembersDropped dropped ->
+                $"array-shaped intersection maps to its element array; {dropped} members from the other operands are dropped"
 
 /// Type parameter binding: `Shape.typeParamsOf`, `aliasTypeParams`, key variables and erasure.
 [<Prefix "TP">]
@@ -567,6 +577,10 @@ type RepairArity =
     | [<Widened>] GenericWithoutArguments of name: string
     | [<Widened>] ArityMismatch of name: string * given: int * declared: int
     | [<Ergonomic>] ReadWithoutWrite of name: string
+    /// Wave three, lane I. An alias whose resolved target uses fewer type parameters than its
+    /// head declares. The alias is written with the surplus parameters erased as phantoms, so
+    /// references keep their arity; the erased parameters carry no value.
+    | [<Widened>] AliasKeptAsPhantom of name: string
 
     interface IFindingKind with
         member this.Message =
@@ -580,6 +594,8 @@ type RepairArity =
                 $"{name} applied to {given} arguments but declares {declared}; widened to obj"
             | ReadWithoutWrite name ->
                 $"{name} reads but does not write: its type holds no value, and F# has no setter of type unit"
+            | AliasKeptAsPhantom name ->
+                $"{name} resolves to a target using fewer type parameters than its head; the surplus are erased phantoms"
 
 /// `audit-coverage`.
 [<Prefix("AC", "audit-coverage")>]

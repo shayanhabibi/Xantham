@@ -76,6 +76,8 @@ let findingsTests =
                     "TR044 TypeReference.ArgumentNotASubtypeOfConstraint widened"
                     "TR045 TypeReference.ConditionalTypeDeferred widened"
                     "TR046 TypeReference.ConditionalResolvedToBranch ergonomic"
+                    "TR047 TypeReference.ObjectWithoutMembers widened"
+                    "TR048 TypeReference.ArrayIntersectionMembersDropped widened"
                     "TP001 TypeParameters.UnnamedTypeParameter widened"
                     "TP002 TypeParameters.ConstraintDropped ergonomic"
                     "TP003 TypeParameters.GenericFunctionHoisted ergonomic"
@@ -122,6 +124,7 @@ let findingsTests =
                     "RA003 RepairArity.GenericWithoutArguments widened"
                     "RA004 RepairArity.ArityMismatch widened"
                     "RA005 RepairArity.ReadWithoutWrite ergonomic"
+                    "RA006 RepairArity.AliasKeptAsPhantom widened"
                     "AC001 AuditCoverage.ExportNotRepresented escape" ]
 
               Expect.equal table expected "keys are positional: append new cases, never insert or reorder"
