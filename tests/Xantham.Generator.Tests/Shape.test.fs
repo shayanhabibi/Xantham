@@ -110,6 +110,40 @@ let private genericDecl (id: int) (parameters: int list) (members: ResolvedMembe
         TypeArguments = parameters
         Members = members }
 
+/// A generic alias over an intersection, paired with one application of it, under a shared
+/// operand table (§11.4, `tests/fixtures/hoist-conditional-lab`):
+///
+/// * 20 - the alias's parameter, `TNodeType`
+/// * 30 - `{ isNode: boolean }`, an operand instantiation leaves alone
+/// * 31 - the conditional operand, deferred on 20
+/// * 32 - `{ tag: TNodeType }`; 41 - `{ tag: number }`
+/// * 40 - what the conditional resolved to
+/// * 50 - the declaration, named `Node`; 60 - the application, exported as `seed`
+///
+/// The declaration carries no members and the application carries both, which is the shape the
+/// checker hands over whenever an alias body intersects a conditional.
+let private conditionalAliasModel (declaredOperands: int list) (appliedOperands: int list) =
+    let table =
+        [ Build.facts (Build.typeResponse 20 TypeFlags.TypeParameter)
+          marker 30 "isNode" 3
+          Build.facts (Build.typeResponse 31 TypeFlags.Conditional)
+          marker 32 "tag" 20
+          marker 40 "toVar" 1
+          marker 41 "tag" 2
+          { Build.facts { Build.typeResponse 50 TypeFlags.Intersection with AliasSymbol = ValueSome 100 } with
+              AliasTypeArguments = [ 20 ]
+              IntersectionMembers = declaredOperands }
+          { Build.facts { Build.typeResponse 60 TypeFlags.Intersection with AliasSymbol = ValueSome 100 } with
+              IntersectionMembers = appliedOperands
+              Members =
+                [ Build.resolvedMember (Build.symbol 300 "isNode" SymbolFlags.Property) 3
+                  Build.resolvedMember (Build.symbol 301 "tag" SymbolFlags.Property) 2 ] } ]
+
+    { Build.shapeModel (table @ Build.primitives) with
+        Harvest = { Exports = [ Build.export "seed" (Build.symbol 400 "seed" SymbolFlags.BlockScopedVariable) ] }
+        ExportTypes = Map.ofList [ 400, { Declared = None; Value = Some 60 } ]
+        DeclNames = Map.ofList [ 50, "Node" ] }
+
 [<Tests>]
 let typeRefTests =
     testList "shape typeRef" [
@@ -1000,6 +1034,47 @@ let shapePassTests =
 
             Expect.equal (Map.tryFind 30 named.DeclNames) (Some "Ready") "the declaration is named"
             Expect.equal (Map.tryFind 31 named.DeclNames) None "the instantiation is written as an application"
+
+        testCase "synthesize-anonymous recognises an alias whose intersection body defers on a conditional" <| fun _ ->
+            // `three`'s `Node<TNodeType>` (`docs/plans/generator-three-rung.md` §11.4):
+            //
+            //     type Node<TNodeType> = { isNode: true }
+            //         & (unknown extends TNodeType ? {} : NodeExtensions<TNodeType>)
+            //         & { tag: TNodeType };
+            //
+            // The conditional operand waits on the alias's own parameter, so the checker
+            // surrenders no members at the declaration (50) and four at `Node<number>` (60).
+            // Both carry alias symbol 100, and the argument comes back off the tag operand.
+            let model = conditionalAliasModel [ 30; 31; 32 ] [ 30; 40; 41 ]
+
+            let named, findings = Build.runPass Anonymous.synthesizeAnonymous model
+
+            Expect.equal (Map.tryFind 60 named.DeclNames) (Some "Node") "the application reads back the declaration's name"
+            Expect.equal (Map.tryFind 60 named.DeclParams) (Some [ 2 ]) "the argument comes back off the operands that resolved"
+            Expect.equal (findings |> List.map _.Key) [ "SY001" ] "recognition, not a second hoist"
+
+        testCase "synthesize-anonymous aligns the operands a vanished conditional leaves behind" <| fun _ ->
+            // `Node<unknown>` takes the true branch, the checker keeps no `{}` in an
+            // intersection, and the application arrives one operand short of its declaration.
+            let model = conditionalAliasModel [ 30; 31; 32 ] [ 30; 41 ]
+
+            let named, findings = Build.runPass Anonymous.synthesizeAnonymous model
+
+            Expect.equal (Map.tryFind 60 named.DeclNames) (Some "Node") "the shorter application is still the same alias"
+            Expect.equal (Map.tryFind 60 named.DeclParams) (Some [ 2 ]) "the surviving operands carry the argument"
+            Expect.equal (findings |> List.map _.Key) [ "SY001" ] "recognition, not a second hoist"
+
+        testCase "synthesize-anonymous widens an alias whose argument only the conditional carried" <| fun _ ->
+            // Drop the tag operand and the parameter appears under the conditional alone. The
+            // checker keeps neither branch nor argument there, so the application is
+            // unwritable - and widening it is what bounds the chain (§9 blocker 1's second
+            // option), because a hoist here mints a strictly larger type per generation.
+            let model = conditionalAliasModel [ 30; 31 ] [ 30; 40 ]
+
+            let named, findings = Build.runPass Anonymous.synthesizeAnonymous model
+
+            Expect.equal (Map.tryFind 60 named.DeclNames) None "no second declaration under a minted name"
+            Expect.equal (findings |> List.map _.Key) [ "SY002" ] "the widening is reported"
 
         testCase "bind-free-type-params declares a hoisted object over the parameters it reads" <| fun _ ->
             // `each<T, U>(props: { items: T[]; render: (item: T) => U })`: the hoisted

@@ -1119,6 +1119,65 @@ let pipelineTests =
                           "abstract self: unit -> Plain<'TValue>"
                           "bare polymorphic `this` still reads as its own declaration" ])
 
+        // Wave three lane J's fixture. `docs/plans/generator-three-rung.md` §11.4: the same
+        // chain as `chain-lab` with one operand of the alias body replaced by a conditional
+        // deferred on the alias's own parameter, paired against a control differing in that
+        // operand alone. `three`'s `Node<TNodeType>` is written this way, and the runaway it
+        // produced held at 518 declarations and 76.5% of the rendered file while `chain-lab`
+        // passed.
+        yield!
+            fixtureTests "hoist-conditional-lab" (handFixture "hoist-conditional-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a conditional operand in the alias body bounds the chain, as the control does" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      // The size assertion, and the whole point of the lab: eight declared
+                      // types and one export container, whatever the two halves render as. An
+                      // unbounded run mints one declaration per application until the depth
+                      // cutoff stops it - thirteen for the reproducer's five declarations, and
+                      // 518 on `three`.
+                      Expect.equal (rendered.Decls |> List.length) 9 "the source's own eight types and the export container"
+
+                      // A mint is named by appending the member name plus `Result`. Neither
+                      // half may produce one: the control writes applications, the reproducer
+                      // widens.
+                      Expect.isFalse (source.Contains "Result") "no <Member>Result declaration minted"
+
+                  testCase "the conditional operand is the whole difference between the halves" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                      let keyed key =
+                          rendered.Findings |> List.filter (fun finding -> finding.Key = key)
+
+                      // The control recognises every application of its two aliases and writes
+                      // each as one. The reproducer recognises `CondNode` too and stops there:
+                      // `TNodeType` appears in the conditional operand alone, and a deferred
+                      // conditional carries neither branch nor argument, so the application has
+                      // nothing to be written with and widens instead.
+                      Expect.equal
+                          (keyed "SY001" |> List.map _.Symbol)
+                          [ "DirectExtensionsToVarResult"
+                            "DirectNodeToVarResult"
+                            "DirectVarNodeToVarResult"
+                            "DirectSeed" ]
+                          "the control writes an application at every site"
+
+                      Expect.equal (keyed "SY002" |> List.map _.Symbol) [ "CondSeed" ] "the reproducer widens one site"
+
+                  testCase "the control's chain is written as applications" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains
+                          source
+                          "abstract toVar: Func<string option, DirectVarNode<'TNodeType, DirectNode<'TNodeType>>> with get, set"
+                          "the alias intersects its own operand, applied over its parameter"
+
+                      Expect.stringContains
+                          source
+                          "static member directSeed: DirectNode<float> = jsNative"
+                          "and the export is a fourth site" ])
+
         // Wave two lane C's fixture. `docs/plans/generator-three-rung.md` §9 blocker 3: a
         // structural `extends` constraint whose argument satisfies it structurally but not
         // nominally. TypeScript accepts `Geometry<Narrow>` where `Narrow extends Wide`

@@ -6464,16 +6464,9 @@ type LoopbackDurableObjectNamespace =
     abstract newUniqueId: ?options: DurableObjectNamespaceNewUniqueIdOptions -> DurableObjectId
     abstract idFromName: name: string -> DurableObjectId
     abstract idFromString: id: string -> DurableObjectId
-    abstract get: id: DurableObjectId * ?options: DurableObjectNamespaceGetDurableObjectOptions -> LoopbackDurableObjectNamespaceGetResult
-    abstract getByName: name: string * ?options: DurableObjectNamespaceGetDurableObjectOptions -> LoopbackDurableObjectNamespaceGetResult
+    abstract get: id: DurableObjectId * ?options: DurableObjectNamespaceGetDurableObjectOptions -> obj
+    abstract getByName: name: string * ?options: DurableObjectNamespaceGetDurableObjectOptions -> obj
     abstract jurisdiction: jurisdiction: DurableObjectJurisdiction -> DurableObjectNamespace<unit>
-
-type LoopbackDurableObjectNamespaceGetResult =
-    inherit RequestFetcher
-    abstract fetch: input: U3<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, URL> * ?init: RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> -> JS.Promise<Response>
-    abstract connect: address: U2<string, SocketAddress> * ?options: SocketOptions -> Socket
-    abstract id: DurableObjectId
-    abstract name: string option
 
 type LoopbackColoLocalActorNamespace =
     inherit ColoLocalActorNamespace
