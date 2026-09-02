@@ -1,4 +1,4 @@
-/// Tier 3 - Shape: the mapping document executed. Phase B of
+﻿/// Tier 3 - Shape: the mapping document executed. Phase B of
 /// `docs/plans/generator-architecture.md` covers interfaces with methods and overloads,
 /// literal unions (D12), callbacks as delegates (D5), classes (instance interface plus
 /// constructor members on `Exports`), ParamObject synthesis (D3), arrays, and value exports;
