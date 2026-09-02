@@ -1,0 +1,1 @@
+{"name":"parse-lab","type":"module","types":"index.d.ts","description":"Phase E lab: renderer spacing that the F# lexer is sensitive to - a method-level type parameter whose constraint is a generic application renders a head ending `>>`, and `>>:` does not parse."}

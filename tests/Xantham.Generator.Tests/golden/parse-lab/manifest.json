@@ -1,0 +1,87 @@
+{
+  "package": "parse-lab",
+  "module": "ParseLab",
+  "counts": {
+    "exact": 2,
+    "ergonomic": 4,
+    "widened": 0,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 4,
+      "ergonomic": 4
+    }
+  ],
+  "symbols": [
+    {
+      "name": "EventMap",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "EventMap",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "EventMapClick",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "EventMapClick",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "Object3D",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Object3D",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "Intersection",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Intersection",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "Caster",
+      "file": "index.d.ts",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "Plain",
+      "file": "index.d.ts",
+      "tier": "exact",
+      "findings": []
+    }
+  ]
+}

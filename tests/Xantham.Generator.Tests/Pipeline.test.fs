@@ -765,6 +765,36 @@ let pipelineTests =
                           (rendered.Findings |> List.filter (fun f -> f.Key = "TR014"))
                           "no construct here is left reported as an unmapped flag" ])
 
+        yield!
+            fixtureTests "parse-lab" (handFixture "parse-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a member head ending in a generic constraint keeps the colon a separate token" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    // `>>:` lexes as one token, so the member's colon is swallowed and the file
+                    // fails to parse (FS0010) - taking the whole compile gate with it, before any
+                    // other diagnostic is reported. One space is the entire fix.
+                    Expect.stringContains
+                        source
+                        "abstract intersectObject<'TIntersected when 'TIntersected :> Object3D<EventMap>> :"
+                        "a constraint that is a generic application ends the head in >>"
+
+                    Expect.stringContains
+                        source
+                        "and 'TSecond :> Object3D<EventMap>> :"
+                        "two constraints join with and, and still end the head in >>"
+
+                    Expect.isFalse (source.Contains ">>:") "no head runs into its colon"
+
+                  testCase "a head ending in a single > keeps the colon tight" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    // `>:` lexes correctly, so the space is spent only where it is needed and no
+                    // existing golden moves.
+                    Expect.stringContains source "abstract echo<'T>:" "a parameter with no constraint"
+                    Expect.stringContains source "abstract on<'T when 'T :> EventMap>:" "a constraint that is a bare name" ])
+
         yield! fixtureTests "animejs" (npmFixture "animejs") GeneratorConfig.Default (fun _ -> [])
 
         // workers-types is a global type library that *replaces* the DOM lib: its README

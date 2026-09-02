@@ -776,6 +776,30 @@ Phases — each ends with the compile gate green on its fixtures:
     gates. Not done: `Conditional`, the 227 sites above and now the whole of `TR014` - §4.11
     treats a conditional type as deferred, and it is a shape question, not a flag one.
 
+- **Phase E — a member's type-parameter head is spaced off its colon (`parse-lab`).**
+    A method-level type parameter whose constraint is itself a generic application renders a
+    head ending `>>`, and F# lexes `>>:` as one token: the member's colon is swallowed and the
+    file fails to parse with `FS0010`. Because a parse error stops the compiler before it
+    reports anything else, one such member takes the whole compile gate with it — which is what
+    `@types/three` hits at `Raycaster.intersectObject`, and what stopped that rung's recon from
+    seeing any other diagnostic.
+    The fix is `Render.memberColon`: a head ending `>>` is followed by ` :`, everything else
+    keeps the tight `:`. The narrowness is deliberate and was measured at the lexer rather than
+    assumed — `m<'T>:`, and `m<'T when 'T :> Ev>:` with a constraint that is a bare name, both
+    parse, so only a nested constraint needs the space. Consequence: **no golden written before
+    this moves** (`git diff --numstat` over the whole corpus: zero files), and the corpus
+    contained no `>>:` site to begin with, because such a file could never have passed the gate
+    to be committed.
+    Evidence is `tests/fixtures/parse-lab/`: two members whose heads end `>>` (one constraint,
+    and two joined with `and`) against three negatives that must keep the tight colon. It is
+    linked into the compile gate, which is the gate that has an opinion here; the run gate is
+    not, since nothing about this reaches runtime. Three new tests — one on the renderer
+    against a hand-built model, two on the rung — plus the standing guard that no rendered
+    source anywhere contains `>>:`. All three gates green: `dotnet build Xantham.slnx` clean,
+    182 + 85 Expecto tests, run gate 49 checks. Found by the `@types/three` recon
+    (`docs/plans/generator-three-rung.md` §9, blocker 4); it is not `three`-specific, which is
+    why the lab landed regardless of whether that rung ever does.
+
 ## 7. Decisions (2026-09-01)
 
 All six original open questions were resolved in review; each is also inlined at its

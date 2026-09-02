@@ -36,6 +36,7 @@
     <Compile Include="..\Xantham.Generator.Tests\golden\brand-lab\BrandLab.fs" Link="brand-lab\BrandLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\flags-lab\FlagsLab.fs" Link="flags-lab\FlagsLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\lib-lab\LibLab.fs" Link="lib-lab\LibLab.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\parse-lab\ParseLab.fs" Link="parse-lab\ParseLab.fs" />
     <Compile Include="..\Xantham.Generator.Tests\golden\animejs\Animejs.fs" Link="animejs\Animejs.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\@cloudflare\workers-types\Cloudflare.WorkersTypes.fs"
                  Link="workers-types\Cloudflare.WorkersTypes.fs" />

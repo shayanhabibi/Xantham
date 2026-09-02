@@ -368,9 +368,10 @@ let private renderAbstractSignature (parameters: FsParam list) (returns: FsTypeR
 
 /// A declaration's name with its type parameters and their constraints (§4.9), as written at
 /// the point of definition: `Box<'T>`, `Node<'T when 'T :> Element>`. A generic *member*
-/// writes its own parameters the same way - `abstract read<'K> : ...`. F# admits one `when`
-/// clause, after the last parameter, with the constraints joined by `and` - a clause between
-/// two parameters (`<'A when 'A :> X, 'B>`) is a syntax error.
+/// writes its own parameters the same way - `abstract read<'K>: ...`, spaced off its colon by
+/// `memberColon` below where the head ends in `>>`. F# admits one `when` clause, after the last
+/// parameter, with the constraints joined by `and` - a clause between two parameters
+/// (`<'A when 'A :> X, 'B>`) is a syntax error.
 let private declHead (name: string) (typeParameters: FsTypeParam list) =
     if typeParameters.IsEmpty then
         ident name
@@ -389,6 +390,15 @@ let private declHead (name: string) (typeParameters: FsTypeParam list) =
         | constraints ->
             let joined = String.concat " and " constraints
             $"{ident name}<{parameters} when {joined}>"
+
+/// The separator between a member's head and its signature. F# lexes `>>` as a single token, so
+/// a head whose last constraint is itself a generic application - `m<'T when 'T :> Obj<Ev>>` -
+/// runs into the member's colon as `>>:` and the whole file fails to parse (`FS0010`). One space
+/// before the colon is the entire fix. A head ending in a single `>` (`m<'T>:`, `m<'T when 'T :>
+/// Ev>:`) lexes correctly, so the space is spent only where it is needed and no existing golden
+/// moves.
+let private memberColon (head: string) =
+    if head.EndsWith ">>" then " :" else ":"
 
 /// The same declaration written at a reference position, where the parameters appear bare:
 /// `Box<'T>`. A constraint belongs to the definition only, so it is not repeated here.
@@ -412,7 +422,8 @@ let private renderMember (m: FsMember) =
     | FsMethod m ->
         [
             yield! docLines "    " m.Docs m.Tags
-            yield $"    abstract {declHead m.Name m.TypeParameters}: {renderAbstractSignature m.Parameters m.Return}"
+            let head = declHead m.Name m.TypeParameters
+            yield $"    abstract {head}{memberColon head} {renderAbstractSignature m.Parameters m.Return}"
         ]
     | FsIndexer i ->
         // `[<EmitIndexer>]` is what makes this reach JavaScript as `bag[key]` rather than a

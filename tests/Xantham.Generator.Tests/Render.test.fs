@@ -169,6 +169,47 @@ let renderTests =
                 "type Labelled<'T, 'U, 'V when 'T :> Named and 'V :> Box<'U>> ="
                 "parameters first, then every constraint in one clause"
 
+        testCase "a member head ending in > is separated from its colon" <| fun _ ->
+            // F# lexes `>>` as one token, so `m<'T when 'T :> Obj<Ev>>:` swallows the colon and
+            // the file fails to parse (FS0010). A head ending in a single `>` lexes correctly and
+            // keeps the tight colon, so no golden written before this moves.
+            let method' name typeParameters =
+                FsMethod
+                    { Name = name
+                      Docs = ""
+                      Tags = []
+                      TypeParameters = typeParameters
+                      Parameters =
+                        [ { Name = "value"
+                            Type = FsTypeVar "T"
+                            Optional = false
+                            Rest = false } ]
+                      Return = FsUnit }
+
+            let model =
+                { baseModel with
+                    Decls =
+                        [ FsInterface
+                              { Name = "Caster"
+                                Docs = ""
+                                Tags = []
+                                Order = None
+                                TypeParameters = []
+                                Inherits = []
+                                Members =
+                                  [ method' "nested" [ { Name = "T"; Constraint = Some(FsApp("Obj", [ FsNamed "Ev" ])) } ]
+                                    method' "bare" [ { Name = "T"; Constraint = None } ]
+                                    method' "named" [ { Name = "T"; Constraint = Some(FsNamed "Ev") } ] ]
+                                CreateOverloads = []
+                                Statics = [] } ] }
+
+            let source = renderAll model |> Map.find "TestPkg.fs"
+
+            Expect.stringContains source "abstract nested<'T when 'T :> Obj<Ev>> : value: 'T -> unit" "the space is spent here"
+            Expect.stringContains source "abstract bare<'T>: value: 'T -> unit" "and nowhere else"
+            Expect.stringContains source "abstract named<'T when 'T :> Ev>: value: 'T -> unit" "a single > is fine"
+            Expect.isFalse (source.Contains ">>:") "no head runs into its colon"
+
         testCase "a qualified templated name escapes per segment" <| fun _ ->
             Expect.equal (Render.printType (FsNamed "TypeScript.Lib.RegExp")) "TypeScript.Lib.RegExp" "qualified"
             Expect.equal (Render.printType (FsNamed "Pkg.type")) "Pkg.``type``" "keyword segment"
