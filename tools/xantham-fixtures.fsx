@@ -148,7 +148,13 @@ module Stage =
                                 ele[fixture] <- "*"
                                 ele
 
-                            use file = File.OpenWrite(Path.Combine(fixturePath, "package.json"))
+                            // `File.Create`, not `File.OpenWrite`: the latter opens at position 0
+                            // *without* truncating, so writing shorter content over an existing
+                            // manifest leaves the tail of the old one behind. npm rewrites this
+                            // file to the resolved exact version (longer than the `"*"` written
+                            // here), so a rewrite produced `..."*"}}260901.1"}}` and npm then
+                            // failed the install with EJSONPARSE.
+                            use file = File.Create(Path.Combine(fixturePath, "package.json"))
                             use writer = new Utf8JsonWriter(file)
                             doc.WriteTo(writer))
                     }
