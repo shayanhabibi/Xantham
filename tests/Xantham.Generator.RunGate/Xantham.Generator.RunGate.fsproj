@@ -36,6 +36,7 @@
         <Compile Include="..\Xantham.Generator.Tests\golden\inherit-lab\InheritLab.fs" Link="inherit-lab\InheritLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\fable-workaround-lab\FableWorkaroundLab.fs" Link="fable-workaround-lab\FableWorkaroundLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\ambient-module-lab\AmbientModuleLab.fs" Link="ambient-module-lab\AmbientModuleLab.fs" />
+        <Compile Include="Probes.fs" />
         <Compile Include="Program.fs" />
         <None Include="register.mjs" />
     </ItemGroup>
