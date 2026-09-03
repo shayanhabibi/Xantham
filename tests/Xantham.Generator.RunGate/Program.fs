@@ -475,8 +475,96 @@ let private entrypointClasses () =
     // object-literal Create the entrypoint form has no room for.
     let anvil = AmbientModuleLab.Anvil.Create 9.0
     equal "a global abstract class keeps its ParamObject Create" 9.0 anvil.mass
+
     let vise = AmbientModuleLab.Vise.Create(2.0, 5.0, Func<_, _>(fun (p: AmbientModuleLab.Payload) -> p.label))
     equal "and so does a class whose base this run declares" 2.0 vise.jaw
+
+/// Wave six's three probes, over the hand-written forms in `Probes.fs`. Each one settles a Fable
+/// emission question a lane is designed against, so each check names the platform behaviour it
+/// licenses rather than the F# it was written from.
+let private probes () =
+    let payload = AmbientModuleLab.Exports.connect "socket"
+
+    // Probe 1. An optional hook carried by an interface the consumer's entrypoint subclass
+    // implements. A platform that discovers hooks by reading `instance.fetch` walks the prototype
+    // chain and finds it; a platform that enumerates own keys finds an instance carrying only
+    // what the base constructor assigned.
+    let hooked = Probes.HookedBench "vice"
+
+    check
+        "an interface-implemented hook is reachable by property access"
+        (emitJsExpr hooked "typeof $0.fetch === \"function\"")
+
+    check "and by the `in` operator, which walks the same chain" (emitJsExpr hooked "\"fetch\" in $0")
+
+    equal
+        "and it dispatches to the implementation the subclass gave"
+        "fetch:vice:socket"
+        (emitJsExpr (hooked, payload) "$0.fetch($1)")
+
+    check
+        "the hook is no own property: own-key enumeration does not discover it"
+        (emitJsExpr hooked "Object.keys($0).indexOf(\"fetch\") === -1")
+
+    check
+        "nor does hasOwnProperty, nor getOwnPropertyNames on the instance"
+        (emitJsExpr
+            hooked
+            "!Object.prototype.hasOwnProperty.call($0, \"fetch\") && Object.getOwnPropertyNames($0).indexOf(\"fetch\") === -1")
+
+    equal
+        "the instance's own keys are what the base constructor assigned"
+        "label"
+        (emitJsExpr hooked "Object.keys($0).join(\",\")")
+
+    check
+        "the prototype's methods are non-enumerable, so Object.keys on it discovers nothing either"
+        (emitJsExpr hooked "Object.keys(Object.getPrototypeOf($0)).length === 0")
+
+    // The negative. A subclass that declines the hook must read as carrying none.
+    let bare = Probes.BareBench "plain"
+    check "a subclass that omits the interface carries no hook" (emitJsExpr bare "typeof $0.fetch === \"undefined\"")
+    check "which the `in` operator agrees with" (emitJsExpr bare "!(\"fetch\" in $0)")
+    equal "and the override it did make still dispatches" "bare:plain:socket" (emitJsExpr (bare, payload) "$0.run($1)")
+
+    // Probe 2. The member name Fable emits for an interface implementation on a class. A mangled
+    // name is a method no platform will look up.
+    equal
+        "an interface member on a class is emitted under its declared name, unmangled, once per interface"
+        "constructor,run,fetch,alarm"
+        (emitJsExpr hooked "Object.getOwnPropertyNames(Object.getPrototypeOf($0)).join(\",\")")
+
+    equal "and the second interface's member dispatches under that name" "alarm:vice" (emitJsExpr hooked "$0.alarm()")
+
+    check
+        "and the class overriding an abstract base member emits that name too"
+        (emitJsExpr bare "Object.getOwnPropertyNames(Object.getPrototypeOf($0)).indexOf(\"run\") >= 0")
+
+    // Probe 3. A module beside a type of the same name, holding the type an inline shape is named
+    // for. The owner refers forward into the module and the nested type refers back out of it,
+    // both under the `module rec` header every golden carries.
+    let options =
+        Probes.Widget.Options.Create(depth = 2.0, retry = Probes.Widget.Options.Retry.Create(attempts = 3.0))
+
+    let widget = Probes.Widget.Create(label = "w", options = options)
+
+    equal
+        "a nested module's type, and one nested two levels down, are the object literals their Creates built"
+        """{"depth":2,"retry":{"attempts":3}}"""
+        (json options)
+
+    equal
+        "and the owner carries it under the property the reference named"
+        """{"label":"w","options":{"depth":2,"retry":{"attempts":3}}}"""
+        (json widget)
+
+    widget.options.owner <- Some widget
+    equal "the nested type's reference back to its owner reads through" "w" (emitJsExpr widget "$0.options.owner.label")
+
+    equal
+        "an import declared inside the nested module reaches the specifier's export"
+        6.0
+        (Probes.Widget.Exports.measure payload)
 
 [<EntryPoint>]
 let main _ =
@@ -490,6 +578,7 @@ let main _ =
     heritage ()
     taggedUnions ()
     workarounds ()
+    probes ()
 
     match failures with
     | [] ->
