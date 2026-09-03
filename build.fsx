@@ -59,7 +59,8 @@ module Options =
 
     let generateOnly =
         Input.option<string> "--only"
-        |> Input.description "Limit generation to one layer: ast | proto | session | browser. All four by default."
+        |> Input.description
+            "Limit generation to one layer: ast | proto | session | browser | schema. All five by default."
         |> Input.def ""
 
     /// The generator's inner loop, in three flags. An agent iterating on a pass runs
@@ -246,6 +247,13 @@ module Stages =
                     stage "generate browser" {
                         when' (wanted "browser")
                         run "dotnet fsi tools/generate-wire.fsx -- generate browser"
+                    }
+                    // The `xantham.json` schema, emitted from the config record by the CLI that
+                    // ships it - so a key added to `GeneratorConfig` reaches an editor by
+                    // rerunning this rather than by a second hand edit.
+                    stage "generate schema" {
+                        when' (wanted "schema")
+                        run "dotnet run --project src/Xantham.Cli -- schema -o xantham.schema.json"
                     }
                 }
         }

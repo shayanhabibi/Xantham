@@ -239,6 +239,8 @@ Layered, mirroring the tiers:
 New projects (names step around the archive, which is invisible to the solution anyway):
 
 - `src/Xantham.Generator` — the pipeline, passes, model, renderer. .NET, references Wire.
+- `src/Xantham.Cli` — the `xantham` command. A shell over `Pipeline.run` and `Schema.json`,
+  packed as a .NET tool.
 - `src/Xantham.Fable.Core` — revived support package (erased `keyof`/`typekeyof`/
   `PropertyRecord`, brand helpers). Fable library, no dependency on the generator.
 - `tests/Xantham.Generator.Tests` — Expecto, same conventions as the Wire suite.
@@ -248,14 +250,29 @@ New projects (names step around the archive, which is invisible to the solution 
   a **JSON Schema generated from the config record itself** so the file self-documents and
   editors check it. The generator core is a library function taking the config record; the
   CLI (`xantham generate <package-dir> [-o <out>] [--config <path>]`) and the scratch
-  harness are both thin shells over it, and the CLI is deferred to phase C. Keys so far:
+  harness are both thin shells over it. Keys so far:
   `module`, `groups` (O7), `lib` - the compiler's option as `tsconfig.json` spells it,
   for a global type library that replaces the DOM rather than extending it (phase E) - and
   `runtime`, the npm package the generated `[<Import(…)>]` attributes name, which defaults to
   the package name with DefinitelyTyped's `@types/` naming undone (phase E, wave two lane D;
-  `generator-three-rung.md` §8). **The generated schema is still unbuilt**: `load` is a
-  hand-written `System.Text.Json` reader, so a new key is two hand edits and its round-trip
-  test, and nothing validates an `xantham.json` in an editor yet.
+  `generator-three-rung.md` §8).
+
+  *Status (2026-09-03, wave five batch 2):* both halves are built. `xantham generate
+  <package-dir> [-o <dir>] [--config <path>] [--quiet]` writes the binding, the shipped
+  groups and `manifest.json`, listing the written paths on standard output and the tier and
+  finding-key counts on standard error; it exits 0 generated, 1 usage, 2 no package, 3
+  configuration refused, 4 generation failed. `xantham.schema.json` at the repository root is
+  emitted by `xantham schema` from `GeneratorConfig`, `GroupDisposition` and `MappedName` by
+  reflection — the property set, their JSON types and the disposition vocabulary come from the
+  F# declarations, the key spellings and descriptions from a table in `src/Xantham.Cli/Schema.fs`
+  that emission refuses to skip. `dotnet fsi build.fsx -- generate --only schema` regenerates
+  it, and `Cli.test.fs` fails when the committed text and the record disagree.
+
+  Two things `load` still leaves to a caller. It is addressed by *directory*, so `--config`
+  pointing at a file under another name reads it through a staged copy; a `loadFile` taking
+  the path would remove that. And it signals every refusal with `failwith`, so the CLI
+  separates "configuration refused" from "generation failed" by catching around the call
+  rather than by the exception's type.
 
 Phases — each ends with the compile gate green on its fixtures:
 
@@ -1055,7 +1072,8 @@ section above.
   well-formedness assertions are the escape hatch if ordering bugs appear (§4).
 - **O4 — JSON config with generated schema.** `xantham.json` beside the target
   `package.json`, JSONC-tolerant, JSON Schema generated from the config record; generator
-  core is a library function, CLI a thin shell deferred to phase C (§6).
+  core is a library function, CLI a thin shell over it (§6). *Built 2026-09-03, wave five
+  batch 2:* `src/Xantham.Cli` and `xantham.schema.json`.
 - **O5 — golden-print snapshots.** Human-readable textual projection of the model as the
   tier-test corpus and the between-pass debug dump; no machine round-tripping required
   anywhere in the strategy (§5).

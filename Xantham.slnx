@@ -43,6 +43,7 @@
   <Folder Name="/misc/sln build/">
     <File Path="Directory.Build.props" />
     <File Path="Directory.Build.targets" />
+    <File Path="xantham.schema.json" />
   </Folder>
   <Folder Name="/misc/">
     <File Path="README.md" />
@@ -53,6 +54,7 @@
   <Folder Name="/src/">
     <Project Path="src/Xantham.TypeScript.Wire/Xantham.TypeScript.Wire.fsproj" />
     <Project Path="src/Xantham.Generator/Xantham.Generator.fsproj" />
+    <Project Path="src/Xantham.Cli/Xantham.Cli.fsproj" />
     <Project Path="src/Xantham.Fable.Core/Xantham.Fable.Core.fsproj" />
   </Folder>
   <Folder Name="/tests/">
