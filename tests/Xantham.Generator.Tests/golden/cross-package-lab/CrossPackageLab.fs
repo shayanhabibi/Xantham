@@ -16,16 +16,9 @@ open Xantham.Fable.Core
 type Panel =
     abstract widget: obj with get, set
     abstract boxed: obj with get, set
-    abstract pair: PanelPair with get, set
+    abstract pair: obj with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (widget: obj, boxed: obj, pair: PanelPair) : Panel = jsNative
-
-[<Interface>]
-type PanelPair =
-    abstract left: obj with get, set
-    abstract right: obj with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (left: obj, right: obj) : PanelPair = jsNative
+    static member Create (widget: obj, boxed: obj, pair: obj) : Panel = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

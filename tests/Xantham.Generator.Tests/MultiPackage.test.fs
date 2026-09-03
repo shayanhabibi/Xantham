@@ -235,9 +235,9 @@ let multiPackageTests =
                 $"every name templated into {DependencyModule} is declared there at the same arity"
 
         // The other half of identity-only resolution: a referenced group's types are named, not
-        // copied. This does not hold either - `WidgetPair` is re-derived into the entry package
-        // as `PanelPair`, so one TypeScript type gets two unrelated F# declarations.
-        ptestCase "cross-package-lab: a referenced type is templated rather than re-declared"
+        // copied. `WidgetPair` is an alias over an object literal, and the name it templates
+        // under is read off the alias symbol (wave five, lane V).
+        testCase "cross-package-lab: a referenced type is templated rather than re-declared"
         <| fun _ ->
             let entry = declaredIn entryReference.Value
 

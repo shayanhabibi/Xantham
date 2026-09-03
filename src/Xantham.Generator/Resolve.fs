@@ -392,41 +392,65 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
             // Deferring to a name that does not exist widens the whole expansion to obj and
             // loses the operand with it (D6), so an anonymous shape is resolved by content
             // whatever group it was written in.
-            let isAnonymousShape =
-                let objectFlags = ty.ObjectFlags |> ValueOption.defaultValue ObjectFlags.None
+            let objectFlags = ty.ObjectFlags |> ValueOption.defaultValue ObjectFlags.None
 
-                // A member's type is named for the member: the type of `Promise.then` carries
-                // the symbol `then`, a member name rather than a declaration head. Such a type
-                // resolves by content whatever group it was written in; a symbol that declares
-                // a type keeps the shortcut.
-                let isMemberType =
-                    match symbol with
-                    | ValueSome s ->
-                        hasAny (SymbolFlags.Method ||| SymbolFlags.Property ||| SymbolFlags.Signature) s.Flags
-                        && not (
-                            hasAny
-                                (SymbolFlags.Interface
-                                 ||| SymbolFlags.Class
-                                 ||| SymbolFlags.TypeAlias
-                                 ||| SymbolFlags.RegularEnum
-                                 ||| SymbolFlags.ConstEnum)
-                                s.Flags
-                        )
-                    | ValueNone -> false
+            // A member's type is named for the member: the type of `Promise.then` carries
+            // the symbol `then`, a member name rather than a declaration head. Such a type
+            // resolves by content whatever group it was written in; a symbol that declares
+            // a type keeps the shortcut.
+            let isMemberType =
+                match symbol with
+                | ValueSome s ->
+                    hasAny (SymbolFlags.Method ||| SymbolFlags.Property ||| SymbolFlags.Signature) s.Flags
+                    && not (
+                        hasAny
+                            (SymbolFlags.Interface
+                             ||| SymbolFlags.Class
+                             ||| SymbolFlags.TypeAlias
+                             ||| SymbolFlags.RegularEnum
+                             ||| SymbolFlags.ConstEnum)
+                            s.Flags
+                    )
+                | ValueNone -> false
 
-                objectFlags.HasFlag ObjectFlags.Mapped
-                || isMemberType
-                || match symbol with
-                   | ValueSome s -> s.Name.StartsWith "__"
-                   | ValueNone -> true
+            // The name a symbol supplies a declaration with. The checker's placeholders -
+            // `__type`, `__object`, `__@iterator@194` - all carry the prefix.
+            let named (candidate: SymbolResponse voption) =
+                match candidate with
+                | ValueSome s when not (s.Name.StartsWith "__") -> Some s.Name
+                | _ -> None
 
-            if GeneratorConfig.disposition ctx.Config origin <> Ship && not isAnonymousShape then
+            // The name a `ship` run of the group declares the shape under. An alias body carries
+            // `__type` on the type's own symbol and its declared name on the alias symbol -
+            // `type Pair = { left: Widget }` is the whole family - so a shape the type's own
+            // symbol leaves unnamed takes the name on its alias. A shape both symbols leave
+            // unnamed resolves by content, into a declaration of its own in the entry package.
+            //
+            // The round trip is spent only where the answer can be used: the entry group and the
+            // two kinds above resolve by content whatever either symbol says.
+            let! shapeName =
+                if
+                    GeneratorConfig.disposition ctx.Config origin = Ship
+                    || objectFlags.HasFlag ObjectFlags.Mapped
+                    || isMemberType
+                then
+                    async.Return None
+                else
+                    match named symbol with
+                    | Some name -> async.Return(Some name)
+                    | None ->
+                        async {
+                            let! alias = ctx.Session.getAliasSymbolOfType ty.Id
+                            return named alias
+                        }
+
+            if shapeName.IsSome then
                 // Identity only (O7): the shape tier renders references to this group by
                 // templated name or widens them, and either way nothing reads its members.
                 return
                     { TypeFacts.shallow ty with
                         Origin = origin
-                        SymbolName = symbol |> ValueOption.map _.Name |> ValueOption.toOption
+                        SymbolName = shapeName
                         TypeArguments = typeArguments |> List.map _.Id
                         TupleElements = tupleElements
                         AliasTypeArguments = aliasTypeArguments |> List.map _.Id
