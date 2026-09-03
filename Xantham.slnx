@@ -43,6 +43,7 @@
   <Folder Name="/misc/sln build/">
     <File Path="Directory.Build.props" />
     <File Path="Directory.Build.targets" />
+    <File Path="package.json" />
     <File Path="xantham.schema.json" />
   </Folder>
   <Folder Name="/misc/">

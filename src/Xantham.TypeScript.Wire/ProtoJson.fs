@@ -16,10 +16,9 @@ type ValueOptionConverter<'T>() =
     inherit JsonConverter<'T voption>()
 
     override _.Read(reader, _, options) =
-        if reader.TokenType = JsonTokenType.Null then
-            ValueNone
-        else
-            ValueSome(JsonSerializer.Deserialize<'T>(&reader, options))
+        match reader.TokenType with
+        | JsonTokenType.Null -> ValueNone
+        | _ -> JsonSerializer.Deserialize<'T>(&reader, options) |> ValueSome
 
     override _.Write(writer, value, options) =
         match value with
@@ -51,7 +50,7 @@ type DocumentIdentifierConverter() =
             match document.RootElement.TryGetProperty "uri" with
             | true, value -> Uri(value.GetString())
             | _ -> failwith "DocumentIdentifier object had no 'uri' property"
-        | other -> failwithf "DocumentIdentifier expected a string or an object, got %A" other
+        | other -> failwithf $"DocumentIdentifier expected a string or an object, got %A{other}"
 
     override _.Write(writer, value, _) =
         match value with
