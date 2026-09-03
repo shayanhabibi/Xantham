@@ -8,19 +8,15 @@ open FSharp.Reflection
 /// `docs/plans/generator-type-mapping.md` §1. Declaration order is severity order: a symbol's
 /// tier is the worst tier among its findings, and structural comparison on this type is that
 /// "worst".
-[<Struct>]
 type Tier =
-    /// The F# type accepts and rejects exactly what TypeScript does. Never a warning.
+    /// The F# type accepts and rejects exactly what TypeScript does.
     | Exact
     /// Meaning preserved, spelling made idiomatic - e.g. `null | undefined` hoisted to `option`.
-    /// Where behaviour might surprise, the warning should be raised.
-    | Ergonomic of isWarning: bool
+    | Ergonomic
     /// Information TypeScript had was dropped - e.g. a union collapsed to `obj`.
-    /// Where the behaviour might surprise, the warning should be raised.
-    | Widened of isWarning: bool
+    | Widened
     /// The construct is not represented; the consumer is on their own.
-    /// The warning should be raised in most circumstances.
-    | Escape of isWarning: bool
+    | Escape
 
 // -------------------------------------------------------------------------------------------------
 // The finding catalogue. Every kind of finding the generator can raise is a case of one of the
@@ -44,19 +40,16 @@ type ExactAttribute() =
     inherit TierAttribute(Exact)
 
 [<Sealed>]
-type ErgonomicAttribute(warning) =
-    inherit TierAttribute(Ergonomic warning)
-    new() = ErgonomicAttribute(true)
+type ErgonomicAttribute() =
+    inherit TierAttribute(Ergonomic)
 
 [<Sealed>]
-type WidenedAttribute(warning) =
-    inherit TierAttribute(Widened warning)
-    new() = WidenedAttribute(true)
+type WidenedAttribute() =
+    inherit TierAttribute(Widened)
 
 [<Sealed>]
-type EscapeAttribute(warning: bool) =
-    inherit TierAttribute(Escape warning)
-    new() = EscapeAttribute(true)
+type EscapeAttribute() =
+    inherit TierAttribute(Escape)
 
 /// The manifest key prefix of a finding union, and for a per-pass union the name of the pass it
 /// belongs to. Explicit rather than derived from the type name so a rename never moves a key.
@@ -182,14 +175,12 @@ type TypeReference =
     | [<Widened>] SelfReferenceThroughUnnamed
     | [<Widened>] TypeNotResolved of reason: string
     | [<Escape>] MissingFromTypeTable of typeId: int
-    // TODO
     | [<Widened>] LoneEnumMemberToFloat
     | [<Widened>] LoneEnumMemberToString
     | [<Widened>] StringLiteralToString
     | [<Widened>] NumericLiteralToFloat
-    //
-    | [<Escape false>] AnyToObj
-    | [<Widened false>] UnknownToObj // TODO - should probably be objnull or obj option
+    | [<Escape>] AnyToObj
+    | [<Widened>] UnknownToObj
     | [<Ergonomic>] PolymorphicThisAsDeclaringType
     | [<Widened>] ThisOutsideDeclaration
     | [<Widened>] TypeParameterOutOfScopeToConstraint of constraintName: string
@@ -198,11 +189,11 @@ type TypeReference =
     | [<Ergonomic>] KeyOfOpenOperand of name: string
     | [<Widened>] KeyOfOperandOutOfScope
     | [<Ergonomic>] UnnamedBrandToPrimitive
-    | [<Widened>] IntersectionOverNonObject // TODO - we can manage this for some cases - tbd
+    | [<Widened>] IntersectionOverNonObject
     | [<Widened>] IntersectionNotDeclared
     | [<Widened>] IndexedAccessNoForm
     | [<Widened>] AnonymousInReferencedGroup
-    | [<Widened false>] GlobalThisToObj
+    | [<Widened>] GlobalThisToObj
     | [<Widened>] NotAmongGeneratedDeclarations of shown: string
     | [<Ergonomic>] LibExtraTypeArgumentsDropped of name: string * given: int * fsharpName: string * arity: int
     | [<Ergonomic>] LibBindingLoss of note: string
@@ -212,22 +203,22 @@ type TypeReference =
     | [<Widened>] TupleArityNoForm of components: int
     | [<Widened>] CallableWithoutSignatures
     | [<Widened>] CallbackOverloadsFromFirst of overloads: int
-    | [<Ergonomic false>] NullableHoistedToOption
-    | [<Widened false>] OnlyNullUndefinedToUnit
-    | [<Widened false>] EmptyUnionToObj
+    | [<Ergonomic>] NullableHoistedToOption
+    | [<Widened>] OnlyNullUndefinedToUnit
+    | [<Widened>] EmptyUnionToObj
     | [<Widened>] UnionWithObjArm
     | [<Widened>] UnionTooWide of arms: int * cap: int
-    | [<Widened>] TemplateLiteralToString // TODO - we can improve this
-    | [<Widened>] StringMappingToString // TODO - we can maybe improve this
+    | [<Widened>] TemplateLiteralToString
+    | [<Widened>] StringMappingToString
     | [<Widened>] BigIntLiteralToBigInt
-    | [<Widened false>] ObjectTypeToObj
+    | [<Widened>] ObjectTypeToObj
     | [<Widened>] SymbolNoBinding
     | [<Widened>] UniqueSymbolNoBinding
     | [<Widened>] ConstructorObjectNotDeclared of constructs: string
     /// F# subtyping is nominal where TypeScript's is structural: an argument that merely has
     /// the constraint's members is FS0001 at the application, so it is written as the
     /// constraint, the way an argument that widened to `obj` already is.
-    | [<Widened false>] ArgumentNotASubtypeOfConstraint of argument: string * name: string * bound: string
+    | [<Widened>] ArgumentNotASubtypeOfConstraint of argument: string * name: string * bound: string
     /// Wave two, lane E. A conditional type is deferred: its branch is not chosen until the
     /// checker has an argument to test, and F# has no form that defers a type. The whole of
     /// `TR014` is now this construct, so it is named rather than reported as a flag.
@@ -238,7 +229,7 @@ type TypeReference =
     /// Wave three, lane H. An object type declaring no members. `obj` admits everything the
     /// type does, so the reference is exact in surface and widened only in name. Distinct from
     /// `TR023`, which reports a declaration the run was expected to generate and did not.
-    | [<Widened false>] ObjectWithoutMembers
+    | [<Widened>] ObjectWithoutMembers
     /// Wave three, lane H. An intersection whose operands include an array shape maps to the
     /// element array; members contributed by the other operands have no F# form on an array.
     | [<Widened>] ArrayIntersectionMembersDropped of dropped: int
@@ -345,7 +336,7 @@ type TypeReference =
 [<Prefix "TP">]
 type TypeParameters =
     | [<Widened>] UnnamedTypeParameter of id: int
-    | [<Ergonomic false>] ConstraintDropped of name: string
+    | [<Ergonomic>] ConstraintDropped of name: string
     | [<Ergonomic>] GenericFunctionHoisted
     | [<Ergonomic>] KeyWithIndexedAccess of operand: string * result: string
     | [<Ergonomic>] KeyOverOperand of operand: string
@@ -358,7 +349,7 @@ type TypeParameters =
     /// retiring it renumbers `TP008`, and the key is quoted by four source files and by the
     /// measurements two plan documents record. Delete it only alongside a renumbering already
     /// being paid for.
-    | [<Widened false>] UnnamedTypeParametersCounted of count: int
+    | [<Widened>] UnnamedTypeParametersCounted of count: int
     /// Wave two, lane C. TypeScript's `extends` is structural and F#'s `:>` is nominal, so a
     /// constraint the run cannot prove nominally is dropped from the rendered head rather than
     /// rendered as an `FS0001` waiting to happen. Distinct from `TP002`, which is a constraint
@@ -388,10 +379,10 @@ type TypeParameters =
 /// Member and parameter shaping: `Shape.parametersOf` and `membersOf`.
 [<Prefix "MB">]
 type Members =
-    | [<Ergonomic false>] OptionalParameterAsOption
+    | [<Ergonomic>] OptionalParameterAsOption
     | [<Widened>] SymbolKeyedMemberDropped
-    | [<Ergonomic false>] OptionalMemberAsOption
-    | [<Ergonomic false>] IndexSignatureAsIndexer
+    | [<Ergonomic>] OptionalMemberAsOption
+    | [<Ergonomic>] IndexSignatureAsIndexer
 
     interface IFindingKind with
         member this.Message =
@@ -510,13 +501,13 @@ type ShapeInterfaces =
     /// The undifferentiated case the three below split out of: a base with no F# name at this
     /// position at all. Its members are still flattened in, so nothing of the member set is
     /// lost - only the upcast.
-    | [<Ergonomic false>] BaseMembersFlattened
-    | [<Ergonomic false>] IntersectionFlattened of operands: int
+    | [<Ergonomic>] BaseMembersFlattened
+    | [<Ergonomic>] IntersectionFlattened of operands: int
     /// A constructor object declared as an interface of its own (§4.4): F# has no first-class
     /// type of a class object, so `typeof Request` at a member position reads as a named
     /// declaration whose construct signatures are `[<EmitConstructor>]` `Create` members and
     /// whose properties are the class's statics.
-    | [<Ergonomic false>] ConstructorObjectDeclared of signatures: int
+    | [<Ergonomic>] ConstructorObjectDeclared of signatures: int
     /// §4.4's heritage rule, emitted: the base is a declaration this run writes as an
     /// interface, so the derived type upcasts to it. Its members are declared again beside the
     /// `inherit` - F# admits the redeclaration - which is what keeps `Create` and the member
@@ -530,7 +521,7 @@ type ShapeInterfaces =
     /// A base that reaches this declaration again through the inherit graph. TypeScript has no
     /// cyclic heritage, but two type ids can share one F# name, so the graph is checked rather
     /// than assumed: `inherit` here is FS0954, so the base stays flattened.
-    | [<Ergonomic false>] BaseWouldCycle of name: string
+    | [<Ergonomic>] BaseWouldCycle of name: string
 
     interface IFindingKind with
         member this.Message =
@@ -552,7 +543,7 @@ type ShapeInterfaces =
 /// `shape-aliases`.
 [<Prefix("SA", "shape-aliases")>]
 type ShapeAliases =
-    | [<Ergonomic false>] BrandAsMeasure
+    | [<Ergonomic>] BrandAsMeasure
     | [<Widened>] PhantomComputation
     | [<Widened>] AbbreviationNameTaken of declared: string
 
@@ -634,10 +625,10 @@ type ShapeExports =
 /// `synthesize-paramobjects`.
 [<Prefix("SP", "synthesize-paramobjects")>]
 type SynthesizeParamObjects =
-    | [<Ergonomic false>] ParamObjectSynthesized
+    | [<Ergonomic>] ParamObjectSynthesized
     /// Wave four, lane O. A method member carried into `Create` as a function-typed parameter.
     /// The delegate it binds receives no `this`.
-    | [<Ergonomic false>] MethodMemberAsCreateParameter
+    | [<Ergonomic>] MethodMemberAsCreateParameter
     /// Wave four, lane O. An interface with no `Create`, and why. The interface itself is
     /// unchanged: a consumer builds it as they did before this convenience existed.
     | [<Ergonomic>] CreateNotSynthesized of reason: string
@@ -653,7 +644,7 @@ type SynthesizeParamObjects =
 /// `dedupe-overloads`.
 [<Prefix("DO", "dedupe-overloads")>]
 type DedupeOverloads =
-    | [<Widened false>] OverloadDropped
+    | [<Widened>] OverloadDropped
 
     interface IFindingKind with
         member this.Message =
@@ -667,7 +658,7 @@ type RepairArity =
     | [<Widened>] ReferenceToDroppedAlias of name: string
     | [<Widened>] GenericWithoutArguments of name: string
     | [<Widened>] ArityMismatch of name: string * given: int * declared: int
-    | [<Ergonomic false>] ReadWithoutWrite of name: string
+    | [<Ergonomic>] ReadWithoutWrite of name: string
     /// Wave three, lane I. An alias whose resolved target uses fewer type parameters than its
     /// head declares. The alias is written with the surplus parameters erased as phantoms, so
     /// references keep their arity; the erased parameters carry no value.

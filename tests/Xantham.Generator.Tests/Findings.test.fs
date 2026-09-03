@@ -9,9 +9,9 @@ open Xantham.Generator
 let private tierLabel =
     function
     | Exact -> "exact"
-    | Ergonomic _ -> "ergonomic"
-    | Widened _ -> "widened"
-    | Escape _ -> "escape"
+    | Ergonomic -> "ergonomic"
+    | Widened -> "widened"
+    | Escape -> "escape"
 
 [<Tests>]
 let findingsTests =
@@ -161,7 +161,7 @@ let findingsTests =
           testCase "a finding derives key, tier and message from its kind" <| fun _ ->
               let finding = Finding.make "Options.legacy" (TypeReference.UnionTooWide(5, 4))
               Expect.equal finding.Key "TR036" "key"
-              Expect.equal finding.Tier (Widened true) "tier"
+              Expect.equal finding.Tier Widened "tier"
 
               Expect.equal
                   finding.Message

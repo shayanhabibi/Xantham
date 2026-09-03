@@ -3,23 +3,21 @@
   "module": "KeyofLab",
   "counts": {
     "exact": 5,
-    "ergonomic": 7,
+    "ergonomic": 13,
     "widened": 7,
-    "escape": 0,
-    "limitations": 6
+    "escape": 0
   },
   "passes": [
     {
       "pass": "SI - shape-interfaces",
       "total": 12,
-      "ergonomic": 2,
-      "limitation": 10
+      "ergonomic": 12
     },
     {
       "pass": "SA - shape-aliases",
       "total": 9,
-      "widened": 8,
-      "limitation": 1
+      "ergonomic": 1,
+      "widened": 8
     },
     {
       "pass": "SE - shape-exports",
@@ -30,8 +28,7 @@
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 13,
-      "ergonomic": 4,
-      "limitation": 9
+      "ergonomic": 13
     }
   ],
   "symbols": [
@@ -39,7 +36,15 @@
       "name": "Options",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Options",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "OptionKey",
@@ -63,7 +68,15 @@
       "name": "Selection",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Selection",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "Accessor",
@@ -83,6 +96,27 @@
           "tier": "ergonomic",
           "symbol": "Accessor.read",
           "message": "key over \u0027T\u0027 with its indexed access reads as typekeyof\u003C\u0027T,\u0027R\u003E (\u00A74.10)"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Accessor",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Accessor.all",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Accessor.read",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         }
       ]
     },
@@ -91,6 +125,13 @@
       "file": "index.d.ts",
       "tier": "ergonomic",
       "findings": [
+        {
+          "key": "MB004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Bag.[]",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        },
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
@@ -106,6 +147,13 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "key": "MB004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Slots.[]",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        },
+        {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -119,6 +167,13 @@
       "file": "index.d.ts",
       "tier": "ergonomic",
       "findings": [
+        {
+          "key": "MB004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Registry.[]",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        },
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
@@ -134,6 +189,13 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "key": "MB004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "FrozenBag.[]",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        },
+        {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -146,25 +208,99 @@
       "name": "PartialOptions",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "PartialOptions.duration",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "PartialOptions.duration",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "PartialOptions.label",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "PartialOptions.label",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "PartialOptions.loop",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "PartialOptions.loop",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "PartialOptions",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "OptionsHead",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "OptionsHead",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "OptionsTail",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "OptionsTail",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "FrozenOptions",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "FrozenOptions",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "DeepPartial",
@@ -246,6 +382,13 @@
           "tier": "widened",
           "symbol": "Prefixed",
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
+        },
+        {
+          "key": "TP002",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "Prefixed",
+          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
           "key": "TR037",

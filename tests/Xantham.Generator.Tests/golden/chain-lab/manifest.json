@@ -3,10 +3,9 @@
   "module": "ChainLab",
   "counts": {
     "exact": 5,
-    "ergonomic": 0,
+    "ergonomic": 5,
     "widened": 1,
-    "escape": 0,
-    "limitations": 5
+    "escape": 0
   },
   "passes": [
     {
@@ -22,12 +21,12 @@
     {
       "pass": "SI - shape-interfaces",
       "total": 5,
-      "limitation": 5
+      "ergonomic": 5
     },
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 7,
-      "limitation": 7
+      "ergonomic": 7
     }
   ],
   "symbols": [
@@ -35,31 +34,120 @@
       "name": "NodeExtensions",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "NodeExtensions.toVar(name)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "NodeExtensions",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "Node",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Node",
+          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Node.toVar(name)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Node",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "VarNodeInterface",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "VarNodeInterface",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "VarNode",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "VarNode",
+          "message": "intersection of 3 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "VarNode.toVar(name)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "VarNode",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "Plain",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Plain",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Plain.self",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Plain.wrap",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        }
+      ]
     },
     {
       "name": "seed",
@@ -82,22 +170,54 @@
     {
       "name": "NodeExtensionsToVarResult",
       "tier": "exact",
-      "findings": []
+      "findings": [
+        {
+          "key": "SY001",
+          "pass": "synthesize-anonymous",
+          "tier": "exact",
+          "symbol": "NodeExtensionsToVarResult",
+          "message": "anonymous shape is an instantiation of VarNode; written as an application"
+        }
+      ]
     },
     {
       "name": "NodeToVarResult",
       "tier": "exact",
-      "findings": []
+      "findings": [
+        {
+          "key": "SY001",
+          "pass": "synthesize-anonymous",
+          "tier": "exact",
+          "symbol": "NodeToVarResult",
+          "message": "anonymous shape is an instantiation of VarNode; written as an application"
+        }
+      ]
     },
     {
       "name": "Seed",
       "tier": "exact",
-      "findings": []
+      "findings": [
+        {
+          "key": "SY001",
+          "pass": "synthesize-anonymous",
+          "tier": "exact",
+          "symbol": "Seed",
+          "message": "anonymous shape is an instantiation of Node; written as an application"
+        }
+      ]
     },
     {
       "name": "VarNodeToVarResult",
       "tier": "exact",
-      "findings": []
+      "findings": [
+        {
+          "key": "SY001",
+          "pass": "synthesize-anonymous",
+          "tier": "exact",
+          "symbol": "VarNodeToVarResult",
+          "message": "anonymous shape is an instantiation of VarNode; written as an application"
+        }
+      ]
     }
   ]
 }

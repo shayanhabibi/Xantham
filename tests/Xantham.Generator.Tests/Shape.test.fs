@@ -165,7 +165,7 @@ let typeRefTests =
 
             Expect.equal reference FsString "`on${string}` is a string"
             Expect.equal (findings |> List.map _.Key) [ "TR037" ] "the template-literal finding, not TR014"
-            Expect.equal (findings |> List.map _.Tier) [ Widened true ] "widened: it accepts strings the pattern does not"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened: it accepts strings the pattern does not"
             Expect.stringContains (List.head findings).Message "pattern" "and the message says which half was lost"
 
         testCase "an intrinsic string mapping reads as string too" <| fun _ ->
@@ -190,7 +190,7 @@ let typeRefTests =
 
             Expect.equal reference FsBigInt "2n"
             Expect.equal (findings |> List.map _.Key) [ "TR039" ] "the literal's own widening"
-            Expect.equal (findings |> List.map _.Tier) [ Widened true ] "widened"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
 
         testCase "TypeScript's object maps to obj, and says that is still a widening" <| fun _ ->
             let model = Build.shapeModel (intrinsic 10 TypeFlags.NonPrimitive :: Build.primitives)
@@ -230,7 +230,7 @@ let typeRefTests =
             let reference, findings = Spec.typeRef Build.context model None "x" 10
 
             Expect.equal reference (FsOption FsString) "string | undefined"
-            Expect.equal (findings |> List.map _.Tier) [ Ergonomic false ] "one ergonomic finding"
+            Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "one ergonomic finding"
 
         testCase "a union of null and undefined alone maps to unit, widened" <| fun _ ->
             let union =
@@ -240,7 +240,7 @@ let typeRefTests =
             let reference, findings = Spec.typeRef Build.context model None "x" 10
 
             Expect.equal reference FsUnit "null | undefined"
-            Expect.equal (findings |> List.map _.Tier) [ Widened false ] "widened"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
 
         testCase "a union of several non-null members is erased (D4)" <| fun _ ->
             let union =
@@ -253,7 +253,7 @@ let typeRefTests =
 
             Expect.equal
                 (findings |> List.map _.Tier)
-                [ Ergonomic false ]
+                [ Ergonomic ]
                 "the hoist is reported; the erased union is not a widening"
 
         testCase "a union wider than the erased arity still widens to obj" <| fun _ ->
@@ -275,7 +275,7 @@ let typeRefTests =
             let reference, findings = Spec.typeRef Build.context model None "x" 10
 
             Expect.equal reference FsObj "six members, five arms"
-            Expect.equal (findings |> List.map _.Tier) [ Widened true ] "widened"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
 
         testCase "a fixed tuple maps to an F# tuple (D7)" <| fun _ ->
             let model =
@@ -310,7 +310,7 @@ let typeRefTests =
             let reference, findings = Spec.typeRef Build.context model None "x" 10
 
             Expect.equal reference (FsArray FsObj) "components disagree, so the element is obj"
-            Expect.equal (findings |> List.map _.Tier) [ Widened true ] "widened"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
 
         testCase "a spread element contributes its own element to the widened array" <| fun _ ->
             // `[...Chapters]` spreads an array, so the widened array is that array, not one over it.
@@ -332,7 +332,7 @@ let typeRefTests =
             let reference, findings = Spec.typeRef Build.context model None "x" 10
 
             Expect.equal reference (FsArray FsString) "widened to its element"
-            Expect.equal (findings |> List.map _.Tier) [ Widened true ] "widened"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
 
         testCase "a type parameter in scope names its variable (§4.9)" <| fun _ ->
             let model =
@@ -350,7 +350,7 @@ let typeRefTests =
             let reference, findings = Spec.typeRef Build.context model None "x" 20
 
             Expect.equal reference FsObj "nothing here binds T"
-            Expect.equal (findings |> List.map _.Tier) [ Widened true ] "widened"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
 
         testCase "an out-of-scope type parameter widens to its constraint, not to obj" <| fun _ ->
             // `Ai<obj>` does not compile against `'AiModelList :> AiModelListType`: where the
@@ -365,7 +365,7 @@ let typeRefTests =
             let reference, findings = Spec.typeRef Build.context model None "x" 20
 
             Expect.equal reference (FsNamed "Timer") "the tightest thing still true of T"
-            Expect.equal (findings |> List.map _.Tier) [ Widened true ] "still a widening, just a smaller one"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "still a widening, just a smaller one"
 
         testCase "an out-of-scope parameter bound to a generic still widens to obj" <| fun _ ->
             // A generic constraint would need an arity this position cannot supply.
@@ -378,7 +378,7 @@ let typeRefTests =
             let reference, findings = Spec.typeRef Build.context model None "x" 20
 
             Expect.equal reference FsObj "no arity to write Box at"
-            Expect.equal (findings |> List.map _.Tier) [ Widened true ] "widened"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
 
         testCase "keyof over an operand not in scope widens to obj" <| fun _ ->
             // The idiom needs a `'T` to be taken over; without one there is nothing to phantom
@@ -387,7 +387,7 @@ let typeRefTests =
             let reference, findings = Spec.typeRef Build.context model None "x" 40
 
             Expect.equal reference FsObj "no operand, no keyof"
-            Expect.equal (findings |> List.map _.Tier) [ Widened true ] "widened"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
 
         testCase "keyof over an in-scope operand reads as keyof of it" <| fun _ ->
             let model =
@@ -397,7 +397,7 @@ let typeRefTests =
             let reference, findings = Spec.typeRef Build.context model None "x" 40
 
             Expect.equal reference (FsApp("keyof", [ FsTypeVar "T" ])) "keyof<'T>"
-            Expect.equal (findings |> List.map _.Tier) [ Ergonomic true ] "the support idiom is ergonomic, not a widening"
+            Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "the support idiom is ergonomic, not a widening"
 
         testCase "an indexed access no key variable selects has no F# form" <| fun _ ->
             // `T[keyof T]` - the value-of idiom. Nothing names the value type, so there is no
@@ -411,7 +411,7 @@ let typeRefTests =
             let reference, findings = Spec.typeRef Build.context model None "x" 41
 
             Expect.equal reference FsObj "widened"
-            Expect.equal (findings |> List.map _.Tier) [ Widened true ] "and said so"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "and said so"
 
         testCase "an instantiation of a declared generic is written as an application" <| fun _ ->
             // A reference, as the wire reports an instantiation of an interface or class; an
@@ -470,7 +470,7 @@ let typeRefTests =
             Expect.contains
                 (findings |> List.map (fun finding -> finding.Key, finding.Tier, finding.Message))
                 ("TR044",
-                 Widened false,
+                 Widened,
                  "Lookalike does not inherit Holder's constraint Marker; the argument is written as the constraint")
                 "and the substitution is owned by name"
 
@@ -553,7 +553,7 @@ let typeRefTests =
             Expect.contains
                 (primitiveFindings |> List.map (fun finding -> finding.Key, finding.Tier, finding.Message))
                 ("TR044",
-                 Widened false,
+                 Widened,
                  "string does not inherit Holder's constraint Lengthy; the argument is written as the constraint")
                 "the primitive is named by its F# spelling"
 
@@ -615,7 +615,7 @@ let typeRefTests =
             let reference, findings = Spec.typeRef Build.context model None "x" 10
 
             Expect.equal reference (FsOption(FsNamed "TimeUnit")) "the classified union's name"
-            Expect.equal (findings |> List.map _.Tier) [ Ergonomic false ] "only the hoist"
+            Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "only the hoist"
 
         testCase "an array of a generated declaration reads as an F# array" <| fun _ ->
             let array =
@@ -729,7 +729,7 @@ let typeRefTests =
             let reference, findings = Spec.typeRef Build.context model (Some "Timer") "Timer.play()" 13
 
             Expect.equal reference (FsNamed "Timer") "chainable"
-            Expect.equal (findings |> List.map _.Tier) [ Ergonomic true ] "ergonomic, not silent"
+            Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "ergonomic, not silent"
 
         testCase "an aliased object type references its generated declaration" <| fun _ ->
             let aliased = Build.facts (Build.typeResponse 20 TypeFlags.Object)
@@ -750,7 +750,7 @@ let typeRefTests =
 
             match findings with
             | [ finding ] ->
-                Expect.equal finding.Tier (Widened true) "tier"
+                Expect.equal finding.Tier Widened "tier"
                 Expect.stringContains finding.Message "RegExp" "the message says what was widened"
             | findings -> failtest $"expected one finding, got %A{findings}"
 
@@ -758,7 +758,7 @@ let typeRefTests =
             let reference, findings = Spec.typeRef Build.context (Build.shapeModel []) None "x" 99
 
             Expect.equal reference FsObj "widened"
-            Expect.equal (findings |> List.map _.Tier) [ Escape true ] "escape"
+            Expect.equal (findings |> List.map _.Tier) [ Escape ] "escape"
 
         testCase "a deliberately-not-followed type reports its reason" <| fun _ ->
             let model =
@@ -767,7 +767,7 @@ let typeRefTests =
             let reference, findings = Spec.typeRef Build.context model None "x" 99
 
             Expect.equal reference FsObj "widened"
-            Expect.equal (findings |> List.map _.Tier) [ Widened true ] "widened, not escaped"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened, not escaped"
             Expect.stringContains findings.Head.Message "depth cutoff" "the reason is carried"
 
         testCase "a referenced group's type templates into its module, exact, no finding" <| fun _ ->
@@ -800,7 +800,7 @@ let typeRefTests =
             let reference, findings = Spec.typeRef context (Build.shapeModel [ external ]) None "x" 22
 
             Expect.equal reference FsObj "nothing to template with"
-            Expect.equal (findings |> List.map _.Tier) [ Widened true ] "reported, not silent"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "reported, not silent"
 
         // Wave five, lane R: O7's `map`. A group's table redirects the names it carries to a
         // binding somebody already wrote; every other name of the group keeps its widening.
@@ -1081,7 +1081,7 @@ let shapePassTests =
 
                 Expect.equal
                     (findings |> List.map (fun f -> f.Tier, f.Symbol))
-                    [ Ergonomic false, "ansiRegex(options)"; Widened true, "ansiRegex()" ]
+                    [ Ergonomic, "ansiRegex(options)"; Widened, "ansiRegex()" ]
                     "the hoist and the widening are both findings"
             | decls -> failtest $"expected the Exports group, got %A{decls}"
 
@@ -1292,7 +1292,7 @@ let shapePassTests =
 
             Expect.contains
                 (findings |> List.map (fun f -> f.Tier, f.Symbol))
-                (Ergonomic false, "NamedTimed")
+                (Ergonomic, "NamedTimed")
                 "the flattening is recorded on the declaration"
 
             let reference, refFindings = Spec.typeRef Build.context shaped None "x" 50
@@ -1416,7 +1416,7 @@ let shapePassTests =
             Expect.contains
                 (findings |> List.map (fun finding -> finding.Key, finding.Tier, finding.Message))
                 ("SI006",
-                 Ergonomic true,
+                 Ergonomic,
                  "base JS.Promise is not declared by this run as an interface; its members are flattened in and the is-a relation is not emitted (§4.4)")
                 "the base that was not inherited is named"
 
@@ -1448,7 +1448,7 @@ let shapePassTests =
 
             Expect.contains
                 (findings |> List.map (fun finding -> finding.Key, finding.Tier))
-                ("SI002", Ergonomic false)
+                ("SI002", Ergonomic)
                 "the nameless case is still reported, distinctly from the named ones"
 
         testCase "shape-interfaces refuses an inherit that would close a cycle" <| fun _ ->
@@ -1486,7 +1486,7 @@ let shapePassTests =
 
             Expect.contains
                 (findings |> List.map (fun finding -> finding.Key, finding.Tier, finding.Symbol))
-                ("SI007", Ergonomic false, "B")
+                ("SI007", Ergonomic, "B")
                 "and the refusal is recorded where it happened"
 
         testCase "repair-arity drops an inherit whose base the widening just unnamed" <| fun _ ->
@@ -1811,7 +1811,7 @@ let shapePassTests =
 
                 Expect.equal
                     (findings |> List.map _.Tier |> List.distinct)
-                    [ Ergonomic true ]
+                    [ Ergonomic ]
                     "this-chaining is the only finding"
             | decls -> failtest $"expected one interface, got %A{decls}"
 
@@ -1879,7 +1879,7 @@ let shapePassTests =
                 Expect.equal decl.TypeParameters [ { Name = "T"; Constraint = None } ] "the variable stays, the bound goes"
             | decls -> failtest $"expected one interface, got %A{decls}"
 
-            Expect.equal (findings |> List.map _.Tier) [ Ergonomic false ] "a dropped bound is ergonomic, not widening"
+            Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "a dropped bound is ergonomic, not widening"
 
         testCase "a constraint with no F# form is dropped with a finding" <| fun _ ->
             // `K extends string`: an F# subtype constraint cannot name a primitive, and the
@@ -1900,7 +1900,7 @@ let shapePassTests =
                 Expect.equal decl.TypeParameters [ { Name = "K"; Constraint = None } ] "the variable stays, the bound goes"
             | decls -> failtest $"expected one interface, got %A{decls}"
 
-            Expect.equal (findings |> List.map _.Tier) [ Ergonomic false ] "a dropped bound is ergonomic, not widening"
+            Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "a dropped bound is ergonomic, not widening"
 
         testCase "a generic method binds its own parameters over the declaration's" <| fun _ ->
             // `interface Accessor<T> { read<K>(key: K): T }` - the member's `K` is layered onto
@@ -1972,7 +1972,7 @@ let shapePassTests =
 
             Expect.equal
                 (findings |> List.map _.Tier |> List.distinct)
-                [ Widened true ]
+                [ Widened ]
                 "the widening and the erasure are both recorded"
 
             Expect.isTrue
@@ -2025,7 +2025,7 @@ let shapePassTests =
                 | members -> failtest $"expected one method, got %A{members}"
             | decls -> failtest $"expected one interface, got %A{decls}"
 
-            Expect.equal (findings |> List.map _.Tier |> List.distinct) [ Ergonomic true ] "an idiom, not a widening"
+            Expect.equal (findings |> List.map _.Tier |> List.distinct) [ Ergonomic ] "an idiom, not a widening"
 
         testCase "a key variable nothing indexes with reads as a bare keyof" <| fun _ ->
             // `read<K extends keyof T>(key: K): void` - no `T[K]`, so nothing needs the value
@@ -2136,7 +2136,7 @@ let shapePassTests =
 
             Expect.contains
                 (findings |> List.map (fun finding -> finding.Key, finding.Tier, finding.Message))
-                ("TP009", Ergonomic true, "'U' is declared by 2 signatures of the same alias; the head writes one variable")
+                ("TP009", Ergonomic, "'U' is declared by 2 signatures of the same alias; the head writes one variable")
                 "the collapse is reported"
 
         testCase "shape-callbacks keeps one name declared under two bounds apart" <| fun _ ->
@@ -2259,7 +2259,7 @@ let shapePassTests =
 
             let shaped, findings = Build.runPass Classes.shapeClasses model
 
-            Expect.isEmpty (findings |> List.filter _.Tier.IsEscape) "no drops"
+            Expect.isEmpty (findings |> List.filter (fun f -> f.Tier = Escape)) "no drops"
 
             match shaped.ExportMembers with
             | [ (0, m) ] ->
@@ -2681,7 +2681,7 @@ let shapePassTests =
             let model = { Build.shapeModel [] with Decls = [ decl ] }
             let shaped, findings = Build.runPass ParamObjects.synthesizeParamObjects model
 
-            Expect.equal (findings |> List.map _.Tier) [ Ergonomic false ] "reported"
+            Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "reported"
 
             match shaped.Decls with
             | [ FsInterface decl ] ->
@@ -2789,7 +2789,7 @@ let shapePassTests =
 
             let shaped, findings = Build.runPass ParamObjects.synthesizeParamObjects model
 
-            Expect.equal (findings |> List.map (fun f -> f.Key, f.Tier) |> List.distinct) [ "SP003", Ergonomic true ] "all ergonomic"
+            Expect.equal (findings |> List.map (fun f -> f.Key, f.Tier) |> List.distinct) [ "SP003", Ergonomic ] "all ergonomic"
 
             let reasons = findings |> List.map (fun f -> f.Symbol, f.Message)
 
@@ -2880,7 +2880,7 @@ let shapePassTests =
 
             Expect.equal
                 (findings |> List.map (fun f -> f.Tier, f.Symbol))
-                [ Widened false, "Scope.add" ]
+                [ Widened, "Scope.add" ]
                 "the twin is a finding"
 
             match deduped.Decls |> List.pick (function FsInterface d -> Some d | _ -> None) with
@@ -2969,7 +2969,7 @@ let shapePassTests =
                 (shaped.Decls |> List.choose (function FsTaggedUnion d -> Some d | _ -> None))
                 "a method has no case-field form, so the erased union stands"
 
-            Expect.equal (findings |> List.map _.Tier) [ Ergonomic true ] "the missed match is reported"
+            Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "the missed match is reported"
 
         testCase "shape-aliases twin unions chain to the smallest id, never cycle" <| fun _ ->
             // Two declared unions over the same member set: only the smaller id is canonical.
@@ -3020,7 +3020,7 @@ let shapePassTests =
             let reference, findings = Spec.typeRef Build.context model None "x" 10
 
             Expect.equal reference (FsNamed "JS.Uint8Array") "the name survives the lib's drift"
-            Expect.equal (findings |> List.map _.Tier) [ Ergonomic true ] "and the dropped argument is recorded"
+            Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "and the dropped argument is recorded"
 
         testCase "a lib type with too few arguments is some other type wearing the name" <| fun _ ->
             // A `Map` of one argument is not the `Map` this table is about. Guessing here would
@@ -3030,7 +3030,7 @@ let shapePassTests =
             let reference, findings = Spec.typeRef Build.context model None "x" 10
 
             Expect.equal reference FsObj "no binding is claimed"
-            Expect.equal (findings |> List.map _.Tier) [ Widened true ] "and the widening is the ordinary one"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "and the widening is the ordinary one"
 
         testCase "a lib name nothing shipped binds keeps widening" <| fun _ ->
             // The synchronous iteration protocol has no Fable.Core binding, and `seq<'T>` is not
@@ -3042,7 +3042,7 @@ let shapePassTests =
             for id in [ 10; 11 ] do
                 let reference, findings = Spec.typeRef Build.context model None "x" id
                 Expect.equal reference FsObj "still obj"
-                Expect.equal (findings |> List.map _.Tier) [ Widened true ] "and still says so"
+                Expect.equal (findings |> List.map _.Tier) [ Widened ] "and still says so"
 
         testCase "a lib name a Fable.Browser package binds is referenced, not widened" <| fun _ ->
             // The DOM half of the same disposition. The table is generated from the family's
@@ -3080,7 +3080,7 @@ let shapePassTests =
             let reference, findings = Spec.typeRef Build.context model None "x" 10
 
             Expect.equal reference FsObj "an ambiguous name is not written"
-            Expect.equal (findings |> List.map _.Tier) [ Widened true ] "and the widening is the ordinary one"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "and the widening is the ordinary one"
 
         testCase "a package's own type named like a lib type is untouched" <| fun _ ->
             // The table is keyed by name, so what keeps it from hijacking a package's own
@@ -3118,7 +3118,7 @@ let shapePassTests =
             let reference, findings = Spec.typeRef Build.context model None "x" 10
 
             Expect.equal reference FsString "the primitive survives"
-            Expect.equal (findings |> List.map _.Tier) [ Ergonomic true ] "the brand does not, and says so"
+            Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "the brand does not, and says so"
 
         testCase "an intersection whose object half carries a real member is not a brand" <| fun _ ->
             // `string & { count: number }` has a member a caller can actually read, so reading it
@@ -3130,7 +3130,7 @@ let shapePassTests =
             let reference, findings = Spec.typeRef Build.context model None "x" 10
 
             Expect.equal reference FsObj "no brand, and no shape either yet"
-            Expect.equal (findings |> List.map _.Tier) [ Widened true ] "the widening is recorded"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "the widening is recorded"
 
         testCase "a brand over a union distributes and is still one brand" <| fun _ ->
             // `boolean & Marker` reaches us as `(true & Marker) | (false & Marker)`: the checker
@@ -3170,7 +3170,7 @@ let shapePassTests =
                 (shaped.Decls |> List.choose (function FsAbbrev d -> Some d.Name | _ -> None))
                 "and no abbreviation competing for the name"
 
-            Expect.equal (findings |> List.map _.Tier) [ Ergonomic false ] "the idiom is recorded once, at the declaration"
+            Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "the idiom is recorded once, at the declaration"
 
         testCase "shape-aliases emits a phantom for a computation that names none of its parameters" <| fun _ ->
             // `type Unwrap<T> = T extends Array<infer E> ? E : T`: a conditional the checker
@@ -3200,7 +3200,7 @@ let shapePassTests =
                 "and it is not also written as an abbreviation"
 
             Expect.isTrue
-                (findings |> List.exists (fun f -> f.Tier.IsWidened && f.Message.Contains "erased phantom"))
+                (findings |> List.exists (fun f -> f.Tier = Widened && f.Message.Contains "erased phantom"))
                 "the manifest says a phantom is what it got"
 
         testCase "shape-aliases carries a template literal's phantom on a string" <| fun _ ->
@@ -3342,7 +3342,7 @@ let shapePassTests =
 
             Expect.equal
                 (findings |> List.map (fun f -> f.Key, f.Tier, f.Symbol))
-                [ "RA006", Widened true, "Params" ]
+                [ "RA006", Widened, "Params" ]
                 "the erasure is the only loss"
 
         testCase "repair-arity erases the surplus parameter and keeps the rest of the head" <| fun _ ->
@@ -3482,7 +3482,7 @@ let shapePassTests =
                     "the generic widened; a name this run does not declare is left alone (O7)"
             | decls -> failtest $"expected the interface and the alias, got %A{decls}"
 
-            Expect.equal (findings |> List.map _.Tier) [ Widened true ] "one widening, reported"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "one widening, reported"
 
         testCase "repair-arity demotes a settable property that holds no value" <| fun _ ->
             // FS0252: `[__BRAND]: never` shapes to `unit`, which cannot be a setter's type.
@@ -3516,7 +3516,7 @@ let shapePassTests =
                 | members -> failtest $"expected one property, got %A{members}"
             | decls -> failtest $"expected the interface, got %A{decls}"
 
-            Expect.equal (findings |> List.map (fun f -> f.Tier, f.Symbol)) [ Ergonomic false, "Branded" ] "reported"
+            Expect.equal (findings |> List.map (fun f -> f.Tier, f.Symbol)) [ Ergonomic, "Branded" ] "reported"
 
         testCase "audit-coverage reports an export nothing represented" <| fun _ ->
             let model =
@@ -3527,7 +3527,7 @@ let shapePassTests =
 
             Expect.equal
                 (findings |> List.map (fun f -> f.Tier, f.Symbol))
-                [ Escape true, "Gone" ]
+                [ Escape, "Gone" ]
                 "the dropped export is a finding, not silence"
 
         testCase "the pipeline fold stamps findings with the pass that made them" <| fun _ ->

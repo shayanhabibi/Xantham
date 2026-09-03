@@ -50,10 +50,6 @@ let private configKeys =
             ("runtime",
              "The npm package the generated `[<Import(…)>]` attributes name. Defaults to the package name \
           with DefinitelyTyped's `@types/` convention undone, so `@types/three` imports from `three`.")
-
-            "Manifest",
-            ("manifest",
-             "The manifest configuration. Influences the verbosity, and formatting of the generated manifest.")
         ]
 
 /// The JSON key, description and requiredness of one `MappedName` field.
@@ -126,20 +122,6 @@ let private writeFieldType (w: Utf8JsonWriter) (name: string) (t: Type) =
     | t when t = typeof<int> ->
         w.WriteString("type", "integer")
         w.WriteNumber("minimum", 0)
-    | t when t = typeof<ManifestConfig> ->
-        w.WriteString("type", "object")
-
-        w.WriteStartObject "properties"
-        w.WriteStartObject "verbose"
-        w.WriteString("type", "boolean")
-
-        w.WriteString(
-            "description",
-            "Whether to include all findings in the manifest. If false, will omit known limitations or non-issues."
-        )
-
-        w.WriteEndObject()
-        w.WriteEndObject()
     | t when isList t typeof<string> ->
         w.WriteString("type", "array")
         w.WriteStartObject "items"

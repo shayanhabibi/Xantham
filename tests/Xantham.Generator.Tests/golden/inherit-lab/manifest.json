@@ -3,24 +3,23 @@
   "module": "InheritLab",
   "counts": {
     "exact": 0,
-    "ergonomic": 0,
-    "widened": 1,
-    "escape": 0,
-    "limitations": 14
+    "ergonomic": 12,
+    "widened": 2,
+    "escape": 1
   },
   "passes": [
     {
       "pass": "SI - shape-interfaces",
       "total": 34,
       "exact": 9,
-      "ergonomic": 4,
-      "widened": 2,
-      "limitation": 19
+      "ergonomic": 20,
+      "widened": 3,
+      "escape": 2
     },
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 18,
-      "limitation": 18
+      "ergonomic": 18
     }
   ],
   "symbols": [
@@ -28,13 +27,36 @@
       "name": "Base",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Base",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "Derived",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SI005",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "Derived",
+          "message": "base Base is inherited: the is-a relation is emitted (\u00A74.4)"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Derived",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "Narrowed",
@@ -42,11 +64,25 @@
       "tier": "widened",
       "findings": [
         {
+          "key": "SI005",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "Narrowed",
+          "message": "base Base is inherited: the is-a relation is emitted (\u00A74.4)"
+        },
+        {
           "key": "TR006",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "Narrowed.name",
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Narrowed",
+          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -54,55 +90,204 @@
       "name": "Loud",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Loud",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "Pitched",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SI005",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "Pitched",
+          "message": "base Loud is inherited: the is-a relation is emitted (\u00A74.4)"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Pitched",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "Both",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SI005",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "Both",
+          "message": "base Loud is inherited: the is-a relation is emitted (\u00A74.4)"
+        },
+        {
+          "key": "SI005",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "Both",
+          "message": "base Pitched is inherited: the is-a relation is emitted (\u00A74.4)"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Both",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "Box",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Box",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "Labelled",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SI005",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "Labelled",
+          "message": "base Box is inherited: the is-a relation is emitted (\u00A74.4)"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Labelled",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "Tagged",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SI005",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "Tagged",
+          "message": "base Box is inherited: the is-a relation is emitted (\u00A74.4)"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Tagged",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "Node",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Node",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "Leaf",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SI005",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "Leaf",
+          "message": "base Node is inherited: the is-a relation is emitted (\u00A74.4)"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Leaf",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "Failure",
       "file": "index.d.ts",
       "tier": "widened",
-      "findings": []
+      "findings": [
+        {
+          "key": "SI002",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Failure",
+          "message": "base has no F# name at this position; its members are flattened in and the is-a relation is not emitted (\u00A74.4)"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Failure.cause",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Failure.cause",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Failure.stack",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Failure.stack",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Failure",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "Deferred",
@@ -124,11 +309,39 @@
           "message": "symbol-keyed member dropped (unrepresentable in F#)"
         },
         {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Deferred.catch(onrejected)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
           "key": "TR025",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Deferred.catch(onrejected)()",
           "message": "PromiseLike reads as JS.Promise; a bare thenable is not one"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "Deferred.catch(onrejected)(reason)",
+          "message": "any maps to obj"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Deferred.finally(onfinally)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Deferred.then(onfulfilled)",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "TR025",
@@ -138,11 +351,53 @@
           "message": "PromiseLike reads as JS.Promise; a bare thenable is not one"
         },
         {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Deferred.then(onrejected)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
           "key": "TR025",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Deferred.then(onrejected)()",
           "message": "PromiseLike reads as JS.Promise; a bare thenable is not one"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "Deferred.then(onrejected)(reason)",
+          "message": "any maps to obj"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Deferred",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Deferred.catch",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Deferred.finally",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Deferred.then",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         }
       ]
     },
@@ -150,13 +405,92 @@
       "name": "Slim",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SI005",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "Slim",
+          "message": "base SlimBase is inherited: the is-a relation is emitted (\u00A74.4)"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Slim.at",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Slim.at",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Slim.name",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Slim.name",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Slim",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "SlimBase",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "SlimBase.at",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "SlimBase.at",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "SlimBase.name",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "SlimBase.name",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "SlimBase",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     }
   ]
 }

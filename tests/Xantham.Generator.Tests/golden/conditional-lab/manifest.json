@@ -3,10 +3,9 @@
   "module": "ConditionalLab",
   "counts": {
     "exact": 1,
-    "ergonomic": 4,
+    "ergonomic": 7,
     "widened": 3,
-    "escape": 0,
-    "limitations": 3
+    "escape": 0
   },
   "passes": [
     {
@@ -29,7 +28,7 @@
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 3,
-      "limitation": 3
+      "ergonomic": 3
     }
   ],
   "symbols": [
@@ -37,13 +36,36 @@
       "name": "Marker",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Marker",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "Tagged",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SI005",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "Tagged",
+          "message": "base Marker is inherited: the is-a relation is emitted (\u00A74.4)"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Tagged",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "Proven",
@@ -125,7 +147,15 @@
       "name": "Box",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Box",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "proven",

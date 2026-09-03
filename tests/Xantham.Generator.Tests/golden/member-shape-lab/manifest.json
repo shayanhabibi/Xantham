@@ -3,23 +3,22 @@
   "module": "MemberShapeLab",
   "counts": {
     "exact": 4,
-    "ergonomic": 0,
+    "ergonomic": 1,
     "widened": 2,
-    "escape": 0,
-    "limitations": 2
+    "escape": 1
   },
   "passes": [
     {
       "pass": "SI - shape-interfaces",
       "total": 23,
-      "ergonomic": 4,
+      "ergonomic": 13,
       "widened": 8,
-      "limitation": 11
+      "escape": 2
     },
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 10,
-      "limitation": 10
+      "ergonomic": 10
     }
   ],
   "symbols": [
@@ -29,11 +28,25 @@
       "tier": "escape",
       "findings": [
         {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Deferred",
+          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
           "key": "MB002",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "Deferred.__@toStringTag",
           "message": "symbol-keyed member dropped (unrepresentable in F#)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Deferred.catch(onrejected)",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "TR025",
@@ -43,6 +56,27 @@
           "message": "PromiseLike reads as JS.Promise; a bare thenable is not one"
         },
         {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "Deferred.catch(onrejected)(reason)",
+          "message": "any maps to obj"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Deferred.finally(onfinally)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Deferred.then(onfulfilled)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
           "key": "TR025",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -50,11 +84,53 @@
           "message": "PromiseLike reads as JS.Promise; a bare thenable is not one"
         },
         {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Deferred.then(onrejected)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
           "key": "TR025",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Deferred.then(onrejected)()",
           "message": "PromiseLike reads as JS.Promise; a bare thenable is not one"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "Deferred.then(onrejected)(reason)",
+          "message": "any maps to obj"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Deferred",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Deferred.catch",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Deferred.finally",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Deferred.then",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         }
       ]
     },
@@ -85,6 +161,20 @@
           "message": "EventListenerObject is not among the generated declarations; widened to obj"
         },
         {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Recorder.addEventListener(callback)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Recorder.addEventListener(options)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -99,6 +189,13 @@
           "message": "EventListenerObject is not among the generated declarations; widened to obj"
         },
         {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Recorder.removeEventListener(callback)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -106,11 +203,46 @@
           "message": "EventListenerOptions is not among the generated declarations; widened to obj"
         },
         {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Recorder.removeEventListener(options)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
           "key": "TR035",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "Recorder.removeEventListener(options)",
           "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Recorder",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Recorder.addEventListener",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Recorder.dispatchEvent",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Recorder.removeEventListener",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         }
       ]
     },
@@ -118,7 +250,15 @@
       "name": "Stamped",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Stamped",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "Located",
@@ -131,6 +271,13 @@
           "tier": "widened",
           "symbol": "Located.matrix",
           "message": "DOMMatrix is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Located",
+          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },

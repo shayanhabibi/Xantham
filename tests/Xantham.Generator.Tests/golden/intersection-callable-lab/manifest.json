@@ -3,23 +3,21 @@
   "module": "IntersectionCallableLab",
   "counts": {
     "exact": 4,
-    "ergonomic": 0,
+    "ergonomic": 1,
     "widened": 2,
-    "escape": 0,
-    "limitations": 1
+    "escape": 0
   },
   "passes": [
     {
       "pass": "SI - shape-interfaces",
       "total": 4,
-      "ergonomic": 1,
-      "widened": 2,
-      "limitation": 1
+      "ergonomic": 2,
+      "widened": 2
     },
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 4,
-      "limitation": 4
+      "ergonomic": 4
     }
   ],
   "symbols": [
@@ -47,6 +45,13 @@
           "tier": "ergonomic",
           "symbol": "Utils.round",
           "message": "intersection of callable operands rendered from its 2 call signatures"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Utils",
+          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -54,7 +59,15 @@
       "name": "Timers",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Timers",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "TimersSchedule",
@@ -67,6 +80,27 @@
           "tier": "widened",
           "symbol": "TimersSchedule",
           "message": "callable-and-properties hybrid loses its call signatures (Invoke emission is future work)"
+        },
+        {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "TimersSchedule",
+          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "TimersSchedule",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "TimersSchedule.cancel",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         }
       ]
     },

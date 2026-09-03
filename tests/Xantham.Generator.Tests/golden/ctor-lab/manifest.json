@@ -3,21 +3,20 @@
   "module": "CtorLab",
   "counts": {
     "exact": 3,
-    "ergonomic": 0,
+    "ergonomic": 9,
     "widened": 0,
-    "escape": 0,
-    "limitations": 9
+    "escape": 0
   },
   "passes": [
     {
       "pass": "SI - shape-interfaces",
       "total": 3,
-      "limitation": 3
+      "ergonomic": 3
     },
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 8,
-      "limitation": 8
+      "ergonomic": 8
     }
   ],
   "symbols": [
@@ -25,55 +24,141 @@
       "name": "Widget",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Widget",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Widget.resize",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        }
+      ]
     },
     {
       "name": "WidgetConstructor",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WidgetConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
     },
     {
       "name": "Gauge",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Gauge",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "GaugeConstructor",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "GaugeConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
     },
     {
       "name": "Scope",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Scope",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "ParcelFactory",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "ParcelFactory",
+          "message": "constructor object declared as its own interface; 2 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
     },
     {
       "name": "Parcel",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Parcel",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "Solo",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Solo",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Solo.tag",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        }
+      ]
     },
     {
       "name": "Meta",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Meta",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "scope",

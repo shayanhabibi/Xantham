@@ -3,19 +3,17 @@
   "module": "NominalLab",
   "counts": {
     "exact": 3,
-    "ergonomic": 3,
+    "ergonomic": 5,
     "widened": 2,
-    "escape": 0,
-    "limitations": 2
+    "escape": 0
   },
   "passes": [
     {
       "pass": "SI - shape-interfaces",
       "total": 6,
       "exact": 1,
-      "ergonomic": 1,
-      "widened": 2,
-      "limitation": 2
+      "ergonomic": 3,
+      "widened": 2
     },
     {
       "pass": "SC - shape-classes",
@@ -25,8 +23,7 @@
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 7,
-      "ergonomic": 2,
-      "limitation": 5
+      "ergonomic": 7
     }
   ],
   "symbols": [
@@ -41,6 +38,13 @@
           "tier": "widened",
           "symbol": "Attr.kind",
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Attr",
+          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -55,6 +59,13 @@
           "tier": "widened",
           "symbol": "GLAttr.kind",
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "GLAttr",
+          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -63,6 +74,13 @@
       "file": "index.d.ts",
       "tier": "ergonomic",
       "findings": [
+        {
+          "key": "MB004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Narrow.[]",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        },
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
@@ -77,6 +95,13 @@
       "file": "index.d.ts",
       "tier": "ergonomic",
       "findings": [
+        {
+          "key": "MB004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Wide.[]",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        },
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
@@ -104,6 +129,13 @@
           "tier": "ergonomic",
           "symbol": "Geometry",
           "message": "constraint Wide on \u0027Attributes\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Geometry",
+          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -111,13 +143,36 @@
       "name": "Base",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Base",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "Derived",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SI005",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "Derived",
+          "message": "base Base is inherited: the is-a relation is emitted (\u00A74.4)"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Derived",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "g",

@@ -1,4 +1,4 @@
-﻿#r "nuget: Partas.Build, 0.4.0-alpha.1"
+﻿#r "nuget: Partas.Build, 0.3.0"
 #r "nuget: Partas.TypeProvider.BuildHelper, 0.2.5"
 #r "nuget: Str"
 #r "nuget: Fake.IO.FileSystem"
@@ -29,30 +29,24 @@ module Options =
         |> InputSpec.map (Option.defaultValue "Release")
 
     let projects =
-        Input.choicesManyCI "--project" (Spec.srcProjects |> List.map (fun p -> p.Name, p))
-        |> Input.alias "-p"
-        |> Input.def (Spec.srcProjects |> List.filter _.Name.EndsWith("Wire"))
+        Spec.srcProjects
+        |> List.map _.Name
+        |> Baked.Input.Project.target
+        |> Input.def (Spec.srcProjects |> List.filter _.Name.EndsWith("Wire") |> List.map _.Name)
+        |> Input.customParser (fun res ->
+            res.Tokens
+            |> Seq.map (fun token ->
+                Spec.srcProjects
+                |> List.find _.Name.Equals(token.Value, System.StringComparison.OrdinalIgnoreCase)
+                |> _.RelativePath)
+            |> Seq.toList)
         |> InputSpec.ofInput
-
-    // let projects =
-    //     Spec.srcProjects
-    //     |> List.map _.Name
-    //     |> Baked.Input.Project.target
-    //     |> Input.def (Spec.srcProjects |> List.filter _.Name.EndsWith("Wire") |> List.map _.Name)
-    //     |> Input.customParser (fun res ->
-    //         res.Tokens
-    //         |> Seq.map (fun token ->
-    //             Spec.srcProjects
-    //             |> List.find _.Name.Equals(token.Value, System.StringComparison.OrdinalIgnoreCase)
-    //             |> _.RelativePath)
-    //         |> Seq.toList)
-    //     |> InputSpec.ofInput
-    //     |> InputSpec.map (fun projects ->
-    //         Spec.srcProjects
-    //         |> List.filter (_.RelativePath >> List.contains >> fun fn -> fn projects)
-    //         |> function
-    //             | [] -> Spec.srcProjects |> List.filter _.Name.EndsWith("Wire")
-    //             | projects -> projects)
+        |> InputSpec.map (fun projects ->
+            Spec.srcProjects
+            |> List.filter (_.RelativePath >> List.contains >> fun fn -> fn projects)
+            |> function
+                | [] -> Spec.srcProjects |> List.filter _.Name.EndsWith("Wire")
+                | projects -> projects)
 
     let watch =
         Input.option<bool> "--watch"
@@ -149,7 +143,7 @@ module Stages =
                 }
         }
 
-    let build (projects: InputSpec<string list>) =
+    let build (projects: Internal.InputSpec<string list>) =
         input {
             let! projects = projects
             and! config = Options.config

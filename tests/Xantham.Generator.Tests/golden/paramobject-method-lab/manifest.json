@@ -3,22 +3,21 @@
   "module": "ParamobjectMethodLab",
   "counts": {
     "exact": 4,
-    "ergonomic": 2,
-    "widened": 0,
-    "escape": 0,
-    "limitations": 4
+    "ergonomic": 5,
+    "widened": 1,
+    "escape": 0
   },
   "passes": [
     {
       "pass": "SI - shape-interfaces",
       "total": 5,
-      "limitation": 5
+      "ergonomic": 4,
+      "widened": 1
     },
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 7,
-      "ergonomic": 3,
-      "limitation": 4
+      "ergonomic": 7
     }
   ],
   "symbols": [
@@ -26,13 +25,63 @@
       "name": "Listener",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Listener.tag",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Listener.tag",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Listener",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Listener.notify",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Listener.reset",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        }
+      ]
     },
     {
       "name": "Bag",
       "file": "index.d.ts",
       "tier": "widened",
       "findings": [
+        {
+          "key": "MB004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Bag.[]",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Bag.[]",
+          "message": "unknown maps to obj (D8)"
+        },
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
@@ -46,13 +95,29 @@
       "name": "Handle",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Handle",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "HandleConstructor",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "HandleConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
     },
     {
       "name": "Formatter",

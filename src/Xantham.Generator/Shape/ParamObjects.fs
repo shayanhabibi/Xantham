@@ -25,8 +25,7 @@ module private Reason =
     let OverBudget = "more members than the Create parameter budget"
 
     [<Literal>]
-    let EntrypointClass =
-        "the declaration is a class a consumer inherits, where `new` is the construction"
+    let EntrypointClass = "the declaration is a class a consumer inherits, where `new` is the construction"
 
 let private isConstructor =
     function

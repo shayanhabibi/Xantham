@@ -3,21 +3,20 @@
   "module": "AliasCopyLab",
   "counts": {
     "exact": 1,
-    "ergonomic": 0,
+    "ergonomic": 3,
     "widened": 0,
-    "escape": 0,
-    "limitations": 3
+    "escape": 0
   },
   "passes": [
     {
       "pass": "SI - shape-interfaces",
       "total": 6,
-      "limitation": 6
+      "ergonomic": 6
     },
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 3,
-      "limitation": 3
+      "ergonomic": 3
     }
   ],
   "symbols": [
@@ -25,19 +24,85 @@
       "name": "Panel",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Panel",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "PanelPair",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "PanelPair",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "DraftPanel",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DraftPanel.format",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DraftPanel.format",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DraftPanel.pair",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DraftPanel.pair",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DraftPanel.widget",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DraftPanel.widget",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "DraftPanel",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "draft",

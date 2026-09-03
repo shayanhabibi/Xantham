@@ -179,7 +179,7 @@ let generate (config: GeneratorConfig) (packageDir: string) : Async<RenderModel>
         let! rendered, manifestFindings =
             runTier
                 ctx
-                [ Render.renderManifest config.Manifest ]
+                [ Render.renderManifest ]
                 { sourced with
                     Findings = sourced.Findings @ sourceFindings
                 }

@@ -5,8 +5,7 @@
     "exact": 0,
     "ergonomic": 0,
     "widened": 0,
-    "escape": 2,
-    "limitations": 0
+    "escape": 2
   },
   "passes": [
     {
@@ -22,7 +21,7 @@
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 1,
-      "limitation": 1
+      "ergonomic": 1
     }
   ],
   "symbols": [
@@ -37,6 +36,13 @@
           "tier": "escape",
           "symbol": "Panel.boxed",
           "message": "Box is referenced with 1 type arguments against a group resolved by identity only; the arity is unverified"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Panel",
+          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },

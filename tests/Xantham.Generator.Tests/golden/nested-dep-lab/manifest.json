@@ -3,16 +3,15 @@
   "module": "NestedDepLab",
   "counts": {
     "exact": 3,
-    "ergonomic": 0,
+    "ergonomic": 3,
     "widened": 0,
-    "escape": 0,
-    "limitations": 3
+    "escape": 0
   },
   "passes": [
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 3,
-      "limitation": 3
+      "ergonomic": 3
     },
     {
       "pass": "render-source",
@@ -25,19 +24,43 @@
       "name": "Pulse",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Pulse",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "Reading",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Reading",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "Signal",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": []
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Signal",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "read",
@@ -47,12 +70,28 @@
     {
       "name": "inner-lab",
       "tier": "exact",
-      "findings": []
+      "findings": [
+        {
+          "key": "GE001",
+          "pass": "render-source",
+          "tier": "exact",
+          "symbol": "inner-lab",
+          "message": "inner-lab is shipped as its own module, carrying 1 declarations"
+        }
+      ]
     },
     {
       "name": "outer-lab",
       "tier": "exact",
-      "findings": []
+      "findings": [
+        {
+          "key": "GE001",
+          "pass": "render-source",
+          "tier": "exact",
+          "symbol": "outer-lab",
+          "message": "outer-lab is shipped as its own module, carrying 1 declarations"
+        }
+      ]
     }
   ]
 }
