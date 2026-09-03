@@ -1,0 +1,53 @@
+{
+  "package": "alias-copy-dep-lab",
+  "module": "AliasCopyDepLab",
+  "counts": {
+    "exact": 1,
+    "ergonomic": 2,
+    "widened": 0,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 2,
+      "ergonomic": 2
+    }
+  ],
+  "symbols": [
+    {
+      "name": "Widget",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Widget",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "WidgetPair",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "WidgetPair",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "Formatter",
+      "file": "index.d.ts",
+      "tier": "exact",
+      "findings": []
+    }
+  ]
+}

@@ -3,7 +3,7 @@
   "module": "CrossPackageLab",
   "counts": {
     "exact": 0,
-    "ergonomic": 1,
+    "ergonomic": 0,
     "widened": 0,
     "escape": 2
   },
@@ -20,8 +20,8 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 2,
-      "ergonomic": 2
+      "total": 1,
+      "ergonomic": 1
     }
   ],
   "symbols": [
@@ -42,20 +42,6 @@
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
           "symbol": "Panel",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "PanelPair",
-      "file": "index.d.ts",
-      "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "PanelPair",
           "message": "ParamObject Create synthesized (D3)"
         }
       ]

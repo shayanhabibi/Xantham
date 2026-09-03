@@ -1940,7 +1940,7 @@ let pipelineTests =
                               (rendered.Findings
                                |> List.filter (fun finding -> finding.Message.Contains "not among the generated")
                                |> List.map _.Symbol)
-                              [ "Panel.widget"; "Panel.boxed"; "PanelPair.left"; "PanelPair.right"; "mount(widget)"; "mount()" ]
+                              [ "Panel.widget"; "Panel.boxed"; "Panel.pair"; "mount(widget)"; "mount()" ]
                               "every reference into the dependency is a widening with a name" ])
 
         // Wave five lane S (O7's `ship` disposition). Two dependencies are installed beside the
@@ -2085,5 +2085,71 @@ let pipelineTests =
                                |> List.sortBy (fun (_, symbol, _) -> symbol))
                               [ "GE001", "inner-lab", Exact; "GE001", "outer-lab", Exact ]
                               "both shipped, neither collided" ])
+        // Wave five lane V (O7). An alias over an object literal carries `__type` on the type's
+        // own symbol and its declared name on the alias symbol, so the shape is named by the
+        // second question rather than the first. Both halves are registered as entry packages,
+        // which puts the templated module in the gated corpus and makes the F# compiler the
+        // judge of whether the entry names what the dependency ships.
+        yield!
+            fixtureTests
+                "alias-copy-dep-lab"
+                (handFixture "alias-copy-lab/node_modules/alias-copy-dep-lab")
+                GeneratorConfig.Default
+                (fun _ -> [])
+
+        yield!
+            fixtureTests
+                "alias-copy-lab"
+                (handInstalledFixture "alias-copy-lab")
+                (handConfig (handInstalledFixture "alias-copy-lab"))
+                (fun package ->
+                    let config = handConfig (Some package)
+
+                    let source () =
+                        Async.RunSynchronously(Pipeline.generate config package).Files
+                        |> List.find (fun (name, _) -> name.EndsWith ".fs")
+                        |> snd
+
+                    /// The names a rendered source declares, in emission order. Read off the
+                    /// source: a second declaration of one TypeScript type is only real if it
+                    /// survives to the file the compile gate builds.
+                    let declarationsIn (rendered: string) =
+                        rendered.Split('\n')
+                        |> Array.choose (fun line ->
+                            if line.StartsWith "type " then
+                                Some(line.Substring(5).Split([| ' '; '<'; '\r' |]).[0])
+                            else
+                                None)
+                        |> List.ofArray
+
+                    [ testCase "a referenced alias over an object literal is named, not copied" <| fun _ ->
+                          let rendered = source ()
+
+                          Expect.stringContains
+                              rendered
+                              "abstract pair: AliasCopyDepLab.WidgetPair"
+                              "the alias is read under the name the dependency ships"
+
+                          Expect.equal
+                              (declarationsIn rendered)
+                              [ "Panel"; "PanelPair"; "DraftPanel"; "Exports" ]
+                              "and the dependency's shape is not re-derived under a second name"
+
+                      testCase "the entry package's own alias over an object literal is declared here" <| fun _ ->
+                          Expect.stringContains (source ()) "type PanelPair =" "the entry group resolves by content"
+
+                      testCase "a mapped type over an entry operand still resolves by content" <| fun _ ->
+                          // `Partial<Panel>` groups as the compiler lib and is widened there, so
+                          // deferring to its name would lose the operand with it (D6).
+                          Expect.stringContains
+                              (source ())
+                              "abstract widget: AliasCopyDepLab.Widget option"
+                              "the mapped expansion carries the operand's own members"
+
+                      testCase "a referenced callback alias is named rather than expanded" <| fun _ ->
+                          Expect.stringContains
+                              (source ())
+                              "abstract format: AliasCopyDepLab.Formatter"
+                              "an alias with no members is still a name the dependency ships" ])
 
     ]

@@ -1,4 +1,4 @@
-/// Two packages, generated separately: the O7 contract that generation order does not matter.
+﻿/// Two packages, generated separately: the O7 contract that generation order does not matter.
 ///
 /// A `reference` group renders every one of its types as `<groupModule>.<typeName>` on the
 /// promise that a `ship` run of that group declares exactly those names, at exactly those
@@ -237,11 +237,9 @@ let multiPackageTests =
                 "and each names the referenced type with the count applied"
 
         // The other half of identity-only resolution: a referenced group's types are named, not
-        // copied. This does not hold - `WidgetPair` is re-derived into the entry package as
-        // `PanelPair`, so one TypeScript type gets two unrelated F# declarations. Lane T's
-        // section of docs/plans/generator-wave-five.md records the repair as belonging to
-        // `Resolve.fs`.
-        ptestCase "cross-package-lab: a referenced type is templated rather than re-declared"
+        // copied. `WidgetPair` is an alias over an object literal, and the name it templates
+        // under is read off the alias symbol (wave five, lane V).
+        testCase "cross-package-lab: a referenced type is templated rather than re-declared"
         <| fun _ ->
             let entry = declaredIn entryReference.Value
 
