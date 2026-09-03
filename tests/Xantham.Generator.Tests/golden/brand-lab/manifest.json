@@ -3,21 +3,22 @@
   "module": "BrandLab",
   "counts": {
     "exact": 1,
-    "ergonomic": 10,
+    "ergonomic": 0,
     "widened": 2,
-    "escape": 0
+    "escape": 0,
+    "limitations": 10
   },
   "passes": [
     {
       "pass": "SI - shape-interfaces",
       "total": 4,
-      "ergonomic": 4
+      "limitation": 4
     },
     {
       "pass": "SA - shape-aliases",
       "total": 8,
-      "ergonomic": 7,
-      "widened": 1
+      "widened": 1,
+      "limitation": 7
     },
     {
       "pass": "SE - shape-exports",
@@ -27,7 +28,7 @@
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 7,
-      "ergonomic": 7
+      "limitation": 7
     }
   ],
   "symbols": [
@@ -35,176 +36,55 @@
       "name": "UserId",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SA001",
-          "pass": "shape-aliases",
-          "tier": "ergonomic",
-          "symbol": "UserId",
-          "message": "branding intersection emitted as a unit of measure; uses read as the branded primitive (\u00A74.6, D11)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "SessionId",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SA001",
-          "pass": "shape-aliases",
-          "tier": "ergonomic",
-          "symbol": "SessionId",
-          "message": "branding intersection emitted as a unit of measure; uses read as the branded primitive (\u00A74.6, D11)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "OrderId",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SA001",
-          "pass": "shape-aliases",
-          "tier": "ergonomic",
-          "symbol": "OrderId",
-          "message": "branding intersection emitted as a unit of measure; uses read as the branded primitive (\u00A74.6, D11)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Millis",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SA001",
-          "pass": "shape-aliases",
-          "tier": "ergonomic",
-          "symbol": "Millis",
-          "message": "branding intersection emitted as a unit of measure; uses read as the branded primitive (\u00A74.6, D11)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Verified",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SA001",
-          "pass": "shape-aliases",
-          "tier": "ergonomic",
-          "symbol": "Verified",
-          "message": "branding intersection emitted as a unit of measure; uses read as the branded primitive (\u00A74.6, D11)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Nonce",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SA001",
-          "pass": "shape-aliases",
-          "tier": "ergonomic",
-          "symbol": "Nonce",
-          "message": "branding intersection emitted as a unit of measure; uses read as the branded primitive (\u00A74.6, D11)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Mode",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SA001",
-          "pass": "shape-aliases",
-          "tier": "ergonomic",
-          "symbol": "Mode",
-          "message": "branding intersection emitted as a unit of measure; uses read as the branded primitive (\u00A74.6, D11)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Store",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Store.find()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Store.find(id)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Store",
-          "message": "ParamObject Create synthesized (D3)"
-        },
-        {
-          "key": "SP002",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Store.find",
-          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
-        },
-        {
-          "key": "SP002",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Store.get",
-          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
-        },
-        {
-          "key": "SP002",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Store.ids",
-          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
-        },
-        {
-          "key": "SP002",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Store.put",
-          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Merged",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SI003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Merged",
-          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Merged",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Counted",
@@ -224,22 +104,7 @@
       "name": "Wrapped",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SI003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Wrapped",
-          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Wrapped",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "orderIdTag",

@@ -521,7 +521,8 @@ let private renderEntrypointClass (runtimePackage: string) (decl: FsInterfaceDec
         yield! docLines "" decl.Docs decl.Tags
         yield bindingAttribute runtimePackage "" "; AbstractClass" entrypoint.Binding
 
-        let head = $"type {declHead decl.Name decl.TypeParameters} {renderParamList entrypoint.Parameters}"
+        let head =
+            $"type {declHead decl.Name decl.TypeParameters} {renderParamList entrypoint.Parameters}"
 
         match decl.Members, decl.Statics with
         | [], [] -> yield $"{head} = class end"
@@ -1036,17 +1037,23 @@ let counts (rows: (string * Tier * Finding list) list) =
 
     {
         Exact = count Exact
-        Ergonomic = count Ergonomic
-        Widened = count Widened
-        Escape = count Escape
+        Ergonomic = count (Ergonomic false)
+        Widened = count (Widened false)
+        Escape = count (Escape false)
+        Warnings =
+            {
+                Ergonomic = count (Ergonomic true)
+                Widened = count (Widened true)
+                Escape = count (Escape true)
+            }
     }
 
 let private tierLabel =
     function
     | Exact -> "exact"
-    | Ergonomic -> "ergonomic"
-    | Widened -> "widened"
-    | Escape -> "escape"
+    | Ergonomic _ -> "ergonomic"
+    | Widened _ -> "widened"
+    | Escape _ -> "escape"
 
 // The manifest's shape, spelled as records so property order is fixed by declaration. A pass
 // is labelled with the prefix of the union it owns (`SI - shape-interfaces`). `file`
@@ -1067,6 +1074,7 @@ type ManifestCounts =
         ergonomic: int
         widened: int
         escape: int
+        limitations: int
     }
 
 /// A pass's tallies: only the non-zero ones are written, so a pass that raised nothing at any
@@ -1079,6 +1087,7 @@ type ManifestPass =
         ergonomic: Nullable<int>
         widened: Nullable<int>
         escape: Nullable<int>
+        limitation: Nullable<int>
     }
 
 type ManifestSymbol =
@@ -1158,14 +1167,26 @@ let private passTallies (findings: Finding list) : ManifestPass list =
                 pass = FindingCatalogue.passLabel pass
                 total = nonZero raised.Length
                 exact = count Exact
-                ergonomic = count Ergonomic
-                widened = count Widened
-                escape = count Escape
+                ergonomic = count (Ergonomic true)
+                widened = count (Widened true)
+                escape = count (Escape true)
+                limitation =
+                    raised
+                    |> List.filter (
+                        _.Tier
+                        >> function
+                            | Ergonomic false
+                            | Widened false
+                            | Escape false -> true
+                            | _ -> false
+                    )
+                    |> List.length
+                    |> nonZero
             }
     ]
 
 /// The fidelity report: which pass widened what, and why, per exported symbol.
-let renderManifest: Pass<RenderModel> =
+let renderManifest (config: ManifestConfig) : Pass<RenderModel> =
     Pass.pure' "render-manifest" (fun _ model ->
         let rows = symbolTiers model
         let tallies = counts rows
@@ -1178,9 +1199,10 @@ let renderManifest: Pass<RenderModel> =
                 counts =
                     {
                         exact = tallies.Exact
-                        ergonomic = tallies.Ergonomic
-                        widened = tallies.Widened
-                        escape = tallies.Escape
+                        ergonomic = tallies.Warnings.Ergonomic
+                        widened = tallies.Warnings.Widened
+                        escape = tallies.Warnings.Escape
+                        limitations = tallies.Ergonomic + tallies.Widened + tallies.Escape
                     }
                 passes = passTallies model.Findings
                 symbols =
@@ -1191,9 +1213,25 @@ let renderManifest: Pass<RenderModel> =
                                 file = files |> Map.tryFind name |> Option.toObj
                                 tier = tierLabel tier
                                 findings =
+                                    let filterVerbosity: Finding list -> _ =
+                                        if config.Verbose then
+                                            id
+                                        else
+                                            List.filter (
+                                                _.Tier
+                                                >> function
+                                                    | Exact
+                                                    | Escape false
+                                                    | Widened false
+                                                    | Ergonomic false -> false
+                                                    | _ -> true
+                                            )
+
                                     [
                                         for finding in
-                                            findings |> List.sortBy (fun f -> f.Pass, f.Symbol, f.Key, f.Message) ->
+                                            findings
+                                            |> filterVerbosity
+                                            |> List.sortBy (fun f -> f.Pass, f.Symbol, f.Key, f.Message) ->
                                             {
                                                 key = finding.Key
                                                 pass = finding.Pass
@@ -1216,4 +1254,5 @@ let renderManifest: Pass<RenderModel> =
 ///
 /// The pipeline runs the two halves separately, so the manifest reports what group emission
 /// found; a caller with no group plan gets the whole tier in one list.
-let passes: Pass<RenderModel> list = [ renderSources []; renderManifest ]
+let passes manifestConfig : Pass<RenderModel> list =
+    [ renderSources []; renderManifest manifestConfig ]

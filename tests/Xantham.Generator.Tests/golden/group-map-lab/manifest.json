@@ -3,15 +3,16 @@
   "module": "GroupMapLab",
   "counts": {
     "exact": 4,
-    "ergonomic": 3,
+    "ergonomic": 0,
     "widened": 2,
-    "escape": 0
+    "escape": 0,
+    "limitations": 3
   },
   "passes": [
     {
       "pass": "SI - shape-interfaces",
       "total": 2,
-      "ergonomic": 2
+      "limitation": 2
     },
     {
       "pass": "SE - shape-exports",
@@ -21,7 +22,7 @@
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 3,
-      "ergonomic": 3
+      "limitation": 3
     }
   ],
   "symbols": [
@@ -29,57 +30,19 @@
       "name": "Box",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Box",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Handle",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Handle",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Registry",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Registry.held",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Registry.held",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Registry",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "compile",

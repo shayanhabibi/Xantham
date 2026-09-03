@@ -3,9 +3,10 @@
   "module": "GlobalsLab",
   "counts": {
     "exact": 4,
-    "ergonomic": 7,
+    "ergonomic": 2,
     "widened": 0,
-    "escape": 0
+    "escape": 0,
+    "limitations": 5
   },
   "passes": [
     {
@@ -16,22 +17,23 @@
     {
       "pass": "SI - shape-interfaces",
       "total": 4,
-      "ergonomic": 4
+      "limitation": 4
     },
     {
       "pass": "SE - shape-exports",
       "total": 1,
-      "ergonomic": 1
+      "limitation": 1
     },
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 7,
-      "ergonomic": 7
+      "ergonomic": 2,
+      "limitation": 5
     },
     {
       "pass": "RA - repair-arity",
       "total": 1,
-      "ergonomic": 1
+      "limitation": 1
     }
   ],
   "symbols": [
@@ -39,84 +41,25 @@
       "name": "Widget",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Widget.size",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Widget.size",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Widget",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Gadget",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Gadget",
-          "message": "ParamObject Create synthesized (D3)"
-        },
-        {
-          "key": "SP002",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Gadget.spin",
-          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Branded",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "RA005",
-          "pass": "repair-arity",
-          "tier": "ergonomic",
-          "symbol": "Branded",
-          "message": "__brand reads but does not write: its type holds no value, and F# has no setter of type unit"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Branded",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Loose",
       "file": "index.d.ts",
       "tier": "ergonomic",
       "findings": [
-        {
-          "key": "MB004",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Loose.[]",
-          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
-        },
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
@@ -130,28 +73,13 @@
       "name": "Bag",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Bag",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "BagLoose",
       "file": "index.d.ts",
       "tier": "ergonomic",
       "findings": [
-        {
-          "key": "MB004",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "BagLoose.[]",
-          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
-        },
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
@@ -174,15 +102,7 @@
     {
       "name": "ping",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "ping(retries)",
-          "message": "null/undefined union members hoisted to option"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "extra",
@@ -192,15 +112,7 @@
     {
       "name": "\u0022globals-lab:extra\u0022",
       "tier": "exact",
-      "findings": [
-        {
-          "key": "HG004",
-          "pass": "harvest-globals",
-          "tier": "exact",
-          "symbol": "\u0022globals-lab:extra\u0022",
-          "message": "1 exports harvested from ambient module \u0022globals-lab:extra\u0022; each binds with [\u003CImport(name, \u0022globals-lab:extra\u0022)\u003E]"
-        }
-      ]
+      "findings": []
     }
   ]
 }

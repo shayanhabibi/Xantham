@@ -3,15 +3,16 @@
   "module": "ParseLab",
   "counts": {
     "exact": 0,
-    "ergonomic": 6,
+    "ergonomic": 0,
     "widened": 0,
-    "escape": 0
+    "escape": 0,
+    "limitations": 6
   },
   "passes": [
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 11,
-      "ergonomic": 11
+      "limitation": 11
     }
   ],
   "symbols": [
@@ -19,120 +20,37 @@
       "name": "EventMap",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "EventMap",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "EventMapClick",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "EventMapClick",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Object3D",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Object3D",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Intersection",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Intersection",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Caster",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Caster",
-          "message": "ParamObject Create synthesized (D3)"
-        },
-        {
-          "key": "SP002",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Caster.intersectObject",
-          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
-        },
-        {
-          "key": "SP002",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Caster.intersectPair",
-          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Plain",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Plain",
-          "message": "ParamObject Create synthesized (D3)"
-        },
-        {
-          "key": "SP002",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Plain.echo",
-          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
-        },
-        {
-          "key": "SP002",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Plain.on",
-          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
-        },
-        {
-          "key": "SP002",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Plain.ping",
-          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
-        }
-      ]
+      "findings": []
     }
   ]
 }

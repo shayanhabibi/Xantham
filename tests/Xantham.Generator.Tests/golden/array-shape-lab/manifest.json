@@ -5,7 +5,8 @@
     "exact": 4,
     "ergonomic": 1,
     "widened": 5,
-    "escape": 0
+    "escape": 0,
+    "limitations": 0
   },
   "passes": [
     {
@@ -16,7 +17,7 @@
     {
       "pass": "SI - shape-interfaces",
       "total": 1,
-      "ergonomic": 1
+      "limitation": 1
     },
     {
       "pass": "SA - shape-aliases",
@@ -88,13 +89,6 @@
       "file": "index.d.ts",
       "tier": "ergonomic",
       "findings": [
-        {
-          "key": "MB004",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Register.[]",
-          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
-        },
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",

@@ -3,15 +3,16 @@
   "module": "CrossPackageDep",
   "counts": {
     "exact": 0,
-    "ergonomic": 3,
+    "ergonomic": 0,
     "widened": 0,
-    "escape": 0
+    "escape": 0,
+    "limitations": 3
   },
   "passes": [
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 3,
-      "ergonomic": 3
+      "limitation": 3
     }
   ],
   "symbols": [
@@ -19,43 +20,19 @@
       "name": "Widget",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Widget",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Box",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Box",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "WidgetPair",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "WidgetPair",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     }
   ]
 }

@@ -3,31 +3,34 @@
   "module": "FlagsLab",
   "counts": {
     "exact": 4,
-    "ergonomic": 1,
-    "widened": 12,
-    "escape": 0
+    "ergonomic": 0,
+    "widened": 10,
+    "escape": 0,
+    "limitations": 3
   },
   "passes": [
     {
       "pass": "SI - shape-interfaces",
       "total": 7,
-      "widened": 7
+      "widened": 6,
+      "limitation": 1
     },
     {
       "pass": "SA - shape-aliases",
       "total": 5,
-      "ergonomic": 1,
-      "widened": 4
+      "widened": 4,
+      "limitation": 1
     },
     {
       "pass": "SE - shape-exports",
       "total": 7,
-      "widened": 7
+      "widened": 5,
+      "limitation": 2
     },
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 7,
-      "ergonomic": 7
+      "limitation": 7
     }
   ],
   "symbols": [
@@ -77,20 +80,6 @@
           "tier": "widened",
           "symbol": "Emitter.resolve(scope)",
           "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Emitter",
-          "message": "ParamObject Create synthesized (D3)"
-        },
-        {
-          "key": "SP002",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Emitter.resolve",
-          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         }
       ]
     },
@@ -119,13 +108,6 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TP002",
-          "pass": "shape-aliases",
-          "tier": "ergonomic",
-          "symbol": "Tagged",
-          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
           "key": "TR037",
           "pass": "shape-aliases",
           "tier": "widened",
@@ -138,22 +120,7 @@
       "name": "Ledger",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Ledger",
-          "message": "ParamObject Create synthesized (D3)"
-        },
-        {
-          "key": "SP002",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Ledger.credit",
-          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Two",
@@ -173,22 +140,7 @@
       "name": "Registry",
       "file": "index.d.ts",
       "tier": "widened",
-      "findings": [
-        {
-          "key": "TR040",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Registry.holder",
-          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Registry",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Keyed",
@@ -201,13 +153,6 @@
           "tier": "widened",
           "symbol": "Keyed.id",
           "message": "symbol has no binding in Fable.Core 5.2.0; widened to obj (\u00A74.1)"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Keyed",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -222,13 +167,6 @@
           "tier": "widened",
           "symbol": "Plain.kind",
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Plain",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -278,22 +216,7 @@
     {
       "name": "freeze",
       "tier": "widened",
-      "findings": [
-        {
-          "key": "TR040",
-          "pass": "shape-exports",
-          "tier": "widened",
-          "symbol": "freeze()",
-          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
-        },
-        {
-          "key": "TR040",
-          "pass": "shape-exports",
-          "tier": "widened",
-          "symbol": "freeze(value)",
-          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "brandTag",

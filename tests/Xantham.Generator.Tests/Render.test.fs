@@ -6,7 +6,7 @@ open Expecto
 open Xantham.Generator
 
 let private renderAll (model: RenderModel) =
-    let rendered, findings = Async.RunSynchronously(Pipeline.runTier Build.context Render.passes model)
+    let rendered, findings = Async.RunSynchronously(Pipeline.runTier Build.context (Render.passes Build.context.Config.Manifest) model)
     Expect.isEmpty findings "render passes never degrade"
     rendered.Files |> Map.ofList
 
@@ -527,7 +527,8 @@ let renderTests =
                       "    \"exact\": 0,"
                       "    \"ergonomic\": 0,"
                       "    \"widened\": 1,"
-                      "    \"escape\": 1"
+                      "    \"escape\": 1,"
+                      "    \"limitations\": 0"
                       "  },"
                       "  \"passes\": ["
                       "    {"

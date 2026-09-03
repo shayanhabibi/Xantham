@@ -3,15 +3,16 @@
   "module": "MultiShipLab",
   "counts": {
     "exact": 2,
-    "ergonomic": 3,
+    "ergonomic": 0,
     "widened": 1,
-    "escape": 1
+    "escape": 1,
+    "limitations": 3
   },
   "passes": [
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 3,
-      "ergonomic": 3
+      "limitation": 3
     },
     {
       "pass": "render-source",
@@ -26,43 +27,19 @@
       "name": "Cargo",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Cargo",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Spare",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Spare",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Widget",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Widget",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "load",
@@ -85,15 +62,7 @@
     {
       "name": "dep-lab",
       "tier": "exact",
-      "findings": [
-        {
-          "key": "GE001",
-          "pass": "render-source",
-          "tier": "exact",
-          "symbol": "dep-lab",
-          "message": "dep-lab is shipped as its own module, carrying 1 declarations"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "dep_lab",

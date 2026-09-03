@@ -14,7 +14,6 @@ open System.Text.Json
 open Expecto
 open Xantham.TypeScript.Wire
 open Xantham.Generator
-
 let private required =
     match Environment.GetEnvironmentVariable "XANTHAM_REQUIRE_TSC" with
     | null
@@ -252,7 +251,7 @@ let private fixtureTests (fixture: string) (package: string option) (config: Gen
                     regenerate the goldens (XANTHAM_UPDATE_GOLDEN=1) in the same commit." ]
     | Some _, Some package ->
         [ testCase $"{fixture} generates the committed goldens" <| fun _ ->
-              matchesGoldens fixture config package |> ignore
+              matchesGoldens fixture { config with Manifest.Verbose = false } package |> ignore
 
           testCase $"{fixture} generation is deterministic run to run" <| fun _ ->
               let first = Async.RunSynchronously(Pipeline.generate config package)
@@ -390,17 +389,19 @@ let private groupMapLab = handFixture "group-map-lab"
 [<Tests>]
 let pipelineTests =
     testList "generator e2e" [
+        let verboseConfig = { GeneratorConfig.Default with Manifest.Verbose = true }
+        let silentConfig = { GeneratorConfig.Default with Manifest.Verbose = false }
         yield!
-            fixtureTests "ansi-regex" (npmFixture "ansi-regex") GeneratorConfig.Default (fun package ->
+            fixtureTests "ansi-regex" (npmFixture "ansi-regex") silentConfig  (fun package ->
                 [ testCase "no export of ansi-regex is silently dropped" <| fun _ ->
-                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let rendered = Async.RunSynchronously(Pipeline.generate silentConfig package)
                       let counts = Render.counts (Render.symbolTiers rendered)
 
                       Expect.equal counts.Escape 0 "ansi-regex is declared fully representable - no escapes"
 
                   testCase "a reference disposition templates lib types instead of widening" <| fun _ ->
                       let config =
-                          { GeneratorConfig.Default with
+                          { silentConfig with
                               Groups = Map.ofList [ "typescript/lib", Reference ] }
 
                       let rendered = Async.RunSynchronously(Pipeline.generate config package)
@@ -662,7 +663,7 @@ let pipelineTests =
 
                     Expect.contains
                         (rendered.Findings |> List.map (fun finding -> finding.Tier, finding.Message))
-                        (Widened, "intersection over a non-object operand has no members to flatten; widened to obj (§4.6)")
+                        (Widened true, "intersection over a non-object operand has no members to flatten; widened to obj (§4.6)")
                         "the widening is owned"
 
                     Expect.isEmpty
@@ -811,8 +812,8 @@ let pipelineTests =
                         rendered.Findings
                         |> List.map (fun finding -> finding.Key, finding.Symbol, finding.Tier)
 
-                    Expect.contains byKey ("SI002", "Failure", Ergonomic) "the nameless base"
-                    Expect.contains byKey ("SI006", "Deferred", Ergonomic) "the named-but-undeclared base"
+                    Expect.contains byKey ("SI002", "Failure", Ergonomic false) "the nameless base"
+                    Expect.contains byKey ("SI006", "Deferred", Ergonomic true) "the named-but-undeclared base"
 
                     Expect.contains
                         (rendered.Findings |> List.map _.Message)
@@ -956,12 +957,12 @@ let pipelineTests =
 
                     Expect.contains
                         (rendered.Findings |> List.map (fun finding -> finding.Tier, finding.Message))
-                        (Ergonomic,
+                        (Ergonomic false,
                          "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (§4.4)")
                         "the mapping owns itself"
 
                     Expect.isEmpty
-                        (rendered.Findings |> List.filter (fun finding -> finding.Tier = Widened || finding.Tier = Escape))
+                        (rendered.Findings |> List.filter (fun finding -> finding.Tier.IsWidened || finding.Tier.IsEscape))
                         "every constructor object in the lab is declared" ])
 
         yield!
@@ -1068,7 +1069,7 @@ let pipelineTests =
 
                     Expect.isTrue
                         (rendered.Findings
-                         |> List.exists (fun f -> f.Symbol.StartsWith "values" && f.Tier = Widened))
+                         |> List.exists (fun f -> f.Symbol.StartsWith "values" && f.Tier.IsWidened))
                         "and the widening is recorded"
 
                   testCase "a type-level computation over an open operand emits an erased phantom" <| fun _ ->
@@ -1107,7 +1108,7 @@ let pipelineTests =
                         Expect.isTrue
                             (rendered.Findings
                              |> List.exists (fun f ->
-                                 f.Symbol = name && f.Tier = Widened && f.Message.Contains "erased phantom"))
+                                 f.Symbol = name && f.Tier.IsWidened && f.Message.Contains "erased phantom"))
                             $"{name} says in the manifest that it is a phantom" ])
 
         yield!
@@ -1255,13 +1256,13 @@ let pipelineTests =
                           Expect.isTrue
                               (rendered.Findings
                                |> List.exists (fun f ->
-                                   f.Symbol = name && f.Tier = Ergonomic && f.Message.Contains "flattened into one interface"))
+                                   f.Symbol = name && f.Tier.IsErgonomic && f.Message.Contains "flattened into one interface"))
                               $"{name} is an ordinary intersection, and flattens"
 
                       Expect.isTrue
                           (rendered.Findings
                            |> List.exists (fun f ->
-                               f.Symbol = "Counted" && f.Tier = Widened && f.Message.Contains "non-object operand"))
+                               f.Symbol = "Counted" && f.Tier.IsWidened && f.Message.Contains "non-object operand"))
                           "Counted is neither a brand nor a shape, and says so"
 
                       Expect.isFalse (source.Contains "Merged>") "and none of them is written as a measure" ])
@@ -1799,7 +1800,7 @@ let pipelineTests =
         // merges with the lib's declaration, groups as the compiler lib by its first
         // declaration, and never reaches the harvest. The rung runs the way a consumer would.
         let workersTypesConfig =
-            { GeneratorConfig.Default with
+            { verboseConfig with
                 Lib = Some [ "esnext" ] }
 
         yield!
@@ -1889,7 +1890,7 @@ let pipelineTests =
                                |> List.exists (fun f ->
                                    f.Symbol = name
                                    && f.Pass = "resolve-export-types"
-                                   && f.Tier = Escape
+                                   && f.Tier.IsEscape
                                    && f.Message.Contains "Inf"))
                               $"{name} is escaped by the resolve tier with the encoder's complaint"
 
@@ -1939,7 +1940,7 @@ let pipelineTests =
 
                       Expect.equal
                           (derived |> List.map (fun f -> f.Pass, f.Symbol, f.Tier))
-                          [ "shape-exports", "<module>", Ergonomic ]
+                          [ "shape-exports", "<module>", Ergonomic true ]
                           "one run-level finding, owned by the pass whose prefix SE is"
 
                       Expect.stringContains
@@ -2095,14 +2096,14 @@ let pipelineTests =
                 (fun package ->
                     let config = handConfig (Some package)
 
-                    let generate () =
-                        Async.RunSynchronously(Pipeline.generate config package)
+                    let generate (manifest: ManifestConfig) =
+                        Async.RunSynchronously(Pipeline.generate {config with Manifest = manifest} package)
 
                     let fileNamed (rendered: RenderModel) name =
                         rendered.Files |> List.tryFind (fst >> (=) name) |> Option.map snd
 
                     [ testCase "a shipped dependency is written as its own module" <| fun _ ->
-                          let rendered = generate ()
+                          let rendered = generate { Verbose = true }
 
                           Expect.equal
                               (rendered.Files |> List.map fst)
@@ -2123,7 +2124,7 @@ let pipelineTests =
                               "and recording which package it came out of"
 
                       testCase "the entry names the dependency's type across the module boundary" <| fun _ ->
-                          let rendered = generate ()
+                          let rendered = generate { Verbose = true }
 
                           let entry =
                               fileNamed rendered "MultiShipLab.fs"
@@ -2135,7 +2136,7 @@ let pipelineTests =
                           Expect.isFalse (entry.Contains "type Widget =") "and declared there once, not twice"
 
                       testCase "emission is reported per group, and reaches the manifest" <| fun _ ->
-                          let rendered = generate ()
+                          let rendered = generate { Verbose = true }
 
                           let emitted =
                               rendered.Findings
@@ -2145,8 +2146,8 @@ let pipelineTests =
                           Expect.equal
                               emitted
                               [ "GE001", "dep-lab", Exact
-                                "GE003", "dep_lab", Escape
-                                "GE002", "absent-lab", Widened ]
+                                "GE003", "dep_lab", Escape true
+                                "GE002", "absent-lab", Widened true ]
                               "one shipped, one collided, one configured and never reached"
 
                           let manifest =
@@ -2156,7 +2157,7 @@ let pipelineTests =
                           Expect.stringContains manifest "\"GE001\"" "the manifest carries what emission found"
 
                       testCase "a group that loses the module name keeps its declarations in the entry" <| fun _ ->
-                          let rendered = generate ()
+                          let rendered = generate { Verbose = true }
 
                           let entry =
                               fileNamed rendered "MultiShipLab.fs"

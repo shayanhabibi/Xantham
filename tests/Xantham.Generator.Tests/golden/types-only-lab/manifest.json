@@ -3,9 +3,10 @@
   "module": "TypesOnlyLab",
   "counts": {
     "exact": 2,
-    "ergonomic": 2,
+    "ergonomic": 1,
     "widened": 0,
-    "escape": 0
+    "escape": 0,
+    "limitations": 1
   },
   "passes": [
     {
@@ -16,7 +17,7 @@
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 1,
-      "ergonomic": 1
+      "limitation": 1
     }
   ],
   "symbols": [
@@ -24,15 +25,7 @@
       "name": "Counter",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Counter",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "greet",

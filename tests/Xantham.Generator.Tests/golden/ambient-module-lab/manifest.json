@@ -3,9 +3,10 @@
   "module": "AmbientModuleLab",
   "counts": {
     "exact": 7,
-    "ergonomic": 8,
-    "widened": 3,
-    "escape": 2
+    "ergonomic": 1,
+    "widened": 2,
+    "escape": 2,
+    "limitations": 8
   },
   "passes": [
     {
@@ -18,8 +19,7 @@
       "pass": "SI - shape-interfaces",
       "total": 6,
       "exact": 1,
-      "ergonomic": 4,
-      "widened": 1
+      "limitation": 5
     },
     {
       "pass": "SA - shape-aliases",
@@ -35,7 +35,8 @@
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 13,
-      "ergonomic": 13
+      "ergonomic": 2,
+      "limitation": 11
     }
   ],
   "symbols": [
@@ -43,43 +44,19 @@
       "name": "Payload",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Payload",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Point",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Point",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Telemetry",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Telemetry",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Session",
@@ -92,13 +69,6 @@
           "tier": "widened",
           "symbol": "Session",
           "message": "abbreviation dropped - Session2 already declares the name; the type reads under that declaration"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Session",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -106,63 +76,25 @@
       "name": "Anvil",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Anvil",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Hammer",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Hammer",
-          "message": "ParamObject Create synthesized (D3)"
-        },
-        {
-          "key": "SP002",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Hammer.strike",
-          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Reading",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Reading",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Workbench",
       "file": "index.d.ts",
       "tier": "ergonomic",
       "findings": [
-        {
-          "key": "SC007",
-          "pass": "shape-classes",
-          "tier": "exact",
-          "symbol": "Workbench",
-          "message": "entrypoint class emitted as an AbstractClass imported from ambient-lab:tools; a consumer inherits it"
-        },
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
@@ -177,48 +109,6 @@
       "file": "index.d.ts",
       "tier": "widened",
       "findings": [
-        {
-          "key": "SC007",
-          "pass": "shape-classes",
-          "tier": "exact",
-          "symbol": "Snag",
-          "message": "entrypoint class emitted as an AbstractClass imported from ambient-lab:tools; a consumer inherits it"
-        },
-        {
-          "key": "SI002",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Snag",
-          "message": "base has no F# name at this position; its members are flattened in and the is-a relation is not emitted (\u00A74.4)"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Snag.cause",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR009",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Snag.cause",
-          "message": "unknown maps to obj (D8)"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Snag.stack",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Snag.stack",
-          "message": "null/undefined union members hoisted to option"
-        },
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
@@ -239,27 +129,6 @@
           "tier": "widened",
           "symbol": "Vise",
           "message": "entrypoint class kept the interface form: the class inherits a base whose constructor arguments have no F# form"
-        },
-        {
-          "key": "SI005",
-          "pass": "shape-interfaces",
-          "tier": "exact",
-          "symbol": "Vise",
-          "message": "base Hammer is inherited: the is-a relation is emitted (\u00A74.4)"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Vise",
-          "message": "ParamObject Create synthesized (D3)"
-        },
-        {
-          "key": "SP002",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Vise.strike",
-          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         }
       ]
     },
@@ -267,15 +136,7 @@
       "name": "Session2",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Session2",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "measure",
@@ -321,54 +182,22 @@
     {
       "name": "\u0022ambient-lab:runtime\u0022",
       "tier": "exact",
-      "findings": [
-        {
-          "key": "HG004",
-          "pass": "harvest-globals",
-          "tier": "exact",
-          "symbol": "\u0022ambient-lab:runtime\u0022",
-          "message": "2 exports harvested from ambient module \u0022ambient-lab:runtime\u0022; each binds with [\u003CImport(name, \u0022ambient-lab:runtime\u0022)\u003E]"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "\u0022ambient-lab:sockets\u0022",
       "tier": "exact",
-      "findings": [
-        {
-          "key": "HG004",
-          "pass": "harvest-globals",
-          "tier": "exact",
-          "symbol": "\u0022ambient-lab:sockets\u0022",
-          "message": "1 exports harvested from ambient module \u0022ambient-lab:sockets\u0022; each binds with [\u003CImport(name, \u0022ambient-lab:sockets\u0022)\u003E]"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "\u0022ambient-lab:tools\u0022",
       "tier": "exact",
-      "findings": [
-        {
-          "key": "HG004",
-          "pass": "harvest-globals",
-          "tier": "exact",
-          "symbol": "\u0022ambient-lab:tools\u0022",
-          "message": "6 exports harvested from ambient module \u0022ambient-lab:tools\u0022; each binds with [\u003CImport(name, \u0022ambient-lab:tools\u0022)\u003E]"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "AmbientLabRuntime",
       "tier": "exact",
-      "findings": [
-        {
-          "key": "HG006",
-          "pass": "harvest-globals",
-          "tier": "exact",
-          "symbol": "AmbientLabRuntime",
-          "message": "AmbientLabRuntime is the body of ambient module \u0022ambient-lab:runtime\u0022 (export =) rather than a global"
-        }
-      ]
+      "findings": []
     }
   ]
 }

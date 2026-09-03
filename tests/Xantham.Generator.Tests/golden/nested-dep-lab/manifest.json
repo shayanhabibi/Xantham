@@ -3,15 +3,16 @@
   "module": "NestedDepLab",
   "counts": {
     "exact": 3,
-    "ergonomic": 3,
+    "ergonomic": 0,
     "widened": 0,
-    "escape": 0
+    "escape": 0,
+    "limitations": 3
   },
   "passes": [
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 3,
-      "ergonomic": 3
+      "limitation": 3
     },
     {
       "pass": "render-source",
@@ -24,43 +25,19 @@
       "name": "Pulse",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Pulse",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Reading",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Reading",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Signal",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Signal",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "read",
@@ -70,28 +47,12 @@
     {
       "name": "inner-lab",
       "tier": "exact",
-      "findings": [
-        {
-          "key": "GE001",
-          "pass": "render-source",
-          "tier": "exact",
-          "symbol": "inner-lab",
-          "message": "inner-lab is shipped as its own module, carrying 1 declarations"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "outer-lab",
       "tier": "exact",
-      "findings": [
-        {
-          "key": "GE001",
-          "pass": "render-source",
-          "tier": "exact",
-          "symbol": "outer-lab",
-          "message": "outer-lab is shipped as its own module, carrying 1 declarations"
-        }
-      ]
+      "findings": []
     }
   ]
 }

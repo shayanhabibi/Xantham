@@ -3,9 +3,10 @@
   "module": "HoistConditionalLab",
   "counts": {
     "exact": 5,
-    "ergonomic": 5,
+    "ergonomic": 0,
     "widened": 6,
-    "escape": 0
+    "escape": 0,
+    "limitations": 5
   },
   "passes": [
     {
@@ -22,8 +23,8 @@
     {
       "pass": "SI - shape-interfaces",
       "total": 7,
-      "ergonomic": 6,
-      "widened": 1
+      "widened": 1,
+      "limitation": 6
     },
     {
       "pass": "SA - shape-aliases",
@@ -38,7 +39,7 @@
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 6,
-      "ergonomic": 6
+      "limitation": 6
     }
   ],
   "symbols": [
@@ -53,20 +54,6 @@
           "tier": "widened",
           "symbol": "CondExtensions.toVar()",
           "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CondExtensions.toVar(name)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "CondExtensions",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -95,15 +82,7 @@
       "name": "CondVarNodeInterface",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "CondVarNodeInterface",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "CondVarNode",
@@ -130,92 +109,25 @@
       "name": "DirectExtensions",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DirectExtensions.toVar(name)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "DirectExtensions",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "DirectNode",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SI003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DirectNode",
-          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DirectNode.toVar(name)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "DirectNode",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "DirectVarNodeInterface",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "DirectVarNodeInterface",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "DirectVarNode",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SI003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DirectVarNode",
-          "message": "intersection of 3 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DirectVarNode.toVar(name)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "DirectVarNode",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "condSeed",
@@ -264,54 +176,22 @@
     {
       "name": "DirectExtensionsToVarResult",
       "tier": "exact",
-      "findings": [
-        {
-          "key": "SY001",
-          "pass": "synthesize-anonymous",
-          "tier": "exact",
-          "symbol": "DirectExtensionsToVarResult",
-          "message": "anonymous shape is an instantiation of DirectVarNode; written as an application"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "DirectNodeToVarResult",
       "tier": "exact",
-      "findings": [
-        {
-          "key": "SY001",
-          "pass": "synthesize-anonymous",
-          "tier": "exact",
-          "symbol": "DirectNodeToVarResult",
-          "message": "anonymous shape is an instantiation of DirectVarNode; written as an application"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "DirectSeed",
       "tier": "exact",
-      "findings": [
-        {
-          "key": "SY001",
-          "pass": "synthesize-anonymous",
-          "tier": "exact",
-          "symbol": "DirectSeed",
-          "message": "anonymous shape is an instantiation of DirectNode; written as an application"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "DirectVarNodeToVarResult",
       "tier": "exact",
-      "findings": [
-        {
-          "key": "SY001",
-          "pass": "synthesize-anonymous",
-          "tier": "exact",
-          "symbol": "DirectVarNodeToVarResult",
-          "message": "anonymous shape is an instantiation of DirectVarNode; written as an application"
-        }
-      ]
+      "findings": []
     }
   ]
 }

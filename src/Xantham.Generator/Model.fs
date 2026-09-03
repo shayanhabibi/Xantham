@@ -45,6 +45,30 @@ type GroupDisposition =
     /// non-entry groups until the shipped compiler-lib package exists.
     | Widen
 
+/// The configuration of the generated manifest.
+type ManifestConfig =
+    {
+#if DEBUG
+        /// Whether to include non-warning findings. This will remove findings that are known
+        /// limitations of interop between F# and JavaScript via Fable.
+        /// Defaults to `true`.
+#else
+        /// Whether to include non-warning findings. This will remove findings that are known
+        /// limitations of interop between F# and JavaScript via Fable.
+        /// Defaults to `false`.
+#endif
+        Verbose: bool
+    }
+
+    static member Default =
+        {
+#if DEBUG
+            Verbose = true
+#else
+            Verbose = false
+#endif
+        }
+
 /// Per-package generator configuration, read from `xantham.json` next to the package manifest
 /// when present (decision O4 in `docs/plans/generator-architecture.md`).
 type GeneratorConfig =
@@ -76,6 +100,8 @@ type GeneratorConfig =
         /// a `@types/*` package whose runtime is named something else entirely, and a
         /// types-only package published outside DefinitelyTyped.
         RuntimePackage: string option
+        /// Configuration for manifest generation.
+        Manifest: ManifestConfig
     }
 
     static member Default =
@@ -85,11 +111,24 @@ type GeneratorConfig =
             Groups = Map.empty
             Lib = None
             RuntimePackage = None
+            Manifest = ManifestConfig.Default
         }
 
 module GeneratorConfig =
     let private jsonOptions =
         JsonDocumentOptions(CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true)
+
+    let private parseManifestConfig (value: JsonElement) =
+        let boolParse (field: string) =
+            match value.TryGetProperty(field) with
+            | true, v when v.ValueKind = JsonValueKind.True || v.ValueKind = JsonValueKind.False ->
+                v.GetBoolean() |> Some
+            | true, _ -> failwith $"xantham.json: manifest field {field} must be a boolean."
+            | _ -> None
+
+        {
+            Verbose = boolParse "verbose" |> Option.defaultValue ManifestConfig.Default.Verbose
+        }
 
     /// One entry of a mapped group's table: `"Buffer": "Node.Buffer.Buffer"` for a
     /// destination that takes no type arguments, `"Readable": { "name": "Node.Stream.Readable",
@@ -176,12 +215,19 @@ module GeneratorConfig =
                 | true, _ -> failwith "xantham.json: lib must be an array of strings"
                 | _ -> None
 
+            let manifest =
+                match doc.RootElement.TryGetProperty "manifest" with
+                | true, v when v.ValueKind = JsonValueKind.Object -> parseManifestConfig v
+                | true, _ -> failwith "xantham.json: manifest must be an object"
+                | _ -> ManifestConfig.Default
+
             {
                 ModuleName = field "module"
                 Namespace = field "namespace"
                 Groups = groups
                 Lib = lib
                 RuntimePackage = field "runtime"
+                Manifest = manifest
             }
 
     /// Loads `<packageDir>/xantham.json`.
@@ -1099,12 +1145,20 @@ type RenderModel =
         Files: (string * string) list
     }
 
+type TierWarnings =
+    {
+        Ergonomic: int
+        Widened: int
+        Escape: int
+    }
+
 type TierCounts =
     {
         Exact: int
         Ergonomic: int
         Widened: int
         Escape: int
+        Warnings: TierWarnings
     }
 
 /// What a run reports back: where the fidelity manifest's numbers come from.

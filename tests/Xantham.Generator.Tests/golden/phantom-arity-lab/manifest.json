@@ -3,15 +3,16 @@
   "module": "PhantomArityLab",
   "counts": {
     "exact": 1,
-    "ergonomic": 1,
+    "ergonomic": 0,
     "widened": 1,
-    "escape": 0
+    "escape": 0,
+    "limitations": 1
   },
   "passes": [
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 1,
-      "ergonomic": 1
+      "limitation": 1
     },
     {
       "pass": "RA - repair-arity",
@@ -44,15 +45,7 @@
       "name": "Holder",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Holder",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     }
   ]
 }

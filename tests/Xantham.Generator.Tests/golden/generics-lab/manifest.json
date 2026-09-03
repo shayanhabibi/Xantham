@@ -3,31 +3,34 @@
   "module": "GenericsLab",
   "counts": {
     "exact": 5,
-    "ergonomic": 10,
+    "ergonomic": 1,
     "widened": 1,
-    "escape": 0
+    "escape": 0,
+    "limitations": 9
   },
   "passes": [
     {
       "pass": "SI - shape-interfaces",
       "total": 7,
-      "ergonomic": 6,
-      "widened": 1
+      "ergonomic": 1,
+      "widened": 1,
+      "limitation": 5
     },
     {
       "pass": "SA - shape-aliases",
       "total": 1,
-      "ergonomic": 1
+      "limitation": 1
     },
     {
       "pass": "SE - shape-exports",
       "total": 1,
-      "ergonomic": 1
+      "limitation": 1
     },
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 11,
-      "ergonomic": 11
+      "ergonomic": 1,
+      "limitation": 10
     }
   ],
   "symbols": [
@@ -35,36 +38,13 @@
       "name": "Ready",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Ready",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Pending",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Pending.previous",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Pending",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Resource",
@@ -88,43 +68,13 @@
       "name": "Source",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-aliases",
-          "tier": "ergonomic",
-          "symbol": "Source",
-          "message": "null/undefined union members hoisted to option"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "EachProps",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "EachProps.fallback",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "EachProps.fallback",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "EachProps",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Handle",
@@ -136,63 +86,25 @@
       "name": "HandleItem",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "HandleItem",
-          "message": "ParamObject Create synthesized (D3)"
-        },
-        {
-          "key": "SP002",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "HandleItem.reset",
-          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Named",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Named",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Labelled",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Labelled",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Registry",
       "file": "index.d.ts",
       "tier": "widened",
       "findings": [
-        {
-          "key": "TP002",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Registry",
-          "message": "constraint on \u0027M\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
         {
           "key": "TP004",
           "pass": "shape-interfaces",
@@ -206,20 +118,6 @@
           "tier": "widened",
           "symbol": "Registry.pick()",
           "message": "\u0027R is not bound with Labelled\u0027s constraint; the argument is written as the constraint Named"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Registry",
-          "message": "ParamObject Create synthesized (D3)"
-        },
-        {
-          "key": "SP002",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Registry.pick",
-          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         }
       ]
     },
@@ -227,28 +125,13 @@
       "name": "Manifest",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Manifest",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "ManifestFlags",
       "file": "index.d.ts",
       "tier": "ergonomic",
       "findings": [
-        {
-          "key": "MB004",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ManifestFlags.[]",
-          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
-        },
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
@@ -266,15 +149,7 @@
     {
       "name": "schedule",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "schedule(delay)",
-          "message": "null/undefined union members hoisted to option"
-        }
-      ]
+      "findings": []
     }
   ]
 }

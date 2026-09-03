@@ -3,9 +3,10 @@
   "module": "SolidJs",
   "counts": {
     "exact": 19,
-    "ergonomic": 62,
-    "widened": 73,
-    "escape": 19
+    "ergonomic": 1,
+    "widened": 71,
+    "escape": 0,
+    "limitations": 82
   },
   "passes": [
     {
@@ -21,42 +22,44 @@
     {
       "pass": "shape-callbacks",
       "total": 23,
-      "ergonomic": 16,
-      "widened": 7
+      "ergonomic": 2,
+      "widened": 7,
+      "limitation": 14
     },
     {
       "pass": "SI - shape-interfaces",
       "total": 486,
       "exact": 14,
-      "ergonomic": 359,
-      "widened": 72,
-      "escape": 41
+      "ergonomic": 22,
+      "widened": 70,
+      "limitation": 380
     },
     {
       "pass": "SA - shape-aliases",
       "total": 255,
       "exact": 4,
-      "ergonomic": 14,
-      "widened": 236,
-      "escape": 1
+      "ergonomic": 1,
+      "widened": 234,
+      "limitation": 16
     },
     {
       "pass": "SE - shape-exports",
       "total": 136,
-      "ergonomic": 86,
-      "widened": 48,
-      "escape": 2
+      "ergonomic": 6,
+      "widened": 44,
+      "limitation": 86
     },
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 85,
-      "ergonomic": 85
+      "ergonomic": 2,
+      "limitation": 83
     },
     {
       "pass": "RA - repair-arity",
       "total": 26,
-      "ergonomic": 7,
-      "widened": 19
+      "widened": 19,
+      "limitation": 7
     }
   ],
   "symbols": [
@@ -73,25 +76,11 @@
           "message": "type refers to itself through unnamed shapes; widened to obj"
         },
         {
-          "key": "TR032",
-          "pass": "shape-aliases",
-          "tier": "ergonomic",
-          "symbol": "JSXElement",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
           "key": "TR036",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "JSXElement",
           "message": "union of 5 distinct types widened to obj (D4 caps the erased union at 4)"
-        },
-        {
-          "key": "TR049",
-          "pass": "shape-aliases",
-          "tier": "exact",
-          "symbol": "JSXElement",
-          "message": "empty intersection operand reduced away; the remaining operand is the type"
         }
       ]
     },
@@ -99,176 +88,7 @@
       "name": "Computation",
       "file": "types/index.d.ts",
       "tier": "escape",
-      "findings": [
-        {
-          "key": "SI005",
-          "pass": "shape-interfaces",
-          "tier": "exact",
-          "symbol": "Computation",
-          "message": "base Owner is inherited: the is-a relation is emitted (\u00A74.4)"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Computation",
-          "message": "constraint on \u0027Next\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Computation.cleanups",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "Computation.context",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Computation.name",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Computation.name",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "Computation.owned",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "Computation.owned",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Computation.owned",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Computation.owner",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Computation.sourceMap",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Computation.sourceMap",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Computation.sourceSlots",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Computation.sources",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Computation.suspense",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Computation.suspense",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Computation.tState",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Computation.tState",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Computation.updatedAt",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Computation.user",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Computation.user",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Computation.value",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Computation.value",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Computation",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "ComputationState",
@@ -280,638 +100,37 @@
       "name": "ComputationSuspense",
       "file": "types/index.d.ts",
       "tier": "escape",
-      "findings": [
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ComputationSuspense.decrement",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ComputationSuspense.decrement",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ComputationSuspense.effects",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "ComputationSuspense.effects",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "ComputationSuspense.effects",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ComputationSuspense.effects",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ComputationSuspense.inFallback",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ComputationSuspense.inFallback",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ComputationSuspense.increment",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ComputationSuspense.increment",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ComputationSuspense.resolved",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ComputationSuspense.resolved",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "ComputationSuspense",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "DEV",
       "file": "types/index.d.ts",
       "tier": "escape",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "DEV",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "DEV.writeSignal()",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DEV.writeSignal(isComp)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "DEV.writeSignal(node)",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "DEV.writeSignal(node)",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "DEV.writeSignal(node)",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "DEV.writeSignal(value)",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "DEV",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "DEVHooks",
       "file": "types/index.d.ts",
       "tier": "escape",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DEVHooks.afterCreateOwner",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DEVHooks.afterCreateSignal",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "DEVHooks.afterCreateSignal(signal)",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DEVHooks.afterRegisterGraph",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DEVHooks.afterUpdate",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "DEVHooks",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Memo",
       "file": "types/index.d.ts",
       "tier": "escape",
-      "findings": [
-        {
-          "key": "SI005",
-          "pass": "shape-interfaces",
-          "tier": "exact",
-          "symbol": "Memo",
-          "message": "base Computation is inherited: the is-a relation is emitted (\u00A74.4)"
-        },
-        {
-          "key": "SI005",
-          "pass": "shape-interfaces",
-          "tier": "exact",
-          "symbol": "Memo",
-          "message": "base SignalState is inherited: the is-a relation is emitted (\u00A74.4)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Memo.cleanups",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Memo.comparator",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Memo.comparator",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "Memo.context",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Memo.graph",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Memo.graph",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Memo.internal",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Memo.internal",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Memo.name",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Memo.name",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Memo.observerSlots",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "Memo.observers",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "Memo.observers",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Memo.observers",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "Memo.owned",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "Memo.owned",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Memo.owned",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Memo.owner",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Memo.sourceMap",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Memo.sourceMap",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Memo.sourceSlots",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Memo.sources",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Memo.suspense",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Memo.suspense",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Memo.tOwned",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Memo.tOwned",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Memo.tState",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Memo.tState",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Memo.tValue",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Memo.tValue",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Memo.updatedAt",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Memo.user",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Memo.user",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Memo",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "SignalState",
       "file": "types/index.d.ts",
       "tier": "escape",
-      "findings": [
-        {
-          "key": "SI005",
-          "pass": "shape-interfaces",
-          "tier": "exact",
-          "symbol": "SignalState",
-          "message": "base SourceMapValue is inherited: the is-a relation is emitted (\u00A74.4)"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SignalState.comparator",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SignalState.comparator",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SignalState.graph",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SignalState.graph",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SignalState.internal",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SignalState.internal",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SignalState.name",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SignalState.name",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SignalState.observerSlots",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "SignalState.observers",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "SignalState.observers",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SignalState.observers",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SignalState.tValue",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SignalState.tValue",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "SignalState",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "SourceMapValue",
       "file": "types/index.d.ts",
       "tier": "widened",
-      "findings": [
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SourceMapValue.graph",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SourceMapValue.graph",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SourceMapValue.name",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SourceMapValue.name",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR009",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SourceMapValue.value",
-          "message": "unknown maps to obj (D8)"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "SourceMapValue",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "JSX",
@@ -924,13 +143,6 @@
           "tier": "widened",
           "symbol": "JSX.SERIALIZABLE",
           "message": "unique symbol has no binding in Fable.Core 5.2.0 and no F# form for its identity; widened to obj"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "JSX",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -938,71 +150,13 @@
       "name": "MapArrayOptions",
       "file": "types/reactive/array.d.ts",
       "tier": "escape",
-      "findings": [
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "MapArrayOptions.fallback",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "MapArrayOptions.fallback",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "MapArrayOptions.fallback()",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "MapArrayOptions",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "IndexArrayOptions",
       "file": "types/reactive/array.d.ts",
       "tier": "escape",
-      "findings": [
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "IndexArrayOptions.fallback",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "IndexArrayOptions.fallback",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "IndexArrayOptions.fallback()",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "IndexArrayOptions",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "ObservableObserver",
@@ -1014,64 +168,7 @@
       "name": "ObservableObserver2",
       "file": "types/reactive/observable.d.ts",
       "tier": "escape",
-      "findings": [
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ObservableObserver2.complete",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ObservableObserver2.complete",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ObservableObserver2.error",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ObservableObserver2.error",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "ObservableObserver2.error(v)",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ObservableObserver2.next",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ObservableObserver2.next",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "ObservableObserver2",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Observable",
@@ -1084,20 +181,6 @@
           "tier": "widened",
           "symbol": "Observable.__@observable",
           "message": "symbol-keyed member dropped (unrepresentable in F#)"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Observable",
-          "message": "ParamObject Create synthesized (D3)"
-        },
-        {
-          "key": "SP002",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Observable.subscribe",
-          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         }
       ]
     },
@@ -1105,169 +188,43 @@
       "name": "ObservableSubscribeObserver",
       "file": "types/reactive/observable.d.ts",
       "tier": "escape",
-      "findings": [
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ObservableSubscribeObserver.complete",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ObservableSubscribeObserver.complete",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ObservableSubscribeObserver.error",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ObservableSubscribeObserver.error",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "ObservableSubscribeObserver.error(v)",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ObservableSubscribeObserver.next",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ObservableSubscribeObserver.next",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "ObservableSubscribeObserver",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "ObservableSubscribeResult",
       "file": "types/reactive/observable.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "ObservableSubscribeResult",
-          "message": "ParamObject Create synthesized (D3)"
-        },
-        {
-          "key": "SP002",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "ObservableSubscribeResult.unsubscribe",
-          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "FromProducer",
       "file": "types/reactive/observable.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "FromProducer",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "FromProducer2",
       "file": "types/reactive/observable.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "FromProducer2.subscribe(fn)(v)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "FromProducer2",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "FromProducerSubscribeResult",
       "file": "types/reactive/observable.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "FromProducerSubscribeResult",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Task",
       "file": "types/reactive/scheduler.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Task.fn",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Task",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "RequestCallbackOptions",
       "file": "types/reactive/scheduler.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "RequestCallbackOptions",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Owner",
@@ -1280,90 +237,6 @@
           "tier": "widened",
           "symbol": "Owner",
           "message": "mutable binding emitted read-only"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "Owner",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Owner.cleanups",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "Owner.context",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Owner.name",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Owner.name",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "Owner.owned",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "Owner.owned",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Owner.owned",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Owner.owner",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Owner.sourceMap",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Owner.sourceMap",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Owner",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -1371,134 +244,13 @@
       "name": "Transition",
       "file": "types/reactive/signal.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "Transition",
-          "message": "null/undefined union members hoisted to option"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "TransitionState",
       "file": "types/reactive/signal.d.ts",
       "tier": "escape",
-      "findings": [
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "TransitionState.disposed",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "TransitionState.disposed",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "TransitionState.done",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "TransitionState.done",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "TransitionState.effects",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "TransitionState.effects",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "TransitionState.promises",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "TransitionState.queue",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "TransitionState.queue",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "TransitionState.resolve",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "TransitionState.resolve",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "TransitionState.scheduler",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "TransitionState.scheduler",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR009",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "TransitionState.scheduler()",
-          "message": "unknown maps to obj (D8)"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "TransitionState.sources",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "TransitionState",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Accessor",
@@ -1517,20 +269,6 @@
           "tier": "widened",
           "symbol": "Setter",
           "message": "Setter resolves to a target using fewer type parameters than its head; the surplus are erased phantoms"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "Setter",
-          "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "Setter",
-          "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
           "key": "TP003",
@@ -1608,92 +346,13 @@
       "name": "BaseOptions",
       "file": "types/reactive/signal.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "BaseOptions.name",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "BaseOptions.name",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "BaseOptions",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "SignalOptions",
       "file": "types/reactive/signal.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SI005",
-          "pass": "shape-interfaces",
-          "tier": "exact",
-          "symbol": "SignalOptions",
-          "message": "base MemoOptions is inherited: the is-a relation is emitted (\u00A74.4)"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SignalOptions.equals",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SignalOptions.equals",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SignalOptions.internal",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SignalOptions.internal",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SignalOptions.name",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SignalOptions.name",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "SignalOptions",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "NoInfer",
@@ -1713,161 +372,31 @@
       "name": "EffectOptions",
       "file": "types/reactive/signal.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SI005",
-          "pass": "shape-interfaces",
-          "tier": "exact",
-          "symbol": "EffectOptions",
-          "message": "base BaseOptions is inherited: the is-a relation is emitted (\u00A74.4)"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "EffectOptions.name",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "EffectOptions.name",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "EffectOptions",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "EffectFunction",
       "file": "types/reactive/signal.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TP002",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "EffectFunction",
-          "message": "constraint on \u0027Next\u0027 has no F# form and is dropped (\u00A74.9)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "CreateEffectOptions",
       "file": "types/reactive/signal.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SI003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateEffectOptions",
-          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateEffectOptions.name",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateEffectOptions.name",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateEffectOptions.render",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateEffectOptions.render",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "CreateEffectOptions",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "MemoOptions",
       "file": "types/reactive/signal.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SI005",
-          "pass": "shape-interfaces",
-          "tier": "exact",
-          "symbol": "MemoOptions",
-          "message": "base EffectOptions is inherited: the is-a relation is emitted (\u00A74.4)"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "MemoOptions.equals",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "MemoOptions.equals",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "MemoOptions.name",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "MemoOptions.name",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "MemoOptions",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Errored",
       "file": "types/reactive/signal.d.ts",
       "tier": "escape",
       "findings": [
-        {
-          "key": "RA005",
-          "pass": "repair-arity",
-          "tier": "ergonomic",
-          "symbol": "Errored",
-          "message": "latest reads but does not write: its type holds no value, and F# has no setter of type unit"
-        },
         {
           "key": "SI001",
           "pass": "shape-interfaces",
@@ -1876,25 +405,11 @@
           "message": "callable-and-properties hybrid loses its call signatures (Invoke emission is future work)"
         },
         {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "Errored.error",
-          "message": "any maps to obj"
-        },
-        {
           "key": "TR006",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "Errored.state",
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Errored",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -1903,20 +418,6 @@
       "file": "types/reactive/signal.d.ts",
       "tier": "widened",
       "findings": [
-        {
-          "key": "RA005",
-          "pass": "repair-arity",
-          "tier": "ergonomic",
-          "symbol": "Pending",
-          "message": "error reads but does not write: its type holds no value, and F# has no setter of type unit"
-        },
-        {
-          "key": "RA005",
-          "pass": "repair-arity",
-          "tier": "ergonomic",
-          "symbol": "Pending",
-          "message": "latest reads but does not write: its type holds no value, and F# has no setter of type unit"
-        },
         {
           "key": "SI001",
           "pass": "shape-interfaces",
@@ -1930,13 +431,6 @@
           "tier": "widened",
           "symbol": "Pending.state",
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Pending",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -1945,13 +439,6 @@
       "file": "types/reactive/signal.d.ts",
       "tier": "widened",
       "findings": [
-        {
-          "key": "RA005",
-          "pass": "repair-arity",
-          "tier": "ergonomic",
-          "symbol": "Ready",
-          "message": "error reads but does not write: its type holds no value, and F# has no setter of type unit"
-        },
         {
           "key": "SI001",
           "pass": "shape-interfaces",
@@ -1965,13 +452,6 @@
           "tier": "widened",
           "symbol": "Ready.state",
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Ready",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -1980,13 +460,6 @@
       "file": "types/reactive/signal.d.ts",
       "tier": "widened",
       "findings": [
-        {
-          "key": "RA005",
-          "pass": "repair-arity",
-          "tier": "ergonomic",
-          "symbol": "Refreshing",
-          "message": "error reads but does not write: its type holds no value, and F# has no setter of type unit"
-        },
         {
           "key": "SI001",
           "pass": "shape-interfaces",
@@ -2000,13 +473,6 @@
           "tier": "widened",
           "symbol": "Refreshing.state",
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Refreshing",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -2044,20 +510,6 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "RA005",
-          "pass": "repair-arity",
-          "tier": "ergonomic",
-          "symbol": "Unresolved",
-          "message": "error reads but does not write: its type holds no value, and F# has no setter of type unit"
-        },
-        {
-          "key": "RA005",
-          "pass": "repair-arity",
-          "tier": "ergonomic",
-          "symbol": "Unresolved",
-          "message": "latest reads but does not write: its type holds no value, and F# has no setter of type unit"
-        },
-        {
           "key": "SI001",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -2070,13 +522,6 @@
           "tier": "widened",
           "symbol": "Unresolved.state",
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Unresolved",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -2119,27 +564,6 @@
           "tier": "widened",
           "symbol": "ResourceActions.mutate(args)",
           "message": "an inline conditional is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ResourceActions.refetch()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ResourceActions.refetch(info)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "ResourceActions",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -2147,22 +571,7 @@
       "name": "ResourceSource",
       "file": "types/reactive/signal.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-aliases",
-          "tier": "ergonomic",
-          "symbol": "ResourceSource",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-aliases",
-          "tier": "ergonomic",
-          "symbol": "ResourceSource()",
-          "message": "null/undefined union members hoisted to option"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "ResourceFetcher",
@@ -2189,43 +598,13 @@
       "name": "ResourceFetcherInfo2",
       "file": "types/reactive/signal.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ResourceFetcherInfo2.value",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "ResourceFetcherInfo2",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "ResourceFetcherInfo",
       "file": "types/reactive/signal.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ResourceFetcherInfo.value",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "ResourceFetcherInfo",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "ResourceOptions",
@@ -2233,109 +612,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ResourceOptions.deferStream",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ResourceOptions.deferStream",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ResourceOptions.initialValue",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ResourceOptions.initialValue",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ResourceOptions.name",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ResourceOptions.name",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ResourceOptions.onHydrated",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ResourceOptions.onHydrated",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ResourceOptions.onHydrated(k)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ResourceOptions.ssrLoadFrom",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ResourceOptions.ssrLoadFrom",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ResourceOptions.storage",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ResourceOptions.storage",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
           "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "ResourceOptions.storage()",
           "message": "callback with 4 overloads shaped from the first"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ResourceOptions.storage()()",
-          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "TR046",
@@ -2357,20 +638,6 @@
           "tier": "ergonomic",
           "symbol": "ResourceOptions.storage()(args)",
           "message": "an inline conditional resolved to its true branch; the condition itself is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ResourceOptions.storage(init)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "ResourceOptions",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -2378,22 +645,7 @@
       "name": "ResourceOptionsOnHydratedInfo",
       "file": "types/reactive/signal.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ResourceOptionsOnHydratedInfo.value",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "ResourceOptionsOnHydratedInfo",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "ResourceOptionsSsrLoadFrom",
@@ -2407,109 +659,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "SI003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "InitializedResourceOptions",
-          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "InitializedResourceOptions.deferStream",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "InitializedResourceOptions.deferStream",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR051",
-          "pass": "shape-interfaces",
-          "tier": "exact",
-          "symbol": "InitializedResourceOptions.initialValue",
-          "message": "every operand of the flattened property is the same type"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "InitializedResourceOptions.name",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "InitializedResourceOptions.name",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "InitializedResourceOptions.onHydrated",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "InitializedResourceOptions.onHydrated",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "InitializedResourceOptions.onHydrated(k)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "InitializedResourceOptions.ssrLoadFrom",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "InitializedResourceOptions.ssrLoadFrom",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "InitializedResourceOptions.storage",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "InitializedResourceOptions.storage",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
           "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "InitializedResourceOptions.storage()",
           "message": "callback with 4 overloads shaped from the first"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "InitializedResourceOptions.storage()()",
-          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "TR046",
@@ -2531,20 +685,6 @@
           "tier": "ergonomic",
           "symbol": "InitializedResourceOptions.storage()(args)",
           "message": "an inline conditional resolved to its true branch; the condition itself is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "InitializedResourceOptions.storage(init)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "InitializedResourceOptions",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -2552,22 +692,7 @@
       "name": "InitializedResourceOptionsOnHydratedInfo",
       "file": "types/reactive/signal.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "InitializedResourceOptionsOnHydratedInfo.value",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "InitializedResourceOptionsOnHydratedInfo",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "ResourceReturn",
@@ -2629,34 +754,6 @@
           "tier": "ergonomic",
           "symbol": "ResourceReturnItem.mutate(args)",
           "message": "an inline conditional resolved to its true branch; the condition itself is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ResourceReturnItem.refetch()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ResourceReturnItem.refetch()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ResourceReturnItem.refetch(info)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "ResourceReturnItem",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -2706,27 +803,6 @@
           "tier": "widened",
           "symbol": "InitializedResourceReturnItem.mutate(args)",
           "message": "an inline conditional is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "InitializedResourceReturnItem.refetch()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "InitializedResourceReturnItem.refetch(info)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "InitializedResourceReturnItem",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -2734,112 +810,31 @@
       "name": "CreateResourceFetcherInfo",
       "file": "types/reactive/signal.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceFetcherInfo.value",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceFetcherInfo",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "CreateResourceFetcherInfo2",
       "file": "types/reactive/signal.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceFetcherInfo2.value",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceFetcherInfo2",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "CreateResourceFetcherInfo3",
       "file": "types/reactive/signal.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceFetcherInfo3.value",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceFetcherInfo3",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "CreateResourceFetcherInfo4",
       "file": "types/reactive/signal.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceFetcherInfo4.value",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceFetcherInfo4",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "CreateResourceOptions",
       "file": "types/reactive/signal.d.ts",
       "tier": "widened",
       "findings": [
-        {
-          "key": "SI003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions",
-          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions.deferStream",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions.deferStream",
-          "message": "null/undefined union members hoisted to option"
-        },
         {
           "key": "TR018",
           "pass": "shape-interfaces",
@@ -2862,81 +857,11 @@
           "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions.name",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions.name",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions.onHydrated",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions.onHydrated",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions.onHydrated(k)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions.ssrLoadFrom",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions.ssrLoadFrom",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions.storage",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions.storage",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
           "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "CreateResourceOptions.storage()",
           "message": "callback with 4 overloads shaped from the first"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions.storage()()",
-          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "TR046",
@@ -2958,20 +883,6 @@
           "tier": "ergonomic",
           "symbol": "CreateResourceOptions.storage()(args)",
           "message": "an inline conditional resolved to its true branch; the condition itself is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions.storage(init)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -2981,102 +892,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions2.deferStream",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions2.deferStream",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions2.initialValue",
-          "message": "optional member reads as option"
-        },
-        {
           "key": "TR020",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "CreateResourceOptions2.initialValue",
           "message": "indexed access has no F# form here; widened to obj"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions2.initialValue",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions2.name",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions2.name",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions2.onHydrated",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions2.onHydrated",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions2.onHydrated(k)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions2.ssrLoadFrom",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions2.ssrLoadFrom",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions2.storage",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions2.storage",
-          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "TR031",
@@ -3093,13 +913,6 @@
           "message": "indexed access has no F# form here; widened to obj"
         },
         {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions2.storage()()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
           "key": "TR046",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -3126,20 +939,6 @@
           "tier": "widened",
           "symbol": "CreateResourceOptions2.storage(init)",
           "message": "indexed access has no F# form here; widened to obj"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions2.storage(init)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions2",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -3154,20 +953,6 @@
           "tier": "widened",
           "symbol": "CreateResourceOptions2OnHydratedInfo.value",
           "message": "indexed access has no F# form here; widened to obj"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions2OnHydratedInfo.value",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions2OnHydratedInfo",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -3176,27 +961,6 @@
       "file": "types/reactive/signal.d.ts",
       "tier": "widened",
       "findings": [
-        {
-          "key": "SI003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions3",
-          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions3.deferStream",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions3.deferStream",
-          "message": "null/undefined union members hoisted to option"
-        },
         {
           "key": "TR018",
           "pass": "shape-interfaces",
@@ -3219,81 +983,11 @@
           "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions3.name",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions3.name",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions3.onHydrated",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions3.onHydrated",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions3.onHydrated(k)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions3.ssrLoadFrom",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions3.ssrLoadFrom",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions3.storage",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions3.storage",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
           "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "CreateResourceOptions3.storage()",
           "message": "callback with 4 overloads shaped from the first"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions3.storage()()",
-          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "TR046",
@@ -3315,20 +1009,6 @@
           "tier": "ergonomic",
           "symbol": "CreateResourceOptions3.storage()(args)",
           "message": "an inline conditional resolved to its true branch; the condition itself is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions3.storage(init)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions3",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -3336,22 +1016,7 @@
       "name": "CreateResourceOptions3OnHydratedInfo",
       "file": "types/reactive/signal.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions3OnHydratedInfo.value",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions3OnHydratedInfo",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "CreateResourceOptions4",
@@ -3359,102 +1024,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions4.deferStream",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions4.deferStream",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions4.initialValue",
-          "message": "optional member reads as option"
-        },
-        {
           "key": "TR020",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "CreateResourceOptions4.initialValue",
           "message": "indexed access has no F# form here; widened to obj"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions4.initialValue",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions4.name",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions4.name",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions4.onHydrated",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions4.onHydrated",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions4.onHydrated(k)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions4.ssrLoadFrom",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions4.ssrLoadFrom",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions4.storage",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions4.storage",
-          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "TR031",
@@ -3471,13 +1045,6 @@
           "message": "indexed access has no F# form here; widened to obj"
         },
         {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions4.storage()()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
           "key": "TR046",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -3504,20 +1071,6 @@
           "tier": "widened",
           "symbol": "CreateResourceOptions4.storage(init)",
           "message": "indexed access has no F# form here; widened to obj"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions4.storage(init)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions4",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -3532,20 +1085,6 @@
           "tier": "widened",
           "symbol": "CreateResourceOptions4OnHydratedInfo.value",
           "message": "indexed access has no F# form here; widened to obj"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions4OnHydratedInfo.value",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptions4OnHydratedInfo",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -3553,22 +1092,7 @@
       "name": "CreateResourceOptionsOnHydratedInfo",
       "file": "types/reactive/signal.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptionsOnHydratedInfo.value",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceOptionsOnHydratedInfo",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "CreateResourceResultItem",
@@ -3595,27 +1119,6 @@
           "tier": "widened",
           "symbol": "CreateResourceResultItem.mutate(args)",
           "message": "an inline conditional is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceResultItem.refetch()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceResultItem.refetch(info)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceResultItem",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -3651,34 +1154,6 @@
           "tier": "ergonomic",
           "symbol": "CreateResourceResultItem2.mutate(args)",
           "message": "an inline conditional resolved to its true branch; the condition itself is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceResultItem2.refetch()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceResultItem2.refetch()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceResultItem2.refetch(info)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceResultItem2",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -3707,27 +1182,6 @@
           "tier": "widened",
           "symbol": "CreateResourceResultItem3.mutate(args)",
           "message": "an inline conditional is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceResultItem3.refetch()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceResultItem3.refetch(info)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceResultItem3",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -3763,34 +1217,6 @@
           "tier": "ergonomic",
           "symbol": "CreateResourceResultItem4.mutate(args)",
           "message": "an inline conditional resolved to its true branch; the condition itself is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceResultItem4.refetch()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceResultItem4.refetch()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceResultItem4.refetch(info)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "CreateResourceResultItem4",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -3798,57 +1224,7 @@
       "name": "DeferredOptions",
       "file": "types/reactive/signal.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DeferredOptions.equals",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DeferredOptions.equals",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DeferredOptions.name",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DeferredOptions.name",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DeferredOptions.timeoutMs",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DeferredOptions.timeoutMs",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "DeferredOptions",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "ReturnTypes",
@@ -3877,13 +1253,6 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TR009",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "AccessorArray",
-          "message": "unknown maps to obj (D8)"
-        },
-        {
           "key": "TR028",
           "pass": "shape-aliases",
           "tier": "widened",
@@ -3903,141 +1272,37 @@
       "name": "OnEffectFunction",
       "file": "types/reactive/signal.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TP002",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "OnEffectFunction",
-          "message": "constraint on \u0027Next\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "OnEffectFunction(prevInput)",
-          "message": "null/undefined union members hoisted to option"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "OnOptions",
       "file": "types/reactive/signal.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "OnOptions.defer",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "OnOptions.defer",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "OnOptions",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "OnOptions2",
       "file": "types/reactive/signal.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SI003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "OnOptions2",
-          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "OnOptions2.defer",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "OnOptions2.defer",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "OnOptions2",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "OnOptions3",
       "file": "types/reactive/signal.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "OnOptions3",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "ContextProviderComponent",
       "file": "types/reactive/signal.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "ContextProviderComponent()",
-          "message": "null/undefined union members hoisted to option"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "ContextProviderComponentProps",
       "file": "types/reactive/signal.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SI003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ContextProviderComponentProps",
-          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ContextProviderComponentProps.children",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "ContextProviderComponentProps",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Context",
@@ -4045,25 +1310,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "Context.Provider()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
           "key": "TR041",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "Context.id",
           "message": "symbol has no binding in Fable.Core 5.2.0; widened to obj (\u00A74.1)"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Context",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -4071,50 +1322,13 @@
       "name": "ContextProviderProps",
       "file": "types/reactive/signal.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SI003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ContextProviderProps",
-          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ContextProviderProps.children",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "ContextProviderProps",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "ResolvedJSXElement",
       "file": "types/reactive/signal.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-aliases",
-          "tier": "ergonomic",
-          "symbol": "ResolvedJSXElement",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR049",
-          "pass": "shape-aliases",
-          "tier": "exact",
-          "symbol": "ResolvedJSXElement",
-          "message": "empty intersection operand reduced away; the remaining operand is the type"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "ResolvedChildren",
@@ -4122,32 +1336,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TR032",
-          "pass": "shape-aliases",
-          "tier": "ergonomic",
-          "symbol": "ResolvedChildren",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-aliases",
-          "tier": "ergonomic",
-          "symbol": "ResolvedChildren",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
           "key": "TR036",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "ResolvedChildren",
           "message": "union of 5 distinct types widened to obj (D4 caps the erased union at 4)"
-        },
-        {
-          "key": "TR049",
-          "pass": "shape-aliases",
-          "tier": "exact",
-          "symbol": "ResolvedChildren",
-          "message": "empty intersection operand reduced away; the remaining operand is the type"
         }
       ]
     },
@@ -4162,27 +1355,6 @@
           "tier": "widened",
           "symbol": "ChildrenReturn",
           "message": "callable-and-properties hybrid loses its call signatures (Invoke emission is future work)"
-        },
-        {
-          "key": "SI003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ChildrenReturn",
-          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ChildrenReturn.toArray()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "ChildrenReturn",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -4190,50 +1362,13 @@
       "name": "ExternalSource",
       "file": "types/reactive/signal.d.ts",
       "tier": "escape",
-      "findings": [
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "ExternalSource.track()",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "ExternalSource.track(v)",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "ExternalSource",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Component",
       "file": "types/render/component.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TP002",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "Component",
-          "message": "constraint on \u0027P\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "Component()",
-          "message": "null/undefined union members hoisted to option"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "VoidProps",
@@ -4246,13 +1381,6 @@
           "tier": "widened",
           "symbol": "VoidProps",
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-aliases",
-          "tier": "ergonomic",
-          "symbol": "VoidProps",
-          "message": "constraint on \u0027P\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
           "key": "TR018",
@@ -4276,20 +1404,6 @@
           "message": "VoidComponent resolves to a target using fewer type parameters than its head; the surplus are erased phantoms"
         },
         {
-          "key": "TP002",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "VoidComponent",
-          "message": "constraint on \u0027P\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "VoidComponent()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
           "key": "TR018",
           "pass": "shape-callbacks",
           "tier": "widened",
@@ -4309,13 +1423,6 @@
           "tier": "widened",
           "symbol": "ParentProps",
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-aliases",
-          "tier": "ergonomic",
-          "symbol": "ParentProps",
-          "message": "constraint on \u0027P\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
           "key": "TR018",
@@ -4339,20 +1446,6 @@
           "message": "ParentComponent resolves to a target using fewer type parameters than its head; the surplus are erased phantoms"
         },
         {
-          "key": "TP002",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "ParentComponent",
-          "message": "constraint on \u0027P\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "ParentComponent()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
           "key": "TR018",
           "pass": "shape-callbacks",
           "tier": "widened",
@@ -4372,13 +1465,6 @@
           "tier": "widened",
           "symbol": "FlowProps",
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-aliases",
-          "tier": "ergonomic",
-          "symbol": "FlowProps",
-          "message": "constraint on \u0027P\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
           "key": "TR018",
@@ -4402,20 +1488,6 @@
           "message": "FlowComponent resolves to a target using fewer type parameters than its head; the surplus are erased phantoms"
         },
         {
-          "key": "TP002",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "FlowComponent",
-          "message": "constraint on \u0027P\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "FlowComponent()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
           "key": "TR018",
           "pass": "shape-callbacks",
           "tier": "widened",
@@ -4435,13 +1507,6 @@
           "tier": "widened",
           "symbol": "PropsWithChildren",
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-aliases",
-          "tier": "ergonomic",
-          "symbol": "PropsWithChildren",
-          "message": "constraint on \u0027P\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
           "key": "TR018",
@@ -5912,27 +2977,6 @@
           "tier": "widened",
           "symbol": "ValidComponent",
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
-        },
-        {
-          "key": "TR049",
-          "pass": "shape-aliases",
-          "tier": "exact",
-          "symbol": "ValidComponent",
-          "message": "empty intersection operand reduced away; the remaining operand is the type"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-aliases",
-          "tier": "ergonomic",
-          "symbol": "ValidComponent()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-aliases",
-          "tier": "escape",
-          "symbol": "ValidComponent(props)",
-          "message": "any maps to obj"
         }
       ]
     },
@@ -5947,13 +2991,6 @@
           "tier": "widened",
           "symbol": "ComponentProps",
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-aliases",
-          "tier": "ergonomic",
-          "symbol": "ComponentProps",
-          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
           "key": "TR045",
@@ -5983,13 +3020,6 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TP002",
-          "pass": "shape-aliases",
-          "tier": "ergonomic",
-          "symbol": "MergeProps",
-          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
           "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
@@ -6009,13 +3039,6 @@
           "tier": "widened",
           "symbol": "SplitProps",
           "message": "tuple with a rest element widened to an array (\u00A74.12 leaves the erased carrier to a fixture)"
-        },
-        {
-          "key": "TR047",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "SplitProps",
-          "message": "object type declares no members; obj admits the same values"
         }
       ]
     },
@@ -6024,20 +3047,6 @@
       "file": "types/render/component.d.ts",
       "tier": "widened",
       "findings": [
-        {
-          "key": "TP002",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SplitPropsResultItemItem",
-          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "MB004",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SplitPropsResultItemItem.[]",
-          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
-        },
         {
           "key": "TR020",
           "pass": "shape-interfaces",
@@ -6058,22 +3067,7 @@
       "name": "LazyFnResultItem",
       "file": "types/render/component.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TP002",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "LazyFnResultItem",
-          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "LazyFnResultItem",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "ForProps",
@@ -6081,53 +3075,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TP002",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ForProps",
-          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ForProps",
-          "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
           "key": "TR020",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "ForProps.children(item)",
           "message": "indexed access has no F# form here; widened to obj"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ForProps.each",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ForProps.fallback",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ForProps.fallback",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "ForProps",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -6137,53 +3089,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TP002",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "IndexProps",
-          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "IndexProps",
-          "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
           "key": "TR020",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "IndexProps.children(item)()",
           "message": "indexed access has no F# form here; widened to obj"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "IndexProps.each",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "IndexProps.fallback",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "IndexProps.fallback",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "IndexProps",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -6193,27 +3103,6 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TP002",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ShowProps",
-          "message": "constraint on \u0027TRenderFunction\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ShowProps.children",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ShowProps.children",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
           "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -6226,55 +3115,6 @@
           "tier": "ergonomic",
           "symbol": "ShowProps.children",
           "message": "RequiredParameter resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR049",
-          "pass": "shape-interfaces",
-          "tier": "exact",
-          "symbol": "ShowProps.children",
-          "message": "empty intersection operand reduced away; the remaining operand is the type"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ShowProps.fallback",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ShowProps.fallback",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ShowProps.keyed",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ShowProps.keyed",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ShowProps.when",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "ShowProps",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -6284,27 +3124,6 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TP002",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ShowProps2",
-          "message": "constraint on \u0027TRenderFunction\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ShowProps2.children",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ShowProps2.children",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
           "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -6317,41 +3136,6 @@
           "tier": "ergonomic",
           "symbol": "ShowProps2.children",
           "message": "RequiredParameter resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR049",
-          "pass": "shape-interfaces",
-          "tier": "exact",
-          "symbol": "ShowProps2.children",
-          "message": "empty intersection operand reduced away; the remaining operand is the type"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ShowProps2.fallback",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ShowProps2.fallback",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ShowProps2.when",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "ShowProps2",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -6359,36 +3143,7 @@
       "name": "SwitchProps",
       "file": "types/render/flow.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SwitchProps.children",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SwitchProps.fallback",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SwitchProps.fallback",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "SwitchProps",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "MatchProps",
@@ -6396,39 +3151,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "MatchProps.children",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "MatchProps.children",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
           "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "MatchProps.children",
           "message": "union of 6 distinct types widened to obj (D4 caps the erased union at 4)"
-        },
-        {
-          "key": "TR049",
-          "pass": "shape-interfaces",
-          "tier": "exact",
-          "symbol": "MatchProps.children",
-          "message": "empty intersection operand reduced away; the remaining operand is the type"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "MatchProps.children()",
-          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "TR018",
@@ -6450,34 +3177,6 @@
           "tier": "widened",
           "symbol": "MatchProps.children(item)()",
           "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "MatchProps.keyed",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "MatchProps.keyed",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "MatchProps.when",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "MatchProps",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -6487,27 +3186,6 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TP002",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "MatchProps2",
-          "message": "constraint on \u0027TRenderFunction\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "MatchProps2.children",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "MatchProps2.children",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
           "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -6520,41 +3198,6 @@
           "tier": "ergonomic",
           "symbol": "MatchProps2.children",
           "message": "RequiredParameter resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR049",
-          "pass": "shape-interfaces",
-          "tier": "exact",
-          "symbol": "MatchProps2.children",
-          "message": "empty intersection operand reduced away; the remaining operand is the type"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "MatchProps2.keyed",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "MatchProps2.keyed",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "MatchProps2.when",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "MatchProps2",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -6564,27 +3207,6 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TP002",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "MatchProps3",
-          "message": "constraint on \u0027TRenderFunction\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "MatchProps3.children",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "MatchProps3.children",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
           "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -6597,27 +3219,6 @@
           "tier": "ergonomic",
           "symbol": "MatchProps3.children",
           "message": "RequiredParameter resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR049",
-          "pass": "shape-interfaces",
-          "tier": "exact",
-          "symbol": "MatchProps3.children",
-          "message": "empty intersection operand reduced away; the remaining operand is the type"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "MatchProps3.when",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "MatchProps3",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -6627,60 +3228,11 @@
       "tier": "escape",
       "findings": [
         {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ErrorBoundaryProps.children",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ErrorBoundaryProps.fallback",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ErrorBoundaryProps.fallback",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
           "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "ErrorBoundaryProps.fallback",
           "message": "union of 6 distinct types widened to obj (D4 caps the erased union at 4)"
-        },
-        {
-          "key": "TR049",
-          "pass": "shape-interfaces",
-          "tier": "exact",
-          "symbol": "ErrorBoundaryProps.fallback",
-          "message": "empty intersection operand reduced away; the remaining operand is the type"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ErrorBoundaryProps.fallback()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "ErrorBoundaryProps.fallback(err)",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "ErrorBoundaryProps",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -6688,210 +3240,19 @@
       "name": "SharedConfig",
       "file": "types/render/hydration.d.ts",
       "tier": "escape",
-      "findings": [
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SharedConfig.context",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SharedConfig.context",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SharedConfig.count",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SharedConfig.count",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SharedConfig.done",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SharedConfig.done",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SharedConfig.effects",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "SharedConfig.effects",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "SharedConfig.effects",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SharedConfig.effects",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SharedConfig.gather",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SharedConfig.gather",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SharedConfig.has",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SharedConfig.has",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SharedConfig.load",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SharedConfig.load",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "SharedConfig.load()",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SharedConfig.registry",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SharedConfig.registry",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SharedConfig.resources",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SharedConfig.resources",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "SharedConfig",
-          "message": "ParamObject Create synthesized (D3)"
-        },
-        {
-          "key": "SP002",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "SharedConfig.getContextId",
-          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
-        },
-        {
-          "key": "SP002",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "SharedConfig.getNextContextId",
-          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "SharedConfigContext",
       "file": "types/render/hydration.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "SharedConfigContext",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "SharedConfigResources",
       "file": "types/render/hydration.d.ts",
       "tier": "escape",
       "findings": [
-        {
-          "key": "MB004",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SharedConfigResources.[]",
-          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "SharedConfigResources.[]",
-          "message": "any maps to obj"
-        },
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
@@ -6905,36 +3266,7 @@
       "name": "SuspenseListProps",
       "file": "types/render/suspense.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SuspenseListProps.children",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SuspenseListProps.tail",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SuspenseListProps.tail",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "SuspenseListProps",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "SuspenseListPropsRevealOrder",
@@ -6952,76 +3284,17 @@
       "name": "SuspenseProps",
       "file": "types/render/suspense.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SuspenseProps.children",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SuspenseProps.fallback",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SuspenseProps.fallback",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "SuspenseProps",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "mapArray",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "mapArray(list)()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "mapArray(options)",
-          "message": "null/undefined union members hoisted to option"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "indexArray",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "indexArray(list)()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "indexArray(options)",
-          "message": "null/undefined union members hoisted to option"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "observable",
@@ -7032,13 +3305,6 @@
       "name": "from",
       "tier": "widened",
       "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "from()()",
-          "message": "null/undefined union members hoisted to option"
-        },
         {
           "key": "TR031",
           "pass": "shape-exports",
@@ -7093,15 +3359,7 @@
     {
       "name": "requestCallback",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "requestCallback(options)",
-          "message": "null/undefined union members hoisted to option"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "cancelCallback",
@@ -7155,15 +3413,7 @@
     {
       "name": "createRoot",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "createRoot(detachedOwner)",
-          "message": "null/undefined union members hoisted to option"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "createSignal",
@@ -7182,13 +3432,6 @@
           "tier": "widened",
           "symbol": "createSignal()",
           "message": "callback with 4 overloads shaped from the first"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "createSignal()()",
-          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "TR045",
@@ -7224,13 +3467,6 @@
           "tier": "ergonomic",
           "symbol": "createSignal()(args)",
           "message": "an inline conditional resolved to its true branch; the condition itself is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "createSignal(options)",
-          "message": "null/undefined union members hoisted to option"
         }
       ]
     },
@@ -7244,20 +3480,6 @@
           "tier": "widened",
           "symbol": "createComputed(fn)(v)",
           "message": "indexed access has no F# form here; widened to obj"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "createComputed(fn)(v)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "createComputed(options)",
-          "message": "null/undefined union members hoisted to option"
         }
       ]
     },
@@ -7271,20 +3493,6 @@
           "tier": "widened",
           "symbol": "createRenderEffect(fn)(v)",
           "message": "indexed access has no F# form here; widened to obj"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "createRenderEffect(fn)(v)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "createRenderEffect(options)",
-          "message": "null/undefined union members hoisted to option"
         }
       ]
     },
@@ -7298,54 +3506,18 @@
           "tier": "widened",
           "symbol": "createEffect(fn)(v)",
           "message": "indexed access has no F# form here; widened to obj"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "createEffect(fn)(v)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "createEffect(options)",
-          "message": "null/undefined union members hoisted to option"
         }
       ]
     },
     {
       "name": "createReaction",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "createReaction(options)",
-          "message": "null/undefined union members hoisted to option"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "createMemo",
       "tier": "widened",
       "findings": [
-        {
-          "key": "TP002",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "createMemo",
-          "message": "constraint on \u0027Next\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "createMemo",
-          "message": "constraint on \u0027Next\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
         {
           "key": "TP006",
           "pass": "shape-exports",
@@ -7359,20 +3531,6 @@
           "tier": "widened",
           "symbol": "createMemo(fn)(v)",
           "message": "indexed access has no F# form here; widened to obj"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "createMemo(fn)(v)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "createMemo(options)",
-          "message": "null/undefined union members hoisted to option"
         }
       ]
     },
@@ -7421,83 +3579,18 @@
           "tier": "widened",
           "symbol": "createResource()",
           "message": "union of 5 distinct types widened to obj (D4 caps the erased union at 4)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "createResource(options)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "createResource(options)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "createResource(source)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "createResource(source)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "createResource(source)()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "createResource(source)()",
-          "message": "null/undefined union members hoisted to option"
         }
       ]
     },
     {
       "name": "createDeferred",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "createDeferred(options)",
-          "message": "null/undefined union members hoisted to option"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "createSelector",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "createSelector(fn)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "createSelector(options)",
-          "message": "null/undefined union members hoisted to option"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "batch",
@@ -7514,20 +3607,6 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TP002",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "on",
-          "message": "constraint on \u0027Next\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "on",
-          "message": "constraint on \u0027Next\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
           "key": "TP006",
           "pass": "shape-exports",
           "tier": "widened",
@@ -7556,13 +3635,6 @@
           "message": "indexed access has no F# form here; widened to obj"
         },
         {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "on()()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
           "key": "TR020",
           "pass": "shape-exports",
           "tier": "widened",
@@ -7575,34 +3647,6 @@
           "tier": "widened",
           "symbol": "on()(v)",
           "message": "indexed access has no F# form here; widened to obj"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "on()(v)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "on()(v)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR009",
-          "pass": "shape-exports",
-          "tier": "widened",
-          "symbol": "on(deps)",
-          "message": "unknown maps to obj (D8)"
-        },
-        {
-          "key": "TR009",
-          "pass": "shape-exports",
-          "tier": "widened",
-          "symbol": "on(deps)",
-          "message": "unknown maps to obj (D8)"
         },
         {
           "key": "TR028",
@@ -7645,41 +3689,6 @@
           "tier": "widened",
           "symbol": "on(fn)(prev)",
           "message": "indexed access has no F# form here; widened to obj"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "on(fn)(prev)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "on(fn)(prev)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "on(fn)(prevInput)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "on(fn)(prevInput)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "on(options)",
-          "message": "null/undefined union members hoisted to option"
         }
       ]
     },
@@ -7691,27 +3700,12 @@
     {
       "name": "onCleanup",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TP002",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "onCleanup",
-          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "catchError",
       "tier": "widened",
       "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "catchError()",
-          "message": "null/undefined union members hoisted to option"
-        },
         {
           "key": "TR023",
           "pass": "shape-exports",
@@ -7724,95 +3718,27 @@
     {
       "name": "getListener",
       "tier": "escape",
-      "findings": [
-        {
-          "key": "TR008",
-          "pass": "shape-exports",
-          "tier": "escape",
-          "symbol": "getListener()",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "TR008",
-          "pass": "shape-exports",
-          "tier": "escape",
-          "symbol": "getListener()",
-          "message": "any maps to obj"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "getListener()",
-          "message": "null/undefined union members hoisted to option"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "getOwner",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "getOwner()",
-          "message": "null/undefined union members hoisted to option"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "runWithOwner",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "runWithOwner()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "runWithOwner(o)",
-          "message": "null/undefined union members hoisted to option"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "enableScheduling",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "enableScheduling(scheduler)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "enableScheduling(scheduler)(options)",
-          "message": "null/undefined union members hoisted to option"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "startTransition",
       "tier": "widened",
-      "findings": [
-        {
-          "key": "TR009",
-          "pass": "shape-exports",
-          "tier": "widened",
-          "symbol": "startTransition(fn)()",
-          "message": "unknown maps to obj (D8)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "useTransition",
@@ -7822,29 +3748,7 @@
     {
       "name": "createContext",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "createContext()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "createContext(options)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "createContext(options)",
-          "message": "null/undefined union members hoisted to option"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "useContext",
@@ -7854,15 +3758,7 @@
     {
       "name": "children",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "children(fn)()",
-          "message": "null/undefined union members hoisted to option"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "enableExternalSource",
@@ -7881,13 +3777,6 @@
           "tier": "widened",
           "symbol": "enableExternalSource(factory)(fn)(v)",
           "message": "type parameter is not in scope here; widened to obj"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "enableExternalSource(untrack)",
-          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "TR013",
@@ -7926,41 +3815,12 @@
     {
       "name": "createComponent",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TP002",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "createComponent",
-          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "createComponent()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "createComponent(Comp)()",
-          "message": "null/undefined union members hoisted to option"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "mergeProps",
       "tier": "widened",
       "findings": [
-        {
-          "key": "TP002",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "mergeProps",
-          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
         {
           "key": "TR045",
           "pass": "shape-exports",
@@ -7975,32 +3835,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TP002",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "splitProps",
-          "message": "constraint on \u0027K\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "splitProps",
-          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
           "key": "TR028",
           "pass": "shape-exports",
           "tier": "widened",
           "symbol": "splitProps()",
           "message": "tuple with a rest element widened to an array (\u00A74.12 leaves the erased carrier to a fixture)"
-        },
-        {
-          "key": "TR047",
-          "pass": "shape-exports",
-          "tier": "widened",
-          "symbol": "splitProps()",
-          "message": "object type declares no members; obj admits the same values"
         }
       ]
     },
@@ -8008,13 +3847,6 @@
       "name": "lazy",
       "tier": "widened",
       "findings": [
-        {
-          "key": "TP002",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "lazy",
-          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
         {
           "key": "TR018",
           "pass": "shape-exports",
@@ -8032,137 +3864,27 @@
     {
       "name": "For",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TP002",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "For",
-          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "For",
-          "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "For()",
-          "message": "null/undefined union members hoisted to option"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Index",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TP002",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "Index",
-          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "Index",
-          "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "Index()",
-          "message": "null/undefined union members hoisted to option"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Show",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TP002",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "Show",
-          "message": "constraint on \u0027TRenderFunction\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "Show",
-          "message": "constraint on \u0027TRenderFunction\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "Show()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "Show()",
-          "message": "null/undefined union members hoisted to option"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Switch",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "Switch()",
-          "message": "null/undefined union members hoisted to option"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Match",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TP002",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "Match",
-          "message": "constraint on \u0027TRenderFunction\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "Match",
-          "message": "constraint on \u0027TRenderFunction\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "Match()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "Match()",
-          "message": "null/undefined union members hoisted to option"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "resetErrorBoundaries",
@@ -8172,15 +3894,7 @@
     {
       "name": "ErrorBoundary",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "ErrorBoundary()",
-          "message": "null/undefined union members hoisted to option"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "sharedConfig",
@@ -8190,28 +3904,12 @@
     {
       "name": "SuspenseList",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "SuspenseList()",
-          "message": "null/undefined union members hoisted to option"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Suspense",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "TR032",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "Suspense()",
-          "message": "null/undefined union members hoisted to option"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "\u003Ctype-table\u003E",

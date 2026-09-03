@@ -3,22 +3,23 @@
   "module": "IntersectionEmptyLab",
   "counts": {
     "exact": 2,
-    "ergonomic": 2,
+    "ergonomic": 0,
     "widened": 4,
-    "escape": 0
+    "escape": 0,
+    "limitations": 2
   },
   "passes": [
     {
       "pass": "SA - shape-aliases",
       "total": 12,
       "exact": 4,
-      "ergonomic": 1,
-      "widened": 7
+      "widened": 7,
+      "limitation": 1
     },
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 1,
-      "ergonomic": 1
+      "limitation": 1
     }
   ],
   "symbols": [
@@ -40,13 +41,6 @@
           "tier": "widened",
           "symbol": "Ease",
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
-        },
-        {
-          "key": "TR049",
-          "pass": "shape-aliases",
-          "tier": "exact",
-          "symbol": "Ease",
-          "message": "empty intersection operand reduced away; the remaining operand is the type"
         }
       ]
     },
@@ -54,15 +48,7 @@
       "name": "Loose",
       "file": "index.d.ts",
       "tier": "exact",
-      "findings": [
-        {
-          "key": "TR049",
-          "pass": "shape-aliases",
-          "tier": "exact",
-          "symbol": "Loose",
-          "message": "empty intersection operand reduced away; the remaining operand is the type"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Size",
@@ -82,13 +68,6 @@
           "tier": "widened",
           "symbol": "Size",
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
-        },
-        {
-          "key": "TR049",
-          "pass": "shape-aliases",
-          "tier": "exact",
-          "symbol": "Size",
-          "message": "empty intersection operand reduced away; the remaining operand is the type"
         }
       ]
     },
@@ -110,13 +89,6 @@
           "tier": "widened",
           "symbol": "Weight",
           "message": "numeric literal type widened to float (doc-noted, \u00A74.2)"
-        },
-        {
-          "key": "TR049",
-          "pass": "shape-aliases",
-          "tier": "exact",
-          "symbol": "Weight",
-          "message": "empty intersection operand reduced away; the remaining operand is the type"
         }
       ]
     },
@@ -138,29 +110,13 @@
       "name": "UserId",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SA001",
-          "pass": "shape-aliases",
-          "tier": "ergonomic",
-          "symbol": "UserId",
-          "message": "branding intersection emitted as a unit of measure; uses read as the branded primitive (\u00A74.6, D11)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "Padded",
       "file": "index.d.ts",
       "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Padded",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
+      "findings": []
     },
     {
       "name": "ease",

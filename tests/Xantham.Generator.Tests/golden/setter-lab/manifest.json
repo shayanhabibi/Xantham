@@ -5,7 +5,8 @@
     "exact": 0,
     "ergonomic": 0,
     "widened": 5,
-    "escape": 1
+    "escape": 1,
+    "limitations": 0
   },
   "passes": [
     {
@@ -16,8 +17,9 @@
     {
       "pass": "shape-callbacks",
       "total": 21,
-      "ergonomic": 15,
-      "widened": 6
+      "ergonomic": 5,
+      "widened": 6,
+      "limitation": 10
     },
     {
       "pass": "SI - shape-interfaces",
@@ -27,7 +29,7 @@
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 1,
-      "ergonomic": 1
+      "limitation": 1
     },
     {
       "pass": "RA - repair-arity",
@@ -52,20 +54,6 @@
           "tier": "widened",
           "symbol": "Setter",
           "message": "Setter resolves to a target using fewer type parameters than its head; the surplus are erased phantoms"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "Setter",
-          "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "Setter",
-          "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
           "key": "TP003",
@@ -124,27 +112,6 @@
           "message": "Distinct resolves to a target using fewer type parameters than its head; the surplus are erased phantoms"
         },
         {
-          "key": "TP002",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "Distinct",
-          "message": "constraint on \u0027A\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "Distinct",
-          "message": "constraint on \u0027A\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "Distinct",
-          "message": "constraint on \u0027B\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
           "key": "TP003",
           "pass": "shape-callbacks",
           "tier": "ergonomic",
@@ -171,20 +138,6 @@
           "tier": "widened",
           "symbol": "Single",
           "message": "Single resolves to a target using fewer type parameters than its head; the surplus are erased phantoms"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "Single",
-          "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "Single",
-          "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
           "key": "TP003",
@@ -297,13 +250,6 @@
           "tier": "widened",
           "symbol": "Holder.single(value)",
           "message": "type parameter is not in scope here; widened to obj"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Holder",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -337,27 +283,6 @@
           "tier": "widened",
           "symbol": "DivergentBound",
           "message": "generic alias dropped: its target widened away every type parameter, and F# has no unused type variable in an abbreviation"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "DivergentBound",
-          "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "DivergentBound",
-          "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "DivergentBound",
-          "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
           "key": "TP003",
