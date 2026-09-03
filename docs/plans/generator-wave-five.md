@@ -198,11 +198,57 @@ test for the fix.
 Stub synthesis is refused. A stub is written from the templated identity, so it agrees with the
 template by construction, and both breaks above would compile clean against one.
 
+## Batch 1 — landed
+
+| lane | result |
+|---|---|
+| R | `map` is a real disposition. Configured as a per-name table, because arity cannot be inferred from the site and a group-level rule has nowhere to carry it. The pinned lib tables are **not** folded in — they fire under `reference` too, and one group has one disposition, so `map` cannot mean "redirected *and* templated"; the two compose instead, pinned tables first and configured table for the rest. `TR053` 1 (the lab's own negative), `TR052` 0. |
+| S | A shipped group is written as its own module under `groups/`, one file per `ship` group. A name crossing the boundary is spelled exactly as `reference` templates it, so a shipped group and a referenced one are interchangeable at the use site. The module-name collision is real and pinned: `dep-lab` and `dep_lab` both derive `DepLab`, the entry claims first, the loser keeps its declarations in the entry module and says so. `GE001`, `GE002`, `GE003` one each. |
+| T | **The contract does not hold.** Two breaks, neither repaired — both are `src/` files this lane does not own. Order-independence itself holds byte for byte. Gate policy settled: closed configurations, corpus as the unit of closure. |
+
+Corpus 31 → 35 fixtures. **Every pre-existing fixture is byte-unchanged**: regenerating over the
+composed tree moved no golden and no manifest, so each lane's counts survived composition exactly
+and no interaction appeared. That is the whole aggregate story of this wave, as designed — `map`
+is inert until configured, `ship` emission is inert until a group is configured `ship`, and lane T
+wrote no `src/`.
+
+Gates over the composed tree: 337 generator tests passed, 2 skipped, 85 wire tests passed, compile
+gate built, run gate 98 checks passed.
+
+### The two breaks, which are what this wave bought
+
+1. **A templated generic loses its type arguments.** `Shape/Spec.fs` renders a `reference` name as
+   `FsNamed "{module}.{name}", []`, discarding `facts.TypeArguments`. `Box<string>` reads
+   `Dep.Box` against a dependency declaring `Box<'T>`: `FS0033` at every site, and **no finding
+   raised**. `instantiationOf` is what would re-apply them, and it resolves the target through
+   `model.DeclNames`, which identity-only resolution never fills. Repair belongs in `Shape/Spec.fs`
+   beside lane R's work. `golden/cross-package-lab/CrossPackageLab.reference.open.fs` is committed
+   and excluded from the gate because of this; renaming it into the gate is the acceptance test.
+2. **A referenced object alias is copied rather than named.** An alias over an object literal
+   carries `__type` on `symbol` rather than `aliasSymbol`, so `isAnonymousShape` is true, the O7
+   shortcut is skipped, and the dependency's shape is re-derived into the entry package under a
+   second name. One TypeScript type becomes two unrelated F# interfaces. **This one compiles**,
+   which makes it the more expensive of the two. Disposition-independent — it happens under `widen`
+   as well. Repair belongs in `Resolve.fs`.
+
+### Two constraints found on the way
+
+- **`Grouping.classify` cannot see a nested dependency.** The entry-package check runs before the
+  `node_modules` check, so a dependency installed *under* the entry package — npm's nested layout,
+  which is what a version conflict produces — classifies as `EntryPackage` and is shipped into it.
+  Both multi-package labs are laid out side by side to avoid it.
+- **`TR052` and its twin `TR021` are unreachable from a live fixture.** `Resolve.fs` skips the
+  identity-only shortcut for anonymous shapes, so an anonymous shape from a non-entry group
+  resolves fully and is declared; it never reaches the disposition match. Both stand at 0 across
+  the corpus, pinned by synthetic unit tests. A future `inline` is the first thing likely to
+  construct one.
+
 ## Batch 2 — priced by batch 1, not before
 
-1. **`inline` and demand-driven resolve.** The named prerequisite for shipping large groups. Lane
-   S measures what a shipped group costs in lines; that number decides whether this is a lane or a
-   wave.
+1. **The two breaks above**, in that order. Break 1 is bounded and has an acceptance test already
+   committed. Break 2 is unbounded until somebody reads what `aliasSymbol` costs, and it is the
+   one that ships wrong output silently.
+2. **`inline` and demand-driven resolve.** The named prerequisite for shipping large groups.
 2. **The compiler lib as a real shipped package.** O7's default flips from `widen` to `reference`
    "once the shipped compiler-lib package exists". Lanes R and S together are what make it
    buildable.

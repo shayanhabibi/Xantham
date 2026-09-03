@@ -1082,8 +1082,12 @@ section above.
   Groups are addressed in `xantham.json` under `"groups"` by npm name, the compiler lib
   as `"typescript/lib"`.
 
-  *Status (2026-09-02):* `ship`, `reference` and `widen` are implemented; `map` and `inline`
-  are not. The compiler lib is the one group where a `map` already happens in practice, and it
+  *Status (2026-09-03, wave five batch 1):* `ship`, `reference`, `map` and `widen` are
+  implemented; `inline` is not. `map` is configured per group as a per-name table
+  (`{ "map": { "Buffer": "Node.Buffer.Buffer", "Readable": { "name": "...", "arity": 1 } } }`),
+  because the arity a destination takes cannot be inferred from the site and a group-level
+  rule has nowhere to carry it. A shipped group is now written as its own module under
+  `groups/`, so a run emits one file per `ship` group rather than one file. The compiler lib is the one group where a `map` already happens in practice, and it
   happens *below* the disposition rather than through it — the group is still configured
   `widen`, and `Shape.libBinding` intercepts any name the pinned tables bind
   (`Naming.LibBindings` → `Fable.Core.JS.*`, `Naming.BrowserBindings` → `Browser.Types.*`)
@@ -1100,14 +1104,28 @@ section above.
   agree on every templated name — while
   remembering that source-level agreement is not identity; the compiled *assembly*
   (NuGet version discipline against the `typescript` npm pin, as Wire already
-  practices) is what unifies a type across packages. Ship-group emission beyond the
-  entry package, and demand-driven resolve (a prerequisite for `inline` and for
-  shipping large groups), are phase B+.
+  practices) is what unifies a type across packages. Demand-driven resolve (a
+  prerequisite for `inline` and for shipping large groups) is phase B+.
 
-  **Open:** what the compile gate means for output whose `reference` groups are not
-  shipped anywhere yet — gate only closed configurations (every group `ship`/`map`/
-  `inline`), or synthesize stub assemblies from the templated identities. Simplest
-  first: gate closed configurations only.
+  **The first consequence does not hold yet, and wave five lane T is where it is stated as a
+  test** (`tests/Xantham.Generator.Tests/MultiPackage.test.fs`, two `ptestCase`). Two breaks
+  stand between the contract and the claim. A templated *generic* is rendered by
+  `Shape/Spec.fs` as a bare name with its type arguments discarded, so `Box<string>` reads
+  `Dep.Box` against a dependency declaring `Box<'T>` and the reference fails `FS0033` with no
+  finding raised; `instantiationOf` would re-apply them, and it looks the target up in
+  `model.DeclNames`, which identity-only resolution never fills. And a referenced *alias over
+  an object literal* carries the symbol `__type` on `symbol` rather than `aliasSymbol`, so
+  `isAnonymousShape` is true, the group shortcut is skipped, and the dependency's shape is
+  re-derived into the entry package under a second name — one TypeScript type declared as two
+  unrelated F# interfaces, and that one compiles.
+
+  *Settled (wave five lane T):* the compile gate takes closed configurations only, with the
+  **corpus** as the unit of closure rather than the run. `cross-package-lab` and
+  `cross-package-dep` are gated together, which makes the F# compiler rather than a string
+  comparison the judge of whether a templated name is the shipped one. A golden whose
+  templated module nothing ships carries the `.open.fs` suffix and stays out. Stub synthesis
+  is refused: a stub written from the templated identity agrees with the template by
+  construction, and both breaks above would compile clean against one.
 
 Watch items rather than open questions: the debug assertion pass (O3) and the bespoke
 JSON model dump (O5) are named escape hatches, built only when their triggering need
