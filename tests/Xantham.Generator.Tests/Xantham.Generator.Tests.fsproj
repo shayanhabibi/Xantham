@@ -14,6 +14,7 @@
         <Compile Include="Findings.test.fs" />
         <Compile Include="MultiPackage.test.fs" />
         <Compile Include="Pipeline.test.fs" />
+        <Compile Include="Cli.test.fs" />
         <Compile Include="Main.fs" />
     </ItemGroup>
 
@@ -25,6 +26,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\Xantham.Generator\Xantham.Generator.fsproj" />
+        <ProjectReference Include="..\..\src\Xantham.Cli\Xantham.Cli.fsproj" />
     </ItemGroup>
 
     <ItemGroup>

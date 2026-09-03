@@ -33,6 +33,8 @@ compile gate is only evidence if it compiles against what a consumer will:
 - `src/Xantham.Generator` — the bindings generator. Harvest → Resolve → Shape → Render, one
   linear pass per tier, sequenced by `Pipeline.fs`; emits a binding file plus a `manifest.json`
   of per-symbol findings. `BrowserBindingTable.generated.fs` is generated, not hand-written.
+- `src/Xantham.Cli` — the `xantham` command, packed as a .NET tool. `generate` is a shell over
+  `Pipeline.run`; `schema` emits `xantham.schema.json` from the config record.
 - `src/Xantham.Fable.Core` — the hand-written support library generated bindings open.
 - `tests/Xantham.TypeScript.Wire.Tests` — Expecto suite. No `package.json` of its own: the live
   tests call `Tsc.locate`, which walks parents and finds the root `node_modules`.
@@ -62,7 +64,8 @@ compile gate is only evidence if it compiles against what a consumer will:
   commands that need the compiler run `npm install` at the repository root first.
 - `dotnet fsi build.fsx -- generate [--only ast|proto|session|browser] [--sync]` — installs the
   root `typescript` pin, then routes to `tools/generate-wire.fsx` for every generated layer with
-  repository defaults. `--sync` re-vendors the upstream sources first (network).
+  repository defaults. `--sync` re-vendors the upstream sources first (network). `--only schema`
+  re-emits `xantham.schema.json` from `GeneratorConfig` through the CLI.
 - `dotnet fsi tools/generate-wire.fsx sync tsc-ast [--check]` — vendor (or verify) the upstream
   sources pinned in `tools/tsc-ast/upstream.json` into `tools/tsc-ast/upstream/`, against the
   per-file digests in `upstream.lock.json`. The lock is committed; the tree is not.
@@ -76,6 +79,10 @@ compile gate is only evidence if it compiles against what a consumer will:
   `src/Xantham.Generator/BrowserBindingTable.generated.fs` and the gate file
   `tests/Xantham.Generator.CompileGate/BrowserBindings.fs`. Reads NuGet and the pinned compiler's
   `lib/`, so it needs neither `--sync` nor the other layers.
+- `dotnet run --project src/Xantham.Cli -- generate <package-dir> [-o <dir>] [--config <path>]`
+  — generate a binding outside the test harness. Exit codes: 0 generated, 1 usage, 2 no
+  package, 3 configuration refused, 4 generation failed. The written paths go to standard
+  output, the tier and finding counts to standard error.
 - `dotnet fsi tools/xantham-fixtures.fsx -- init` — install `tests/fixtures/` from
   `tests/fixtures/pins.json`. Also runs as a stage of `build.fsx -- test|pack|publish`.
 

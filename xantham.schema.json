@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/shayanhabibi/Xantham/master/xantham.schema.json",
+  "title": "xantham.json",
+  "description": "Per-package configuration for the Xantham TypeScript-to-F# bindings generator, read from the file beside the package manifest. Comments and trailing commas are accepted.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "module": {
+      "type": "string",
+      "description": "The F# module the binding is written into. Defaults to the package name under the O7 naming contract, where `@scope/pkg-name` becomes `Scope.PkgName`."
+    },
+    "groups": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/disposition"
+      },
+      "description": "What the generator does with each package boundary its declarations reach (decision O7), keyed by npm name, with the compiler's own library as `typescript/lib`. An unlisted group widens."
+    },
+    "lib": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "The compiler's `lib` option, as `tsconfig.json` spells it. Omitted, the compiler's default applies, which includes the DOM. A global type library that redeclares DOM names sets this to what its README prescribes."
+    },
+    "runtime": {
+      "type": "string",
+      "description": "The npm package the generated `[<Import(…)>]` attributes name. Defaults to the package name with DefinitelyTyped's `@types/` convention undone, so `@types/three` imports from `three`."
+    }
+  },
+  "$defs": {
+    "disposition": {
+      "description": "One group's disposition (decision O7): how deep resolution follows into the group, and what a reference to its types renders as.",
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "ship",
+            "reference",
+            "widen"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "map"
+          ],
+          "properties": {
+            "map": {
+              "type": "object",
+              "description": "The destination of each redirected name, keyed by the TypeScript name the group declares. A name outside the table widens.",
+              "additionalProperties": {
+                "description": "Where one TypeScript name is redirected to. A bare string is a destination taking no type arguments; the object form states the arity.",
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "name"
+                    ],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "The F# name a reference renders as, qualified as the destination package spells it."
+                      },
+                      "arity": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "The number of type arguments the destination takes. A reference applying any other number widens with finding TR053."
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
