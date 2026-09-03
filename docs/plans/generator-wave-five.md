@@ -1,4 +1,4 @@
----
+﻿---
 category: Generator
 audience: managing agent
 title: Plan - generator wave five
@@ -259,6 +259,27 @@ gate built, run gate 98 checks passed.
 4. **The CLI** (`xantham generate <package-dir>`), deferred since phase C, plus the JSON Schema
    generated from the config record — both grow in value once `groups` is a key anyone tunes, and
    the CLI is how a package *family* gets generated at all.
+
+## Batch 2 - dispatched
+
+Four lanes, off `fbe0c13`, which pre-declares the case keys so four unions can be appended to
+without racing for a position. `inline` is held back: it stays unpriced until lane W reports what
+shipping a large group costs, and lane W owes that number whether or not its fix lands. The
+`Fable.Core` gaps wait on `map` proving itself in use.
+
+| Lane | Objective | Owns | Keys | Fixture |
+| --- | --- | --- | --- | --- |
+| U | Break 1: a referenced generic carries its type arguments | `Shape/Spec.fs`, the compile gate | `TR054`, `TR055` | `cross-package-lab` (existing) |
+| V | Break 2: a referenced alias is named rather than copied | `Resolve.fs` | `RT003` | `alias-copy-lab` |
+| W | The compiler lib ships; a nested dependency classifies by nesting | `Model.fs` (`Grouping`), config | `GE004` | `nested-dep-lab` |
+| X | `xantham generate <package-dir>`, and a schema for `groups` | `src/Xantham.Generator.Cli/`, `build.fsx`, additive `Pipeline.fs` | none | reuses `*lab` |
+
+`Shape/Spec.fs` goes to exactly one lane, as it did in batch 1. A lane that needs a case it was
+not given reports it; appending one races the other three.
+
+Lane U's acceptance test is the rename of
+`golden/cross-package-lab/CrossPackageLab.reference.open.fs` into the compile gate. Lane X's is
+byte-identical output between the CLI path and the harness path.
 
 ## What every lane reports
 
