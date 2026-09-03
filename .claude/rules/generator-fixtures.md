@@ -10,9 +10,9 @@ paths:
 # Working the generator: small fixtures, measured large ones
 
 The generator is gated against real npm packages, and those goldens are enormous — the
-`@cloudflare/workers-types` binding is 30k lines and its manifest is 78k. An agent that reads one
-has spent its context on output it did not need to see, and has less left for the change it was
-sent to make.
+`@cloudflare/workers-types` binding is 30k lines and its per-symbol findings run to 1,800. An agent
+that reads one has spent its context on output it did not need to see, and has less left for the
+change it was sent to make.
 
 Two costs look alike here and only one is real. **Running** against a large fixture is a build and
 a test run: it costs no context and it is the project's actual safety net. **Reading** the result
@@ -74,14 +74,17 @@ later) are **still regenerated and still gated on every change**. Nothing here r
 Unless the managing agent or the user directs otherwise:
 
 - **Do not open a large golden binding file, and do not page through its diff.**
-- **Do not load a whole manifest.** The per-symbol `symbols` array is the part that is 78k lines
-  long, and it is never the thing you need.
+- **Do not load a fixture's `symbols.jsonl`.** A run writes its report as two files: `manifest.json`
+  carries the aggregate and stays under a hundred lines for any package, so read the whole of it;
+  `symbols.jsonl` carries the per-symbol detail, one symbol per line, and runs to thousands of
+  lines. Grep it for a symbol or a finding name and read the lines that answer.
 - Per-symbol findings are **aggregated, never read**, and `build.fsx` does the aggregating:
 
 ```
 dotnet fsi build.fsx -- findings                       # every fixture: tiers, then counts by key
 dotnet fsi build.fsx -- findings --fixture animejs     # one fixture
-dotnet fsi build.fsx -- findings --key TR014           # one finding across the corpus
+dotnet fsi build.fsx -- findings --key TR014           # one finding across the corpus, by code
+dotnet fsi build.fsx -- findings --key TR.TypeFlagsNotMapped   # or by name
 ```
 
 Run it before your change and after it. The two outputs, diffed, are the measurement that

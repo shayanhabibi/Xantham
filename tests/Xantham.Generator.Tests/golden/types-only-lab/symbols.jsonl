@@ -1,0 +1,4 @@
+{"name":"Counter","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Counter","message":"ParamObject Create synthesized (D3)"}]}
+{"name":"greet","tier":"exact","findings":[]}
+{"name":"version","tier":"exact","findings":[]}
+{"name":"\u003Cmodule\u003E","tier":"ergonomic","findings":[{"name":"SE.RuntimeSpecifierDerived","key":"SE002","pass":"shape-exports","tier":"ergonomic","symbol":"\u003Cmodule\u003E","fields":{"specifier":"types-only-lab"},"message":"types-only package has no runtime; imports bind to types-only-lab, derived rather than configured"}]}

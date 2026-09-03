@@ -1054,6 +1054,12 @@ let private tierLabel =
 // is labelled with the prefix of the union it owns (`SI - shape-interfaces`). `file`
 // is null where a symbol has no declaration to point at (drops, table-level findings) and is
 // then omitted from the JSON.
+//
+// A run writes the report as two files. `manifest.json` holds the aggregate - the package, the
+// tier counts and the per-pass tallies - and stays a page long for any package, so a reader
+// takes the whole of it. `symbols.jsonl` holds the per-symbol detail, one symbol per line, and
+// runs to thousands of lines for a package the size of `@cloudflare/workers-types`: a reader
+// greps it or takes the lines it wants.
 type ManifestFinding =
     {
         /// The finding's stable name, `TR.NullableHoistedToOption`: what a consumer dispatches
@@ -1100,16 +1106,25 @@ type ManifestSymbol =
 
 type Manifest =
     {
+        /// The shape of the pair of files, bumped when a consumer would have to read them
+        /// differently.
+        schemaVersion: int
         package: string
         ``module``: string
         counts: ManifestCounts
         passes: ManifestPass list
-        symbols: ManifestSymbol list
     }
 
 let private manifestOptions =
     let options = JsonSerializerOptions(WriteIndented = true)
     options.NewLine <- "\n" // byte-identical output whatever the OS
+    options.DefaultIgnoreCondition <- JsonIgnoreCondition.WhenWritingNull
+    options
+
+/// `symbols.jsonl` is one symbol per line, so a reader takes the symbols it wants and a grep
+/// answers with the line it found rather than a position in a file it has to reconstruct.
+let private symbolOptions =
+    let options = JsonSerializerOptions(WriteIndented = false)
     options.DefaultIgnoreCondition <- JsonIgnoreCondition.WhenWritingNull
     options
 
@@ -1206,6 +1221,7 @@ let renderManifest: Pass<RenderModel> =
 
         let manifest =
             {
+                schemaVersion = 1
                 package = model.PackageName
                 ``module`` = model.ModuleName
                 counts =
@@ -1216,35 +1232,40 @@ let renderManifest: Pass<RenderModel> =
                         escape = tallies.Escape
                     }
                 passes = passTallies model.Findings
-                symbols =
-                    [
-                        for name, tier, findings in rows ->
-                            {
-                                name = name
-                                file = files |> Map.tryFind name |> Option.toObj
-                                tier = tierLabel tier
-                                findings =
-                                    [
-                                        for finding in
-                                            findings |> List.sortBy (fun f -> f.Pass, f.Symbol, f.Key, f.Message) ->
-                                            {
-                                                name = finding.Name
-                                                key = finding.Key
-                                                pass = finding.Pass
-                                                tier = tierLabel finding.Tier
-                                                symbol = finding.Symbol
-                                                fields = payloadFields finding
-                                                message = finding.Message
-                                            }
-                                    ]
-                            }
-                    ]
             }
+
+        let symbols =
+            [
+                for name, tier, findings in rows ->
+                    {
+                        name = name
+                        file = files |> Map.tryFind name |> Option.toObj
+                        tier = tierLabel tier
+                        findings =
+                            [
+                                for finding in findings |> List.sortBy (fun f -> f.Pass, f.Symbol, f.Key, f.Message) ->
+                                    {
+                                        name = finding.Name
+                                        key = finding.Key
+                                        pass = finding.Pass
+                                        tier = tierLabel finding.Tier
+                                        symbol = finding.Symbol
+                                        fields = payloadFields finding
+                                        message = finding.Message
+                                    }
+                            ]
+                    }
+            ]
 
         let json = JsonSerializer.Serialize(manifest, manifestOptions) + "\n"
 
+        let lines =
+            symbols
+            |> List.map (fun symbol -> JsonSerializer.Serialize(symbol, symbolOptions) + "\n")
+            |> String.concat ""
+
         { model with
-            Files = model.Files @ [ "manifest.json", json ]
+            Files = model.Files @ [ "manifest.json", json; "symbols.jsonl", lines ]
         })
 
 /// The tier's pass list, in execution order, for a run that writes the entry package alone.

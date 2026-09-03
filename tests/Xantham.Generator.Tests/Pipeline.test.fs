@@ -190,11 +190,11 @@ let private matchesGoldens (fixture: string) (config: GeneratorConfig) (package:
     let rendered = Async.RunSynchronously(Pipeline.generate config package)
 
     // A shipped group is written under `groups/` (O7); what every run owes is the entry
-    // package's module and the manifest.
+    // package's module and the manifest's two halves.
     Expect.equal
         (rendered.Files |> List.map fst |> List.filter (fun name -> not (name.StartsWith "groups/")))
-        [ $"{rendered.ModuleName}.fs"; "manifest.json" ]
-        "the entry module and the manifest"
+        [ $"{rendered.ModuleName}.fs"; "manifest.json"; "symbols.jsonl" ]
+        "the entry module, the aggregate manifest and the per-symbol lines"
 
     if updateGoldens then
         Directory.CreateDirectory goldenDir |> ignore
@@ -2106,8 +2106,8 @@ let pipelineTests =
 
                           Expect.equal
                               (rendered.Files |> List.map fst)
-                              [ "MultiShipLab.fs"; "groups/DepLab.fs"; "manifest.json" ]
-                              "the entry module, the shipped group under groups/, and the manifest"
+                              [ "MultiShipLab.fs"; "groups/DepLab.fs"; "manifest.json"; "symbols.jsonl" ]
+                              "the entry module, the shipped group under groups/, and the manifest's two halves"
 
                           let group =
                               fileNamed rendered "groups/DepLab.fs"
@@ -2149,11 +2149,11 @@ let pipelineTests =
                                 "GE002", "absent-lab", Widened ]
                               "one shipped, one collided, one configured and never reached"
 
-                          let manifest =
-                              fileNamed rendered "manifest.json"
-                              |> Option.defaultWith (fun () -> failtest "no manifest")
+                          let symbols =
+                              fileNamed rendered "symbols.jsonl"
+                              |> Option.defaultWith (fun () -> failtest "no per-symbol lines")
 
-                          Expect.stringContains manifest "\"GE001\"" "the manifest carries what emission found"
+                          Expect.stringContains symbols "\"GE001\"" "the manifest carries what emission found"
 
                       testCase "a group that loses the module name keeps its declarations in the entry" <| fun _ ->
                           let rendered = generate ()

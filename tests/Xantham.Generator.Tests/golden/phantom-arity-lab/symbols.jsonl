@@ -1,0 +1,3 @@
+{"name":"SurplusParameter","file":"index.d.ts","tier":"widened","findings":[{"name":"RA.AliasKeptAsPhantom","key":"RA006","pass":"repair-arity","tier":"widened","symbol":"SurplusParameter","fields":{"name":"SurplusParameter"},"message":"SurplusParameter resolves to a target using fewer type parameters than its head; the surplus are erased phantoms"}]}
+{"name":"EveryParameter","file":"index.d.ts","tier":"exact","findings":[]}
+{"name":"Holder","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Holder","message":"ParamObject Create synthesized (D3)"}]}
