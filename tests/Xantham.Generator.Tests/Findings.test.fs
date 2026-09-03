@@ -83,6 +83,8 @@ let findingsTests =
                     "TR051 TypeReference.IntersectionOperandsIdentical exact"
                     "TR052 TypeReference.AnonymousInMappedGroup widened"
                     "TR053 TypeReference.MappedNameArityMismatch widened"
+                    "TR054 TypeReference.ReferencedArityUnconfirmed escape"
+                    "TR055 TypeReference.ReferencedNameArityMismatch widened"
                     "TP001 TypeParameters.UnnamedTypeParameter widened"
                     "TP002 TypeParameters.ConstraintDropped ergonomic"
                     "TP003 TypeParameters.GenericFunctionHoisted ergonomic"
@@ -102,6 +104,7 @@ let findingsTests =
                     "RE001 ResolveExportTypes.FacetNotResolved escape"
                     "RT001 ResolveTypeTable.FrontierNotResolved widened"
                     "RT002 ResolveTypeTable.TypeNotResolved widened"
+                    "RT003 ResolveTypeTable.AliasShapeWithoutSymbol escape"
                     "LU001 ClassifyLiteralUnions.NonStringLiteralCase exact"
                     "DT001 DetectTaggedUnions.ArmNotPlainData ergonomic"
                     "DT002 DetectTaggedUnions.TaggedUnion exact"
@@ -139,7 +142,8 @@ let findingsTests =
                     "AC001 AuditCoverage.ExportNotRepresented escape"
                     "GE001 EmitGroups.GroupShipped exact"
                     "GE002 EmitGroups.ShippedGroupWithoutDeclarations widened"
-                    "GE003 EmitGroups.GroupModuleCollision escape" ]
+                    "GE003 EmitGroups.GroupModuleCollision escape"
+                    "GE004 EmitGroups.NestedDependencyClassifiedAsEntry escape" ]
 
               Expect.equal table expected "keys are positional: append new cases, never insert or reorder"
 

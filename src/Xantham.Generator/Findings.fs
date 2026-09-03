@@ -248,6 +248,12 @@ type TypeReference =
     /// Wave five, lane R. The destination binding takes a different number of type arguments
     /// than the site applies.
     | [<Widened>] MappedNameArityMismatch of name: string * given: int
+    /// Wave five, lane U. A reference into a `reference` group applies type arguments, and the
+    /// group's declaration is resolved by identity only.
+    | [<Escape>] ReferencedArityUnconfirmed of name: string * given: int
+    /// Wave five, lane U. The referenced declaration takes a different number of type arguments
+    /// than the site applies.
+    | [<Widened>] ReferencedNameArityMismatch of name: string * given: int * declared: int
 
     interface IFindingKind with
         member this.Message =
@@ -326,6 +332,10 @@ type TypeReference =
                 "anonymous shape in a mapped group; the destination binds names and this type has none"
             | MappedNameArityMismatch(name, given) ->
                 $"{name} is applied to {given} type arguments that its mapped destination does not take; widened to obj"
+            | ReferencedArityUnconfirmed(name, given) ->
+                $"{name} is referenced with {given} type arguments against a group resolved by identity only; the arity is unverified"
+            | ReferencedNameArityMismatch(name, given, declared) ->
+                $"{name} is applied to {given} type arguments and its referenced declaration takes {declared}; widened to obj"
 
 /// Type parameter binding: `Shape.typeParamsOf`, `aliasTypeParams`, key variables and erasure.
 [<Prefix "TP">]
@@ -422,6 +432,9 @@ type ResolveExportTypes =
 type ResolveTypeTable =
     | [<Widened>] FrontierNotResolved of count: int * depth: int
     | [<Widened>] TypeNotResolved of reason: string
+    /// Wave five, lane V. An alias body carries a member symbol in place of its alias symbol,
+    /// so the shape resolves by content under the entry package instead of by the alias name.
+    | [<Escape>] AliasShapeWithoutSymbol of shape: string
 
     interface IFindingKind with
         member this.Message =
@@ -429,6 +442,8 @@ type ResolveTypeTable =
             | FrontierNotResolved(count, depth) ->
                 $"{count} types not resolved: beyond the depth cutoff ({depth}) - the frontier of instantiations still growing after that many generations"
             | TypeNotResolved reason -> $"not resolved: {reason}"
+            | AliasShapeWithoutSymbol shape ->
+                $"{shape} is an alias body whose alias symbol is unavailable; the shape resolves by content under the entry package"
 
 /// `classify-literal-unions`.
 [<Prefix("LU", "classify-literal-unions")>]
@@ -673,6 +688,9 @@ type EmitGroups =
     /// Wave five, lane S. Two groups template one module name, so one run would write the name
     /// twice (`@types/three` and `three` both derive `Three`).
     | [<Escape>] GroupModuleCollision of group: string * moduleName: string
+    /// Wave five, lane W. A dependency nested under another package's `node_modules` classifies
+    /// as the entry package.
+    | [<Escape>] NestedDependencyClassifiedAsEntry of specifier: string * host: string
 
     interface IFindingKind with
         member this.Message =
@@ -683,6 +701,8 @@ type EmitGroups =
                 $"{group} is configured ship and no reference reached it; the module is not written"
             | GroupModuleCollision(group, moduleName) ->
                 $"{group} templates the module {moduleName}, which another group in this run already writes"
+            | NestedDependencyClassifiedAsEntry(specifier, host) ->
+                $"{specifier} is nested under {host}'s node_modules and classifies as the entry package"
 
 module FindingCatalogue =
     /// Every finding union, in the order the manifest legend lists them. The snapshot test
