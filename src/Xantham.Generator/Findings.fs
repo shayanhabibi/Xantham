@@ -148,6 +148,7 @@ module FindingCodes =
             "MB.SymbolKeyedMemberDropped", "MB002"
             "MB.OptionalMemberAsOption", "MB003"
             "MB.IndexSignatureAsIndexer", "MB004"
+            "MB.OptionalHookAsInterface", "MB005"
             "HG.AmbientModuleDropped", "HG001"
             "HG.UnwritableGlobalDropped", "HG002"
             "HG.NothingHarvested", "HG003"
@@ -163,6 +164,7 @@ module FindingCodes =
             "SY.InstantiationNamedOnce", "SY001"
             "SY.HoistArgumentsNotRecovered", "SY002"
             "SY.IntersectionOperandNotHoisted", "SY003"
+            "SY.NameNestedUnderOwner", "SY004"
             "SI.HybridLosesCallSignatures", "SI001"
             "SI.BaseMembersFlattened", "SI002"
             "SI.IntersectionFlattened", "SI003"
@@ -181,6 +183,7 @@ module FindingCodes =
             "SC.StaticSettable", "SC006"
             "SC.EntrypointClassEmitted", "SC007"
             "SC.EntrypointClassRefused", "SC008"
+            "SC.EntrypointClassInheritsExn", "SC009"
             "SE.NoValueType", "SE001"
             "SE.RuntimeSpecifierDerived", "SE002"
             "SE.MutableValueReadOnly", "SE003"
@@ -384,7 +387,7 @@ type TypeReference =
     | [<Widened>] TupleArityNoForm of components: int
     | [<Widened>] CallableWithoutSignatures
     | [<Widened>] CallbackOverloadsFromFirst of overloads: int
-    | [<Ergonomic>] NullableHoistedToOption
+    | [<Ergonomic>] NullableHoistedToOption of fromNull: bool * fromUndefined: bool * fromVoid: bool
     | [<Widened>] OnlyNullUndefinedToUnit
     | [<Widened>] EmptyUnionToObj
     | [<Widened>] UnionWithObjArm
@@ -474,7 +477,19 @@ type TypeReference =
             | TupleArityNoForm components -> $"{components}-element tuple has no F# tuple form; widened to an array"
             | CallableWithoutSignatures -> "callable type without signatures; widened to obj"
             | CallbackOverloadsFromFirst overloads -> $"callback with {overloads} overloads shaped from the first"
-            | NullableHoistedToOption -> "null/undefined union members hoisted to option"
+            | NullableHoistedToOption(fromNull, fromUndefined, fromVoid) ->
+                let spelled =
+                    [
+                        if fromNull then
+                            "null"
+                        if fromUndefined then
+                            "undefined"
+                        if fromVoid then
+                            "void"
+                    ]
+                    |> String.concat "/"
+
+                $"{spelled} union members hoisted to option"
             | OnlyNullUndefinedToUnit -> "union of only null/undefined members maps to unit"
             | EmptyUnionToObj -> "empty union widened to obj"
             | UnionWithObjArm -> "union with an obj arm widened to obj (an erased union over obj is no safer)"
@@ -564,6 +579,7 @@ type Members =
     | [<Widened>] SymbolKeyedMemberDropped
     | [<Ergonomic>] OptionalMemberAsOption
     | [<Ergonomic>] IndexSignatureAsIndexer
+    | [<Ergonomic>] OptionalHookAsInterface of asInterface: string
 
     interface IFindingKind with
         member this.Message =
@@ -572,6 +588,8 @@ type Members =
             | SymbolKeyedMemberDropped -> "symbol-keyed member dropped (unrepresentable in F#)"
             | OptionalMemberAsOption -> "optional member reads as option"
             | IndexSignatureAsIndexer -> "index signature reads as an EmitIndexer Item member (§4.10)"
+            | OptionalHookAsInterface asInterface ->
+                $"optional method emitted as the opt-in interface {asInterface} a subclass implements"
 
 // -------------------------------------------------------------------------------------------------
 // Per-pass unions, in pipeline order. Append-only.
@@ -665,6 +683,7 @@ type SynthesizeAnonymous =
     /// Wave three, lane J. One operand of an intersection resists hoisting while the others are
     /// named, so the reference carries the named operands and widens the rest.
     | [<Widened>] IntersectionOperandNotHoisted of name: string
+    | [<Ergonomic>] NameNestedUnderOwner of nestedAs: string
 
     interface IFindingKind with
         member this.Message =
@@ -674,6 +693,7 @@ type SynthesizeAnonymous =
                 $"{name} is an instantiation whose type arguments could not be recovered; widened to obj rather than named again"
             | IntersectionOperandNotHoisted name ->
                 $"{name} intersects an operand no declaration names; that operand's members are dropped"
+            | NameNestedUnderOwner nestedAs -> $"anonymous shape named {nestedAs} under the declaration that owns it"
 
 /// `shape-interfaces`.
 [<Prefix("SI", "shape-interfaces")>]
@@ -765,6 +785,7 @@ type ShapeClasses =
     /// Wave five. A class the entrypoint rule selected that F# will not admit in the class form,
     /// and why. The declaration keeps the interface form, `Create` included.
     | [<Widened>] EntrypointClassRefused of reason: string
+    | [<Ergonomic>] EntrypointClassInheritsExn of baseName: string
 
     interface IFindingKind with
         member this.Message =
@@ -782,6 +803,8 @@ type ShapeClasses =
             | EntrypointClassEmitted specifier ->
                 $"entrypoint class emitted as an AbstractClass imported from {specifier}; a consumer inherits it"
             | EntrypointClassRefused reason -> $"entrypoint class kept the interface form: {reason}"
+            | EntrypointClassInheritsExn baseName ->
+                $"entrypoint class derives from {baseName} as exn; a consumer raises it and catches it by type"
 
 /// `shape-exports`.
 [<Prefix("SE", "shape-exports")>]

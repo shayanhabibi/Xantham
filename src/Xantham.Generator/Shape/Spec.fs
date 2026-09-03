@@ -67,6 +67,19 @@ let internal isNullish (facts: TypeFacts) =
     || flag TypeFlags.Null facts
     || flag TypeFlags.Void facts
 
+/// Reports which of null, undefined and void appear among the hoisted members.
+let internal absenceOf (model: ShapeModel) hoisted =
+    hoisted
+    |> List.fold
+        (fun (fromNull, fromUndefined, fromVoid) id ->
+            match Map.tryFind id model.Types with
+            | Some facts ->
+                fromNull || flag TypeFlags.Null facts,
+                fromUndefined || flag TypeFlags.Undefined facts,
+                fromVoid || flag TypeFlags.Void facts
+            | None -> fromNull, fromUndefined, fromVoid)
+        (false, false, false)
+
 /// A union's members split into the hoisted nullish part (D1) and everything else.
 let internal splitNullish (model: ShapeModel) (facts: TypeFacts) =
     facts.UnionMembers
@@ -1203,7 +1216,11 @@ and internal unionRef
                 | FsOption _ -> reference
                 | reference -> FsOption reference
 
-            wrapped, Finding.make owner TypeReference.NullableHoistedToOption :: findings
+            let fromNull, fromUndefined, fromVoid = absenceOf model hoisted
+
+            wrapped,
+            Finding.make owner (TypeReference.NullableHoistedToOption(fromNull, fromUndefined, fromVoid))
+            :: findings
 
     match remaining with
     | [] -> FsUnit, [ Finding.make owner TypeReference.OnlyNullUndefinedToUnit ]
