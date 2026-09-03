@@ -2027,4 +2027,62 @@ let pipelineTests =
                           Expect.stringContains entry "type Spare =" "declared in the entry module"
                           Expect.stringContains entry "abstract spare: Spare" "and named there unqualified" ])
 
+        // Wave five lane W (O7 group classification). npm installs a package's dependencies
+        // under the package's own `node_modules`, and a version conflicting with one the entry
+        // package resolved goes under that dependency's `node_modules` in turn. Both depths
+        // carry the entry package's directory as a path prefix, so this lab is what separates a
+        // dependency from its host.
+        yield!
+            fixtureTests
+                "nested-dep-lab"
+                (handFixture "nested-dep-lab")
+                (handConfig (handFixture "nested-dep-lab"))
+                (fun package ->
+                    let config = handConfig (Some package)
+
+                    let generate () =
+                        Async.RunSynchronously(Pipeline.generate config package)
+
+                    let fileNamed (rendered: RenderModel) name =
+                        rendered.Files |> List.tryFind (fst >> (=) name) |> Option.map snd
+
+                    [ testCase "a dependency under the entry package's own node_modules is its own group" <| fun _ ->
+                          let rendered = generate ()
+
+                          let outer =
+                              fileNamed rendered "groups/OuterLab.fs"
+                              |> Option.defaultWith (fun () -> failtest "no module for outer-lab")
+
+                          Expect.stringContains outer "module rec OuterLab" "the group's own module"
+                          Expect.stringContains outer "type Signal =" "carrying its declaration"
+
+                      testCase "a dependency nested under another dependency is that dependency" <| fun _ ->
+                          let rendered = generate ()
+
+                          let inner =
+                              fileNamed rendered "groups/InnerLab.fs"
+                              |> Option.defaultWith (fun () -> failtest "no module for inner-lab")
+
+                          Expect.stringContains inner "module rec InnerLab" "named for the package npm nested"
+                          Expect.stringContains inner "type Pulse =" "and carrying its declaration"
+
+                          let entry =
+                              fileNamed rendered "NestedDepLab.fs"
+                              |> Option.defaultWith (fun () -> failtest "no entry module")
+
+                          Expect.isFalse (entry.Contains "type Signal =") "neither depth lands in the entry module"
+                          Expect.isFalse (entry.Contains "type Pulse =") "at either level of nesting"
+                          Expect.stringContains entry "abstract signal: OuterLab.Signal" "each is named where it ships"
+
+                      testCase "both depths are reported as shipped groups" <| fun _ ->
+                          let rendered = generate ()
+
+                          Expect.equal
+                              (rendered.Findings
+                               |> List.filter (fun f -> f.Key.StartsWith "GE")
+                               |> List.map (fun f -> f.Key, f.Symbol, f.Tier)
+                               |> List.sortBy (fun (_, symbol, _) -> symbol))
+                              [ "GE001", "inner-lab", Exact; "GE001", "outer-lab", Exact ]
+                              "both shipped, neither collided" ])
+
     ]

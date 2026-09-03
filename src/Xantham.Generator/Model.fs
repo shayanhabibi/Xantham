@@ -1074,10 +1074,10 @@ module Grouping =
         | _ -> None
 
     /// Classifies a symbol's origin group (O7) from its first declaration's file path: under the
-    /// package directory is the entry package; the compiler's default libs are the compiler-lib
-    /// group; under a `node_modules` entry is that dependency; anything else - including
-    /// anonymous shapes with no declaration - is unclassified, which dispositions as the entry
-    /// group.
+    /// package directory and outside any `node_modules` below it is the entry package; the
+    /// compiler's default libs are the compiler-lib group; under a `node_modules` entry is that
+    /// dependency, at whatever depth npm installed it; anything else - including anonymous
+    /// shapes with no declaration - is unclassified, which dispositions as the entry group.
     ///
     /// The default libs are recognised three ways because the compiler serves them three ways:
     /// from the platform package (`node_modules/@typescript/typescript-<rid>/lib/lib.*.d.ts` -
@@ -1103,11 +1103,20 @@ module Grouping =
             let root = packageDir.Replace('\\', '/').TrimEnd '/' + "/"
             let file = path.Substring(path.LastIndexOf '/' + 1)
             let isLibFile = file.StartsWith "lib." && file.EndsWith ".d.ts"
+            let installedAt = path.LastIndexOf "/node_modules/"
 
-            if path.StartsWith(root, System.StringComparison.OrdinalIgnoreCase) then
+            // npm installs a package's dependencies under the package's own `node_modules`, so
+            // a dependency's path carries the entry package's directory as a prefix. The
+            // deepest `node_modules` boundary decides the group: one below the entry directory
+            // separates a dependency from its host, one at or above it is the entry package's
+            // own installation.
+            if
+                path.StartsWith(root, System.StringComparison.OrdinalIgnoreCase)
+                && installedAt < root.Length - 1
+            then
                 EntryPackage
             else
-                match path.LastIndexOf "/node_modules/" with
+                match installedAt with
                 | -1 -> if isLibFile then CompilerLib else Unclassified
                 | at ->
                     match path.Substring(at + "/node_modules/".Length).Split '/' with

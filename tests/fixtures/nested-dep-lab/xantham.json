@@ -1,0 +1,8 @@
+{
+    // Both dependencies ship, so the run writes three modules and the compile gate is the
+    // judge of whether each name landed in the module its group templates.
+    "groups": {
+        "outer-lab": "ship",
+        "inner-lab": "ship"
+    }
+}
