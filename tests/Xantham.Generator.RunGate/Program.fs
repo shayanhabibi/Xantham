@@ -450,9 +450,7 @@ let private entrypointClasses () =
     let bench = Bench "vice"
     let workbench: obj = import "Workbench" "ambient-lab:tools"
 
-    check
-        "a derived class extends the module's class in JavaScript"
-        (emitJsExpr (bench, workbench) "$0 instanceof $1")
+    check "a derived class extends the module's class in JavaScript" (emitJsExpr (bench, workbench) "$0 instanceof $1")
 
     equal "the base constructor's assignment reads back off the instance" "vice" bench.label
     equal "and the JavaScript prototype carries the same value" "vice" (emitJsExpr bench "$0.label")
@@ -476,7 +474,9 @@ let private entrypointClasses () =
     let anvil = AmbientModuleLab.Anvil.Create 9.0
     equal "a global abstract class keeps its ParamObject Create" 9.0 anvil.mass
 
-    let vise = AmbientModuleLab.Vise.Create(2.0, 5.0, Func<_, _>(fun (p: AmbientModuleLab.Payload) -> p.label))
+    let vise =
+        AmbientModuleLab.Vise.Create(2.0, 5.0, Func<_, _>(fun (p: AmbientModuleLab.Payload) -> p.label))
+
     equal "and so does a class whose base this run declares" 2.0 vise.jaw
 
 /// Wave six's three probes, over the hand-written forms in `Probes.fs`. Each one settles a Fable

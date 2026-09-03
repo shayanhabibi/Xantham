@@ -40,10 +40,12 @@ module private Refusal =
     let NoDeclaration = "the run emits no interface under the class's name"
 
     [<Literal>]
-    let FreeTypeParameter = "the constructor binds a type parameter the declaration's head does not"
+    let FreeTypeParameter =
+        "the constructor binds a type parameter the declaration's head does not"
 
     [<Literal>]
-    let InheritedBase = "the class inherits a base whose constructor arguments have no F# form"
+    let InheritedBase =
+        "the class inherits a base whose constructor arguments have no F# form"
 
 /// The type variables a reference mentions. A primary constructor is written under the
 /// declaration's own head, so its parameters may name those variables and no others.
@@ -316,7 +318,8 @@ let shapeClasses: Pass<ShapeModel> =
                                         // class is `DurableObject2` beside the global interface of
                                         // that name, and the class form belongs to the class.
                                         let declaredName =
-                                            declaredId |> Option.bind (fun typeId -> Map.tryFind typeId model.DeclNames)
+                                            declaredId
+                                            |> Option.bind (fun typeId -> Map.tryFind typeId model.DeclNames)
 
                                         admitEntrypoint export facts (Option.defaultValue name declaredName)
 
@@ -345,8 +348,7 @@ let shapeClasses: Pass<ShapeModel> =
                                 FsInterface
                                     { decl with
                                         Statics =
-                                            decl.Statics
-                                            @ (Map.tryFind decl.Name statics |> Option.defaultValue [])
+                                            decl.Statics @ (Map.tryFind decl.Name statics |> Option.defaultValue [])
                                         Entrypoint = Map.tryFind decl.Name entrypoints
                                     }
                             | other -> other)
