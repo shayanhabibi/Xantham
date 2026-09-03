@@ -864,9 +864,7 @@ and internal objectRef
                     | None ->
 
                         match GeneratorConfig.disposition ctx.Config facts.Origin, facts.SymbolName with
-                        | Reference, Some typeName ->
-                            // The O7 contract: a `ship` run of this group produces exactly this name.
-                            FsNamed $"{Naming.groupModule ctx.PackageName facts.Origin}.{typeName}", []
+                        | Reference, Some typeName -> referencedRef ctx model self owner facts typeName
                         | Reference, None -> FsObj, [ Finding.make owner TypeReference.AnonymousInReferencedGroup ]
                         | Map _, None -> FsObj, [ Finding.make owner TypeReference.AnonymousInMappedGroup ]
                         | (Ship | Widen | Map _), Some "globalThis" ->
@@ -967,6 +965,31 @@ and internal mappedBinding
             else
                 appliedRef ctx model self owner destination.FSharpName arguments)
     | _ -> None
+
+/// A type of a referenced group written as the name a `ship` run of that group produces (O7),
+/// applied to the type arguments the site gives, each shaped at its position.
+///
+/// The shipped declaration's arity stays outside a run resolving the group by identity alone, so
+/// every application raises `ReferencedArityUnconfirmed`.
+and internal referencedRef
+    (ctx: Context)
+    (model: ShapeModel)
+    (self: string option)
+    (owner: string)
+    (facts: TypeFacts)
+    (typeName: string)
+    : FsTypeRef * Finding list =
+    let name = $"{Naming.groupModule ctx.PackageName facts.Origin}.{typeName}"
+
+    match facts.TypeArguments with
+    | [] -> FsNamed name, []
+    | arguments ->
+        let reference, findings = appliedRef ctx model self owner name arguments
+
+        let unconfirmed =
+            Finding.make owner (TypeReference.ReferencedArityUnconfirmed(typeName, arguments.Length))
+
+        reference, findings @ [ unconfirmed ]
 
 /// A generic name applied to type arguments, each shaped at this position (§4.9).
 and internal appliedRef

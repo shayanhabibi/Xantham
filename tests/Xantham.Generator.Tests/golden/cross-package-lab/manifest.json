@@ -3,20 +3,20 @@
   "module": "CrossPackageLab",
   "counts": {
     "exact": 0,
-    "ergonomic": 0,
-    "widened": 3,
-    "escape": 0
+    "ergonomic": 1,
+    "widened": 0,
+    "escape": 2
   },
   "passes": [
     {
       "pass": "SI - shape-interfaces",
-      "total": 4,
-      "widened": 4
+      "total": 1,
+      "escape": 1
     },
     {
       "pass": "SE - shape-exports",
-      "total": 2,
-      "widened": 2
+      "total": 1,
+      "escape": 1
     },
     {
       "pass": "SP - synthesize-paramobjects",
@@ -28,21 +28,14 @@
     {
       "name": "Panel",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "escape",
       "findings": [
         {
-          "key": "TR023",
+          "key": "TR054",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "escape",
           "symbol": "Panel.boxed",
-          "message": "Box is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Panel.widget",
-          "message": "Widget is not among the generated declarations; widened to obj"
+          "message": "Box is referenced with 1 type arguments against a group resolved by identity only; the arity is unverified"
         },
         {
           "key": "SP001",
@@ -56,22 +49,8 @@
     {
       "name": "PanelPair",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "PanelPair.left",
-          "message": "Widget is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "PanelPair.right",
-          "message": "Widget is not among the generated declarations; widened to obj"
-        },
         {
           "key": "SP001",
           "pass": "synthesize-paramobjects",
@@ -83,21 +62,14 @@
     },
     {
       "name": "mount",
-      "tier": "widened",
+      "tier": "escape",
       "findings": [
         {
-          "key": "TR023",
+          "key": "TR054",
           "pass": "shape-exports",
-          "tier": "widened",
+          "tier": "escape",
           "symbol": "mount()",
-          "message": "Box is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-exports",
-          "tier": "widened",
-          "symbol": "mount(widget)",
-          "message": "Widget is not among the generated declarations; widened to obj"
+          "message": "Box is referenced with 1 type arguments against a group resolved by identity only; the arity is unverified"
         }
       ]
     }

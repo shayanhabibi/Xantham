@@ -14,18 +14,18 @@ open Xantham.Fable.Core
 /// </summary>
 [<Interface>]
 type Panel =
-    abstract widget: obj with get, set
-    abstract boxed: obj with get, set
+    abstract widget: CrossPackageDep.Widget with get, set
+    abstract boxed: CrossPackageDep.Box<string> with get, set
     abstract pair: PanelPair with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (widget: obj, boxed: obj, pair: PanelPair) : Panel = jsNative
+    static member Create (widget: CrossPackageDep.Widget, boxed: CrossPackageDep.Box<string>, pair: PanelPair) : Panel = jsNative
 
 [<Interface>]
 type PanelPair =
-    abstract left: obj with get, set
-    abstract right: obj with get, set
+    abstract left: CrossPackageDep.Widget with get, set
+    abstract right: CrossPackageDep.Widget with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (left: obj, right: obj) : PanelPair = jsNative
+    static member Create (left: CrossPackageDep.Widget, right: CrossPackageDep.Widget) : PanelPair = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
@@ -34,4 +34,4 @@ type Exports =
     /// A referenced generic at a return position, applied to another referenced name.
     /// </summary>
     [<Import("mount", "cross-package-lab")>]
-    static member mount (widget: obj) : obj = jsNative
+    static member mount (widget: CrossPackageDep.Widget) : CrossPackageDep.Box<CrossPackageDep.Widget> = jsNative

@@ -47,7 +47,9 @@
              which is what makes the F# compiler - rather than a string comparison - the judge
              of whether the templated name is the shipped one. A golden whose templated module
              nothing ships carries the `.open.fs` suffix and stays out; lane T's section of
-             docs/plans/generator-wave-five.md records why stub assemblies were refused. -->
+             docs/plans/generator-wave-five.md records why stub assemblies were refused. The
+             corpus carries no such golden today - the exclusion is the policy an open
+             configuration would be admitted under. -->
         <Compile Include="..\Xantham.Generator.Tests\golden\**\groups\*.fs"
                  Exclude="..\Xantham.Generator.Tests\golden\**\*.open.fs"
                  Link="golden\%(RecursiveDir)%(Filename)%(Extension)" />
