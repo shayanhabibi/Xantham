@@ -42,6 +42,23 @@ let classifyTests =
                 (Dependency "@types/node")
                 "scoped"
 
+        // Wave five lane W. npm's own layout: a package's dependencies are installed under its
+        // `node_modules`, so every dependency path carries the entry package's directory as a
+        // prefix, and a conflicting version is nested a level deeper again. The deepest
+        // `node_modules` boundary names the group.
+        testCase "a dependency installed under the entry package is that dependency" <| fun _ ->
+            Expect.equal
+                (Grouping.classify packageDir (declaredAt $"{packageDir}/node_modules/left-pad/index.d.ts"))
+                (Dependency "left-pad")
+                "one level below the entry directory"
+
+            Expect.equal
+                (Grouping.classify
+                    packageDir
+                    (declaredAt $"{packageDir}/node_modules/left-pad/node_modules/@types/node/fs.d.ts"))
+                (Dependency "@types/node")
+                "and nested under that dependency in turn"
+
         testCase "no declaration path is unclassified, which dispositions as the entry" <| fun _ ->
             Expect.equal (Grouping.classify packageDir ValueNone) Unclassified "no symbol"
 

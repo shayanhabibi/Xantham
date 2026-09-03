@@ -1,0 +1,6 @@
+{
+    "name": "nested-dep-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "description": "Hand-authored fixture for O7 group classification under npm's real installation layout: a dependency lives under the entry package's own `node_modules`, and a version-conflicting dependency of that one lives under `node_modules` again. Both are dependencies, at whatever depth. Tracked in git, no npm install, so the goldens pin classification under the live compiler."
+}
