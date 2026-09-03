@@ -17562,12 +17562,6 @@ type GatewayOptionsMetadata =
     [<EmitIndexer>]
     abstract Item: string -> U4<string, float, bigint, bool> option with get, set
 
-[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type GatewayRetriesBackoff =
-    | [<CompiledName("constant")>] Constant
-    | [<CompiledName("exponential")>] Exponential
-    | [<CompiledName("linear")>] Linear
-
 type GatewayRetriesMaxAttempts =
     | N1 = 1
     | N2 = 2
@@ -17932,9 +17926,9 @@ type ConversionResponse3 =
 type GatewayRetries =
     abstract maxAttempts: GatewayRetriesMaxAttempts option with get, set
     abstract retryDelayMs: float option with get, set
-    abstract backoff: GatewayRetriesBackoff option with get, set
+    abstract backoff: WorkflowBackoff option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?maxAttempts: GatewayRetriesMaxAttempts, ?retryDelayMs: float, ?backoff: GatewayRetriesBackoff) : GatewayRetries = jsNative
+    static member Create (?maxAttempts: GatewayRetriesMaxAttempts, ?retryDelayMs: float, ?backoff: WorkflowBackoff) : GatewayRetries = jsNative
 
 [<Interface>]
 type GatewayOptions =
@@ -25376,6 +25370,10 @@ type EmailEvent =
 
 type EmailExportedHandler<'Env, 'Props> = Func<ForwardableEmailMessage, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>
 
+type EmailMessageConstructor =
+    [<EmitConstructor>]
+    abstract Create: from: string * ``to``: string * raw: U2<string, ReadableStream<obj>> -> EmailMessage
+
 /// <summary>
 /// Evaluation context for targeting rules.
 /// Keys are attribute names (e.g. "userId", "country"), values are the attribute values.
@@ -26230,6 +26228,25 @@ type MediaError =
     [<ParamObject; Emit("$0")>]
     static member Create (code: float, message: string, name: string, ?stack: string, ?cause: obj) : MediaError = jsNative
 
+[<Interface>]
+type NodeStyleServer =
+    abstract listen: [<ParamArray>] args: obj[] -> NodeStyleServer
+    abstract address: unit -> NodeStyleServerAddressResult
+    [<ParamObject; Emit("$0")>]
+    static member Create (listen: Func<obj[], NodeStyleServer>, address: Func<NodeStyleServerAddressResult>) : NodeStyleServer = jsNative
+
+[<Interface>]
+type NodeStyleServerAddressResult =
+    abstract port: float option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?port: float) : NodeStyleServerAddressResult = jsNative
+
+[<Interface>]
+type HttpServerHandlerOptions =
+    abstract port: float with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (port: float) : HttpServerHandlerOptions = jsNative
+
 [<Erase>]
 type Params<'P> = private Params__ of obj
 
@@ -26292,6 +26309,42 @@ type PagesPluginFunctionContext<'Env, 'Params, 'Data, 'PluginArgs when 'Data :> 
     abstract pluginArgs: 'PluginArgs with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: Action<JS.Promise<obj>>, passThroughOnException: Action, next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>> option, RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option, JS.Promise<Response>>, env: obj, ``params``: obj, data: 'Data, pluginArgs: 'PluginArgs) : PagesPluginFunctionContext<'Env, 'Params, 'Data, 'PluginArgs> = jsNative
+
+[<Interface>]
+type PipelineTransformationEntrypoint<'Env, 'I, 'O when 'I :> PipelineRecord and 'O :> PipelineRecord> =
+    abstract env: 'Env with get, set
+    abstract ctx: ExecutionContext<obj> with get, set
+    /// <summary>
+    /// run receives an array of PipelineRecord which can be
+    /// transformed and returned to the pipeline
+    /// </summary>
+    /// <remarks>@param records Incoming records from the pipeline to be transformed</remarks>
+    /// <remarks>@param metadata Information about the specific pipeline calling the transformation entrypoint</remarks>
+    /// <remarks>@returns A promise containing the transformed PipelineRecord array</remarks>
+    abstract run: records: 'I[] * metadata: PipelineBatchMetadata -> JS.Promise<'O[]>
+    [<ParamObject; Emit("$0")>]
+    static member Create (env: 'Env, ctx: ExecutionContext<obj>, run: Func<'I[], PipelineBatchMetadata, JS.Promise<'O[]>>) : PipelineTransformationEntrypoint<'Env, 'I, 'O> = jsNative
+
+type PipelineRecord =
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
+
+[<Interface>]
+type PipelineBatchMetadata =
+    abstract pipelineId: string with get, set
+    abstract pipelineName: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (pipelineId: string, pipelineName: string) : PipelineBatchMetadata = jsNative
+
+[<Interface>]
+type Pipeline<'T when 'T :> PipelineRecord> =
+    /// <summary>
+    /// The Pipeline interface represents the type of a binding to a Pipeline
+    /// </summary>
+    /// <remarks>@param records The records to send to the pipeline</remarks>
+    abstract send: records: 'T[] -> JS.Promise<unit>
+    [<ParamObject; Emit("$0")>]
+    static member Create (send: Func<'T[], JS.Promise<unit>>) : Pipeline<'T> = jsNative
 
 [<Interface>]
 type PubSubMessage =
@@ -26365,56 +26418,18 @@ type Rpc =
     [<ParamObject; Emit("$0")>]
     static member Create (__RPC_STUB_BRAND: string, __RPC_TARGET_BRAND: string, __WORKER_ENTRYPOINT_BRAND: string, __DURABLE_OBJECT_BRAND: string, __WORKFLOW_ENTRYPOINT_BRAND: string) : Rpc = jsNative
 
-[<Interface>]
-type CloudflareWorkersModule =
-    abstract RpcStub: CloudflareWorkersModuleRpcStubConstructor
-    abstract RpcTarget: RpcTargetConstructor with get, set
-    abstract WorkerEntrypoint: WorkerEntrypointConstructor with get, set
-    abstract DurableObject: DurableObjectConstructor with get, set
-    abstract WorkflowStep: WorkflowStepConstructor with get, set
-    abstract WorkflowEntrypoint: WorkflowEntrypointConstructor with get, set
-    abstract waitUntil: Action<JS.Promise<obj>> with get, set
-    abstract withEnv: Func<obj, Func<obj>, obj> with get, set
-    abstract withExports: Func<obj, Func<obj>, obj> with get, set
-    abstract withEnvAndExports: Func<obj, obj, Func<obj>, obj> with get, set
-    abstract env: obj
-    abstract exports: obj
-    abstract cache: CacheContext
-    abstract tracing: Tracing
-    [<ParamObject; Emit("$0")>]
-    static member Create (RpcStub: CloudflareWorkersModuleRpcStubConstructor, RpcTarget: RpcTargetConstructor, WorkerEntrypoint: WorkerEntrypointConstructor, DurableObject: DurableObjectConstructor, WorkflowStep: WorkflowStepConstructor, WorkflowEntrypoint: WorkflowEntrypointConstructor, waitUntil: Action<JS.Promise<obj>>, withEnv: Func<obj, Func<obj>, obj>, withExports: Func<obj, Func<obj>, obj>, withEnvAndExports: Func<obj, obj, Func<obj>, obj>, env: obj, exports: obj, cache: CacheContext, tracing: Tracing) : CloudflareWorkersModule = jsNative
+[<Erase>]
+type RpcStub<'T> = private RpcStub__ of obj
 
-type CloudflareWorkersModuleRpcStubConstructor =
+type RpcStubConstructor =
     [<EmitConstructor>]
     abstract Create<'T>: value: 'T -> obj
-
-[<Interface>]
-type DurableObject2<'Env, 'Props> =
-    abstract __DURABLE_OBJECT_BRAND: unit
-    abstract ctx: DurableObjectState<'Props> with get, set
-    abstract env: 'Env with get, set
-    abstract alarm: Func<AlarmInvocationInfo option, JS.Promise<unit> option> option with get, set
-    abstract fetch: Func<Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, U2<JS.Promise<Response>, Response>> option with get, set
-    abstract connect: Func<Socket, JS.Promise<unit> option> option with get, set
-    abstract webSocketMessage: Func<WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option> option with get, set
-    abstract webSocketClose: Func<WebSocket, float, string, bool, JS.Promise<unit> option> option with get, set
-    abstract webSocketError: Func<WebSocket, obj, JS.Promise<unit> option> option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (ctx: DurableObjectState<'Props>, env: 'Env, ?alarm: Func<AlarmInvocationInfo option, JS.Promise<unit> option>, ?fetch: Func<Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, U2<JS.Promise<Response>, Response>>, ?connect: Func<Socket, JS.Promise<unit> option>, ?webSocketMessage: Func<WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option>, ?webSocketClose: Func<WebSocket, float, string, bool, JS.Promise<unit> option>, ?webSocketError: Func<WebSocket, obj, JS.Promise<unit> option>) : DurableObject2<'Env, 'Props> = jsNative
-
-type DurableObjectConstructor =
-    [<EmitConstructor>]
-    abstract Create<'Env, 'Props>: ctx: DurableObjectState<obj> * env: 'Env -> DurableObject2<'Env, 'Props>
 
 [<Interface>]
 type RpcTarget =
     abstract __RPC_TARGET_BRAND: unit
     [<ParamObject; Emit("$0")>]
     static member Create () : RpcTarget = jsNative
-
-type RpcTargetConstructor =
-    [<EmitConstructor>]
-    abstract Create: unit -> RpcTarget
 
 [<Interface>]
 type WorkerEntrypoint<'Env, 'Props> =
@@ -26433,35 +26448,142 @@ type WorkerEntrypoint<'Env, 'Props> =
     [<ParamObject; Emit("$0")>]
     static member Create (ctx: ExecutionContext<'Props>, env: 'Env, ?email: Func<ForwardableEmailMessage, JS.Promise<unit> option>, ?fetch: Func<Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, U2<JS.Promise<Response>, Response>>, ?connect: Func<Socket, JS.Promise<unit> option>, ?queue: Func<MessageBatch<obj>, JS.Promise<unit> option>, ?scheduled: Func<ScheduledController, JS.Promise<unit> option>, ?tail: Func<TraceItem[], JS.Promise<unit> option>, ?tailStream: Func<TailEvent2<Onset>, U3<JS.Promise<U2<Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, ?test: Func<TestController, JS.Promise<unit> option>, ?trace: Func<TraceItem[], JS.Promise<unit> option>) : WorkerEntrypoint<'Env, 'Props> = jsNative
 
-type WorkerEntrypointConstructor =
-    [<EmitConstructor>]
-    abstract Create<'Env, 'Props>: ctx: ExecutionContext<obj> * env: 'Env -> WorkerEntrypoint<'Env, 'Props>
-
 [<Interface>]
-type WorkflowEntrypoint<'Env, 'T> =
-    abstract __WORKFLOW_ENTRYPOINT_BRAND: unit
-    abstract ctx: ExecutionContext<obj> with get, set
+type DurableObject2<'Env, 'Props> =
+    abstract __DURABLE_OBJECT_BRAND: unit
+    abstract ctx: DurableObjectState<'Props> with get, set
     abstract env: 'Env with get, set
-    abstract run: ``event``: WorkflowEntrypointRunEvent * step: WorkflowStep -> JS.Promise<obj>
+    abstract alarm: Func<AlarmInvocationInfo option, JS.Promise<unit> option> option with get, set
+    abstract fetch: Func<Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, U2<JS.Promise<Response>, Response>> option with get, set
+    abstract connect: Func<Socket, JS.Promise<unit> option> option with get, set
+    abstract webSocketMessage: Func<WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option> option with get, set
+    abstract webSocketClose: Func<WebSocket, float, string, bool, JS.Promise<unit> option> option with get, set
+    abstract webSocketError: Func<WebSocket, obj, JS.Promise<unit> option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (ctx: ExecutionContext<obj>, env: 'Env, run: Func<WorkflowEntrypointRunEvent, WorkflowStep, JS.Promise<obj>>) : WorkflowEntrypoint<'Env, 'T> = jsNative
+    static member Create (ctx: DurableObjectState<'Props>, env: 'Env, ?alarm: Func<AlarmInvocationInfo option, JS.Promise<unit> option>, ?fetch: Func<Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, U2<JS.Promise<Response>, Response>>, ?connect: Func<Socket, JS.Promise<unit> option>, ?webSocketMessage: Func<WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option>, ?webSocketClose: Func<WebSocket, float, string, bool, JS.Promise<unit> option>, ?webSocketError: Func<WebSocket, obj, JS.Promise<unit> option>) : DurableObject2<'Env, 'Props> = jsNative
 
-type WorkflowEntrypointConstructor =
-    [<EmitConstructor>]
-    abstract Create<'Env, 'T>: ctx: ExecutionContext<obj> * env: 'Env -> WorkflowEntrypoint<'Env, 'T>
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type WorkflowDurationLabel =
+    | [<CompiledName("day")>] Day
+    | [<CompiledName("hour")>] Hour
+    | [<CompiledName("minute")>] Minute
+    | [<CompiledName("month")>] Month
+    | [<CompiledName("second")>] Second
+    | [<CompiledName("week")>] Week
+    | [<CompiledName("year")>] Year
+
+type WorkflowSleepDuration = U2<float, string>
+
+type WorkflowDelayDuration = WorkflowSleepDuration
 
 [<Interface>]
-type WorkflowEntrypointRunEvent =
-    abstract payload: obj
-    abstract timestamp: JS.Date
-    abstract instanceId: string
-    abstract workflowName: string
-    abstract schedule: WorkflowEntrypointRunEventSchedule option
+type WorkflowDynamicDelayContext =
+    abstract ctx: WorkflowDynamicDelayContextCtx with get, set
+    abstract error: obj with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (payload: obj, timestamp: JS.Date, instanceId: string, workflowName: string, ?schedule: WorkflowEntrypointRunEventSchedule) : WorkflowEntrypointRunEvent = jsNative
+    static member Create (ctx: WorkflowDynamicDelayContextCtx, error: obj) : WorkflowDynamicDelayContext = jsNative
 
 [<Interface>]
-type WorkflowEntrypointRunEventSchedule =
+type WorkflowDynamicDelayContextCtx =
+    abstract step: WorkflowDynamicDelayContextCtxStep with get, set
+    abstract attempt: float with get, set
+    abstract config: WorkflowDynamicDelayContextCtxConfig with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (step: WorkflowDynamicDelayContextCtxStep, attempt: float, config: WorkflowDynamicDelayContextCtxConfig) : WorkflowDynamicDelayContextCtx = jsNative
+
+[<Interface>]
+type WorkflowDynamicDelayContextCtxConfig =
+    abstract retries: WorkflowDynamicDelayContextCtxConfigRetries option with get, set
+    abstract timeout: WorkflowSleepDuration option with get, set
+    abstract sensitive: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?retries: WorkflowDynamicDelayContextCtxConfigRetries, ?timeout: WorkflowSleepDuration, ?sensitive: string) : WorkflowDynamicDelayContextCtxConfig = jsNative
+
+[<Interface>]
+type WorkflowDynamicDelayContextCtxConfigRetries =
+    abstract limit: float with get, set
+    abstract backoff: WorkflowBackoff option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (limit: float, ?backoff: WorkflowBackoff) : WorkflowDynamicDelayContextCtxConfigRetries = jsNative
+
+[<Interface>]
+type WorkflowDynamicDelayContextCtxStep =
+    abstract name: string with get, set
+    abstract count: float with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (name: string, count: float) : WorkflowDynamicDelayContextCtxStep = jsNative
+
+type WorkflowDelayFunction = Func<WorkflowDynamicDelayContext, U3<float, JS.Promise<WorkflowSleepDuration>, string>>
+
+type WorkflowTimeoutDuration = WorkflowSleepDuration
+
+type WorkflowRetentionDuration = WorkflowSleepDuration
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type WorkflowBackoff =
+    | [<CompiledName("constant")>] Constant
+    | [<CompiledName("exponential")>] Exponential
+    | [<CompiledName("linear")>] Linear
+
+type WorkflowStepSensitivity = string
+
+[<Interface>]
+type WorkflowStepConfig =
+    abstract retries: WorkflowStepConfigRetries option with get, set
+    abstract timeout: WorkflowSleepDuration option with get, set
+    abstract sensitive: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?retries: WorkflowStepConfigRetries, ?timeout: WorkflowSleepDuration, ?sensitive: string) : WorkflowStepConfig = jsNative
+
+[<Interface>]
+type WorkflowStepConfigRetries =
+    abstract limit: float with get, set
+    abstract delay: U3<float, WorkflowDelayFunction, string> with get, set
+    abstract backoff: WorkflowBackoff option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (limit: float, delay: U3<float, WorkflowDelayFunction, string>, ?backoff: WorkflowBackoff) : WorkflowStepConfigRetries = jsNative
+
+[<Interface>]
+type WorkflowStepConfigWithStaticDelay =
+    abstract timeout: WorkflowSleepDuration option with get, set
+    abstract sensitive: string option with get, set
+    abstract retries: WorkflowStepConfigWithStaticDelayRetries option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?timeout: WorkflowSleepDuration, ?sensitive: string, ?retries: WorkflowStepConfigWithStaticDelayRetries) : WorkflowStepConfigWithStaticDelay = jsNative
+
+[<Interface>]
+type WorkflowStepConfigWithStaticDelayRetries =
+    abstract limit: float with get, set
+    abstract delay: WorkflowSleepDuration with get, set
+    abstract backoff: WorkflowBackoff option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (limit: float, delay: WorkflowSleepDuration, ?backoff: WorkflowBackoff) : WorkflowStepConfigWithStaticDelayRetries = jsNative
+
+[<Interface>]
+type WorkflowStepConfigWithDelayFunction =
+    abstract timeout: WorkflowSleepDuration option with get, set
+    abstract sensitive: string option with get, set
+    abstract retries: WorkflowStepConfigWithDelayFunctionRetries with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (retries: WorkflowStepConfigWithDelayFunctionRetries, ?timeout: WorkflowSleepDuration, ?sensitive: string) : WorkflowStepConfigWithDelayFunction = jsNative
+
+[<Interface>]
+type WorkflowStepConfigWithDelayFunctionRetries =
+    abstract limit: float with get, set
+    abstract delay: WorkflowDelayFunction with get, set
+    abstract backoff: WorkflowBackoff option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (limit: float, delay: WorkflowDelayFunction, ?backoff: WorkflowBackoff) : WorkflowStepConfigWithDelayFunctionRetries = jsNative
+
+[<Interface>]
+type WorkflowStepRollbackConfig =
+    abstract retries: WorkflowStepConfigRetries option with get, set
+    abstract timeout: WorkflowSleepDuration option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?retries: WorkflowStepConfigRetries, ?timeout: WorkflowSleepDuration) : WorkflowStepRollbackConfig = jsNative
+
+[<Interface>]
+type WorkflowCronSchedule =
     /// <summary>
     /// Cron expression that triggered this event.
     /// </summary>
@@ -26471,28 +26593,147 @@ type WorkflowEntrypointRunEventSchedule =
     /// </summary>
     abstract scheduledTime: float with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (cron: string, scheduledTime: float) : WorkflowEntrypointRunEventSchedule = jsNative
+    static member Create (cron: string, scheduledTime: float) : WorkflowCronSchedule = jsNative
+
+[<Interface>]
+type WorkflowEvent<'T> =
+    abstract payload: obj with get, set
+    abstract timestamp: JS.Date with get, set
+    abstract instanceId: string with get, set
+    abstract workflowName: string with get, set
+    abstract schedule: WorkflowCronSchedule option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (payload: obj, timestamp: JS.Date, instanceId: string, workflowName: string, ?schedule: WorkflowCronSchedule) : WorkflowEvent<'T> = jsNative
+
+[<Interface>]
+type WorkflowStepEvent<'T> =
+    abstract payload: obj with get, set
+    abstract timestamp: JS.Date with get, set
+    abstract ``type``: string with get, set
+    abstract sensitive: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (payload: obj, timestamp: JS.Date, ``type``: string, ?sensitive: string) : WorkflowStepEvent<'T> = jsNative
+
+[<Interface>]
+type WorkflowStepContext<'Delay> =
+    abstract step: WorkflowDynamicDelayContextCtxStep with get, set
+    abstract attempt: float with get, set
+    abstract config: WorkflowStepContextConfig with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (step: WorkflowDynamicDelayContextCtxStep, attempt: float, config: WorkflowStepContextConfig) : WorkflowStepContext<'Delay> = jsNative
+
+[<Interface>]
+type WorkflowStepContextConfig =
+    abstract retries: obj option with get, set
+    abstract timeout: WorkflowSleepDuration option with get, set
+    abstract sensitive: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?retries: obj, ?timeout: WorkflowSleepDuration, ?sensitive: string) : WorkflowStepContextConfig = jsNative
+
+[<Interface>]
+type WorkflowRollbackContext<'T, 'Delay> =
+    abstract ctx: obj with get, set
+    abstract error: obj with get, set
+    abstract output: 'T option with get, set
+    /// <remarks>@deprecated Use <c>ctx.step.name</c> and <c>ctx.step.count</c> instead.</remarks>
+    abstract stepName: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (ctx: obj, error: obj, stepName: string, ?output: 'T) : WorkflowRollbackContext<'T, 'Delay> = jsNative
+
+[<Interface>]
+type WorkflowRollbackContextCtx<'Delay> =
+    abstract step: WorkflowDynamicDelayContextCtxStep with get, set
+    abstract attempt: float with get, set
+    abstract config: WorkflowRollbackContextCtxConfig with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (step: WorkflowDynamicDelayContextCtxStep, attempt: float, config: WorkflowRollbackContextCtxConfig) : WorkflowRollbackContextCtx<'Delay> = jsNative
+
+[<Interface>]
+type WorkflowRollbackContextCtxConfig =
+    abstract retries: obj option with get, set
+    abstract timeout: WorkflowSleepDuration option with get, set
+    abstract sensitive: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?retries: obj, ?timeout: WorkflowSleepDuration, ?sensitive: string) : WorkflowRollbackContextCtxConfig = jsNative
+
+[<Erase>]
+type WorkflowRollbackHandler<'T, 'Delay> = private WorkflowRollbackHandler__ of Func<obj, JS.Promise<unit>>
+
+[<Interface>]
+type WorkflowRollbackHandlerCtx<'T, 'Delay> =
+    abstract ctx: obj with get, set
+    abstract error: obj with get, set
+    abstract output: 'T option with get, set
+    /// <remarks>@deprecated Use <c>ctx.step.name</c> and <c>ctx.step.count</c> instead.</remarks>
+    abstract stepName: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (ctx: obj, error: obj, stepName: string, ?output: 'T) : WorkflowRollbackHandlerCtx<'T, 'Delay> = jsNative
+
+[<Interface>]
+type WorkflowRollbackHandlerCtxCtx<'Delay> =
+    abstract step: WorkflowDynamicDelayContextCtxStep with get, set
+    abstract attempt: float with get, set
+    abstract config: WorkflowRollbackHandlerCtxCtxConfig with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (step: WorkflowDynamicDelayContextCtxStep, attempt: float, config: WorkflowRollbackHandlerCtxCtxConfig) : WorkflowRollbackHandlerCtxCtx<'Delay> = jsNative
+
+[<Interface>]
+type WorkflowRollbackHandlerCtxCtxConfig =
+    abstract retries: obj option with get, set
+    abstract timeout: WorkflowSleepDuration option with get, set
+    abstract sensitive: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?retries: obj, ?timeout: WorkflowSleepDuration, ?sensitive: string) : WorkflowRollbackHandlerCtxCtxConfig = jsNative
+
+[<Interface>]
+type WorkflowStepRollbackOptions<'T, 'Delay> =
+    abstract rollback: Func<obj, JS.Promise<unit>> with get, set
+    abstract rollbackConfig: WorkflowStepRollbackConfig option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (rollback: Func<obj, JS.Promise<unit>>, ?rollbackConfig: WorkflowStepRollbackConfig) : WorkflowStepRollbackOptions<'T, 'Delay> = jsNative
+
+[<Interface>]
+type WorkflowStepRollbackOptionsRollbackCtx<'T, 'Delay> =
+    abstract ctx: obj with get, set
+    abstract error: obj with get, set
+    abstract output: 'T option with get, set
+    /// <remarks>@deprecated Use <c>ctx.step.name</c> and <c>ctx.step.count</c> instead.</remarks>
+    abstract stepName: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (ctx: obj, error: obj, stepName: string, ?output: 'T) : WorkflowStepRollbackOptionsRollbackCtx<'T, 'Delay> = jsNative
+
+[<Interface>]
+type WorkflowStepRollbackOptionsRollbackCtxCtx<'Delay> =
+    abstract step: WorkflowDynamicDelayContextCtxStep with get, set
+    abstract attempt: float with get, set
+    abstract config: WorkflowStepRollbackOptionsRollbackCtxCtxConfig with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (step: WorkflowDynamicDelayContextCtxStep, attempt: float, config: WorkflowStepRollbackOptionsRollbackCtxCtxConfig) : WorkflowStepRollbackOptionsRollbackCtxCtx<'Delay> = jsNative
+
+[<Interface>]
+type WorkflowStepRollbackOptionsRollbackCtxCtxConfig =
+    abstract retries: obj option with get, set
+    abstract timeout: WorkflowSleepDuration option with get, set
+    abstract sensitive: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?retries: obj, ?timeout: WorkflowSleepDuration, ?sensitive: string) : WorkflowStepRollbackOptionsRollbackCtxCtxConfig = jsNative
 
 type WorkflowStep =
     abstract ``do``<'T>: name: string * callback: Func<WorkflowStepDoCallbackCtx, JS.Promise<'T>> * ?rollbackOptions: obj -> JS.Promise<'T>
-    abstract ``do``<'T>: name: string * config: WorkflowStepDoConfig * callback: Func<WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtx, JS.Promise<'T>> * ?rollbackOptions: obj -> JS.Promise<'T>
-    abstract ``do``<'T>: name: string * config: WorkflowStepDoConfig2 * callback: Func<WorkflowStepDoCallbackCtx, JS.Promise<'T>> * ?rollbackOptions: obj -> JS.Promise<'T>
-    abstract ``do``<'T>: name: string * config: WorkflowStepDoConfig3 * callback: Func<WorkflowStepDoCallbackCtx, JS.Promise<'T>> * ?rollbackOptions: obj -> JS.Promise<'T>
+    abstract ``do``<'T>: name: string * config: WorkflowStepConfigWithDelayFunction * callback: Func<WorkflowDynamicDelayContextCtx, JS.Promise<'T>> * ?rollbackOptions: obj -> JS.Promise<'T>
+    abstract ``do``<'T>: name: string * config: WorkflowStepConfigWithStaticDelay * callback: Func<WorkflowStepDoCallbackCtx, JS.Promise<'T>> * ?rollbackOptions: obj -> JS.Promise<'T>
+    abstract ``do``<'T>: name: string * config: WorkflowStepConfig * callback: Func<WorkflowStepDoCallbackCtx, JS.Promise<'T>> * ?rollbackOptions: obj -> JS.Promise<'T>
     abstract sleep: Func<string, WorkflowSleepDuration, JS.Promise<unit>> with get, set
     abstract sleepUntil: Func<string, U2<float, JS.Date>, JS.Promise<unit>> with get, set
     abstract waitForEvent: name: string * options: WorkflowStepWaitForEventOptions -> JS.Promise<obj>
 
-type WorkflowStepConstructor =
-    [<EmitConstructor>]
-    abstract Create: unit -> WorkflowStep
-
 [<Interface>]
 type WorkflowStepDoCallbackCtx =
-    abstract step: WorkflowStepDoCallbackCtxStep with get, set
+    abstract step: WorkflowDynamicDelayContextCtxStep with get, set
     abstract attempt: float with get, set
     abstract config: WorkflowStepDoCallbackCtxConfig with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (step: WorkflowStepDoCallbackCtxStep, attempt: float, config: WorkflowStepDoCallbackCtxConfig) : WorkflowStepDoCallbackCtx = jsNative
+    static member Create (step: WorkflowDynamicDelayContextCtxStep, attempt: float, config: WorkflowStepDoCallbackCtxConfig) : WorkflowStepDoCallbackCtx = jsNative
 
 [<Interface>]
 type WorkflowStepDoCallbackCtxConfig =
@@ -26504,90 +26745,43 @@ type WorkflowStepDoCallbackCtxConfig =
 
 [<Interface>]
 type WorkflowStepDoCallbackCtxConfigRetries =
-    inherit WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtxConfigRetries
+    inherit WorkflowDynamicDelayContextCtxConfigRetries
     abstract limit: float with get, set
-    abstract backoff: GatewayRetriesBackoff option with get, set
+    abstract backoff: WorkflowBackoff option with get, set
     abstract delay: WorkflowSleepDuration with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (limit: float, delay: WorkflowSleepDuration, ?backoff: GatewayRetriesBackoff) : WorkflowStepDoCallbackCtxConfigRetries = jsNative
-
-[<Interface>]
-type WorkflowStepDoCallbackCtxStep =
-    abstract name: string with get, set
-    abstract count: float with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (name: string, count: float) : WorkflowStepDoCallbackCtxStep = jsNative
-
-[<Interface>]
-type WorkflowStepDoConfig =
-    abstract timeout: WorkflowSleepDuration option with get, set
-    abstract sensitive: string option with get, set
-    abstract retries: WorkflowStepDoConfigRetries with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (retries: WorkflowStepDoConfigRetries, ?timeout: WorkflowSleepDuration, ?sensitive: string) : WorkflowStepDoConfig = jsNative
-
-[<Interface>]
-type WorkflowStepDoConfig2 =
-    abstract timeout: WorkflowSleepDuration option with get, set
-    abstract sensitive: string option with get, set
-    abstract retries: WorkflowStepDoConfig2Retries option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (?timeout: WorkflowSleepDuration, ?sensitive: string, ?retries: WorkflowStepDoConfig2Retries) : WorkflowStepDoConfig2 = jsNative
-
-[<Interface>]
-type WorkflowStepDoConfig2Retries =
-    abstract limit: float with get, set
-    abstract delay: WorkflowSleepDuration with get, set
-    abstract backoff: GatewayRetriesBackoff option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (limit: float, delay: WorkflowSleepDuration, ?backoff: GatewayRetriesBackoff) : WorkflowStepDoConfig2Retries = jsNative
-
-[<Interface>]
-type WorkflowStepDoConfig3 =
-    abstract retries: WorkflowStepDoRollbackOptionsRollbackConfigRetries option with get, set
-    abstract timeout: WorkflowSleepDuration option with get, set
-    abstract sensitive: string option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (?retries: WorkflowStepDoRollbackOptionsRollbackConfigRetries, ?timeout: WorkflowSleepDuration, ?sensitive: string) : WorkflowStepDoConfig3 = jsNative
-
-[<Interface>]
-type WorkflowStepDoConfigRetries =
-    abstract limit: float with get, set
-    abstract delay: Func<WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInput, U3<float, JS.Promise<WorkflowSleepDuration>, string>> with get, set
-    abstract backoff: GatewayRetriesBackoff option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (limit: float, delay: Func<WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInput, U3<float, JS.Promise<WorkflowSleepDuration>, string>>, ?backoff: GatewayRetriesBackoff) : WorkflowStepDoConfigRetries = jsNative
+    static member Create (limit: float, delay: WorkflowSleepDuration, ?backoff: WorkflowBackoff) : WorkflowStepDoCallbackCtxConfigRetries = jsNative
 
 [<Interface>]
 type WorkflowStepDoRollbackOptions<'T> =
     abstract rollback: Func<obj, JS.Promise<unit>> with get, set
-    abstract rollbackConfig: WorkflowStepDoRollbackOptionsRollbackConfig option with get, set
+    abstract rollbackConfig: WorkflowStepRollbackConfig option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (rollback: Func<obj, JS.Promise<unit>>, ?rollbackConfig: WorkflowStepDoRollbackOptionsRollbackConfig) : WorkflowStepDoRollbackOptions<'T> = jsNative
+    static member Create (rollback: Func<obj, JS.Promise<unit>>, ?rollbackConfig: WorkflowStepRollbackConfig) : WorkflowStepDoRollbackOptions<'T> = jsNative
 
 [<Interface>]
 type WorkflowStepDoRollbackOptions2<'T> =
     abstract rollback: Func<obj, JS.Promise<unit>> with get, set
-    abstract rollbackConfig: WorkflowStepDoRollbackOptionsRollbackConfig option with get, set
+    abstract rollbackConfig: WorkflowStepRollbackConfig option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (rollback: Func<obj, JS.Promise<unit>>, ?rollbackConfig: WorkflowStepDoRollbackOptionsRollbackConfig) : WorkflowStepDoRollbackOptions2<'T> = jsNative
+    static member Create (rollback: Func<obj, JS.Promise<unit>>, ?rollbackConfig: WorkflowStepRollbackConfig) : WorkflowStepDoRollbackOptions2<'T> = jsNative
 
 [<Interface>]
 type WorkflowStepDoRollbackOptions2RollbackCtx<'T> =
-    abstract ctx: WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtx with get, set
+    abstract ctx: WorkflowDynamicDelayContextCtx with get, set
     abstract error: obj with get, set
     abstract output: 'T option with get, set
     /// <remarks>@deprecated Use <c>ctx.step.name</c> and <c>ctx.step.count</c> instead.</remarks>
     abstract stepName: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (ctx: WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtx, error: obj, stepName: string, ?output: 'T) : WorkflowStepDoRollbackOptions2RollbackCtx<'T> = jsNative
+    static member Create (ctx: WorkflowDynamicDelayContextCtx, error: obj, stepName: string, ?output: 'T) : WorkflowStepDoRollbackOptions2RollbackCtx<'T> = jsNative
 
 [<Interface>]
 type WorkflowStepDoRollbackOptions3<'T> =
     abstract rollback: Func<obj, JS.Promise<unit>> with get, set
-    abstract rollbackConfig: WorkflowStepDoRollbackOptionsRollbackConfig option with get, set
+    abstract rollbackConfig: WorkflowStepRollbackConfig option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (rollback: Func<obj, JS.Promise<unit>>, ?rollbackConfig: WorkflowStepDoRollbackOptionsRollbackConfig) : WorkflowStepDoRollbackOptions3<'T> = jsNative
+    static member Create (rollback: Func<obj, JS.Promise<unit>>, ?rollbackConfig: WorkflowStepRollbackConfig) : WorkflowStepDoRollbackOptions3<'T> = jsNative
 
 [<Interface>]
 type WorkflowStepDoRollbackOptions3RollbackCtx<'T> =
@@ -26602,9 +26796,9 @@ type WorkflowStepDoRollbackOptions3RollbackCtx<'T> =
 [<Interface>]
 type WorkflowStepDoRollbackOptions4<'T> =
     abstract rollback: Func<obj, JS.Promise<unit>> with get, set
-    abstract rollbackConfig: WorkflowStepDoRollbackOptionsRollbackConfig option with get, set
+    abstract rollbackConfig: WorkflowStepRollbackConfig option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (rollback: Func<obj, JS.Promise<unit>>, ?rollbackConfig: WorkflowStepDoRollbackOptionsRollbackConfig) : WorkflowStepDoRollbackOptions4<'T> = jsNative
+    static member Create (rollback: Func<obj, JS.Promise<unit>>, ?rollbackConfig: WorkflowStepRollbackConfig) : WorkflowStepDoRollbackOptions4<'T> = jsNative
 
 [<Interface>]
 type WorkflowStepDoRollbackOptions4RollbackCtx<'T> =
@@ -26615,51 +26809,6 @@ type WorkflowStepDoRollbackOptions4RollbackCtx<'T> =
     abstract stepName: string with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (ctx: WorkflowStepDoCallbackCtx, error: obj, stepName: string, ?output: 'T) : WorkflowStepDoRollbackOptions4RollbackCtx<'T> = jsNative
-
-[<Interface>]
-type WorkflowStepDoRollbackOptionsRollbackConfig =
-    abstract retries: WorkflowStepDoRollbackOptionsRollbackConfigRetries option with get, set
-    abstract timeout: WorkflowSleepDuration option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (?retries: WorkflowStepDoRollbackOptionsRollbackConfigRetries, ?timeout: WorkflowSleepDuration) : WorkflowStepDoRollbackOptionsRollbackConfig = jsNative
-
-[<Interface>]
-type WorkflowStepDoRollbackOptionsRollbackConfigRetries =
-    abstract limit: float with get, set
-    abstract delay: U3<float, Func<WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInput, U3<float, JS.Promise<WorkflowSleepDuration>, string>>, string> with get, set
-    abstract backoff: GatewayRetriesBackoff option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (limit: float, delay: U3<float, Func<WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInput, U3<float, JS.Promise<WorkflowSleepDuration>, string>>, string>, ?backoff: GatewayRetriesBackoff) : WorkflowStepDoRollbackOptionsRollbackConfigRetries = jsNative
-
-[<Interface>]
-type WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInput =
-    abstract ctx: WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtx with get, set
-    abstract error: obj with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (ctx: WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtx, error: obj) : WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInput = jsNative
-
-[<Interface>]
-type WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtx =
-    abstract step: WorkflowStepDoCallbackCtxStep with get, set
-    abstract attempt: float with get, set
-    abstract config: WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtxConfig with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (step: WorkflowStepDoCallbackCtxStep, attempt: float, config: WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtxConfig) : WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtx = jsNative
-
-[<Interface>]
-type WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtxConfig =
-    abstract retries: WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtxConfigRetries option with get, set
-    abstract timeout: WorkflowSleepDuration option with get, set
-    abstract sensitive: string option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (?retries: WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtxConfigRetries, ?timeout: WorkflowSleepDuration, ?sensitive: string) : WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtxConfig = jsNative
-
-[<Interface>]
-type WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtxConfigRetries =
-    abstract limit: float with get, set
-    abstract backoff: GatewayRetriesBackoff option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (limit: float, ?backoff: GatewayRetriesBackoff) : WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtxConfigRetries = jsNative
 
 [<Interface>]
 type WorkflowStepDoRollbackOptionsRollbackCtx<'T> =
@@ -26686,6 +26835,37 @@ type WorkflowStepWaitForEventResultItem<'T> =
     abstract sensitive: string option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (payload: obj, timestamp: JS.Date, ``type``: string, ?sensitive: string) : WorkflowStepWaitForEventResultItem<'T> = jsNative
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type WorkflowInstanceStatus =
+    | [<CompiledName("complete")>] Complete
+    | [<CompiledName("errored")>] Errored
+    | [<CompiledName("paused")>] Paused
+    | [<CompiledName("queued")>] Queued
+    | [<CompiledName("running")>] Running
+    | [<CompiledName("terminated")>] Terminated
+    | [<CompiledName("unknown")>] Unknown
+    | [<CompiledName("waiting")>] Waiting
+    | [<CompiledName("waitingForPause")>] WaitingForPause
+
+[<Interface>]
+type WorkflowEntrypoint<'Env, 'T> =
+    abstract __WORKFLOW_ENTRYPOINT_BRAND: unit
+    abstract ctx: ExecutionContext<obj> with get, set
+    abstract env: 'Env with get, set
+    abstract run: ``event``: WorkflowEntrypointRunEvent * step: WorkflowStep -> JS.Promise<obj>
+    [<ParamObject; Emit("$0")>]
+    static member Create (ctx: ExecutionContext<obj>, env: 'Env, run: Func<WorkflowEntrypointRunEvent, WorkflowStep, JS.Promise<obj>>) : WorkflowEntrypoint<'Env, 'T> = jsNative
+
+[<Interface>]
+type WorkflowEntrypointRunEvent =
+    abstract payload: obj
+    abstract timestamp: JS.Date
+    abstract instanceId: string
+    abstract workflowName: string
+    abstract schedule: WorkflowCronSchedule option
+    [<ParamObject; Emit("$0")>]
+    static member Create (payload: obj, timestamp: JS.Date, instanceId: string, workflowName: string, ?schedule: WorkflowCronSchedule) : WorkflowEntrypointRunEvent = jsNative
 
 [<Interface>]
 type SecretsStoreSecret =
@@ -28215,24 +28395,30 @@ type DispatchNamespaceGetArgs =
     [<EmitIndexer>]
     abstract Item: string -> obj with get, set
 
+/// <summary>
+/// NonRetryableError allows for a user to throw a fatal error
+/// that makes a Workflow instance fail immediately without triggering a retry
+/// </summary>
+[<Interface>]
+type NonRetryableError =
+    abstract name: string with get, set
+    abstract message: string with get, set
+    abstract stack: string option with get, set
+    abstract cause: obj option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (name: string, message: string, ?stack: string, ?cause: obj) : NonRetryableError = jsNative
+    /// <summary>
+    /// Indicates whether the argument provided is a built-in Error instance or not.
+    /// </summary>
+    [<Import("NonRetryableError.isError", "cloudflare:workflows")>]
+    static member isError (error: obj) : bool = jsNative
+
 [<Interface>]
 type InstanceStatusError =
     abstract name: string with get, set
     abstract message: string with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (name: string, message: string) : InstanceStatusError = jsNative
-
-[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type InstanceStatusStatus =
-    | [<CompiledName("complete")>] Complete
-    | [<CompiledName("errored")>] Errored
-    | [<CompiledName("paused")>] Paused
-    | [<CompiledName("queued")>] Queued
-    | [<CompiledName("running")>] Running
-    | [<CompiledName("terminated")>] Terminated
-    | [<CompiledName("unknown")>] Unknown
-    | [<CompiledName("waiting")>] Waiting
-    | [<CompiledName("waitingForPause")>] WaitingForPause
 
 [<Interface>]
 type Workflow<'PARAMS> =
@@ -28326,7 +28512,7 @@ type WorkflowBatchDeleteResult =
     static member Create (deleted: WorkflowBatchDeleteResultDeletedItem[], errors: WorkflowBatchDeleteResultErrorsItem[]) : WorkflowBatchDeleteResult = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type WorkflowDurationLabel =
+type WorkflowDurationLabel2 =
     | [<CompiledName("day")>] Day
     | [<CompiledName("hour")>] Hour
     | [<CompiledName("minute")>] Minute
@@ -28335,9 +28521,7 @@ type WorkflowDurationLabel =
     | [<CompiledName("week")>] Week
     | [<CompiledName("year")>] Year
 
-type WorkflowSleepDuration = U2<float, string>
-
-type WorkflowRetentionDuration = WorkflowSleepDuration
+type WorkflowSleepDuration2 = WorkflowSleepDuration
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type WorkflowInstanceLocationHint =
@@ -28378,11 +28562,11 @@ type WorkflowInstanceCreateOptions<'PARAMS> =
 
 [<Interface>]
 type InstanceStatus =
-    abstract status: InstanceStatusStatus with get, set
+    abstract status: WorkflowInstanceStatus with get, set
     abstract error: InstanceStatusError option with get, set
     abstract output: obj option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (status: InstanceStatusStatus, ?error: InstanceStatusError, ?output: obj) : InstanceStatus = jsNative
+    static member Create (status: WorkflowInstanceStatus, ?error: InstanceStatusError, ?output: obj) : InstanceStatus = jsNative
 
 [<Interface>]
 type WorkflowError =
@@ -29237,6 +29421,8 @@ type Exports =
     static member D1PreparedStatement () : D1PreparedStatement = jsNative
     [<Global("EmailEvent"); EmitConstructor>]
     static member EmailEvent (``type``: string, ?init: EventInit) : EmailEvent = jsNative
+    [<Import("EmailMessage", "cloudflare:email")>]
+    static member EmailMessage: EmailMessageConstructor = jsNative
     /// <summary>
     /// Feature flags binding for evaluating feature flags from a Cloudflare Workers script.
     /// </summary>
@@ -29259,10 +29445,46 @@ type Exports =
     /// </remarks>
     [<Global("Flagship"); EmitConstructor>]
     static member Flagship () : Flagship = jsNative
+    [<Import("httpServerHandler", "cloudflare:node")>]
+    static member httpServerHandler (port: float) : ExportedHandler<obj, obj, obj, obj> = jsNative
+    [<Import("httpServerHandler", "cloudflare:node")>]
+    static member httpServerHandler (options: HttpServerHandlerOptions) : ExportedHandler<obj, obj, obj, obj> = jsNative
+    [<Import("httpServerHandler", "cloudflare:node")>]
+    static member httpServerHandler (server: NodeStyleServer) : ExportedHandler<obj, obj, obj, obj> = jsNative
+    [<Import("PipelineTransformationEntrypoint", "cloudflare:pipelines"); EmitConstructor>]
+    static member PipelineTransformationEntrypoint<'Env, 'I, 'O when 'I :> PipelineRecord and 'O :> PipelineRecord> (ctx: ExecutionContext<obj>, env: 'Env) : PipelineTransformationEntrypoint<'Env, 'I, 'O> = jsNative
     [<Global("Rpc")>]
     static member Rpc: Rpc = jsNative
-    [<Global("CloudflareWorkersModule")>]
-    static member CloudflareWorkersModule: CloudflareWorkersModule = jsNative
+    [<Import("RpcStub", "cloudflare:workers")>]
+    static member RpcStub: RpcStubConstructor = jsNative
+    [<Import("RpcTarget", "cloudflare:workers"); EmitConstructor>]
+    static member RpcTarget () : RpcTarget = jsNative
+    [<Import("WorkerEntrypoint", "cloudflare:workers"); EmitConstructor>]
+    static member WorkerEntrypoint<'Env, 'Props> (ctx: ExecutionContext<obj>, env: 'Env) : WorkerEntrypoint<'Env, 'Props> = jsNative
+    [<Import("DurableObject", "cloudflare:workers"); EmitConstructor>]
+    static member DurableObject<'Env, 'Props> (ctx: DurableObjectState<obj>, env: 'Env) : DurableObject2<'Env, 'Props> = jsNative
+    [<Import("WorkflowStep", "cloudflare:workers"); EmitConstructor>]
+    static member WorkflowStep () : WorkflowStep = jsNative
+    [<Import("WorkflowEntrypoint", "cloudflare:workers"); EmitConstructor>]
+    static member WorkflowEntrypoint<'Env, 'T> (ctx: ExecutionContext<obj>, env: 'Env) : WorkflowEntrypoint<'Env, 'T> = jsNative
+    [<Import("waitUntil", "cloudflare:workers")>]
+    static member waitUntil (promise: JS.Promise<obj>) : unit = jsNative
+    [<Import("withEnv", "cloudflare:workers")>]
+    static member withEnv (newEnv: obj, fn: Func<obj>) : obj = jsNative
+    [<Import("withExports", "cloudflare:workers")>]
+    static member withExports (newExports: obj, fn: Func<obj>) : obj = jsNative
+    [<Import("withEnvAndExports", "cloudflare:workers")>]
+    static member withEnvAndExports (newEnv: obj, newExports: obj, fn: Func<obj>) : obj = jsNative
+    [<Import("env", "cloudflare:workers")>]
+    static member env: obj = jsNative
+    [<Import("exports", "cloudflare:workers")>]
+    static member exports: obj = jsNative
+    [<Import("cache", "cloudflare:workers")>]
+    static member cache: CacheContext = jsNative
+    [<Import("tracing", "cloudflare:workers")>]
+    static member tracing: Tracing = jsNative
+    [<Import("connect", "cloudflare:sockets")>]
+    static member connect (address: U2<string, SocketAddress>, ?options: SocketOptions) : Socket = jsNative
     [<Global("ToMarkdownService"); EmitConstructor>]
     static member ToMarkdownService () : ToMarkdownService = jsNative
     /// <summary>
@@ -29311,6 +29533,12 @@ type Exports =
     /// </remarks>
     [<Global("WebSearch"); EmitConstructor>]
     static member WebSearch () : WebSearch = jsNative
+    /// <summary>
+    /// NonRetryableError allows for a user to throw a fatal error
+    /// that makes a Workflow instance fail immediately without triggering a retry
+    /// </summary>
+    [<Import("NonRetryableError", "cloudflare:workflows"); EmitConstructor>]
+    static member NonRetryableError (message: string, ?name: string) : NonRetryableError = jsNative
     [<Global("Workflow"); EmitConstructor>]
     static member Workflow<'PARAMS> () : Workflow<'PARAMS> = jsNative
     [<Global("WorkflowInstance"); EmitConstructor>]

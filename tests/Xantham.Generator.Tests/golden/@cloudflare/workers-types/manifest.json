@@ -2,16 +2,17 @@
   "package": "@cloudflare/workers-types",
   "module": "Cloudflare.WorkersTypes",
   "counts": {
-    "exact": 231,
-    "ergonomic": 1061,
-    "widened": 365,
-    "escape": 115
+    "exact": 242,
+    "ergonomic": 1069,
+    "widened": 387,
+    "escape": 110
   },
   "passes": [
     {
       "pass": "HG - harvest-globals",
-      "total": 7,
-      "escape": 7
+      "total": 8,
+      "exact": 7,
+      "escape": 1
     },
     {
       "pass": "RT - resolve-type-table",
@@ -38,42 +39,42 @@
     },
     {
       "pass": "shape-callbacks",
-      "total": 13,
+      "total": 27,
       "ergonomic": 11,
-      "widened": 2
+      "widened": 16
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 7785,
+      "total": 7795,
       "exact": 72,
-      "ergonomic": 6903,
-      "widened": 660,
-      "escape": 150
+      "ergonomic": 6938,
+      "widened": 634,
+      "escape": 151
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 80,
-      "ergonomic": 31,
-      "widened": 49
+      "total": 88,
+      "ergonomic": 32,
+      "widened": 56
     },
     {
       "pass": "SC - shape-classes",
-      "total": 56,
-      "ergonomic": 45,
-      "widened": 3,
+      "total": 63,
+      "ergonomic": 47,
+      "widened": 8,
       "escape": 8
     },
     {
       "pass": "SE - shape-exports",
-      "total": 31,
-      "ergonomic": 15,
-      "widened": 9,
+      "total": 57,
+      "ergonomic": 16,
+      "widened": 34,
       "escape": 7
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 1926,
-      "ergonomic": 1926
+      "total": 1951,
+      "ergonomic": 1951
     },
     {
       "pass": "DO - dedupe-overloads",
@@ -82,9 +83,9 @@
     },
     {
       "pass": "RA - repair-arity",
-      "total": 23,
+      "total": 33,
       "ergonomic": 4,
-      "widened": 19
+      "widened": 29
     }
   ],
   "symbols": [
@@ -5448,6 +5449,20 @@
       "file": "index.d.ts",
       "tier": "widened",
       "findings": [
+        {
+          "key": "SA003",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "DurableObject",
+          "message": "abbreviation dropped - DurableObject2 already declares the name; the type reads under that declaration"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-classes",
+          "tier": "widened",
+          "symbol": "DurableObject(ctx)",
+          "message": "unknown maps to obj (D8)"
+        },
         {
           "key": "MB003",
           "pass": "shape-interfaces",
@@ -55069,12 +55084,6 @@
       ]
     },
     {
-      "name": "GatewayRetriesBackoff",
-      "file": "index.d.ts",
-      "tier": "exact",
-      "findings": []
-    },
-    {
       "name": "GatewayRetriesMaxAttempts",
       "file": "index.d.ts",
       "tier": "exact",
@@ -71931,6 +71940,27 @@
       ]
     },
     {
+      "name": "EmailMessageConstructor",
+      "file": "index.d.ts",
+      "tier": "escape",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "EmailMessageConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "EmailMessageConstructor.Create(raw)",
+          "message": "any maps to obj"
+        }
+      ]
+    },
+    {
       "name": "FlagshipEvaluationContext",
       "file": "index.d.ts",
       "tier": "ergonomic",
@@ -74834,6 +74864,83 @@
       ]
     },
     {
+      "name": "NodeStyleServer",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "NodeStyleServer.listen(args)",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "NodeStyleServer",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "NodeStyleServer.address",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "NodeStyleServer.listen",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        }
+      ]
+    },
+    {
+      "name": "NodeStyleServerAddressResult",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "NodeStyleServerAddressResult.port",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "NodeStyleServerAddressResult.port",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "NodeStyleServerAddressResult",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "HttpServerHandlerOptions",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "HttpServerHandlerOptions",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
       "name": "Params",
       "file": "index.d.ts",
       "tier": "widened",
@@ -75275,6 +75382,104 @@
       ]
     },
     {
+      "name": "PipelineTransformationEntrypoint",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "TR009",
+          "pass": "shape-classes",
+          "tier": "widened",
+          "symbol": "PipelineTransformationEntrypoint(ctx)",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "PipelineTransformationEntrypoint.ctx",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "PipelineTransformationEntrypoint",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "PipelineTransformationEntrypoint.run",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        }
+      ]
+    },
+    {
+      "name": "PipelineRecord",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "MB004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "PipelineRecord.[]",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "PipelineRecord.[]",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "SP003",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "PipelineRecord",
+          "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
+        }
+      ]
+    },
+    {
+      "name": "PipelineBatchMetadata",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "PipelineBatchMetadata",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "Pipeline",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Pipeline",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Pipeline.send",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        }
+      ]
+    },
+    {
       "name": "PubSubMessage",
       "file": "index.d.ts",
       "tier": "ergonomic",
@@ -75667,112 +75872,35 @@
       ]
     },
     {
-      "name": "CloudflareWorkersModule",
+      "name": "RpcStub",
       "file": "index.d.ts",
       "tier": "widened",
       "findings": [
         {
-          "key": "TR023",
-          "pass": "shape-interfaces",
+          "key": "SA002",
+          "pass": "shape-aliases",
           "tier": "widened",
-          "symbol": "CloudflareWorkersModule.env",
-          "message": "Env is not among the generated declarations; widened to obj"
+          "symbol": "RpcStub",
+          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR047",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "CloudflareWorkersModule.exports",
-          "message": "object type declares no members; obj admits the same values"
-        },
-        {
-          "key": "TR009",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "CloudflareWorkersModule.waitUntil(promise)",
-          "message": "unknown maps to obj (D8)"
-        },
-        {
-          "key": "TR009",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "CloudflareWorkersModule.withEnv()",
-          "message": "unknown maps to obj (D8)"
-        },
-        {
-          "key": "TR009",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "CloudflareWorkersModule.withEnv(fn)()",
-          "message": "unknown maps to obj (D8)"
-        },
-        {
-          "key": "TR009",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "CloudflareWorkersModule.withEnv(newEnv)",
-          "message": "unknown maps to obj (D8)"
-        },
-        {
-          "key": "TR009",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "CloudflareWorkersModule.withEnvAndExports()",
-          "message": "unknown maps to obj (D8)"
-        },
-        {
-          "key": "TR009",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "CloudflareWorkersModule.withEnvAndExports(fn)()",
-          "message": "unknown maps to obj (D8)"
-        },
-        {
-          "key": "TR009",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "CloudflareWorkersModule.withEnvAndExports(newEnv)",
-          "message": "unknown maps to obj (D8)"
-        },
-        {
-          "key": "TR009",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "CloudflareWorkersModule.withEnvAndExports(newExports)",
-          "message": "unknown maps to obj (D8)"
-        },
-        {
-          "key": "TR009",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "CloudflareWorkersModule.withExports()",
-          "message": "unknown maps to obj (D8)"
-        },
-        {
-          "key": "TR009",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "CloudflareWorkersModule.withExports(fn)()",
-          "message": "unknown maps to obj (D8)"
-        },
-        {
-          "key": "TR009",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "CloudflareWorkersModule.withExports(newExports)",
-          "message": "unknown maps to obj (D8)"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
+          "key": "TP002",
+          "pass": "shape-aliases",
           "tier": "ergonomic",
-          "symbol": "CloudflareWorkersModule",
-          "message": "ParamObject Create synthesized (D3)"
+          "symbol": "RpcStub",
+          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "key": "TR018",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "RpcStub",
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         }
       ]
     },
     {
-      "name": "CloudflareWorkersModuleRpcStubConstructor",
+      "name": "RpcStubConstructor",
       "file": "index.d.ts",
       "tier": "widened",
       "findings": [
@@ -75780,211 +75908,22 @@
           "key": "SI004",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "symbol": "CloudflareWorkersModuleRpcStubConstructor",
+          "symbol": "RpcStubConstructor",
           "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
         },
         {
           "key": "TP002",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "symbol": "CloudflareWorkersModuleRpcStubConstructor.Create",
+          "symbol": "RpcStubConstructor.Create",
           "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
           "key": "TR018",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "CloudflareWorkersModuleRpcStubConstructor.Create()",
+          "symbol": "RpcStubConstructor.Create()",
           "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        }
-      ]
-    },
-    {
-      "name": "DurableObject2",
-      "file": "index.d.ts",
-      "tier": "widened",
-      "findings": [
-        {
-          "key": "RA005",
-          "pass": "repair-arity",
-          "tier": "ergonomic",
-          "symbol": "DurableObject2",
-          "message": "__DURABLE_OBJECT_BRAND reads but does not write: its type holds no value, and F# has no setter of type unit"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DurableObject2.alarm",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DurableObject2.alarm",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DurableObject2.alarm()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DurableObject2.alarm(alarmInfo)",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DurableObject2.connect",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DurableObject2.connect",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DurableObject2.connect()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DurableObject2.fetch",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DurableObject2.fetch",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR009",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DurableObject2.fetch(request)",
-          "message": "unknown maps to obj (D8)"
-        },
-        {
-          "key": "TR009",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DurableObject2.fetch(request)",
-          "message": "unknown maps to obj (D8)"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DurableObject2.webSocketClose",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DurableObject2.webSocketClose",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DurableObject2.webSocketClose()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DurableObject2.webSocketError",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DurableObject2.webSocketError",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DurableObject2.webSocketError()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR009",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DurableObject2.webSocketError(error)",
-          "message": "unknown maps to obj (D8)"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DurableObject2.webSocketMessage",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DurableObject2.webSocketMessage",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DurableObject2.webSocketMessage()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "DurableObject2",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "DurableObjectConstructor",
-      "file": "index.d.ts",
-      "tier": "widened",
-      "findings": [
-        {
-          "key": "SI004",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "DurableObjectConstructor",
-          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
-        },
-        {
-          "key": "TR009",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DurableObjectConstructor.Create(ctx)",
-          "message": "unknown maps to obj (D8)"
         }
       ]
     },
@@ -76010,20 +75949,6 @@
       ]
     },
     {
-      "name": "RpcTargetConstructor",
-      "file": "index.d.ts",
-      "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SI004",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RpcTargetConstructor",
-          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
-        }
-      ]
-    },
-    {
       "name": "WorkerEntrypoint",
       "file": "index.d.ts",
       "tier": "widened",
@@ -76034,6 +75959,13 @@
           "tier": "ergonomic",
           "symbol": "WorkerEntrypoint",
           "message": "__WORKER_ENTRYPOINT_BRAND reads but does not write: its type holds no value, and F# has no setter of type unit"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-classes",
+          "tier": "widened",
+          "symbol": "WorkerEntrypoint(ctx)",
+          "message": "unknown maps to obj (D8)"
         },
         {
           "key": "MB003",
@@ -76269,28 +76201,7 @@
       ]
     },
     {
-      "name": "WorkerEntrypointConstructor",
-      "file": "index.d.ts",
-      "tier": "widened",
-      "findings": [
-        {
-          "key": "SI004",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkerEntrypointConstructor",
-          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
-        },
-        {
-          "key": "TR009",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkerEntrypointConstructor.Create(ctx)",
-          "message": "unknown maps to obj (D8)"
-        }
-      ]
-    },
-    {
-      "name": "WorkflowEntrypoint",
+      "name": "DurableObject2",
       "file": "index.d.ts",
       "tier": "widened",
       "findings": [
@@ -76298,111 +76209,320 @@
           "key": "RA005",
           "pass": "repair-arity",
           "tier": "ergonomic",
-          "symbol": "WorkflowEntrypoint",
-          "message": "__WORKFLOW_ENTRYPOINT_BRAND reads but does not write: its type holds no value, and F# has no setter of type unit"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowEntrypoint",
-          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TR009",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowEntrypoint.ctx",
-          "message": "unknown maps to obj (D8)"
-        },
-        {
-          "key": "TR009",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowEntrypoint.run()",
-          "message": "unknown maps to obj (D8)"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "WorkflowEntrypoint",
-          "message": "ParamObject Create synthesized (D3)"
-        },
-        {
-          "key": "SP002",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "WorkflowEntrypoint.run",
-          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
-        }
-      ]
-    },
-    {
-      "name": "WorkflowEntrypointConstructor",
-      "file": "index.d.ts",
-      "tier": "widened",
-      "findings": [
-        {
-          "key": "SI004",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowEntrypointConstructor",
-          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowEntrypointConstructor.Create",
-          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TR009",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowEntrypointConstructor.Create(ctx)",
-          "message": "unknown maps to obj (D8)"
-        }
-      ]
-    },
-    {
-      "name": "WorkflowEntrypointRunEvent",
-      "file": "index.d.ts",
-      "tier": "widened",
-      "findings": [
-        {
-          "key": "TR047",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowEntrypointRunEvent.payload",
-          "message": "object type declares no members; obj admits the same values"
+          "symbol": "DurableObject2",
+          "message": "__DURABLE_OBJECT_BRAND reads but does not write: its type holds no value, and F# has no setter of type unit"
         },
         {
           "key": "MB003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "symbol": "WorkflowEntrypointRunEvent.schedule",
+          "symbol": "DurableObject2.alarm",
           "message": "optional member reads as option"
         },
         {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "symbol": "WorkflowEntrypointRunEvent.schedule",
+          "symbol": "DurableObject2.alarm",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DurableObject2.alarm()",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DurableObject2.alarm(alarmInfo)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DurableObject2.connect",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DurableObject2.connect",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DurableObject2.connect()",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DurableObject2.fetch",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DurableObject2.fetch",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "DurableObject2.fetch(request)",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "DurableObject2.fetch(request)",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DurableObject2.webSocketClose",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DurableObject2.webSocketClose",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DurableObject2.webSocketClose()",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DurableObject2.webSocketError",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DurableObject2.webSocketError",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DurableObject2.webSocketError()",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "DurableObject2.webSocketError(error)",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DurableObject2.webSocketMessage",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DurableObject2.webSocketMessage",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DurableObject2.webSocketMessage()",
           "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
-          "symbol": "WorkflowEntrypointRunEvent",
+          "symbol": "DurableObject2",
           "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
     {
-      "name": "WorkflowEntrypointRunEventSchedule",
+      "name": "WorkflowDurationLabel",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "SA003",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "WorkflowDurationLabel",
+          "message": "abbreviation dropped - WorkflowDurationLabel2 already declares the name; the type reads under that declaration"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowSleepDuration",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "SA003",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "WorkflowSleepDuration",
+          "message": "abbreviation dropped - WorkflowSleepDuration2 already declares the name; the type reads under that declaration"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "WorkflowSleepDuration",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "WorkflowSleepDuration",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "WorkflowSleepDuration",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "WorkflowSleepDuration",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "WorkflowSleepDuration",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "WorkflowSleepDuration",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "WorkflowSleepDuration",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "WorkflowSleepDuration",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "WorkflowSleepDuration",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "WorkflowSleepDuration",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "WorkflowSleepDuration",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "WorkflowSleepDuration",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "WorkflowSleepDuration",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "WorkflowSleepDuration",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowDelayDuration",
+      "file": "index.d.ts",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "WorkflowDynamicDelayContext",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "TR023",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowDynamicDelayContext.error",
+          "message": "Error is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "WorkflowDynamicDelayContext",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowDynamicDelayContextCtx",
       "file": "index.d.ts",
       "tier": "ergonomic",
       "findings": [
@@ -76410,7 +76530,1286 @@
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
-          "symbol": "WorkflowEntrypointRunEventSchedule",
+          "symbol": "WorkflowDynamicDelayContextCtx",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowDynamicDelayContextCtxConfig",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowDynamicDelayContextCtxConfig.retries",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowDynamicDelayContextCtxConfig.retries",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowDynamicDelayContextCtxConfig.sensitive",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR006",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowDynamicDelayContextCtxConfig.sensitive",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowDynamicDelayContextCtxConfig.sensitive",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowDynamicDelayContextCtxConfig.timeout",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowDynamicDelayContextCtxConfig.timeout",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "WorkflowDynamicDelayContextCtxConfig",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowDynamicDelayContextCtxConfigRetries",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowDynamicDelayContextCtxConfigRetries.backoff",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowDynamicDelayContextCtxConfigRetries.backoff",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "WorkflowDynamicDelayContextCtxConfigRetries",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowDynamicDelayContextCtxStep",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "WorkflowDynamicDelayContextCtxStep",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowDelayFunction",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "TR037",
+          "pass": "shape-callbacks",
+          "tier": "widened",
+          "symbol": "WorkflowDelayFunction()",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-callbacks",
+          "tier": "widened",
+          "symbol": "WorkflowDelayFunction()",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-callbacks",
+          "tier": "widened",
+          "symbol": "WorkflowDelayFunction()",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-callbacks",
+          "tier": "widened",
+          "symbol": "WorkflowDelayFunction()",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-callbacks",
+          "tier": "widened",
+          "symbol": "WorkflowDelayFunction()",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-callbacks",
+          "tier": "widened",
+          "symbol": "WorkflowDelayFunction()",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-callbacks",
+          "tier": "widened",
+          "symbol": "WorkflowDelayFunction()",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-callbacks",
+          "tier": "widened",
+          "symbol": "WorkflowDelayFunction()",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-callbacks",
+          "tier": "widened",
+          "symbol": "WorkflowDelayFunction()",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-callbacks",
+          "tier": "widened",
+          "symbol": "WorkflowDelayFunction()",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-callbacks",
+          "tier": "widened",
+          "symbol": "WorkflowDelayFunction()",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-callbacks",
+          "tier": "widened",
+          "symbol": "WorkflowDelayFunction()",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-callbacks",
+          "tier": "widened",
+          "symbol": "WorkflowDelayFunction()",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-callbacks",
+          "tier": "widened",
+          "symbol": "WorkflowDelayFunction()",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowTimeoutDuration",
+      "file": "index.d.ts",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "WorkflowRetentionDuration",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "SA003",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "WorkflowRetentionDuration",
+          "message": "abbreviation dropped - WorkflowSleepDuration2 already declares the name; the type reads under that declaration"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowBackoff",
+      "file": "index.d.ts",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "WorkflowStepSensitivity",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "TR006",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "WorkflowStepSensitivity",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowStepConfig",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepConfig.retries",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepConfig.retries",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepConfig.sensitive",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR006",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowStepConfig.sensitive",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepConfig.sensitive",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepConfig.timeout",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepConfig.timeout",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepConfig",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowStepConfigRetries",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepConfigRetries.backoff",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepConfigRetries.backoff",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowStepConfigRetries.delay",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowStepConfigRetries.delay",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowStepConfigRetries.delay",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowStepConfigRetries.delay",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowStepConfigRetries.delay",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowStepConfigRetries.delay",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowStepConfigRetries.delay",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowStepConfigRetries.delay",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowStepConfigRetries.delay",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowStepConfigRetries.delay",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowStepConfigRetries.delay",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowStepConfigRetries.delay",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowStepConfigRetries.delay",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowStepConfigRetries.delay",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepConfigRetries",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowStepConfigWithStaticDelay",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepConfigWithStaticDelay",
+          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepConfigWithStaticDelay.retries",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepConfigWithStaticDelay.retries",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepConfigWithStaticDelay.sensitive",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR006",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowStepConfigWithStaticDelay.sensitive",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepConfigWithStaticDelay.sensitive",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepConfigWithStaticDelay.timeout",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepConfigWithStaticDelay.timeout",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepConfigWithStaticDelay",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowStepConfigWithStaticDelayRetries",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepConfigWithStaticDelayRetries.backoff",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepConfigWithStaticDelayRetries.backoff",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepConfigWithStaticDelayRetries",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowStepConfigWithDelayFunction",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepConfigWithDelayFunction",
+          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepConfigWithDelayFunction.sensitive",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR006",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowStepConfigWithDelayFunction.sensitive",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepConfigWithDelayFunction.sensitive",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepConfigWithDelayFunction.timeout",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepConfigWithDelayFunction.timeout",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepConfigWithDelayFunction",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowStepConfigWithDelayFunctionRetries",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepConfigWithDelayFunctionRetries.backoff",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepConfigWithDelayFunctionRetries.backoff",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepConfigWithDelayFunctionRetries",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowStepRollbackConfig",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepRollbackConfig.retries",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepRollbackConfig.retries",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepRollbackConfig.timeout",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepRollbackConfig.timeout",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepRollbackConfig",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowCronSchedule",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "WorkflowCronSchedule",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowEvent",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "TR047",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowEvent.payload",
+          "message": "object type declares no members; obj admits the same values"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowEvent.schedule",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowEvent.schedule",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "WorkflowEvent",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowStepEvent",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "TR047",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowStepEvent.payload",
+          "message": "object type declares no members; obj admits the same values"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepEvent.sensitive",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR006",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowStepEvent.sensitive",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepEvent.sensitive",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepEvent",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowStepContext",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepContext",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowStepContextConfig",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepContextConfig.retries",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR018",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowStepContextConfig.retries",
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepContextConfig.retries",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepContextConfig.sensitive",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR006",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowStepContextConfig.sensitive",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepContextConfig.sensitive",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepContextConfig.timeout",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepContextConfig.timeout",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepContextConfig",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowRollbackContext",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "WorkflowRollbackContext",
+          "message": "WorkflowRollbackContextCtx is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "WorkflowRollbackContext",
+          "message": "WorkflowRollbackContextCtx is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "TR023",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowRollbackContext.error",
+          "message": "Error is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowRollbackContext.output",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "WorkflowRollbackContext",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowRollbackContextCtx",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "WorkflowRollbackContextCtx",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowRollbackContextCtxConfig",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowRollbackContextCtxConfig.retries",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR018",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowRollbackContextCtxConfig.retries",
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowRollbackContextCtxConfig.retries",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowRollbackContextCtxConfig.sensitive",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR006",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowRollbackContextCtxConfig.sensitive",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowRollbackContextCtxConfig.sensitive",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowRollbackContextCtxConfig.timeout",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowRollbackContextCtxConfig.timeout",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "WorkflowRollbackContextCtxConfig",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowRollbackHandler",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "WorkflowRollbackHandler",
+          "message": "WorkflowRollbackHandlerCtx is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA006",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "WorkflowRollbackHandler",
+          "message": "WorkflowRollbackHandler resolves to a target using fewer type parameters than its head; the surplus are erased phantoms"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowRollbackHandlerCtx",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "WorkflowRollbackHandlerCtx",
+          "message": "WorkflowRollbackHandlerCtxCtx is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "WorkflowRollbackHandlerCtx",
+          "message": "WorkflowRollbackHandlerCtxCtx is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "TR023",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowRollbackHandlerCtx.error",
+          "message": "Error is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowRollbackHandlerCtx.output",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "WorkflowRollbackHandlerCtx",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowRollbackHandlerCtxCtx",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "WorkflowRollbackHandlerCtxCtx",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowRollbackHandlerCtxCtxConfig",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowRollbackHandlerCtxCtxConfig.retries",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR018",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowRollbackHandlerCtxCtxConfig.retries",
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowRollbackHandlerCtxCtxConfig.retries",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowRollbackHandlerCtxCtxConfig.sensitive",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR006",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowRollbackHandlerCtxCtxConfig.sensitive",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowRollbackHandlerCtxCtxConfig.sensitive",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowRollbackHandlerCtxCtxConfig.timeout",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowRollbackHandlerCtxCtxConfig.timeout",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "WorkflowRollbackHandlerCtxCtxConfig",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowStepRollbackOptions",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "WorkflowStepRollbackOptions",
+          "message": "WorkflowStepRollbackOptionsRollbackCtx is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "WorkflowStepRollbackOptions",
+          "message": "WorkflowStepRollbackOptionsRollbackCtx is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepRollbackOptions.rollbackConfig",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepRollbackOptions.rollbackConfig",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepRollbackOptions",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowStepRollbackOptionsRollbackCtx",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "WorkflowStepRollbackOptionsRollbackCtx",
+          "message": "WorkflowStepRollbackOptionsRollbackCtxCtx is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "WorkflowStepRollbackOptionsRollbackCtx",
+          "message": "WorkflowStepRollbackOptionsRollbackCtxCtx is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "TR023",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowStepRollbackOptionsRollbackCtx.error",
+          "message": "Error is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepRollbackOptionsRollbackCtx.output",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepRollbackOptionsRollbackCtx",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowStepRollbackOptionsRollbackCtxCtx",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepRollbackOptionsRollbackCtxCtx",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowStepRollbackOptionsRollbackCtxCtxConfig",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepRollbackOptionsRollbackCtxCtxConfig.retries",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR018",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowStepRollbackOptionsRollbackCtxCtxConfig.retries",
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepRollbackOptionsRollbackCtxCtxConfig.retries",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepRollbackOptionsRollbackCtxCtxConfig.sensitive",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR006",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowStepRollbackOptionsRollbackCtxCtxConfig.sensitive",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepRollbackOptionsRollbackCtxCtxConfig.sensitive",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepRollbackOptionsRollbackCtxCtxConfig.timeout",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepRollbackOptionsRollbackCtxCtxConfig.timeout",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepRollbackOptionsRollbackCtxCtxConfig",
           "message": "ParamObject Create synthesized (D3)"
         }
       ]
@@ -76535,20 +77934,6 @@
       ]
     },
     {
-      "name": "WorkflowStepConstructor",
-      "file": "index.d.ts",
-      "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SI004",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepConstructor",
-          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
-        }
-      ]
-    },
-    {
       "name": "WorkflowStepDoCallbackCtx",
       "file": "index.d.ts",
       "tier": "ergonomic",
@@ -76656,363 +78041,6 @@
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
           "symbol": "WorkflowStepDoCallbackCtxConfigRetries",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "WorkflowStepDoCallbackCtxStep",
-      "file": "index.d.ts",
-      "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoCallbackCtxStep",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "WorkflowStepDoConfig",
-      "file": "index.d.ts",
-      "tier": "widened",
-      "findings": [
-        {
-          "key": "SI003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoConfig",
-          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoConfig.sensitive",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR006",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoConfig.sensitive",
-          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoConfig.sensitive",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoConfig.timeout",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoConfig.timeout",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoConfig",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "WorkflowStepDoConfig2",
-      "file": "index.d.ts",
-      "tier": "widened",
-      "findings": [
-        {
-          "key": "SI003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoConfig2",
-          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoConfig2.retries",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoConfig2.retries",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoConfig2.sensitive",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR006",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoConfig2.sensitive",
-          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoConfig2.sensitive",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoConfig2.timeout",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoConfig2.timeout",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoConfig2",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "WorkflowStepDoConfig2Retries",
-      "file": "index.d.ts",
-      "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoConfig2Retries.backoff",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoConfig2Retries.backoff",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoConfig2Retries",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "WorkflowStepDoConfig3",
-      "file": "index.d.ts",
-      "tier": "widened",
-      "findings": [
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoConfig3.retries",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoConfig3.retries",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoConfig3.sensitive",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR006",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoConfig3.sensitive",
-          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoConfig3.sensitive",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoConfig3.timeout",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoConfig3.timeout",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoConfig3",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "WorkflowStepDoConfigRetries",
-      "file": "index.d.ts",
-      "tier": "widened",
-      "findings": [
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoConfigRetries.backoff",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoConfigRetries.backoff",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoConfigRetries.delay()",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoConfigRetries.delay()",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoConfigRetries.delay()",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoConfigRetries.delay()",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoConfigRetries.delay()",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoConfigRetries.delay()",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoConfigRetries.delay()",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoConfigRetries.delay()",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoConfigRetries.delay()",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoConfigRetries.delay()",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoConfigRetries.delay()",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoConfigRetries.delay()",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoConfigRetries.delay()",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoConfigRetries.delay()",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoConfigRetries",
           "message": "ParamObject Create synthesized (D3)"
         }
       ]
@@ -77319,398 +78347,6 @@
       ]
     },
     {
-      "name": "WorkflowStepDoRollbackOptionsRollbackConfig",
-      "file": "index.d.ts",
-      "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfig.retries",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfig.retries",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfig.timeout",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfig.timeout",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfig",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "WorkflowStepDoRollbackOptionsRollbackConfigRetries",
-      "file": "index.d.ts",
-      "tier": "widened",
-      "findings": [
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.backoff",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.backoff",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay()",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay()",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay()",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay()",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay()",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay()",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay()",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay()",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay()",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay()",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay()",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay()",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay()",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay()",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInput",
-      "file": "index.d.ts",
-      "tier": "widened",
-      "findings": [
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInput.error",
-          "message": "Error is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInput",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtx",
-      "file": "index.d.ts",
-      "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtx",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtxConfig",
-      "file": "index.d.ts",
-      "tier": "widened",
-      "findings": [
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtxConfig.retries",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtxConfig.retries",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtxConfig.sensitive",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR006",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtxConfig.sensitive",
-          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtxConfig.sensitive",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtxConfig.timeout",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtxConfig.timeout",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtxConfig",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtxConfigRetries",
-      "file": "index.d.ts",
-      "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtxConfigRetries.backoff",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtxConfigRetries.backoff",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtxConfigRetries",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
       "name": "WorkflowStepDoRollbackOptionsRollbackCtx",
       "file": "index.d.ts",
       "tier": "widened",
@@ -77818,6 +78454,110 @@
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
           "symbol": "WorkflowStepWaitForEventResultItem",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowInstanceStatus",
+      "file": "index.d.ts",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "WorkflowEntrypoint",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA005",
+          "pass": "repair-arity",
+          "tier": "ergonomic",
+          "symbol": "WorkflowEntrypoint",
+          "message": "__WORKFLOW_ENTRYPOINT_BRAND reads but does not write: its type holds no value, and F# has no setter of type unit"
+        },
+        {
+          "key": "TP002",
+          "pass": "shape-classes",
+          "tier": "ergonomic",
+          "symbol": "WorkflowEntrypoint",
+          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-classes",
+          "tier": "widened",
+          "symbol": "WorkflowEntrypoint(ctx)",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "TP002",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowEntrypoint",
+          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowEntrypoint.ctx",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowEntrypoint.run()",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "WorkflowEntrypoint",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "WorkflowEntrypoint.run",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowEntrypointRunEvent",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "TR047",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowEntrypointRunEvent.payload",
+          "message": "object type declares no members; obj admits the same values"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowEntrypointRunEvent.schedule",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowEntrypointRunEvent.schedule",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "WorkflowEntrypointRunEvent",
           "message": "ParamObject Create synthesized (D3)"
         }
       ]
@@ -80989,6 +81729,69 @@
       ]
     },
     {
+      "name": "NonRetryableError",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "TR032",
+          "pass": "shape-classes",
+          "tier": "ergonomic",
+          "symbol": "NonRetryableError(name)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-classes",
+          "tier": "widened",
+          "symbol": "NonRetryableError.isError(error)",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "SI002",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "NonRetryableError",
+          "message": "base has no F# name at this position; its members are flattened in and the is-a relation is not emitted (\u00A74.4)"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "NonRetryableError.cause",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "NonRetryableError.cause",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "NonRetryableError.stack",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "NonRetryableError.stack",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "NonRetryableError",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
       "name": "InstanceStatusError",
       "file": "index.d.ts",
       "tier": "ergonomic",
@@ -81001,12 +81804,6 @@
           "message": "ParamObject Create synthesized (D3)"
         }
       ]
-    },
-    {
-      "name": "InstanceStatusStatus",
-      "file": "index.d.ts",
-      "tier": "exact",
-      "findings": []
     },
     {
       "name": "Workflow",
@@ -81211,118 +82008,13 @@
       ]
     },
     {
-      "name": "WorkflowDurationLabel",
+      "name": "WorkflowDurationLabel2",
       "file": "index.d.ts",
       "tier": "exact",
       "findings": []
     },
     {
-      "name": "WorkflowSleepDuration",
-      "file": "index.d.ts",
-      "tier": "widened",
-      "findings": [
-        {
-          "key": "TR037",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "WorkflowSleepDuration",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "WorkflowSleepDuration",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "WorkflowSleepDuration",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "WorkflowSleepDuration",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "WorkflowSleepDuration",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "WorkflowSleepDuration",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "WorkflowSleepDuration",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "WorkflowSleepDuration",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "WorkflowSleepDuration",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "WorkflowSleepDuration",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "WorkflowSleepDuration",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "WorkflowSleepDuration",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "WorkflowSleepDuration",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        },
-        {
-          "key": "TR037",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "WorkflowSleepDuration",
-          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
-        }
-      ]
-    },
-    {
-      "name": "WorkflowRetentionDuration",
+      "name": "WorkflowSleepDuration2",
       "file": "index.d.ts",
       "tier": "exact",
       "findings": []
@@ -81978,93 +82670,333 @@
       "findings": []
     },
     {
+      "name": "httpServerHandler",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "TR009",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "httpServerHandler()",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "httpServerHandler()",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "httpServerHandler()",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "httpServerHandler()",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "httpServerHandler()",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "httpServerHandler()",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "httpServerHandler()",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "httpServerHandler()",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "httpServerHandler()",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "httpServerHandler()",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "httpServerHandler()",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "httpServerHandler()",
+          "message": "unknown maps to obj (D8)"
+        }
+      ]
+    },
+    {
+      "name": "waitUntil",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "TR009",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "waitUntil(promise)",
+          "message": "unknown maps to obj (D8)"
+        }
+      ]
+    },
+    {
+      "name": "withEnv",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "TR009",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "withEnv()",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "withEnv(fn)()",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "withEnv(newEnv)",
+          "message": "unknown maps to obj (D8)"
+        }
+      ]
+    },
+    {
+      "name": "withExports",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "TR009",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "withExports()",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "withExports(fn)()",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "withExports(newExports)",
+          "message": "unknown maps to obj (D8)"
+        }
+      ]
+    },
+    {
+      "name": "withEnvAndExports",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "TR009",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "withEnvAndExports()",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "withEnvAndExports(fn)()",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "withEnvAndExports(newEnv)",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "withEnvAndExports(newExports)",
+          "message": "unknown maps to obj (D8)"
+        }
+      ]
+    },
+    {
+      "name": "env",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "TR023",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "env",
+          "message": "Env is not among the generated declarations; widened to obj"
+        }
+      ]
+    },
+    {
+      "name": "exports",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "TR047",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "exports",
+          "message": "object type declares no members; obj admits the same values"
+        }
+      ]
+    },
+    {
+      "name": "cache",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "tracing",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "connect",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "TR032",
+          "pass": "shape-exports",
+          "tier": "ergonomic",
+          "symbol": "connect(options)",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
       "name": "\u0022assets:*\u0022",
       "tier": "escape",
       "findings": [
         {
-          "key": "HG001",
+          "key": "HG005",
           "pass": "harvest-globals",
           "tier": "escape",
           "symbol": "\u0022assets:*\u0022",
-          "message": "global dropped - an ambient module declaration; its members are importable from that specifier, which the generator does not emit yet"
+          "message": "ambient module \u0022assets:*\u0022 dropped - a wildcard specifier names no module an import can resolve"
         }
       ]
     },
     {
       "name": "\u0022cloudflare:email\u0022",
-      "tier": "escape",
+      "tier": "exact",
       "findings": [
         {
-          "key": "HG001",
+          "key": "HG004",
           "pass": "harvest-globals",
-          "tier": "escape",
+          "tier": "exact",
           "symbol": "\u0022cloudflare:email\u0022",
-          "message": "global dropped - an ambient module declaration; its members are importable from that specifier, which the generator does not emit yet"
+          "message": "1 exports harvested from ambient module \u0022cloudflare:email\u0022; each binds with [\u003CImport(name, \u0022cloudflare:email\u0022)\u003E]"
         }
       ]
     },
     {
       "name": "\u0022cloudflare:node\u0022",
-      "tier": "escape",
+      "tier": "exact",
       "findings": [
         {
-          "key": "HG001",
+          "key": "HG004",
           "pass": "harvest-globals",
-          "tier": "escape",
+          "tier": "exact",
           "symbol": "\u0022cloudflare:node\u0022",
-          "message": "global dropped - an ambient module declaration; its members are importable from that specifier, which the generator does not emit yet"
+          "message": "2 exports harvested from ambient module \u0022cloudflare:node\u0022; each binds with [\u003CImport(name, \u0022cloudflare:node\u0022)\u003E]"
         }
       ]
     },
     {
       "name": "\u0022cloudflare:pipelines\u0022",
-      "tier": "escape",
+      "tier": "exact",
       "findings": [
         {
-          "key": "HG001",
+          "key": "HG004",
           "pass": "harvest-globals",
-          "tier": "escape",
+          "tier": "exact",
           "symbol": "\u0022cloudflare:pipelines\u0022",
-          "message": "global dropped - an ambient module declaration; its members are importable from that specifier, which the generator does not emit yet"
+          "message": "4 exports harvested from ambient module \u0022cloudflare:pipelines\u0022; each binds with [\u003CImport(name, \u0022cloudflare:pipelines\u0022)\u003E]"
         }
       ]
     },
     {
       "name": "\u0022cloudflare:sockets\u0022",
-      "tier": "escape",
+      "tier": "exact",
       "findings": [
         {
-          "key": "HG001",
+          "key": "HG004",
           "pass": "harvest-globals",
-          "tier": "escape",
+          "tier": "exact",
           "symbol": "\u0022cloudflare:sockets\u0022",
-          "message": "global dropped - an ambient module declaration; its members are importable from that specifier, which the generator does not emit yet"
+          "message": "1 exports harvested from ambient module \u0022cloudflare:sockets\u0022; each binds with [\u003CImport(name, \u0022cloudflare:sockets\u0022)\u003E]"
         }
       ]
     },
     {
       "name": "\u0022cloudflare:workers\u0022",
-      "tier": "escape",
+      "tier": "exact",
       "findings": [
         {
-          "key": "HG001",
+          "key": "HG004",
           "pass": "harvest-globals",
-          "tier": "escape",
+          "tier": "exact",
           "symbol": "\u0022cloudflare:workers\u0022",
-          "message": "global dropped - an ambient module declaration; its members are importable from that specifier, which the generator does not emit yet"
+          "message": "35 exports harvested from ambient module \u0022cloudflare:workers\u0022; each binds with [\u003CImport(name, \u0022cloudflare:workers\u0022)\u003E]"
         }
       ]
     },
     {
       "name": "\u0022cloudflare:workflows\u0022",
-      "tier": "escape",
+      "tier": "exact",
       "findings": [
         {
-          "key": "HG001",
+          "key": "HG004",
           "pass": "harvest-globals",
-          "tier": "escape",
+          "tier": "exact",
           "symbol": "\u0022cloudflare:workflows\u0022",
-          "message": "global dropped - an ambient module declaration; its members are importable from that specifier, which the generator does not emit yet"
+          "message": "1 exports harvested from ambient module \u0022cloudflare:workflows\u0022; each binds with [\u003CImport(name, \u0022cloudflare:workflows\u0022)\u003E]"
         }
       ]
     },
@@ -82077,7 +83009,20 @@
           "pass": "resolve-type-table",
           "tier": "widened",
           "symbol": "\u003Ctype-table\u003E",
-          "message": "1772 types not resolved: beyond the depth cutoff (12) - the frontier of instantiations still growing after that many generations"
+          "message": "1815 types not resolved: beyond the depth cutoff (12) - the frontier of instantiations still growing after that many generations"
+        }
+      ]
+    },
+    {
+      "name": "CloudflareWorkersModule",
+      "tier": "exact",
+      "findings": [
+        {
+          "key": "HG006",
+          "pass": "harvest-globals",
+          "tier": "exact",
+          "symbol": "CloudflareWorkersModule",
+          "message": "CloudflareWorkersModule is the body of ambient module \u0022cloudflare:workers\u0022 (export =) rather than a global"
         }
       ]
     },

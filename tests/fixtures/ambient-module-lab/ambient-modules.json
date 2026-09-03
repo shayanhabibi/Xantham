@@ -1,0 +1,5 @@
+{
+    "ambient-lab:tools": "tools.js",
+    "ambient-lab:sockets": "sockets.js",
+    "ambient-lab:runtime": "runtime.js"
+}

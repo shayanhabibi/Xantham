@@ -61,11 +61,90 @@ let harvestExports: Pass<HarvestModel> =
                 }
     }
 
+/// One export of an ambient module, followed through `getAliasedSymbol` so that
+/// `export { _connect as connect }` lands on the declaring symbol under the exported name.
+let private followAlias (ctx: Context) (export: SymbolResponse) =
+    async {
+        if export.Flags.HasFlag SymbolFlags.Alias then
+            let! origin = ctx.Session.getAliasedSymbol export.Id
+            return export.Name, origin
+        else
+            return export.Name, export
+    }
+
+/// One ambient module declaration, harvested: its exports under the specifier they import
+/// from, the findings the declaration raises, and the symbol id of the namespace it re-exports
+/// where it is written `export = Namespace`.
+///
+/// `getExportsOfModule` resolves `export =` in place, so the exports of `cloudflare:workers` are
+/// the members of `CloudflareWorkersModule`, and `getParentOfSymbol` over any of them returns
+/// that namespace. Such a namespace is the module's body, reachable through the specifier
+/// alone; a `[<Global>]` binding to it reads `undefined`.
+let private harvestAmbientModule (ctx: Context) (moduleSymbol: SymbolResponse) =
+    async {
+        let specifier = moduleSymbol.Name.Trim '"'
+
+        if specifier.Contains "*" then
+            return
+                [],
+                [
+                    Finding.make moduleSymbol.Name (HarvestGlobals.AmbientModuleWildcard specifier)
+                ],
+                None
+        else
+            let! exports = ctx.Session.getExportsOfModule moduleSymbol.Id
+            let exports = exports |> ValueOption.defaultValue [||]
+
+            if exports.Length = 0 then
+                return [], [ Finding.make moduleSymbol.Name HarvestGlobals.AmbientModuleDropped ], None
+            else
+                let! resolved = exports |> Array.map (followAlias ctx) |> Async.Parallel
+                let! parent = ctx.Session.getParentOfSymbol exports[0].Id
+
+                let body =
+                    parent
+                    |> ValueOption.filter (fun (p: SymbolResponse) -> p.Name <> moduleSymbol.Name)
+                    |> ValueOption.map (fun p -> p.Id, p.Name)
+                    |> ValueOption.toOption
+
+                let harvested =
+                    resolved
+                    |> Array.sortBy fst
+                    |> Array.map (fun (name, origin) ->
+                        {
+                            ExportName = name
+                            Symbol = origin
+                            Docs = ""
+                            Tags = []
+                            Origin = FromAmbientModule specifier
+                            Order = Grouping.declOrder origin.Declarations
+                        })
+                    |> Array.toList
+
+                let findings =
+                    [
+                        Finding.make
+                            moduleSymbol.Name
+                            (HarvestGlobals.AmbientModuleHarvested(specifier, harvested.Length))
+
+                        match body with
+                        | Some(_, name) -> Finding.make name (HarvestGlobals.NamespaceIsModuleBody(name, specifier))
+                        | None -> ()
+                    ]
+
+                return harvested, findings, body |> Option.map fst
+    }
+
 /// The entry package's ambient global declarations, for a package that declares no module at
 /// all. Asking the checker for the symbols in scope at the top of the entry file returns the
 /// whole global environment - three thousand names for `@cloudflare/workers-types`, two
 /// thirds of them `lib.dom.d.ts` - so the result is filtered to the symbols the package
 /// itself declares, by the same O7 placement the resolve tier groups types with.
+///
+/// An ambient module declaration (`declare module "cloudflare:email"`) arrives here too, under
+/// a symbol name that is its quoted specifier. Its exports are harvested under
+/// `FromAmbientModule`: the types are declared beside the package's globals, and the values
+/// carry the specifier's own import.
 ///
 /// Runs only when `harvest-exports` found nothing: a package with a module symbol may also
 /// augment the global scope, and folding those globals into its exports would emit names the
@@ -93,38 +172,49 @@ let harvestGlobals: Pass<HarvestModel> =
                             |> Array.filter (fun symbol ->
                                 Grouping.classify ctx.PackageDir (ValueSome symbol) = EntryPackage)
 
-                        // An ambient module declaration (`declare module "cloudflare:email"`) is a
-                        // global-scope symbol whose name is its quoted specifier. It is a module,
-                        // not a type: its members are importable from that specifier, and emitting
-                        // it as a declaration would need a nested module with its own imports. Until
-                        // that exists, dropping it loudly beats a name F# cannot write.
+                        // An ambient module declaration is a global-scope symbol whose name is
+                        // its quoted specifier. Its exports are harvested under that specifier;
+                        // the specifier itself heads no declaration.
                         let writable, unwritable =
                             ours |> Array.partition (fun symbol -> Naming.isWritableTypeName symbol.Name)
 
-                        let findings =
-                            unwritable
-                            |> Array.map (fun symbol ->
-                                let what =
-                                    if symbol.Name.StartsWith "\"" then
-                                        HarvestGlobals.AmbientModuleDropped
-                                    else
-                                        HarvestGlobals.UnwritableGlobalDropped
+                        let modules, unnameable =
+                            unwritable |> Array.partition (fun symbol -> symbol.Name.StartsWith "\"")
 
-                                Finding.make symbol.Name what)
-                            |> Array.toList
+                        let! fromModules =
+                            modules
+                            |> Array.sortBy _.Name
+                            |> Array.map (harvestAmbientModule ctx)
+                            |> Async.Parallel
+
+                        let moduleBodies =
+                            fromModules |> Array.choose (fun (_, _, body) -> body) |> Set.ofArray
+
+                        let findings =
+                            [
+                                for symbol in unnameable do
+                                    Finding.make symbol.Name HarvestGlobals.UnwritableGlobalDropped
+
+                                for _, moduleFindings, _ in fromModules do
+                                    yield! moduleFindings
+                            ]
 
                         let harvested =
-                            writable
-                            |> Array.map (fun symbol ->
-                                {
-                                    ExportName = symbol.Name
-                                    Symbol = symbol
-                                    Docs = ""
-                                    Tags = []
-                                    Origin = FromGlobal
-                                    Order = Grouping.declOrder symbol.Declarations
-                                })
-                            |> Array.toList
+                            [
+                                for symbol in writable do
+                                    if not (Set.contains symbol.Id moduleBodies) then
+                                        {
+                                            ExportName = symbol.Name
+                                            Symbol = symbol
+                                            Docs = ""
+                                            Tags = []
+                                            Origin = FromGlobal
+                                            Order = Grouping.declOrder symbol.Declarations
+                                        }
+
+                                for exports, _, _ in fromModules do
+                                    yield! exports
+                            ]
 
                         if List.isEmpty harvested && List.isEmpty findings then
                             return

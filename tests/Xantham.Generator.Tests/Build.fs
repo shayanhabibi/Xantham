@@ -1,4 +1,4 @@
-/// The terse model-construction vocabulary the per-pass tests are written in: wire responses
+﻿/// The terse model-construction vocabulary the per-pass tests are written in: wire responses
 /// have many fields and the tests care about two or three, so each shape is written out once
 /// here and copy-updated at use sites.
 module Xantham.Generator.Tests.Build
@@ -45,6 +45,7 @@ let typeResponse (id: int) (flags: TypeFlags) : TypeResponse =
         ElementFlags = ValueNone
         FixedLength = ValueNone
         Readonly = ValueNone
+        LabeledElementDeclarations = ValueNone
         ObjectType = ValueNone
         IndexType = ValueNone
         CheckType = ValueNone

@@ -92,7 +92,13 @@ let shapeAliases: Pass<ShapeModel> =
                             | _ -> None)
                         |> Map.ofList
 
-                    // A second type-like export of an already-named type abbreviates to it.
+                    // A second type-like export of an already-named type abbreviates to it. An
+                    // export whose name some declaration already holds reads under that
+                    // declaration: two ambient scopes of one file each declaring
+                    // `WorkflowRetentionDuration` reach the same union.
+                    let mutable claimed =
+                        Set.union declaredNames (model.DeclNames |> Map.toList |> List.map snd |> Set.ofList)
+
                     let aliasDecls =
                         model.Harvest.Exports
                         |> List.choose (fun export ->
@@ -104,7 +110,15 @@ let shapeAliases: Pass<ShapeModel> =
                                 match Map.tryFind export.Symbol.Id model.ExportTypes |> Option.bind _.Declared with
                                 | Some typeId ->
                                     match Map.tryFind typeId model.DeclNames with
-                                    | Some primary when primary <> name ->
+                                    | Some primary when primary = name -> None
+                                    | Some primary when Set.contains name claimed ->
+                                        if primary <> name then
+                                            findings <-
+                                                findings
+                                                @ [ Finding.make name (ShapeAliases.AbbreviationNameTaken primary) ]
+
+                                        None
+                                    | Some primary ->
                                         let typeParameters = Map.tryFind primary parametersOf |> Option.defaultValue []
 
                                         let target =
@@ -112,6 +126,8 @@ let shapeAliases: Pass<ShapeModel> =
                                                 FsNamed primary
                                             else
                                                 FsApp(primary, typeParameters |> List.map (_.Name >> FsTypeVar))
+
+                                        claimed <- Set.add name claimed
 
                                         Some(
                                             FsAbbrev
@@ -124,7 +140,7 @@ let shapeAliases: Pass<ShapeModel> =
                                                     Target = target
                                                 }
                                         )
-                                    | _ -> None
+                                    | None -> None
                                 | None -> None)
 
                     let remainingDecls =

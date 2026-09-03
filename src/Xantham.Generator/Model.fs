@@ -530,6 +530,10 @@ type ExportOrigin =
     /// has no module to import from; the name is already on `globalThis`, so values bind with
     /// `[<Global>]` instead.
     | FromGlobal
+    /// An export of an ambient module declaration (`declare module "cloudflare:workers"`),
+    /// carrying the specifier that declaration quotes. Values bind with
+    /// `[<Import(name, specifier)>]`.
+    | FromAmbientModule of specifier: string
 
 /// One export of the entry module, aliases already followed to their origin so re-exports
 /// appear once under the name they are exported as. A global type library has no module to
@@ -828,6 +832,9 @@ type ImportBinding =
     /// An ambient global (`declare function fetch`): there is no module to import from, so the
     /// name is taken off `globalThis` with `[<Global>]`.
     | GlobalName of string
+    /// An export of an ambient module, under the specifier that module declares. The specifier
+    /// is the declaration's own rather than the run's runtime package.
+    | ImportFrom of name: string * specifier: string
 
 /// What one *bound* member is - a member whose body is not F# but a reference into JavaScript,
 /// carried by an `ImportBinding`. Two kinds of declaration hold these: the `Exports` type, whose

@@ -2,16 +2,16 @@
   "package": "globals-lab",
   "module": "GlobalsLab",
   "counts": {
-    "exact": 2,
+    "exact": 4,
     "ergonomic": 7,
     "widened": 0,
-    "escape": 1
+    "escape": 0
   },
   "passes": [
     {
       "pass": "HG - harvest-globals",
       "total": 1,
-      "escape": 1
+      "exact": 1
     },
     {
       "pass": "SI - shape-interfaces",
@@ -185,15 +185,20 @@
       ]
     },
     {
+      "name": "extra",
+      "tier": "exact",
+      "findings": []
+    },
+    {
       "name": "\u0022globals-lab:extra\u0022",
-      "tier": "escape",
+      "tier": "exact",
       "findings": [
         {
-          "key": "HG001",
+          "key": "HG004",
           "pass": "harvest-globals",
-          "tier": "escape",
+          "tier": "exact",
           "symbol": "\u0022globals-lab:extra\u0022",
-          "message": "global dropped - an ambient module declaration; its members are importable from that specifier, which the generator does not emit yet"
+          "message": "1 exports harvested from ambient module \u0022globals-lab:extra\u0022; each binds with [\u003CImport(name, \u0022globals-lab:extra\u0022)\u003E]"
         }
       ]
     }

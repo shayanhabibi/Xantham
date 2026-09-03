@@ -445,13 +445,15 @@ let private renderMember (m: FsMember) =
         ]
 
 /// One binding attribute at `indent`, optionally carrying a second attribute inside the same
-/// brackets. A global names its own path off `globalThis`; an import names its specifier.
+/// brackets. A global names its own path off `globalThis`; an import names its specifier - the
+/// run's runtime package, or an ambient module's own quoted specifier.
 let private bindingAttribute (runtimePackage: string) (indent: string) (also: string) (binding: ImportBinding) =
     let package = stringLit runtimePackage
 
     match binding with
     | ImportDefault -> $"{indent}[<Import({stringLit Naming.defaultImportKey}, {package}){also}>]"
     | ImportNamed name -> $"{indent}[<Import({stringLit name}, {package}){also}>]"
+    | ImportFrom(name, specifier) -> $"{indent}[<Import({stringLit name}, {stringLit specifier}){also}>]"
     | GlobalName name -> $"{indent}[<Global({stringLit name}){also}>]"
 
 /// The binding a declaration writes at the type level, where it holds a settable member. Under a

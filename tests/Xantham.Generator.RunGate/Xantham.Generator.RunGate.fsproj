@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <!-- The Fable *run* gate of docs/plans/generator-architecture.md §5: where the compile gate
          proves the goldens type-check, this one proves the erased idioms they lean on *behave* -
@@ -35,6 +35,7 @@
         <Compile Include="..\Xantham.Generator.Tests\golden\ctor-lab\CtorLab.fs" Link="ctor-lab\CtorLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\inherit-lab\InheritLab.fs" Link="inherit-lab\InheritLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\fable-workaround-lab\FableWorkaroundLab.fs" Link="fable-workaround-lab\FableWorkaroundLab.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\ambient-module-lab\AmbientModuleLab.fs" Link="ambient-module-lab\AmbientModuleLab.fs" />
         <Compile Include="Program.fs" />
         <None Include="register.mjs" />
     </ItemGroup>

@@ -402,15 +402,23 @@ type HarvestGlobals =
     | [<Escape>] AmbientModuleDropped
     | [<Escape>] UnwritableGlobalDropped
     | [<Escape>] NothingHarvested of entryFile: string
+    | [<Exact>] AmbientModuleHarvested of specifier: string * exports: int
+    | [<Escape>] AmbientModuleWildcard of specifier: string
+    | [<Exact>] NamespaceIsModuleBody of ns: string * specifier: string
 
     interface IFindingKind with
         member this.Message =
             match this with
-            | AmbientModuleDropped ->
-                "global dropped - an ambient module declaration; its members are importable from that specifier, which the generator does not emit yet"
+            | AmbientModuleDropped -> "global dropped - an ambient module declaration that exports nothing"
             | UnwritableGlobalDropped -> "global dropped - its name cannot be written as an F# declaration"
             | NothingHarvested entryFile ->
                 $"{entryFile} declares neither a module nor any ambient global - nothing harvested"
+            | AmbientModuleHarvested(specifier, exports) ->
+                $"{exports} exports harvested from ambient module \"{specifier}\"; each binds with [<Import(name, \"{specifier}\")>]"
+            | AmbientModuleWildcard specifier ->
+                $"ambient module \"{specifier}\" dropped - a wildcard specifier names no module an import can resolve"
+            | NamespaceIsModuleBody(ns, specifier) ->
+                $"{ns} is the body of ambient module \"{specifier}\" (export =) rather than a global"
 
 /// `resolve-export-types`.
 [<Prefix("RE", "resolve-export-types")>]
@@ -537,6 +545,7 @@ type ShapeInterfaces =
 type ShapeAliases =
     | [<Ergonomic>] BrandAsMeasure
     | [<Widened>] PhantomComputation
+    | [<Widened>] AbbreviationNameTaken of declared: string
 
     interface IFindingKind with
         member this.Message =
@@ -545,6 +554,8 @@ type ShapeAliases =
                 "branding intersection emitted as a unit of measure; uses read as the branded primitive (§4.6, D11)"
             | PhantomComputation ->
                 "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
+            | AbbreviationNameTaken declared ->
+                $"abbreviation dropped - {declared} already declares the name; the type reads under that declaration"
 
 /// `shape-classes`.
 [<Prefix("SC", "shape-classes")>]

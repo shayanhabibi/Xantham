@@ -432,7 +432,12 @@ let pipelineTests =
 
                       Expect.stringContains source "[<Global(\"registry\")>]" "a global value binds off globalThis"
                       Expect.stringContains source "[<Global(\"Gadget\"); EmitConstructor>]" "so does a global class"
-                      Expect.isFalse (source.Contains "[<Import(") "a global library imports nothing"
+
+                      // A global library imports from one place only: an ambient module
+                      // declaration of its own, under the specifier that declaration quotes.
+                      Expect.isFalse
+                          (source.Contains "[<Import(\"extra\", \"globals-lab\")>]")
+                          "and never from the package the library itself is published as"
 
                       // repair-arity, end to end: a brand holds no value, so it has no setter.
                       // `__brand` reaches the checker escaped to `___brand`; the emitted member
@@ -447,17 +452,79 @@ let pipelineTests =
                       Expect.stringContains source "type Loose<'P> =" "the alias survives once its index signature is shape"
                       Expect.stringContains source "abstract Item: string -> string with get, set" "and carries an EmitIndexer"
 
-                  testCase "an ambient module declaration is dropped loudly" <| fun _ ->
+                  testCase "an ambient module's export imports from the specifier it declares" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
 
-                      // Its name is its quoted specifier, which is not an F# declaration name;
-                      // the escape is the promise that it will not vanish unremarked.
-                      Expect.contains
-                          (rendered.Findings
-                           |> List.filter (fun finding -> finding.Pass = "harvest-globals")
-                           |> List.map (fun finding -> finding.Tier, finding.Symbol))
-                          (Escape, "\"globals-lab:extra\"")
-                          "the ambient module is an escape, not a silence" ])
+                      // The specifier is the declaration's own, so the attribute names it rather
+                      // than the package the rest of the file imports from.
+                      Expect.stringContains
+                          source
+                          "[<Import(\"extra\", \"globals-lab:extra\")>]"
+                          "the ambient module's export carries its own specifier" ])
+
+        yield!
+            fixtureTests "ambient-module-lab" (handFixture "ambient-module-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "an ambient module's exports bind to its specifier" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.stringContains
+                        source
+                        "[<Import(\"measure\", \"ambient-lab:tools\")>]"
+                        "a function exported from a specifier imports from it"
+
+                    Expect.stringContains
+                        source
+                        "[<Import(\"Hammer\", \"ambient-lab:tools\"); EmitConstructor>]"
+                        "so does a class the module exports"
+
+                    Expect.stringContains
+                        source
+                        "[<Import(\"Hammer.LIMIT\", \"ambient-lab:tools\")>]"
+                        "and a static dots off the imported name"
+
+                  testCase "a re-export binds under the name the module exports it as" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.stringContains
+                        source
+                        "[<Import(\"connect\", \"ambient-lab:sockets\")>]"
+                        "`export { _connect as connect }` imports `connect`"
+
+                    Expect.isFalse (source.Contains "\"_connect\"") "the module-local name is not the import selector"
+
+                  testCase "a namespace re-exported by `export =` is the module's body, not a global" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.isFalse
+                        (source.Contains "[<Global(\"AmbientLabRuntime\")>]")
+                        "nothing puts the namespace on globalThis"
+
+                    Expect.stringContains
+                        source
+                        "[<Import(\"version\", \"ambient-lab:runtime\")>]"
+                        "its members import from the specifier that re-exports it"
+
+                  testCase "a namespace declaring a value keeps its global, one declaring only types has none" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.stringContains source "[<Global(\"Telemetry\")>]" "a namespace with a value is on globalThis"
+                    Expect.isFalse (source.Contains "[<Global(\"Shapes\")>]") "one with only types is not"
+
+                  testCase "a wildcard specifier and an empty module are escapes" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                    let harvest =
+                        rendered.Findings
+                        |> List.filter (fun finding -> finding.Pass = "harvest-globals")
+                        |> List.map (fun finding -> finding.Key, finding.Symbol)
+
+                    Expect.contains harvest ("HG005", "\"ambient-lab:*\"") "a wildcard names no importable module"
+                    Expect.contains harvest ("HG001", "\"ambient-lab:empty\"") "a module exporting nothing is still dropped" ])
 
         yield!
             fixtureTests "generics-lab" (handFixture "generics-lab") GeneratorConfig.Default (fun package ->
@@ -1706,7 +1773,37 @@ let pipelineTests =
                           // every name here comes from `harvest-globals`, and a value it declares
                           // is already on `globalThis` rather than importable.
                           Expect.stringContains source "[<Global(\"Cloudflare\")>]" "a declared global binds with Global"
-                          Expect.isFalse (source.Contains "[<Import(") "a global library imports nothing"
+
+                          Expect.isFalse
+                              (source.Contains "[<Import(\"env\", \"@cloudflare/workers-types\")>]")
+                              "and nothing imports from the types package, which ships no JavaScript"
+
+                      testCase "an ambient module's exports import from its specifier" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate workersTypesConfig package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          // `declare module "cloudflare:workers" { export = CloudflareWorkersModule }`.
+                          // The namespace is the module's body: nothing puts it on `globalThis`,
+                          // and the members reach F# under the specifier that re-exports them.
+                          Expect.isFalse
+                              (source.Contains "[<Global(\"CloudflareWorkersModule\")>]")
+                              "the namespace a specifier re-exports is not a global"
+
+                          for name in [ "WorkerEntrypoint"; "DurableObject"; "RpcTarget"; "WorkflowEntrypoint" ] do
+                              Expect.stringContains
+                                  source
+                                  $"[<Import(\"{name}\", \"cloudflare:workers\"); EmitConstructor>]"
+                                  $"{name} is constructed off the cloudflare:workers import"
+
+                          Expect.stringContains
+                              source
+                              "[<Import(\"connect\", \"cloudflare:sockets\")>]"
+                              "a renamed re-export imports under the name the module exports it as"
+
+                          Expect.stringContains
+                              source
+                              "[<Import(\"httpServerHandler\", \"cloudflare:node\")>]"
+                              "and each specifier binds its own exports"
 
                       testCase "a class that shares a DOM name is the package's own to harvest" <| fun _ ->
                           let rendered = Async.RunSynchronously(Pipeline.generate workersTypesConfig package)

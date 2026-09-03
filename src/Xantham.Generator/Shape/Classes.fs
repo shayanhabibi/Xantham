@@ -32,6 +32,7 @@ let private staticBinding (binding: ImportBinding) (key: string) =
     | ImportDefault -> ImportNamed $"{Naming.defaultImportKey}.{key}"
     | ImportNamed name -> ImportNamed $"{name}.{key}"
     | GlobalName name -> GlobalName $"{name}.{key}"
+    | ImportFrom(name, specifier) -> ImportFrom($"{name}.{key}", specifier)
 
 /// Constructor members on `Exports` for exported classes: `Exports.Name(...)` is
 /// `new Name(...)` through `[<EmitConstructor>]` (§4.4). The same pass shapes the class's

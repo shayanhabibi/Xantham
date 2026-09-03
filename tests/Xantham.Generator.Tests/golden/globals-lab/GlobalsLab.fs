@@ -92,3 +92,5 @@ type Exports =
     /// </summary>
     [<Global("Gadget"); EmitConstructor>]
     static member Gadget (widget: Widget) : Gadget = jsNative
+    [<Import("extra", "globals-lab:extra")>]
+    static member extra: float = jsNative

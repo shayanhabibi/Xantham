@@ -412,10 +412,33 @@ let private workarounds () =
 
     check "and the same = does not terminate on a self-referencing object" threw
 
+/// An ambient module declaration binds to the specifier it quotes rather than to the package the
+/// rest of the file imports from, and a renamed re-export binds under the exported name.
+let private ambientModules () =
+    let payload = AmbientModuleLab.Exports.connect "socket"
+    equal "a renamed re-export reaches the export, not the module-local name" "socket" payload.label
+    equal "a function imported from a specifier reaches that module" 6.0 (AmbientModuleLab.Exports.measure payload)
+
+    let hammer = AmbientModuleLab.Exports.Hammer 4.0
+    let hammerClass: obj = import "Hammer" "ambient-lab:tools"
+
+    check
+        "a class imported from a specifier news that module's class"
+        (emitJsExpr (hammer, hammerClass) "$0 instanceof $1")
+
+    equal "and its method runs" "socket:4" (hammer.strike payload)
+    equal "a static dots off the imported name" 12.0 AmbientModuleLab.Hammer.LIMIT
+
+    // `declare module "ambient-lab:runtime" { export = AmbientLabRuntime }`. Nothing puts the
+    // namespace on `globalThis`, so a `[<Global>]` binding to it would read `undefined`.
+    equal "an `export =` namespace's members read through the specifier" "1.4.0" AmbientModuleLab.Exports.version
+    check "and the namespace itself is no global" (emitJsExpr () "globalThis.AmbientLabRuntime === undefined")
+
 [<EntryPoint>]
 let main _ =
     globals ()
     imports ()
+    ambientModules ()
     statics ()
     bigints ()
     constructorObjects ()

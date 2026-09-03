@@ -15,10 +15,12 @@ let internal hasAny (mask: SymbolFlags) (flags: SymbolFlags) = uint32 (flags &&&
 let defaultExportName (ctx: Context) = Naming.defaultExport ctx.PackageName
 
 /// How a harvested value binds in JavaScript. An ambient global is already on `globalThis`, so
-/// it takes `[<Global>]`; only a module export carries an import.
+/// it takes `[<Global>]`; a module export carries an import, and an ambient module's export
+/// carries the specifier its declaration quotes.
 let bindingOf (export: HarvestedExport) =
     match export.Origin with
     | FromGlobal -> GlobalName export.ExportName
+    | FromAmbientModule specifier -> ImportFrom(export.ExportName, specifier)
     | FromModule when export.ExportName = "default" -> ImportDefault
     | FromModule -> ImportNamed export.ExportName
 

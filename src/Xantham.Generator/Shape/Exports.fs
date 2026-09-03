@@ -90,6 +90,7 @@ let shapeExports: Pass<ShapeModel> =
                                         match binding with
                                         | GlobalName _ -> mutableValue
                                         | ImportDefault
+                                        | ImportFrom _
                                         | ImportNamed _ -> false
 
                                     if mutableValue && not settable then

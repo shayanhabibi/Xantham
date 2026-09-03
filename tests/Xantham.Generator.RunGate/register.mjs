@@ -18,6 +18,11 @@ const fixtures = path.resolve(import.meta.dirname, "..", "fixtures");
 // exact where a second copy of the mapping can only drift from it. The literal map this
 // replaces was one of the handful of append-only lists that every parallel branch edited and
 // so every merge conflicted in; a lab added now is picked up with no edit here at all.
+//
+// A fixture declaring ambient modules (`declare module "ambient-lab:tools"`) resolves those
+// specifiers too, from an `ambient-modules.json` beside its declarations mapping each specifier
+// to the runtime file behind it. The specifier is the declaration's own rather than the
+// package's, so it cannot be derived from the manifest the way a package name is.
 const packages = new Map(
     fs
         .readdirSync(fixtures, { withFileTypes: true })
@@ -26,9 +31,18 @@ const packages = new Map(
             const dir = path.join(fixtures, entry.name);
             const runtime = path.join(dir, "index.js");
             const manifest = path.join(dir, "package.json");
-            if (!fs.existsSync(runtime) || !fs.existsSync(manifest)) return [];
+            const ambient = path.join(dir, "ambient-modules.json");
+
+            const specifiers = fs.existsSync(ambient)
+                ? Object.entries(JSON.parse(fs.readFileSync(ambient, "utf8"))).map(([specifier, file]) => [
+                      specifier,
+                      path.join(dir, file),
+                  ])
+                : [];
+
+            if (!fs.existsSync(runtime) || !fs.existsSync(manifest)) return specifiers;
             const { name } = JSON.parse(fs.readFileSync(manifest, "utf8"));
-            return name ? [[name, runtime]] : [];
+            return name ? [...specifiers, [name, runtime]] : specifiers;
         }),
 );
 

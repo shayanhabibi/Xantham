@@ -1,0 +1,6 @@
+{
+    "name": "ambient-module-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "description": "Hand-authored fixture for the ambient module declarations a global type library carries beside its globals - the shape @cloudflare/workers-types uses for cloudflare:workers. Each specifier is importable, so its exports bind with [<Import(name, specifier)>] rather than [<Global>]. Tracked in git, no npm install."
+}
