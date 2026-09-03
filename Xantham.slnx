@@ -24,12 +24,6 @@
     <File Path="docs/wire-usage.md" />
     <File Path="docs/_head.html" />
   </Folder>
-  <Folder Name="/docs/plans/">
-    <File Path="docs/plans/generator-architecture.md" />
-    <File Path="docs/plans/generator-type-mapping.md" />
-    <File Path="docs/plans/tsgo-protocol.md" />
-    <File Path="docs/plans/wire-remaining-work.md" />
-  </Folder>
   <Folder Name="/docs/content/">
     <File Path="docs/content/fsdocs-theme.css" />
   </Folder>

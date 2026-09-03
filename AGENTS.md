@@ -8,6 +8,7 @@
   * Generated typed layer reading binary AST
 * Emits bindings for **Fable 5.x only** — see below
 * Coordinated build pipelines through `build.fsx`
+* Consumer documentation lands in `docs/`. AI/Agent plans, notes, and hand-overs land in `docs/.ai/`.
 
 ## Fable 5.x only
 
@@ -203,8 +204,8 @@ its language server fails on `.archive/` and on `Library.fs`. Use `fslangmcp` in
   support fails the build rather than a golden diff.
 - The AST is read in place out of the blob; `Node<'Tag>` is a struct over a blob index.
 - The generator is nano-passes over accumulating per-tier records, in linear lists — source
-  order is execution order. `docs/plans/generator-architecture.md` carries the decisions
-  (O1–O7) and what each phase landed; `docs/plans/generator-type-mapping.md` carries the
+  order is execution order. `docs/.ai/plans/generator-architecture.md` carries the decisions
+  (O1–O7) and what each phase landed; `docs/.ai/plans/generator-type-mapping.md` carries the
   per-construct mapping. Update the phase record in the same commit as the behaviour.
 - A mapping that loses something says so. Findings are graded `Exact | Ergonomic | Widened |
   Escape` per symbol and land in `manifest.json`; silently widening is the failure mode the
