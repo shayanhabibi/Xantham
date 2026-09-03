@@ -61,12 +61,18 @@ let private handFixture (name: string) =
     let path = Path.Combine(root, "tests", "fixtures", name)
     if Directory.Exists path then Some path else None
 
-/// A hand-authored fixture's own `xantham.json`, so the committed golden gates the configured
-/// spelling itself rather than a configuration built beside it.
-let private fixtureConfig (package: string option) =
-    package
-    |> Option.map GeneratorConfig.load
-    |> Option.defaultValue GeneratorConfig.Default
+/// A hand-authored fixture laid out the way an install is: the package under its own
+/// `node_modules`, with its hand-authored dependencies beside it. A declaration's group is
+/// read off its path (O7), so a multi-package lab has to sit where npm would have put it.
+let private handInstalledFixture (name: string) =
+    let path = Path.Combine(root, "tests", "fixtures", name, "node_modules", name)
+    if Directory.Exists path then Some path else None
+
+/// A hand-authored fixture's own `xantham.json` (O4), so a lab's configuration is the file
+/// beside its declarations rather than a copy of it here, and the committed golden gates the
+/// configured spelling itself.
+let private handConfig (path: string option) =
+    path |> Option.map GeneratorConfig.load |> Option.defaultValue GeneratorConfig.Default
 
 /// The `inherit` lines a rendered declaration carries, in emission order. Reading them off the
 /// source rather than the model is deliberate: §4.4's is-a relation is only real if it survives
@@ -183,16 +189,20 @@ let private matchesGoldens (fixture: string) (config: GeneratorConfig) (package:
     let goldenDir = Path.Combine(__SOURCE_DIRECTORY__, "golden", fixture)
     let rendered = Async.RunSynchronously(Pipeline.generate config package)
 
+    // A shipped group is written under `groups/` (O7); what every run owes is the entry
+    // package's module and the manifest.
     Expect.equal
-        (rendered.Files |> List.map fst)
+        (rendered.Files |> List.map fst |> List.filter (fun name -> not (name.StartsWith "groups/")))
         [ $"{rendered.ModuleName}.fs"; "manifest.json" ]
-        "one source file and the manifest"
+        "the entry module and the manifest"
 
     if updateGoldens then
         Directory.CreateDirectory goldenDir |> ignore
 
         for name, content in rendered.Files do
-            File.WriteAllText(Path.Combine(goldenDir, name), content, Text.UTF8Encoding false)
+            let path = Path.Combine(goldenDir, name)
+            Directory.CreateDirectory(Path.GetDirectoryName path) |> ignore
+            File.WriteAllText(path, content, Text.UTF8Encoding false)
     else
         for name, content in rendered.Files do
             match readGolden goldenDir name with
@@ -1049,9 +1059,9 @@ let pipelineTests =
 
 
         yield!
-            fixtureTests "group-map-lab" groupMapLab (fixtureConfig groupMapLab) (fun package ->
+            fixtureTests "group-map-lab" groupMapLab (handConfig groupMapLab) (fun package ->
                 [ testCase "a mapped group is redirected to the bindings its table names" <| fun _ ->
-                      let rendered = Async.RunSynchronously(Pipeline.generate (fixtureConfig groupMapLab) package)
+                      let rendered = Async.RunSynchronously(Pipeline.generate (handConfig groupMapLab) package)
                       let source = rendered.Files |> List.head |> snd
 
                       // O7's `map`: the group resolves to identity only, and each name the
@@ -1072,7 +1082,7 @@ let pipelineTests =
                       Expect.stringContains source "abstract boxed: Box<System.Text.RegularExpressions.Regex>" "and through a generic this run declares"
 
                   testCase "a mapped group carries only the names its table carries" <| fun _ ->
-                      let rendered = Async.RunSynchronously(Pipeline.generate (fixtureConfig groupMapLab) package)
+                      let rendered = Async.RunSynchronously(Pipeline.generate (handConfig groupMapLab) package)
                       let source = rendered.Files |> List.head |> snd
 
                       let says key fragment =
@@ -1091,7 +1101,7 @@ let pipelineTests =
                       Expect.isTrue (says "TR053" "Iterator is applied to 3 type arguments") "reported with the arity applied"
 
                   testCase "the pinned Fable tables answer ahead of a mapped group's own" <| fun _ ->
-                      let rendered = Async.RunSynchronously(Pipeline.generate (fixtureConfig groupMapLab) package)
+                      let rendered = Async.RunSynchronously(Pipeline.generate (handConfig groupMapLab) package)
                       let source = rendered.Files |> List.head |> snd
 
                       // Mapping the compiler lib extends `Naming.LibBindings` and
@@ -1931,5 +1941,90 @@ let pipelineTests =
                                |> List.map _.Symbol)
                               [ "Panel.widget"; "Panel.boxed"; "PanelPair.left"; "PanelPair.right"; "mount(widget)"; "mount()" ]
                               "every reference into the dependency is a widening with a name" ])
+
+        // Wave five lane S (O7's `ship` disposition). Two dependencies are installed beside the
+        // entry package and both configured `ship`. `dep-lab` is emitted as its own module and
+        // the entry names its type across the boundary; `dep_lab` templates the same module
+        // name, so it keeps its declarations in the entry module and says so.
+        yield!
+            fixtureTests
+                "multi-ship-lab"
+                (handInstalledFixture "multi-ship-lab")
+                (handConfig (handInstalledFixture "multi-ship-lab"))
+                (fun package ->
+                    let config = handConfig (Some package)
+
+                    let generate () =
+                        Async.RunSynchronously(Pipeline.generate config package)
+
+                    let fileNamed (rendered: RenderModel) name =
+                        rendered.Files |> List.tryFind (fst >> (=) name) |> Option.map snd
+
+                    [ testCase "a shipped dependency is written as its own module" <| fun _ ->
+                          let rendered = generate ()
+
+                          Expect.equal
+                              (rendered.Files |> List.map fst)
+                              [ "MultiShipLab.fs"; "groups/DepLab.fs"; "manifest.json" ]
+                              "the entry module, the shipped group under groups/, and the manifest"
+
+                          let group =
+                              fileNamed rendered "groups/DepLab.fs"
+                              |> Option.defaultWith (fun () -> failtest "no module for the shipped group")
+
+                          Expect.stringContains group "module rec DepLab" "under the name O7 templates for it"
+                          Expect.stringContains group "type Widget =" "carrying the dependency's declaration"
+                          Expect.stringContains group "abstract size: float" "resolved in full, not by identity"
+
+                          Expect.stringContains
+                              group
+                              "Generated by Xantham.Generator from dep-lab"
+                              "and recording which package it came out of"
+
+                      testCase "the entry names the dependency's type across the module boundary" <| fun _ ->
+                          let rendered = generate ()
+
+                          let entry =
+                              fileNamed rendered "MultiShipLab.fs"
+                              |> Option.defaultWith (fun () -> failtest "no entry module")
+
+                          // The same spelling the `reference` disposition templates: a shipped
+                          // group and a referenced one are interchangeable at the use site.
+                          Expect.stringContains entry "abstract widget: DepLab.Widget" "qualified into the group's module"
+                          Expect.isFalse (entry.Contains "type Widget =") "and declared there once, not twice"
+
+                      testCase "emission is reported per group, and reaches the manifest" <| fun _ ->
+                          let rendered = generate ()
+
+                          let emitted =
+                              rendered.Findings
+                              |> List.filter (fun f -> f.Key.StartsWith "GE")
+                              |> List.map (fun f -> f.Key, f.Symbol, f.Tier)
+
+                          Expect.equal
+                              emitted
+                              [ "GE001", "dep-lab", Exact
+                                "GE003", "dep_lab", Escape
+                                "GE002", "absent-lab", Widened ]
+                              "one shipped, one collided, one configured and never reached"
+
+                          let manifest =
+                              fileNamed rendered "manifest.json"
+                              |> Option.defaultWith (fun () -> failtest "no manifest")
+
+                          Expect.stringContains manifest "\"GE001\"" "the manifest carries what emission found"
+
+                      testCase "a group that loses the module name keeps its declarations in the entry" <| fun _ ->
+                          let rendered = generate ()
+
+                          let entry =
+                              fileNamed rendered "MultiShipLab.fs"
+                              |> Option.defaultWith (fun () -> failtest "no entry module")
+
+                          // `dep-lab` and `dep_lab` both template `DepLab`. The loser is not
+                          // written twice and its references are not left dangling: the
+                          // declarations stay where a run writing one module puts them.
+                          Expect.stringContains entry "type Spare =" "declared in the entry module"
+                          Expect.stringContains entry "abstract spare: Spare" "and named there unqualified" ])
 
     ]

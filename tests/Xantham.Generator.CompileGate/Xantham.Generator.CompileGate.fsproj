@@ -30,20 +30,29 @@
              compile *all* of them, so a list of them is a list that can only ever be wrong:
              a golden left off the list is a golden silently ungated. Naming them also made
              this a file every parallel branch appended a line to, and so a file every merge
-             conflicted in. The goldens are independent modules, so wildcard order is
-             immaterial - but all of them follow the two hand-written files above, which
-             they are allowed to reference. -->
-        <!-- Except the open ones. O7's `reference` disposition renders a group's types as names
-             templated into another package's module, so a golden generated against it compiles
-             only where the gated corpus also ships that module. The corpus is the unit of
-             closure, not the run: `cross-package-lab` is generated as a `reference` against
-             `cross-package-dep`, and both halves are gated together, which is what makes the F#
-             compiler - rather than a string comparison - the judge of whether the templated name
-             is the shipped one. A golden whose templated module nothing ships is committed with
-             the `.open.fs` suffix and stays out; wave five lane T's section of
+             conflicted in. All of them follow the two hand-written files above, which they
+             are allowed to reference.
+
+             The two wildcards below are one ordering rule rather than a list: a run that
+             ships a group writes it under `groups/` (O7), and the module naming its types
+             refers to it, so `groups/` compiles first. F# resolves a reference into an
+             earlier file only, and a wildcard's own order is the filesystem's. Every other
+             golden is an independent module, so a new fixture needs no line here.
+
+             Both wildcards exclude the open goldens. O7's `reference` disposition renders a
+             group's types as names templated into another package's module, so a golden
+             generated against it compiles only where the gated corpus also ships that module.
+             The corpus is the unit of closure, not the run: `cross-package-lab` is generated
+             as a `reference` against `cross-package-dep`, and both halves are gated together,
+             which is what makes the F# compiler - rather than a string comparison - the judge
+             of whether the templated name is the shipped one. A golden whose templated module
+             nothing ships carries the `.open.fs` suffix and stays out; lane T's section of
              docs/plans/generator-wave-five.md records why stub assemblies were refused. -->
-        <Compile Include="..\Xantham.Generator.Tests\golden\**\*.fs"
+        <Compile Include="..\Xantham.Generator.Tests\golden\**\groups\*.fs"
                  Exclude="..\Xantham.Generator.Tests\golden\**\*.open.fs"
+                 Link="golden\%(RecursiveDir)%(Filename)%(Extension)" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\**\*.fs"
+                 Exclude="..\Xantham.Generator.Tests\golden\**\groups\*.fs;..\Xantham.Generator.Tests\golden\**\*.open.fs"
                  Link="golden\%(RecursiveDir)%(Filename)%(Extension)" />
     </ItemGroup>
 

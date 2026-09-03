@@ -36,11 +36,15 @@ tests/fixtures/**/*
 # lab directories themselves.
 !tests/fixtures/*lab/
 !tests/fixtures/*lab/**
-tests/fixtures/*lab/node_modules/
-# ... except cross-package-lab, whose `node_modules` is the fixture rather than an install:
-# it carries two hand-authored packages side by side, which is the only layout
-# `Grouping.classify` reads as a dependency - a path under the entry package's own directory
-# classifies as the entry package.
+tests/fixtures/*lab/node_modules/*
+# ... except a lab's own hand-authored dependencies, which are source for the same reason the
+# lab is. A multi-package lab installs nothing: the dependency is committed where the compiler's
+# module resolution looks for it, so the group a declaration lands in is decided by the same path
+# rule an npm install would produce. The line above excludes the entries rather than the
+# directory, so the re-includes below reach both. `cross-package-dep` is named for its role
+# rather than the `*lab` family, and needs its own pair.
+!tests/fixtures/*lab/node_modules/*lab/
+!tests/fixtures/*lab/node_modules/*lab/**
 !tests/fixtures/cross-package-lab/node_modules/
 !tests/fixtures/cross-package-lab/node_modules/**
 # ... and except the pins, which are the tracked half of every npm rung: the install is
