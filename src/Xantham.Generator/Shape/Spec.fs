@@ -856,7 +856,10 @@ and internal objectRef
 
                     appliedRefTo ctx model self owner name parameters arguments
                 | None ->
-                    match libBinding ctx model self owner facts with
+                    match
+                        libBinding ctx model self owner facts
+                        |> Option.orElseWith (fun () -> mappedBinding ctx model self owner facts)
+                    with
                     | Some result -> result
                     | None ->
 
@@ -865,9 +868,10 @@ and internal objectRef
                             // The O7 contract: a `ship` run of this group produces exactly this name.
                             FsNamed $"{Naming.groupModule ctx.PackageName facts.Origin}.{typeName}", []
                         | Reference, None -> FsObj, [ Finding.make owner TypeReference.AnonymousInReferencedGroup ]
-                        | (Ship | Widen), Some "globalThis" ->
+                        | Map _, None -> FsObj, [ Finding.make owner TypeReference.AnonymousInMappedGroup ]
+                        | (Ship | Widen | Map _), Some "globalThis" ->
                             FsObj, [ Finding.make owner TypeReference.GlobalThisToObj ]
-                        | (Ship | Widen), _ when isConstructorObject facts ->
+                        | (Ship | Widen | Map _), _ when isConstructorObject facts ->
                             // A constructor object this run did not name: the generic message
                             // would say `__type is not among the generated declarations`, which
                             // names the checker's placeholder rather than the construct.
@@ -878,7 +882,7 @@ and internal objectRef
                                 |> Option.defaultValue "an anonymous class"
 
                             FsObj, [ Finding.make owner (TypeReference.ConstructorObjectNotDeclared constructs) ]
-                        | (Ship | Widen), _ when facts.Members.IsEmpty && facts.IndexInfos.IsEmpty ->
+                        | (Ship | Widen | Map _), _ when facts.Members.IsEmpty && facts.IndexInfos.IsEmpty ->
                             // A member-less object type maps completely to `obj`, and the
                             // declaration it would have taken would hold the same. An
                             // author-written name read from somewhere else stays a declaration
@@ -887,7 +891,7 @@ and internal objectRef
                             | Some shown when shown <> owner && not (isSyntheticName shown) ->
                                 FsObj, [ Finding.make owner (TypeReference.NotAmongGeneratedDeclarations shown) ]
                             | _ -> FsObj, [ Finding.make owner TypeReference.ObjectWithoutMembers ]
-                        | (Ship | Widen), _ ->
+                        | (Ship | Widen | Map _), _ ->
                             let shown = facts.SymbolName |> Option.defaultValue "an anonymous object type"
                             FsObj, [ Finding.make owner (TypeReference.NotAmongGeneratedDeclarations shown) ]
 
@@ -935,6 +939,33 @@ and internal libBinding (ctx: Context) (model: ShapeModel) (self: string option)
                 |> List.map (fun note -> Finding.make owner (TypeReference.LibBindingLoss note))
 
             Some(reference, findings @ dropped @ lossy)
+    | _ -> None
+
+/// A type of a mapped group written as the binding somebody already wrote (O7's `map`): the
+/// group's table gives the F# name, and that name's arity decides whether the application is
+/// legal. A name the table does not carry widens, exactly as the rest of the group does.
+and internal mappedBinding
+    (ctx: Context)
+    (model: ShapeModel)
+    (self: string option)
+    (owner: string)
+    (facts: TypeFacts)
+    : (FsTypeRef * Finding list) option =
+    match GeneratorConfig.disposition ctx.Config facts.Origin, facts.SymbolName with
+    | Map names, Some name ->
+        Map.tryFind name names
+        |> Option.map (fun destination ->
+            let arguments = facts.TypeArguments
+
+            if arguments.Length <> destination.Arity then
+                FsObj,
+                [
+                    Finding.make owner (TypeReference.MappedNameArityMismatch(name, arguments.Length))
+                ]
+            elif arguments.IsEmpty then
+                FsNamed destination.FSharpName, []
+            else
+                appliedRef ctx model self owner destination.FSharpName arguments)
     | _ -> None
 
 /// A generic name applied to type arguments, each shaped at this position (§4.9).

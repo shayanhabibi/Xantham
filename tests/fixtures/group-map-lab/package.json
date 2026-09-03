@@ -1,0 +1,6 @@
+{
+    "name": "group-map-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "description": "Hand-authored fixture for the `map` disposition (docs/plans/generator-architecture.md O7): a group redirected to bindings somebody already wrote, the arity rule that keeps the redirection honest, and the two pinned Fable tables answering ahead of it. Tracked in git, no npm install, so the goldens pin every case under the live compiler."
+}

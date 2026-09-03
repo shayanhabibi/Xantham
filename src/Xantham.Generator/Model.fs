@@ -19,14 +19,28 @@ type PackageId =
     /// of the entry package, which is what they are in practice.
     | Unclassified
 
-/// What the generator does with one group's types (O7). `Map` and `Inline` are decided but
-/// not yet built; they arrive with the reference-map machinery.
+/// The F# destination of one mapped name (O7's `map`).
+type MappedName =
+    {
+        /// The name written at a reference position, qualified as the destination package
+        /// spells it: `Node.Buffer.Buffer`, `System.Text.RegularExpressions.Regex`.
+        FSharpName: string
+        /// The number of type arguments the destination takes. A reference applying any other
+        /// number widens with a finding (`TR053`).
+        Arity: int
+    }
+
+/// What the generator does with one group's types (O7). `Inline` is decided but not yet
+/// built; it arrives with demand-driven resolution.
 type GroupDisposition =
     /// Resolve fully and emit the group's declarations. Always the entry package's mode.
     | Ship
     /// Resolve identity only; references render as the group's templated module name, on the
     /// contract that a `ship` run of that group (ours or anyone's) produces those names.
     | Reference
+    /// Resolve identity only; a name the table carries renders as its destination - a binding
+    /// somebody already wrote by hand - and every other name of the group widens.
+    | Map of names: Map<string, MappedName>
     /// Resolve identity only; references widen to `obj` with a finding. The default for
     /// non-entry groups until the shipped compiler-lib package exists.
     | Widen
@@ -67,12 +81,55 @@ module GeneratorConfig =
     let private jsonOptions =
         JsonDocumentOptions(CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true)
 
-    let private parseDisposition (key: string) =
-        function
-        | "ship" -> Ship
-        | "reference" -> Reference
-        | "widen" -> Widen
-        | other -> failwith $"xantham.json: group {key} has unknown disposition '{other}' (ship|reference|widen)"
+    /// One entry of a mapped group's table: `"Buffer": "Node.Buffer.Buffer"` for a
+    /// destination that takes no type arguments, `"Readable": { "name": "Node.Stream.Readable",
+    /// "arity": 1 }` for one that does.
+    let private parseMappedName (key: string) (name: string) (value: JsonElement) =
+        match value.ValueKind with
+        | JsonValueKind.String ->
+            {
+                FSharpName = value.GetString()
+                Arity = 0
+            }
+        | JsonValueKind.Object ->
+            let fsharpName =
+                match value.TryGetProperty "name" with
+                | true, v when v.ValueKind = JsonValueKind.String -> v.GetString()
+                | _ -> failwith $"xantham.json: group {key} maps {name} to an object without a name"
+
+            let arity =
+                match value.TryGetProperty "arity" with
+                | true, v when v.ValueKind = JsonValueKind.Number -> v.GetInt32()
+                | true, _ -> failwith $"xantham.json: group {key} maps {name} at a non-numeric arity"
+                | _ -> 0
+
+            {
+                FSharpName = fsharpName
+                Arity = arity
+            }
+        | _ -> failwith $"xantham.json: group {key} maps {name} to neither a name nor a name-and-arity object"
+
+    /// One group's disposition. A string is the disposition itself; an object carries the
+    /// destination table a mapped group needs, keyed by TypeScript name.
+    let private parseGroup (key: string) (value: JsonElement) =
+        match value.ValueKind with
+        | JsonValueKind.String ->
+            match value.GetString() with
+            | "ship" -> Ship
+            | "reference" -> Reference
+            | "widen" -> Widen
+            | "map" -> failwith $"xantham.json: group {key} is mapped, so it needs a table: {{ \"map\": {{ ... }} }}"
+            | other ->
+                failwith $"xantham.json: group {key} has unknown disposition '{other}' (ship|reference|widen|map)"
+        | JsonValueKind.Object ->
+            match value.TryGetProperty "map" with
+            | true, table when table.ValueKind = JsonValueKind.Object ->
+                table.EnumerateObject()
+                |> Seq.map (fun p -> p.Name, parseMappedName key p.Name p.Value)
+                |> Map.ofSeq
+                |> GroupDisposition.Map
+            | _ -> failwith $"xantham.json: group {key} is an object, so its one key is \"map\""
+        | _ -> failwith $"xantham.json: group {key} is neither a disposition nor a mapped group"
 
     /// Loads `<packageDir>/xantham.json`, tolerating comments and trailing commas (the file is
     /// authored by hand). A missing file is the default configuration, not an error.
@@ -93,7 +150,7 @@ module GeneratorConfig =
                 match doc.RootElement.TryGetProperty "groups" with
                 | true, v when v.ValueKind = JsonValueKind.Object ->
                     v.EnumerateObject()
-                    |> Seq.map (fun p -> p.Name, parseDisposition p.Name (p.Value.GetString()))
+                    |> Seq.map (fun p -> p.Name, parseGroup p.Name p.Value)
                     |> Map.ofSeq
                 | _ -> Map.empty
 

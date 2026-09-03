@@ -1,0 +1,25 @@
+{
+    // The `map` disposition of O7, spelled as `xantham.json` takes it. A group whose value is
+    // a string keeps every disposition it had; a group whose value is an object is mapped, and
+    // its `map` table is read by TypeScript name.
+    //
+    // A destination spelled as a bare string takes no type arguments. One that does states its
+    // arity, because the arity is what makes the redirection safe: TypeScript's own lib moves,
+    // and a mapping that guessed would emit an application that does not compile.
+    "groups": {
+        "typescript/lib": {
+            "map": {
+                // Fable compiles the BCL regular expression to the JavaScript one, so the
+                // destination is the same runtime object the declaration means.
+                "RegExp": "System.Text.RegularExpressions.Regex",
+                // A generic destination, at the one argument it takes.
+                "WeakRef": { "name": "System.WeakReference", "arity": 1 },
+                // A destination narrower than the lib name it is mapped from: `Iterator` in a
+                // modern lib carries a return and a next type beside the element, and
+                // `IEnumerator<'T>` carries the element alone. The reference widens rather
+                // than dropping what the destination cannot hold.
+                "Iterator": { "name": "System.Collections.Generic.IEnumerator", "arity": 1 }
+            }
+        }
+    }
+}
