@@ -117,6 +117,7 @@ let renderTests =
                                         Tags = []
                                         ReadOnly = false
                                         Type = FsTypeVar "T" } ]
+                                Entrypoint = None
                                 CreateOverloads =
                                   [ [ { Name = "held"
                                         Type = FsTypeVar "T"
@@ -160,6 +161,7 @@ let renderTests =
                                     { Name = "V"; Constraint = Some(FsApp("Box", [ FsTypeVar "U" ])) } ]
                                 Inherits = []
                                 Members = []
+                                Entrypoint = None
                                 CreateOverloads = []
                                 Statics = [] } ] }
 
@@ -201,6 +203,7 @@ let renderTests =
                                   [ method' "nested" [ { Name = "T"; Constraint = Some(FsApp("Obj", [ FsNamed "Ev" ])) } ]
                                     method' "bare" [ { Name = "T"; Constraint = None } ]
                                     method' "named" [ { Name = "T"; Constraint = Some(FsNamed "Ev") } ] ]
+                                Entrypoint = None
                                 CreateOverloads = []
                                 Statics = [] } ] }
 
@@ -250,6 +253,7 @@ let renderTests =
                                                 Rest = false
                                                 Type = FsOption FsBool } ]
                                           Return = FsNamed "Options" } ]
+                                Entrypoint = None
                                 CreateOverloads =
                                   [ [ { Name = "onlyFirst"
                                         Optional = false
@@ -502,6 +506,7 @@ let renderTests =
                                 TypeParameters = []
                                 Inherits = []
                                 Members = []
+                                Entrypoint = None
                                 CreateOverloads = []
                                 Statics = [] } ]
                     Findings =

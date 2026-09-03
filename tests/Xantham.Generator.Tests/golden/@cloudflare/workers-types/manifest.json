@@ -59,7 +59,8 @@
     },
     {
       "pass": "SC - shape-classes",
-      "total": 63,
+      "total": 70,
+      "exact": 7,
       "ergonomic": 47,
       "widened": 8,
       "escape": 8
@@ -73,8 +74,8 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 1951,
-      "ergonomic": 1951
+      "total": 1949,
+      "ergonomic": 1949
     },
     {
       "pass": "DO - dedupe-overloads",
@@ -75387,6 +75388,13 @@
       "tier": "widened",
       "findings": [
         {
+          "key": "SC007",
+          "pass": "shape-classes",
+          "tier": "exact",
+          "symbol": "PipelineTransformationEntrypoint",
+          "message": "entrypoint class emitted as an AbstractClass imported from cloudflare:pipelines; a consumer inherits it"
+        },
+        {
           "key": "TR009",
           "pass": "shape-classes",
           "tier": "widened",
@@ -75401,18 +75409,11 @@
           "message": "unknown maps to obj (D8)"
         },
         {
-          "key": "SP001",
+          "key": "SP003",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
           "symbol": "PipelineTransformationEntrypoint",
-          "message": "ParamObject Create synthesized (D3)"
-        },
-        {
-          "key": "SP002",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "PipelineTransformationEntrypoint.run",
-          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+          "message": "no ParamObject Create synthesized: the declaration is a class a consumer inherits, where \u0060new\u0060 is the construction"
         }
       ]
     },
@@ -75940,11 +75941,18 @@
           "message": "__RPC_TARGET_BRAND reads but does not write: its type holds no value, and F# has no setter of type unit"
         },
         {
-          "key": "SP001",
+          "key": "SC007",
+          "pass": "shape-classes",
+          "tier": "exact",
+          "symbol": "RpcTarget",
+          "message": "entrypoint class emitted as an AbstractClass imported from cloudflare:workers; a consumer inherits it"
+        },
+        {
+          "key": "SP003",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
           "symbol": "RpcTarget",
-          "message": "ParamObject Create synthesized (D3)"
+          "message": "no ParamObject Create synthesized: the declaration is a class a consumer inherits, where \u0060new\u0060 is the construction"
         }
       ]
     },
@@ -75959,6 +75967,13 @@
           "tier": "ergonomic",
           "symbol": "WorkerEntrypoint",
           "message": "__WORKER_ENTRYPOINT_BRAND reads but does not write: its type holds no value, and F# has no setter of type unit"
+        },
+        {
+          "key": "SC007",
+          "pass": "shape-classes",
+          "tier": "exact",
+          "symbol": "WorkerEntrypoint",
+          "message": "entrypoint class emitted as an AbstractClass imported from cloudflare:workers; a consumer inherits it"
         },
         {
           "key": "TR009",
@@ -76192,11 +76207,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "SP001",
+          "key": "SP003",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
           "symbol": "WorkerEntrypoint",
-          "message": "ParamObject Create synthesized (D3)"
+          "message": "no ParamObject Create synthesized: the declaration is a class a consumer inherits, where \u0060new\u0060 is the construction"
         }
       ]
     },
@@ -76211,6 +76226,13 @@
           "tier": "ergonomic",
           "symbol": "DurableObject2",
           "message": "__DURABLE_OBJECT_BRAND reads but does not write: its type holds no value, and F# has no setter of type unit"
+        },
+        {
+          "key": "SC007",
+          "pass": "shape-classes",
+          "tier": "exact",
+          "symbol": "DurableObject2",
+          "message": "entrypoint class emitted as an AbstractClass imported from cloudflare:workers; a consumer inherits it"
         },
         {
           "key": "MB003",
@@ -76360,11 +76382,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "SP001",
+          "key": "SP003",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
           "symbol": "DurableObject2",
-          "message": "ParamObject Create synthesized (D3)"
+          "message": "no ParamObject Create synthesized: the declaration is a class a consumer inherits, where \u0060new\u0060 is the construction"
         }
       ]
     },
@@ -77855,6 +77877,13 @@
           "message": "WorkflowStepWaitForEventResultItem is generic and this position has no arguments to apply; widened to obj"
         },
         {
+          "key": "SC007",
+          "pass": "shape-classes",
+          "tier": "exact",
+          "symbol": "WorkflowStep",
+          "message": "entrypoint class emitted as an AbstractClass imported from cloudflare:workers; a consumer inherits it"
+        },
+        {
           "key": "TP002",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -77929,7 +77958,7 @@
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
           "symbol": "WorkflowStep",
-          "message": "no ParamObject Create synthesized: an overloaded method would bind two parameters of one name"
+          "message": "no ParamObject Create synthesized: the declaration is a class a consumer inherits, where \u0060new\u0060 is the construction"
         }
       ]
     },
@@ -78477,6 +78506,13 @@
           "message": "__WORKFLOW_ENTRYPOINT_BRAND reads but does not write: its type holds no value, and F# has no setter of type unit"
         },
         {
+          "key": "SC007",
+          "pass": "shape-classes",
+          "tier": "exact",
+          "symbol": "WorkflowEntrypoint",
+          "message": "entrypoint class emitted as an AbstractClass imported from cloudflare:workers; a consumer inherits it"
+        },
+        {
           "key": "TP002",
           "pass": "shape-classes",
           "tier": "ergonomic",
@@ -78512,18 +78548,11 @@
           "message": "unknown maps to obj (D8)"
         },
         {
-          "key": "SP001",
+          "key": "SP003",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
           "symbol": "WorkflowEntrypoint",
-          "message": "ParamObject Create synthesized (D3)"
-        },
-        {
-          "key": "SP002",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "WorkflowEntrypoint.run",
-          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+          "message": "no ParamObject Create synthesized: the declaration is a class a consumer inherits, where \u0060new\u0060 is the construction"
         }
       ]
     },
@@ -81734,6 +81763,13 @@
       "tier": "widened",
       "findings": [
         {
+          "key": "SC007",
+          "pass": "shape-classes",
+          "tier": "exact",
+          "symbol": "NonRetryableError",
+          "message": "entrypoint class emitted as an AbstractClass imported from cloudflare:workflows; a consumer inherits it"
+        },
+        {
           "key": "TR032",
           "pass": "shape-classes",
           "tier": "ergonomic",
@@ -81783,11 +81819,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "SP001",
+          "key": "SP003",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
           "symbol": "NonRetryableError",
-          "message": "ParamObject Create synthesized (D3)"
+          "message": "no ParamObject Create synthesized: the declaration is a class a consumer inherits, where \u0060new\u0060 is the construction"
         }
       ]
     },

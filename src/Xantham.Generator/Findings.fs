@@ -577,6 +577,13 @@ type ShapeClasses =
     /// Wave four, lane N. A settable static emitted with a setter, proven against `index.js` by
     /// the run gate.
     | [<Exact>] StaticSettable
+    /// Wave five. A class an ambient module exports for consumers to derive from, emitted as an
+    /// `[<AbstractClass>]` under the specifier's import. An F# interface admits no `inherit`, so
+    /// this is the one form a derived class reaches.
+    | [<Exact>] EntrypointClassEmitted of specifier: string
+    /// Wave five. A class the entrypoint rule selected that F# will not admit in the class form,
+    /// and why. The declaration keeps the interface form, `Create` included.
+    | [<Widened>] EntrypointClassRefused of reason: string
 
     interface IFindingKind with
         member this.Message =
@@ -591,6 +598,9 @@ type ShapeClasses =
             | StaticMethodWithoutSignatures declaredIn ->
                 $"static method emitted as a value: its type is declared in {declaredIn}, which this run resolves identity-only, so there are no signatures to shape"
             | StaticSettable -> "settable static emitted with a setter"
+            | EntrypointClassEmitted specifier ->
+                $"entrypoint class emitted as an AbstractClass imported from {specifier}; a consumer inherits it"
+            | EntrypointClassRefused reason -> $"entrypoint class kept the interface form: {reason}"
 
 /// `shape-exports`.
 [<Prefix("SE", "shape-exports")>]

@@ -494,6 +494,47 @@ let private renderBound (runtimePackage: string) (m: FsExportMember) =
                 $"    static member {declHead m.Name m.TypeParameters} {renderParamList parameters} : {printType returns} = jsNative"
     ]
 
+/// One member of an entrypoint class. A method stays `abstract`, which is the slot a derived
+/// class overrides; a property is a concrete binding onto the instance, because the JavaScript
+/// constructor is what assigns it and a derived class reads it as it stands.
+let private renderClassMember (m: FsMember) =
+    match m with
+    | FsProperty p ->
+        [
+            yield! docLines "    " p.Docs p.Tags
+            let reference = printType p.Type
+
+            if p.ReadOnly then
+                yield $"    member _.{ident p.Name}: {reference} = jsNative"
+            else
+                yield $"    member _.{ident p.Name}"
+                yield $"        with get (): {reference} = jsNative"
+                yield $"        and set (_: {reference}): unit = jsNative"
+        ]
+    | other -> renderMember other
+
+/// A class an ambient module exports for consumers to derive from (§4.4). `[<AbstractClass>]`
+/// under the import that binds the JavaScript constructor: Fable compiles a derived class's
+/// `inherit` to `extends` and its constructor to `super(...)`.
+let private renderEntrypointClass (runtimePackage: string) (decl: FsInterfaceDecl) (entrypoint: FsEntrypoint) =
+    [
+        yield! docLines "" decl.Docs decl.Tags
+        yield bindingAttribute runtimePackage "" "; AbstractClass" entrypoint.Binding
+
+        let head = $"type {declHead decl.Name decl.TypeParameters} {renderParamList entrypoint.Parameters}"
+
+        match decl.Members, decl.Statics with
+        | [], [] -> yield $"{head} = class end"
+        | members, statics ->
+            yield $"{head} ="
+
+            for m in members do
+                yield! renderClassMember m
+
+            for m in statics do
+                yield! renderBound runtimePackage m
+    ]
+
 let private renderInterface (runtimePackage: string) (decl: FsInterfaceDecl) =
     [
         yield! docLines "" decl.Docs decl.Tags
@@ -748,6 +789,12 @@ let private qualifyDecl foreign =
                 TypeParameters = qualifyTypeParams foreign decl.TypeParameters
                 Inherits = decl.Inherits |> List.map (qualifyRef foreign)
                 Members = decl.Members |> List.map (qualifyMember foreign)
+                Entrypoint =
+                    decl.Entrypoint
+                    |> Option.map (fun entrypoint ->
+                        { entrypoint with
+                            Parameters = entrypoint.Parameters |> List.map (qualifyParam foreign)
+                        })
                 CreateOverloads = decl.CreateOverloads |> List.map (List.map (qualifyParam foreign))
                 Statics = decl.Statics |> List.map (qualifyBound foreign)
             }
@@ -799,7 +846,10 @@ let private renderModule (group: GroupModule) (foreign: Map<string, string>) =
     let body =
         decls
         |> List.map (function
-            | FsInterface decl -> renderInterface group.RuntimePackage decl
+            | FsInterface decl ->
+                match decl.Entrypoint with
+                | Some entrypoint -> renderEntrypointClass group.RuntimePackage decl entrypoint
+                | None -> renderInterface group.RuntimePackage decl
             | FsStringEnum decl -> renderStringEnum decl
             | FsTaggedUnion decl -> renderTaggedUnion decl
             | FsEnum decl -> renderEnum decl

@@ -3,8 +3,8 @@
   "module": "AmbientModuleLab",
   "counts": {
     "exact": 7,
-    "ergonomic": 6,
-    "widened": 1,
+    "ergonomic": 8,
+    "widened": 3,
     "escape": 2
   },
   "passes": [
@@ -15,14 +15,27 @@
       "escape": 2
     },
     {
+      "pass": "SI - shape-interfaces",
+      "total": 6,
+      "exact": 1,
+      "ergonomic": 4,
+      "widened": 1
+    },
+    {
       "pass": "SA - shape-aliases",
       "total": 1,
       "widened": 1
     },
     {
+      "pass": "SC - shape-classes",
+      "total": 3,
+      "exact": 2,
+      "widened": 1
+    },
+    {
       "pass": "SP - synthesize-paramobjects",
-      "total": 8,
-      "ergonomic": 8
+      "total": 13,
+      "ergonomic": 13
     }
   ],
   "symbols": [
@@ -90,6 +103,20 @@
       ]
     },
     {
+      "name": "Anvil",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Anvil",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
       "name": "Hammer",
       "file": "index.d.ts",
       "tier": "ergonomic",
@@ -121,6 +148,118 @@
           "tier": "ergonomic",
           "symbol": "Reading",
           "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "Workbench",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SC007",
+          "pass": "shape-classes",
+          "tier": "exact",
+          "symbol": "Workbench",
+          "message": "entrypoint class emitted as an AbstractClass imported from ambient-lab:tools; a consumer inherits it"
+        },
+        {
+          "key": "SP003",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Workbench",
+          "message": "no ParamObject Create synthesized: the declaration is a class a consumer inherits, where \u0060new\u0060 is the construction"
+        }
+      ]
+    },
+    {
+      "name": "Snag",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "SC007",
+          "pass": "shape-classes",
+          "tier": "exact",
+          "symbol": "Snag",
+          "message": "entrypoint class emitted as an AbstractClass imported from ambient-lab:tools; a consumer inherits it"
+        },
+        {
+          "key": "SI002",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Snag",
+          "message": "base has no F# name at this position; its members are flattened in and the is-a relation is not emitted (\u00A74.4)"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Snag.cause",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Snag.cause",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "MB003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Snag.stack",
+          "message": "optional member reads as option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Snag.stack",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP003",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Snag",
+          "message": "no ParamObject Create synthesized: the declaration is a class a consumer inherits, where \u0060new\u0060 is the construction"
+        }
+      ]
+    },
+    {
+      "name": "Vise",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "SC008",
+          "pass": "shape-classes",
+          "tier": "widened",
+          "symbol": "Vise",
+          "message": "entrypoint class kept the interface form: the class inherits a base whose constructor arguments have no F# form"
+        },
+        {
+          "key": "SI005",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "Vise",
+          "message": "base Hammer is inherited: the is-a relation is emitted (\u00A74.4)"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Vise",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Vise.strike",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         }
       ]
     },
@@ -214,7 +353,7 @@
           "pass": "harvest-globals",
           "tier": "exact",
           "symbol": "\u0022ambient-lab:tools\u0022",
-          "message": "3 exports harvested from ambient module \u0022ambient-lab:tools\u0022; each binds with [\u003CImport(name, \u0022ambient-lab:tools\u0022)\u003E]"
+          "message": "6 exports harvested from ambient module \u0022ambient-lab:tools\u0022; each binds with [\u003CImport(name, \u0022ambient-lab:tools\u0022)\u003E]"
         }
       ]
     },

@@ -174,6 +174,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                                             TypeParameters = typeParameters
                                             Inherits = inherits |> List.map snd
                                             Members = members
+                                            Entrypoint = None
                                             CreateOverloads = []
                                             Statics = []
                                         }

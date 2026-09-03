@@ -26310,10 +26310,14 @@ type PagesPluginFunctionContext<'Env, 'Params, 'Data, 'PluginArgs when 'Data :> 
     [<ParamObject; Emit("$0")>]
     static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: Action<JS.Promise<obj>>, passThroughOnException: Action, next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>> option, RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option, JS.Promise<Response>>, env: obj, ``params``: obj, data: 'Data, pluginArgs: 'PluginArgs) : PagesPluginFunctionContext<'Env, 'Params, 'Data, 'PluginArgs> = jsNative
 
-[<Interface>]
-type PipelineTransformationEntrypoint<'Env, 'I, 'O when 'I :> PipelineRecord and 'O :> PipelineRecord> =
-    abstract env: 'Env with get, set
-    abstract ctx: ExecutionContext<obj> with get, set
+[<Import("PipelineTransformationEntrypoint", "cloudflare:pipelines"); AbstractClass>]
+type PipelineTransformationEntrypoint<'Env, 'I, 'O when 'I :> PipelineRecord and 'O :> PipelineRecord> (ctx: ExecutionContext<obj>, env: 'Env) =
+    member _.env
+        with get (): 'Env = jsNative
+        and set (_: 'Env): unit = jsNative
+    member _.ctx
+        with get (): ExecutionContext<obj> = jsNative
+        and set (_: ExecutionContext<obj>): unit = jsNative
     /// <summary>
     /// run receives an array of PipelineRecord which can be
     /// transformed and returned to the pipeline
@@ -26322,8 +26326,6 @@ type PipelineTransformationEntrypoint<'Env, 'I, 'O when 'I :> PipelineRecord and
     /// <remarks>@param metadata Information about the specific pipeline calling the transformation entrypoint</remarks>
     /// <remarks>@returns A promise containing the transformed PipelineRecord array</remarks>
     abstract run: records: 'I[] * metadata: PipelineBatchMetadata -> JS.Promise<'O[]>
-    [<ParamObject; Emit("$0")>]
-    static member Create (env: 'Env, ctx: ExecutionContext<obj>, run: Func<'I[], PipelineBatchMetadata, JS.Promise<'O[]>>) : PipelineTransformationEntrypoint<'Env, 'I, 'O> = jsNative
 
 type PipelineRecord =
     [<EmitIndexer>]
@@ -26425,42 +26427,74 @@ type RpcStubConstructor =
     [<EmitConstructor>]
     abstract Create<'T>: value: 'T -> obj
 
-[<Interface>]
-type RpcTarget =
-    abstract __RPC_TARGET_BRAND: unit
-    [<ParamObject; Emit("$0")>]
-    static member Create () : RpcTarget = jsNative
+[<Import("RpcTarget", "cloudflare:workers"); AbstractClass>]
+type RpcTarget () =
+    member _.__RPC_TARGET_BRAND: unit = jsNative
 
-[<Interface>]
-type WorkerEntrypoint<'Env, 'Props> =
-    abstract __WORKER_ENTRYPOINT_BRAND: unit
-    abstract ctx: ExecutionContext<'Props> with get, set
-    abstract env: 'Env with get, set
-    abstract email: Func<ForwardableEmailMessage, JS.Promise<unit> option> option with get, set
-    abstract fetch: Func<Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, U2<JS.Promise<Response>, Response>> option with get, set
-    abstract connect: Func<Socket, JS.Promise<unit> option> option with get, set
-    abstract queue: Func<MessageBatch<obj>, JS.Promise<unit> option> option with get, set
-    abstract scheduled: Func<ScheduledController, JS.Promise<unit> option> option with get, set
-    abstract tail: Func<TraceItem[], JS.Promise<unit> option> option with get, set
-    abstract tailStream: Func<TailEvent2<Onset>, U3<JS.Promise<U2<Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>> option with get, set
-    abstract test: Func<TestController, JS.Promise<unit> option> option with get, set
-    abstract trace: Func<TraceItem[], JS.Promise<unit> option> option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (ctx: ExecutionContext<'Props>, env: 'Env, ?email: Func<ForwardableEmailMessage, JS.Promise<unit> option>, ?fetch: Func<Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, U2<JS.Promise<Response>, Response>>, ?connect: Func<Socket, JS.Promise<unit> option>, ?queue: Func<MessageBatch<obj>, JS.Promise<unit> option>, ?scheduled: Func<ScheduledController, JS.Promise<unit> option>, ?tail: Func<TraceItem[], JS.Promise<unit> option>, ?tailStream: Func<TailEvent2<Onset>, U3<JS.Promise<U2<Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, ?test: Func<TestController, JS.Promise<unit> option>, ?trace: Func<TraceItem[], JS.Promise<unit> option>) : WorkerEntrypoint<'Env, 'Props> = jsNative
+[<Import("WorkerEntrypoint", "cloudflare:workers"); AbstractClass>]
+type WorkerEntrypoint<'Env, 'Props> (ctx: ExecutionContext<obj>, env: 'Env) =
+    member _.__WORKER_ENTRYPOINT_BRAND: unit = jsNative
+    member _.ctx
+        with get (): ExecutionContext<'Props> = jsNative
+        and set (_: ExecutionContext<'Props>): unit = jsNative
+    member _.env
+        with get (): 'Env = jsNative
+        and set (_: 'Env): unit = jsNative
+    member _.email
+        with get (): Func<ForwardableEmailMessage, JS.Promise<unit> option> option = jsNative
+        and set (_: Func<ForwardableEmailMessage, JS.Promise<unit> option> option): unit = jsNative
+    member _.fetch
+        with get (): Func<Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, U2<JS.Promise<Response>, Response>> option = jsNative
+        and set (_: Func<Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, U2<JS.Promise<Response>, Response>> option): unit = jsNative
+    member _.connect
+        with get (): Func<Socket, JS.Promise<unit> option> option = jsNative
+        and set (_: Func<Socket, JS.Promise<unit> option> option): unit = jsNative
+    member _.queue
+        with get (): Func<MessageBatch<obj>, JS.Promise<unit> option> option = jsNative
+        and set (_: Func<MessageBatch<obj>, JS.Promise<unit> option> option): unit = jsNative
+    member _.scheduled
+        with get (): Func<ScheduledController, JS.Promise<unit> option> option = jsNative
+        and set (_: Func<ScheduledController, JS.Promise<unit> option> option): unit = jsNative
+    member _.tail
+        with get (): Func<TraceItem[], JS.Promise<unit> option> option = jsNative
+        and set (_: Func<TraceItem[], JS.Promise<unit> option> option): unit = jsNative
+    member _.tailStream
+        with get (): Func<TailEvent2<Onset>, U3<JS.Promise<U2<Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>> option = jsNative
+        and set (_: Func<TailEvent2<Onset>, U3<JS.Promise<U2<Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>> option): unit = jsNative
+    member _.test
+        with get (): Func<TestController, JS.Promise<unit> option> option = jsNative
+        and set (_: Func<TestController, JS.Promise<unit> option> option): unit = jsNative
+    member _.trace
+        with get (): Func<TraceItem[], JS.Promise<unit> option> option = jsNative
+        and set (_: Func<TraceItem[], JS.Promise<unit> option> option): unit = jsNative
 
-[<Interface>]
-type DurableObject2<'Env, 'Props> =
-    abstract __DURABLE_OBJECT_BRAND: unit
-    abstract ctx: DurableObjectState<'Props> with get, set
-    abstract env: 'Env with get, set
-    abstract alarm: Func<AlarmInvocationInfo option, JS.Promise<unit> option> option with get, set
-    abstract fetch: Func<Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, U2<JS.Promise<Response>, Response>> option with get, set
-    abstract connect: Func<Socket, JS.Promise<unit> option> option with get, set
-    abstract webSocketMessage: Func<WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option> option with get, set
-    abstract webSocketClose: Func<WebSocket, float, string, bool, JS.Promise<unit> option> option with get, set
-    abstract webSocketError: Func<WebSocket, obj, JS.Promise<unit> option> option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (ctx: DurableObjectState<'Props>, env: 'Env, ?alarm: Func<AlarmInvocationInfo option, JS.Promise<unit> option>, ?fetch: Func<Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, U2<JS.Promise<Response>, Response>>, ?connect: Func<Socket, JS.Promise<unit> option>, ?webSocketMessage: Func<WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option>, ?webSocketClose: Func<WebSocket, float, string, bool, JS.Promise<unit> option>, ?webSocketError: Func<WebSocket, obj, JS.Promise<unit> option>) : DurableObject2<'Env, 'Props> = jsNative
+[<Import("DurableObject", "cloudflare:workers"); AbstractClass>]
+type DurableObject2<'Env, 'Props> (ctx: DurableObjectState<obj>, env: 'Env) =
+    member _.__DURABLE_OBJECT_BRAND: unit = jsNative
+    member _.ctx
+        with get (): DurableObjectState<'Props> = jsNative
+        and set (_: DurableObjectState<'Props>): unit = jsNative
+    member _.env
+        with get (): 'Env = jsNative
+        and set (_: 'Env): unit = jsNative
+    member _.alarm
+        with get (): Func<AlarmInvocationInfo option, JS.Promise<unit> option> option = jsNative
+        and set (_: Func<AlarmInvocationInfo option, JS.Promise<unit> option> option): unit = jsNative
+    member _.fetch
+        with get (): Func<Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, U2<JS.Promise<Response>, Response>> option = jsNative
+        and set (_: Func<Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, U2<JS.Promise<Response>, Response>> option): unit = jsNative
+    member _.connect
+        with get (): Func<Socket, JS.Promise<unit> option> option = jsNative
+        and set (_: Func<Socket, JS.Promise<unit> option> option): unit = jsNative
+    member _.webSocketMessage
+        with get (): Func<WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option> option = jsNative
+        and set (_: Func<WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option> option): unit = jsNative
+    member _.webSocketClose
+        with get (): Func<WebSocket, float, string, bool, JS.Promise<unit> option> option = jsNative
+        and set (_: Func<WebSocket, float, string, bool, JS.Promise<unit> option> option): unit = jsNative
+    member _.webSocketError
+        with get (): Func<WebSocket, obj, JS.Promise<unit> option> option = jsNative
+        and set (_: Func<WebSocket, obj, JS.Promise<unit> option> option): unit = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type WorkflowDurationLabel =
@@ -26718,13 +26752,18 @@ type WorkflowStepRollbackOptionsRollbackCtxCtxConfig =
     [<ParamObject; Emit("$0")>]
     static member Create (?retries: obj, ?timeout: WorkflowSleepDuration, ?sensitive: string) : WorkflowStepRollbackOptionsRollbackCtxCtxConfig = jsNative
 
-type WorkflowStep =
+[<Import("WorkflowStep", "cloudflare:workers"); AbstractClass>]
+type WorkflowStep () =
     abstract ``do``<'T>: name: string * callback: Func<WorkflowStepDoCallbackCtx, JS.Promise<'T>> * ?rollbackOptions: obj -> JS.Promise<'T>
     abstract ``do``<'T>: name: string * config: WorkflowStepConfigWithDelayFunction * callback: Func<WorkflowDynamicDelayContextCtx, JS.Promise<'T>> * ?rollbackOptions: obj -> JS.Promise<'T>
     abstract ``do``<'T>: name: string * config: WorkflowStepConfigWithStaticDelay * callback: Func<WorkflowStepDoCallbackCtx, JS.Promise<'T>> * ?rollbackOptions: obj -> JS.Promise<'T>
     abstract ``do``<'T>: name: string * config: WorkflowStepConfig * callback: Func<WorkflowStepDoCallbackCtx, JS.Promise<'T>> * ?rollbackOptions: obj -> JS.Promise<'T>
-    abstract sleep: Func<string, WorkflowSleepDuration, JS.Promise<unit>> with get, set
-    abstract sleepUntil: Func<string, U2<float, JS.Date>, JS.Promise<unit>> with get, set
+    member _.sleep
+        with get (): Func<string, WorkflowSleepDuration, JS.Promise<unit>> = jsNative
+        and set (_: Func<string, WorkflowSleepDuration, JS.Promise<unit>>): unit = jsNative
+    member _.sleepUntil
+        with get (): Func<string, U2<float, JS.Date>, JS.Promise<unit>> = jsNative
+        and set (_: Func<string, U2<float, JS.Date>, JS.Promise<unit>>): unit = jsNative
     abstract waitForEvent: name: string * options: WorkflowStepWaitForEventOptions -> JS.Promise<obj>
 
 [<Interface>]
@@ -26848,14 +26887,16 @@ type WorkflowInstanceStatus =
     | [<CompiledName("waiting")>] Waiting
     | [<CompiledName("waitingForPause")>] WaitingForPause
 
-[<Interface>]
-type WorkflowEntrypoint<'Env, 'T> =
-    abstract __WORKFLOW_ENTRYPOINT_BRAND: unit
-    abstract ctx: ExecutionContext<obj> with get, set
-    abstract env: 'Env with get, set
+[<Import("WorkflowEntrypoint", "cloudflare:workers"); AbstractClass>]
+type WorkflowEntrypoint<'Env, 'T> (ctx: ExecutionContext<obj>, env: 'Env) =
+    member _.__WORKFLOW_ENTRYPOINT_BRAND: unit = jsNative
+    member _.ctx
+        with get (): ExecutionContext<obj> = jsNative
+        and set (_: ExecutionContext<obj>): unit = jsNative
+    member _.env
+        with get (): 'Env = jsNative
+        and set (_: 'Env): unit = jsNative
     abstract run: ``event``: WorkflowEntrypointRunEvent * step: WorkflowStep -> JS.Promise<obj>
-    [<ParamObject; Emit("$0")>]
-    static member Create (ctx: ExecutionContext<obj>, env: 'Env, run: Func<WorkflowEntrypointRunEvent, WorkflowStep, JS.Promise<obj>>) : WorkflowEntrypoint<'Env, 'T> = jsNative
 
 [<Interface>]
 type WorkflowEntrypointRunEvent =
@@ -28399,14 +28440,20 @@ type DispatchNamespaceGetArgs =
 /// NonRetryableError allows for a user to throw a fatal error
 /// that makes a Workflow instance fail immediately without triggering a retry
 /// </summary>
-[<Interface>]
-type NonRetryableError =
-    abstract name: string with get, set
-    abstract message: string with get, set
-    abstract stack: string option with get, set
-    abstract cause: obj option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (name: string, message: string, ?stack: string, ?cause: obj) : NonRetryableError = jsNative
+[<Import("NonRetryableError", "cloudflare:workflows"); AbstractClass>]
+type NonRetryableError (message: string, ?name: string) =
+    member _.name
+        with get (): string = jsNative
+        and set (_: string): unit = jsNative
+    member _.message
+        with get (): string = jsNative
+        and set (_: string): unit = jsNative
+    member _.stack
+        with get (): string option = jsNative
+        and set (_: string option): unit = jsNative
+    member _.cause
+        with get (): obj option = jsNative
+        and set (_: obj option): unit = jsNative
     /// <summary>
     /// Indicates whether the argument provided is a built-in Error instance or not.
     /// </summary>

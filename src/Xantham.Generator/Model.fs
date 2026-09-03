@@ -594,6 +594,9 @@ type ResolvedSignature =
         /// The signature's own type parameters (§4.9). A generic *function* carries them here
         /// rather than on its type, which is where a callback alias's `T` lives.
         TypeParameters: int list
+        /// A construct signature of an `abstract class`, which TypeScript refuses `new` on. It
+        /// marks the class as one written to be derived from (§4.4).
+        IsAbstract: bool
         ReturnTypeId: int
     }
 
@@ -868,6 +871,19 @@ type FsExportMember =
         Settable: bool
     }
 
+/// What makes a declaration an F# *class* rather than an interface (§4.4): the import that binds
+/// the JavaScript constructor and the parameters a derived class passes to it. An F# interface
+/// admits no `inherit`, so a TypeScript class written to be derived from - an entrypoint an
+/// ambient module exports - reaches F# only in this form.
+type FsEntrypoint =
+    {
+        /// The specifier and name the constructor is imported under, carried at the type level so
+        /// that Fable's `super(...)` reaches it.
+        Binding: ImportBinding
+        /// The primary constructor's parameters, from the class's first construct signature.
+        Parameters: FsParam list
+    }
+
 type FsInterfaceDecl =
     {
         Name: string
@@ -878,6 +894,9 @@ type FsInterfaceDecl =
         /// Base interfaces (`extends`, or a class base) - rendered as `inherit` lines.
         Inherits: FsTypeRef list
         Members: FsMember list
+        /// Present where the declaration renders as an `[<AbstractClass>]` a consumer inherits;
+        /// `None` where it renders as an `[<Interface>]`.
+        Entrypoint: FsEntrypoint option
         /// `[<ParamObject; Emit("$0")>]` Create overloads for plain-data interfaces (D3) -
         /// parameter lists mirroring the members, so consumers never hand-build objects.
         CreateOverloads: FsParam list list
