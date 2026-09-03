@@ -1,4 +1,4 @@
-/// `xantham` - the command line over the generator. Every command is a shell over a library
+﻿/// `xantham` - the command line over the generator. Every command is a shell over a library
 /// function the test harness calls as well: `generate` is `Pipeline.run`, `schema` is
 /// `Schema.json`.
 module Xantham.Cli.Program
@@ -105,21 +105,7 @@ let private loadConfig (options: GenerateOptions) =
     | None -> GeneratorConfig.load options.PackageDir
     | Some path when Directory.Exists path -> GeneratorConfig.load path
     | Some path when not (File.Exists path) -> failwith $"no configuration at {path}"
-    | Some path when Path.GetFileName path = "xantham.json" ->
-        GeneratorConfig.load (Path.GetDirectoryName(Path.GetFullPath path))
-    | Some path ->
-        // `GeneratorConfig.load` is addressed by directory, so a file under another name is read
-        // through a temporary directory holding it as `xantham.json`.
-        let staged =
-            Path.Combine(Path.GetTempPath(), "xantham-config-" + Guid.NewGuid().ToString "N")
-
-        Directory.CreateDirectory staged |> ignore
-
-        try
-            File.Copy(path, Path.Combine(staged, "xantham.json"))
-            GeneratorConfig.load staged
-        finally
-            Directory.Delete(staged, true)
+    | Some path -> GeneratorConfig.loadFile path
 
 /// The findings a run raised, in the manifest's own vocabulary: the four tiers, then the count
 /// of each finding key, commonest first.

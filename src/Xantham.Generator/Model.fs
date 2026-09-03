@@ -131,11 +131,9 @@ module GeneratorConfig =
             | _ -> failwith $"xantham.json: group {key} is an object, so its one key is \"map\""
         | _ -> failwith $"xantham.json: group {key} is neither a disposition nor a mapped group"
 
-    /// Loads `<packageDir>/xantham.json`, tolerating comments and trailing commas (the file is
-    /// authored by hand). A missing file is the default configuration, not an error.
-    let load (packageDir: string) : GeneratorConfig =
-        let path = Path.Combine(packageDir, "xantham.json")
-
+    /// Loads a configuration file, tolerating comments and trailing commas (the file is authored
+    /// by hand). A missing file is the default configuration, not an error.
+    let loadFile (path: string) : GeneratorConfig =
         if not (File.Exists path) then
             GeneratorConfig.Default
         else
@@ -174,6 +172,10 @@ module GeneratorConfig =
                 Lib = lib
                 RuntimePackage = field "runtime"
             }
+
+    /// Loads `<packageDir>/xantham.json`.
+    let load (packageDir: string) : GeneratorConfig =
+        loadFile (Path.Combine(packageDir, "xantham.json"))
 
     /// The npm package a binding's imports name at runtime, derived from the package the
     /// declarations were generated from.
