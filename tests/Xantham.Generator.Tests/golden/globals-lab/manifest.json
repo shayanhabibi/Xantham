@@ -41,6 +41,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "MB.OptionalMemberAsOption",
           "key": "MB003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -48,6 +49,7 @@
           "message": "optional member reads as option"
         },
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -55,6 +57,7 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -69,6 +72,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -76,6 +80,7 @@
           "message": "ParamObject Create synthesized (D3)"
         },
         {
+          "name": "SP.MethodMemberAsCreateParameter",
           "key": "SP002",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -90,13 +95,18 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "RA.ReadWithoutWrite",
           "key": "RA005",
           "pass": "repair-arity",
           "tier": "ergonomic",
           "symbol": "Branded",
+          "fields": {
+            "name": "__brand"
+          },
           "message": "__brand reads but does not write: its type holds no value, and F# has no setter of type unit"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -111,6 +121,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "MB.IndexSignatureAsIndexer",
           "key": "MB004",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -118,10 +129,14 @@
           "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
         },
         {
+          "name": "SP.CreateNotSynthesized",
           "key": "SP003",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
           "symbol": "Loose",
+          "fields": {
+            "reason": "an index signature has no name to bind a parameter to"
+          },
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
       ]
@@ -132,6 +147,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -146,6 +162,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "MB.IndexSignatureAsIndexer",
           "key": "MB004",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -153,10 +170,14 @@
           "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
         },
         {
+          "name": "SP.CreateNotSynthesized",
           "key": "SP003",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
           "symbol": "BagLoose",
+          "fields": {
+            "reason": "an index signature has no name to bind a parameter to"
+          },
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
       ]
@@ -176,6 +197,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-exports",
           "tier": "ergonomic",
@@ -194,10 +216,15 @@
       "tier": "exact",
       "findings": [
         {
+          "name": "HG.AmbientModuleHarvested",
           "key": "HG004",
           "pass": "harvest-globals",
           "tier": "exact",
           "symbol": "\u0022globals-lab:extra\u0022",
+          "fields": {
+            "specifier": "globals-lab:extra",
+            "exports": 1
+          },
           "message": "1 exports harvested from ambient module \u0022globals-lab:extra\u0022; each binds with [\u003CImport(name, \u0022globals-lab:extra\u0022)\u003E]"
         }
       ]

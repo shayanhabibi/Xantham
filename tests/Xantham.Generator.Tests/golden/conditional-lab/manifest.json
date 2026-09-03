@@ -38,6 +38,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -52,13 +53,18 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SI.BaseInherited",
           "key": "SI005",
           "pass": "shape-interfaces",
           "tier": "exact",
           "symbol": "Tagged",
+          "fields": {
+            "name": "Marker"
+          },
           "message": "base Marker is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -73,10 +79,15 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "TR.ConditionalResolvedToBranch",
           "key": "TR046",
           "pass": "shape-aliases",
           "tier": "ergonomic",
           "symbol": "Proven",
+          "fields": {
+            "conditional": "Proven",
+            "branch": "true"
+          },
           "message": "Proven resolved to its true branch; the condition itself is not carried (\u00A74.11)"
         }
       ]
@@ -87,10 +98,15 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "TR.ConditionalResolvedToBranch",
           "key": "TR046",
           "pass": "shape-aliases",
           "tier": "ergonomic",
           "symbol": "Inhabited",
+          "fields": {
+            "conditional": "Inhabited",
+            "branch": "sole inhabited"
+          },
           "message": "Inhabited resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
         }
       ]
@@ -101,6 +117,7 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "SA.PhantomComputation",
           "key": "SA002",
           "pass": "shape-aliases",
           "tier": "widened",
@@ -108,10 +125,14 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
+          "name": "TR.ConditionalTypeDeferred",
           "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "Divergent",
+          "fields": {
+            "conditional": "Divergent"
+          },
           "message": "Divergent is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
@@ -122,6 +143,7 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "SA.PhantomComputation",
           "key": "SA002",
           "pass": "shape-aliases",
           "tier": "widened",
@@ -129,10 +151,14 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
+          "name": "TR.ConditionalTypeDeferred",
           "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "OrUndefined",
+          "fields": {
+            "conditional": "OrUndefined"
+          },
           "message": "OrUndefined is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
@@ -149,6 +175,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -162,10 +189,15 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "TR.ConditionalResolvedToBranch",
           "key": "TR046",
           "pass": "shape-exports",
           "tier": "ergonomic",
           "symbol": "proven(value)",
+          "fields": {
+            "conditional": "Proven",
+            "branch": "true"
+          },
           "message": "Proven resolved to its true branch; the condition itself is not carried (\u00A74.11)"
         }
       ]
@@ -175,10 +207,15 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "TR.ConditionalResolvedToBranch",
           "key": "TR046",
           "pass": "shape-exports",
           "tier": "ergonomic",
           "symbol": "inhabited(value)",
+          "fields": {
+            "conditional": "Inhabited",
+            "branch": "sole inhabited"
+          },
           "message": "Inhabited resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
         }
       ]
@@ -188,17 +225,25 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "TP.TypeParameterErased",
           "key": "TP006",
           "pass": "shape-exports",
           "tier": "widened",
           "symbol": "divergent",
+          "fields": {
+            "name": "T"
+          },
           "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
         },
         {
+          "name": "TR.ConditionalTypeDeferred",
           "key": "TR045",
           "pass": "shape-exports",
           "tier": "widened",
           "symbol": "divergent(value)",
+          "fields": {
+            "conditional": "Divergent"
+          },
           "message": "Divergent is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]

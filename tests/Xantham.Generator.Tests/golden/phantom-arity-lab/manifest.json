@@ -26,10 +26,14 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "RA.AliasKeptAsPhantom",
           "key": "RA006",
           "pass": "repair-arity",
           "tier": "widened",
           "symbol": "SurplusParameter",
+          "fields": {
+            "name": "SurplusParameter"
+          },
           "message": "SurplusParameter resolves to a target using fewer type parameters than its head; the surplus are erased phantoms"
         }
       ]
@@ -46,6 +50,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",

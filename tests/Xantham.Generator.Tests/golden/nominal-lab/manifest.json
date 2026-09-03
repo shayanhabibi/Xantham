@@ -33,6 +33,7 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "TR.StringLiteralToString",
           "key": "TR006",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -40,6 +41,7 @@
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -54,6 +56,7 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "TR.StringLiteralToString",
           "key": "TR006",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -61,6 +64,7 @@
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -75,6 +79,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "MB.IndexSignatureAsIndexer",
           "key": "MB004",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -82,10 +87,14 @@
           "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
         },
         {
+          "name": "SP.CreateNotSynthesized",
           "key": "SP003",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
           "symbol": "Narrow",
+          "fields": {
+            "reason": "an index signature has no name to bind a parameter to"
+          },
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
       ]
@@ -96,6 +105,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "MB.IndexSignatureAsIndexer",
           "key": "MB004",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -103,10 +113,14 @@
           "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
         },
         {
+          "name": "SP.CreateNotSynthesized",
           "key": "SP003",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
           "symbol": "Wide",
+          "fields": {
+            "reason": "an index signature has no name to bind a parameter to"
+          },
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
       ]
@@ -117,20 +131,31 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "TP.ConstraintNotProvenNominal",
           "key": "TP008",
           "pass": "shape-classes",
           "tier": "ergonomic",
           "symbol": "Geometry",
+          "fields": {
+            "name": "Attributes",
+            "bound": "Wide"
+          },
           "message": "constraint Wide on \u0027Attributes\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
+          "name": "TP.ConstraintNotProvenNominal",
           "key": "TP008",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Geometry",
+          "fields": {
+            "name": "Attributes",
+            "bound": "Wide"
+          },
           "message": "constraint Wide on \u0027Attributes\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -145,6 +170,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -159,13 +185,18 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SI.BaseInherited",
           "key": "SI005",
           "pass": "shape-interfaces",
           "tier": "exact",
           "symbol": "Derived",
+          "fields": {
+            "name": "Base"
+          },
           "message": "base Base is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",

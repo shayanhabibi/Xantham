@@ -32,6 +32,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -46,6 +47,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "MB.OptionalMemberAsOption",
           "key": "MB003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -53,6 +55,7 @@
           "message": "optional member reads as option"
         },
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -60,6 +63,7 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -74,13 +78,18 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SI.IntersectionFlattened",
           "key": "SI003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "NamedTimed",
+          "fields": {
+            "operands": 2
+          },
           "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
         },
         {
+          "name": "MB.OptionalMemberAsOption",
           "key": "MB003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -88,6 +97,7 @@
           "message": "optional member reads as option"
         },
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -95,6 +105,7 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -109,13 +120,18 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SI.IntersectionFlattened",
           "key": "SI003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Extended",
+          "fields": {
+            "operands": 2
+          },
           "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -130,13 +146,18 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SI.IntersectionFlattened",
           "key": "SI003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "LabelTarget",
+          "fields": {
+            "operands": 2
+          },
           "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -151,13 +172,18 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SI.IntersectionFlattened",
           "key": "SI003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "WithValue",
+          "fields": {
+            "operands": 2
+          },
           "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -172,6 +198,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -186,6 +213,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -200,13 +228,18 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SI.IntersectionFlattened",
           "key": "SI003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "LoudPitched",
+          "fields": {
+            "operands": 2
+          },
           "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -221,13 +254,18 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "SI.IntersectionFlattened",
           "key": "SI003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Bag",
+          "fields": {
+            "operands": 2
+          },
           "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
         },
         {
+          "name": "MB.IndexSignatureAsIndexer",
           "key": "MB004",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -235,6 +273,7 @@
           "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
         },
         {
+          "name": "TR.UnknownToObj",
           "key": "TR009",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -242,10 +281,14 @@
           "message": "unknown maps to obj (D8)"
         },
         {
+          "name": "SP.CreateNotSynthesized",
           "key": "SP003",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
           "symbol": "Bag",
+          "fields": {
+            "reason": "an index signature has no name to bind a parameter to"
+          },
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
       ]
@@ -256,13 +299,18 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SI.IntersectionFlattened",
           "key": "SI003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Loose",
+          "fields": {
+            "operands": 2
+          },
           "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
         },
         {
+          "name": "MB.OptionalMemberAsOption",
           "key": "MB003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -270,6 +318,7 @@
           "message": "optional member reads as option"
         },
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -277,6 +326,7 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "name": "MB.OptionalMemberAsOption",
           "key": "MB003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -284,6 +334,7 @@
           "message": "optional member reads as option"
         },
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -291,6 +342,7 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -305,6 +357,7 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "SI.HybridLosesCallSignatures",
           "key": "SI001",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -312,13 +365,18 @@
           "message": "callable-and-properties hybrid loses its call signatures (Invoke emission is future work)"
         },
         {
+          "name": "SI.IntersectionFlattened",
           "key": "SI003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Cancelable",
+          "fields": {
+            "operands": 2
+          },
           "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -326,6 +384,7 @@
           "message": "ParamObject Create synthesized (D3)"
         },
         {
+          "name": "SP.MethodMemberAsCreateParameter",
           "key": "SP002",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -344,6 +403,7 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "TR.IntersectionOverNonObject",
           "key": "TR018",
           "pass": "shape-exports",
           "tier": "widened",

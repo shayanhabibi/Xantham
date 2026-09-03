@@ -32,6 +32,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -46,6 +47,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -66,6 +68,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -80,13 +83,18 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SI.BaseInherited",
           "key": "SI005",
           "pass": "shape-interfaces",
           "tier": "exact",
           "symbol": "Circle",
+          "fields": {
+            "name": "Shape"
+          },
           "message": "base Shape is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -101,6 +109,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SC.StaticSettable",
           "key": "SC006",
           "pass": "shape-classes",
           "tier": "exact",
@@ -108,6 +117,7 @@
           "message": "settable static emitted with a setter"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -122,6 +132,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -129,6 +140,7 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -143,6 +155,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -150,6 +163,7 @@
           "message": "ParamObject Create synthesized (D3)"
         },
         {
+          "name": "SP.MethodMemberAsCreateParameter",
           "key": "SP002",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",

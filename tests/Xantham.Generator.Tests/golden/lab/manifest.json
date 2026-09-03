@@ -70,6 +70,7 @@
       "tier": "exact",
       "findings": [
         {
+          "name": "LU.NonStringLiteralCase",
           "key": "LU001",
           "pass": "classify-literal-unions",
           "tier": "exact",
@@ -77,6 +78,7 @@
           "message": "non-string literal case carries CompiledValue (D12)"
         },
         {
+          "name": "LU.NonStringLiteralCase",
           "key": "LU001",
           "pass": "classify-literal-unions",
           "tier": "exact",
@@ -91,6 +93,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-callbacks",
           "tier": "ergonomic",
@@ -105,6 +108,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "MB.OptionalMemberAsOption",
           "key": "MB003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -112,6 +116,7 @@
           "message": "optional member reads as option"
         },
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -119,6 +124,7 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "name": "MB.OptionalMemberAsOption",
           "key": "MB003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -126,6 +132,7 @@
           "message": "optional member reads as option"
         },
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -133,6 +140,7 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "name": "MB.OptionalMemberAsOption",
           "key": "MB003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -140,6 +148,7 @@
           "message": "optional member reads as option"
         },
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -147,6 +156,7 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -161,6 +171,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-classes",
           "tier": "ergonomic",
@@ -168,6 +179,7 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -175,6 +187,7 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -182,6 +195,7 @@
           "message": "ParamObject Create synthesized (D3)"
         },
         {
+          "name": "SP.MethodMemberAsCreateParameter",
           "key": "SP002",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -189,6 +203,7 @@
           "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         },
         {
+          "name": "SP.MethodMemberAsCreateParameter",
           "key": "SP002",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -196,6 +211,7 @@
           "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         },
         {
+          "name": "SP.MethodMemberAsCreateParameter",
           "key": "SP002",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -210,6 +226,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "MB.OptionalMemberAsOption",
           "key": "MB003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -217,6 +234,7 @@
           "message": "optional member reads as option"
         },
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -224,6 +242,7 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -250,6 +269,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-aliases",
           "tier": "ergonomic",
@@ -264,6 +284,7 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "TR.TupleRestToArray",
           "key": "TR028",
           "pass": "shape-aliases",
           "tier": "widened",
@@ -290,10 +311,15 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "TR.UnionTooWide",
           "key": "TR036",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "Anything",
+          "fields": {
+            "arms": 5,
+            "cap": 4
+          },
           "message": "union of 5 distinct types widened to obj (D4 caps the erased union at 4)"
         }
       ]
@@ -304,6 +330,7 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "TR.StringLiteralToString",
           "key": "TR006",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -311,6 +338,7 @@
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -325,6 +353,7 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "TR.StringLiteralToString",
           "key": "TR006",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -332,6 +361,7 @@
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -346,10 +376,14 @@
       "tier": "exact",
       "findings": [
         {
+          "name": "DT.TaggedUnion",
           "key": "DT002",
           "pass": "detect-tagged-unions",
           "tier": "exact",
           "symbol": "Shape",
+          "fields": {
+            "tag": "kind"
+          },
           "message": "discriminated union on \u0027kind\u0027 (D4)"
         }
       ]
@@ -360,6 +394,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -367,6 +402,7 @@
           "message": "ParamObject Create synthesized (D3)"
         },
         {
+          "name": "SP.MethodMemberAsCreateParameter",
           "key": "SP002",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -387,6 +423,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -401,13 +438,18 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "TP.ConstraintDropped",
           "key": "TP002",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Keyed",
+          "fields": {
+            "name": "K"
+          },
           "message": "constraint on \u0027K\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -428,6 +470,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -441,6 +484,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-exports",
           "tier": "ergonomic",

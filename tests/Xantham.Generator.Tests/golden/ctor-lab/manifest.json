@@ -26,6 +26,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -33,6 +34,7 @@
           "message": "ParamObject Create synthesized (D3)"
         },
         {
+          "name": "SP.MethodMemberAsCreateParameter",
           "key": "SP002",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -47,10 +49,14 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SI.ConstructorObjectDeclared",
           "key": "SI004",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "WidgetConstructor",
+          "fields": {
+            "signatures": 1
+          },
           "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
         }
       ]
@@ -61,6 +67,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -75,10 +82,14 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SI.ConstructorObjectDeclared",
           "key": "SI004",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "GaugeConstructor",
+          "fields": {
+            "signatures": 1
+          },
           "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
         }
       ]
@@ -89,6 +100,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -103,10 +115,14 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SI.ConstructorObjectDeclared",
           "key": "SI004",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "ParcelFactory",
+          "fields": {
+            "signatures": 2
+          },
           "message": "constructor object declared as its own interface; 2 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
         }
       ]
@@ -117,6 +133,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -131,6 +148,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -138,6 +156,7 @@
           "message": "ParamObject Create synthesized (D3)"
         },
         {
+          "name": "SP.MethodMemberAsCreateParameter",
           "key": "SP002",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -152,6 +171,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",

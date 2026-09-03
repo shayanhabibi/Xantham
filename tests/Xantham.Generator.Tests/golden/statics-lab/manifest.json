@@ -32,6 +32,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SC.StaticSettable",
           "key": "SC006",
           "pass": "shape-classes",
           "tier": "exact",
@@ -39,6 +40,7 @@
           "message": "settable static emitted with a setter"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -46,6 +48,7 @@
           "message": "ParamObject Create synthesized (D3)"
         },
         {
+          "name": "SP.MethodMemberAsCreateParameter",
           "key": "SP002",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -60,6 +63,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SC.StaticSettable",
           "key": "SC006",
           "pass": "shape-classes",
           "tier": "exact",
@@ -67,13 +71,18 @@
           "message": "settable static emitted with a setter"
         },
         {
+          "name": "SI.BaseInherited",
           "key": "SI005",
           "pass": "shape-interfaces",
           "tier": "exact",
           "symbol": "Doubling",
+          "fields": {
+            "name": "Counter"
+          },
           "message": "base Counter is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -81,6 +90,7 @@
           "message": "ParamObject Create synthesized (D3)"
         },
         {
+          "name": "SP.MethodMemberAsCreateParameter",
           "key": "SP002",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -88,6 +98,7 @@
           "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         },
         {
+          "name": "SP.MethodMemberAsCreateParameter",
           "key": "SP002",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -102,6 +113,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -116,6 +128,7 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "SC.StaticMemberDropped",
           "key": "SC002",
           "pass": "shape-classes",
           "tier": "widened",
@@ -123,6 +136,7 @@
           "message": "static member dropped: its name is an instance member\u0027s, which F# admits only between two methods"
         },
         {
+          "name": "SC.StaticMemberDropped",
           "key": "SC002",
           "pass": "shape-classes",
           "tier": "widened",
@@ -130,6 +144,7 @@
           "message": "static member dropped: its name is an instance member\u0027s, which F# admits only between two methods"
         },
         {
+          "name": "SC.StaticMemberDropped",
           "key": "SC002",
           "pass": "shape-classes",
           "tier": "widened",
@@ -137,6 +152,7 @@
           "message": "static member dropped: its name is an instance member\u0027s, which F# admits only between two methods"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -144,6 +160,7 @@
           "message": "ParamObject Create synthesized (D3)"
         },
         {
+          "name": "SP.MethodMemberAsCreateParameter",
           "key": "SP002",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -151,6 +168,7 @@
           "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         },
         {
+          "name": "SP.MethodMemberAsCreateParameter",
           "key": "SP002",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",

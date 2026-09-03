@@ -26,6 +26,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -49,10 +50,14 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SE.RuntimeSpecifierDerived",
           "key": "SE002",
           "pass": "shape-exports",
           "tier": "ergonomic",
           "symbol": "\u003Cmodule\u003E",
+          "fields": {
+            "specifier": "types-only-lab"
+          },
           "message": "types-only package has no runtime; imports bind to types-only-lab, derived rather than configured"
         }
       ]

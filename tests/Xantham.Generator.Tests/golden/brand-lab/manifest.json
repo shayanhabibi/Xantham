@@ -37,6 +37,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SA.BrandAsMeasure",
           "key": "SA001",
           "pass": "shape-aliases",
           "tier": "ergonomic",
@@ -51,6 +52,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SA.BrandAsMeasure",
           "key": "SA001",
           "pass": "shape-aliases",
           "tier": "ergonomic",
@@ -65,6 +67,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SA.BrandAsMeasure",
           "key": "SA001",
           "pass": "shape-aliases",
           "tier": "ergonomic",
@@ -79,6 +82,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SA.BrandAsMeasure",
           "key": "SA001",
           "pass": "shape-aliases",
           "tier": "ergonomic",
@@ -93,6 +97,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SA.BrandAsMeasure",
           "key": "SA001",
           "pass": "shape-aliases",
           "tier": "ergonomic",
@@ -107,6 +112,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SA.BrandAsMeasure",
           "key": "SA001",
           "pass": "shape-aliases",
           "tier": "ergonomic",
@@ -121,6 +127,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SA.BrandAsMeasure",
           "key": "SA001",
           "pass": "shape-aliases",
           "tier": "ergonomic",
@@ -135,6 +142,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -142,6 +150,7 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -149,6 +158,7 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -156,6 +166,7 @@
           "message": "ParamObject Create synthesized (D3)"
         },
         {
+          "name": "SP.MethodMemberAsCreateParameter",
           "key": "SP002",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -163,6 +174,7 @@
           "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         },
         {
+          "name": "SP.MethodMemberAsCreateParameter",
           "key": "SP002",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -170,6 +182,7 @@
           "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         },
         {
+          "name": "SP.MethodMemberAsCreateParameter",
           "key": "SP002",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -177,6 +190,7 @@
           "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         },
         {
+          "name": "SP.MethodMemberAsCreateParameter",
           "key": "SP002",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -191,13 +205,18 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SI.IntersectionFlattened",
           "key": "SI003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Merged",
+          "fields": {
+            "operands": 2
+          },
           "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -212,6 +231,7 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "TR.IntersectionOverNonObject",
           "key": "TR018",
           "pass": "shape-aliases",
           "tier": "widened",
@@ -226,13 +246,18 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SI.IntersectionFlattened",
           "key": "SI003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Wrapped",
+          "fields": {
+            "operands": 2
+          },
           "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -246,6 +271,7 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "TR.UniqueSymbolNoBinding",
           "key": "TR042",
           "pass": "shape-exports",
           "tier": "widened",

@@ -47,27 +47,40 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "RA.AliasKeptAsPhantom",
           "key": "RA006",
           "pass": "repair-arity",
           "tier": "widened",
           "symbol": "Setter",
+          "fields": {
+            "name": "Setter"
+          },
           "message": "Setter resolves to a target using fewer type parameters than its head; the surplus are erased phantoms"
         },
         {
+          "name": "TP.ConstraintDropped",
           "key": "TP002",
           "pass": "shape-callbacks",
           "tier": "ergonomic",
           "symbol": "Setter",
+          "fields": {
+            "name": "U"
+          },
           "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
+          "name": "TP.ConstraintDropped",
           "key": "TP002",
           "pass": "shape-callbacks",
           "tier": "ergonomic",
           "symbol": "Setter",
+          "fields": {
+            "name": "U"
+          },
           "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
+          "name": "TP.GenericFunctionHoisted",
           "key": "TP003",
           "pass": "shape-callbacks",
           "tier": "ergonomic",
@@ -75,38 +88,59 @@
           "message": "generic function type hoisted onto the alias; F# has no rank-2 form (\u00A74.9)"
         },
         {
+          "name": "TP.TypeParameterErased",
           "key": "TP006",
           "pass": "shape-callbacks",
           "tier": "widened",
           "symbol": "Setter",
+          "fields": {
+            "name": "U"
+          },
           "message": "type parameter \u0027U\u0027 is erased: every use of it widened away"
         },
         {
+          "name": "TP.DuplicateTypeParameterCollapsed",
           "key": "TP009",
           "pass": "shape-callbacks",
           "tier": "ergonomic",
           "symbol": "Setter",
+          "fields": {
+            "name": "U",
+            "declared": 3
+          },
           "message": "\u0027U\u0027 is declared by 3 signatures of the same alias; the head writes one variable"
         },
         {
+          "name": "TR.CallbackOverloadsFromFirst",
           "key": "TR031",
           "pass": "shape-callbacks",
           "tier": "widened",
           "symbol": "Setter",
+          "fields": {
+            "overloads": 3
+          },
           "message": "callback with 3 overloads shaped from the first"
         },
         {
+          "name": "TR.ConditionalTypeDeferred",
           "key": "TR045",
           "pass": "shape-callbacks",
           "tier": "widened",
           "symbol": "Setter()",
+          "fields": {
+            "conditional": "an inline conditional"
+          },
           "message": "an inline conditional is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         },
         {
+          "name": "TR.ConditionalTypeDeferred",
           "key": "TR045",
           "pass": "shape-callbacks",
           "tier": "widened",
           "symbol": "Setter(args)",
+          "fields": {
+            "conditional": "an inline conditional"
+          },
           "message": "an inline conditional is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
@@ -117,34 +151,51 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "RA.AliasKeptAsPhantom",
           "key": "RA006",
           "pass": "repair-arity",
           "tier": "widened",
           "symbol": "Distinct",
+          "fields": {
+            "name": "Distinct"
+          },
           "message": "Distinct resolves to a target using fewer type parameters than its head; the surplus are erased phantoms"
         },
         {
+          "name": "TP.ConstraintDropped",
           "key": "TP002",
           "pass": "shape-callbacks",
           "tier": "ergonomic",
           "symbol": "Distinct",
+          "fields": {
+            "name": "A"
+          },
           "message": "constraint on \u0027A\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
+          "name": "TP.ConstraintDropped",
           "key": "TP002",
           "pass": "shape-callbacks",
           "tier": "ergonomic",
           "symbol": "Distinct",
+          "fields": {
+            "name": "A"
+          },
           "message": "constraint on \u0027A\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
+          "name": "TP.ConstraintDropped",
           "key": "TP002",
           "pass": "shape-callbacks",
           "tier": "ergonomic",
           "symbol": "Distinct",
+          "fields": {
+            "name": "B"
+          },
           "message": "constraint on \u0027B\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
+          "name": "TP.GenericFunctionHoisted",
           "key": "TP003",
           "pass": "shape-callbacks",
           "tier": "ergonomic",
@@ -152,10 +203,14 @@
           "message": "generic function type hoisted onto the alias; F# has no rank-2 form (\u00A74.9)"
         },
         {
+          "name": "TR.CallbackOverloadsFromFirst",
           "key": "TR031",
           "pass": "shape-callbacks",
           "tier": "widened",
           "symbol": "Distinct",
+          "fields": {
+            "overloads": 2
+          },
           "message": "callback with 2 overloads shaped from the first"
         }
       ]
@@ -166,27 +221,40 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "RA.AliasKeptAsPhantom",
           "key": "RA006",
           "pass": "repair-arity",
           "tier": "widened",
           "symbol": "Single",
+          "fields": {
+            "name": "Single"
+          },
           "message": "Single resolves to a target using fewer type parameters than its head; the surplus are erased phantoms"
         },
         {
+          "name": "TP.ConstraintDropped",
           "key": "TP002",
           "pass": "shape-callbacks",
           "tier": "ergonomic",
           "symbol": "Single",
+          "fields": {
+            "name": "U"
+          },
           "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
+          "name": "TP.ConstraintDropped",
           "key": "TP002",
           "pass": "shape-callbacks",
           "tier": "ergonomic",
           "symbol": "Single",
+          "fields": {
+            "name": "U"
+          },
           "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
+          "name": "TP.GenericFunctionHoisted",
           "key": "TP003",
           "pass": "shape-callbacks",
           "tier": "ergonomic",
@@ -201,13 +269,18 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "TR.CallbackOverloadsFromFirst",
           "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "Holder.distinct",
+          "fields": {
+            "overloads": 2
+          },
           "message": "callback with 2 overloads shaped from the first"
         },
         {
+          "name": "TR.TypeParameterOutOfScope",
           "key": "TR013",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -215,6 +288,7 @@
           "message": "type parameter is not in scope here; widened to obj"
         },
         {
+          "name": "TR.TypeParameterOutOfScope",
           "key": "TR013",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -222,13 +296,18 @@
           "message": "type parameter is not in scope here; widened to obj"
         },
         {
+          "name": "TR.CallbackOverloadsFromFirst",
           "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "Holder.divergent",
+          "fields": {
+            "overloads": 2
+          },
           "message": "callback with 2 overloads shaped from the first"
         },
         {
+          "name": "TR.TypeParameterOutOfScope",
           "key": "TR013",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -236,6 +315,7 @@
           "message": "type parameter is not in scope here; widened to obj"
         },
         {
+          "name": "TR.TypeParameterOutOfScope",
           "key": "TR013",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -243,20 +323,29 @@
           "message": "type parameter is not in scope here; widened to obj"
         },
         {
+          "name": "TR.CallbackOverloadsFromFirst",
           "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "Holder.optional",
+          "fields": {
+            "overloads": 3
+          },
           "message": "callback with 3 overloads shaped from the first"
         },
         {
+          "name": "TR.CallbackOverloadsFromFirst",
           "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "Holder.setter",
+          "fields": {
+            "overloads": 3
+          },
           "message": "callback with 3 overloads shaped from the first"
         },
         {
+          "name": "TR.TypeParameterOutOfScope",
           "key": "TR013",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -264,6 +353,7 @@
           "message": "type parameter is not in scope here; widened to obj"
         },
         {
+          "name": "TR.TypeParameterOutOfScope",
           "key": "TR013",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -271,6 +361,7 @@
           "message": "type parameter is not in scope here; widened to obj"
         },
         {
+          "name": "TR.UnionWithObjArm",
           "key": "TR035",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -278,6 +369,7 @@
           "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
+          "name": "TR.TypeParameterOutOfScope",
           "key": "TR013",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -285,6 +377,7 @@
           "message": "type parameter is not in scope here; widened to obj"
         },
         {
+          "name": "TR.TypeParameterOutOfScope",
           "key": "TR013",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -292,6 +385,7 @@
           "message": "type parameter is not in scope here; widened to obj"
         },
         {
+          "name": "TR.TypeParameterOutOfScope",
           "key": "TR013",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -299,6 +393,7 @@
           "message": "type parameter is not in scope here; widened to obj"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -312,10 +407,15 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "RT.FrontierNotResolved",
           "key": "RT001",
           "pass": "resolve-type-table",
           "tier": "widened",
           "symbol": "\u003Ctype-table\u003E",
+          "fields": {
+            "count": 2,
+            "depth": 12
+          },
           "message": "2 types not resolved: beyond the depth cutoff (12) - the frontier of instantiations still growing after that many generations"
         }
       ]
@@ -325,6 +425,7 @@
       "tier": "escape",
       "findings": [
         {
+          "name": "AC.ExportNotRepresented",
           "key": "AC001",
           "pass": "audit-coverage",
           "tier": "escape",
@@ -332,6 +433,7 @@
           "message": "export not represented in the generated output"
         },
         {
+          "name": "RA.GenericAliasDropped",
           "key": "RA001",
           "pass": "repair-arity",
           "tier": "widened",
@@ -339,27 +441,40 @@
           "message": "generic alias dropped: its target widened away every type parameter, and F# has no unused type variable in an abbreviation"
         },
         {
+          "name": "TP.ConstraintDropped",
           "key": "TP002",
           "pass": "shape-callbacks",
           "tier": "ergonomic",
           "symbol": "DivergentBound",
+          "fields": {
+            "name": "U"
+          },
           "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
+          "name": "TP.ConstraintDropped",
           "key": "TP002",
           "pass": "shape-callbacks",
           "tier": "ergonomic",
           "symbol": "DivergentBound",
+          "fields": {
+            "name": "U"
+          },
           "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
+          "name": "TP.ConstraintDropped",
           "key": "TP002",
           "pass": "shape-callbacks",
           "tier": "ergonomic",
           "symbol": "DivergentBound",
+          "fields": {
+            "name": "U"
+          },
           "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
+          "name": "TP.GenericFunctionHoisted",
           "key": "TP003",
           "pass": "shape-callbacks",
           "tier": "ergonomic",
@@ -367,10 +482,14 @@
           "message": "generic function type hoisted onto the alias; F# has no rank-2 form (\u00A74.9)"
         },
         {
+          "name": "TR.CallbackOverloadsFromFirst",
           "key": "TR031",
           "pass": "shape-callbacks",
           "tier": "widened",
           "symbol": "DivergentBound",
+          "fields": {
+            "overloads": 2
+          },
           "message": "callback with 2 overloads shaped from the first"
         }
       ]

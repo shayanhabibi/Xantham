@@ -28,6 +28,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -42,6 +43,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -56,6 +58,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -74,10 +77,14 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "GE.ShippedGroupWithoutDeclarations",
           "key": "GE002",
           "pass": "render-source",
           "tier": "widened",
           "symbol": "absent-lab",
+          "fields": {
+            "group": "absent-lab"
+          },
           "message": "absent-lab is configured ship and no reference reached it; the module is not written"
         }
       ]
@@ -87,10 +94,15 @@
       "tier": "exact",
       "findings": [
         {
+          "name": "GE.GroupShipped",
           "key": "GE001",
           "pass": "render-source",
           "tier": "exact",
           "symbol": "dep-lab",
+          "fields": {
+            "group": "dep-lab",
+            "declarations": 1
+          },
           "message": "dep-lab is shipped as its own module, carrying 1 declarations"
         }
       ]
@@ -100,10 +112,15 @@
       "tier": "escape",
       "findings": [
         {
+          "name": "GE.GroupModuleCollision",
           "key": "GE003",
           "pass": "render-source",
           "tier": "escape",
           "symbol": "dep_lab",
+          "fields": {
+            "group": "dep_lab",
+            "moduleName": "DepLab"
+          },
           "message": "dep_lab templates the module DepLab, which another group in this run already writes"
         }
       ]

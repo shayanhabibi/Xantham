@@ -29,6 +29,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -43,13 +44,18 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SI.BaseInherited",
           "key": "SI005",
           "pass": "shape-interfaces",
           "tier": "exact",
           "symbol": "Derived",
+          "fields": {
+            "name": "Base"
+          },
           "message": "base Base is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -64,13 +70,18 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "SI.BaseInherited",
           "key": "SI005",
           "pass": "shape-interfaces",
           "tier": "exact",
           "symbol": "Narrowed",
+          "fields": {
+            "name": "Base"
+          },
           "message": "base Base is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
+          "name": "TR.StringLiteralToString",
           "key": "TR006",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -78,6 +89,7 @@
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -92,6 +104,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -106,13 +119,18 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SI.BaseInherited",
           "key": "SI005",
           "pass": "shape-interfaces",
           "tier": "exact",
           "symbol": "Pitched",
+          "fields": {
+            "name": "Loud"
+          },
           "message": "base Loud is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -127,20 +145,29 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SI.BaseInherited",
           "key": "SI005",
           "pass": "shape-interfaces",
           "tier": "exact",
           "symbol": "Both",
+          "fields": {
+            "name": "Loud"
+          },
           "message": "base Loud is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
+          "name": "SI.BaseInherited",
           "key": "SI005",
           "pass": "shape-interfaces",
           "tier": "exact",
           "symbol": "Both",
+          "fields": {
+            "name": "Pitched"
+          },
           "message": "base Pitched is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -155,6 +182,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -169,13 +197,18 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SI.BaseInherited",
           "key": "SI005",
           "pass": "shape-interfaces",
           "tier": "exact",
           "symbol": "Labelled",
+          "fields": {
+            "name": "Box"
+          },
           "message": "base Box is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -190,13 +223,18 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SI.BaseInherited",
           "key": "SI005",
           "pass": "shape-interfaces",
           "tier": "exact",
           "symbol": "Tagged",
+          "fields": {
+            "name": "Box"
+          },
           "message": "base Box is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -211,6 +249,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -225,13 +264,18 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SI.BaseInherited",
           "key": "SI005",
           "pass": "shape-interfaces",
           "tier": "exact",
           "symbol": "Leaf",
+          "fields": {
+            "name": "Node"
+          },
           "message": "base Node is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -246,6 +290,7 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "SI.BaseMembersFlattened",
           "key": "SI002",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -253,6 +298,7 @@
           "message": "base has no F# name at this position; its members are flattened in and the is-a relation is not emitted (\u00A74.4)"
         },
         {
+          "name": "MB.OptionalMemberAsOption",
           "key": "MB003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -260,6 +306,7 @@
           "message": "optional member reads as option"
         },
         {
+          "name": "TR.UnknownToObj",
           "key": "TR009",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -267,6 +314,7 @@
           "message": "unknown maps to obj (D8)"
         },
         {
+          "name": "MB.OptionalMemberAsOption",
           "key": "MB003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -274,6 +322,7 @@
           "message": "optional member reads as option"
         },
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -281,6 +330,7 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -295,13 +345,18 @@
       "tier": "escape",
       "findings": [
         {
+          "name": "SI.BaseNotDeclaredHere",
           "key": "SI006",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Deferred",
+          "fields": {
+            "name": "JS.Promise"
+          },
           "message": "base JS.Promise is not declared by this run as an interface; its members are flattened in and the is-a relation is not emitted (\u00A74.4)"
         },
         {
+          "name": "MB.SymbolKeyedMemberDropped",
           "key": "MB002",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -309,6 +364,7 @@
           "message": "symbol-keyed member dropped (unrepresentable in F#)"
         },
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -316,13 +372,18 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "name": "TR.LibBindingLoss",
           "key": "TR025",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Deferred.catch(onrejected)()",
+          "fields": {
+            "note": "PromiseLike reads as JS.Promise; a bare thenable is not one"
+          },
           "message": "PromiseLike reads as JS.Promise; a bare thenable is not one"
         },
         {
+          "name": "TR.AnyToObj",
           "key": "TR008",
           "pass": "shape-interfaces",
           "tier": "escape",
@@ -330,6 +391,7 @@
           "message": "any maps to obj"
         },
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -337,6 +399,7 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -344,13 +407,18 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "name": "TR.LibBindingLoss",
           "key": "TR025",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Deferred.then(onfulfilled)()",
+          "fields": {
+            "note": "PromiseLike reads as JS.Promise; a bare thenable is not one"
+          },
           "message": "PromiseLike reads as JS.Promise; a bare thenable is not one"
         },
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -358,13 +426,18 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "name": "TR.LibBindingLoss",
           "key": "TR025",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Deferred.then(onrejected)()",
+          "fields": {
+            "note": "PromiseLike reads as JS.Promise; a bare thenable is not one"
+          },
           "message": "PromiseLike reads as JS.Promise; a bare thenable is not one"
         },
         {
+          "name": "TR.AnyToObj",
           "key": "TR008",
           "pass": "shape-interfaces",
           "tier": "escape",
@@ -372,6 +445,7 @@
           "message": "any maps to obj"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -379,6 +453,7 @@
           "message": "ParamObject Create synthesized (D3)"
         },
         {
+          "name": "SP.MethodMemberAsCreateParameter",
           "key": "SP002",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -386,6 +461,7 @@
           "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         },
         {
+          "name": "SP.MethodMemberAsCreateParameter",
           "key": "SP002",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -393,6 +469,7 @@
           "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         },
         {
+          "name": "SP.MethodMemberAsCreateParameter",
           "key": "SP002",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -407,13 +484,18 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SI.BaseInherited",
           "key": "SI005",
           "pass": "shape-interfaces",
           "tier": "exact",
           "symbol": "Slim",
+          "fields": {
+            "name": "SlimBase"
+          },
           "message": "base SlimBase is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
+          "name": "MB.OptionalMemberAsOption",
           "key": "MB003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -421,6 +503,7 @@
           "message": "optional member reads as option"
         },
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -428,6 +511,7 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "name": "MB.OptionalMemberAsOption",
           "key": "MB003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -435,6 +519,7 @@
           "message": "optional member reads as option"
         },
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -442,6 +527,7 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -456,6 +542,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "MB.OptionalMemberAsOption",
           "key": "MB003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -463,6 +550,7 @@
           "message": "optional member reads as option"
         },
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -470,6 +558,7 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "name": "MB.OptionalMemberAsOption",
           "key": "MB003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -477,6 +566,7 @@
           "message": "optional member reads as option"
         },
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -484,6 +574,7 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",

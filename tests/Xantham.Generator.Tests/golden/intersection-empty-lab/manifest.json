@@ -28,6 +28,7 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "TR.StringLiteralToString",
           "key": "TR006",
           "pass": "shape-aliases",
           "tier": "widened",
@@ -35,6 +36,7 @@
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
+          "name": "TR.StringLiteralToString",
           "key": "TR006",
           "pass": "shape-aliases",
           "tier": "widened",
@@ -42,6 +44,7 @@
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
+          "name": "TR.EmptyIntersectionOperandReduced",
           "key": "TR049",
           "pass": "shape-aliases",
           "tier": "exact",
@@ -56,6 +59,7 @@
       "tier": "exact",
       "findings": [
         {
+          "name": "TR.EmptyIntersectionOperandReduced",
           "key": "TR049",
           "pass": "shape-aliases",
           "tier": "exact",
@@ -70,6 +74,7 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "TR.StringLiteralToString",
           "key": "TR006",
           "pass": "shape-aliases",
           "tier": "widened",
@@ -77,6 +82,7 @@
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
+          "name": "TR.StringLiteralToString",
           "key": "TR006",
           "pass": "shape-aliases",
           "tier": "widened",
@@ -84,6 +90,7 @@
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
+          "name": "TR.EmptyIntersectionOperandReduced",
           "key": "TR049",
           "pass": "shape-aliases",
           "tier": "exact",
@@ -98,6 +105,7 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "TR.NumericLiteralToFloat",
           "key": "TR007",
           "pass": "shape-aliases",
           "tier": "widened",
@@ -105,6 +113,7 @@
           "message": "numeric literal type widened to float (doc-noted, \u00A74.2)"
         },
         {
+          "name": "TR.NumericLiteralToFloat",
           "key": "TR007",
           "pass": "shape-aliases",
           "tier": "widened",
@@ -112,6 +121,7 @@
           "message": "numeric literal type widened to float (doc-noted, \u00A74.2)"
         },
         {
+          "name": "TR.EmptyIntersectionOperandReduced",
           "key": "TR049",
           "pass": "shape-aliases",
           "tier": "exact",
@@ -126,6 +136,7 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "TR.IntersectionOverNonObject",
           "key": "TR018",
           "pass": "shape-aliases",
           "tier": "widened",
@@ -140,6 +151,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SA.BrandAsMeasure",
           "key": "SA001",
           "pass": "shape-aliases",
           "tier": "ergonomic",
@@ -154,6 +166,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",

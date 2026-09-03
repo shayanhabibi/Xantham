@@ -95,7 +95,8 @@ module Options =
 
     let findingsKey =
         Input.option<string> "--key"
-        |> Input.description "Report only this finding key, e.g. --key TR023."
+        |> Input.description
+            "Report only this finding, named or coded, e.g. --key TR023 or --key TR.NotAmongGeneratedDeclarations."
         |> Input.def ""
 
     let syncUpstream =
@@ -362,8 +363,12 @@ module Stages =
                                         match symbol.TryGetProperty "findings" with
                                         | true, findings -> findings.EnumerateArray() |> Seq.cast
                                         | _ -> Seq.empty<System.Text.Json.JsonElement>)
-                                    |> Seq.map (fun finding -> finding.GetProperty("key").GetString())
-                                    |> Seq.filter (fun found -> System.String.IsNullOrWhiteSpace key || found = key)
+                                    |> Seq.map (fun finding ->
+                                        finding.GetProperty("name").GetString(),
+                                        finding.GetProperty("key").GetString())
+                                    |> Seq.filter (fun (name, code) ->
+                                        System.String.IsNullOrWhiteSpace key || name = key || code = key)
+                                    |> Seq.map snd
                                     |> Seq.countBy id
                                     |> Seq.sortByDescending snd
                                     |> Seq.toList

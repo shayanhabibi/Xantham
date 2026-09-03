@@ -31,13 +31,19 @@
       "tier": "escape",
       "findings": [
         {
+          "name": "TR.ReferencedArityUnconfirmed",
           "key": "TR054",
           "pass": "shape-interfaces",
           "tier": "escape",
           "symbol": "Panel.boxed",
+          "fields": {
+            "name": "Box",
+            "given": 1
+          },
           "message": "Box is referenced with 1 type arguments against a group resolved by identity only; the arity is unverified"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -51,10 +57,15 @@
       "tier": "escape",
       "findings": [
         {
+          "name": "TR.ReferencedArityUnconfirmed",
           "key": "TR054",
           "pass": "shape-exports",
           "tier": "escape",
           "symbol": "mount()",
+          "fields": {
+            "name": "Box",
+            "given": 1
+          },
           "message": "Box is referenced with 1 type arguments against a group resolved by identity only; the arity is unverified"
         }
       ]

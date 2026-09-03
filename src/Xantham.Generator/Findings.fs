@@ -20,12 +20,17 @@ type Tier =
 
 // -------------------------------------------------------------------------------------------------
 // The finding catalogue. Every kind of finding the generator can raise is a case of one of the
-// unions below, grouped by the pass (or shared helper) that raises it. The manifest key is
-// derived, not written: the union's `Prefix` plus the case's 1-based declaration position, so
-// `SI001` is the first case of the `SI` union. That makes the catalogue exhaustive - a case
-// without a tier attribute fails at first use, a case without a key cannot exist - at the price
-// of one rule: **cases are append-only**. Inserting or reordering renumbers every key after the
-// edit; `Findings.test.fs` snapshots the table so that cannot happen silently.
+// unions below, grouped by the pass (or shared helper) that raises it. A finding carries two
+// identities into the manifest. Its **name** is the union's `Prefix` and the case's own name,
+// `TR.NullableHoistedToOption`: fixed by what the case is called, so it survives a case being
+// retired, and it is what a downstream consumer dispatches on. Its **key** is the numeric
+// `TR032`, kept for prose and for `--key` filters, and read from the committed table in
+// `FindingCodes` rather than from declaration position.
+//
+// A case therefore needs three things, and the catalogue is exhaustive in all three: a tier
+// attribute, whose absence fails at first use; a `Prefix` on its union; and a row in
+// `FindingCodes.table`, whose absence fails at first use and in `Findings.test.fs`. Cases stay
+// append-only by convention, but a reorder now moves nothing: keys follow names, not positions.
 // -------------------------------------------------------------------------------------------------
 
 /// The tier a finding case carries. Applied through the four sealed subclasses below, so the
@@ -66,8 +71,147 @@ type PrefixAttribute(prefix: string, pass: string) =
 type IFindingKind =
     abstract Message: string
 
-/// A finding union read once through reflection: prefix, tag reader and per-case tiers, cached
-/// per type. Reading is a dictionary hit and a tag read; the reflection happens once.
+/// The numeric code of every finding, keyed by the finding's name. Committed rather than derived
+/// from declaration position: a case retired, inserted or reordered leaves every other code where
+/// it is, so a code cited in prose survives any edit to the catalogue.
+///
+/// A new case needs a row here, and takes the next unused number under its prefix. A retired case
+/// keeps its row, so its number is never handed out twice. `Findings.test.fs` pins the table
+/// against the catalogue: a case with no row fails there, as does a moved code.
+module FindingCodes =
+    let table: (string * string) list =
+        [
+            "TR.SelfReferenceThroughUnnamed", "TR001"
+            "TR.TypeNotResolved", "TR002"
+            "TR.MissingFromTypeTable", "TR003"
+            "TR.LoneEnumMemberToFloat", "TR004"
+            "TR.LoneEnumMemberToString", "TR005"
+            "TR.StringLiteralToString", "TR006"
+            "TR.NumericLiteralToFloat", "TR007"
+            "TR.AnyToObj", "TR008"
+            "TR.UnknownToObj", "TR009"
+            "TR.PolymorphicThisAsDeclaringType", "TR010"
+            "TR.ThisOutsideDeclaration", "TR011"
+            "TR.TypeParameterOutOfScopeToConstraint", "TR012"
+            "TR.TypeParameterOutOfScope", "TR013"
+            "TR.TypeFlagsNotMapped", "TR014"
+            "TR.KeyOfOpenOperand", "TR015"
+            "TR.KeyOfOperandOutOfScope", "TR016"
+            "TR.UnnamedBrandToPrimitive", "TR017"
+            "TR.IntersectionOverNonObject", "TR018"
+            "TR.IntersectionNotDeclared", "TR019"
+            "TR.IndexedAccessNoForm", "TR020"
+            "TR.AnonymousInReferencedGroup", "TR021"
+            "TR.GlobalThisToObj", "TR022"
+            "TR.NotAmongGeneratedDeclarations", "TR023"
+            "TR.LibExtraTypeArgumentsDropped", "TR024"
+            "TR.LibBindingLoss", "TR025"
+            "TR.ConstrainedArgumentWidened", "TR026"
+            "TR.ArgumentNotBoundWithConstraint", "TR027"
+            "TR.TupleRestToArray", "TR028"
+            "TR.TupleArityNoForm", "TR029"
+            "TR.CallableWithoutSignatures", "TR030"
+            "TR.CallbackOverloadsFromFirst", "TR031"
+            "TR.NullableHoistedToOption", "TR032"
+            "TR.OnlyNullUndefinedToUnit", "TR033"
+            "TR.EmptyUnionToObj", "TR034"
+            "TR.UnionWithObjArm", "TR035"
+            "TR.UnionTooWide", "TR036"
+            "TR.TemplateLiteralToString", "TR037"
+            "TR.StringMappingToString", "TR038"
+            "TR.BigIntLiteralToBigInt", "TR039"
+            "TR.ObjectTypeToObj", "TR040"
+            "TR.SymbolNoBinding", "TR041"
+            "TR.UniqueSymbolNoBinding", "TR042"
+            "TR.ConstructorObjectNotDeclared", "TR043"
+            "TR.ArgumentNotASubtypeOfConstraint", "TR044"
+            "TR.ConditionalTypeDeferred", "TR045"
+            "TR.ConditionalResolvedToBranch", "TR046"
+            "TR.ObjectWithoutMembers", "TR047"
+            "TR.ArrayIntersectionMembersDropped", "TR048"
+            "TR.EmptyIntersectionOperandReduced", "TR049"
+            "TR.IntersectionCallableFlattened", "TR050"
+            "TR.IntersectionOperandsIdentical", "TR051"
+            "TR.AnonymousInMappedGroup", "TR052"
+            "TR.MappedNameArityMismatch", "TR053"
+            "TR.ReferencedArityUnconfirmed", "TR054"
+            "TP.UnnamedTypeParameter", "TP001"
+            "TP.ConstraintDropped", "TP002"
+            "TP.GenericFunctionHoisted", "TP003"
+            "TP.KeyWithIndexedAccess", "TP004"
+            "TP.KeyOverOperand", "TP005"
+            "TP.TypeParameterErased", "TP006"
+            "TP.UnnamedTypeParametersCounted", "TP007"
+            "TP.ConstraintNotProvenNominal", "TP008"
+            "TP.DuplicateTypeParameterCollapsed", "TP009"
+            "MB.OptionalParameterAsOption", "MB001"
+            "MB.SymbolKeyedMemberDropped", "MB002"
+            "MB.OptionalMemberAsOption", "MB003"
+            "MB.IndexSignatureAsIndexer", "MB004"
+            "HG.AmbientModuleDropped", "HG001"
+            "HG.UnwritableGlobalDropped", "HG002"
+            "HG.NothingHarvested", "HG003"
+            "HG.AmbientModuleHarvested", "HG004"
+            "HG.AmbientModuleWildcard", "HG005"
+            "HG.NamespaceIsModuleBody", "HG006"
+            "RE.FacetNotResolved", "RE001"
+            "RT.FrontierNotResolved", "RT001"
+            "RT.TypeNotResolved", "RT002"
+            "LU.NonStringLiteralCase", "LU001"
+            "DT.ArmNotPlainData", "DT001"
+            "DT.TaggedUnion", "DT002"
+            "SY.InstantiationNamedOnce", "SY001"
+            "SY.HoistArgumentsNotRecovered", "SY002"
+            "SY.IntersectionOperandNotHoisted", "SY003"
+            "SI.HybridLosesCallSignatures", "SI001"
+            "SI.BaseMembersFlattened", "SI002"
+            "SI.IntersectionFlattened", "SI003"
+            "SI.ConstructorObjectDeclared", "SI004"
+            "SI.BaseInherited", "SI005"
+            "SI.BaseNotDeclaredHere", "SI006"
+            "SI.BaseWouldCycle", "SI007"
+            "SA.BrandAsMeasure", "SA001"
+            "SA.PhantomComputation", "SA002"
+            "SA.AbbreviationNameTaken", "SA003"
+            "SC.ClassWithoutValueType", "SC001"
+            "SC.StaticMemberDropped", "SC002"
+            "SC.StaticReadOnly", "SC003"
+            "SC.StaticWithoutDeclaration", "SC004"
+            "SC.StaticMethodWithoutSignatures", "SC005"
+            "SC.StaticSettable", "SC006"
+            "SC.EntrypointClassEmitted", "SC007"
+            "SC.EntrypointClassRefused", "SC008"
+            "SE.NoValueType", "SE001"
+            "SE.RuntimeSpecifierDerived", "SE002"
+            "SE.MutableValueReadOnly", "SE003"
+            "SP.ParamObjectSynthesized", "SP001"
+            "SP.MethodMemberAsCreateParameter", "SP002"
+            "SP.CreateNotSynthesized", "SP003"
+            "DO.OverloadDropped", "DO001"
+            "RA.GenericAliasDropped", "RA001"
+            "RA.ReferenceToDroppedAlias", "RA002"
+            "RA.GenericWithoutArguments", "RA003"
+            "RA.ArityMismatch", "RA004"
+            "RA.ReadWithoutWrite", "RA005"
+            "RA.AliasKeptAsPhantom", "RA006"
+            "AC.ExportNotRepresented", "AC001"
+            "GE.GroupShipped", "GE001"
+            "GE.ShippedGroupWithoutDeclarations", "GE002"
+            "GE.GroupModuleCollision", "GE003"
+            "GE.GroupModuleFromNamespace", "GE004"
+        ]
+
+    let private byName = Map.ofList table
+
+    /// The numeric code of a finding key.
+    let codeOf (name: string) : string =
+        match Map.tryFind name byName with
+        | Some code -> code
+        | None -> failwith $"finding case {name} carries no numeric code; add a row to FindingCodes.table"
+
+/// A finding union read once through reflection: prefix, tag reader, per-case tiers and per-case
+/// payload readers, cached per type. Reading is a dictionary hit and a tag read; the reflection
+/// happens once.
 type Coder =
     {
         Prefix: string
@@ -76,6 +220,10 @@ type Coder =
         Tag: obj -> int
         Tiers: Tier[]
         Names: string[]
+        /// Per case, in declaration order: the declared name of each field, and the reader that
+        /// lifts a value's fields out in the same order. Both arrays are empty for a case
+        /// without a payload.
+        Fields: (string[] * (obj -> obj[]))[]
     }
 
 module Coder =
@@ -101,19 +249,28 @@ module Coder =
 
         let reader = FSharpValue.PreComputeUnionTagReader(kindType, true)
 
+        let fields =
+            cases
+            |> Array.map (fun case ->
+                case.GetFields() |> Array.map _.Name, FSharpValue.PreComputeUnionReader(case, true))
+
         {
             Prefix = prefix
             Pass = pass
             Tag = reader
             Tiers = tiers
             Names = cases |> Array.map _.Name
+            Fields = fields
         }
 
     /// The coder for a finding union, computed on first use.
     let forType (kindType: Type) : Coder = cache.GetOrAdd(kindType, precompute)
 
-    /// The manifest key of a case index under a coder: prefix plus 1-based position, three digits.
-    let key (coder: Coder) (tag: int) = $"{coder.Prefix}{tag + 1:D3}"
+    /// The key of a case index under a coder: the union's prefix and the case's own name.
+    let name (coder: Coder) (tag: int) = $"{coder.Prefix}.{coder.Names[tag]}"
+
+    /// The numeric code of a case index under a coder, from the committed table.
+    let key (coder: Coder) (tag: int) = FindingCodes.codeOf (name coder tag)
 
     /// The union a case value belongs to. A case with fields is compiled to a nested subclass
     /// of its union, so the runtime type is one step below the type the attributes sit on.
@@ -127,7 +284,12 @@ module Coder =
 
     let private coderOf (kind: IFindingKind) = forType (unionOf kind)
 
-    /// The manifest key of a finding kind.
+    /// The key of a finding kind: `TR.NullableHoistedToOption`.
+    let stableName (kind: IFindingKind) =
+        let coder = coderOf kind
+        name coder (coder.Tag kind)
+
+    /// The numeric code of a finding kind.
     let code (kind: IFindingKind) =
         let coder = coderOf kind
         key coder (coder.Tag kind)
@@ -136,6 +298,17 @@ module Coder =
     let tier (kind: IFindingKind) =
         let coder = coderOf kind
         coder.Tiers[coder.Tag kind]
+
+    /// A finding kind's payload, as the declared name of each field paired with its value, in
+    /// declaration order. Empty for a case without a payload.
+    let payload (kind: IFindingKind) : (string * obj)[] =
+        let coder = coderOf kind
+        let names, read = coder.Fields[coder.Tag kind]
+
+        if Array.isEmpty names then
+            [||]
+        else
+            Array.zip names (read kind)
 
 /// One thing a pass had to say about a symbol: a widening, a drop, or an ergonomic rewrite.
 /// Findings are the raw material of the fidelity manifest - a silent drop is a bug by
@@ -147,13 +320,21 @@ type Finding =
         Pass: string
         /// The symbol concerned, qualified from the exported name down: `Options.onlyFirst`.
         Symbol: string
-        /// Which finding, with whatever detail it carries. Key, tier and message derive from it.
+        /// Which finding, with whatever detail it carries. Key, code, tier, payload and message
+        /// all derive from it.
         Kind: IFindingKind
     }
 
+    /// The finding's key: `TR.NullableHoistedToOption`.
+    member this.Name = Coder.stableName this.Kind
+    /// The finding's numeric code: `TR032`.
     member this.Key = Coder.code this.Kind
     member this.Tier = Coder.tier this.Kind
     member this.Message = this.Kind.Message
+
+    /// The case's payload, as the declared name of each field paired with its value. A consumer
+    /// dispatches on these rather than on the prose in `Message`.
+    member this.Payload = Coder.payload this.Kind
 
 module Finding =
     /// A finding not yet stamped with its pass; the pipeline fold fills `Pass` in.
@@ -756,12 +937,13 @@ module FindingCatalogue =
         | Some prefix -> $"{prefix} - {pass}"
         | None -> pass
 
-    /// The whole key table: `(key, union case name, tier)` for every case of every union.
+    /// The whole catalogue: `(key, numeric code, union case name, tier)` for every case of every
+    /// union.
     let table () =
         [
             for kindType in unions do
                 let coder = Coder.forType kindType
 
                 for tag in 0 .. coder.Names.Length - 1 do
-                    Coder.key coder tag, $"{kindType.Name}.{coder.Names[tag]}", coder.Tiers[tag]
+                    Coder.name coder tag, Coder.key coder tag, $"{kindType.Name}.{coder.Names[tag]}", coder.Tiers[tag]
         ]

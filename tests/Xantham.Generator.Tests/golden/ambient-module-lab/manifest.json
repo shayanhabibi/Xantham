@@ -45,6 +45,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -59,6 +60,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -73,6 +75,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -87,13 +90,18 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "SA.AbbreviationNameTaken",
           "key": "SA003",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "Session",
+          "fields": {
+            "declared": "Session2"
+          },
           "message": "abbreviation dropped - Session2 already declares the name; the type reads under that declaration"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -108,6 +116,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -122,6 +131,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -129,6 +139,7 @@
           "message": "ParamObject Create synthesized (D3)"
         },
         {
+          "name": "SP.MethodMemberAsCreateParameter",
           "key": "SP002",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -143,6 +154,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -157,17 +169,25 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SC.EntrypointClassEmitted",
           "key": "SC007",
           "pass": "shape-classes",
           "tier": "exact",
           "symbol": "Workbench",
+          "fields": {
+            "specifier": "ambient-lab:tools"
+          },
           "message": "entrypoint class emitted as an AbstractClass imported from ambient-lab:tools; a consumer inherits it"
         },
         {
+          "name": "SP.CreateNotSynthesized",
           "key": "SP003",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
           "symbol": "Workbench",
+          "fields": {
+            "reason": "the declaration is a class a consumer inherits, where \u0060new\u0060 is the construction"
+          },
           "message": "no ParamObject Create synthesized: the declaration is a class a consumer inherits, where \u0060new\u0060 is the construction"
         }
       ]
@@ -178,13 +198,18 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "SC.EntrypointClassEmitted",
           "key": "SC007",
           "pass": "shape-classes",
           "tier": "exact",
           "symbol": "Snag",
+          "fields": {
+            "specifier": "ambient-lab:tools"
+          },
           "message": "entrypoint class emitted as an AbstractClass imported from ambient-lab:tools; a consumer inherits it"
         },
         {
+          "name": "SI.BaseMembersFlattened",
           "key": "SI002",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -192,6 +217,7 @@
           "message": "base has no F# name at this position; its members are flattened in and the is-a relation is not emitted (\u00A74.4)"
         },
         {
+          "name": "MB.OptionalMemberAsOption",
           "key": "MB003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -199,6 +225,7 @@
           "message": "optional member reads as option"
         },
         {
+          "name": "TR.UnknownToObj",
           "key": "TR009",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -206,6 +233,7 @@
           "message": "unknown maps to obj (D8)"
         },
         {
+          "name": "MB.OptionalMemberAsOption",
           "key": "MB003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -213,6 +241,7 @@
           "message": "optional member reads as option"
         },
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -220,10 +249,14 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "name": "SP.CreateNotSynthesized",
           "key": "SP003",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
           "symbol": "Snag",
+          "fields": {
+            "reason": "the declaration is a class a consumer inherits, where \u0060new\u0060 is the construction"
+          },
           "message": "no ParamObject Create synthesized: the declaration is a class a consumer inherits, where \u0060new\u0060 is the construction"
         }
       ]
@@ -234,20 +267,29 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "SC.EntrypointClassRefused",
           "key": "SC008",
           "pass": "shape-classes",
           "tier": "widened",
           "symbol": "Vise",
+          "fields": {
+            "reason": "the class inherits a base whose constructor arguments have no F# form"
+          },
           "message": "entrypoint class kept the interface form: the class inherits a base whose constructor arguments have no F# form"
         },
         {
+          "name": "SI.BaseInherited",
           "key": "SI005",
           "pass": "shape-interfaces",
           "tier": "exact",
           "symbol": "Vise",
+          "fields": {
+            "name": "Hammer"
+          },
           "message": "base Hammer is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -255,6 +297,7 @@
           "message": "ParamObject Create synthesized (D3)"
         },
         {
+          "name": "SP.MethodMemberAsCreateParameter",
           "key": "SP002",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -269,6 +312,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -297,10 +341,14 @@
       "tier": "escape",
       "findings": [
         {
+          "name": "HG.AmbientModuleWildcard",
           "key": "HG005",
           "pass": "harvest-globals",
           "tier": "escape",
           "symbol": "\u0022ambient-lab:*\u0022",
+          "fields": {
+            "specifier": "ambient-lab:*"
+          },
           "message": "ambient module \u0022ambient-lab:*\u0022 dropped - a wildcard specifier names no module an import can resolve"
         }
       ]
@@ -310,6 +358,7 @@
       "tier": "escape",
       "findings": [
         {
+          "name": "HG.AmbientModuleDropped",
           "key": "HG001",
           "pass": "harvest-globals",
           "tier": "escape",
@@ -323,10 +372,15 @@
       "tier": "exact",
       "findings": [
         {
+          "name": "HG.AmbientModuleHarvested",
           "key": "HG004",
           "pass": "harvest-globals",
           "tier": "exact",
           "symbol": "\u0022ambient-lab:runtime\u0022",
+          "fields": {
+            "specifier": "ambient-lab:runtime",
+            "exports": 2
+          },
           "message": "2 exports harvested from ambient module \u0022ambient-lab:runtime\u0022; each binds with [\u003CImport(name, \u0022ambient-lab:runtime\u0022)\u003E]"
         }
       ]
@@ -336,10 +390,15 @@
       "tier": "exact",
       "findings": [
         {
+          "name": "HG.AmbientModuleHarvested",
           "key": "HG004",
           "pass": "harvest-globals",
           "tier": "exact",
           "symbol": "\u0022ambient-lab:sockets\u0022",
+          "fields": {
+            "specifier": "ambient-lab:sockets",
+            "exports": 1
+          },
           "message": "1 exports harvested from ambient module \u0022ambient-lab:sockets\u0022; each binds with [\u003CImport(name, \u0022ambient-lab:sockets\u0022)\u003E]"
         }
       ]
@@ -349,10 +408,15 @@
       "tier": "exact",
       "findings": [
         {
+          "name": "HG.AmbientModuleHarvested",
           "key": "HG004",
           "pass": "harvest-globals",
           "tier": "exact",
           "symbol": "\u0022ambient-lab:tools\u0022",
+          "fields": {
+            "specifier": "ambient-lab:tools",
+            "exports": 6
+          },
           "message": "6 exports harvested from ambient module \u0022ambient-lab:tools\u0022; each binds with [\u003CImport(name, \u0022ambient-lab:tools\u0022)\u003E]"
         }
       ]
@@ -362,10 +426,15 @@
       "tier": "exact",
       "findings": [
         {
+          "name": "HG.NamespaceIsModuleBody",
           "key": "HG006",
           "pass": "harvest-globals",
           "tier": "exact",
           "symbol": "AmbientLabRuntime",
+          "fields": {
+            "ns": "AmbientLabRuntime",
+            "specifier": "ambient-lab:runtime"
+          },
           "message": "AmbientLabRuntime is the body of ambient module \u0022ambient-lab:runtime\u0022 (export =) rather than a global"
         }
       ]

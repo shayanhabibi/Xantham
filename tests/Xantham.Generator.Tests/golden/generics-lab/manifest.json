@@ -37,6 +37,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -51,6 +52,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -58,6 +60,7 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -90,6 +93,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-aliases",
           "tier": "ergonomic",
@@ -104,6 +108,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "MB.OptionalMemberAsOption",
           "key": "MB003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -111,6 +116,7 @@
           "message": "optional member reads as option"
         },
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -118,6 +124,7 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -138,6 +145,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -145,6 +153,7 @@
           "message": "ParamObject Create synthesized (D3)"
         },
         {
+          "name": "SP.MethodMemberAsCreateParameter",
           "key": "SP002",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -159,6 +168,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -173,6 +183,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -187,27 +198,43 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "TP.ConstraintDropped",
           "key": "TP002",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Registry",
+          "fields": {
+            "name": "M"
+          },
           "message": "constraint on \u0027M\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
+          "name": "TP.KeyWithIndexedAccess",
           "key": "TP004",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Registry.pick",
+          "fields": {
+            "operand": "M",
+            "result": "R"
+          },
           "message": "key over \u0027M\u0027 with its indexed access reads as typekeyof\u003C\u0027M,\u0027R\u003E (\u00A74.10)"
         },
         {
+          "name": "TR.ArgumentNotBoundWithConstraint",
           "key": "TR027",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "Registry.pick()",
+          "fields": {
+            "variable": "R",
+            "name": "Labelled",
+            "bound": "Named"
+          },
           "message": "\u0027R is not bound with Labelled\u0027s constraint; the argument is written as the constraint Named"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -215,6 +242,7 @@
           "message": "ParamObject Create synthesized (D3)"
         },
         {
+          "name": "SP.MethodMemberAsCreateParameter",
           "key": "SP002",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -229,6 +257,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -243,6 +272,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "MB.IndexSignatureAsIndexer",
           "key": "MB004",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -250,10 +280,14 @@
           "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
         },
         {
+          "name": "SP.CreateNotSynthesized",
           "key": "SP003",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
           "symbol": "ManifestFlags",
+          "fields": {
+            "reason": "an index signature has no name to bind a parameter to"
+          },
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
       ]
@@ -268,6 +302,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-exports",
           "tier": "ergonomic",

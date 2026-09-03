@@ -48,6 +48,7 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "TR.IntersectionOverNonObject",
           "key": "TR018",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -55,6 +56,7 @@
           "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         },
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -62,6 +64,7 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -76,6 +79,7 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "SA.PhantomComputation",
           "key": "SA002",
           "pass": "shape-aliases",
           "tier": "widened",
@@ -83,6 +87,7 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
+          "name": "TR.IntersectionOverNonObject",
           "key": "TR018",
           "pass": "shape-aliases",
           "tier": "widened",
@@ -97,6 +102,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -111,6 +117,7 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "SA.PhantomComputation",
           "key": "SA002",
           "pass": "shape-aliases",
           "tier": "widened",
@@ -118,6 +125,7 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
+          "name": "TR.IntersectionOverNonObject",
           "key": "TR018",
           "pass": "shape-aliases",
           "tier": "widened",
@@ -132,6 +140,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -139,6 +148,7 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -153,13 +163,18 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SI.IntersectionFlattened",
           "key": "SI003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "DirectNode",
+          "fields": {
+            "operands": 2
+          },
           "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
         },
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -167,6 +182,7 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -181,6 +197,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -195,13 +212,18 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SI.IntersectionFlattened",
           "key": "SI003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "DirectVarNode",
+          "fields": {
+            "operands": 3
+          },
           "message": "intersection of 3 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
         },
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -209,6 +231,7 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -222,6 +245,7 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "TR.IntersectionNotDeclared",
           "key": "TR019",
           "pass": "shape-exports",
           "tier": "widened",
@@ -240,10 +264,15 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "RT.FrontierNotResolved",
           "key": "RT001",
           "pass": "resolve-type-table",
           "tier": "widened",
           "symbol": "\u003Ctype-table\u003E",
+          "fields": {
+            "count": 14,
+            "depth": 12
+          },
           "message": "14 types not resolved: beyond the depth cutoff (12) - the frontier of instantiations still growing after that many generations"
         }
       ]
@@ -253,10 +282,14 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "SY.HoistArgumentsNotRecovered",
           "key": "SY002",
           "pass": "synthesize-anonymous",
           "tier": "widened",
           "symbol": "CondSeed",
+          "fields": {
+            "name": "CondNode"
+          },
           "message": "CondNode is an instantiation whose type arguments could not be recovered; widened to obj rather than named again"
         }
       ]
@@ -266,10 +299,14 @@
       "tier": "exact",
       "findings": [
         {
+          "name": "SY.InstantiationNamedOnce",
           "key": "SY001",
           "pass": "synthesize-anonymous",
           "tier": "exact",
           "symbol": "DirectExtensionsToVarResult",
+          "fields": {
+            "name": "DirectVarNode"
+          },
           "message": "anonymous shape is an instantiation of DirectVarNode; written as an application"
         }
       ]
@@ -279,10 +316,14 @@
       "tier": "exact",
       "findings": [
         {
+          "name": "SY.InstantiationNamedOnce",
           "key": "SY001",
           "pass": "synthesize-anonymous",
           "tier": "exact",
           "symbol": "DirectNodeToVarResult",
+          "fields": {
+            "name": "DirectVarNode"
+          },
           "message": "anonymous shape is an instantiation of DirectVarNode; written as an application"
         }
       ]
@@ -292,10 +333,14 @@
       "tier": "exact",
       "findings": [
         {
+          "name": "SY.InstantiationNamedOnce",
           "key": "SY001",
           "pass": "synthesize-anonymous",
           "tier": "exact",
           "symbol": "DirectSeed",
+          "fields": {
+            "name": "DirectNode"
+          },
           "message": "anonymous shape is an instantiation of DirectNode; written as an application"
         }
       ]
@@ -305,10 +350,14 @@
       "tier": "exact",
       "findings": [
         {
+          "name": "SY.InstantiationNamedOnce",
           "key": "SY001",
           "pass": "synthesize-anonymous",
           "tier": "exact",
           "symbol": "DirectVarNodeToVarResult",
+          "fields": {
+            "name": "DirectVarNode"
+          },
           "message": "anonymous shape is an instantiation of DirectVarNode; written as an application"
         }
       ]

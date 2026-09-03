@@ -31,6 +31,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -45,6 +46,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -59,6 +61,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "MB.OptionalMemberAsOption",
           "key": "MB003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -66,6 +69,7 @@
           "message": "optional member reads as option"
         },
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -73,6 +77,7 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -96,10 +101,14 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "TR.NotAmongGeneratedDeclarations",
           "key": "TR023",
           "pass": "shape-exports",
           "tier": "widened",
           "symbol": "respond()",
+          "fields": {
+            "shown": "Response"
+          },
           "message": "Response is not among the generated declarations; widened to obj"
         }
       ]
@@ -109,10 +118,15 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "TR.MappedNameArityMismatch",
           "key": "TR053",
           "pass": "shape-exports",
           "tier": "widened",
           "symbol": "walk(over)",
+          "fields": {
+            "name": "Iterator",
+            "given": 3
+          },
           "message": "Iterator is applied to 3 type arguments that its mapped destination does not take; widened to obj"
         }
       ]

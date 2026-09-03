@@ -26,6 +26,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -40,6 +41,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -54,6 +56,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -72,10 +75,15 @@
       "tier": "exact",
       "findings": [
         {
+          "name": "GE.GroupShipped",
           "key": "GE001",
           "pass": "render-source",
           "tier": "exact",
           "symbol": "inner-lab",
+          "fields": {
+            "group": "inner-lab",
+            "declarations": 1
+          },
           "message": "inner-lab is shipped as its own module, carrying 1 declarations"
         }
       ]
@@ -85,10 +93,15 @@
       "tier": "exact",
       "findings": [
         {
+          "name": "GE.GroupShipped",
           "key": "GE001",
           "pass": "render-source",
           "tier": "exact",
           "symbol": "outer-lab",
+          "fields": {
+            "group": "outer-lab",
+            "declarations": 1
+          },
           "message": "outer-lab is shipped as its own module, carrying 1 declarations"
         }
       ]

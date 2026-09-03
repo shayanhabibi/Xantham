@@ -33,20 +33,29 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "TR.CallbackOverloadsFromFirst",
           "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "Utils.round",
+          "fields": {
+            "overloads": 2
+          },
           "message": "callback with 2 overloads shaped from the first"
         },
         {
+          "name": "TR.IntersectionCallableFlattened",
           "key": "TR050",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Utils.round",
+          "fields": {
+            "signatures": 2
+          },
           "message": "intersection of callable operands rendered from its 2 call signatures"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -61,6 +70,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -75,6 +85,7 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "SI.HybridLosesCallSignatures",
           "key": "SI001",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -82,13 +93,18 @@
           "message": "callable-and-properties hybrid loses its call signatures (Invoke emission is future work)"
         },
         {
+          "name": "SI.IntersectionFlattened",
           "key": "SI003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "TimersSchedule",
+          "fields": {
+            "operands": 2
+          },
           "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -96,6 +112,7 @@
           "message": "ParamObject Create synthesized (D3)"
         },
         {
+          "name": "SP.MethodMemberAsCreateParameter",
           "key": "SP002",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",

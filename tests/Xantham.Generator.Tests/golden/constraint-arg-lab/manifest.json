@@ -32,6 +32,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -46,6 +47,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -60,10 +62,16 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "TR.ArgumentNotASubtypeOfConstraint",
           "key": "TR044",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "HeldString",
+          "fields": {
+            "argument": "string",
+            "name": "Holder",
+            "bound": "Lengthy"
+          },
           "message": "string does not inherit Holder\u0027s constraint Lengthy; the argument is written as the constraint"
         }
       ]
@@ -74,10 +82,16 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "TR.ArgumentNotASubtypeOfConstraint",
           "key": "TR044",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "HeldTuple",
+          "fields": {
+            "argument": "string * float",
+            "name": "Holder",
+            "bound": "Lengthy"
+          },
           "message": "string * float does not inherit Holder\u0027s constraint Lengthy; the argument is written as the constraint"
         }
       ]
@@ -88,10 +102,16 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "TR.ArgumentNotASubtypeOfConstraint",
           "key": "TR044",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "HeldArray",
+          "fields": {
+            "argument": "float[]",
+            "name": "Holder",
+            "bound": "Lengthy"
+          },
           "message": "float[] does not inherit Holder\u0027s constraint Lengthy; the argument is written as the constraint"
         }
       ]
@@ -102,13 +122,18 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SI.BaseInherited",
           "key": "SI005",
           "pass": "shape-interfaces",
           "tier": "exact",
           "symbol": "Sized",
+          "fields": {
+            "name": "Lengthy"
+          },
           "message": "base Lengthy is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -129,27 +154,46 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "TR.ArgumentNotASubtypeOfConstraint",
           "key": "TR044",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "Shelf.arr",
+          "fields": {
+            "argument": "float[]",
+            "name": "Holder",
+            "bound": "Lengthy"
+          },
           "message": "float[] does not inherit Holder\u0027s constraint Lengthy; the argument is written as the constraint"
         },
         {
+          "name": "TR.ArgumentNotASubtypeOfConstraint",
           "key": "TR044",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "Shelf.str",
+          "fields": {
+            "argument": "string",
+            "name": "Holder",
+            "bound": "Lengthy"
+          },
           "message": "string does not inherit Holder\u0027s constraint Lengthy; the argument is written as the constraint"
         },
         {
+          "name": "TR.ArgumentNotASubtypeOfConstraint",
           "key": "TR044",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "Shelf.tup",
+          "fields": {
+            "argument": "string * float",
+            "name": "Holder",
+            "bound": "Lengthy"
+          },
           "message": "string * float does not inherit Holder\u0027s constraint Lengthy; the argument is written as the constraint"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",

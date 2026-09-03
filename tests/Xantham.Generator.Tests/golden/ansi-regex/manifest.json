@@ -27,6 +27,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -40,13 +41,18 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "TR.NotAmongGeneratedDeclarations",
           "key": "TR023",
           "pass": "shape-exports",
           "tier": "widened",
           "symbol": "ansiRegex()",
+          "fields": {
+            "shown": "RegExp"
+          },
           "message": "RegExp is not among the generated declarations; widened to obj"
         },
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-exports",
           "tier": "ergonomic",

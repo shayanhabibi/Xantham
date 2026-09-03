@@ -32,13 +32,21 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "TR.LibExtraTypeArgumentsDropped",
           "key": "TR024",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Store.load()",
+          "fields": {
+            "name": "Uint8Array",
+            "given": 1,
+            "fsharpName": "JS.Uint8Array",
+            "arity": 0
+          },
           "message": "Uint8Array carries 1 type arguments where JS.Uint8Array takes 0; the extras are dropped"
         },
         {
+          "name": "MB.OptionalMemberAsOption",
           "key": "MB003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -46,6 +54,7 @@
           "message": "optional member reads as option"
         },
         {
+          "name": "TR.NullableHoistedToOption",
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -53,6 +62,7 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -60,6 +70,7 @@
           "message": "ParamObject Create synthesized (D3)"
         },
         {
+          "name": "SP.MethodMemberAsCreateParameter",
           "key": "SP002",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -67,6 +78,7 @@
           "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         },
         {
+          "name": "SP.MethodMemberAsCreateParameter",
           "key": "SP002",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -81,6 +93,7 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "SP.ParamObjectSynthesized",
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -114,6 +127,7 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "TR.ObjectTypeToObj",
           "key": "TR040",
           "pass": "shape-exports",
           "tier": "widened",
@@ -121,6 +135,7 @@
           "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         },
         {
+          "name": "TR.ObjectTypeToObj",
           "key": "TR040",
           "pass": "shape-exports",
           "tier": "widened",
@@ -139,17 +154,31 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "TR.LibExtraTypeArgumentsDropped",
           "key": "TR024",
           "pass": "shape-exports",
           "tier": "ergonomic",
           "symbol": "view()",
+          "fields": {
+            "name": "ArrayBufferView",
+            "given": 1,
+            "fsharpName": "JS.ArrayBufferView",
+            "arity": 0
+          },
           "message": "ArrayBufferView carries 1 type arguments where JS.ArrayBufferView takes 0; the extras are dropped"
         },
         {
+          "name": "TR.LibExtraTypeArgumentsDropped",
           "key": "TR024",
           "pass": "shape-exports",
           "tier": "ergonomic",
           "symbol": "view(over)",
+          "fields": {
+            "name": "DataView",
+            "given": 1,
+            "fsharpName": "JS.DataView",
+            "arity": 0
+          },
           "message": "DataView carries 1 type arguments where JS.DataView takes 0; the extras are dropped"
         }
       ]
@@ -159,17 +188,31 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "TR.LibExtraTypeArgumentsDropped",
           "key": "TR024",
           "pass": "shape-exports",
           "tier": "ergonomic",
           "symbol": "stream()",
+          "fields": {
+            "name": "AsyncIterator",
+            "given": 3,
+            "fsharpName": "JS.AsyncIterator",
+            "arity": 1
+          },
           "message": "AsyncIterator carries 3 type arguments where JS.AsyncIterator takes 1; the extras are dropped"
         },
         {
+          "name": "TR.LibExtraTypeArgumentsDropped",
           "key": "TR024",
           "pass": "shape-exports",
           "tier": "ergonomic",
           "symbol": "stream(source)",
+          "fields": {
+            "name": "AsyncIterable",
+            "given": 3,
+            "fsharpName": "JS.AsyncIterable",
+            "arity": 1
+          },
           "message": "AsyncIterable carries 3 type arguments where JS.AsyncIterable takes 1; the extras are dropped"
         }
       ]
@@ -184,17 +227,31 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "TR.LibExtraTypeArgumentsDropped",
           "key": "TR024",
           "pass": "shape-exports",
           "tier": "ergonomic",
           "symbol": "bytes()",
+          "fields": {
+            "name": "Float64Array",
+            "given": 1,
+            "fsharpName": "JS.Float64Array",
+            "arity": 0
+          },
           "message": "Float64Array carries 1 type arguments where JS.Float64Array takes 0; the extras are dropped"
         },
         {
+          "name": "TR.LibExtraTypeArgumentsDropped",
           "key": "TR024",
           "pass": "shape-exports",
           "tier": "ergonomic",
           "symbol": "bytes(input)",
+          "fields": {
+            "name": "Uint8Array",
+            "given": 1,
+            "fsharpName": "JS.Uint8Array",
+            "arity": 0
+          },
           "message": "Uint8Array carries 1 type arguments where JS.Uint8Array takes 0; the extras are dropped"
         }
       ]
@@ -204,10 +261,14 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "TR.LibBindingLoss",
           "key": "TR025",
           "pass": "shape-exports",
           "tier": "ergonomic",
           "symbol": "thenable()",
+          "fields": {
+            "note": "PromiseLike reads as JS.Promise; a bare thenable is not one"
+          },
           "message": "PromiseLike reads as JS.Promise; a bare thenable is not one"
         }
       ]
@@ -217,17 +278,25 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "name": "TR.LibBindingLoss",
           "key": "TR025",
           "pass": "shape-exports",
           "tier": "ergonomic",
           "symbol": "frozen(entries)",
+          "fields": {
+            "note": "ReadonlyMap reads as JS.Map; the readonly restriction is not carried"
+          },
           "message": "ReadonlyMap reads as JS.Map; the readonly restriction is not carried"
         },
         {
+          "name": "TR.LibBindingLoss",
           "key": "TR025",
           "pass": "shape-exports",
           "tier": "ergonomic",
           "symbol": "frozen(values)",
+          "fields": {
+            "note": "ReadonlySet reads as JS.Set; the readonly restriction is not carried"
+          },
           "message": "ReadonlySet reads as JS.Set; the readonly restriction is not carried"
         }
       ]
@@ -257,10 +326,14 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "TR.NotAmongGeneratedDeclarations",
           "key": "TR023",
           "pass": "shape-exports",
           "tier": "widened",
           "symbol": "each(values)",
+          "fields": {
+            "shown": "Iterable"
+          },
           "message": "Iterable is not among the generated declarations; widened to obj"
         }
       ]
@@ -270,10 +343,14 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "TR.NotAmongGeneratedDeclarations",
           "key": "TR023",
           "pass": "shape-exports",
           "tier": "widened",
           "symbol": "select(over)",
+          "fields": {
+            "shown": "Range"
+          },
           "message": "Range is not among the generated declarations; widened to obj"
         }
       ]
@@ -283,10 +360,14 @@
       "tier": "widened",
       "findings": [
         {
+          "name": "TR.NotAmongGeneratedDeclarations",
           "key": "TR023",
           "pass": "shape-exports",
           "tier": "widened",
           "symbol": "respond()",
+          "fields": {
+            "shown": "Response"
+          },
           "message": "Response is not among the generated declarations; widened to obj"
         }
       ]

@@ -7,6 +7,7 @@ module Xantham.Generator.Render
 
 open System
 open System.Text.Json
+open System.Text.Json.Nodes
 open System.Text.Json.Serialization
 open Xantham.TypeScript.Wire.Proto
 
@@ -521,7 +522,8 @@ let private renderEntrypointClass (runtimePackage: string) (decl: FsInterfaceDec
         yield! docLines "" decl.Docs decl.Tags
         yield bindingAttribute runtimePackage "" "; AbstractClass" entrypoint.Binding
 
-        let head = $"type {declHead decl.Name decl.TypeParameters} {renderParamList entrypoint.Parameters}"
+        let head =
+            $"type {declHead decl.Name decl.TypeParameters} {renderParamList entrypoint.Parameters}"
 
         match decl.Members, decl.Statics with
         | [], [] -> yield $"{head} = class end"
@@ -1054,10 +1056,17 @@ let private tierLabel =
 // then omitted from the JSON.
 type ManifestFinding =
     {
+        /// The finding's stable name, `TR.NullableHoistedToOption`: what a consumer dispatches
+        /// on, since it is fixed by what the case is called.
+        name: string
+        /// The same finding's numeric code, `TR032`, as prose and `--key` filters cite it.
         key: string
         pass: string
         tier: string
         symbol: string
+        /// The case's payload, field by field, for a consumer that dispatches on the detail
+        /// rather than reading `message`. Null, and so omitted, for a case without a payload.
+        fields: JsonObject
         message: string
     }
 
@@ -1103,6 +1112,30 @@ let private manifestOptions =
     options.NewLine <- "\n" // byte-identical output whatever the OS
     options.DefaultIgnoreCondition <- JsonIgnoreCondition.WhenWritingNull
     options
+
+/// A payload field's value as JSON: the number, string or boolean it is, and its `ToString` for
+/// any other type a case might later carry.
+let private fieldValue (value: obj) : JsonNode =
+    match value with
+    | null -> null
+    | :? string as text -> JsonValue.Create text
+    | :? int as number -> JsonValue.Create number
+    | :? bool as flag -> JsonValue.Create flag
+    | :? float as number -> JsonValue.Create number
+    | other -> JsonValue.Create(string other)
+
+/// A finding's payload as a JSON object, field name to value, in declaration order. Null for a
+/// case without a payload, so the property is omitted.
+let private payloadFields (finding: Finding) : JsonObject =
+    match finding.Payload with
+    | [||] -> null
+    | payload ->
+        let fields = JsonObject()
+
+        for name, value in payload do
+            fields[name] <- fieldValue value
+
+        fields
 
 /// The declaration file a symbol came from, as the manifest reports it: relative to the package
 /// for the package's own files, from `node_modules/` down for anything installed, and the bare
@@ -1195,10 +1228,12 @@ let renderManifest: Pass<RenderModel> =
                                         for finding in
                                             findings |> List.sortBy (fun f -> f.Pass, f.Symbol, f.Key, f.Message) ->
                                             {
+                                                name = finding.Name
                                                 key = finding.Key
                                                 pass = finding.Pass
                                                 tier = tierLabel finding.Tier
                                                 symbol = finding.Symbol
+                                                fields = payloadFields finding
                                                 message = finding.Message
                                             }
                                     ]
