@@ -24,6 +24,9 @@ module private Reason =
     [<Literal>]
     let OverBudget = "more members than the Create parameter budget"
 
+    [<Literal>]
+    let EntrypointClass = "the declaration is a class a consumer inherits, where `new` is the construction"
+
 let private isConstructor =
     function
     | FsConstructor _ -> true
@@ -42,7 +45,9 @@ let private refusal (decl: FsInterfaceDecl) =
             | FsMethod m -> Some m.Name
             | _ -> None)
 
-    if List.isEmpty decl.Members then
+    if decl.Entrypoint.IsSome then
+        Some Reason.EntrypointClass
+    elif List.isEmpty decl.Members then
         Some Reason.NoMembers
     elif decl.Members |> List.exists isIndexer then
         Some Reason.IndexSignature

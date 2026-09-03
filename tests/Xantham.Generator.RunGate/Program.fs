@@ -4,6 +4,7 @@
 /// after printing all of them.
 module Xantham.Generator.RunGate.Program
 
+open System
 open Fable.Core
 open Fable.Core.JsInterop
 
@@ -412,6 +413,14 @@ let private workarounds () =
 
     check "and the same = does not terminate on a self-referencing object" threw
 
+/// A consumer's class over an entrypoint the lab's ambient module exports. Declared here because
+/// `inherit` is a source construct: this type existing at all is the check the interface form
+/// could not pass (FS0946), and its behaviour is what the checks below read.
+type private Bench(label: string) =
+    inherit AmbientModuleLab.Workbench(label)
+
+    override this.run(payload) = $"derived:{this.label}:{payload.label}"
+
 /// An ambient module declaration binds to the specifier it quotes rather than to the package the
 /// rest of the file imports from, and a renamed re-export binds under the exported name.
 let private ambientModules () =
@@ -434,11 +443,47 @@ let private ambientModules () =
     equal "an `export =` namespace's members read through the specifier" "1.4.0" AmbientModuleLab.Exports.version
     check "and the namespace itself is no global" (emitJsExpr () "globalThis.AmbientLabRuntime === undefined")
 
+/// The entrypoint form: an `[<AbstractClass>]` under the specifier's import, which a consumer
+/// derives from. Fable compiles the `inherit` to `extends` and the constructor to `super(...)`,
+/// so the derived object is the module's class at runtime.
+let private entrypointClasses () =
+    let bench = Bench "vice"
+    let workbench: obj = import "Workbench" "ambient-lab:tools"
+
+    check
+        "a derived class extends the module's class in JavaScript"
+        (emitJsExpr (bench, workbench) "$0 instanceof $1")
+
+    equal "the base constructor's assignment reads back off the instance" "vice" bench.label
+    equal "and the JavaScript prototype carries the same value" "vice" (emitJsExpr bench "$0.label")
+
+    let payload = AmbientModuleLab.Exports.connect "socket"
+    equal "the override is what F# calls" "derived:vice:socket" (bench.run payload)
+
+    equal
+        "and what JavaScript calls through the base's own method name"
+        "derived:vice:socket"
+        (emitJsExpr (bench, payload) "$0.run($1)")
+
+    // `class Snag extends Error`: the base is the compiler library's, so no `inherit` is emitted
+    // and F# does not see an exception - the JavaScript object is one either way.
+    let snag = AmbientModuleLab.Exports.Snag "torn"
+    check "a class over a lib base is still the module's class" (emitJsExpr snag "$0 instanceof Error")
+    equal "and its base constructor ran" "torn" snag.message
+
+    // The guard: a class no specifier exports, and one whose base this run declares, keep the
+    // object-literal Create the entrypoint form has no room for.
+    let anvil = AmbientModuleLab.Anvil.Create 9.0
+    equal "a global abstract class keeps its ParamObject Create" 9.0 anvil.mass
+    let vise = AmbientModuleLab.Vise.Create(2.0, 5.0, Func<_, _>(fun (p: AmbientModuleLab.Payload) -> p.label))
+    equal "and so does a class whose base this run declares" 2.0 vise.jaw
+
 [<EntryPoint>]
 let main _ =
     globals ()
     imports ()
     ambientModules ()
+    entrypointClasses ()
     statics ()
     bigints ()
     constructorObjects ()

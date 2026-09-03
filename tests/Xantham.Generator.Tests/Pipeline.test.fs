@@ -515,6 +515,49 @@ let pipelineTests =
                     Expect.stringContains source "[<Global(\"Telemetry\")>]" "a namespace with a value is on globalThis"
                     Expect.isFalse (source.Contains "[<Global(\"Shapes\")>]") "one with only types is not"
 
+                  testCase "a class an ambient module exports to be derived from is an F# class" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    // `abstract`, and exported from a specifier: both hold, so the declaration
+                    // carries a primary constructor a derived class calls through `inherit`.
+                    Expect.stringContains
+                        source
+                        "[<Import(\"Workbench\", \"ambient-lab:tools\"); AbstractClass>]"
+                        "the class is imported from the specifier that exports it"
+
+                    Expect.stringContains source "type Workbench (label: string) =" "under a primary constructor"
+                    Expect.stringContains source "abstract run: payload: Payload -> string" "a method stays overridable"
+                    Expect.stringContains source "member _.label: string = jsNative" "a property binds onto the instance"
+
+                    // `class Snag extends Error`: not abstract, and the base is the compiler
+                    // library's, so the base branch of the rule is what selects it.
+                    Expect.stringContains
+                        source
+                        "[<Import(\"Snag\", \"ambient-lab:tools\"); AbstractClass>]"
+                        "a class with a declared base takes the same form"
+
+                  testCase "every other class keeps the interface form and its Create" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.stringContains
+                        source
+                        "static member Create (weight: float, strike: Func<Payload, string>) : Hammer = jsNative"
+                        "a class no specifier marks as an entrypoint keeps its object literal"
+
+                    // `Anvil` is abstract and `Vise` has a base, so each satisfies half the rule.
+                    Expect.stringContains source "static member Create (mass: float) : Anvil = jsNative" "as does a global abstract class"
+
+                    Expect.isFalse (source.Contains "type Workbench =") "and the entrypoint is not also an interface"
+
+                    let refused =
+                        rendered.Findings
+                        |> List.filter (fun finding -> finding.Key = "SC008")
+                        |> List.map _.Symbol
+
+                    Expect.equal refused [ "Vise" ] "a base this run declares is the one refusal the lab reaches"
+
                   testCase "a wildcard specifier and an empty module are escapes" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
 

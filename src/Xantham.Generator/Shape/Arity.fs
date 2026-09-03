@@ -63,6 +63,12 @@ let private mapDeclRefs (f: FsTypeRef -> FsTypeRef) (decl: FsDecl) : FsDecl =
                 TypeParameters = d.TypeParameters |> List.map typeParam
                 Inherits = d.Inherits |> List.map reference
                 Members = d.Members |> List.map declMember
+                Entrypoint =
+                    d.Entrypoint
+                    |> Option.map (fun entrypoint ->
+                        { entrypoint with
+                            Parameters = entrypoint.Parameters |> List.map parameter
+                        })
                 CreateOverloads = d.CreateOverloads |> List.map (List.map parameter)
             }
     | FsAbbrev d ->

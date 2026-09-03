@@ -201,6 +201,7 @@ let private deriveStructure (ctx: Context) (ty: TypeResponse) =
                                     Parameters = parameterFacts |> Array.map fst |> Array.toList
                                     HasRest = signature.Flags.HasFlag SignatureFlags.HasRestParameter
                                     TypeParameters = typeParameters |> Array.map _.Id |> Array.toList
+                                    IsAbstract = signature.Flags.HasFlag SignatureFlags.Abstract
                                     ReturnTypeId = returnType.Id
                                 },
                                 [ yield! parameterFacts |> Array.map snd; yield! typeParameters; returnType ]

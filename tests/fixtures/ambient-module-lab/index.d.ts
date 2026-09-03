@@ -27,6 +27,12 @@ declare class Session {
     readonly kind: string;
 }
 
+/** An abstract class no specifier exports: `globalThis.Anvil` is not a module entrypoint, so it
+ * keeps the interface form and its `Create`. */
+declare abstract class Anvil {
+    readonly mass: number;
+}
+
 /** An ambient module declaring its own class, function and interface. */
 declare module "ambient-lab:tools" {
     /** A class exported from a specifier rather than from `globalThis`. */
@@ -43,6 +49,32 @@ declare module "ambient-lab:tools" {
     /** A type declared inside the module block. */
     export interface Reading {
         depth: number;
+    }
+
+    /**
+     * A class written to be derived from: `abstract`, and exported from a specifier. F# reaches
+     * this one as a class, because an interface admits no `inherit`.
+     */
+    export abstract class Workbench {
+        constructor(label: string);
+        readonly label: string;
+        /** The slot a derived class fills. */
+        run(payload: Payload): string;
+    }
+
+    /**
+     * A class with a base the compiler library owns. Not abstract, and still the class form:
+     * `extends` is what says a consumer derives from it.
+     */
+    export class Snag extends Error {
+        constructor(message: string);
+    }
+
+    /** A class whose base this run declares. An F# class reaches its base through a constructor
+     * call, and an interface has none, so this keeps the interface form. */
+    export class Vise extends Hammer {
+        constructor(weight: number, jaw: number);
+        readonly jaw: number;
     }
 }
 

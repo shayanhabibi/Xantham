@@ -128,6 +128,8 @@ let findingsTests =
                     "SC004 ShapeClasses.StaticWithoutDeclaration widened"
                     "SC005 ShapeClasses.StaticMethodWithoutSignatures widened"
                     "SC006 ShapeClasses.StaticSettable exact"
+                    "SC007 ShapeClasses.EntrypointClassEmitted exact"
+                    "SC008 ShapeClasses.EntrypointClassRefused widened"
                     "SE001 ShapeExports.NoValueType escape"
                     "SE002 ShapeExports.RuntimeSpecifierDerived ergonomic"
                     "SE003 ShapeExports.MutableValueReadOnly widened"

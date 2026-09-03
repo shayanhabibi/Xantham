@@ -1502,6 +1502,7 @@ let shapePassTests =
                       TypeParameters = parameters |> List.map (fun p -> { Name = p; Constraint = None })
                       Inherits = inherits
                       Members = []
+                      Entrypoint = None
                       CreateOverloads = []
                       Statics = [] }
 
@@ -2316,6 +2317,7 @@ let shapePassTests =
                                 Tags = []
                                 ReadOnly = false
                                 Type = FsFloat } ]
+                      Entrypoint = None
                       CreateOverloads = []
                       Statics = [] }
 
@@ -2471,6 +2473,135 @@ let shapePassTests =
                 ("TR043", "typeof Gauge is a constructor object this run does not declare; widened to obj (§4.4)")
                 "the finding names the construct, not the checker's placeholder"
 
+        testCase "shape-classes converts only an ambient module's abstract or derived classes" <| fun _ ->
+            // Four classes over one shape, differing only in the two facts the rule reads. The
+            // declaration each one would carry is identical, so what moves is the rule alone.
+            let entrypoint (name: string) (id: int) (isAbstract: bool) (bases: int list) origin =
+                let instance =
+                    { Build.facts (Build.typeResponse id TypeFlags.Object) with
+                        Members = [ Build.resolvedMember (Build.symbol (id * 10) "label" SymbolFlags.Property) 1 ]
+                        BaseTypes = bases }
+
+                let static' =
+                    { Build.facts (Build.typeResponse (id + 1) TypeFlags.Object) with
+                        ConstructSignatures =
+                            [ { Build.signature
+                                    [ Build.resolvedMember
+                                          (Build.symbol (id * 10 + 1) "label" SymbolFlags.FunctionScopedVariable)
+                                          1 ]
+                                    id with
+                                  IsAbstract = isAbstract } ] }
+
+                let declaration =
+                    FsInterface
+                        { Name = name
+                          Docs = ""
+                          Tags = []
+                          Order = None
+                          TypeParameters = []
+                          Inherits = []
+                          Members =
+                            [ FsProperty
+                                  { Name = "label"
+                                    Docs = ""
+                                    Tags = []
+                                    ReadOnly = true
+                                    Type = FsString } ]
+                          Entrypoint = None
+                          CreateOverloads = []
+                          Statics = [] }
+
+                let export =
+                    { Build.export name (Build.symbol (id + 2) name (SymbolFlags.Class ||| SymbolFlags.Value)) with
+                        Origin = origin }
+
+                [ instance; static' ], declaration, export, (id + 2, { Declared = Some id; Value = Some(id + 1) })
+
+            let cases =
+                [ entrypoint "Derived" 80 true [] (FromAmbientModule "lab:tools")
+                  entrypoint "Based" 90 false [ 1 ] (FromAmbientModule "lab:tools")
+                  entrypoint "Plain" 100 false [] (FromAmbientModule "lab:tools")
+                  entrypoint "Global" 110 true [] FromGlobal ]
+
+            let model =
+                { Build.shapeModel ((cases |> List.collect (fun (facts, _, _, _) -> facts)) @ Build.primitives) with
+                    Harvest =
+                        { Exports = cases |> List.map (fun (_, _, export, _) -> export) }
+                    ExportTypes = cases |> List.map (fun (_, _, _, types) -> types) |> Map.ofList
+                    Decls = cases |> List.map (fun (_, declaration, _, _) -> declaration) }
+
+            let shaped, findings = Build.runPass Classes.shapeClasses model
+
+            let converted =
+                shaped.Decls
+                |> List.choose (function
+                    | FsInterface decl when decl.Entrypoint.IsSome -> Some decl.Name
+                    | _ -> None)
+
+            Expect.equal converted [ "Derived"; "Based" ] "abstract or based, and out of an ambient module"
+
+            Expect.equal
+                (findings |> List.filter (fun f -> f.Key = "SC007") |> List.map _.Symbol)
+                [ "Derived"; "Based" ]
+                "each conversion is reported"
+
+            match shaped.Decls |> List.pick (function
+                                             | FsInterface decl when decl.Name = "Derived" -> Some decl
+                                             | _ -> None) with
+            | decl ->
+                let entry = decl.Entrypoint.Value
+                Expect.equal entry.Binding (ImportFrom("Derived", "lab:tools")) "the specifier's import binds the class"
+                Expect.equal (entry.Parameters |> List.map _.Name) [ "label" ] "the construct signature's parameters"
+
+        testCase "shape-classes refuses the class form where F# would not admit it" <| fun _ ->
+            // A base this run declares is an interface, and an F# class reaches its base through
+            // a constructor call an interface has none of.
+            let instance =
+                { Build.facts (Build.typeResponse 80 TypeFlags.Object) with
+                    Members = [ Build.resolvedMember (Build.symbol 801 "jaw" SymbolFlags.Property) 2 ]
+                    BaseTypes = [ 70 ] }
+
+            let static' =
+                { Build.facts (Build.typeResponse 81 TypeFlags.Object) with
+                    ConstructSignatures = [ { Build.signature [] 80 with IsAbstract = true } ] }
+
+            let declaration =
+                FsInterface
+                    { Name = "Vise"
+                      Docs = ""
+                      Tags = []
+                      Order = None
+                      TypeParameters = []
+                      Inherits = [ FsNamed "Hammer" ]
+                      Members = []
+                      Entrypoint = None
+                      CreateOverloads = []
+                      Statics = [] }
+
+            let model =
+                { Build.shapeModel (instance :: static' :: Build.primitives) with
+                    Harvest =
+                        { Exports =
+                            [ { Build.export "Vise" (Build.symbol 800 "Vise" (SymbolFlags.Class ||| SymbolFlags.Value)) with
+                                  Origin = FromAmbientModule "lab:tools" } ] }
+                    ExportTypes = Map.ofList [ 800, { Declared = Some 80; Value = Some 81 } ]
+                    Decls = [ declaration ] }
+
+            let shaped, findings = Build.runPass Classes.shapeClasses model
+
+            Expect.contains
+                (findings |> List.map (fun f -> f.Key, f.Message))
+                ("SC008",
+                 "entrypoint class kept the interface form: the class inherits a base whose constructor arguments have no F# form")
+                "the refusal names what F# refused"
+
+            Expect.isTrue
+                (shaped.Decls
+                 |> List.forall (function
+                     | FsInterface decl -> decl.Entrypoint.IsNone
+                     | _ -> true))
+                "and the declaration keeps the interface form"
+
         testCase "shape-classes says a static method had no signatures, not that it was settable" <| fun _ ->
             // `DOMException.isError` is inherited from the lib's `ErrorConstructor`, which this
             // run resolves identity-only - so there are no call signatures to shape a method
@@ -2494,6 +2625,7 @@ let shapePassTests =
                       TypeParameters = []
                       Inherits = []
                       Members = []
+                      Entrypoint = None
                       CreateOverloads = []
                       Statics = [] }
 
@@ -2542,6 +2674,7 @@ let shapePassTests =
                                 Tags = []
                                 ReadOnly = false
                                 Type = FsString } ]
+                      Entrypoint = None
                       CreateOverloads = []
                       Statics = [] }
 
@@ -2570,6 +2703,7 @@ let shapePassTests =
                   TypeParameters = []
                   Inherits = []
                   Members = members
+                  Entrypoint = None
                   CreateOverloads = []
                   Statics = [] }
 
@@ -2738,6 +2872,7 @@ let shapePassTests =
                                   [ method' "add" [ parameter "targets" (FsNamed "DOMTargets") ]
                                     method' "add" [ parameter "targets" (FsNamed "JSTargets") ]
                                     method' "add" [ parameter "targets" FsString ] ]
+                                Entrypoint = None
                                 CreateOverloads = []
                                 Statics = [] } ] }
 
@@ -3129,6 +3264,7 @@ let shapePassTests =
                       TypeParameters = []
                       Inherits = []
                       Members = []
+                      Entrypoint = None
                       CreateOverloads = []
                       Statics = [] }
 
@@ -3187,6 +3323,7 @@ let shapePassTests =
                                             Tags = []
                                             ReadOnly = true
                                             Type = FsApp("Params", [ FsString ]) } ]
+                                Entrypoint = None
                                 CreateOverloads = []
                                 Statics = [] } ] }
 
@@ -3238,6 +3375,7 @@ let shapePassTests =
                                             Tags = []
                                             ReadOnly = true
                                             Type = FsApp("ExcludeStrict", [ FsString; FsFloat ]) } ]
+                                Entrypoint = None
                                 CreateOverloads = []
                                 Statics = [] } ] }
 
@@ -3318,6 +3456,7 @@ let shapePassTests =
                       TypeParameters = [ { Name = "Env"; Constraint = None } ]
                       Inherits = []
                       Members = []
+                      Entrypoint = None
                       CreateOverloads = []
                       Statics = [] }
 
@@ -3364,6 +3503,7 @@ let shapePassTests =
                                             Tags = []
                                             ReadOnly = false
                                             Type = FsUnit } ]
+                                Entrypoint = None
                                 CreateOverloads = []
                                 Statics = [] } ] }
 

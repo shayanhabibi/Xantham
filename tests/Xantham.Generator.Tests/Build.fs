@@ -106,6 +106,7 @@ let signature (parameters: ResolvedMember list) (returnTypeId: int) : ResolvedSi
         Parameters = parameters
         HasRest = false
         TypeParameters = []
+        IsAbstract = false
         ReturnTypeId = returnTypeId
     }
 

@@ -34,9 +34,48 @@ let private staticBinding (binding: ImportBinding) (key: string) =
     | GlobalName name -> GlobalName $"{name}.{key}"
     | ImportFrom(name, specifier) -> ImportFrom($"{name}.{key}", specifier)
 
+/// The closed vocabulary `SC008` reports, so a corpus aggregates by reason.
+module private Refusal =
+    [<Literal>]
+    let NoDeclaration = "the run emits no interface under the class's name"
+
+    [<Literal>]
+    let FreeTypeParameter = "the constructor binds a type parameter the declaration's head does not"
+
+    [<Literal>]
+    let InheritedBase = "the class inherits a base whose constructor arguments have no F# form"
+
+/// The type variables a reference mentions. A primary constructor is written under the
+/// declaration's own head, so its parameters may name those variables and no others.
+let rec private typeVars (reference: FsTypeRef) =
+    match reference with
+    | FsTypeVar name -> Set.singleton name
+    | FsOption inner
+    | FsArray inner
+    | FsBranded(inner, _) -> typeVars inner
+    | FsTuple parts
+    | FsErasedUnion parts
+    | FsApp(_, parts) -> parts |> List.fold (fun found part -> Set.union found (typeVars part)) Set.empty
+    | FsDelegate(parameters, returns) ->
+        returns :: parameters
+        |> List.fold (fun found part -> Set.union found (typeVars part)) Set.empty
+    | _ -> Set.empty
+
+/// A class an ambient module exports for consumers to derive from: `abstract`, or carrying a
+/// base of its own. F# admits no `inherit` of an interface (FS0946), so this is the one shape
+/// that reaches a consumer's `type Actor(ctx, env) = inherit DurableObject(ctx, env)`. Every
+/// other class keeps the interface form, where the `[<ParamObject>]` Create is the construction
+/// a consumer wants.
+let private isEntrypoint (export: HarvestedExport) (constructSignatures: ResolvedSignature list) (bases: int list) =
+    match export.Origin with
+    | FromAmbientModule _ -> (constructSignatures |> List.exists _.IsAbstract) || not bases.IsEmpty
+    | FromGlobal
+    | FromModule -> false
+
 /// Constructor members on `Exports` for exported classes: `Exports.Name(...)` is
 /// `new Name(...)` through `[<EmitConstructor>]` (§4.4). The same pass shapes the class's
-/// *statics* onto its own interface, so a consumer writes `Counter.MAX` as TypeScript does.
+/// *statics* onto its own interface, so a consumer writes `Counter.MAX` as TypeScript does, and
+/// converts an ambient module's entrypoint classes to the `[<AbstractClass>]` form.
 let shapeClasses: Pass<ShapeModel> =
     {
         Name = "shape-classes"
@@ -58,6 +97,9 @@ let shapeClasses: Pass<ShapeModel> =
                         |> Map.ofList
 
                     let mutable statics: Map<string, FsExportMember list> = Map.empty
+
+                    // The declarations that convert to the class form, by name.
+                    let mutable entrypoints: Map<string, FsEntrypoint> = Map.empty
 
                     /// One static, shaped: a method where the checker says so and it has a
                     /// signature, a property otherwise - settable where TypeScript declares it
@@ -154,6 +196,64 @@ let shapeClasses: Pass<ShapeModel> =
                                     }
                                 ]
 
+                    /// One class in the entrypoint form: the declaration's own head, the
+                    /// parameters of its first construct signature, and the import that binds the
+                    /// JavaScript constructor. Refused where F# would not admit the result, and
+                    /// the declaration then keeps the interface form it already has.
+                    let admitEntrypoint (export: HarvestedExport) (facts: TypeFacts) (name: string) =
+                        let declaration =
+                            model.Decls
+                            |> List.tryPick (function
+                                | FsInterface decl when decl.Name = name -> Some decl
+                                | _ -> None)
+
+                        let refuse reason =
+                            emit (Finding.make name (ShapeClasses.EntrypointClassRefused reason))
+
+                        match declaration with
+                        | None -> refuse Refusal.NoDeclaration
+                        // An F# class reaches its base through a constructor call, and a base
+                        // this run declares is an interface with none. The interface form keeps
+                        // the is-a relation the `inherit` line already carries.
+                        | Some declaration when not declaration.Inherits.IsEmpty -> refuse Refusal.InheritedBase
+                        | Some declaration ->
+                            // The constructor overloads beyond the first have no F# form: a
+                            // primary constructor takes one parameter list. `Exports` still
+                            // carries every one of them under `[<EmitConstructor>]`.
+                            let parameters =
+                                match facts.ConstructSignatures with
+                                | [] -> []
+                                | signature :: _ ->
+                                    let _, parameters, _, _ = shapeSignature ctx model (Some name) name signature
+                                    parameters
+
+                            let bound = declaration.TypeParameters |> List.map _.Name |> Set.ofList
+
+                            let free =
+                                parameters
+                                |> List.fold (fun found p -> Set.union found (typeVars p.Type)) Set.empty
+                                |> fun mentioned -> Set.difference mentioned bound
+
+                            if not free.IsEmpty then
+                                refuse Refusal.FreeTypeParameter
+                            else
+                                let specifier =
+                                    match export.Origin with
+                                    | FromAmbientModule specifier -> specifier
+                                    | FromGlobal
+                                    | FromModule -> ""
+
+                                entrypoints <-
+                                    Map.add
+                                        name
+                                        {
+                                            Binding = bindingOf export
+                                            Parameters = parameters
+                                        }
+                                        entrypoints
+
+                                emit (Finding.make name (ShapeClasses.EntrypointClassEmitted specifier))
+
                     let members =
                         model.Harvest.Exports
                         |> List.indexed
@@ -201,6 +301,25 @@ let shapeClasses: Pass<ShapeModel> =
                                                 ((Map.tryFind name statics |> Option.defaultValue []) @ shaped)
                                                 statics
 
+                                    let declaredId =
+                                        Map.tryFind export.Symbol.Id model.ExportTypes |> Option.bind _.Declared
+
+                                    let bases =
+                                        declaredId
+                                        |> Option.bind (fun typeId -> Map.tryFind typeId model.Types)
+                                        |> Option.map _.BaseTypes
+                                        |> Option.defaultValue []
+
+                                    if isEntrypoint export facts.ConstructSignatures bases then
+                                        // The name the *instance* side is declared under, which a
+                                        // clash renames: `cloudflare:workers`'s `DurableObject`
+                                        // class is `DurableObject2` beside the global interface of
+                                        // that name, and the class form belongs to the class.
+                                        let declaredName =
+                                            declaredId |> Option.bind (fun typeId -> Map.tryFind typeId model.DeclNames)
+
+                                        admitEntrypoint export facts (Option.defaultValue name declaredName)
+
                                     facts.ConstructSignatures
                                     |> List.map (fun signature ->
                                         let typeParameters, parameters, returns, signatureFindings =
@@ -222,10 +341,13 @@ let shapeClasses: Pass<ShapeModel> =
                     let decls =
                         model.Decls
                         |> List.map (function
-                            | FsInterface decl when (Map.containsKey decl.Name statics) ->
+                            | FsInterface decl ->
                                 FsInterface
                                     { decl with
-                                        Statics = decl.Statics @ Map.find decl.Name statics
+                                        Statics =
+                                            decl.Statics
+                                            @ (Map.tryFind decl.Name statics |> Option.defaultValue [])
+                                        Entrypoint = Map.tryFind decl.Name entrypoints
                                     }
                             | other -> other)
 

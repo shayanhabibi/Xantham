@@ -15,3 +15,26 @@ export class Hammer {
 export function measure(payload) {
     return payload.label.length;
 }
+
+export class Workbench {
+    constructor(label) {
+        this.label = label;
+    }
+    run(payload) {
+        return `base:${payload.label}`;
+    }
+}
+
+export class Snag extends Error {
+    constructor(message) {
+        super(message);
+        this.name = "Snag";
+    }
+}
+
+export class Vise extends Hammer {
+    constructor(weight, jaw) {
+        super(weight);
+        this.jaw = jaw;
+    }
+}
