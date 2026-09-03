@@ -45,19 +45,14 @@ let private dependencyPackage = Path.Combine(packages, "cross-package-dep")
 [<Literal>]
 let private DependencyModule = "CrossPackageDep"
 
-/// The dependency as a `reference` group, so its types render as templated names rather than
-/// resolving or widening.
-let private referenceConfig =
-    { GeneratorConfig.Default with
-        Groups = Map.ofList [ "cross-package-dep", Reference ]
-    }
+/// The entry package's own `xantham.json`, which configures the dependency `reference`, so the
+/// templated rendering is the one the corpus commits and the compile gate compiles.
+let private referenceConfig = GeneratorConfig.load entryPackage
 
-/// The entry package rendered against that configuration. Its `reference` group templates into
-/// a module the gated corpus ships, at names the corpus does not declare, so the file is
-/// committed under the `.open.fs` suffix the compile gate excludes - see the gate's own project
-/// file. Renaming it into the gate is what a fix for the pinned violations below looks like.
-let private openGolden =
-    Path.Combine(goldenDir, "cross-package-lab", "CrossPackageLab.reference.open.fs")
+/// The entry package rendered against that configuration, written by its `Pipeline.test.fs`
+/// registration and read here as a file.
+let private entryGolden =
+    Path.Combine(goldenDir, "cross-package-lab", "CrossPackageLab.fs")
 
 /// The dependency's committed golden: what a `ship` run of the group produced, generated
 /// separately and read here as a file rather than as a value.
@@ -196,18 +191,12 @@ let multiPackageTests =
     let shipped = lazy (declaredIn (readText dependencyGolden))
 
     testList "generator multi-package" [
-        testCase "cross-package-lab: the reference rendering matches its committed golden"
+        testCase "cross-package-lab: the reference rendering is the committed golden"
         <| fun _ ->
-            if updateGoldens then
-                Directory.CreateDirectory(Path.GetDirectoryName openGolden) |> ignore
-                File.WriteAllText(openGolden, entryReference.Value, Text.UTF8Encoding false)
-            else
-                Expect.isTrue
-                    (File.Exists openGolden)
-                    "golden cross-package-lab/CrossPackageLab.reference.open.fs does not exist - run once \
-                     with XANTHAM_UPDATE_GOLDEN=1 and review the diff"
-
-                Expect.equal (readText openGolden) entryReference.Value "the reference rendering is pinned"
+            // The gate compiles the file, so the contract below is held against the same text
+            // the F# compiler judges.
+            if not updateGoldens then
+                Expect.equal (readText entryGolden) entryReference.Value "the reference rendering is pinned"
 
         testCase "cross-package-lab: the dependency's types are qualified and the entry's own are not"
         <| fun _ ->
@@ -225,18 +214,33 @@ let multiPackageTests =
 
             Expect.isEmpty missing $"templated into {DependencyModule} and declared nowhere in its golden"
 
-        // The O7 contract itself. It does not hold; the pinned set below is what it costs, and
-        // lane T's section of docs/plans/generator-wave-five.md records why the repair is not
-        // here.
-        ptestCase "cross-package-lab: every templated name carries the arity the dependency declares"
+        // The O7 contract itself, over arity.
+        testCase "cross-package-lab: every templated name carries the arity the dependency declares"
         <| fun _ ->
             Expect.isEmpty
                 (violations templated.Value shipped.Value)
                 $"every name templated into {DependencyModule} is declared there at the same arity"
 
+        // An application into a referenced group is an escape: the shipped declaration's arity
+        // belongs to a run this one does not make. `Box<string>` and `Box<Widget>` are the two.
+        testCase "cross-package-lab: an applied reference reports its arity as unconfirmed"
+        <| fun _ ->
+            let unconfirmed =
+                (generated referenceConfig entryPackage).Findings
+                |> List.filter (fun finding -> finding.Key = "TR054")
+
+            Expect.hasLength unconfirmed 2 "each applied reference raises TR054"
+
+            Expect.isTrue
+                (unconfirmed
+                 |> List.forall (fun finding -> finding.Message.Contains "Box is referenced with 1 type argument"))
+                "and each names the referenced type with the count applied"
+
         // The other half of identity-only resolution: a referenced group's types are named, not
-        // copied. This does not hold either - `WidgetPair` is re-derived into the entry package
-        // as `PanelPair`, so one TypeScript type gets two unrelated F# declarations.
+        // copied. This does not hold - `WidgetPair` is re-derived into the entry package as
+        // `PanelPair`, so one TypeScript type gets two unrelated F# declarations. Lane T's
+        // section of docs/plans/generator-wave-five.md records the repair as belonging to
+        // `Resolve.fs`.
         ptestCase "cross-package-lab: a referenced type is templated rather than re-declared"
         <| fun _ ->
             let entry = declaredIn entryReference.Value
@@ -245,25 +249,6 @@ let multiPackageTests =
                 Expect.isFalse
                     (entry |> Map.exists (fun declared _ -> declared.EndsWith(name, StringComparison.Ordinal)))
                     $"{name} belongs to the dependency and is declared in the entry package too"
-
-        // What the two pending cases above cost, exactly. Pinned so the break can neither widen
-        // nor change shape unremarked; an empty list here is the fix.
-        testCase "cross-package-lab: the templated names O7 does not honour are exactly these"
-        <| fun _ ->
-            Expect.equal
-                (violations templated.Value shipped.Value)
-                [
-                    // `Box<string>` and `Box<Widget>` both template as a bare `CrossPackageDep.Box`.
-                    // The shape tier drops `facts.TypeArguments` at the `Reference` disposition, so
-                    // the applied argument is lost and the name lands at an arity the dependency
-                    // does not declare - with no finding.
-                    {
-                        Name = "Box"
-                        Applied = 0
-                        Declared = Some 1
-                    }
-                ]
-                "the O7 contract holds for every templated name but these"
 
         testCase "cross-package-lab: generation order does not matter"
         <| fun _ ->
