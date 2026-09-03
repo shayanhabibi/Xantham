@@ -1904,4 +1904,32 @@ let pipelineTests =
                                |> List.filter (fun f -> f.Key = "SP003" && f.Symbol.StartsWith "Handle"))
                               "a declaration that already has Create members is not reported as missing one" ])
 
+        // Wave five lane T (O7). `cross-package-lab` is two packages under one `node_modules`,
+        // and each half is registered here as its own entry package - the closed configuration,
+        // where nothing is templated into a module no golden ships and the compile gate takes
+        // both. The `reference` configuration that templates one half into the other is an open
+        // one, and lives in `MultiPackage.test.fs` with the contract it is there to hold.
+        yield!
+            fixtureTests
+                "cross-package-dep"
+                (handFixture "cross-package-lab/node_modules/cross-package-dep")
+                GeneratorConfig.Default
+                (fun _ -> [])
+
+        yield!
+            fixtureTests
+                "cross-package-lab"
+                (handFixture "cross-package-lab/node_modules/cross-package-lab")
+                GeneratorConfig.Default
+                (fun package ->
+                    [ testCase "a dependency left unconfigured widens rather than being resolved" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                          Expect.equal
+                              (rendered.Findings
+                               |> List.filter (fun finding -> finding.Message.Contains "not among the generated")
+                               |> List.map _.Symbol)
+                              [ "Panel.widget"; "Panel.boxed"; "PanelPair.left"; "PanelPair.right"; "mount(widget)"; "mount()" ]
+                              "every reference into the dependency is a widening with a name" ])
+
     ]

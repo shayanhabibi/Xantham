@@ -33,7 +33,17 @@
              conflicted in. The goldens are independent modules, so wildcard order is
              immaterial - but all of them follow the two hand-written files above, which
              they are allowed to reference. -->
+        <!-- Except the open ones. O7's `reference` disposition renders a group's types as names
+             templated into another package's module, so a golden generated against it compiles
+             only where the gated corpus also ships that module. The corpus is the unit of
+             closure, not the run: `cross-package-lab` is generated as a `reference` against
+             `cross-package-dep`, and both halves are gated together, which is what makes the F#
+             compiler - rather than a string comparison - the judge of whether the templated name
+             is the shipped one. A golden whose templated module nothing ships is committed with
+             the `.open.fs` suffix and stays out; wave five lane T's section of
+             docs/plans/generator-wave-five.md records why stub assemblies were refused. -->
         <Compile Include="..\Xantham.Generator.Tests\golden\**\*.fs"
+                 Exclude="..\Xantham.Generator.Tests\golden\**\*.open.fs"
                  Link="golden\%(RecursiveDir)%(Filename)%(Extension)" />
     </ItemGroup>
 

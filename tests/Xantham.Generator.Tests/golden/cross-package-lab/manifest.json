@@ -1,0 +1,105 @@
+{
+  "package": "cross-package-lab",
+  "module": "CrossPackageLab",
+  "counts": {
+    "exact": 0,
+    "ergonomic": 0,
+    "widened": 3,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 4,
+      "widened": 4
+    },
+    {
+      "pass": "SE - shape-exports",
+      "total": 2,
+      "widened": 2
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 2,
+      "ergonomic": 2
+    }
+  ],
+  "symbols": [
+    {
+      "name": "Panel",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "TR023",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Panel.boxed",
+          "message": "Box is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "TR023",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Panel.widget",
+          "message": "Widget is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Panel",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "PanelPair",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "TR023",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "PanelPair.left",
+          "message": "Widget is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "TR023",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "PanelPair.right",
+          "message": "Widget is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "PanelPair",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "mount",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "TR023",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "mount()",
+          "message": "Box is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "TR023",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "mount(widget)",
+          "message": "Widget is not among the generated declarations; widened to obj"
+        }
+      ]
+    }
+  ]
+}

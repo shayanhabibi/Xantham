@@ -146,6 +146,58 @@ is the cheapest one in the wave to break by accident.
 - Findings: none expected. A finding this lane needs is a request back to the manager.
 - Done: the contract holds or it does not, stated as a test rather than a paragraph.
 
+#### Lane T result — the contract does not hold
+
+`cross-package-lab` is two hand-authored packages side by side under one `node_modules`:
+`cross-package-dep` declares an interface (`Widget`), a generic at arity 1 (`Box<T>`) and an
+object alias (`WidgetPair`); `cross-package-lab` reads all three. Each half is registered in
+`Pipeline.test.fs` as its own entry package, and `MultiPackage.test.fs` generates the entry a
+second time with the dependency configured `reference`.
+
+Two of the three shapes break, and the repairs belong to `Shape/Spec.fs` and `Resolve.fs`, which
+this lane does not own:
+
+1. **A templated generic loses its arguments.** `Shape/Spec.fs`'s `Reference` arm renders
+   `FsNamed $"{groupModule}.{typeName}", []`, discarding `facts.TypeArguments`, so `Box<string>`
+   and `Box<Widget>` both come out as a bare `CrossPackageDep.Box`. The dependency's own golden
+   declares `type Box<'T>`. Three sites, `error FS0033: The type 'CrossPackageDep.Box<_>' expects
+   1 type argument(s) but is given 0`, and no finding is raised. `instantiationOf` is what would
+   normally re-apply the arguments, and it looks the target up in `DeclNames` - which a
+   `reference` group is never in, since identity-only resolution declares nothing.
+2. **A referenced object alias is copied instead of named.** `WidgetPair` is a type alias over an
+   object literal, so the type the checker hands back carries the symbol `__type` and
+   `Resolve.fs`'s `isAnonymousShape` is true; the O7 shortcut is skipped and the dependency's
+   shape is re-derived into the entry package as `PanelPair`. Two packages then declare the same
+   TypeScript type as two unrelated F# interfaces. This one compiles, which is what makes it the
+   more expensive of the two. The alias symbol is on `aliasSymbol` rather than on `symbol`, so
+   the "a mapped type has no name to defer to" reasoning `isAnonymousShape` is written for does
+   not describe this case.
+
+`Widget` - a plain interface - templates and resolves correctly, which is the whole of what the
+four existing unit tests and the `ansi-regex` `typescript/lib` case cover.
+
+Order-independence holds: the entry and the dependency are byte-identical whichever is generated
+first, and the entry is byte-identical whether or not the dependency has been generated before
+it. Generation reads no earlier output, and `MultiPackage.test.fs` now asserts it in both orders.
+
+#### The compile-gate policy for open configurations
+
+**Gate closed configurations only - closure read over the gated corpus, not over the run.** A
+golden generated against a `reference` group joins the compile gate when some other gated golden
+ships the module it templates into; `cross-package-dep` and `cross-package-lab` are gated
+together for exactly that reason, which makes the F# compiler rather than a string comparison the
+judge of whether the templated name is the shipped one. A golden whose templated module nothing
+ships carries the `.open.fs` suffix and is excluded by one `Exclude` attribute in
+`Xantham.Generator.CompileGate.fsproj`.
+
+The entry's `reference` rendering is committed as
+`golden/cross-package-lab/CrossPackageLab.reference.open.fs` and is excluded today - not because
+its group is unshipped, but because of break 1 above. Renaming it into the gate is the acceptance
+test for the fix.
+
+Stub synthesis is refused. A stub is written from the templated identity, so it agrees with the
+template by construction, and both breaks above would compile clean against one.
+
 ## Batch 2 — priced by batch 1, not before
 
 1. **`inline` and demand-driven resolve.** The named prerequisite for shipping large groups. Lane
