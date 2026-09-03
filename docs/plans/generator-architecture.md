@@ -1142,6 +1142,21 @@ section above.
   arguments against a group resolved by identity only, so `TR054` records the applied count
   as an escape on otherwise correct output.
 
+  *Amended (wave five, batch 3): the naming contract takes a configured namespace.* A package
+  family publishes under one F# namespace, and `namespace` in `xantham.json` is where it says
+  so: the entry package is named `<namespace>.<Leaf>`, each group `groups` names takes the same
+  form, and `module` names the family's root outright. `@cloudedge/agents` under
+  `FSharp.CloudEdge` reads `FSharp.CloudEdge.Agents` from either side, so one key per member
+  and one `module` in the root is the whole configuration. Membership is what `groups` lists
+  rather than what an npm scope implies, which lets a family span scopes and lets an unscoped
+  family exist. A dependency the configuration leaves unnamed keeps its derived module.
+
+  This moves part of the naming contract from pinned derivation to agreement between two
+  configuration files, which is the failure mode lane T spent a wave finding. `GE004` is the
+  guard: one escape per group a run names from its namespace, recording that the name is an
+  assertion about a run performed elsewhere. A run configuring no namespace raises none and
+  emits exactly what it emitted before.
+
   *Settled (wave five lane W): the compiler-lib group will not ship, and O7's default stays
   `widen`.* Shipping `TypeScript.Lib` needs no code beyond lane S's group emission, and it
   does not terminate for a realistic entry package: one `EventTarget` reference resolves

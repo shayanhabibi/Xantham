@@ -678,6 +678,9 @@ type EmitGroups =
     /// Wave five, lane S. Two groups template one module name, so one run would write the name
     /// twice (`@types/three` and `three` both derive `Three`).
     | [<Escape>] GroupModuleCollision of group: string * moduleName: string
+    /// Wave five, batch 3. A group named under the entry package's configured namespace rather
+    /// than by the pinned derivation. The referenced run has to configure the same namespace.
+    | [<Escape>] GroupModuleFromNamespace of group: string * moduleName: string
 
     interface IFindingKind with
         member this.Message =
@@ -688,6 +691,8 @@ type EmitGroups =
                 $"{group} is configured ship and no reference reached it; the module is not written"
             | GroupModuleCollision(group, moduleName) ->
                 $"{group} templates the module {moduleName}, which another group in this run already writes"
+            | GroupModuleFromNamespace(group, moduleName) ->
+                $"{group} is named {moduleName} from the configured namespace; a run generating {group} has to configure the same one"
 
 module FindingCatalogue =
     /// Every finding union, in the order the manifest legend lists them. The snapshot test

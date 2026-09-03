@@ -266,4 +266,60 @@ let multiPackageTests =
             if not updateGoldens then
                 let shippedNow = generated GeneratorConfig.Default dependencyPackage
                 Expect.equal (sourceOf shippedNow) (readText dependencyGolden) "the dependency's golden is current"
+
+        // A family names itself: one `namespace` in each member, and `module` in the root alone.
+        // Both runs are generated here rather than committed, so the corpus keeps the names its
+        // goldens carry.
+        testCase "cross-package-lab: a namespace renames both sides of the contract"
+        <| fun _ ->
+            let familyNamespace = Some "FSharp.CloudEdge"
+
+            let entrySource =
+                generated
+                    { referenceConfig with
+                        Namespace = familyNamespace
+                        ModuleName = Some "FSharp.CloudEdge" }
+                    entryPackage
+                |> sourceOf
+
+            let memberSource =
+                generated
+                    { GeneratorConfig.Default with
+                        Namespace = familyNamespace }
+                    dependencyPackage
+                |> sourceOf
+
+            Expect.stringContains entrySource "module rec FSharp.CloudEdge\n" "the root takes the namespace bare"
+
+            Expect.stringContains
+                memberSource
+                "module rec FSharp.CloudEdge.CrossPackageDep\n"
+                "and the member's own run is named under it"
+
+            // The whole point: the name the root writes is the name the member declares.
+            Expect.stringContains
+                entrySource
+                "FSharp.CloudEdge.CrossPackageDep.Widget"
+                "the reference templates the member's module"
+
+        testCase "cross-package-lab: a renamed group is reported"
+        <| fun _ ->
+            let findings =
+                (generated
+                    { referenceConfig with
+                        Namespace = Some "FSharp.CloudEdge" }
+                    entryPackage)
+                    .Findings
+                |> List.filter (fun finding -> finding.Key = "GE004")
+                |> List.map (fun finding -> finding.Symbol)
+
+            Expect.equal findings [ "cross-package-dep" ] "one finding for the group the namespace renamed"
+
+        testCase "cross-package-lab: no namespace leaves every name derived"
+        <| fun _ ->
+            let findings =
+                (generated referenceConfig entryPackage).Findings
+                |> List.filter (fun finding -> finding.Key = "GE004")
+
+            Expect.isEmpty findings "an unconfigured run asserts no cross-package name"
     ]

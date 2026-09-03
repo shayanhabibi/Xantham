@@ -1,4 +1,4 @@
-/// The JSON Schema for `xantham.json` (decision O4), emitted from `GeneratorConfig`,
+﻿/// The JSON Schema for `xantham.json` (decision O4), emitted from `GeneratorConfig`,
 /// `GroupDisposition` and `MappedName` by reflection. The property set, their JSON types and
 /// the disposition vocabulary are read from the F# declarations; the key spellings and the
 /// descriptions are read from the tables here, which carry an entry for every member.
@@ -27,6 +27,13 @@ let private configKeys =
             ("module",
              "The F# module the binding is written into. Defaults to the package name under the O7 naming \
           contract, where `@scope/pkg-name` becomes `Scope.PkgName`.")
+
+            "Namespace",
+            ("namespace",
+             "The F# namespace a package family is written under. The entry package takes it, and each \
+          group named under `groups` takes `<namespace>.<Leaf>`, so `@cloudedge/agents` under \
+          `FSharp.CloudEdge` reads `FSharp.CloudEdge.Agents`. Both sides of a reference configure the \
+          same namespace.")
 
             "Groups",
             ("groups",

@@ -140,7 +140,8 @@ let findingsTests =
                     "AC001 AuditCoverage.ExportNotRepresented escape"
                     "GE001 EmitGroups.GroupShipped exact"
                     "GE002 EmitGroups.ShippedGroupWithoutDeclarations widened"
-                    "GE003 EmitGroups.GroupModuleCollision escape" ]
+                    "GE003 EmitGroups.GroupModuleCollision escape"
+                    "GE004 EmitGroups.GroupModuleFromNamespace escape" ]
 
               Expect.equal table expected "keys are positional: append new cases, never insert or reorder"
 

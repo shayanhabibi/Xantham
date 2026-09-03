@@ -50,12 +50,10 @@ let toShape (resolve: ResolveModel) : ShapeModel =
         Decls = []
     }
 
-/// The generated module's name: the config override, or the entry package's name under the
-/// O7 naming contract (`@scope/pkg-name` -> `Scope.PkgName`).
+/// The generated module's name: the config override, the configured namespace, or the entry
+/// package's name under the O7 naming contract (`@scope/pkg-name` -> `Scope.PkgName`).
 let moduleName (ctx: Context) =
-    match ctx.Config.ModuleName with
-    | Some name -> name
-    | None -> Naming.packageModule ctx.PackageName
+    Naming.groupModule ctx.Config ctx.PackageName EntryPackage
 
 /// The group each generated declaration belongs to (O7), read off the type the shape tier named
 /// it from. A name carried by two type ids takes the smaller id's group.
@@ -109,7 +107,7 @@ let groupModules (ctx: Context) (shape: ShapeModel) : Render.GroupModule list =
             {
                 Group = key
                 IsEntry = false
-                Module = Naming.groupModule ctx.PackageName origin
+                Module = Naming.groupModule ctx.Config ctx.PackageName origin
                 RuntimePackage = GeneratorConfig.derivedRuntimePackage key
                 Decls = decls
             }
@@ -123,6 +121,30 @@ let groupModules (ctx: Context) (shape: ShapeModel) : Render.GroupModule list =
 
     moduleOf EntryPackage :: shipped
 
+/// One finding per group this run names from the configured namespace rather than from the
+/// pinned derivation. The name is an assertion about a run nobody here performs, so it carries
+/// the same weight as an unconfirmed arity.
+let private namespaceFindings (ctx: Context) (shape: ShapeModel) =
+    match ctx.Config.Namespace with
+    | None -> []
+    | Some _ ->
+        shape.Types
+        |> Map.toList
+        |> List.map (fun (_, facts) -> facts.Origin)
+        |> List.distinct
+        |> List.choose (fun origin ->
+            match origin with
+            | Dependency key ->
+                let named = Naming.groupModule ctx.Config ctx.PackageName origin
+
+                if named = Naming.packageModule key then
+                    None
+                else
+                    Some(key, named)
+            | _ -> None)
+        |> List.sortBy fst
+        |> List.map (fun (key, named) -> Finding.make key (EmitGroups.GroupModuleFromNamespace(key, named)))
+
 /// Shape -> Render: declarations plus every finding of every earlier tier.
 let toRender (ctx: Context) (shape: ShapeModel) (findings: Finding list) : RenderModel =
     {
@@ -131,7 +153,7 @@ let toRender (ctx: Context) (shape: ShapeModel) (findings: Finding list) : Rende
         RuntimePackage = GeneratorConfig.runtimePackage ctx.Config ctx.PackageName
         PackageDir = ctx.PackageDir
         Decls = shape.Decls
-        Findings = findings
+        Findings = findings @ namespaceFindings ctx shape
         Files = []
     }
 

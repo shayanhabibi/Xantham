@@ -1,4 +1,4 @@
-/// The resolve tier's origin classification (O7): declaration paths to package groups, and the
+﻿/// The resolve tier's origin classification (O7): declaration paths to package groups, and the
 /// naming contract those groups template under. Pure - the paths are fabricated handles.
 module Xantham.Generator.Tests.ResolveTests
 
@@ -79,9 +79,13 @@ let classifyTests =
         testCase "the naming contract: package names to module names" <| fun _ ->
             Expect.equal (Naming.packageModule "ansi-regex") "AnsiRegex" "plain"
             Expect.equal (Naming.packageModule "@cloudflare/workers-types") "Cloudflare.WorkersTypes" "scoped"
-            Expect.equal (Naming.groupModule "ansi-regex" CompilerLib) "TypeScript.Lib" "the lib module"
-            Expect.equal (Naming.groupModule "ansi-regex" (Dependency "left-pad")) "LeftPad" "a dependency"
-            Expect.equal (Naming.groupModule "ansi-regex" EntryPackage) "AnsiRegex" "the entry"
+            let plain = GeneratorConfig.Default
+
+            Expect.equal (Naming.groupModule plain "ansi-regex" CompilerLib) "TypeScript.Lib" "the lib module"
+
+            Expect.equal (Naming.groupModule plain "ansi-regex" (Dependency "left-pad")) "LeftPad" "a dependency"
+
+            Expect.equal (Naming.groupModule plain "ansi-regex" EntryPackage) "AnsiRegex" "the entry"
 
             // A DefinitelyTyped package is named for the library it describes, so the module an
             // F# consumer opens is the library's.
@@ -90,5 +94,73 @@ let classifyTests =
 
             // The reference side derives it too, or a dependency would be opened under a name no
             // `ship` run of it ever writes.
-            Expect.equal (Naming.groupModule "ansi-regex" (Dependency "@types/three")) "Three" "a types dependency"
+            Expect.equal
+                (Naming.groupModule GeneratorConfig.Default "ansi-regex" (Dependency "@types/three"))
+                "Three"
+                "a types dependency"
+
+        testCase "a configured namespace names the entry package and the family it lists" <| fun _ ->
+            let sdk =
+                { GeneratorConfig.Default with
+                    Namespace = Some "FSharp.CloudEdge"
+                    Groups =
+                        Map.ofList
+                            [ "@cloudedge/agents", Reference
+                              "@cloudedge/kv-store", Reference
+                              "cloudedge-legacy", Reference ] }
+
+            let entry = "@cloudedge/sdk"
+
+            Expect.equal
+                (Naming.groupModule sdk entry EntryPackage)
+                "FSharp.CloudEdge.Sdk"
+                "the entry is named under the namespace like any member"
+
+            Expect.equal
+                (Naming.groupModule sdk entry (Dependency "@cloudedge/agents"))
+                "FSharp.CloudEdge.Agents"
+                "a listed group takes a leaf under it"
+
+            Expect.equal
+                (Naming.groupModule sdk entry (Dependency "@cloudedge/kv-store"))
+                "FSharp.CloudEdge.KvStore"
+                "whose leaf is PascalCased like any other segment"
+
+            // Membership is what `groups` says, so a family spanning scopes stays one family.
+            Expect.equal
+                (Naming.groupModule sdk entry (Dependency "cloudedge-legacy"))
+                "FSharp.CloudEdge.CloudedgeLegacy"
+                "including an unscoped member"
+
+            // A dependency the configuration leaves unnamed keeps the name an independently
+            // generated binding gives it.
+            Expect.equal (Naming.groupModule sdk entry (Dependency "left-pad")) "LeftPad" "an unlisted dependency"
+
+            Expect.equal (Naming.groupModule sdk entry CompilerLib) "TypeScript.Lib" "and the compiler lib"
+
+            Expect.equal
+                (Naming.groupModule { sdk with ModuleName = Some "FSharp.CloudEdge" } entry EntryPackage)
+                "FSharp.CloudEdge"
+                "and the family's root sets `module` to take the namespace bare"
+
+            // The two sides of a reference agree without either naming the other outright: the
+            // root templates the member, and the member's own run lands on the same module.
+            let member' =
+                { GeneratorConfig.Default with
+                    Namespace = Some "FSharp.CloudEdge" }
+
+            Expect.equal
+                (Naming.groupModule member' "@cloudedge/agents" EntryPackage)
+                (Naming.groupModule sdk entry (Dependency "@cloudedge/agents"))
+                "a member generated as the entry takes the name the root templates"
+
+        testCase "a namespace reaches no group the configuration leaves unnamed" <| fun _ ->
+            let config =
+                { GeneratorConfig.Default with
+                    Namespace = Some "FSharp.CloudEdge" }
+
+            Expect.equal
+                (Naming.groupModule config "@cloudedge/sdk" (Dependency "@cloudedge/agents"))
+                "Cloudedge.Agents"
+                "an unlisted sibling"
     ]

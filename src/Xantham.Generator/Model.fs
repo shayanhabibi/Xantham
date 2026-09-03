@@ -51,6 +51,15 @@ type GeneratorConfig =
     {
         /// Overrides the F# module name otherwise derived from the package name.
         ModuleName: string option
+        /// The F# namespace a package family is written under. The entry package takes the
+        /// namespace itself, and each group named under `groups` takes `<Namespace>.<Leaf>`:
+        /// `FSharp.CloudEdge` names `@cloudedge/agents` as `FSharp.CloudEdge.Agents`. A
+        /// dependency the configuration leaves unnamed keeps its derived module.
+        ///
+        /// Both sides of a `reference` configure the same namespace. The referencing run
+        /// templates a name the referenced run has to produce, and `GE004` records each group
+        /// named this way.
+        Namespace: string option
         /// Disposition per group, keyed as `xantham.json` spells them: npm name for a
         /// dependency, `typescript/lib` for the compiler lib.
         Groups: Map<string, GroupDisposition>
@@ -72,6 +81,7 @@ type GeneratorConfig =
     static member Default =
         {
             ModuleName = None
+            Namespace = None
             Groups = Map.empty
             Lib = None
             RuntimePackage = None
@@ -168,6 +178,7 @@ module GeneratorConfig =
 
             {
                 ModuleName = field "module"
+                Namespace = field "namespace"
                 Groups = groups
                 Lib = lib
                 RuntimePackage = field "runtime"
@@ -262,13 +273,38 @@ module Naming =
     [<Literal>]
     let CompilerLibModule = "TypeScript.Lib"
 
+    /// A package's module under a namespace: `FSharp.CloudEdge` over `@cloudedge/agents` is
+    /// `FSharp.CloudEdge.Agents`.
+    let private underNamespace (ns: string) (packageName: string) =
+        let derived = GeneratorConfig.derivedRuntimePackage packageName
+        $"{ns}.{pascalSegment (derived.Split('/') |> Array.last)}"
+
+    /// A dependency's module under the entry package's configured namespace, or its derived
+    /// module where the configuration leaves the dependency unnamed.
+    ///
+    /// The namespace reaches the groups `groups` names, which is the family the entry package
+    /// declares itself part of. Selecting them by configuration rather than by npm scope lets a
+    /// family span scopes, and lets an unscoped one exist at all.
+    let namespacedModule (config: GeneratorConfig) (packageName: string) =
+        match config.Namespace with
+        | Some ns when Map.containsKey packageName config.Groups -> underNamespace ns packageName
+        | _ -> packageModule packageName
+
     /// The module a group's declarations live in (or are templated to live in).
-    let groupModule (entryPackageName: string) =
+    ///
+    /// A package generated as the entry takes the same name under a namespace that a run
+    /// referencing it templates, so one `namespace` in each member of a family is the whole
+    /// configuration. The family's root sets `module` to take the namespace bare.
+    let groupModule (config: GeneratorConfig) (entryPackageName: string) =
         function
         | EntryPackage
-        | Unclassified -> packageModule entryPackageName
+        | Unclassified ->
+            match config.ModuleName, config.Namespace with
+            | Some name, _ -> name
+            | None, Some ns -> underNamespace ns entryPackageName
+            | None, None -> packageModule entryPackageName
         | CompilerLib -> CompilerLibModule
-        | Dependency name -> packageModule name
+        | Dependency name -> namespacedModule config name
 
     /// The compiler-lib names Fable.Core already binds, and the F# spelling of each.
     ///

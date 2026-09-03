@@ -979,7 +979,8 @@ and internal referencedRef
     (facts: TypeFacts)
     (typeName: string)
     : FsTypeRef * Finding list =
-    let name = $"{Naming.groupModule ctx.PackageName facts.Origin}.{typeName}"
+    let name =
+        $"{Naming.groupModule ctx.Config ctx.PackageName facts.Origin}.{typeName}"
 
     match facts.TypeArguments with
     | [] -> FsNamed name, []

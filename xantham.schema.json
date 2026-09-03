@@ -10,6 +10,10 @@
       "type": "string",
       "description": "The F# module the binding is written into. Defaults to the package name under the O7 naming contract, where `@scope/pkg-name` becomes `Scope.PkgName`."
     },
+    "namespace": {
+      "type": "string",
+      "description": "The F# namespace a package family is written under. The entry package takes it, and each group named under `groups` takes `<namespace>.<Leaf>`, so `@cloudedge/agents` under `FSharp.CloudEdge` reads `FSharp.CloudEdge.Agents`. Both sides of a reference configure the same namespace."
+    },
     "groups": {
       "type": "object",
       "additionalProperties": {

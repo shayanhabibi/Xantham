@@ -319,7 +319,17 @@ the last case of their union, so retiring them left every other key at its posit
 keys before dispatch remains right; reserving them is a guess, and a guess that measures out
 gets retired rather than fed a contrived fixture.
 
-## Batch 3 - what this leaves
+## Batch 3
+
+**Landed: a package family names itself.** `namespace` in `xantham.json` names the entry package
+and every group `groups` lists, so an SDK publishing `@cloudedge/sdk` and `@cloudedge/agents`
+reads as `FSharp.CloudEdge` and `FSharp.CloudEdge.Agents` with one key per member. Three call
+sites carry the whole naming surface (`Pipeline.moduleName`, `Pipeline.groupModules`,
+`Shape/Spec.fs`'s reference arm), so nothing inside generation moved: **zero golden churn**,
+371 tests. `GE004` records each group named this way, since the name asserts something about a
+run performed elsewhere.
+
+### Still open
 
 1. **`inline` and demand-driven resolve.** Now priced, and priced as the prerequisite it was
    named as. It has to resolve what a package references rather than what its group contains,
