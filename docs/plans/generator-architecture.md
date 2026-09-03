@@ -1090,7 +1090,7 @@ section above.
   |---|---|---|
   | `ship` | full member resolution | group emitted as its own module (its own package) |
   | `reference` | identity only (name, arity, type args) | `FsNamed` into the group's templated module |
-  | `map` *(future)* | identity only | redirected to an existing package (`Fable.Browser.*`, BCL/Fable-native types) |
+  | `map` | identity only | redirected to an existing package (`Fable.Browser.*`, BCL/Fable-native types) |
   | `inline` *(future)* | demand-driven full | folded into the entry group, scoped to what is actually referenced |
   | `widen` | identity only | `obj` + finding |
 
@@ -1110,8 +1110,8 @@ section above.
   `widen`, and `Shape.libBinding` intercepts any name the pinned tables bind
   (`Naming.LibBindings` → `Fable.Core.JS.*`, `Naming.BrowserBindings` → `Browser.Types.*`)
   before the widening applies. Two tables of known-good names are not a configurable
-  redirection of a whole group, so `map` stays future work; what they do establish is that
-  the destination of such a redirection has to carry arity, not just a name.
+  redirection of a whole group. `map` (wave five, lane R) is that redirection, and the
+  tables are why its destination carries arity rather than a name alone.
 
   Two consequences are the point of the design. First, generation order stops
   mattering: a `reference` group templates exactly the names a real `ship` run of that
@@ -1125,17 +1125,38 @@ section above.
   practices) is what unifies a type across packages. Demand-driven resolve (a
   prerequisite for `inline` and for shipping large groups) is phase B+.
 
-  **The first consequence does not hold yet, and wave five lane T is where it is stated as a
-  test** (`tests/Xantham.Generator.Tests/MultiPackage.test.fs`, two `ptestCase`). Two breaks
-  stand between the contract and the claim. A templated *generic* is rendered by
-  `Shape/Spec.fs` as a bare name with its type arguments discarded, so `Box<string>` reads
-  `Dep.Box` against a dependency declaring `Box<'T>` and the reference fails `FS0033` with no
-  finding raised; `instantiationOf` would re-apply them, and it looks the target up in
-  `model.DeclNames`, which identity-only resolution never fills. And a referenced *alias over
-  an object literal* carries the symbol `__type` on `symbol` rather than `aliasSymbol`, so
-  `isAnonymousShape` is true, the group shortcut is skipped, and the dependency's shape is
+  **The first consequence holds as of wave five batch 2**, and
+  `tests/Xantham.Generator.Tests/MultiPackage.test.fs` asserts it rather than claiming it.
+  Both breaks lane T found are repaired. A templated *generic* now carries the arguments the
+  site applies (lane U, `Shape/Spec.fs`): `Box<string>` reads `Dep.Box<string>` where it read
+  `Dep.Box` and failed `FS0033` in silence. A referenced *alias over an object literal* now
+  reads under the name the dependency ships, taken from its alias symbol (lane V,
+  `Resolve.fs`); previously the symbol `__type` sat on `symbol` rather than `aliasSymbol`, so
+  `isAnonymousShape` was true, the group shortcut was skipped, and the dependency's shape was
   re-derived into the entry package under a second name — one TypeScript type declared as two
-  unrelated F# interfaces, and that one compiles.
+  unrelated F# interfaces, which compiles. Lane V measured that break's reach before repairing
+  it: one declaration duplicated across the whole corpus, because 34 of 35 fixtures were
+  single-package. Silent, rather than rare.
+
+  Arity remains unverifiable from inside a single run. A `reference` site applies its type
+  arguments against a group resolved by identity only, so `TR054` records the applied count
+  as an escape on otherwise correct output.
+
+  *Settled (wave five lane W): the compiler-lib group will not ship, and O7's default stays
+  `widen`.* Shipping `TypeScript.Lib` needs no code beyond lane S's group emission, and it
+  does not terminate for a realistic entry package: one `EventTarget` reference resolves
+  22,931 compiler-lib type entries to emit 6 declarations, and one `HTMLElement` exhausts a
+  12.9 GB heap. The cost is resolution rather than emission — `ship` derives every member,
+  base type and type argument transitively, while the shape tier declares 5 to 49 of the
+  100-175 names that survive. The corpus as a whole names 61 distinct compiler-lib types.
+  Two further blocks stand behind the cost. There is no canonical `TypeScript.Lib` for a
+  `reference` to template against: `Date` alone yields 2, 5 or 49 declarations according to
+  the `lib` setting, so the producer the contract assumes does not exist. And shipping the lib
+  inflates the *consumer's* module, since anonymous lib shapes are entry-package by D6 — one
+  `Date` under `esnext` took an entry module from 55 lines to 346. `reference` itself is free:
+  442 ms against `widen`'s 443 ms on the same fixture. These numbers price `inline`, which
+  has to resolve the 61 names the corpus references rather than the 20,000 a group walk
+  reaches, and has to scope `Unclassified` shapes as well as named group members.
 
   *Settled (wave five lane T):* the compile gate takes closed configurations only, with the
   **corpus** as the unit of closure rather than the run. `cross-package-lab` and

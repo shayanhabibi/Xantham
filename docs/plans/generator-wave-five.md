@@ -281,6 +281,60 @@ Lane U's acceptance test is the rename of
 `golden/cross-package-lab/CrossPackageLab.reference.open.fs` into the compile gate. Lane X's is
 byte-identical output between the CLI path and the harness path.
 
+## Batch 2 - landed
+
+Four lanes composed. Both contract breaks are repaired, so lane T's two `ptestCase` are live
+tests and the suite runs with **nothing skipped**. Corpus 35 -> 37 fixtures. Every pre-existing
+golden is byte-unchanged except `cross-package-lab`, which is where both repairs land - one line
+carries both: `abstract pair: CrossPackageDep.WidgetPair` beside
+`abstract boxed: CrossPackageDep.Box<string>`.
+
+| Lane | Landed | Measured cost |
+| --- | --- | --- |
+| U | A referenced generic carries the arguments the site applies | `Shape/Spec.fs`, one 20-line helper |
+| V | A referenced alias reads under the name its dependency ships | 6,806 extra `getAliasSymbolOfType` calls, inside the noise band |
+| W | A nested dependency classifies by nesting; the compiler lib measured and refused | `Grouping.classify` ordering |
+| X | `xantham generate`, `xantham schema`, five exit codes | new `src/Xantham.Cli`, no change to `Pipeline.fs` |
+
+### What batch 2 bought beyond the code
+
+**The compiler lib will not ship, and O7's default stays `widen`.** Recorded in full under O7 in
+`generator-architecture.md`. The short form: the cost is resolution rather than emission, one
+`HTMLElement` reference exhausts a 12.9 GB heap, and the corpus names only 61 distinct
+compiler-lib types against the ~20,000 a group walk reaches. `reference` is free (442 ms against
+`widen`'s 443 ms). This is the number that prices `inline`, and it prices it as necessary rather
+than optional.
+
+**Break 2 was silent, not rare.** One declaration duplicated across the whole corpus, because 34
+of 35 fixtures were single-package. A duplicated declaration compiles, so no gate would have
+caught it at any corpus size. The lesson is about what the corpus can and cannot see, rather
+than about aliases.
+
+**Three pre-declared keys were retired unraised.** `TR055`, `RT003` and `GE004` were reserved
+before dispatch so four lanes could append without racing. Each lane then measured its own case
+unreachable - `TR055` because control reaches that arm only after both `DeclNames` lookups miss,
+`RT003` because TypeScript attaches an alias symbol to every alias body the corpus reaches, and
+`GE004` because the classification reorder makes the condition unconstructable. All three were
+the last case of their union, so retiring them left every other key at its position. Reserving
+keys before dispatch remains right; reserving them is a guess, and a guess that measures out
+gets retired rather than fed a contrived fixture.
+
+## Batch 3 - what this leaves
+
+1. **`inline` and demand-driven resolve.** Now priced, and priced as the prerequisite it was
+   named as. It has to resolve what a package references rather than what its group contains,
+   and its scoping has to cover `Unclassified` shapes: one `Date` under `esnext` put 37
+   anonymous lib declarations into a consumer's own module.
+2. **The `Fable.Core` binding gaps** (`docs/fable-binding-gaps.md`, four entries). `map` is now
+   built and in use, so the shape these take is settled.
+3. **Publishing the CLI.** `build.fsx -- pack` filters `srcProjects` to names ending `Wire`, so
+   `Xantham.Cli` is packable and never packed. A release decision.
+4. **Group emission ordering.** `groups/*.fs` compiles in filesystem order, which happens to be
+   correct for `nested-dep-lab`. A shipped group sorting after its dependent breaks the gate
+   with no rule to point at.
+5. **A dying tsgo child reports `EndOfStreamException` at `Msgpack.readFrame`** with no
+   indication the child is gone. Cost lane W one run to diagnose.
+
 ## What every lane reports
 
 Per `.claude/rules/generator-fixtures.md`: the finding codes raised, the fixture counts before and
