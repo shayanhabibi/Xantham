@@ -87,7 +87,7 @@ module Options =
         |> Input.def false
 
     /// `findings` reads the manifests, which is the only part of a large fixture worth reading:
-    /// the per-symbol array is tens of thousands of lines, its aggregate is a page.
+    /// `symbols.jsonl` runs to thousands of lines, its aggregate is a page.
     let findingsFixture =
         Input.option<string> "--fixture"
         |> Input.description "Aggregate one fixture's manifest rather than every one."
@@ -95,7 +95,8 @@ module Options =
 
     let findingsKey =
         Input.option<string> "--key"
-        |> Input.description "Report only this finding key, e.g. --key TR023."
+        |> Input.description
+            "Report only this finding, named or coded, e.g. --key TR023 or --key TR.NotAmongGeneratedDeclarations."
         |> Input.def ""
 
     let syncUpstream =
@@ -323,8 +324,8 @@ module Stages =
         }
 
     /// The aggregate of every manifest, which is what a large fixture is *for*: `TR023 148` is
-    /// the measurement a change is justified by, and reading the 78k-line `symbols` array it was
-    /// computed from tells you strictly less.
+    /// the measurement a change is justified by, and reading the thousands of lines of
+    /// `symbols.jsonl` it was computed from tells you strictly less.
     let findings =
         input {
             let! fixture = Options.findingsFixture
@@ -356,17 +357,32 @@ module Stages =
                                 let tiers = root.GetProperty "counts"
                                 let tier (name: string) = tiers.GetProperty(name).GetInt32()
 
+                                let symbols =
+                                    System.IO.Path.Combine(System.IO.Path.GetDirectoryName path, "symbols.jsonl")
+
                                 let counts =
-                                    root.GetProperty("symbols").EnumerateArray()
-                                    |> Seq.collect (fun symbol ->
-                                        match symbol.TryGetProperty "findings" with
-                                        | true, findings -> findings.EnumerateArray() |> Seq.cast
-                                        | _ -> Seq.empty<System.Text.Json.JsonElement>)
-                                    |> Seq.map (fun finding -> finding.GetProperty("key").GetString())
-                                    |> Seq.filter (fun found -> System.String.IsNullOrWhiteSpace key || found = key)
-                                    |> Seq.countBy id
-                                    |> Seq.sortByDescending snd
-                                    |> Seq.toList
+                                    if not (System.IO.File.Exists symbols) then
+                                        []
+                                    else
+                                        System.IO.File.ReadLines symbols
+                                        |> Seq.filter (System.String.IsNullOrWhiteSpace >> not)
+                                        |> Seq.collect (fun line ->
+                                            use symbol = System.Text.Json.JsonDocument.Parse line
+
+                                            match symbol.RootElement.TryGetProperty "findings" with
+                                            | true, findings ->
+                                                findings.EnumerateArray()
+                                                |> Seq.map (fun finding ->
+                                                    finding.GetProperty("name").GetString(),
+                                                    finding.GetProperty("key").GetString())
+                                                |> Seq.toList
+                                            | _ -> [])
+                                        |> Seq.filter (fun (name, code) ->
+                                            System.String.IsNullOrWhiteSpace key || name = key || code = key)
+                                        |> Seq.map snd
+                                        |> Seq.countBy id
+                                        |> Seq.sortByDescending snd
+                                        |> Seq.toList
 
                                 let package = root.GetProperty("package").GetString()
                                 let exact = tier "exact"

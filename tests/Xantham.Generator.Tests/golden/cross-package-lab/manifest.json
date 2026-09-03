@@ -1,4 +1,5 @@
 {
+  "schemaVersion": 1,
   "package": "cross-package-lab",
   "module": "CrossPackageLab",
   "counts": {
@@ -22,42 +23,6 @@
       "pass": "SP - synthesize-paramobjects",
       "total": 1,
       "ergonomic": 1
-    }
-  ],
-  "symbols": [
-    {
-      "name": "Panel",
-      "file": "index.d.ts",
-      "tier": "escape",
-      "findings": [
-        {
-          "key": "TR054",
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "symbol": "Panel.boxed",
-          "message": "Box is referenced with 1 type arguments against a group resolved by identity only; the arity is unverified"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Panel",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "mount",
-      "tier": "escape",
-      "findings": [
-        {
-          "key": "TR054",
-          "pass": "shape-exports",
-          "tier": "escape",
-          "symbol": "mount()",
-          "message": "Box is referenced with 1 type arguments against a group resolved by identity only; the arity is unverified"
-        }
-      ]
     }
   ]
 }

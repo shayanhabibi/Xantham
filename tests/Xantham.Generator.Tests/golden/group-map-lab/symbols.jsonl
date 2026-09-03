@@ -1,0 +1,9 @@
+{"name":"Box","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Box","message":"ParamObject Create synthesized (D3)"}]}
+{"name":"Handle","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Handle","message":"ParamObject Create synthesized (D3)"}]}
+{"name":"Registry","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"MB.OptionalMemberAsOption","key":"MB003","pass":"shape-interfaces","tier":"ergonomic","symbol":"Registry.held","message":"optional member reads as option"},{"name":"TR.NullableHoistedToOption","key":"TR032","pass":"shape-interfaces","tier":"ergonomic","symbol":"Registry.held","message":"null/undefined union members hoisted to option"},{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Registry","message":"ParamObject Create synthesized (D3)"}]}
+{"name":"compile","tier":"exact","findings":[]}
+{"name":"hold","tier":"exact","findings":[]}
+{"name":"respond","tier":"widened","findings":[{"name":"TR.NotAmongGeneratedDeclarations","key":"TR023","pass":"shape-exports","tier":"widened","symbol":"respond()","fields":{"shown":"Response"},"message":"Response is not among the generated declarations; widened to obj"}]}
+{"name":"walk","tier":"widened","findings":[{"name":"TR.MappedNameArityMismatch","key":"TR053","pass":"shape-exports","tier":"widened","symbol":"walk(over)","fields":{"name":"Iterator","given":3},"message":"Iterator is applied to 3 type arguments that its mapped destination does not take; widened to obj"}]}
+{"name":"fetchOne","tier":"exact","findings":[]}
+{"name":"handle","tier":"exact","findings":[]}

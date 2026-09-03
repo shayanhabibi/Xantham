@@ -1,0 +1,6 @@
+{"name":"Pulse","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Pulse","message":"ParamObject Create synthesized (D3)"}]}
+{"name":"Reading","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Reading","message":"ParamObject Create synthesized (D3)"}]}
+{"name":"Signal","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Signal","message":"ParamObject Create synthesized (D3)"}]}
+{"name":"read","tier":"exact","findings":[]}
+{"name":"inner-lab","tier":"exact","findings":[{"name":"GE.GroupShipped","key":"GE001","pass":"render-source","tier":"exact","symbol":"inner-lab","fields":{"group":"inner-lab","declarations":1},"message":"inner-lab is shipped as its own module, carrying 1 declarations"}]}
+{"name":"outer-lab","tier":"exact","findings":[{"name":"GE.GroupShipped","key":"GE001","pass":"render-source","tier":"exact","symbol":"outer-lab","fields":{"group":"outer-lab","declarations":1},"message":"outer-lab is shipped as its own module, carrying 1 declarations"}]}

@@ -1,0 +1,3 @@
+{"name":"Widget","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Widget","message":"ParamObject Create synthesized (D3)"}]}
+{"name":"WidgetPair","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"WidgetPair","message":"ParamObject Create synthesized (D3)"}]}
+{"name":"Formatter","file":"index.d.ts","tier":"exact","findings":[]}

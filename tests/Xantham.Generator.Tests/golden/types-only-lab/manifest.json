@@ -1,4 +1,5 @@
 {
+  "schemaVersion": 1,
   "package": "@types/types-only-lab",
   "module": "TypesOnlyLab",
   "counts": {
@@ -17,45 +18,6 @@
       "pass": "SP - synthesize-paramobjects",
       "total": 1,
       "ergonomic": 1
-    }
-  ],
-  "symbols": [
-    {
-      "name": "Counter",
-      "file": "index.d.ts",
-      "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Counter",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "greet",
-      "tier": "exact",
-      "findings": []
-    },
-    {
-      "name": "version",
-      "tier": "exact",
-      "findings": []
-    },
-    {
-      "name": "\u003Cmodule\u003E",
-      "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SE002",
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "symbol": "\u003Cmodule\u003E",
-          "message": "types-only package has no runtime; imports bind to types-only-lab, derived rather than configured"
-        }
-      ]
     }
   ]
 }

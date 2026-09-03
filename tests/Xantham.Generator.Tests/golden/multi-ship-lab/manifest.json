@@ -1,4 +1,5 @@
 {
+  "schemaVersion": 1,
   "package": "multi-ship-lab",
   "module": "MultiShipLab",
   "counts": {
@@ -19,94 +20,6 @@
       "exact": 1,
       "widened": 1,
       "escape": 1
-    }
-  ],
-  "symbols": [
-    {
-      "name": "Cargo",
-      "file": "index.d.ts",
-      "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Cargo",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "Spare",
-      "file": "index.d.ts",
-      "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Spare",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "Widget",
-      "file": "index.d.ts",
-      "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Widget",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "load",
-      "tier": "exact",
-      "findings": []
-    },
-    {
-      "name": "absent-lab",
-      "tier": "widened",
-      "findings": [
-        {
-          "key": "GE002",
-          "pass": "render-source",
-          "tier": "widened",
-          "symbol": "absent-lab",
-          "message": "absent-lab is configured ship and no reference reached it; the module is not written"
-        }
-      ]
-    },
-    {
-      "name": "dep-lab",
-      "tier": "exact",
-      "findings": [
-        {
-          "key": "GE001",
-          "pass": "render-source",
-          "tier": "exact",
-          "symbol": "dep-lab",
-          "message": "dep-lab is shipped as its own module, carrying 1 declarations"
-        }
-      ]
-    },
-    {
-      "name": "dep_lab",
-      "tier": "escape",
-      "findings": [
-        {
-          "key": "GE003",
-          "pass": "render-source",
-          "tier": "escape",
-          "symbol": "dep_lab",
-          "message": "dep_lab templates the module DepLab, which another group in this run already writes"
-        }
-      ]
     }
   ]
 }

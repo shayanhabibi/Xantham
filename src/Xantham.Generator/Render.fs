@@ -7,6 +7,7 @@ module Xantham.Generator.Render
 
 open System
 open System.Text.Json
+open System.Text.Json.Nodes
 open System.Text.Json.Serialization
 open Xantham.TypeScript.Wire.Proto
 
@@ -521,7 +522,8 @@ let private renderEntrypointClass (runtimePackage: string) (decl: FsInterfaceDec
         yield! docLines "" decl.Docs decl.Tags
         yield bindingAttribute runtimePackage "" "; AbstractClass" entrypoint.Binding
 
-        let head = $"type {declHead decl.Name decl.TypeParameters} {renderParamList entrypoint.Parameters}"
+        let head =
+            $"type {declHead decl.Name decl.TypeParameters} {renderParamList entrypoint.Parameters}"
 
         match decl.Members, decl.Statics with
         | [], [] -> yield $"{head} = class end"
@@ -1052,12 +1054,25 @@ let private tierLabel =
 // is labelled with the prefix of the union it owns (`SI - shape-interfaces`). `file`
 // is null where a symbol has no declaration to point at (drops, table-level findings) and is
 // then omitted from the JSON.
+//
+// A run writes the report as two files. `manifest.json` holds the aggregate - the package, the
+// tier counts and the per-pass tallies - and stays a page long for any package, so a reader
+// takes the whole of it. `symbols.jsonl` holds the per-symbol detail, one symbol per line, and
+// runs to thousands of lines for a package the size of `@cloudflare/workers-types`: a reader
+// greps it or takes the lines it wants.
 type ManifestFinding =
     {
+        /// The finding's stable name, `TR.NullableHoistedToOption`: what a consumer dispatches
+        /// on, since it is fixed by what the case is called.
+        name: string
+        /// The same finding's numeric code, `TR032`, as prose and `--key` filters cite it.
         key: string
         pass: string
         tier: string
         symbol: string
+        /// The case's payload, field by field, for a consumer that dispatches on the detail
+        /// rather than reading `message`. Null, and so omitted, for a case without a payload.
+        fields: JsonObject
         message: string
     }
 
@@ -1091,11 +1106,13 @@ type ManifestSymbol =
 
 type Manifest =
     {
+        /// The shape of the pair of files, bumped when a consumer would have to read them
+        /// differently.
+        schemaVersion: int
         package: string
         ``module``: string
         counts: ManifestCounts
         passes: ManifestPass list
-        symbols: ManifestSymbol list
     }
 
 let private manifestOptions =
@@ -1103,6 +1120,37 @@ let private manifestOptions =
     options.NewLine <- "\n" // byte-identical output whatever the OS
     options.DefaultIgnoreCondition <- JsonIgnoreCondition.WhenWritingNull
     options
+
+/// `symbols.jsonl` is one symbol per line, so a reader takes the symbols it wants and a grep
+/// answers with the line it found rather than a position in a file it has to reconstruct.
+let private symbolOptions =
+    let options = JsonSerializerOptions(WriteIndented = false)
+    options.DefaultIgnoreCondition <- JsonIgnoreCondition.WhenWritingNull
+    options
+
+/// A payload field's value as JSON: the number, string or boolean it is, and its `ToString` for
+/// any other type a case might later carry.
+let private fieldValue (value: obj) : JsonNode =
+    match value with
+    | null -> null
+    | :? string as text -> JsonValue.Create text
+    | :? int as number -> JsonValue.Create number
+    | :? bool as flag -> JsonValue.Create flag
+    | :? float as number -> JsonValue.Create number
+    | other -> JsonValue.Create(string other)
+
+/// A finding's payload as a JSON object, field name to value, in declaration order. Null for a
+/// case without a payload, so the property is omitted.
+let private payloadFields (finding: Finding) : JsonObject =
+    match finding.Payload with
+    | [||] -> null
+    | payload ->
+        let fields = JsonObject()
+
+        for name, value in payload do
+            fields[name] <- fieldValue value
+
+        fields
 
 /// The declaration file a symbol came from, as the manifest reports it: relative to the package
 /// for the package's own files, from `node_modules/` down for anything installed, and the bare
@@ -1173,6 +1221,7 @@ let renderManifest: Pass<RenderModel> =
 
         let manifest =
             {
+                schemaVersion = 1
                 package = model.PackageName
                 ``module`` = model.ModuleName
                 counts =
@@ -1183,33 +1232,40 @@ let renderManifest: Pass<RenderModel> =
                         escape = tallies.Escape
                     }
                 passes = passTallies model.Findings
-                symbols =
-                    [
-                        for name, tier, findings in rows ->
-                            {
-                                name = name
-                                file = files |> Map.tryFind name |> Option.toObj
-                                tier = tierLabel tier
-                                findings =
-                                    [
-                                        for finding in
-                                            findings |> List.sortBy (fun f -> f.Pass, f.Symbol, f.Key, f.Message) ->
-                                            {
-                                                key = finding.Key
-                                                pass = finding.Pass
-                                                tier = tierLabel finding.Tier
-                                                symbol = finding.Symbol
-                                                message = finding.Message
-                                            }
-                                    ]
-                            }
-                    ]
             }
+
+        let symbols =
+            [
+                for name, tier, findings in rows ->
+                    {
+                        name = name
+                        file = files |> Map.tryFind name |> Option.toObj
+                        tier = tierLabel tier
+                        findings =
+                            [
+                                for finding in findings |> List.sortBy (fun f -> f.Pass, f.Symbol, f.Key, f.Message) ->
+                                    {
+                                        name = finding.Name
+                                        key = finding.Key
+                                        pass = finding.Pass
+                                        tier = tierLabel finding.Tier
+                                        symbol = finding.Symbol
+                                        fields = payloadFields finding
+                                        message = finding.Message
+                                    }
+                            ]
+                    }
+            ]
 
         let json = JsonSerializer.Serialize(manifest, manifestOptions) + "\n"
 
+        let lines =
+            symbols
+            |> List.map (fun symbol -> JsonSerializer.Serialize(symbol, symbolOptions) + "\n")
+            |> String.concat ""
+
         { model with
-            Files = model.Files @ [ "manifest.json", json ]
+            Files = model.Files @ [ "manifest.json", json; "symbols.jsonl", lines ]
         })
 
 /// The tier's pass list, in execution order, for a run that writes the entry package alone.
