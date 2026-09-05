@@ -118,3 +118,55 @@ answering a hypothetical.
 Left uncapped. The threshold that would change this answer is a fixture producing either a name
 past roughly 32 characters or two literals in one scope sharing a long prefix; the measurement
 above is what a future wave re-runs rather than re-deriving.
+
+---
+
+# Outcomes
+
+Recorded as each batch merged. Every lane's handover sits in `docs/.ai/handovers/`.
+
+## Batch 0 — the tooling prerequisite
+
+| Item | Lane | Outcome |
+| --- | --- | --- |
+| 9 | AL | **Defect survived alpha 3.** Pre-fix a failing pipeline exits 0, post-fix 1, passing 0. |
+| 10 | AL | **Clean tree after a full run.** `.editorconfig` gains `end_of_line = lf`. |
+| — | prep | `TR057`, `DO003`, `DO004` declared. Gate held at 460 / 90 / 230. |
+
+Lane AL produced both edits and then stalled three times waiting on a background build
+without committing, across roughly 118 tool calls. The managing agent committed the lane's
+working tree and carried out the verification. There is a symmetry worth keeping: an agent that
+cannot trust an exit code falls back to polling a long build and loses its turn to the poll,
+which is the recurring cost item 9 removes.
+
+## Batch 1
+
+| Item | Lane | Outcome |
+| --- | --- | --- |
+| 1 | AM | **Measured safe, no `src/` change.** Run gate 230 → 249. `TR055` 357 → 360. |
+| 5 | AN | **Closed on a corrected premise.** `TR014` already records the site. `TR057` unraised. |
+| 4 | R2 | **Closed from the goldens.** Ten names, longest 26 characters, zero collisions at any cap. |
+
+**Item 5's worklist premise was wrong, and disproving it was the lane's result.** A bare
+`x: null` was described as recording no absence fact. It records a widening fact: the type
+reaches `typeRefOnPath`'s catch-all and the site carries `TR014` with `flags=Null`. The absence
+alphabet has no entry for it, and the site is not silent, so a second finding would duplicate
+one site. Corpus population is one, and it is the lab's own declaration.
+
+**Item 1's read-back result is stronger than wave seven's.** Lane AK measured that a
+function-typed member read back hands F# a curry wrapper of length 1. Through a union member it
+does not: the member's declared type is the union, so the arity JavaScript holds survives.
+
+Left flagged by lane AM, unmeasured: a union arm under an array or an `option`, and `U2<...>`
+nested inside a delegate's type parameter.
+
+## Batch 1 boundary, measured over the composed tree at `50fb712`
+
+Composition introduced nothing. Every count each lane reported independently survives:
+
+Gate: run gate **249** checks, all stages ok, and `git status` clean after a full run — the
+first wave in which that last clause is true. Corpus over 49 fixtures:
+`exact 488, ergonomic 1544, widened 783, escape 193`.
+
+`DO001` 19, `DO002` 4, `TR055` 360, `TR056` 32, `TR014` 1. `TR057`, `DO003` and `DO004` stand at
+zero: one settled unraised, two awaiting lane AO.
