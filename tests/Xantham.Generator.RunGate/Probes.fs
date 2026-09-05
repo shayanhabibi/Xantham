@@ -3,45 +3,20 @@
 /// this file; a form that lands in the generator moves into a lab fixture's golden and out of
 /// here.
 ///
-/// `module rec` is the header every generated golden carries, and probe 3 depends on it.
+/// The optional-hook probe (opt-in interfaces for lifecycle hooks) and the nested-name probe's
+/// object-literal checks moved onto `hook-interface-lab` and `nested-name-lab` once lanes AA and
+/// AD landed those goldens; `tests/Xantham.Generator.RunGate/Program.fs`'s `optionalHooks` and
+/// `nestedNames` carry the checks now. What remains below are two forms neither golden carries:
+/// a nested inline shape holding a field of its own owner's type, and an import bound from inside
+/// a nested module rather than at the file's top level.
+///
+/// `module rec` is the header every generated golden carries, and the probe below depends on it.
 module rec Xantham.Generator.RunGate.Probes
 
 open Fable.Core
 open Fable.Core.JsInterop
 
-// Probes 1 and 2 - an optional lifecycle hook as an opt-in interface.
-
-/// One interface per optional hook, carrying the hook as its only member. Lane AA's proposed
-/// replacement for the settable `jsNative` property an optional method renders as today.
-[<Interface>]
-type IFetchHandler =
-    abstract fetch: payload: AmbientModuleLab.Payload -> string
-
-/// A second hook, so the measurement covers a subclass opting into more than one.
-[<Interface>]
-type IAlarmHandler =
-    abstract alarm: unit -> string
-
-/// A consumer's entrypoint subclass that opts into both hooks.
-type HookedBench(label: string) =
-    inherit AmbientModuleLab.Workbench(label)
-
-    override this.run(payload) = $"hooked:{this.label}:{payload.label}"
-
-    interface IFetchHandler with
-        member this.fetch(payload) = $"fetch:{this.label}:{payload.label}"
-
-    interface IAlarmHandler with
-        member this.alarm() = $"alarm:{this.label}"
-
-/// A consumer's entrypoint subclass that declines the hook. The negative of probe 1: the platform
-/// must read this instance as carrying no `fetch`.
-type BareBench(label: string) =
-    inherit AmbientModuleLab.Workbench(label)
-
-    override this.run(payload) = $"bare:{this.label}:{payload.label}"
-
-// Probe 3 - an inline shape named under a module that shares its owner's name.
+// A nested inline shape named under a module that shares its owner's name.
 
 /// Owner of an inline shape. Lane AD names the shape `Widget.Options`, which puts a module beside
 /// this type and a forward reference into it.
