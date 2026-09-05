@@ -343,7 +343,8 @@ module Naming =
                 // Fable compiles a JavaScript `Error` to `System.Exception`, which is what makes
                 // a class over this base raisable and catchable by type. The instance surface is
                 // where the two disagree: `name`, `stack` and `cause` are the JavaScript object's.
-                "Error", ("exn", 0, Some "Error reads as exn; the JavaScript name, stack and cause properties are not on it")
+                "Error",
+                ("exn", 0, Some "Error reads as exn; the JavaScript name, stack and cause properties are not on it")
                 "Date", ("JS.Date", 0, None)
                 "Function", ("JS.Function", 0, None)
                 "Object", ("JS.Object", 0, None)

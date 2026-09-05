@@ -1421,9 +1421,10 @@ let shapePassTests =
                 "the base that was not inherited is named"
 
         testCase "shape-interfaces flattens a base with no F# name at all" <| fun _ ->
-            // `interface Failure extends Error`: nothing shipped binds `Error`, so the base has
-            // no name at this position for an `inherit` to take. This is the undifferentiated
-            // case the two named ones split out of, and it stays that way.
+            // `interface Failure extends IterableIterator<string>`: the synchronous iteration
+            // protocol has no Fable.Core binding, so the base has no name at this position for an
+            // `inherit` to take. This is the undifferentiated case the two named ones split out
+            // of, and it stays that way.
             let code = Build.resolvedMember (Build.symbol 401 "code" SymbolFlags.Property) 2
 
             let failure =
@@ -1433,7 +1434,7 @@ let shapePassTests =
                     Members = [ code ] }
 
             let model =
-                { Build.shapeModel (libType 40 "Error" [] :: failure :: Build.primitives) with
+                { Build.shapeModel (libType 40 "IterableIterator" [ 1 ] :: failure :: Build.primitives) with
                     DeclNames = Map.ofList [ 41, "Failure" ] }
 
             let shaped, findings = Build.runPass Interfaces.shapeInterfaces model
@@ -3115,6 +3116,21 @@ let shapePassTests =
 
             Expect.equal reference FsObj "no binding is claimed"
             Expect.equal (findings |> List.map _.Tier) [ Widened ] "and the widening is the ordinary one"
+
+        testCase "the lib's Error is F#'s exception type, and says what that costs" <| fun _ ->
+            // Fable compiles a JavaScript `Error` to `System.Exception`, so `exn` is the name at
+            // this position. The instance surface is where the two part company, which is what
+            // the loss note carries.
+            let model = Build.shapeModel (libType 10 "Error" [] :: Build.primitives)
+
+            let reference, findings = Spec.typeRef Build.context model None "x" 10
+
+            Expect.equal reference (FsNamed "exn") "the binding is written"
+
+            Expect.equal
+                (findings |> List.map (fun finding -> finding.Key, finding.Message))
+                [ "TR025", "Error reads as exn; the JavaScript name, stack and cause properties are not on it" ]
+                "and the mapping records what it gives up"
 
         testCase "a lib name nothing shipped binds keeps widening" <| fun _ ->
             // The synchronous iteration protocol has no Fable.Core binding, and `seq<'T>` is not
