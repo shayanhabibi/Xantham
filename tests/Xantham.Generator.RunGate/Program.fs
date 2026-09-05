@@ -1065,6 +1065,82 @@ let private callbackTupledForms () =
         "three:5:1,2,3:undefined:undefined"
         (attempt (fun () -> (factory.makeThree 5.0) (1.0, 2.0, 3.0)))
 
+/// Lane AK. Arity 0 and 1, where the curried and tupled spellings coincide, and the nesting a
+/// conversion of that slice alone produces.
+let private callbackMixedForms () =
+    let attempt (f: unit -> string) =
+        try
+            f ()
+        with e ->
+            $"threw: {e.Message}"
+
+    equal
+        "a unary function returning a delegate crosses at arity 1 over a 2-argument delegate"
+        "1:2:made:5:1:2"
+        (attempt (fun () ->
+            Probes.CallbackMixed.callNesting (fun seed -> System.Func<float, float, string>(fun a b -> $"made:{seed}:{a}:{b}"))))
+
+    // Measured, not wanted. Where a function type's own return is a function type, Fable flattens
+    // the two levels into one JavaScript function of the summed arity, so the runtime's first
+    // application returns the result rather than the inner callback. Arity does not rescue this:
+    // it fails with both levels unary. This is the rule the conversion below obeys - a function
+    // type is emitted only where its return is not one.
+    check
+        "a function type returning a curried function flattens into one JavaScript function"
+        ((attempt (fun () -> Probes.CallbackMixed.callNestingCurried (fun seed a b -> $"made:{seed}:{a}:{b}")))
+            .StartsWith "threw:")
+
+    check
+        "and flattens with both levels unary too"
+        ((attempt (fun () -> Probes.CallbackMixed.callNestingOne (fun seed a -> $"one:{seed}:{a}")))
+            .StartsWith "threw:")
+
+    let mixed =
+        Probes.MixedFactory.Create(
+            make = (fun seed -> System.Func<float, float, string>(fun a b -> $"made:{seed}:{a}:{b}")),
+            ready = (fun () -> "ready"),
+            pair = System.Func<float, float, string>(fun a b -> $"pair:{a}:{b}")
+        )
+
+    equal
+        "a ParamObject literal mixing function types and delegates crosses at every declared arity"
+        "1:2:made:5:1:2:0:ready:2:pair:1:2"
+        (attempt (fun () -> Probes.CallbackMixed.drive mixed))
+
+    equal
+        "a delegate returning a unary function crosses at arity 1 twice"
+        "1:1:one:5:1"
+        (attempt (fun () ->
+            Probes.CallbackMixed.callNestingOneMixed (System.Func<float, float -> string>(fun seed -> (fun a -> $"one:{seed}:{a}")))))
+
+    equal
+        "a delegate returning a unary delegate crosses at arity 1 twice"
+        "1:1:one:5:1"
+        (attempt (fun () ->
+            Probes.CallbackMixed.callNestingOneDelegate (
+                System.Func<float, System.Func<float, string>>(fun seed -> System.Func<float, string>(fun a -> $"one:{seed}:{a}"))
+            )))
+
+    equal
+        "a delegate returning a 2-argument delegate crosses at both declared arities"
+        "1:2:made:5:1:2"
+        (attempt (fun () ->
+            Probes.CallbackMixed.callNestingDelegate (
+                System.Func<float, System.Func<float, float, string>>(fun seed ->
+                    System.Func<float, float, string>(fun a b -> $"made:{seed}:{a}:{b}"))
+            )))
+
+    // Read-back at arity 1, which lane AE left open: its curry-wrapper finding was measured at
+    // arity 2, where a wrapper of length 1 loses an argument. At arity 1 there is none to lose.
+    let fromJs = Probes.CallbackFunctions.handlers
+
+    match fromJs.onDone with
+    | None -> check "an optional function-typed member read back is present" false
+    | Some onDone ->
+        equal "an optional function-typed member reads back at arity 1" 1.0 (emitJsExpr onDone "$0.length")
+        onDone 3.0
+        check "and applies" true
+
 [<EntryPoint>]
 let main _ =
     globals ()
@@ -1085,6 +1161,7 @@ let main _ =
     callbackFunctionForms ()
     callbackDelegateForms ()
     callbackTupledForms ()
+    callbackMixedForms ()
 
     match failures with
     | [] ->

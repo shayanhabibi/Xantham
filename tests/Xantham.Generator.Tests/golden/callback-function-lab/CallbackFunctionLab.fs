@@ -101,3 +101,19 @@ type Exports =
     static member build (options: Options) : string = jsNative
     [<Import("factory", "callback-function-lab")>]
     static member factory: Factory = jsNative
+    /// <summary>
+    /// A callback whose own return is a callback. Where only some arities convert, this is the
+    /// nesting the rule has to decide: the outer function and the inner one need not agree.
+    /// </summary>
+    [<Import("callNesting", "callback-function-lab")>]
+    static member callNesting (outer: Func<float, Func<float, float, string>>) : string = jsNative
+    /// <summary>
+    /// The same nesting with a unary inner callback, where both levels are alike.
+    /// </summary>
+    [<Import("callNestingOne", "callback-function-lab")>]
+    static member callNestingOne (outer: Func<float, Func<float, string>>) : string = jsNative
+    /// <summary>
+    /// A <c>Factory</c> built in F#, so its callback members cross outward rather than back.
+    /// </summary>
+    [<Import("drive", "callback-function-lab")>]
+    static member drive (factory: Factory) : string = jsNative

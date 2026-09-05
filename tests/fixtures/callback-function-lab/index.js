@@ -56,3 +56,26 @@ export const factory = {
     ready: () => "ready",
     pair: (a, b) => `pair:${a}:${b}`,
 };
+
+export function callNesting(outer) {
+    const inner = outer(5);
+    return `${outer.length}:${inner.length}:${String(inner(1, 2))}`;
+}
+
+export function callNestingOne(outer) {
+    const inner = outer(5);
+    return `${outer.length}:${inner.length}:${String(inner(1))}`;
+}
+
+export function drive(factory) {
+    const made = factory.make(5);
+    return [
+        factory.make.length,
+        made.length,
+        String(made(1, 2)),
+        factory.ready.length,
+        String(factory.ready()),
+        factory.pair.length,
+        String(factory.pair(1, 2)),
+    ].join(":");
+}

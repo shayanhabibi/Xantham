@@ -197,3 +197,51 @@ type CallbackTuples =
 
     [<Import("factory", "callback-function-lab")>]
     static member factory: TupledFactory = jsNative
+
+// Probes 14-16 - the arity 0 and 1 slice, where the curried and tupled spellings coincide and
+// there is no arity for either to lose. Lane AK measures the positions lane AE's table left open:
+// a nested callback whose inner level keeps its delegate, and a function-typed member read back
+// at arity 1.
+
+/// A `Factory` whose arity 0 and 1 members are function types and whose arity 2 members keep the
+/// delegate: the mixed form a partial conversion produces.
+[<Interface>]
+type MixedFactory =
+    abstract make: seed: float -> System.Func<float, float, string>
+    abstract ready: (unit -> string)
+    abstract pair: System.Func<float, float, string>
+
+    [<ParamObject; Emit("$0")>]
+    static member Create
+        (make: float -> System.Func<float, float, string>, ready: unit -> string, pair: System.Func<float, float, string>)
+        : MixedFactory =
+        jsNative
+
+[<Erase>]
+type CallbackMixed =
+
+    /// A unary function returning a delegate: the outer level converted, the inner retained.
+    [<Import("callNesting", "callback-function-lab")>]
+    static member callNesting(outer: float -> System.Func<float, float, string>) : string = jsNative
+
+    /// The same nesting with the inner level a curried function too.
+    [<Import("callNesting", "callback-function-lab")>]
+    static member callNestingCurried(outer: float -> (float -> float -> string)) : string = jsNative
+
+    /// Both levels at arity 1, where no spelling differs.
+    [<Import("callNestingOne", "callback-function-lab")>]
+    static member callNestingOne(outer: float -> (float -> string)) : string = jsNative
+
+    [<Import("drive", "callback-function-lab")>]
+    static member drive(factory: MixedFactory) : string = jsNative
+
+    /// A delegate returning a unary function: the outer level retained, the inner converted.
+    [<Import("callNestingOne", "callback-function-lab")>]
+    static member callNestingOneMixed(outer: System.Func<float, float -> string>) : string = jsNative
+
+    /// Both levels retained.
+    [<Import("callNestingOne", "callback-function-lab")>]
+    static member callNestingOneDelegate(outer: System.Func<float, System.Func<float, string>>) : string = jsNative
+
+    [<Import("callNesting", "callback-function-lab")>]
+    static member callNestingDelegate(outer: System.Func<float, System.Func<float, float, string>>) : string = jsNative

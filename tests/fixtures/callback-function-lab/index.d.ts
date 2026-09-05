@@ -61,3 +61,15 @@ export interface Factory {
 }
 
 export declare const factory: Factory;
+
+/**
+ * A callback whose own return is a callback. Where only some arities convert, this is the
+ * nesting the rule has to decide: the outer function and the inner one need not agree.
+ */
+export declare function callNesting(outer: (seed: number) => (a: number, b: number) => string): string;
+
+/** The same nesting with a unary inner callback, where both levels are alike. */
+export declare function callNestingOne(outer: (seed: number) => (a: number) => string): string;
+
+/** A `Factory` built in F#, so its callback members cross outward rather than back. */
+export declare function drive(factory: Factory): string;
