@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "package": "absence-alphabet-lab",
+  "module": "AbsenceAlphabetLab",
+  "counts": {
+    "exact": 1,
+    "ergonomic": 7,
+    "widened": 0,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 7,
+      "ergonomic": 7
+    },
+    {
+      "pass": "SE - shape-exports",
+      "total": 5,
+      "ergonomic": 5
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 4,
+      "ergonomic": 4
+    }
+  ]
+}

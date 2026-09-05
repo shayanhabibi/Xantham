@@ -1,0 +1,6 @@
+{
+    "name": "absence-alphabet-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "description": "The five TypeScript spellings of absence that all reach F# option or unit, each carrying the findings that separate it from the other four."
+}

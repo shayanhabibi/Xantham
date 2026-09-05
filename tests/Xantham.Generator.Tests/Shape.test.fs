@@ -232,6 +232,48 @@ let typeRefTests =
             Expect.equal reference (FsOption FsString) "string | undefined"
             Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "one ergonomic finding"
 
+        testCase "the hoist reports which spellings of absence the union was written with" <| fun _ ->
+            // Four unions, one `string option`. The platforms disagree on which absence they
+            // mean - a KV miss is `null`, a Durable Object storage miss is `undefined` - so the
+            // spelling reaches the consumer through the finding.
+            let union id members =
+                { Build.facts (Build.typeResponse id TypeFlags.Union) with UnionMembers = members }
+
+            let model =
+                Build.shapeModel (
+                    union 10 [ 1; 5 ]
+                    :: union 11 [ 1; 6 ]
+                    :: union 12 [ 1; 5; 6 ]
+                    :: union 13 [ 1; 4 ]
+                    :: Build.primitives
+                )
+
+            let spellings id =
+                let reference, findings = Spec.typeRef Build.context model None "x" id
+                Expect.equal reference (FsOption FsString) "one option, however absence was spelled"
+
+                findings
+                |> List.filter (fun finding -> finding.Key = "TR032")
+                |> List.collect (fun finding ->
+                    finding.Payload
+                    |> Array.toList
+                    |> List.filter (snd >> unbox<bool>)
+                    |> List.map fst)
+
+            Expect.equal (spellings 10) [ "fromUndefined" ] "string | undefined"
+            Expect.equal (spellings 11) [ "fromNull" ] "string | null"
+            Expect.equal (spellings 12) [ "fromNull"; "fromUndefined" ] "string | null | undefined"
+            Expect.equal (spellings 13) [ "fromVoid" ] "string | void"
+
+        testCase "a void return maps to unit and reports no absence" <| fun _ ->
+            // `void` in a return position never reaches the union path, so the fifth shape of
+            // the alphabet is the one carrying no finding at all.
+            let model = Build.shapeModel Build.primitives
+            let reference, findings = Spec.typeRef Build.context model None "f()" 4
+
+            Expect.equal reference FsUnit "void maps to unit"
+            Expect.isEmpty findings "and the site holds no spelling to report"
+
         testCase "a union of null and undefined alone maps to unit, widened" <| fun _ ->
             let union =
                 { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 5; 6 ] }
