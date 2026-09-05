@@ -26513,9 +26513,9 @@ type WorkflowDelayDuration = WorkflowSleepDuration
 [<Interface>]
 type WorkflowDynamicDelayContext =
     abstract ctx: WorkflowDynamicDelayContextCtx with get, set
-    abstract error: obj with get, set
+    abstract error: exn with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (ctx: WorkflowDynamicDelayContextCtx, error: obj) : WorkflowDynamicDelayContext = jsNative
+    static member Create (ctx: WorkflowDynamicDelayContextCtx, error: exn) : WorkflowDynamicDelayContext = jsNative
 
 [<Interface>]
 type WorkflowDynamicDelayContextCtx =
@@ -26667,12 +26667,12 @@ type WorkflowStepContextConfig =
 [<Interface>]
 type WorkflowRollbackContext<'T, 'Delay> =
     abstract ctx: obj with get, set
-    abstract error: obj with get, set
+    abstract error: exn with get, set
     abstract output: 'T option with get, set
     /// <remarks>@deprecated Use <c>ctx.step.name</c> and <c>ctx.step.count</c> instead.</remarks>
     abstract stepName: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (ctx: obj, error: obj, stepName: string, ?output: 'T) : WorkflowRollbackContext<'T, 'Delay> = jsNative
+    static member Create (ctx: obj, error: exn, stepName: string, ?output: 'T) : WorkflowRollbackContext<'T, 'Delay> = jsNative
 
 [<Interface>]
 type WorkflowRollbackContextCtx<'Delay> =
@@ -26696,12 +26696,12 @@ type WorkflowRollbackHandler<'T, 'Delay> = private WorkflowRollbackHandler__ of 
 [<Interface>]
 type WorkflowRollbackHandlerCtx<'T, 'Delay> =
     abstract ctx: obj with get, set
-    abstract error: obj with get, set
+    abstract error: exn with get, set
     abstract output: 'T option with get, set
     /// <remarks>@deprecated Use <c>ctx.step.name</c> and <c>ctx.step.count</c> instead.</remarks>
     abstract stepName: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (ctx: obj, error: obj, stepName: string, ?output: 'T) : WorkflowRollbackHandlerCtx<'T, 'Delay> = jsNative
+    static member Create (ctx: obj, error: exn, stepName: string, ?output: 'T) : WorkflowRollbackHandlerCtx<'T, 'Delay> = jsNative
 
 [<Interface>]
 type WorkflowRollbackHandlerCtxCtx<'Delay> =
@@ -26729,12 +26729,12 @@ type WorkflowStepRollbackOptions<'T, 'Delay> =
 [<Interface>]
 type WorkflowStepRollbackOptionsRollbackCtx<'T, 'Delay> =
     abstract ctx: obj with get, set
-    abstract error: obj with get, set
+    abstract error: exn with get, set
     abstract output: 'T option with get, set
     /// <remarks>@deprecated Use <c>ctx.step.name</c> and <c>ctx.step.count</c> instead.</remarks>
     abstract stepName: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (ctx: obj, error: obj, stepName: string, ?output: 'T) : WorkflowStepRollbackOptionsRollbackCtx<'T, 'Delay> = jsNative
+    static member Create (ctx: obj, error: exn, stepName: string, ?output: 'T) : WorkflowStepRollbackOptionsRollbackCtx<'T, 'Delay> = jsNative
 
 [<Interface>]
 type WorkflowStepRollbackOptionsRollbackCtxCtx<'Delay> =
@@ -26808,12 +26808,12 @@ type WorkflowStepDoRollbackOptions2<'T> =
 [<Interface>]
 type WorkflowStepDoRollbackOptions2RollbackCtx<'T> =
     abstract ctx: WorkflowDynamicDelayContextCtx with get, set
-    abstract error: obj with get, set
+    abstract error: exn with get, set
     abstract output: 'T option with get, set
     /// <remarks>@deprecated Use <c>ctx.step.name</c> and <c>ctx.step.count</c> instead.</remarks>
     abstract stepName: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (ctx: WorkflowDynamicDelayContextCtx, error: obj, stepName: string, ?output: 'T) : WorkflowStepDoRollbackOptions2RollbackCtx<'T> = jsNative
+    static member Create (ctx: WorkflowDynamicDelayContextCtx, error: exn, stepName: string, ?output: 'T) : WorkflowStepDoRollbackOptions2RollbackCtx<'T> = jsNative
 
 [<Interface>]
 type WorkflowStepDoRollbackOptions3<'T> =
@@ -26825,12 +26825,12 @@ type WorkflowStepDoRollbackOptions3<'T> =
 [<Interface>]
 type WorkflowStepDoRollbackOptions3RollbackCtx<'T> =
     abstract ctx: WorkflowStepDoCallbackCtx with get, set
-    abstract error: obj with get, set
+    abstract error: exn with get, set
     abstract output: 'T option with get, set
     /// <remarks>@deprecated Use <c>ctx.step.name</c> and <c>ctx.step.count</c> instead.</remarks>
     abstract stepName: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (ctx: WorkflowStepDoCallbackCtx, error: obj, stepName: string, ?output: 'T) : WorkflowStepDoRollbackOptions3RollbackCtx<'T> = jsNative
+    static member Create (ctx: WorkflowStepDoCallbackCtx, error: exn, stepName: string, ?output: 'T) : WorkflowStepDoRollbackOptions3RollbackCtx<'T> = jsNative
 
 [<Interface>]
 type WorkflowStepDoRollbackOptions4<'T> =
@@ -26842,22 +26842,22 @@ type WorkflowStepDoRollbackOptions4<'T> =
 [<Interface>]
 type WorkflowStepDoRollbackOptions4RollbackCtx<'T> =
     abstract ctx: WorkflowStepDoCallbackCtx with get, set
-    abstract error: obj with get, set
+    abstract error: exn with get, set
     abstract output: 'T option with get, set
     /// <remarks>@deprecated Use <c>ctx.step.name</c> and <c>ctx.step.count</c> instead.</remarks>
     abstract stepName: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (ctx: WorkflowStepDoCallbackCtx, error: obj, stepName: string, ?output: 'T) : WorkflowStepDoRollbackOptions4RollbackCtx<'T> = jsNative
+    static member Create (ctx: WorkflowStepDoCallbackCtx, error: exn, stepName: string, ?output: 'T) : WorkflowStepDoRollbackOptions4RollbackCtx<'T> = jsNative
 
 [<Interface>]
 type WorkflowStepDoRollbackOptionsRollbackCtx<'T> =
     abstract ctx: WorkflowStepDoCallbackCtx with get, set
-    abstract error: obj with get, set
+    abstract error: exn with get, set
     abstract output: 'T option with get, set
     /// <remarks>@deprecated Use <c>ctx.step.name</c> and <c>ctx.step.count</c> instead.</remarks>
     abstract stepName: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (ctx: WorkflowStepDoCallbackCtx, error: obj, stepName: string, ?output: 'T) : WorkflowStepDoRollbackOptionsRollbackCtx<'T> = jsNative
+    static member Create (ctx: WorkflowStepDoCallbackCtx, error: exn, stepName: string, ?output: 'T) : WorkflowStepDoRollbackOptionsRollbackCtx<'T> = jsNative
 
 [<Interface>]
 type WorkflowStepWaitForEventOptions =
@@ -28442,6 +28442,7 @@ type DispatchNamespaceGetArgs =
 /// </summary>
 [<Import("NonRetryableError", "cloudflare:workflows"); AbstractClass>]
 type NonRetryableError (message: string, ?name: string) =
+    inherit exn()
     member _.name
         with get (): string = jsNative
         and set (_: string): unit = jsNative

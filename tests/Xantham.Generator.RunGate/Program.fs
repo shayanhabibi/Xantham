@@ -463,8 +463,9 @@ let private entrypointClasses () =
         "derived:vice:socket"
         (emitJsExpr (bench, payload) "$0.run($1)")
 
-    // `class Snag extends Error`: the base is the compiler library's, so no `inherit` is emitted
-    // and F# does not see an exception - the JavaScript object is one either way.
+    // `class Snag extends Error`: the base is the compiler library's, and `Error` binds to `exn`,
+    // so the class form carries `inherit exn` and F# sees an exception. `errorClasses` below is
+    // where that is exercised; here it is the JavaScript object that is under test.
     let snag = AmbientModuleLab.Exports.Snag "torn"
     check "a class over a lib base is still the module's class" (emitJsExpr snag "$0 instanceof Error")
     equal "and its base constructor ran" "torn" snag.message
@@ -566,12 +567,96 @@ let private probes () =
         6.0
         (Probes.Widget.Exports.measure payload)
 
+/// A consumer's class over the entrypoint the error lab's ambient module exports. Declared here
+/// for the reason `Bench` is: `inherit` is a source construct, and this type compiling at all is
+/// what the flattened form could not reach. `Fault` inherits `exn`, so `Retry` is an F# exception
+/// and the checks below raise it.
+type private Retry(message: string) =
+    inherit ErrorClassLab.Fault(message)
+
+    override this.describe(detail) = $"retry:{this.message}:{detail}"
+
+/// A class an ambient module exports that extends `Error`. The binding inherits `exn`, so a
+/// consumer raises it and catches it by type - the two operations the flattened interface form
+/// admits no spelling of at all.
+let private errorClasses () =
+    let faultClass: obj = import "Fault" "error-lab:faults"
+
+    // The imported constructor's own instance, raised and caught by the type it was declared
+    // under. `raise` typechecks because the binding derives `exn`, and the catch is a type test.
+    let imported = ErrorClassLab.Exports.Fault "torn"
+
+    let caught =
+        try
+            raise imported
+        with :? ErrorClassLab.Fault as fault ->
+            fault.message
+
+    equal "an entrypoint class over Error is raised and caught by its own type" "torn" caught
+
+    // The consumer's subclass, which is the shape a real API asks for.
+    let derived = Retry "stalled"
+
+    let byBase =
+        try
+            raise derived
+        with :? ErrorClassLab.Fault as fault ->
+            fault.describe "twice"
+
+    equal "and a consumer's subclass is caught as the base it derives" "retry:stalled:twice" byBase
+
+    let byOwnType =
+        try
+            raise derived
+        with
+        | :? Retry as retry -> $"own:{retry.message}"
+        | :? ErrorClassLab.Fault -> "base"
+
+    equal "the subclass's own type is what the narrower handler matches" "own:stalled" byOwnType
+
+    // The JavaScript side of the same object: the `inherit exn` is erased at the import, so what
+    // is thrown is the module's class, and the platform's `catch (e) { e instanceof Fault }` sees
+    // it as one.
+    check "the raised object is the module's class in JavaScript" (emitJsExpr (derived, faultClass) "$0 instanceof $1")
+    check "and an Error, which is what a JavaScript catch tests for" (emitJsExpr derived "$0 instanceof Error")
+
+    check
+        "an F# raise reaches a JavaScript catch as the same object"
+        (emitJsExpr
+            (derived, faultClass)
+            "(() => { try { throw $0 } catch (e) { return e instanceof $1 && e.message === \"stalled\" } })()")
+
+    // The base constructor ran, so the JavaScript properties the flattening declared read back.
+    equal "the JavaScript message property reads through the binding" "stalled" derived.message
+    equal "and the runtime's own assignment does too" "Fault" derived.name
+    check "the retryable flag the class assigns is on the instance" derived.retryable
+
+    // The negative: an entrypoint with no base inherits nothing, so it is a plain class. A
+    // `raise` of it would not typecheck, which is the claim; what runs here is that the class
+    // form still reaches its member.
+    let runner = ErrorClassLab.Exports.Runner "plain"
+    equal "an entrypoint with no base is still the module's class" "base:plain:once" (runner.run "once")
+    check "and is no exception" (emitJsExpr runner "!($0 instanceof Error)")
+
+    // `Error` in a reference position now reads as `exn` rather than `obj`, so what comes back is
+    // catchable without a cast.
+    let reason = ErrorClassLab.Exports.reason imported
+
+    equal
+        "a returned Error is an exn the consumer can raise"
+        "torn"
+        (try
+            raise reason
+         with e ->
+             e.Message)
+
 [<EntryPoint>]
 let main _ =
     globals ()
     imports ()
     ambientModules ()
     entrypointClasses ()
+    errorClasses ()
     statics ()
     bigints ()
     constructorObjects ()

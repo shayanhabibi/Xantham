@@ -63,6 +63,25 @@ let rec private typeVars (reference: FsTypeRef) =
         |> List.fold (fun found part -> Set.union found (typeVars part)) Set.empty
     | _ -> Set.empty
 
+/// The TypeScript base a class derives that F# reaches as `exn`, if it has one. `Error` is the
+/// only lib name bound to F#'s exception type, and only through the compiler-lib table, so a
+/// class whose base is shipped by this run or by a mapped group is not one of these.
+let private exnBase (ctx: Context) (model: ShapeModel) (bases: int list) =
+    if GeneratorConfig.disposition ctx.Config CompilerLib = Ship then
+        None
+    else
+        bases
+        |> List.tryPick (fun baseId ->
+            match Map.tryFind baseId model.Types with
+            | Some facts ->
+                match facts.Origin, facts.SymbolName with
+                | CompilerLib, Some baseName ->
+                    match Naming.LibBindings.tryFind baseName with
+                    | Some("exn", _, _) -> Some baseName
+                    | _ -> None
+                | _ -> None
+            | None -> None)
+
 /// A class an ambient module exports for consumers to derive from: `abstract`, or carrying a
 /// base of its own. F# admits no `inherit` of an interface (FS0946), so this is the one shape
 /// that reaches a consumer's `type Actor(ctx, env) = inherit DurableObject(ctx, env)`. Every
@@ -202,7 +221,7 @@ let shapeClasses: Pass<ShapeModel> =
                     /// parameters of its first construct signature, and the import that binds the
                     /// JavaScript constructor. Refused where F# would not admit the result, and
                     /// the declaration then keeps the interface form it already has.
-                    let admitEntrypoint (export: HarvestedExport) (facts: TypeFacts) (name: string) =
+                    let admitEntrypoint (export: HarvestedExport) (facts: TypeFacts) (bases: int list) (name: string) =
                         let declaration =
                             model.Decls
                             |> List.tryPick (function
@@ -245,16 +264,24 @@ let shapeClasses: Pass<ShapeModel> =
                                     | FromGlobal
                                     | FromModule -> ""
 
+                                let inheritsExn = exnBase ctx model bases
+
                                 entrypoints <-
                                     Map.add
                                         name
                                         {
                                             Binding = bindingOf export
                                             Parameters = parameters
+                                            Inherits = inheritsExn |> Option.map (fun _ -> FsNamed "exn")
                                         }
                                         entrypoints
 
                                 emit (Finding.make name (ShapeClasses.EntrypointClassEmitted specifier))
+
+                                match inheritsExn with
+                                | Some baseName ->
+                                    emit (Finding.make name (ShapeClasses.EntrypointClassInheritsExn baseName))
+                                | None -> ()
 
                     let members =
                         model.Harvest.Exports
@@ -321,7 +348,7 @@ let shapeClasses: Pass<ShapeModel> =
                                             declaredId
                                             |> Option.bind (fun typeId -> Map.tryFind typeId model.DeclNames)
 
-                                        admitEntrypoint export facts (Option.defaultValue name declaredName)
+                                        admitEntrypoint export facts bases (Option.defaultValue name declaredName)
 
                                     facts.ConstructSignatures
                                     |> List.map (fun signature ->

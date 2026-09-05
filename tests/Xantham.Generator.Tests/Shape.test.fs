@@ -1463,9 +1463,10 @@ let shapePassTests =
                 "the base that was not inherited is named"
 
         testCase "shape-interfaces flattens a base with no F# name at all" <| fun _ ->
-            // `interface Failure extends Error`: nothing shipped binds `Error`, so the base has
-            // no name at this position for an `inherit` to take. This is the undifferentiated
-            // case the two named ones split out of, and it stays that way.
+            // `interface Failure extends IterableIterator<string>`: the synchronous iteration
+            // protocol has no Fable.Core binding, so the base has no name at this position for an
+            // `inherit` to take. This is the undifferentiated case the two named ones split out
+            // of, and it stays that way.
             let code = Build.resolvedMember (Build.symbol 401 "code" SymbolFlags.Property) 2
 
             let failure =
@@ -1475,7 +1476,7 @@ let shapePassTests =
                     Members = [ code ] }
 
             let model =
-                { Build.shapeModel (libType 40 "Error" [] :: failure :: Build.primitives) with
+                { Build.shapeModel (libType 40 "IterableIterator" [ 1 ] :: failure :: Build.primitives) with
                     DeclNames = Map.ofList [ 41, "Failure" ] }
 
             let shaped, findings = Build.runPass Interfaces.shapeInterfaces model
@@ -2595,6 +2596,90 @@ let shapePassTests =
                 Expect.equal entry.Binding (ImportFrom("Derived", "lab:tools")) "the specifier's import binds the class"
                 Expect.equal (entry.Parameters |> List.map _.Name) [ "label" ] "the construct signature's parameters"
 
+        testCase "shape-classes inherits exn where the entrypoint's base is the lib's Error" <| fun _ ->
+            // Two entrypoints over one shape, differing only in which compiler-lib name they
+            // derive. `Error` is the one bound to F#'s exception type; `Event` is a lib name with
+            // no such binding, and reaches the same class form without a base.
+            let libBase (id: int) (name: string) =
+                { Build.facts (Build.typeResponse id TypeFlags.Object) with
+                    Origin = CompilerLib
+                    SymbolName = Some name }
+
+            let entrypoint (name: string) (id: int) (baseId: int) =
+                let instance =
+                    { Build.facts (Build.typeResponse id TypeFlags.Object) with
+                        Members = [ Build.resolvedMember (Build.symbol (id * 10) "code" SymbolFlags.Property) 2 ]
+                        BaseTypes = [ baseId ] }
+
+                let static' =
+                    { Build.facts (Build.typeResponse (id + 1) TypeFlags.Object) with
+                        ConstructSignatures =
+                            [ Build.signature
+                                  [ Build.resolvedMember
+                                        (Build.symbol (id * 10 + 1) "message" SymbolFlags.FunctionScopedVariable)
+                                        1 ]
+                                  id ] }
+
+                let declaration =
+                    FsInterface
+                        { Name = name
+                          Docs = ""
+                          Tags = []
+                          Order = None
+                          TypeParameters = []
+                          Inherits = []
+                          Members =
+                            [ FsProperty
+                                  { Name = "code"
+                                    Docs = ""
+                                    Tags = []
+                                    ReadOnly = true
+                                    Type = FsFloat } ]
+                          Entrypoint = None
+                          CreateOverloads = []
+                          Statics = [] }
+
+                let export =
+                    { Build.export name (Build.symbol (id + 2) name (SymbolFlags.Class ||| SymbolFlags.Value)) with
+                        Origin = FromAmbientModule "lab:faults" }
+
+                [ instance; static' ], declaration, export, (id + 2, { Declared = Some id; Value = Some(id + 1) })
+
+            let cases = [ entrypoint "Fault" 80 70; entrypoint "Tick" 90 71 ]
+
+            let model =
+                { Build.shapeModel (
+                      libBase 70 "Error"
+                      :: libBase 71 "Event"
+                         :: (cases |> List.collect (fun (facts, _, _, _) -> facts))
+                      @ Build.primitives
+                  ) with
+                    Harvest =
+                        { Exports = cases |> List.map (fun (_, _, export, _) -> export) }
+                    ExportTypes = cases |> List.map (fun (_, _, _, types) -> types) |> Map.ofList
+                    Decls = cases |> List.map (fun (_, declaration, _, _) -> declaration) }
+
+            let shaped, findings = Build.runPass Classes.shapeClasses model
+
+            let entrypointOf name =
+                shaped.Decls
+                |> List.pick (function
+                    | FsInterface decl when decl.Name = name -> Some decl.Entrypoint
+                    | _ -> None)
+
+            Expect.equal
+                ((entrypointOf "Fault").Value.Inherits)
+                (Some(FsNamed "exn"))
+                "the class a consumer raises carries the exception base"
+
+            Expect.equal ((entrypointOf "Tick").Value.Inherits) None "a lib base with no such binding carries none"
+
+            Expect.equal
+                (findings |> List.filter (fun f -> f.Key = "SC009") |> List.map (fun f -> f.Symbol, f.Message))
+                [ "Fault",
+                  "entrypoint class derives from Error as exn; a consumer raises it and catches it by type" ]
+                "and the finding names the TypeScript base it was mapped from"
+
         testCase "shape-classes refuses the class form where F# would not admit it" <| fun _ ->
             // A base this run declares is an interface, and an F# class reaches its base through
             // a constructor call an interface has none of.
@@ -3073,6 +3158,21 @@ let shapePassTests =
 
             Expect.equal reference FsObj "no binding is claimed"
             Expect.equal (findings |> List.map _.Tier) [ Widened ] "and the widening is the ordinary one"
+
+        testCase "the lib's Error is F#'s exception type, and says what that costs" <| fun _ ->
+            // Fable compiles a JavaScript `Error` to `System.Exception`, so `exn` is the name at
+            // this position. The instance surface is where the two part company, which is what
+            // the loss note carries.
+            let model = Build.shapeModel (libType 10 "Error" [] :: Build.primitives)
+
+            let reference, findings = Spec.typeRef Build.context model None "x" 10
+
+            Expect.equal reference (FsNamed "exn") "the binding is written"
+
+            Expect.equal
+                (findings |> List.map (fun finding -> finding.Key, finding.Message))
+                [ "TR025", "Error reads as exn; the JavaScript name, stack and cause properties are not on it" ]
+                "and the mapping records what it gives up"
 
         testCase "a lib name nothing shipped binds keeps widening" <| fun _ ->
             // The synchronous iteration protocol has no Fable.Core binding, and `seq<'T>` is not

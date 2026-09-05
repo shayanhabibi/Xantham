@@ -29,8 +29,9 @@
     },
     {
       "pass": "SC - shape-classes",
-      "total": 3,
+      "total": 4,
       "exact": 2,
+      "ergonomic": 1,
       "widened": 1
     },
     {
