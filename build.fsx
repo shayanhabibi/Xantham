@@ -1,4 +1,4 @@
-﻿#r "nuget: Partas.Build, 0.3.0"
+﻿#r "nuget: Partas.Build, 0.4.0-alpha.3"
 #r "nuget: Partas.TypeProvider.BuildHelper, 0.2.5"
 #r "nuget: Str"
 #r "nuget: Fake.IO.FileSystem"
@@ -144,7 +144,7 @@ module Stages =
                 }
         }
 
-    let build (projects: Internal.InputSpec<string list>) =
+    let build (projects: InputSpec<string list>) =
         input {
             let! projects = projects
             and! config = Options.config
