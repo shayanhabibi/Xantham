@@ -41,18 +41,18 @@ Targets `net10.0`, `net8.0` and `netstandard2.1`. See the
 - [Navigating the AST](wire-navigation.md) — tags, `Node<'Tag>`, views and the escape hatches.
 - [The hand-written register](wire-hand-written.md) — every fact transcribed from upstream
   rather than derived from its schema, and how to update each one.
-- [The wire protocol](plans/tsgo-protocol.md) — framing, error model and the binary AST
+- [The wire protocol](https://github.com/shayanhabibi/Xantham/blob/master/docs/.ai/plans/tsgo-protocol.md) — framing, error model and the binary AST
   format, verified against live byte traces.
-- [Remaining work](plans/wire-remaining-work.md) — what is still outstanding, in phases.
+- [Remaining work](https://github.com/shayanhabibi/Xantham/blob/master/docs/.ai/plans/wire-remaining-work.md) — what is still outstanding, in phases.
 - [Generating F# bindings](generator-usage.md) — install the tool, pin a compiler, write
   `xantham.json`, and compile the output.
-- [Generator architecture](plans/generator-architecture.md) — the nano-pass pipeline, its
+- [Generator architecture](https://github.com/shayanhabibi/Xantham/blob/master/docs/.ai/plans/generator-architecture.md) — the nano-pass pipeline, its
   decisions, and what each phase landed.
-- [Type mapping](plans/generator-type-mapping.md) — how each TypeScript construct becomes F#,
+- [Type mapping](https://github.com/shayanhabibi/Xantham/blob/master/docs/.ai/plans/generator-type-mapping.md) — how each TypeScript construct becomes F#,
   and what it costs when it cannot.
-- [The `@types/three` rung](plans/generator-three-rung.md) — reconnaissance on the largest
+- [The `@types/three` rung](https://github.com/shayanhabibi/Xantham/blob/master/docs/.ai/plans/generator-three-rung.md) — reconnaissance on the largest
   litmus rung attempted, why it does not land yet, and the reproducers it yielded.
-- [Fable 5 workarounds](fable5-workarounds.md) — the six losses that come from how Fable 5
+- [Fable 5 workarounds](https://github.com/shayanhabibi/Xantham/blob/master/docs/.ai/fable5-workarounds.md) — the six losses that come from how Fable 5
   compiles F#, each with F# a consumer can write instead, and what that costs.
 
 ---

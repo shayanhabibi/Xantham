@@ -38,14 +38,14 @@ Targets `net10.0`, `net8.0` and `netstandard2.1`. See the
 - [Navigating the AST](docs/wire-navigation.md) — tags, `Node<'Tag>`, views and the escape hatches.
 - [The hand-written register](docs/wire-hand-written.md) — every fact transcribed from upstream
   rather than derived from its schema, and how to update each one.
-- [The wire protocol](docs/plans/tsgo-protocol.md) — framing, error model and the binary AST
+- [The wire protocol](docs/.ai/plans/tsgo-protocol.md) — framing, error model and the binary AST
   format, verified against live byte traces.
-- [Remaining work](docs/plans/wire-remaining-work.md) — what is still outstanding, in phases.
+- [Remaining work](docs/.ai/plans/wire-remaining-work.md) — what is still outstanding, in phases.
 - [Generating F# bindings](docs/generator-usage.md) — install the tool, pin a compiler, write
   `xantham.json`, and compile the output.
-- [Generator architecture](docs/plans/generator-architecture.md) — the nano-pass pipeline, its
+- [Generator architecture](docs/.ai/plans/generator-architecture.md) — the nano-pass pipeline, its
   decisions, and what each phase landed.
-- [Type mapping](docs/plans/generator-type-mapping.md) — how each TypeScript construct becomes
+- [Type mapping](docs/.ai/plans/generator-type-mapping.md) — how each TypeScript construct becomes
   F#, and what it costs when it cannot.
 
 ---
@@ -92,7 +92,7 @@ build, so a binding that does not compile fails the build rather than a review.
 The generator's progress is tracked as a ladder of real npm packages (`ansi-regex`, `animejs`,
 `@cloudflare/workers-types`, ...), each pinned by version, generated into a committed golden,
 and accompanied by a `manifest.json` grading every symbol `Exact`, `Ergonomic`, `Widened` or
-`Escape`. See [the architecture plan](docs/plans/generator-architecture.md) for where each
+`Escape`. See [the architecture plan](docs/.ai/plans/generator-architecture.md) for where each
 phase stands.
 
 ---
