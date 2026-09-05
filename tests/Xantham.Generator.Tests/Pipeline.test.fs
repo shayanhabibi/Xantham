@@ -76,13 +76,17 @@ let private handConfig (path: string option) =
 
 /// The `inherit` lines a rendered declaration carries, in emission order. Reading them off the
 /// source rather than the model is deliberate: §4.4's is-a relation is only real if it survives
-/// to the file the compile gate builds.
+/// to the file the compile gate builds. The three heads are the interface, the generic one, and
+/// the entrypoint class's primary constructor.
 let private inheritsOf (source: string) (name: string) =
     let lines = source.Replace("\r\n", "\n").Split '\n'
 
     match
         lines
-        |> Array.tryFindIndex (fun line -> line.StartsWith $"type {name} =" || line.StartsWith $"type {name}<")
+        |> Array.tryFindIndex (fun line ->
+            line.StartsWith $"type {name} ="
+            || line.StartsWith $"type {name}<"
+            || line.StartsWith $"type {name} (")
     with
     | None -> failtest $"no declaration named {name} in the rendered source"
     | Some start ->
@@ -570,6 +574,86 @@ let pipelineTests =
                     Expect.contains harvest ("HG001", "\"ambient-lab:empty\"") "a module exporting nothing is still dropped" ])
 
         yield!
+            fixtureTests "error-class-lab" (handFixture "error-class-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "an entrypoint class over Error inherits exn" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.stringContains
+                        source
+                        "[<Import(\"Fault\", \"error-lab:faults\"); AbstractClass>]"
+                        "the class form is imported from the specifier that exports it"
+
+                    Expect.stringContains source "type Fault (message: string) =" "under a primary constructor"
+
+                    Expect.equal
+                        (inheritsOf source "Fault")
+                        [ "exn()" ]
+                        "carrying the inherit line a raise and a catch by type need"
+
+                    Expect.equal
+                        (inheritsOf source "Halt")
+                        [ "exn()" ]
+                        "an abstract entrypoint over the same base reaches the same line"
+
+                    let raised =
+                        rendered.Findings
+                        |> List.filter (fun finding -> finding.Key = "SC009")
+                        |> List.map (fun finding -> finding.Symbol, finding.Message)
+
+                    Expect.equal
+                        raised
+                        [
+                            "Fault", "entrypoint class derives from Error as exn; a consumer raises it and catches it by type"
+                            "Halt", "entrypoint class derives from Error as exn; a consumer raises it and catches it by type"
+                        ]
+                        "and each one is reported under the TypeScript base it was mapped from"
+
+                  testCase "an entrypoint with no base carries no inherit line" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.stringContains
+                        source
+                        "type Runner (label: string) ="
+                        "the class form is reached by `abstract` alone"
+
+                    Expect.equal (inheritsOf source "Runner") [] "and no base is emitted"
+
+                  testCase "an interface over Error keeps the flattened form" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.equal (inheritsOf source "Warned") [] "an F# interface admits no exception base"
+                    Expect.stringContains source "abstract note: string" "and its own member is declared"
+                    Expect.stringContains source "abstract message: string" "beside the base members flattened in"
+
+                    // `Mishap` is a class, but nothing exports it from a specifier, so the
+                    // entrypoint rule does not select it and the same flattening applies.
+                    Expect.equal (inheritsOf source "Mishap") [] "a class no specifier exports flattens too"
+                    Expect.stringContains source "static member Create (at: float," "and keeps its object-literal Create"
+
+                  testCase "Error in a reference position reads as exn with a loss note" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.stringContains
+                        source
+                        "static member reason (fault: Fault) : exn = jsNative"
+                        "the compiler-lib table answers where the reference widened to obj before"
+
+                    let losses =
+                        rendered.Findings
+                        |> List.filter (fun finding -> finding.Key = "TR025")
+                        |> List.map _.Message
+                        |> List.distinct
+
+                    Expect.equal
+                        losses
+                        [ "Error reads as exn; the JavaScript name, stack and cause properties are not on it" ]
+                        "and the mapping records what it gives up" ])
+
+        yield!
             fixtureTests "generics-lab" (handFixture "generics-lab") GeneratorConfig.Default (fun package ->
                 [ testCase "a generic declaration reached only through instantiations is declared once, generically" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -804,14 +888,14 @@ let pipelineTests =
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                     let source = rendered.Files |> List.head |> snd
 
-                    Expect.isEmpty (inheritsOf source "Failure") "Error has no F# name at this position"
+                    Expect.isEmpty (inheritsOf source "Failure") "exn is not an interface type"
                     Expect.isEmpty (inheritsOf source "Deferred") "JS.Promise is not declared by this run"
 
                     let byKey =
                         rendered.Findings
                         |> List.map (fun finding -> finding.Key, finding.Symbol, finding.Tier)
 
-                    Expect.contains byKey ("SI002", "Failure", Ergonomic) "the nameless base"
+                    Expect.contains byKey ("SI006", "Failure", Ergonomic) "a lib base bound to exn"
                     Expect.contains byKey ("SI006", "Deferred", Ergonomic) "the named-but-undeclared base"
 
                     Expect.contains

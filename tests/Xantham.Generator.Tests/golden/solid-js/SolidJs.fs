@@ -1347,7 +1347,7 @@ type Exports =
     /// </remarks>
     /// <remarks>@description https://docs.solidjs.com/reference/reactive-utilities/catch-error</remarks>
     [<Import("catchError", "solid-js")>]
-    static member catchError<'T> (fn: Func<'T>, handler: Action<obj>) : 'T option = jsNative
+    static member catchError<'T> (fn: Func<'T>, handler: Action<exn>) : 'T option = jsNative
     [<Import("getListener", "solid-js")>]
     static member getListener () : Computation<obj, obj> option = jsNative
     [<Import("getOwner", "solid-js")>]
@@ -1447,7 +1447,7 @@ type Exports =
     /// </remarks>
     /// <remarks>@description https://docs.solidjs.com/reference/reactive-utilities/catch-error</remarks>
     [<Import("onError", "solid-js")>]
-    static member onError (fn: Action<obj>) : unit = jsNative
+    static member onError (fn: Action<exn>) : unit = jsNative
     [<Import("enableHydration", "solid-js")>]
     static member enableHydration () : unit = jsNative
     [<Import("createComponent", "solid-js")>]

@@ -56,8 +56,9 @@ export declare class Leaf extends Node {
     readonly leafy: boolean;
 }
 
-/** Not inherited: `Error` is the compiler lib's, and nothing shipped binds it, so the base has
- *  no F# name at this position at all and only its members survive. */
+/** Not inherited: `Error` is the compiler lib's, and the name it binds to is `exn` - which this
+ *  run does not declare as an interface, so only its members survive. An F# interface admits no
+ *  exception base; the class form is where `Error` reaches `inherit`. */
 export interface Failure extends Error {
     code: number;
 }

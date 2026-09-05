@@ -118,8 +118,9 @@ type Leaf =
     static member Create (leafy: bool, id: float) : Leaf = jsNative
 
 /// <summary>
-/// Not inherited: <c>Error</c> is the compiler lib's, and nothing shipped binds it, so the base has
-/// no F# name at this position at all and only its members survive.
+/// Not inherited: <c>Error</c> is the compiler lib's, and the name it binds to is <c>exn</c> - which this
+/// run does not declare as an interface, so only its members survive. An F# interface admits no
+/// exception base; the class form is where <c>Error</c> reaches <c>inherit</c>.
 /// </summary>
 [<Interface>]
 type Failure =

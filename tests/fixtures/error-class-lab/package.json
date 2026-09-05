@@ -1,0 +1,6 @@
+{
+    "name": "error-class-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "description": "Hand-authored fixture for a class an ambient module exports that extends Error. The entrypoint form inherits exn, so a consumer raises the declaration and catches it by type; an interface over the same base, and a class no specifier exports, keep the flattened form. Tracked in git, no npm install."
+}

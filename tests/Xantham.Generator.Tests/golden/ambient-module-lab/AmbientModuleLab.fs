@@ -92,6 +92,7 @@ type Workbench (label: string) =
 /// </summary>
 [<Import("Snag", "ambient-lab:tools"); AbstractClass>]
 type Snag (message: string) =
+    inherit exn()
     member _.name
         with get (): string = jsNative
         and set (_: string): unit = jsNative

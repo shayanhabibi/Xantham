@@ -340,6 +340,10 @@ module Naming =
                 "ReadonlySet",
                 ("JS.Set", 1, Some "ReadonlySet reads as JS.Set; the readonly restriction is not carried")
                 "WeakSet", ("JS.WeakSet", 1, None)
+                // Fable compiles a JavaScript `Error` to `System.Exception`, which is what makes
+                // a class over this base raisable and catchable by type. The instance surface is
+                // where the two disagree: `name`, `stack` and `cause` are the JavaScript object's.
+                "Error", ("exn", 0, Some "Error reads as exn; the JavaScript name, stack and cause properties are not on it")
                 "Date", ("JS.Date", 0, None)
                 "Function", ("JS.Function", 0, None)
                 "Object", ("JS.Object", 0, None)
@@ -882,6 +886,10 @@ type FsEntrypoint =
         Binding: ImportBinding
         /// The primary constructor's parameters, from the class's first construct signature.
         Parameters: FsParam list
+        /// The F# base the class derives, rendered as the `inherit` line of the class form.
+        /// `Some exn` where the TypeScript base is `Error`: a consumer raises the declaration and
+        /// catches it by type. `None` where the class has no base F# reaches.
+        Inherits: FsTypeRef option
     }
 
 type FsInterfaceDecl =

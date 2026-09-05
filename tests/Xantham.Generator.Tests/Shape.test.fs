@@ -2553,6 +2553,90 @@ let shapePassTests =
                 Expect.equal entry.Binding (ImportFrom("Derived", "lab:tools")) "the specifier's import binds the class"
                 Expect.equal (entry.Parameters |> List.map _.Name) [ "label" ] "the construct signature's parameters"
 
+        testCase "shape-classes inherits exn where the entrypoint's base is the lib's Error" <| fun _ ->
+            // Two entrypoints over one shape, differing only in which compiler-lib name they
+            // derive. `Error` is the one bound to F#'s exception type; `Event` is a lib name with
+            // no such binding, and reaches the same class form without a base.
+            let libBase (id: int) (name: string) =
+                { Build.facts (Build.typeResponse id TypeFlags.Object) with
+                    Origin = CompilerLib
+                    SymbolName = Some name }
+
+            let entrypoint (name: string) (id: int) (baseId: int) =
+                let instance =
+                    { Build.facts (Build.typeResponse id TypeFlags.Object) with
+                        Members = [ Build.resolvedMember (Build.symbol (id * 10) "code" SymbolFlags.Property) 2 ]
+                        BaseTypes = [ baseId ] }
+
+                let static' =
+                    { Build.facts (Build.typeResponse (id + 1) TypeFlags.Object) with
+                        ConstructSignatures =
+                            [ Build.signature
+                                  [ Build.resolvedMember
+                                        (Build.symbol (id * 10 + 1) "message" SymbolFlags.FunctionScopedVariable)
+                                        1 ]
+                                  id ] }
+
+                let declaration =
+                    FsInterface
+                        { Name = name
+                          Docs = ""
+                          Tags = []
+                          Order = None
+                          TypeParameters = []
+                          Inherits = []
+                          Members =
+                            [ FsProperty
+                                  { Name = "code"
+                                    Docs = ""
+                                    Tags = []
+                                    ReadOnly = true
+                                    Type = FsFloat } ]
+                          Entrypoint = None
+                          CreateOverloads = []
+                          Statics = [] }
+
+                let export =
+                    { Build.export name (Build.symbol (id + 2) name (SymbolFlags.Class ||| SymbolFlags.Value)) with
+                        Origin = FromAmbientModule "lab:faults" }
+
+                [ instance; static' ], declaration, export, (id + 2, { Declared = Some id; Value = Some(id + 1) })
+
+            let cases = [ entrypoint "Fault" 80 70; entrypoint "Tick" 90 71 ]
+
+            let model =
+                { Build.shapeModel (
+                      libBase 70 "Error"
+                      :: libBase 71 "Event"
+                         :: (cases |> List.collect (fun (facts, _, _, _) -> facts))
+                      @ Build.primitives
+                  ) with
+                    Harvest =
+                        { Exports = cases |> List.map (fun (_, _, export, _) -> export) }
+                    ExportTypes = cases |> List.map (fun (_, _, _, types) -> types) |> Map.ofList
+                    Decls = cases |> List.map (fun (_, declaration, _, _) -> declaration) }
+
+            let shaped, findings = Build.runPass Classes.shapeClasses model
+
+            let entrypointOf name =
+                shaped.Decls
+                |> List.pick (function
+                    | FsInterface decl when decl.Name = name -> Some decl.Entrypoint
+                    | _ -> None)
+
+            Expect.equal
+                ((entrypointOf "Fault").Value.Inherits)
+                (Some(FsNamed "exn"))
+                "the class a consumer raises carries the exception base"
+
+            Expect.equal ((entrypointOf "Tick").Value.Inherits) None "a lib base with no such binding carries none"
+
+            Expect.equal
+                (findings |> List.filter (fun f -> f.Key = "SC009") |> List.map (fun f -> f.Symbol, f.Message))
+                [ "Fault",
+                  "entrypoint class derives from Error as exn; a consumer raises it and catches it by type" ]
+                "and the finding names the TypeScript base it was mapped from"
+
         testCase "shape-classes refuses the class form where F# would not admit it" <| fun _ ->
             // A base this run declares is an interface, and an F# class reaches its base through
             // a constructor call an interface has none of.

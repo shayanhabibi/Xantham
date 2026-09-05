@@ -517,6 +517,9 @@ let private renderClassMember (m: FsMember) =
 /// A class an ambient module exports for consumers to derive from (§4.4). `[<AbstractClass>]`
 /// under the import that binds the JavaScript constructor: Fable compiles a derived class's
 /// `inherit` to `extends` and its constructor to `super(...)`.
+///
+/// The declaration is erased at its import, so an `inherit exn()` line carries the is-a relation
+/// to F# and nothing to JavaScript: the imported constructor is what runs.
 let private renderEntrypointClass (runtimePackage: string) (decl: FsInterfaceDecl) (entrypoint: FsEntrypoint) =
     [
         yield! docLines "" decl.Docs decl.Tags
@@ -525,10 +528,16 @@ let private renderEntrypointClass (runtimePackage: string) (decl: FsInterfaceDec
         let head =
             $"type {declHead decl.Name decl.TypeParameters} {renderParamList entrypoint.Parameters}"
 
-        match decl.Members, decl.Statics with
-        | [], [] -> yield $"{head} = class end"
-        | members, statics ->
+        let inherits =
+            match entrypoint.Inherits with
+            | Some baseRef -> [ $"    inherit {printType baseRef}()" ]
+            | None -> []
+
+        match inherits, decl.Members, decl.Statics with
+        | [], [], [] -> yield $"{head} = class end"
+        | inherits, members, statics ->
             yield $"{head} ="
+            yield! inherits
 
             for m in members do
                 yield! renderClassMember m
@@ -796,6 +805,7 @@ let private qualifyDecl foreign =
                     |> Option.map (fun entrypoint ->
                         { entrypoint with
                             Parameters = entrypoint.Parameters |> List.map (qualifyParam foreign)
+                            Inherits = entrypoint.Inherits |> Option.map (qualifyRef foreign)
                         })
                 CreateOverloads = decl.CreateOverloads |> List.map (List.map (qualifyParam foreign))
                 Statics = decl.Statics |> List.map (qualifyBound foreign)
