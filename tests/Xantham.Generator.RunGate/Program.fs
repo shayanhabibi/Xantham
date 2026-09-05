@@ -1187,6 +1187,146 @@ let private callbackMixedForms () =
         onDone 3.0
         check "and applies" true
 
+/// Lane AM. The same rule inside an erased union arm. `U2` unwraps to whichever arm was supplied,
+/// so each claim reads the `length` of the function JavaScript received beside the result of
+/// calling it with all its arguments at once, and the non-callback arm of the same union is read
+/// beside it.
+let private callbackUnionArmForms () =
+    let attempt (f: unit -> string) =
+        try
+            f ()
+        with e ->
+            $"threw: {e.Message}"
+
+    // Parameter position: the converted arm at arity 0 and 1, the retained delegate at arity 2.
+    equal
+        "a converted callback arm of arity 0 crosses as a 0-argument function"
+        "0:none"
+        (attempt (fun () -> CallbackFunctionLab.Exports.callUnionNone (U2.Case2(fun () -> "none"))))
+
+    equal
+        "a converted callback arm of arity 1 crosses as a 1-argument function"
+        "1:got:1"
+        (attempt (fun () -> CallbackFunctionLab.Exports.callUnionOne (U2.Case2(fun a -> $"got:{a}"))))
+
+    equal
+        "a retained delegate arm of arity 2 crosses at its declared arity"
+        "2:got:1:2"
+        (attempt (fun () ->
+            CallbackFunctionLab.Exports.callUnionTwo (U2.Case2(Func<float, float, string>(fun a b -> $"got:{a}:{b}")))))
+
+    equal
+        "the non-callback arm of the same union crosses as its own value"
+        "text:plain"
+        (attempt (fun () -> CallbackFunctionLab.Exports.callUnionOne (U2.Case1 "plain")))
+
+    equal
+        "a named union abbreviation carries its converted arm at arity 1"
+        "1:named:1"
+        (attempt (fun () -> CallbackFunctionLab.Exports.callUnionNamed (U2.Case2(fun a -> $"named:{a}"))))
+
+    // Return position, where the bare converted callback threw above arity 1.
+    let returnedOne = CallbackFunctionLab.Exports.makeUnionOne 5.0
+
+    equal
+        "a converted callback arm returned from a function arrives at arity 1"
+        1.0
+        (emitJsExpr returnedOne "$0.length")
+
+    equal
+        "and the match reaches it and applies it"
+        "one:5:1"
+        (attempt (fun () ->
+            match returnedOne with
+            | U2.Case1 text -> $"text:{text}"
+            | U2.Case2 callback -> callback 1.0))
+
+    let returnedTwo = CallbackFunctionLab.Exports.makeUnionTwo 5.0
+
+    equal "a retained delegate arm returned from a function arrives at arity 2" 2.0 (emitJsExpr returnedTwo "$0.length")
+
+    equal
+        "and invokes with all its arguments"
+        "two:5:1:2"
+        (attempt (fun () ->
+            match returnedTwo with
+            | U2.Case1 text -> $"text:{text}"
+            | U2.Case2 callback -> callback.Invoke(1.0, 2.0)))
+
+    // Read-back off a member. The member's type is the union, so the read carries no function
+    // type and Fable inserts no curry wrapper: the arity JavaScript holds survives at both arities.
+    let fromJs = CallbackFunctionLab.Exports.unionHandlers
+
+    equal "a converted callback arm read off a member arrives at arity 1" 1.0 (emitJsExpr fromJs.one "$0.length")
+
+    equal
+        "and applies"
+        "js1:1"
+        (attempt (fun () ->
+            match fromJs.one with
+            | U2.Case1 text -> $"text:{text}"
+            | U2.Case2 callback -> callback 1.0))
+
+    equal "a retained delegate arm read off a member arrives at arity 2" 2.0 (emitJsExpr fromJs.two "$0.length")
+
+    equal
+        "and invokes with both its arguments"
+        "js2:1:2"
+        (attempt (fun () ->
+            match fromJs.two with
+            | U2.Case1 text -> $"text:{text}"
+            | U2.Case2 callback -> callback.Invoke(1.0, 2.0)))
+
+    equal
+        "the non-callback arm of a union-typed member reads back as its value"
+        "text:plain"
+        (attempt (fun () ->
+            match fromJs.text with
+            | U2.Case1 text -> $"text:{text}"
+            | U2.Case2 callback -> callback 1.0))
+
+    // The outward direction: a union-typed member built in F# and read by JavaScript.
+    let built =
+        CallbackFunctionLab.UnionHandlers.Create(
+            one = U2.Case2(fun a -> $"one:{a}"),
+            two = U2.Case2(Func<float, float, string>(fun a b -> $"two:{a}:{b}")),
+            text = U2.Case1 "plain"
+        )
+
+    equal
+        "a ParamObject literal carries a converted arm, a delegate arm and a non-callback arm"
+        "1:one:1|2:two:1:2|text:plain"
+        (attempt (fun () -> CallbackFunctionLab.Exports.fireUnion built))
+
+    // The corpus shape exactly: the callback arm beside an object arm. The arm is read out by a
+    // JavaScript discrimination rather than by a match, because a type test on the object arm is
+    // the erased-interface case `workarounds` above measures.
+    equal
+        "a converted callback arm beside an object arm crosses at arity 1"
+        "1:got:1"
+        (attempt (fun () -> CallbackFunctionLab.Exports.callUnionObject (U2.Case2(fun a -> $"got:{a}"))))
+
+    equal
+        "and the object arm of the same union carries its method at arity 1"
+        "object:1:obj:1"
+        (attempt (fun () ->
+            CallbackFunctionLab.Exports.callUnionObject (
+                U2.Case1(CallbackFunctionLab.ListenerObject.Create(fun a -> $"obj:{a}"))
+            )))
+
+    let objectUnion = CallbackFunctionLab.Exports.objectUnion
+
+    equal "a callback arm read back beside an object arm arrives at arity 1" 1.0 (emitJsExpr objectUnion "$0.length")
+
+    equal
+        "and applies with its argument"
+        "js:1"
+        (attempt (fun () ->
+            if emitJsExpr objectUnion "typeof $0 === \"function\"" then
+                (unbox<float -> string> objectUnion) 1.0
+            else
+                "the object arm"))
+
 [<EntryPoint>]
 let main _ =
     globals ()
@@ -1208,6 +1348,7 @@ let main _ =
     callbackGoldenForms ()
     callbackTupledForms ()
     callbackMixedForms ()
+    callbackUnionArmForms ()
 
     match failures with
     | [] ->
