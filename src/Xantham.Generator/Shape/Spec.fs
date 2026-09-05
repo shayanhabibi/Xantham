@@ -615,12 +615,30 @@ let rec internal literalsCarried (model: ShapeModel) (depth: int) (typeId: int) 
             |> List.collect (literalsCarried model (depth + 1))
             |> List.distinct
 
+/// The key a type takes where it carries no literal: the F# type it shapes to, rather than the
+/// checker's id for it. Two unions agreeing on their non-nullish members share a key, and that
+/// is the equivalence `dedupe-overloads` compares under — the second such union reaches the
+/// first's name directly through `namedUnionByMembers`, or through the abbreviation
+/// `shape-aliases` writes where the second is declared too.
+let internal shapedKey (model: ShapeModel) (typeId: int) : string =
+    match Map.tryFind typeId model.Types with
+    | Some facts when flag TypeFlags.Union facts && not (flag TypeFlags.Boolean facts) ->
+        match splitNullish model facts with
+        // One remaining member shapes as that member; two or more take a union name. The
+        // hoisted part is the `option` wrapper, so it separates.
+        | hoisted, (_ :: _ :: _ as remaining) ->
+            let members = remaining |> List.sort |> List.map string |> String.concat "|"
+            let absence = if List.isEmpty hoisted then "" else "?"
+            $"union({members}){absence}"
+        | _ -> string typeId
+    | _ -> string typeId
+
 /// A parameter type with its string literals erased. Two overloads share this key exactly where
 /// the literal is the only thing between them, which is the collision `dedupe-overloads` reports
 /// and the one a retained literal repairs.
 let rec internal literalErasedKey (model: ShapeModel) (depth: int) (typeId: int) : string =
     if depth >= LiteralReach || List.isEmpty (literalsCarried model depth typeId) then
-        string typeId
+        shapedKey model typeId
     else
         match Map.tryFind typeId model.Types with
         | None -> string typeId
@@ -805,6 +823,58 @@ let internal retainedLiteral (model: ShapeModel) (owner: string) (typeId: int) :
         )
 
     Map.tryFind (owner, typeId) sites
+
+// ---------------------------------------------------------------------------------------------
+// Overload sets a `keyof` bound separates in TypeScript alone (§4.9, §4.10).
+// ---------------------------------------------------------------------------------------------
+
+/// What `keyof` reaches the shape as: the open form, where the checker deferred the operand,
+/// and the union of literal keys a closed operand expands to.
+let private isKeySet (model: ShapeModel) (boundId: int) =
+    match Map.tryFind boundId model.Types with
+    | None -> false
+    | Some bound ->
+        flag TypeFlags.Index bound
+        || (flag TypeFlags.Union bound
+            && not bound.UnionMembers.IsEmpty
+            && bound.UnionMembers
+               |> List.forall (fun id ->
+                   match Map.tryFind id model.Types with
+                   | Some m -> flag TypeFlags.StringLiteral m
+                   | None -> false))
+
+/// Whether a signature binds a type parameter over a key set.
+let private boundByKeySet (model: ShapeModel) (signature: ResolvedSignature) =
+    signature.TypeParameters
+    |> List.exists (fun id ->
+        match Map.tryFind id model.Types with
+        | Some parameter -> parameter.Constraint |> Option.exists (isKeySet model)
+        | None -> false)
+
+/// The members whose overload set is told apart by a `keyof` bound and by nothing else F# reads.
+/// `closest<K extends keyof HTMLElementTagNameMap>(selector: K)` writes `'K` bare: .NET keeps
+/// constraints out of a method signature, and the three tag-name maps carry no F# name for
+/// `keyof<'T>` to stand over, so every overload of the set arrives at one parameter type.
+///
+/// Each member is named under both spellings a drop is reported by: the symbol's own and F#'s.
+let internal keyBoundedOverloads (model: ShapeModel) : Set<string> =
+    model.DeclNames
+    |> Map.toList
+    |> List.collect (fun (typeId, owner) ->
+        match Map.tryFind typeId model.Types with
+        | None -> []
+        | Some facts ->
+            facts.Members
+            |> List.collect (fun m ->
+                match Map.tryFind m.TypeId model.Types with
+                | Some memberFacts when
+                    (memberFacts.CallSignatures |> List.filter (boundByKeySet model) |> List.length) > 1
+                    ->
+                    [ m.Symbol.Name; Naming.memberName m.Symbol.Name ]
+                    |> List.distinct
+                    |> List.map (fun spelling -> $"{owner}.{spelling}")
+                | _ -> []))
+    |> Set.ofList
 
 // ---------------------------------------------------------------------------------------------
 // Type references.

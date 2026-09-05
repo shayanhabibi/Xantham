@@ -22622,7 +22622,7 @@ type BrowserRun =
     /// **Headers:**
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </remarks>
-    abstract quickAction: action: string * options: BrowserRunContentOptions -> JS.Promise<Response>
+    abstract quickAction: action: BrowserRun.Content * options: BrowserRunContentOptions -> JS.Promise<Response>
     /// <summary>
     /// Take a screenshot of a web page.
     /// Generate a PDF of a web page.
@@ -23432,7 +23432,178 @@ type BrowserRun =
     /// **Headers:**
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </remarks>
+    abstract quickAction: action: BrowserRun.Markdown * options: BrowserRunMarkdownOptions -> JS.Promise<Response>
+    /// <summary>
+    /// Take a screenshot of a web page.
+    /// Generate a PDF of a web page.
+    /// Get the HTML content of a web page.
+    /// Scrape elements from a web page by CSS selector.
+    /// Extract all links from a web page.
+    /// Get several representations of a web page in one request.
+    /// Extract structured JSON data from a web page using AI.
+    /// Convert a web page to Markdown.
+    /// Get the accessibility tree of a web page.
+    /// </summary>
+    /// <remarks>@param action - Must be <c>'screenshot'</c>.</remarks>
+    /// <remarks>@param options - Screenshot options including viewport, selectors, and image format.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - Binary image data with <c>Content-Type: image/png</c>, <c>image/jpeg</c>, or <c>image/webp</c> (when <c>encoding: 'binary'</c>, the default)
+    /// - Data URI string with <c>Content-Type: text/plain</c> (when <c>encoding: 'base64'</c>)
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'pdf'</c>.</remarks>
+    /// <remarks>@param options - PDF generation options including page size, margins, and headers/footers.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - Binary PDF data with <c>Content-Type: application/pdf</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'content'</c>.</remarks>
+    /// <remarks>@param options - Navigation and page interaction options.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunContentSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'scrape'</c>.</remarks>
+    /// <remarks>@param options - Scrape options with CSS selectors for elements to extract.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunScrapeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'links'</c>.</remarks>
+    /// <remarks>@param options - Options to filter visible or internal links only.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunLinksSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'snapshot'</c>.</remarks>
+    /// <remarks>
+    /// @param
+    /// options - Snapshot options including the <c>formats</c> to return and
+    /// screenshot settings (encoding is always base64).
+    /// </remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunSnapshotSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'json'</c>.</remarks>
+    /// <remarks>@param options - JSON extraction options with prompt or response_format schema.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunJsonSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
+    /// - HTTP 422/500 for AI extraction failures (may include <c>rawAiResponse</c> field)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'markdown'</c>.</remarks>
+    /// <remarks>@param options - Navigation and page interaction options.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunMarkdownSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'accessibilityTree'</c>.</remarks>
+    /// <remarks>
+    /// @param
+    /// options - Options to scope the tree to a subtree and to control
+    /// whether semantically uninteresting nodes are pruned.
+    /// </remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunAccessibilityTreeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    /// - <c>result.accessibilityTree</c> is <c>null</c> when <c>root</c> matched no element
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    /// - HTTP 422 for a malformed <c>root</c> selector
+    /// - HTTP 500 with code <c>2017</c> or <c>2018</c> when the tree could not be built
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
     abstract quickAction: action: string * options: BrowserRunAccessibilityTreeOptions -> JS.Promise<Response>
+
+module BrowserRun =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Content =
+        | [<CompiledName("content")>] Content
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Markdown =
+        | [<CompiledName("markdown")>] Markdown
 
 /// <summary>
 /// In addition to the properties you can set in the RequestInit dict

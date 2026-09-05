@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "package": "keyof-overload-lab",
+  "module": "KeyofOverloadLab",
+  "counts": {
+    "exact": 0,
+    "ergonomic": 4,
+    "widened": 1,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 4,
+      "ergonomic": 2,
+      "widened": 2
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 5,
+      "ergonomic": 5
+    },
+    {
+      "pass": "DO - dedupe-overloads",
+      "total": 2,
+      "widened": 2
+    }
+  ]
+}
