@@ -3,21 +3,31 @@
   "package": "callback-function-lab",
   "module": "CallbackFunctionLab",
   "counts": {
-    "exact": 11,
-    "ergonomic": 3,
+    "exact": 9,
+    "ergonomic": 9,
     "widened": 0,
     "escape": 0
   },
   "passes": [
     {
+      "pass": "shape-callbacks",
+      "total": 1,
+      "ergonomic": 1
+    },
+    {
       "pass": "SI - shape-interfaces",
-      "total": 2,
-      "ergonomic": 2
+      "total": 6,
+      "ergonomic": 6
+    },
+    {
+      "pass": "SE - shape-exports",
+      "total": 5,
+      "ergonomic": 5
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 9,
-      "ergonomic": 9
+      "total": 12,
+      "ergonomic": 12
     }
   ]
 }

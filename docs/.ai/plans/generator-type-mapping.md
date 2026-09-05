@@ -389,7 +389,7 @@ always was.
   `{}` and `Record<never, never>` spellings, beside the operands that carry something.
 - **Callable operands render from their signatures** (`TR050`, Ergonomic). `typeof round &
   Chained` is an overload set, and an export position already wrote it as two overloads; a member
-  position now reads the same signatures as a delegate (D5), reporting the overloads past the
+  position now reads the same signatures as a callback (D5), reporting the overloads past the
   first exactly as any other callback does. `tests/fixtures/intersection-callable-lab` pins the
   two positions against each other.
 - **Operands agreeing on a member's declared type give the member that type** (`TR051`, Exact).
@@ -412,10 +412,12 @@ always was.
 
 - Top-level exported functions → `[<Import>]`-bound members on an `Exports` erased type
   (Glutinum convention) — keeps the module surface in one place.
-- **Callback parameters** → the arity problem: F# curried lambdas auto-uncurry at the Fable
-  boundary, and in Fable 5 this works well in practice. **Decided (D5):** default to
-  **delegates** (`System.Func<..>`/`System.Action<..>`) anyway, for simplicity and
-  guaranteed arity. Curried-lambda emission remains a candidate config toggle later.
+- **Callbacks** → the arity problem: what crosses the Fable boundary has to be a JavaScript
+  function of the arity the declaration wrote. **Decided (D5, revised by D5a):** an F# function
+  type where it preserves that arity, a delegate (`System.Func<..>`/`System.Action<..>`) where it
+  does not, and `TR055` naming the position at every retained site. The rule is a callback of one
+  argument or none whose return is not itself a callback; wave seven's lane AK measured every
+  other shape breaking, and `tests/fixtures/callback-function-lab` pins each measurement.
 - **Rest parameters and optionals** - `[<ParamArray>]` is required and last, so a signature
   with a rest parameter has no optional tail: `setTimeout(cb, delay?, ...args)` keeps `delay`
   required, of `option` type, where `?delay` ahead of the rest would be FS1212 (landed
@@ -772,6 +774,31 @@ from the catalogue as D1–D12.
 5. **D5 — decided.** Delegates by default. Curried lambdas work well in Fable 5, so a
    curried-emission config toggle may come later, but delegates are the simple
    guaranteed-arity default (§4.8).
+
+   *Revised (2026-09-05, wave seven, D5a).* A callback is an F# function type where one argument
+   or none crosses the boundary and its return is not itself a callback; it keeps its delegate
+   everywhere else, and `TR055` names the reason. Three spellings were measured against
+   `tests/fixtures/callback-function-lab` under Fable 5.2, and the two the original decision
+   weighed both fail at two arguments:
+
+   - **Curried** (`float -> float -> string`, lane AE). A method's return of arity 2 or more
+     compiles its call site one argument at a time and throws `TypeError`; a function-typed member
+     read back arrives as a wrapper of length 1.
+   - **Tupled** (`(float * float) -> string`, lane AK). Fable compiles an F# tuple to a JavaScript
+     array, so the value crosses as a one-argument function over an array. In parameter,
+     `ParamObject` and abbreviation position the runtime's arguments read `undefined` and nothing
+     throws; read-back keeps the arity and breaks the application instead.
+   - **Delegate.** Green in all eleven positions, at every arity, in both directions.
+
+   At one argument or none the two function spellings coincide and there is nothing left to lose,
+   which is the slice the conversion takes: 1,250 of the corpus's 1,615 delegate occurrences.
+   Nesting is the one further constraint - Fable flattens `A -> (B -> C)` into a single JavaScript
+   function of the summed arity, so a callback whose return is a callback keeps its delegate at
+   the outer level however few arguments it takes, while the inner level converts on its own
+   terms.
+
+   The config toggle D5 named is closed rather than deferred: it would switch between a binding
+   that works and one that throws for the same declarations.
 6. **D6 — decided.** Simple synthesis for checker-expanded aliases: `Partial<Options>` →
    `OptionsPartial`. Revisit if collisions or readability demand (§4.10).
 
@@ -848,7 +875,7 @@ Threads still live after these decisions:
   union aliases keep their parameters, and a hoisted anonymous type is declared over the
   variables it reads (§4.9). Still open under §4.9: rank-2 callbacks in parameter position
   (`untrack?: <V>(fn: () => V) => V`), which have no F# form at all.
-- The D5 and D8 config toggles, if wanted later.
+- The D8 config toggle, if wanted later. D5's is closed - see D5a.
 
 ---
 

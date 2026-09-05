@@ -25,6 +25,11 @@ export function callVoid(callback) {
     return callback.length;
 }
 
+export function callVoidTwo(callback) {
+    callback(7, 8);
+    return callback.length;
+}
+
 export function callNamed(formatter) {
     return report(formatter, 1.5, 2);
 }
@@ -51,3 +56,26 @@ export const factory = {
     ready: () => "ready",
     pair: (a, b) => `pair:${a}:${b}`,
 };
+
+export function callNesting(outer) {
+    const inner = outer(5);
+    return `${outer.length}:${inner.length}:${String(inner(1, 2))}`;
+}
+
+export function callNestingOne(outer) {
+    const inner = outer(5);
+    return `${outer.length}:${inner.length}:${String(inner(1))}`;
+}
+
+export function drive(factory) {
+    const made = factory.make(5);
+    return [
+        factory.make.length,
+        made.length,
+        String(made(1, 2)),
+        factory.ready.length,
+        String(factory.ready()),
+        factory.pair.length,
+        String(factory.pair(1, 2)),
+    ].join(":");
+}

@@ -35,7 +35,7 @@ type Store =
     /// </summary>
     abstract index: JS.Map<string, JS.ArrayBuffer> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (load: Func<string, JS.Promise<JS.Uint8Array>>, all: Func<JS.Promise<string>[]>, boxed: Box<JS.Date>, index: JS.Map<string, JS.ArrayBuffer>, ?pending: JS.Promise<unit>) : Store = jsNative
+    static member Create (load: (string -> JS.Promise<JS.Uint8Array>), all: (unit -> JS.Promise<string>[]), boxed: Box<JS.Date>, index: JS.Map<string, JS.ArrayBuffer>, ?pending: JS.Promise<unit>) : Store = jsNative
 
 /// <summary>
 /// A generic of our own, so a lib type can be seen passing through one.

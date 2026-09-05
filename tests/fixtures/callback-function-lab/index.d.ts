@@ -19,6 +19,9 @@ export declare function callThree(callback: (a: number, b: number, c: number) =>
 /** A callback returning `void`: the arm that renders `Action` today. */
 export declare function callVoid(callback: (a: number) => void): number;
 
+/** The same arm at arity 2, where `Action<A, B>` has more than one argument to guarantee. */
+export declare function callVoidTwo(callback: (a: number, b: number) => void): number;
+
 /** A named callback type, which abbreviates on its own. */
 export type Formatter = (value: number, digits: number) => string;
 
@@ -58,3 +61,15 @@ export interface Factory {
 }
 
 export declare const factory: Factory;
+
+/**
+ * A callback whose own return is a callback. Where only some arities convert, this is the
+ * nesting the rule has to decide: the outer function and the inner one need not agree.
+ */
+export declare function callNesting(outer: (seed: number) => (a: number, b: number) => string): string;
+
+/** The same nesting with a unary inner callback, where both levels are alike. */
+export declare function callNestingOne(outer: (seed: number) => (a: number) => string): string;
+
+/** A `Factory` built in F#, so its callback members cross outward rather than back. */
+export declare function drive(factory: Factory): string;

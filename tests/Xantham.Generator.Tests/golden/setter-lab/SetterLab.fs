@@ -10,23 +10,23 @@ open Fable.Core.JsInterop
 open Xantham.Fable.Core
 
 [<Erase>]
-type Setter<'T, 'U> = private Setter__ of Func<obj, obj>
+type Setter<'T, 'U> = private Setter__ of (obj -> obj)
 
 [<Erase>]
-type Distinct<'T, 'A, 'B> = private Distinct__ of Func<'A, 'A>
+type Distinct<'T, 'A, 'B> = private Distinct__ of ('A -> 'A)
 
 [<Erase>]
-type Single<'T, 'U> = private Single__ of Func<'U, 'U>
+type Single<'T, 'U> = private Single__ of ('U -> 'U)
 
 /// <summary>
 /// Reference positions, including the empty-tuple rest <c>Setter&lt;string | undefined&gt;</c> reaches.
 /// </summary>
 [<Interface>]
 type Holder =
-    abstract setter: Func<obj, obj> with get, set
-    abstract optional: Action with get, set
-    abstract distinct: Func<obj, obj> with get, set
-    abstract single: Func<obj, obj> with get, set
-    abstract divergent: Func<obj, obj> with get, set
+    abstract setter: (obj -> obj) with get, set
+    abstract optional: (unit -> unit) with get, set
+    abstract distinct: (obj -> obj) with get, set
+    abstract single: (obj -> obj) with get, set
+    abstract divergent: (obj -> obj) with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (setter: Func<obj, obj>, optional: Action, distinct: Func<obj, obj>, single: Func<obj, obj>, divergent: Func<obj, obj>) : Holder = jsNative
+    static member Create (setter: (obj -> obj), optional: (unit -> unit), distinct: (obj -> obj), single: (obj -> obj), divergent: (obj -> obj)) : Holder = jsNative

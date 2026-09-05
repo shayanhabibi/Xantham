@@ -41,12 +41,12 @@ type StringResource = Ready<string>
 /// <summary>
 /// A generic union alias: the parameter is bound on the alias, and the arms read it.
 /// </summary>
-type Ref<'T> = U2<'T, Action<'T>>
+type Ref<'T> = U2<'T, ('T -> unit)>
 
 /// <summary>
 /// A generic union alias with a nullish arm, hoisted to option around the erased union.
 /// </summary>
-type Source<'S> = U2<'S, Func<'S>> option
+type Source<'S> = U2<'S, (unit -> 'S)> option
 
 module Each =
     [<Interface>]
@@ -60,15 +60,15 @@ module Each =
 /// <summary>
 /// An anonymous object type inside a generic alias.
 /// </summary>
-type Handle<'T> = Func<'T> * Handle.Item<'T>
+type Handle<'T> = (unit -> 'T) * Handle.Item<'T>
 
 module Handle =
     [<Interface>]
     type Item<'T> =
-        abstract set: Action<'T> with get, set
+        abstract set: ('T -> unit) with get, set
         abstract reset: unit -> unit
         [<ParamObject; Emit("$0")>]
-        static member Create (set: Action<'T>, reset: Action) : Item<'T> = jsNative
+        static member Create (set: ('T -> unit), reset: (unit -> unit)) : Item<'T> = jsNative
 
 /// <summary>
 /// A named bound: the only kind of constraint F# can state.
@@ -96,7 +96,7 @@ type Labelled<'T, 'U when 'T :> Named> =
 type Registry<'M> =
     abstract pick<'R>: key: typekeyof<'M, 'R> -> Labelled<Named, typekeyof<'M, 'R>>
     [<ParamObject; Emit("$0")>]
-    static member Create (pick: Func<typekeyof<'M, 'R>, Labelled<Named, typekeyof<'M, 'R>>>) : Registry<'M> = jsNative
+    static member Create (pick: (typekeyof<'M, 'R> -> Labelled<Named, typekeyof<'M, 'R>>)) : Registry<'M> = jsNative
 
 /// <summary>
 /// An index-only anonymous object, written in the compiler lib: an interface of one indexer, not <c>obj</c>.
@@ -124,4 +124,4 @@ type Exports =
     /// An optional parameter ahead of a rest parameter: F# has no tail for the <c>?</c>, so it stays required, of option type.
     /// </summary>
     [<Import("schedule", "generics-lab")>]
-    static member schedule (callback: Action<float[]>, delay: float option, [<ParamArray>] args: float[]) : float = jsNative
+    static member schedule (callback: (float[] -> unit), delay: float option, [<ParamArray>] args: float[]) : float = jsNative

@@ -168,6 +168,11 @@ let rec private printTypeIn (atomic: bool) =
         |> List.map (printTypeIn true)
         |> String.concat ", "
         |> sprintf "Func<%s>"
+    // A callback whose arity survives the boundary as an F# function type (D5a). Always
+    // parenthesised: `abstract handler: (float -> string) with get, set` is a property, where the
+    // bare spelling is a method, and `abstract make: seed: float -> (float -> string)` is a
+    // one-parameter method returning a callback, where the bare spelling takes two parameters.
+    | FsFunc(argument, returns) -> $"({printTypeIn true argument} -> {printTypeIn true returns})"
     | FsTypeVar name -> $"'{name}"
     // A brand (§4.6, D11): `string<UserId>` for the non-numeric primitives, through the
     // support package's measure-annotated abbreviations, and an ordinary measure application
@@ -791,6 +796,7 @@ let rec private qualifyRef (foreign: Map<string, string>) =
     | FsErasedUnion arms -> FsErasedUnion(arms |> List.map (qualifyRef foreign))
     | FsDelegate(parameters, returns) ->
         FsDelegate(parameters |> List.map (qualifyRef foreign), qualifyRef foreign returns)
+    | FsFunc(argument, returns) -> FsFunc(qualifyRef foreign argument, qualifyRef foreign returns)
     | FsApp(name, arguments) -> FsApp(qualifyName foreign name, arguments |> List.map (qualifyRef foreign))
     | FsBranded(primitive, measure) -> FsBranded(qualifyRef foreign primitive, qualifyName foreign measure)
     | FsNamed name -> FsNamed(qualifyName foreign name)

@@ -29,7 +29,7 @@ type Emitter =
     /// </summary>
     abstract resolve: scope: string -> string
     [<ParamObject; Emit("$0")>]
-    static member Create (``event``: string, channel: string, resolve: Func<string, string>) : Emitter = jsNative
+    static member Create (``event``: string, channel: string, resolve: (string -> string)) : Emitter = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type Mode =
@@ -57,7 +57,7 @@ type Ledger =
     abstract balance: bigint with get, set
     abstract credit: amount: bigint -> bigint
     [<ParamObject; Emit("$0")>]
-    static member Create (balance: bigint, credit: Func<bigint, bigint>) : Ledger = jsNative
+    static member Create (balance: bigint, credit: (bigint -> bigint)) : Ledger = jsNative
 
 /// <summary>
 /// A bigint *literal* type is the widening its string and number counterparts already are.

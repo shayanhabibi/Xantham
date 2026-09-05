@@ -749,7 +749,7 @@ let typeRefTests =
             let _, referenceFindings = Spec.typeRef Build.context model None "Holder.env" 61
             Expect.equal (referenceFindings |> List.map _.Key) [ "TR023" ] "a reference that leads nowhere"
 
-        testCase "an anonymous callback reads as a delegate (D5)" <| fun _ ->
+        testCase "an anonymous callback of arity 1 reads as an F# function type (D5a)" <| fun _ ->
             let callback =
                 { Build.facts (Build.typeResponse 12 TypeFlags.Object) with
                     CallSignatures =
@@ -761,8 +761,60 @@ let typeRefTests =
 
             Expect.equal
                 (Spec.typeRef Build.context model None "x" 12)
-                (FsDelegate([ FsString ], FsUnit), [])
-                "(value: string) => void -> Action<string>"
+                (FsFunc(FsString, FsUnit), [])
+                "(value: string) => void -> (string -> unit)"
+
+        // Wave seven, lane AK. Two arguments compile a call site one argument at a time, so the
+        // delegate stays and TR055 says why. `tests/fixtures/callback-function-lab` measures it.
+        testCase "an anonymous callback of arity 2 keeps its delegate (D5a)" <| fun _ ->
+            let callback =
+                { Build.facts (Build.typeResponse 12 TypeFlags.Object) with
+                    CallSignatures =
+                        [ Build.signature
+                              [
+                                  Build.resolvedMember (Build.symbol 300 "value" SymbolFlags.FunctionScopedVariable) 1
+                                  Build.resolvedMember (Build.symbol 301 "index" SymbolFlags.FunctionScopedVariable) 2
+                              ]
+                              4 ] }
+
+            let model = Build.shapeModel (callback :: Build.primitives)
+            let reference, findings = Spec.typeRef Build.context model None "x" 12
+            Expect.equal reference (FsDelegate([ FsString; FsFloat ], FsUnit)) "Action<string, float>"
+
+            Expect.equal
+                (findings |> List.map (fun finding -> finding.Key, finding.Tier, finding.Message))
+                [ "TR055", Ergonomic, "callback kept as a delegate: it takes 2 arguments" ]
+                "TR055 names the arity that refused the conversion"
+
+        // Fable flattens `A -> (B -> C)` into one JavaScript function of the summed arity, so the
+        // outer level keeps its delegate however few arguments it takes.
+        testCase "a callback returning a callback keeps its delegate at the outer level" <| fun _ ->
+            let inner =
+                { Build.facts (Build.typeResponse 13 TypeFlags.Object) with
+                    CallSignatures =
+                        [ Build.signature
+                              [ Build.resolvedMember (Build.symbol 302 "value" SymbolFlags.FunctionScopedVariable) 1 ]
+                              4 ] }
+
+            let outer =
+                { Build.facts (Build.typeResponse 12 TypeFlags.Object) with
+                    CallSignatures =
+                        [ Build.signature
+                              [ Build.resolvedMember (Build.symbol 300 "seed" SymbolFlags.FunctionScopedVariable) 2 ]
+                              13 ] }
+
+            let model = Build.shapeModel (outer :: inner :: Build.primitives)
+            let reference, findings = Spec.typeRef Build.context model None "x" 12
+
+            Expect.equal
+                reference
+                (FsDelegate([ FsFloat ], FsFunc(FsString, FsUnit)))
+                "the inner level converts on its own terms"
+
+            Expect.contains
+                (findings |> List.map (fun finding -> finding.Key, finding.Message))
+                ("TR055", "callback kept as a delegate: its return is itself a callback")
+                "TR055 names the nesting that refused the conversion"
 
         testCase "a polymorphic this return reads as the declaring type" <| fun _ ->
             let thisType =
@@ -1777,6 +1829,7 @@ let shapePassTests =
                 (findings |> List.map (fun finding -> finding.Key, finding.Message))
                 [
                     "TR031", "callback with 2 overloads shaped from the first"
+                    "TR055", "callback kept as a delegate: it takes 2 arguments"
                     "TR050", "intersection of callable operands rendered from its 2 call signatures"
                 ]
                 "and both the overload loss and the flattening are owned"
@@ -1946,7 +1999,7 @@ let shapePassTests =
                 [ "SY005", "Kind" ]
                 "sanitising `@cf/meta` reuses SY005; `one-two` sanitises the same way the dash/underscore/dot scheme already did, and reports nothing"
 
-        testCase "shape-callbacks abbreviates a named callback to its delegate" <| fun _ ->
+        testCase "shape-callbacks abbreviates a named callback to its function type" <| fun _ ->
             let timer = Build.facts (Build.typeResponse 60 TypeFlags.Object)
 
             let callback =
@@ -1967,7 +2020,7 @@ let shapePassTests =
             match shaped.Decls with
             | [ FsAbbrev decl ] ->
                 Expect.equal decl.Name "TimerCallback" "name"
-                Expect.equal decl.Target (FsDelegate([ FsNamed "Timer" ], FsUnit)) "Action<Timer>"
+                Expect.equal decl.Target (FsFunc(FsNamed "Timer", FsUnit)) "Timer -> unit"
             | decls -> failtest $"expected one abbreviation, got %A{decls}"
 
         testCase "shape-interfaces emits methods with overloads, this-returns chained" <| fun _ ->
@@ -2280,7 +2333,7 @@ let shapePassTests =
             match shaped.Decls with
             | [ FsAbbrev decl ] ->
                 Expect.equal decl.TypeParameters [ { Name = "T"; Constraint = None } ] "Mapper<'T>"
-                Expect.equal decl.Target (FsDelegate([ FsTypeVar "T" ], FsTypeVar "T")) "Func<'T, 'T>"
+                Expect.equal decl.Target (FsFunc(FsTypeVar "T", FsTypeVar "T")) "'T -> 'T"
             | decls -> failtest $"expected one abbreviation, got %A{decls}"
 
             Expect.isEmpty findings "a generic alias is exact"
@@ -2324,7 +2377,7 @@ let shapePassTests =
 
                 // The second signature is discarded, but its `U` still had to resolve to the
                 // variable the head wrote rather than widening.
-                Expect.equal decl.Target (FsDelegate([ FsTypeVar "U" ], FsTypeVar "U")) "Func<'U, 'U>"
+                Expect.equal decl.Target (FsFunc(FsTypeVar "U", FsTypeVar "U")) "'U -> 'U"
             | decls -> failtest $"expected one abbreviation, got %A{decls}"
 
             Expect.contains
@@ -2401,8 +2454,8 @@ let shapePassTests =
             let single, singleFindings = Spec.typeRef Build.context model None "x" 50
             let empty, emptyFindings = Spec.typeRef Build.context model None "x" 51
 
-            Expect.equal single (FsDelegate([ FsString ], FsUnit)) "Action<string>"
-            Expect.equal empty (FsDelegate([], FsUnit)) "Action"
+            Expect.equal single (FsFunc(FsString, FsUnit)) "string -> unit"
+            Expect.equal empty (FsFunc(FsUnit, FsUnit)) "unit -> unit"
             Expect.isEmpty singleFindings "a parameter list is exact"
             Expect.isEmpty emptyFindings "and so is an empty one"
 
@@ -2426,7 +2479,7 @@ let shapePassTests =
             let model = Build.shapeModel (callback :: variadic :: Build.primitives)
             let reference, findings = Spec.typeRef Build.context model None "x" 50
 
-            Expect.equal reference (FsDelegate([ FsArray FsObj ], FsUnit)) "the rest tail still widens"
+            Expect.equal reference (FsFunc(FsArray FsObj, FsUnit)) "the rest tail still widens"
             Expect.equal (findings |> List.map _.Key) [ "TR028" ] "and says so"
 
         testCase "shape-classes emits a constructor member per construct signature" <| fun _ ->
@@ -3023,7 +3076,7 @@ let shapePassTests =
                           Type = reference })
                   Return = returns }
 
-        testCase "a method member is carried into Create as a delegate-typed parameter" <| fun _ ->
+        testCase "a method member is carried into Create as a callback-typed parameter" <| fun _ ->
             let decl =
                 paramObjectDecl "Timer" [
                     paramObjectProperty "label" FsString
@@ -3045,8 +3098,8 @@ let shapePassTests =
                 match decl.CreateOverloads with
                 | [ [ label; play; seek; tag ] ] ->
                     Expect.equal (label.Name, label.Type) ("label", FsString) "the property is unchanged"
-                    Expect.equal play.Type (FsDelegate([], FsUnit)) "a void method binds an Action"
-                    Expect.equal seek.Type (FsDelegate([ FsFloat ], FsBool)) "and a returning one a Func"
+                    Expect.equal play.Type (FsFunc(FsUnit, FsUnit)) "a void method binds unit -> unit"
+                    Expect.equal seek.Type (FsFunc(FsFloat, FsBool)) "and a returning one float -> bool"
                     Expect.isFalse (play.Optional || seek.Optional) "a method is required, so it sorts first"
                     Expect.equal (tag.Name, tag.Optional) ("tag", true) "and the optional property comes last"
                 | overloads -> failtest $"expected one four-parameter overload, got %A{overloads}"

@@ -584,7 +584,7 @@ let pipelineTests =
 
                     Expect.stringContains
                         source
-                        "static member Create (weight: float, strike: Func<Payload, string>) : Hammer = jsNative"
+                        "static member Create (weight: float, strike: (Payload -> string)) : Hammer = jsNative"
                         "a class no specifier marks as an entrypoint keeps its object literal"
 
                     // `Anvil` is abstract and `Vise` has a base, so each satisfies half the rule.
@@ -708,8 +708,8 @@ let pipelineTests =
                   testCase "a generic union alias keeps its parameter" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                     let source = rendered.Files |> List.head |> snd
-                    Expect.stringContains source "type Ref<'T> = U2<'T, Action<'T>>" "the arms read the alias's parameter"
-                    Expect.stringContains source "type Source<'S> = U2<'S, Func<'S>> option" "so does one with a nullish arm hoisted"
+                    Expect.stringContains source "type Ref<'T> = U2<'T, ('T -> unit)>" "the arms read the alias's parameter"
+                    Expect.stringContains source "type Source<'S> = U2<'S, (unit -> 'S)> option" "so does one with a nullish arm hoisted"
 
                   testCase "an anonymous object type nested in a generic scope is declared over the variables it reads" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -723,7 +723,7 @@ let pipelineTests =
                     Expect.stringContains source "abstract items: 'T[] with get, set" "a member reads the outer variable"
                     Expect.stringContains source "abstract render: Func<'T, float, 'U> with get, set" "so does a callback member"
                     Expect.stringContains source "static member each<'T, 'U> (props: Each.Props<'T, 'U>) : 'U[] = jsNative" "the use applies them back"
-                    Expect.stringContains source "type Handle<'T> = Func<'T> * Handle.Item<'T>" "the same inside a generic alias"
+                    Expect.stringContains source "type Handle<'T> = (unit -> 'T) * Handle.Item<'T>" "the same inside a generic alias"
 
                   testCase "nothing in the lab widens a type parameter out of scope" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -1106,7 +1106,7 @@ let pipelineTests =
 
                     Expect.stringContains
                         source
-                        "type EveryParameter<'T, 'Reserved> = Func<'T, 'Reserved>"
+                        "type EveryParameter<'T, 'Reserved> = ('T -> 'Reserved)"
                         "the negative is untouched"
 
                   testCase "the erasure is reported once, by repair-arity" <| fun _ ->
@@ -1521,17 +1521,17 @@ let pipelineTests =
                       // none of them is a new type.
                       Expect.stringContains
                           source
-                          "abstract toVar: Func<string option, VarNode<'TNodeType, NodeExtensions<'TNodeType>>> with get, set"
+                          "abstract toVar: (string option -> VarNode<'TNodeType, NodeExtensions<'TNodeType>>) with get, set"
                           "the interface `this` is written on"
 
                       Expect.stringContains
                           source
-                          "abstract toVar: Func<string option, VarNode<'TNodeType, Node<'TNodeType>>> with get, set"
+                          "abstract toVar: (string option -> VarNode<'TNodeType, Node<'TNodeType>>) with get, set"
                           "the alias that intersects it, applied over its own parameter"
 
                       Expect.stringContains
                           source
-                          "abstract toVar: Func<string option, VarNode<'TNodeType, VarNode<'TNodeType, 'TNode>>> with get, set"
+                          "abstract toVar: (string option -> VarNode<'TNodeType, VarNode<'TNodeType, 'TNode>>) with get, set"
                           "and the alias that intersects that one, applied over both of its parameters"
 
                       // `const seed: Node<number>` resolves to the same erased intersection as
@@ -1628,7 +1628,7 @@ let pipelineTests =
 
                       Expect.stringContains
                           source
-                          "abstract toVar: Func<string option, DirectVarNode<'TNodeType, DirectNode<'TNodeType>>> with get, set"
+                          "abstract toVar: (string option -> DirectVarNode<'TNodeType, DirectNode<'TNodeType>>) with get, set"
                           "the alias intersects its own operand, applied over its parameter"
 
                       Expect.stringContains
@@ -1837,8 +1837,8 @@ let pipelineTests =
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                       let source = rendered.Files |> List.head |> snd
 
-                      Expect.stringContains source "abstract optional: Action with" "no parameter at all"
-                      Expect.stringContains source "abstract setter: Func<obj, obj> with" "and one for a one-element tuple"
+                      Expect.stringContains source "abstract optional: (unit -> unit) with" "no parameter at all"
+                      Expect.stringContains source "abstract setter: (obj -> obj) with" "and one for a one-element tuple"
 
                       Expect.isEmpty
                           (rendered.Findings |> List.filter (fun f -> f.Key = "TR029"))
@@ -2193,8 +2193,8 @@ let pipelineTests =
                           let source = rendered.Files |> List.head |> snd
 
                           Expect.stringContains source "member _.tag" "an optional data member is still a property"
-                          Expect.stringContains source "abstract ping: Func<Signal, string> option" "a plain interface's optional method is untouched"
-                          Expect.stringContains source "abstract probe: Func<Signal, string> option" "and so is a class the run keeps as an interface"
+                          Expect.stringContains source "abstract ping: (Signal -> string) option" "a plain interface's optional method is untouched"
+                          Expect.stringContains source "abstract probe: (Signal -> string) option" "and so is a class the run keeps as an interface"
 
                           Expect.isFalse (source.Contains "IPingHandler") "no interface is named for either"
                           Expect.isFalse (source.Contains "IProbeHandler") "no interface is named for either"
@@ -2718,13 +2718,13 @@ let pipelineTests =
                 (handFixture "paramobject-method-lab")
                 GeneratorConfig.Default
                 (fun package ->
-                    [ testCase "a method member becomes a delegate-typed Create parameter" <| fun _ ->
+                    [ testCase "a method member becomes a callback-typed Create parameter" <| fun _ ->
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                           let source = rendered.Files |> List.head |> snd
 
                           Expect.stringContains
                               source
-                              "static member Create (name: string, notify: Func<float, string>, reset: Action, ?tag: string)"
+                              "static member Create (name: string, notify: (float -> string), reset: (unit -> unit), ?tag: string)"
                               "the methods bind delegates, required ahead of the optional property"
 
                           let carried =
@@ -2775,7 +2775,41 @@ let pipelineTests =
                 (handFixture "callback-function-lab")
                 GeneratorConfig.Default
                 (fun package ->
-                    [ testCase "a callback in each position renders as a delegate" <| fun _ ->
+                    [ testCase "a callback of arity 0 or 1 renders as an F# function type" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains
+                              source
+                              "static member callOne (callback: (float -> string)) : string"
+                              "a callback in parameter position"
+
+                          Expect.stringContains
+                              source
+                              "static member callNone (callback: (unit -> string)) : string"
+                              "a nullary callback takes unit as its argument"
+
+                          Expect.stringContains
+                              source
+                              "static member callVoid (callback: (float -> unit)) : float"
+                              "a unit-returning callback, which rendered Action"
+
+                          Expect.stringContains
+                              source
+                              "abstract onDone: (float -> unit) option with get, set"
+                              "a callback as an interface member"
+
+                          Expect.stringContains
+                              source
+                              "abstract makeOne: seed: float -> (float -> string)"
+                              "a callback returned from a member"
+
+                          Expect.stringContains
+                              source
+                              "finish: (unit -> unit)"
+                              "a method member as a ParamObject Create parameter"
+
+                      testCase "a callback of arity 2 or more keeps its delegate" <| fun _ ->
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                           let source = rendered.Files |> List.head |> snd
 
@@ -2798,15 +2832,45 @@ let pipelineTests =
 
                           Expect.stringContains
                               source
-                              "transform: Func<float, float, string>"
-                              "a method member as a ParamObject Create parameter"
+                              "callVoidTwo (callback: Action<float, float>)"
+                              "a unit-returning callback of arity 2"
 
-                      testCase "no callback site is reported as keeping the delegate under duress" <| fun _ ->
+                      testCase "a callback whose return is a callback keeps its delegate at that level" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          // Fable flattens `A -> (B -> C)` into one JavaScript function of the
+                          // summed arity, so the outer level of a nested callback keeps its
+                          // delegate however few arguments it takes - and the inner level, which
+                          // the flattening does not reach, converts on its own terms.
+                          Expect.stringContains
+                              source
+                              "callNestingOne (outer: Func<float, (float -> string)>)"
+                              "a unary callback returning a unary callback"
+
+                          Expect.stringContains
+                              source
+                              "callNesting (outer: (float -> Func<float, float, string>))"
+                              "a unary callback returning a callback of arity 2"
+
+                      testCase "every retained delegate is reported with its reason" <| fun _ ->
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
 
-                          Expect.isEmpty
-                              (rendered.Findings |> List.filter (fun f -> f.Key = "TR055"))
-                              "TR055 fires only where a conversion was attempted and refused" ])
+                          let reasons =
+                              rendered.Findings
+                              |> List.filter (fun f -> f.Key = "TR055")
+                              |> List.map _.Message
+                              |> List.distinct
+                              |> List.sort
+
+                          Expect.equal
+                              reasons
+                              [
+                                  "callback kept as a delegate: it takes 2 arguments"
+                                  "callback kept as a delegate: it takes 3 arguments"
+                                  "callback kept as a delegate: its return is itself a callback"
+                              ]
+                              "TR055 names the position that refused the conversion" ])
 
         // Wave five lanes T and U (O7). `cross-package-lab` is two packages under one
         // `node_modules`. The dependency half is registered as its own entry package and ships;

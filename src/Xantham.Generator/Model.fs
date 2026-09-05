@@ -765,8 +765,15 @@ type FsTypeRef =
     /// type is that type instead.
     | FsErasedUnion of FsTypeRef list
     /// A callback as a delegate (D5): parameter types and return. Renders as
-    /// `System.Action`/`System.Func` so the arity is guaranteed at the Fable boundary.
+    /// `System.Action`/`System.Func` so the arity is guaranteed at the Fable boundary. Emitted
+    /// where `FsFunc` would lose that arity: at two or more parameters, and wherever the return
+    /// is itself a callback (D5a).
     | FsDelegate of FsTypeRef list * FsTypeRef
+    /// A callback as an F# function type: one argument and a return, where `unit` is the argument
+    /// of a nullary callback (D5a). Fable hands a JavaScript function of the declared arity across
+    /// the boundary in both directions for this shape, and the F# consumer composes it with `>>`
+    /// and partial application.
+    | FsFunc of FsTypeRef * FsTypeRef
     /// A type variable in scope - a type parameter of the declaration being shaped (§4.9).
     /// Carries the name TypeScript spelled, without the leading tick the renderer adds.
     | FsTypeVar of string

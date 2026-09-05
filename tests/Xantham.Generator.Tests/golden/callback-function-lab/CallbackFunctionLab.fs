@@ -17,9 +17,9 @@ type Formatter = Func<float, float, string>
 [<Interface>]
 type Handlers =
     abstract onTick: Func<float, float, string> with get, set
-    abstract onDone: Action<float> option with get, set
+    abstract onDone: (float -> unit) option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (onTick: Func<float, float, string>, ?onDone: Action<float>) : Handlers = jsNative
+    static member Create (onTick: Func<float, float, string>, ?onDone: (float -> unit)) : Handlers = jsNative
 
 /// <summary>
 /// A method member, which the ParamObject pass binds as a callback-typed Create parameter.
@@ -30,7 +30,7 @@ type Options =
     abstract transform: a: float * b: float -> string
     abstract finish: unit -> unit
     [<ParamObject; Emit("$0")>]
-    static member Create (label: string, transform: Func<float, float, string>, finish: Action) : Options = jsNative
+    static member Create (label: string, transform: Func<float, float, string>, finish: (unit -> unit)) : Options = jsNative
 
 /// <summary>
 /// A callback in return position, at arity 2 and at arity 0.
@@ -38,13 +38,13 @@ type Options =
 [<Interface>]
 type Factory =
     abstract make: seed: float -> Func<float, float, string>
-    abstract makeOne: seed: float -> Func<float, string>
-    abstract makeNone: seed: float -> Func<string>
+    abstract makeOne: seed: float -> (float -> string)
+    abstract makeNone: seed: float -> (unit -> string)
     abstract makeThree: seed: float -> Func<float, float, float, string>
-    abstract ready: Func<string>
+    abstract ready: (unit -> string)
     abstract pair: Func<float, float, string>
     [<ParamObject; Emit("$0")>]
-    static member Create (make: Func<float, Func<float, float, string>>, makeOne: Func<float, Func<float, string>>, makeNone: Func<float, Func<string>>, makeThree: Func<float, Func<float, float, float, string>>, ready: Func<string>, pair: Func<float, float, string>) : Factory = jsNative
+    static member Create (make: (float -> Func<float, float, string>), makeOne: Func<float, (float -> string)>, makeNone: Func<float, (unit -> string)>, makeThree: (float -> Func<float, float, float, string>), ready: (unit -> string), pair: Func<float, float, string>) : Factory = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
@@ -53,12 +53,12 @@ type Exports =
     /// A callback of arity 0 in parameter position.
     /// </summary>
     [<Import("callNone", "callback-function-lab")>]
-    static member callNone (callback: Func<string>) : string = jsNative
+    static member callNone (callback: (unit -> string)) : string = jsNative
     /// <summary>
     /// A callback of arity 1 in parameter position.
     /// </summary>
     [<Import("callOne", "callback-function-lab")>]
-    static member callOne (callback: Func<float, string>) : string = jsNative
+    static member callOne (callback: (float -> string)) : string = jsNative
     /// <summary>
     /// A callback of arity 2 in parameter position.
     /// </summary>
@@ -73,7 +73,12 @@ type Exports =
     /// A callback returning <c>void</c>: the arm that renders <c>Action</c> today.
     /// </summary>
     [<Import("callVoid", "callback-function-lab")>]
-    static member callVoid (callback: Action<float>) : float = jsNative
+    static member callVoid (callback: (float -> unit)) : float = jsNative
+    /// <summary>
+    /// The same arm at arity 2, where <c>Action&lt;A, B&gt;</c> has more than one argument to guarantee.
+    /// </summary>
+    [<Import("callVoidTwo", "callback-function-lab")>]
+    static member callVoidTwo (callback: Action<float, float>) : float = jsNative
     /// <summary>
     /// The named callback in parameter position, so the abbreviation is what crosses.
     /// </summary>
@@ -96,3 +101,19 @@ type Exports =
     static member build (options: Options) : string = jsNative
     [<Import("factory", "callback-function-lab")>]
     static member factory: Factory = jsNative
+    /// <summary>
+    /// A callback whose own return is a callback. Where only some arities convert, this is the
+    /// nesting the rule has to decide: the outer function and the inner one need not agree.
+    /// </summary>
+    [<Import("callNesting", "callback-function-lab")>]
+    static member callNesting (outer: (float -> Func<float, float, string>)) : string = jsNative
+    /// <summary>
+    /// The same nesting with a unary inner callback, where both levels are alike.
+    /// </summary>
+    [<Import("callNestingOne", "callback-function-lab")>]
+    static member callNestingOne (outer: Func<float, (float -> string)>) : string = jsNative
+    /// <summary>
+    /// A <c>Factory</c> built in F#, so its callback members cross outward rather than back.
+    /// </summary>
+    [<Import("drive", "callback-function-lab")>]
+    static member drive (factory: Factory) : string = jsNative

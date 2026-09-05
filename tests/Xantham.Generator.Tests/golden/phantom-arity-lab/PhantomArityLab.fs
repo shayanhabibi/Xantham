@@ -10,16 +10,16 @@ open Fable.Core.JsInterop
 open Xantham.Fable.Core
 
 [<Erase>]
-type SurplusParameter<'T, 'Reserved> = private SurplusParameter__ of Action<'T>
+type SurplusParameter<'T, 'Reserved> = private SurplusParameter__ of ('T -> unit)
 
-type EveryParameter<'T, 'Reserved> = Func<'T, 'Reserved>
+type EveryParameter<'T, 'Reserved> = ('T -> 'Reserved)
 
 /// <summary>
 /// Both aliases at a reference position.
 /// </summary>
 [<Interface>]
 type Holder =
-    abstract surplus: Action<string> with get, set
-    abstract every: Func<string, float> with get, set
+    abstract surplus: (string -> unit) with get, set
+    abstract every: (string -> float) with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (surplus: Action<string>, every: Func<string, float>) : Holder = jsNative
+    static member Create (surplus: (string -> unit), every: (string -> float)) : Holder = jsNative

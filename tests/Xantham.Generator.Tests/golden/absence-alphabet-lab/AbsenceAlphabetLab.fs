@@ -49,7 +49,7 @@ type Absence =
     /// </summary>
     abstract onlyVoidNull: unit
     [<ParamObject; Emit("$0")>]
-    static member Create (returnsVoid: Action, onlyNull: obj, ?optionalOnly: string, ?unionUndefined: string, ?unionNull: string, ?optionalNull: string, ?unionBoth: string) : Absence = jsNative
+    static member Create (returnsVoid: (unit -> unit), onlyNull: obj, ?optionalOnly: string, ?unionUndefined: string, ?unionNull: string, ?optionalNull: string, ?unionBoth: string) : Absence = jsNative
 
 [<Interface>]
 type Present =
@@ -62,7 +62,7 @@ type Present =
     /// </summary>
     abstract read: unit -> string
     [<ParamObject; Emit("$0")>]
-    static member Create (always: string, read: Func<string>) : Present = jsNative
+    static member Create (always: string, read: (unit -> string)) : Present = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

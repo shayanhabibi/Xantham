@@ -4384,9 +4384,9 @@ type Jsonifiable2 =
 module Jsonifiable2 =
     [<Interface>]
     type Item =
-        abstract toJSON: Func<Jsonifiable option> with get, set
+        abstract toJSON: (unit -> Jsonifiable option) with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (toJSON: Func<Jsonifiable option>) : Item = jsNative
+        static member Create (toJSON: (unit -> Jsonifiable option)) : Item = jsNative
 
 /// <summary>
 /// Transform a type to one that is assignable to the <c>JsonValue</c> type.

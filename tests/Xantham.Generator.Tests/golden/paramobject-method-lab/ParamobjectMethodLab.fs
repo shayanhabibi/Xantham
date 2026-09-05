@@ -20,7 +20,7 @@ type Listener =
     abstract notify: count: float -> string
     abstract reset: unit -> unit
     [<ParamObject; Emit("$0")>]
-    static member Create (name: string, notify: Func<float, string>, reset: Action, ?tag: string) : Listener = jsNative
+    static member Create (name: string, notify: (float -> string), reset: (unit -> unit), ?tag: string) : Listener = jsNative
 
 /// <summary>
 /// A negative: an index signature has no name to bind a Create parameter to, whatever named

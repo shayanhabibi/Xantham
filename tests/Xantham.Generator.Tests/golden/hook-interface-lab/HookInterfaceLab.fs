@@ -38,13 +38,13 @@ module Station =
     type IAlarmHandler =
         abstract alarm: unit -> string
         [<ParamObject; Emit("$0")>]
-        static member Create (alarm: Func<string>) : IAlarmHandler = jsNative
+        static member Create (alarm: (unit -> string)) : IAlarmHandler = jsNative
 
     [<Interface>]
     type IFetchHandler =
         abstract fetch: signal: Signal -> string
         [<ParamObject; Emit("$0")>]
-        static member Create (fetch: Func<Signal, string>) : IFetchHandler = jsNative
+        static member Create (fetch: (Signal -> string)) : IFetchHandler = jsNative
 
 /// <summary>
 /// An entrypoint whose hook mentions the class's own type parameter.
@@ -58,7 +58,7 @@ module Relay =
     type IForwardHandler<'T> =
         abstract forward: value: 'T -> 'T
         [<ParamObject; Emit("$0")>]
-        static member Create (forward: Func<'T, 'T>) : IForwardHandler<'T> = jsNative
+        static member Create (forward: ('T -> 'T)) : IForwardHandler<'T> = jsNative
 
 /// <summary>
 /// An exported class that is neither abstract nor derived: the interface form, where an
@@ -67,9 +67,9 @@ module Relay =
 [<Interface>]
 type Hub =
     abstract depth: float
-    abstract probe: Func<Signal, string> option with get, set
+    abstract probe: (Signal -> string) option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (depth: float, ?probe: Func<Signal, string>) : Hub = jsNative
+    static member Create (depth: float, ?probe: (Signal -> string)) : Hub = jsNative
 
 /// <summary>
 /// A class whose base this run declares. An F# interface admits no <c>inherit</c> of a class, so
@@ -80,9 +80,9 @@ type Annex =
     inherit Hub
     abstract tag: string
     abstract depth: float
-    abstract probe: Func<Signal, string> option with get, set
+    abstract probe: (Signal -> string) option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (tag: string, depth: float, ?probe: Func<Signal, string>) : Annex = jsNative
+    static member Create (tag: string, depth: float, ?probe: (Signal -> string)) : Annex = jsNative
 
 /// <summary>
 /// A plain interface carrying an optional method. Nothing derives from it, so the method stays
@@ -90,9 +90,9 @@ type Annex =
 /// </summary>
 [<Interface>]
 type Listener =
-    abstract ping: Func<Signal, string> option with get, set
+    abstract ping: (Signal -> string) option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?ping: Func<Signal, string>) : Listener = jsNative
+    static member Create (?ping: (Signal -> string)) : Listener = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
