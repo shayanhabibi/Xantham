@@ -1,0 +1,6 @@
+{
+  "name": "literal-overload-lab",
+  "type": "module",
+  "types": "index.d.ts",
+  "description": "Overload sets a string-literal parameter tells apart, and the positions where a literal still widens."
+}

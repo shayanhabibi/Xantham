@@ -2172,6 +2172,118 @@ let pipelineTests =
                               ((declaration "Depot").Contains "LIMIT")
                               "the global interface that kept the export name carries none of them" ])
 
+        // Wave seven lane AF's fixture. A string-literal parameter type is what tells an overload
+        // set apart, so the literal is kept as a type of its own wherever it does that work.
+        yield!
+            fixtureTests
+                "literal-overload-lab"
+                (handFixture "literal-overload-lab")
+                GeneratorConfig.Default
+                (fun package ->
+                    [ testCase "every overload the literal separates survives, reading a type of its own" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains
+                              source
+                              "abstract read: key: string * kind: Store.Text -> JS.Promise<string option>"
+                              "the literal parameter reads the type the literal is written as"
+
+                          Expect.stringContains
+                              source
+                              "abstract read: key: string * kind: Store.Json -> JS.Promise<obj>"
+                              "one overload per literal, each keeping its own return type"
+
+                          Expect.stringContains
+                              source
+                              "abstract read: key: string * kind: Store.Bytes -> JS.Promise<Chunk option>"
+                              "including the one no consumer could reach before"
+
+                          Expect.stringContains
+                              source
+                              "?options: ReadOptions<Store.Text>"
+                              "a literal reached through a type argument is kept the same way"
+
+                          Expect.stringContains
+                              source
+                              "?options: ReadOptions<Store.Bytes>"
+                              "for every arm of that group"
+
+                      testCase "the literal is a single-case StringEnum compiled to the literal itself" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains
+                              source
+                              "module Store ="
+                              "the types nest under the declaration that reads them"
+
+                          Expect.stringContains source "type Text =" "one type per literal"
+
+                          Expect.stringContains
+                              source
+                              "[<CompiledName(\"text\")>] Text"
+                              "carrying the literal as its compiled name"
+
+                          Expect.stringContains source "[<CompiledName(\"bytes\")>] Bytes" "one case each"
+
+                      testCase "a literal that separates nothing still widens" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains
+                              source
+                              "abstract tag: name: string -> unit"
+                              "a lone signature has no sibling to be told apart from"
+
+                          Expect.stringContains
+                              source
+                              "abstract kind: string with get, set"
+                              "and a property typed by the same interned literal is untouched"
+
+                          Expect.stringContains
+                              source
+                              "abstract send: body: string * mode: string -> unit"
+                              "overloads that differ before the literal is read keep widening it"
+
+                          Expect.stringContains
+                              source
+                              "abstract pick: kind: Choice.Pick.Kind -> unit"
+                              "and a union of literals per position is already a StringEnum of its own"
+
+                          Expect.stringContains
+                              source
+                              "abstract scan: input: obj -> unit"
+                              "a collision no literal is party to still drops an overload"
+
+                      testCase "the findings say which literals were kept and which overload sets they separate"
+                      <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                          let symbolsOf key =
+                              rendered.Findings
+                              |> List.filter (fun finding -> finding.Key = key)
+                              |> List.map _.Symbol
+                              |> List.distinct
+                              |> List.sort
+
+                          Expect.equal (symbolsOf "DO002") [ "Store.read" ] "one finding per overload set a literal separates"
+
+                          Expect.equal
+                              (symbolsOf "TR056")
+                              [ "Store.read(kind)"; "Store.read(options)" ]
+                              "and one per position the literal is kept at"
+
+                          Expect.equal
+                              (symbolsOf "DO001")
+                              [ "Widen.scan" ]
+                              "a collision the literal has no part in is the only overload still dropped"
+
+                          Expect.contains
+                              (symbolsOf "TR006")
+                              "Solo.tag(name)"
+                              "the literal that separates nothing is still reported as widened" ])
+
         yield! fixtureTests "animejs" (npmFixture "animejs") GeneratorConfig.Default (fun _ -> [])
 
         // workers-types is a global type library that *replaces* the DOM lib: its README

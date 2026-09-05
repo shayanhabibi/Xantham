@@ -3022,6 +3022,96 @@ let shapePassTests =
                     [ FsNamed "DOMTargets"; FsString ]
                     "first of the obj pair survives; the string overload is distinct"
 
+        // A method whose two call signatures differ only in the string literal typing their
+        // second parameter: the collision `dedupe-overloads` would otherwise price, and the one
+        // a retained literal repairs.
+        let literalOverloadModel () =
+            let parameter id name typeId =
+                Build.resolvedMember (Build.symbol id name SymbolFlags.Property) typeId
+
+            let signatures =
+                [
+                    Build.signature [ parameter 101 "key" 1; parameter 102 "kind" 30 ] 1
+                    Build.signature [ parameter 103 "key" 1; parameter 104 "kind" 31 ] 1
+                ]
+
+            let member' =
+                { Build.facts (Build.typeResponse 20 TypeFlags.Object) with
+                    CallSignatures = signatures
+                }
+
+            let owner =
+                { Build.facts (Build.typeResponse 10 TypeFlags.Object) with
+                    SymbolName = Some "Store"
+                    Members = [ Build.resolvedMember (Build.symbol 100 "read" SymbolFlags.Method) 20 ]
+                }
+
+            { Build.shapeModel
+                  [
+                      Build.stringType
+                      owner
+                      member'
+                      { Build.facts
+                            { Build.typeResponse 30 TypeFlags.StringLiteral with
+                                Value = JsonValue.Create "text"
+                            } with
+                          SymbolName = None
+                      }
+                      { Build.facts
+                            { Build.typeResponse 31 TypeFlags.StringLiteral with
+                                Value = JsonValue.Create "json"
+                            } with
+                          SymbolName = None
+                      }
+                  ] with
+                DeclNames = Map.ofList [ 10, "Store" ]
+            }
+
+        testCase "a literal keeps its type at the parameter position that separates an overload set"
+        <| fun _ ->
+            let model = literalOverloadModel ()
+
+            let kept, keptFindings =
+                Spec.typeRef Build.context model None "Store.read(kind)" 30
+
+            Expect.equal kept (FsNamed "Store.Text") "the literal is written as a type nested under its owner"
+
+            Expect.equal
+                (keptFindings |> List.map (fun f -> f.Tier, f.Key))
+                [ Exact, "TR056" ]
+                "and the site reports exact rather than widened"
+
+            let widened, widenedFindings = Spec.typeRef Build.context model None "Label.kind" 30
+
+            Expect.equal widened FsString "the same literal type elsewhere still widens"
+
+            Expect.equal
+                (widenedFindings |> List.map (fun f -> f.Tier, f.Key))
+                [ Widened, "TR006" ]
+                "retention is a property of the position, not of the interned literal type"
+
+        testCase "dedupe-overloads declares the single-case StringEnum each retained literal reads"
+        <| fun _ ->
+            let model = literalOverloadModel ()
+            let shaped, findings = Build.runPass Overloads.dedupeOverloads model
+
+            Expect.equal
+                (findings |> List.map (fun f -> f.Tier, f.Key, f.Symbol))
+                [ Exact, "DO002", "Store.read" ]
+                "one finding per overload set the literal separates"
+
+            let enums =
+                shaped.Decls
+                |> List.choose (function
+                    | FsStringEnum decl -> Some(decl.Name, decl.Cases |> List.map (fun c -> c.Name, c.CompiledName))
+                    | _ -> None)
+                |> List.sortBy fst
+
+            Expect.equal
+                enums
+                [ "Store.Json", [ "Json", Some "json" ]; "Store.Text", [ "Text", Some "text" ] ]
+                "one declaration per literal, each compiled to the literal it stands for"
+
         testCase "detect-tagged-unions reads the arms' fields, not the arm types" <| fun _ ->
             // The arm properties become the case fields, because that is what Fable's erasure
             // writes: `Circle(radius = 2.0)` -> `{ kind: "circle", radius: 2 }`. The tag itself

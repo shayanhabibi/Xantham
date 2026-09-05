@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "package": "literal-overload-lab",
+  "module": "LiteralOverloadLab",
+  "counts": {
+    "exact": 5,
+    "ergonomic": 3,
+    "widened": 4,
+    "escape": 1
+  },
+  "passes": [
+    {
+      "pass": "SY - synthesize-anonymous",
+      "total": 2,
+      "exact": 2
+    },
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 22,
+      "exact": 5,
+      "ergonomic": 10,
+      "widened": 6,
+      "escape": 1
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 9,
+      "ergonomic": 9
+    },
+    {
+      "pass": "DO - dedupe-overloads",
+      "total": 2,
+      "exact": 1,
+      "widened": 1
+    }
+  ]
+}

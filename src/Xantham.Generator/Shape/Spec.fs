@@ -573,6 +573,223 @@ let rec internal typeSpelling (reference: FsTypeRef) : string =
     | FsNamed name -> name
 
 // ---------------------------------------------------------------------------------------------
+// Literal-typed parameters that separate an overload set (§4.2).
+// ---------------------------------------------------------------------------------------------
+
+/// How far into a parameter type a literal is read for. `KVNamespaceGetOptions<"text"> |
+/// undefined` reaches its literal at depth two, and the corpus carries nothing deeper.
+[<Literal>]
+let private LiteralReach = 4
+
+/// The string literals a parameter type carries at the positions widening erases: the type
+/// itself, the members of a union, and the arguments of an instantiation.
+let rec internal literalsCarried (model: ShapeModel) (depth: int) (typeId: int) : (int * string) list =
+    if depth >= LiteralReach then
+        []
+    else
+        match Map.tryFind typeId model.Types with
+        | None -> []
+        | Some facts when flag TypeFlags.StringLiteral facts ->
+            match literalOf facts with
+            | Some(LitString text) -> [ typeId, text ]
+            | _ -> []
+        | Some facts ->
+            facts.UnionMembers @ facts.TypeArguments
+            |> List.collect (literalsCarried model (depth + 1))
+            |> List.distinct
+
+/// A parameter type with its string literals erased. Two overloads share this key exactly where
+/// the literal is the only thing between them, which is the collision `dedupe-overloads` reports
+/// and the one a retained literal repairs.
+let rec internal literalErasedKey (model: ShapeModel) (depth: int) (typeId: int) : string =
+    if depth >= LiteralReach || List.isEmpty (literalsCarried model depth typeId) then
+        string typeId
+    else
+        match Map.tryFind typeId model.Types with
+        | None -> string typeId
+        | Some facts when flag TypeFlags.StringLiteral facts -> "literal"
+        | Some facts ->
+            let target =
+                facts.Response.Target |> ValueOption.map string |> ValueOption.defaultValue ""
+
+            let parts =
+                facts.UnionMembers @ facts.TypeArguments
+                |> List.map (literalErasedKey model (depth + 1))
+                |> String.concat ","
+
+            $"{target}({parts})"
+
+/// One member whose overload set stays distinct because a literal-typed parameter separates it.
+type internal LiteralOverloadSet =
+    {
+        /// The member as the finding names it: `KVNamespace.get`.
+        Member: string
+        /// The parameter the literals are read off.
+        Parameter: string
+        /// Parameter owner as `typeRef` names it, the literal type id kept there, and the
+        /// declaration it is written as.
+        Sites: (string * int * string) list
+        /// Declaration name, the literal it stands for, and the position it sorts under.
+        Declared: (string * string * DeclOrder option) list
+    }
+
+/// The declarations a run writes literals into: the entry module and the anonymous shapes that
+/// join it. A `reference` or shipped dependency group is left alone, so a synthesized literal
+/// type never lands in a module its owner does not read.
+let private ownedByEntry (facts: TypeFacts) =
+    match facts.Origin with
+    | EntryPackage
+    | Unclassified -> true
+    | CompilerLib
+    | Dependency _ -> false
+
+/// The overload sets a literal-typed parameter separates, over every declaration of the run.
+///
+/// A member's call signatures group by their parameter types with literals erased: a group of
+/// two or more is a collision F# would reject. Within a group, a position whose signatures each
+/// carry at most one literal and disagree on which one is a position the literal keeps.
+let private literalOverloadSets (model: ShapeModel) : LiteralOverloadSet list =
+    let existing = model.DeclNames |> Map.toList |> List.map snd |> Set.ofList
+
+    let setsOf (typeId: int) (owner: string) (facts: TypeFacts) =
+        let order = Map.tryFind typeId model.DeclOrders |> Option.defaultValue None
+        let mutable taken = existing
+        // One declaration per literal per owner: `get` and `getWithMetadata` both keep `"text"`,
+        // and both read it as the same type.
+        let mutable declarations = Map.empty
+
+        let declarationOf (text: string) =
+            match Map.tryFind text declarations with
+            | Some name -> name
+            | None ->
+                let candidate = nestUnder owner (Naming.enumCaseOfString text)
+
+                let name =
+                    if Set.contains candidate taken then
+                        Seq.initInfinite (fun i -> $"{candidate}{i + 2}")
+                        |> Seq.find (fun name -> not (Set.contains name taken))
+                    else
+                        candidate
+
+                taken <- Set.add name taken
+                declarations <- Map.add text name declarations
+                name
+
+        facts.Members
+        |> List.choose (fun m ->
+            match Map.tryFind m.TypeId model.Types with
+            | Some memberFacts when memberFacts.CallSignatures.Length > 1 ->
+                let signatures = memberFacts.CallSignatures
+
+                let colliding =
+                    signatures
+                    |> List.groupBy (fun signature ->
+                        signature.Parameters
+                        |> List.map (fun p -> p.Optional, literalErasedKey model 0 p.TypeId))
+                    |> List.map snd
+                    |> List.filter (fun group -> group.Length > 1)
+
+                // A position keeps its literals where each signature of the group carries one
+                // literal at most and two of them disagree on which. A union of literals is left
+                // alone: one literal type stands for `"a"`, and for `"a" | "b"` there is none.
+                let separating =
+                    colliding
+                    |> List.collect (fun group ->
+                        let arity = group |> List.map (fun s -> s.Parameters.Length) |> List.min
+
+                        [ 0 .. arity - 1 ]
+                        |> List.choose (fun position ->
+                            let carried =
+                                group
+                                |> List.map (fun s ->
+                                    let p = s.Parameters[position]
+                                    p, literalsCarried model 0 p.TypeId)
+
+                            let lone = carried |> List.forall (fun (_, literals) -> literals.Length <= 1)
+
+                            let distinct =
+                                carried |> List.map (snd >> List.map snd) |> List.distinct |> List.length
+
+                            if lone && distinct > 1 then
+                                Some(
+                                    carried
+                                    |> List.collect (fun (p, literals) -> literals |> List.map (fun l -> p, l))
+                                )
+                            else
+                                None))
+                    |> List.concat
+                    |> List.distinctBy (fun (p, (literalId, _)) -> p.Symbol.Name, literalId)
+
+                match separating with
+                | [] -> None
+                | separating ->
+                    let kept =
+                        separating
+                        |> List.map (fun (p, (literalId, text)) -> p, literalId, text, declarationOf text)
+
+                    let sites =
+                        kept
+                        |> List.collect (fun (p, literalId, _, name) ->
+                            [ m.Symbol.Name; Naming.memberName m.Symbol.Name ]
+                            |> List.distinct
+                            |> List.map (fun spelling -> $"{owner}.{spelling}({p.Symbol.Name})", literalId, name))
+
+                    Some
+                        {
+                            Member = $"{owner}.{Naming.memberName m.Symbol.Name}"
+                            Parameter = (separating |> List.head |> fst).Symbol.Name
+                            Sites = sites
+                            Declared =
+                                kept
+                                |> List.map (fun (_, _, text, name) -> name, text, order)
+                                |> List.distinctBy (fun (name, _, _) -> name)
+                        }
+            | _ -> None)
+
+    model.DeclNames
+    |> Map.toList
+    |> List.sortBy fst
+    |> List.collect (fun (typeId, owner) ->
+        match Map.tryFind typeId model.Types with
+        | Some facts when ownedByEntry facts -> setsOf typeId owner facts
+        | _ -> [])
+    |> List.distinctBy _.Member
+
+/// The analysis is a function of the type table and the names the run declares, both of which
+/// are fixed before any reference is written, so it is computed once per run rather than at
+/// every literal.
+let private literalOverloadCache =
+    System.Runtime.CompilerServices.ConditionalWeakTable<obj, LiteralOverloadSet list>()
+
+let internal literalOverloads (model: ShapeModel) : LiteralOverloadSet list =
+    literalOverloadCache.GetValue(
+        model.DeclNames,
+        System.Runtime.CompilerServices.ConditionalWeakTable<_, _>.CreateValueCallback(fun _ ->
+            literalOverloadSets model)
+    )
+
+/// Parameter owner and literal type id -> the declaration the literal is written as.
+let private retainedSites (model: ShapeModel) =
+    literalOverloads model
+    |> List.collect _.Sites
+    |> List.map (fun (owner, literalId, name) -> (owner, literalId), name)
+    |> Map.ofList
+
+let private retainedCache =
+    System.Runtime.CompilerServices.ConditionalWeakTable<obj, Map<string * int, string>>()
+
+/// The declaration a string literal keeps at this position, where keeping it separates an
+/// overload set.
+let internal retainedLiteral (model: ShapeModel) (owner: string) (typeId: int) : string option =
+    let sites =
+        retainedCache.GetValue(
+            model.DeclNames,
+            System.Runtime.CompilerServices.ConditionalWeakTable<_, _>.CreateValueCallback(fun _ -> retainedSites model)
+        )
+
+    Map.tryFind (owner, typeId) sites
+
+// ---------------------------------------------------------------------------------------------
 // Type references.
 // ---------------------------------------------------------------------------------------------
 
@@ -635,7 +852,10 @@ and internal typeRefOnPath
             | Some(LitNumber _) -> FsFloat, [ Finding.make owner TypeReference.LoneEnumMemberToFloat ]
             | _ -> FsString, [ Finding.make owner TypeReference.LoneEnumMemberToString ]
         elif has TypeFlags.StringLiteral then
-            FsString, [ Finding.make owner TypeReference.StringLiteralToString ]
+            match retainedLiteral model owner typeId, literalOf facts with
+            | Some name, Some(LitString text) ->
+                FsNamed name, [ Finding.make owner (TypeReference.StringLiteralKeptForOverload text) ]
+            | _ -> FsString, [ Finding.make owner TypeReference.StringLiteralToString ]
         elif has TypeFlags.NumberLiteral then
             FsFloat, [ Finding.make owner TypeReference.NumericLiteralToFloat ]
         elif has TypeFlags.BigIntLiteral then

@@ -1237,6 +1237,18 @@ module DrawableSVGGeometry =
             | [<CompiledName("beforebegin")>] Beforebegin
             | [<CompiledName("beforeend")>] Beforeend
 
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type HttpWwwW3Org1998MathMathML =
+        | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type HttpWwwW3Org1999Xhtml =
+        | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type HttpWwwW3Org2000Svg =
+        | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
 [<Interface>]
 type Svg =
     abstract createMotionPath: Func<TargetsParam, float option, Svg.CreateMotionPath.Result> with get, set
@@ -4269,7 +4281,19 @@ type DrawableSVGGeometry =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS)
     /// </summary>
-    abstract getElementsByTagNameNS: namespaceURI: string * localName: string -> obj
+    abstract getElementsByTagNameNS: namespaceURI: DrawableSVGGeometry.HttpWwwW3Org1999Xhtml * localName: string -> obj
+    /// <summary>
+    /// The **<c>Element.getElementsByTagNameNS()</c>** method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS)
+    /// </summary>
+    abstract getElementsByTagNameNS: namespaceURI: DrawableSVGGeometry.HttpWwwW3Org2000Svg * localName: string -> obj
+    /// <summary>
+    /// The **<c>Element.getElementsByTagNameNS()</c>** method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS)
+    /// </summary>
+    abstract getElementsByTagNameNS: namespaceURI: DrawableSVGGeometry.HttpWwwW3Org1998MathMathML * localName: string -> obj
     /// <summary>
     /// The **<c>Element.getElementsByTagNameNS()</c>** method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
     ///
