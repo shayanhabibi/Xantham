@@ -18,34 +18,40 @@ let private frontierDump =
          | "" -> None
          | path -> Some path)
 
-/// How often each derivation channel discovered a type id, keyed by id and then by channel name.
-let private provenance =
-    ConcurrentDictionary<int, ConcurrentDictionary<string, int>>()
+/// One walk's record of where the types it reached came from: how often each derivation channel
+/// discovered a type id, and the generation each id reached the frontier at. A checker id is
+/// assigned in the order answers arrive, so an id means nothing outside the walk that saw it and
+/// every walk carries its own trace, under a tag that separates its files from a concurrent
+/// walk's.
+type private Trace =
+    {
+        Channels: ConcurrentDictionary<int, ConcurrentDictionary<string, int>>
+        Generations: ConcurrentDictionary<int, int>
+        Tag: string
+    }
 
-/// The generation each type id reached the frontier at.
-let private generations = ConcurrentDictionary<int, int>()
+module private Trace =
+    /// A trace for one walk, or `None` where the dump path is unset.
+    let start () =
+        frontierDump.Value
+        |> Option.map (fun _ ->
+            {
+                Channels = ConcurrentDictionary()
+                Generations = ConcurrentDictionary()
+                Tag = System.Guid.NewGuid().ToString("N").Substring(0, 8)
+            })
 
 /// Tags the types one derivation channel discovered and hands them back unchanged, so a
-/// discovery site is wrapped rather than restructured. Inert while the dump path is unset.
-let private channel (name: string) (types: TypeResponse list) =
-    if frontierDump.Value.IsSome then
+/// discovery site is wrapped rather than restructured.
+let private channel (trace: Trace option) (name: string) (types: TypeResponse list) =
+    match trace with
+    | None -> ()
+    | Some trace ->
         for ty in types do
-            let counts = provenance.GetOrAdd(ty.Id, (fun _ -> ConcurrentDictionary()))
+            let counts = trace.Channels.GetOrAdd(ty.Id, (fun _ -> ConcurrentDictionary()))
             counts.AddOrUpdate(name, 1, (fun _ count -> count + 1)) |> ignore
 
     types
-
-/// Writes the frontier's `TypeResponse` values, one per line, to the dump path - a sampling hook
-/// for measuring what the depth cutoff discards.
-let private dumpFrontier (frontier: TypeResponse list) =
-    match frontierDump.Value with
-    | None -> ()
-    | Some path ->
-        let lines =
-            frontier
-            |> List.map (fun ty -> System.Text.Encoding.UTF8.GetString(ProtoJson.serialize ty))
-
-        System.IO.File.AppendAllLines(path, lines)
 
 /// Generations the breadth-first walk follows before recording the rest as deliberately not
 /// followed. The frontier doubles as the cycle boundary - ids already derived are never
@@ -83,23 +89,25 @@ let private attempt (work: Async<'T>) : Async<Result<'T, string>> =
             return Error $"the compiler could not answer {method} ({complaint message})"
     }
 
-/// Writes the provenance sidecar beside the frontier dump, at `<dump>.prov`. One `ID` line per
-/// type id the walk reached carries its generation, whether the cutoff stranded it, and the
-/// channels that discovered it. One `TARGET` line per distinct `Target` on the frontier carries
-/// the declaration the group instantiates, which costs two round trips - so the whole function
-/// runs only where a dump path is named.
-let private dumpProvenance (ctx: Context) (frontier: TypeResponse list) =
+/// Writes what the depth cutoff discarded, under the walk's own tag: `<dump>.<tag>.jsonl` holds
+/// the frontier's `TypeResponse` values, one per line. `<dump>.<tag>.prov` holds one `ID` line
+/// per type id the walk reached - its generation, whether the cutoff stranded it, and the
+/// channels that discovered it - and one `TARGET` line per distinct `Target` on the frontier,
+/// naming the declaration the group instantiates. Naming a target costs two round trips, so the
+/// whole function runs only where a dump path is named.
+let private dumpFrontier (ctx: Context) (trace: Trace option) (frontier: TypeResponse list) =
     async {
-        match frontierDump.Value with
-        | None -> ()
-        | Some path ->
+        match frontierDump.Value, trace with
+        | None, _
+        | _, None -> ()
+        | Some path, Some trace ->
             let stuck = frontier |> List.map _.Id |> Set.ofList
 
             let idLines =
                 [
-                    for entry in generations do
+                    for entry in trace.Generations do
                         let channels =
-                            match provenance.TryGetValue entry.Key with
+                            match trace.Channels.TryGetValue entry.Key with
                             | true, counts ->
                                 counts
                                 |> Seq.map (fun kv -> $"{kv.Key}={kv.Value}")
@@ -157,7 +165,13 @@ let private dumpProvenance (ctx: Context) (frontier: TypeResponse list) =
                     })
                 |> Async.Sequential
 
-            System.IO.File.AppendAllLines(path + ".prov", idLines @ List.ofArray targetLines)
+            System.IO.File.WriteAllLines(
+                $"{path}.{trace.Tag}.jsonl",
+                frontier
+                |> List.map (fun ty -> System.Text.Encoding.UTF8.GetString(ProtoJson.serialize ty))
+            )
+
+            System.IO.File.WriteAllLines($"{path}.{trace.Tag}.prov", idLines @ List.ofArray targetLines)
     }
 
 /// The type ids each export resolves to: the declared type for type-like symbols, the value
@@ -313,7 +327,7 @@ let private declaresQuestionToken (ctx: Context) (parameter: SymbolResponse) : A
 /// signatures, each with the responses it discovered. Object types and the intersections of
 /// them share it, because the checker answers the same questions about both: the properties of
 /// `A & B` are both sets, a property both declare typed as the intersection of its two types.
-let private deriveStructure (ctx: Context) (ty: TypeResponse) =
+let private deriveStructure (ctx: Context) (trace: Trace option) (ty: TypeResponse) =
     async {
         let! properties = ctx.Session.getPropertiesOfType ty.Id
         let properties = properties |> ValueOption.defaultValue [||]
@@ -392,9 +406,12 @@ let private deriveStructure (ctx: Context) (ty: TypeResponse) =
                                 },
                                 [
                                     yield!
-                                        channel $"{label}-parameter" (parameterFacts |> Array.map snd |> Array.toList)
-                                    yield! channel $"{label}-type-parameter" (typeParameters |> Array.toList)
-                                    yield! channel $"{label}-return" [ returnType ]
+                                        channel
+                                            trace
+                                            $"{label}-parameter"
+                                            (parameterFacts |> Array.map snd |> Array.toList)
+                                    yield! channel trace $"{label}-type-parameter" (typeParameters |> Array.toList)
+                                    yield! channel trace $"{label}-return" [ returnType ]
                                 ]
                         })
                     |> Async.Parallel
@@ -413,11 +430,12 @@ let private deriveStructure (ctx: Context) (ty: TypeResponse) =
 
         let discovered =
             [
-                yield! channel "member-type" (members |> Array.map snd |> Array.toList)
+                yield! channel trace "member-type" (members |> Array.map snd |> Array.toList)
                 yield! callSignatures |> Array.collect (snd >> List.toArray)
                 yield! constructSignatures |> Array.collect (snd >> List.toArray)
                 yield!
                     channel
+                        trace
                         "index-info"
                         [
                             for info in indexInfos do
@@ -444,7 +462,7 @@ let private deriveStructure (ctx: Context) (ty: TypeResponse) =
     }
 
 /// Derives one type's facts and reports the responses it discovered, for the next frontier.
-let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * TypeResponse list> =
+let private deriveFacts (ctx: Context) (trace: Trace option) (ty: TypeResponse) : Async<TypeFacts * TypeResponse list> =
     async {
         let has flag = ty.Flags.HasFlag(flag: TypeFlags)
 
@@ -471,8 +489,8 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                     UnionMembers = members |> List.map _.Id
                     AliasTypeArguments = aliasTypeArguments |> List.map _.Id
                 },
-                channel "union-members" members
-                @ channel "alias-type-arguments" aliasTypeArguments
+                channel trace "union-members" members
+                @ channel trace "alias-type-arguments" aliasTypeArguments
         elif has TypeFlags.Intersection then
             // The constituents, followed into the table. A branding intersection (§4.6) is
             // decided by what its object operands *contain* - a marker property or a real
@@ -504,7 +522,7 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                     && members |> List.forall (fun m -> m.Flags.HasFlag TypeFlags.Object)
                 then
                     async {
-                        let! structure = deriveStructure ctx ty
+                        let! structure = deriveStructure ctx trace ty
                         return Some structure
                     }
                 else
@@ -519,8 +537,8 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                     IntersectionMembers = members |> List.map _.Id
                     AliasTypeArguments = aliasTypeArguments |> List.map _.Id
                 },
-                channel "intersection-members" members
-                @ channel "alias-type-arguments" aliasTypeArguments
+                channel trace "intersection-members" members
+                @ channel trace "alias-type-arguments" aliasTypeArguments
                 @ (structure |> Option.map _.Discovered |> Option.defaultValue [])
         elif has TypeFlags.EnumLiteral then
             // An enum member: its symbol names the F# enum case (§4.7); the value is already
@@ -653,8 +671,8 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                         TupleElements = tupleElements
                         AliasTypeArguments = aliasTypeArguments |> List.map _.Id
                     },
-                    channel "type-arguments" typeArguments
-                    @ channel "alias-type-arguments" aliasTypeArguments
+                    channel trace "type-arguments" typeArguments
+                    @ channel trace "alias-type-arguments" aliasTypeArguments
             else
 
                 // The generic declaration behind an instantiation (§4.9). `Ready<T>` reached only
@@ -673,7 +691,7 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                         }
                     | _ -> async.Return []
 
-                let! structure = deriveStructure ctx ty
+                let! structure = deriveStructure ctx trace ty
                 let! baseTypes = ctx.Session.getBaseTypes ty.Id
 
                 let baseTypes =
@@ -682,10 +700,10 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                 let discovered =
                     [
                         yield! structure.Discovered
-                        yield! channel "base-types" baseTypes
-                        yield! channel "type-arguments" typeArguments
-                        yield! channel "alias-type-arguments" aliasTypeArguments
-                        yield! channel "target" target
+                        yield! channel trace "base-types" baseTypes
+                        yield! channel trace "type-arguments" typeArguments
+                        yield! channel trace "alias-type-arguments" aliasTypeArguments
+                        yield! channel trace "target" target
                     ]
 
                 return
@@ -726,22 +744,22 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                     Default = fallback |> ValueOption.map _.Id |> ValueOption.toOption
                 },
                 [
-                    yield! channel "constraint" (ValueOption.toList bound)
-                    yield! channel "default" (ValueOption.toList fallback)
+                    yield! channel trace "constraint" (ValueOption.toList bound)
+                    yield! channel trace "default" (ValueOption.toList fallback)
                 ]
         elif has TypeFlags.Index then
             // `keyof T` at an operand the checker could not finish (§4.10). The operand is the
             // index type's target, and it is what the whole idiom is about - `keyof<'T>` needs
             // a `'T` - so it is followed rather than left dangling.
             let! operand = ctx.Session.getTargetOfType ty.Id
-            return TypeFacts.shallow ty, channel "index-operand" [ operand ]
+            return TypeFacts.shallow ty, channel trace "index-operand" [ operand ]
         elif has TypeFlags.IndexedAccess then
             // `T[K]`. Both halves are followed: the index is usually a key variable whose
             // constraint names the object, and reading one without the other cannot tell
             // `T[K]` apart from `T[keyof T]`.
             let! objectType = ctx.Session.getObjectTypeOfType ty.Id
             let! indexType = ctx.Session.getIndexTypeOfType ty.Id
-            return TypeFacts.shallow ty, channel "indexed-access" [ objectType; indexType ]
+            return TypeFacts.shallow ty, channel trace "indexed-access" [ objectType; indexType ]
         else
             // A conditional, a template literal or an intrinsic string mapping. None of these
             // has a structure to read - each is a type-level computation over an argument the
@@ -773,8 +791,8 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                 |> Array.toList
 
             let bound =
-                channel "alias-type-arguments" aliasTypeArguments
-                @ channel "template-operands" operands
+                channel trace "alias-type-arguments" aliasTypeArguments
+                @ channel trace "template-operands" operands
 
             // A conditional's two branches (§4.11). Both responses are read - choosing between
             // them is what they are for - and only the branch the mapping takes is followed
@@ -851,7 +869,7 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                                     Name = alias |> ValueOption.map _.Name |> ValueOption.toOption
                                     Branch = taken |> Option.map (fun (side, bare) -> side, bare.Id)
                                 },
-                            channel "conditional-branch" (taken |> Option.map snd |> Option.toList)
+                            channel trace "conditional-branch" (taken |> Option.map snd |> Option.toList)
                     }
                 else
                     async.Return(None, [])
@@ -873,6 +891,8 @@ let resolveTypeTable: Pass<ResolveModel> =
         Run =
             fun ctx model ->
                 async {
+                    let trace = Trace.start ()
+
                     let rec walk table derived notFollowed findings frontier depth =
                         async {
                             let fresh =
@@ -881,15 +901,16 @@ let resolveTypeTable: Pass<ResolveModel> =
                                 |> List.filter (fun ty -> not (Set.contains ty.Id derived))
                                 |> List.sortBy _.Id
 
-                            if frontierDump.Value.IsSome then
+                            match trace with
+                            | None -> ()
+                            | Some trace ->
                                 for ty in fresh do
-                                    generations.TryAdd(ty.Id, depth) |> ignore
+                                    trace.Generations.TryAdd(ty.Id, depth) |> ignore
 
                             match fresh with
                             | [] -> return table, notFollowed, findings
                             | fresh when depth > FollowDepth ->
-                                dumpFrontier fresh
-                                do! dumpProvenance ctx fresh
+                                do! dumpFrontier ctx trace fresh
 
                                 let notFollowed =
                                     fresh
@@ -916,7 +937,7 @@ let resolveTypeTable: Pass<ResolveModel> =
                                     fresh
                                     |> List.map (fun ty ->
                                         async {
-                                            let! result = attempt (deriveFacts ctx ty)
+                                            let! result = attempt (deriveFacts ctx trace ty)
                                             return ty, result
                                         })
                                     |> Async.Parallel
