@@ -615,12 +615,30 @@ let rec internal literalsCarried (model: ShapeModel) (depth: int) (typeId: int) 
             |> List.collect (literalsCarried model (depth + 1))
             |> List.distinct
 
+/// The key a type takes where it carries no literal: the F# type it shapes to, rather than the
+/// checker's id for it. Two unions agreeing on their non-nullish members share a key, and that
+/// is the equivalence `dedupe-overloads` compares under — the second such union reaches the
+/// first's name directly through `namedUnionByMembers`, or through the abbreviation
+/// `shape-aliases` writes where the second is declared too.
+let internal shapedKey (model: ShapeModel) (typeId: int) : string =
+    match Map.tryFind typeId model.Types with
+    | Some facts when flag TypeFlags.Union facts && not (flag TypeFlags.Boolean facts) ->
+        match splitNullish model facts with
+        // One remaining member shapes as that member; two or more take a union name. The
+        // hoisted part is the `option` wrapper, so it separates.
+        | hoisted, (_ :: _ :: _ as remaining) ->
+            let members = remaining |> List.sort |> List.map string |> String.concat "|"
+            let absence = if List.isEmpty hoisted then "" else "?"
+            $"union({members}){absence}"
+        | _ -> string typeId
+    | _ -> string typeId
+
 /// A parameter type with its string literals erased. Two overloads share this key exactly where
 /// the literal is the only thing between them, which is the collision `dedupe-overloads` reports
 /// and the one a retained literal repairs.
 let rec internal literalErasedKey (model: ShapeModel) (depth: int) (typeId: int) : string =
     if depth >= LiteralReach || List.isEmpty (literalsCarried model depth typeId) then
-        string typeId
+        shapedKey model typeId
     else
         match Map.tryFind typeId model.Types with
         | None -> string typeId
