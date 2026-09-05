@@ -711,7 +711,10 @@ let private literalOverloadSets (model: ShapeModel) : LiteralOverloadSet list =
                                 carried |> List.map (snd >> List.map snd) |> List.distinct |> List.length
 
                             if lone && distinct > 1 then
-                                Some(carried |> List.collect (fun (p, literals) -> literals |> List.map (fun l -> p, l)))
+                                Some(
+                                    carried
+                                    |> List.collect (fun (p, literals) -> literals |> List.map (fun l -> p, l))
+                                )
                             else
                                 None))
                     |> List.concat
@@ -781,8 +784,7 @@ let internal retainedLiteral (model: ShapeModel) (owner: string) (typeId: int) :
     let sites =
         retainedCache.GetValue(
             model.DeclNames,
-            System.Runtime.CompilerServices.ConditionalWeakTable<_, _>.CreateValueCallback(fun _ ->
-                retainedSites model)
+            System.Runtime.CompilerServices.ConditionalWeakTable<_, _>.CreateValueCallback(fun _ -> retainedSites model)
         )
 
     Map.tryFind (owner, typeId) sites
