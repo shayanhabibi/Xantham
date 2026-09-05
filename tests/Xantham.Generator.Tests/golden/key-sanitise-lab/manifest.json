@@ -1,24 +1,24 @@
 {
   "schemaVersion": 1,
-  "package": "nested-name-lab",
-  "module": "NestedNameLab",
+  "package": "key-sanitise-lab",
+  "module": "KeySanitiseLab",
   "counts": {
-    "exact": 4,
-    "ergonomic": 13,
+    "exact": 1,
+    "ergonomic": 8,
     "widened": 0,
     "escape": 0
   },
   "passes": [
     {
       "pass": "SY - synthesize-anonymous",
-      "total": 10,
-      "exact": 9,
-      "ergonomic": 1
+      "total": 5,
+      "exact": 2,
+      "ergonomic": 3
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 13,
-      "ergonomic": 13
+      "total": 8,
+      "ergonomic": 8
     }
   ]
 }

@@ -55,7 +55,8 @@ export declare function configure(settings: { verbose: boolean }): void;
 
 // ---------------------------------------------------------------------------
 // A key outside the plain identifier shape. Only an identifier opens a module,
-// so this position concatenates and the name stays one backticked type.
+// so this position concatenates; the concatenation is then reduced to what a
+// declaration name admits, and `key-sanitise-lab` pins that reduction.
 // ---------------------------------------------------------------------------
 
 /** The owner of a member whose JavaScript key does not open a module. */

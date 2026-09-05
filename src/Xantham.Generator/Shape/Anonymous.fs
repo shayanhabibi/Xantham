@@ -216,16 +216,28 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
     let aliasForms = aliasDeclarationForms model
 
     let claim (preferred: string) typeId order =
+        // A member key reaches here verbatim, and a declaration name admits less than a member
+        // name does: `Registry@cf/meta` is FS0883 with or without backticks.
+        let admitted =
+            preferred.Split '.' |> Array.map Naming.identifierName |> String.concat "."
+
         let unique =
-            if not (Set.contains preferred taken) then
-                preferred
+            if not (Set.contains admitted taken) then
+                admitted
             else
-                Seq.initInfinite (fun i -> $"{preferred}{i + 2}")
+                Seq.initInfinite (fun i -> $"{admitted}{i + 2}")
                 |> Seq.find (fun candidate -> not (Set.contains candidate taken))
 
         names <- Map.add typeId unique names
         orders <- Map.add typeId order orders
         taken <- Set.add unique taken
+
+        if admitted <> preferred then
+            findings <-
+                findings
+                @ [
+                    Finding.make unique (SynthesizeAnonymous.NameSanitisedForIdentifier(preferred, unique))
+                ]
 
         if unique.Contains "." then
             findings <-

@@ -2023,8 +2023,12 @@ let pipelineTests =
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                           let source = rendered.Files |> List.head |> snd
 
-                          Expect.stringContains source "``RegistryBeta channel``" "the shape keeps one flat name"
-                          Expect.isFalse (source.Contains "module Registry") "and its owner opens no module"
+                          // The key opens no module, so the shape it names is one flat name. The
+                          // space then leaves that name at the declaration position, which admits
+                          // less than the member position does - `key-sanitise-lab` pins that half.
+                          Expect.stringContains source "type RegistryBetaChannel =" "the shape keeps one flat name"
+                          Expect.stringContains source "abstract ``beta channel``" "and the member keeps the key"
+                          Expect.isFalse (source.Contains "module Registry") "its owner opens no module"
 
                       testCase "every nested name is reported under SY004" <| fun _ ->
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -2060,6 +2064,64 @@ let pipelineTests =
                           // name has no position of its own to take. This is the residue the
                           // nesting scheme leaves, and it is deliberate rather than missed.
                           Expect.stringContains source "Either2" "the second arm disambiguates by number" ])
+
+        // Wave seven lane AI's fixture. A member key is written verbatim at the member position
+        // and reduced to the identifier shape at the declaration position.
+        yield!
+            fixtureTests
+                "key-sanitise-lab"
+                (handFixture "key-sanitise-lab")
+                GeneratorConfig.Default
+                (fun package ->
+                    [ testCase "a key F# refuses as a declaration name is reduced to the identifier shape"
+                      <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains source "type RegistryCfMeta =" "the key names a legal declaration"
+                          Expect.stringContains source "type RegistryCfMetaLlama3 =" "and a second key a second one"
+                          Expect.stringContains source "type RegistryRef =" "a leading $ drops out"
+
+                          Expect.isFalse
+                              (source.Contains "Registry@cf/meta")
+                              "and no declaration carries a character FS0883 refuses"
+
+                      testCase "the member keeps the JavaScript key the declaration gave up" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains
+                              source
+                              "abstract ``@cf/meta``: RegistryCfMeta"
+                              "the member position is backticked, not renamed"
+
+                      testCase "a sanitised name opens a module for the shapes below it" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains source "module RegistryCfMeta =" "the reduced name is nestable"
+                          Expect.stringContains source "abstract limits: RegistryCfMeta.Limits" "and its child nests"
+
+                      testCase "a key that already concatenates into a legal name is untouched" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains source "type Settings2fa =" "a digit-led key concatenates as before"
+                          Expect.stringContains source "module Settings =" "and an identifier-shaped key nests"
+
+                      testCase "every reduction is reported under SY005" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                          let sanitised =
+                              rendered.Findings
+                              |> List.filter (fun finding -> finding.Key = "SY005")
+                              |> List.map _.Symbol
+                              |> List.sort
+
+                          Expect.equal
+                              sanitised
+                              [ "RegistryCfMeta"; "RegistryCfMetaLlama3"; "RegistryRef" ]
+                              "one finding per declaration whose name moved, and none for the rest" ])
 
         // Wave six lane AA's fixture. An entrypoint class's optional method is a lifecycle hook,
         // and each one becomes an interface a subclass opts into.

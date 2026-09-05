@@ -1,0 +1,6 @@
+{
+    "name": "key-sanitise-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "description": "Hand-authored fixture pinning what a synthesized declaration name admits (wave seven lane AI, item 6). A member key is written verbatim at the member position, where backticks rescue anything; the declaration the key names is spelled in the plain identifier shape, because `type ``Registry@cf/meta`` =` is FS0883. Tracked in git, no npm install, so the golden pins every idiom under the live compiler."
+}

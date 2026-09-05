@@ -262,6 +262,25 @@ module Naming =
     /// under. A JavaScript key outside it - `beta channel`, `@cf/meta` - names a type only.
     let nestable (name: string) = identifierShaped.IsMatch name
 
+    /// `name` in the shape an F# declaration admits: characters outside the plain identifier
+    /// separate segments, and every segment after the first is capitalised, so
+    /// `Registry@cf/meta` reads `RegistryCfMeta`. Backticks carry a keyword or a space into a
+    /// declaration name; `` type ``Registry@cf/meta`` `` is FS0883. An identifier-shaped name
+    /// is returned unchanged.
+    let identifierName (name: string) =
+        if nestable name then
+            name
+        else
+            let separated =
+                name
+                |> Seq.map (fun c -> if System.Char.IsLetterOrDigit c then c else '-')
+                |> System.String.Concat
+
+            match pascalSegment separated with
+            | "" -> "Item"
+            | text when System.Char.IsLetter text[0] -> text
+            | text -> "N" + text
+
     /// A package's module name: `@scope/pkg-name` -> `Scope.PkgName`.
     ///
     /// The name is taken from the runtime package, so a DefinitelyTyped package is named for the

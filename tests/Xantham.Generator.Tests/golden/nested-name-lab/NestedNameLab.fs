@@ -100,15 +100,15 @@ module Configure =
 /// </summary>
 [<Interface>]
 type Registry =
-    abstract ``beta channel``: ``RegistryBeta channel`` with get, set
+    abstract ``beta channel``: RegistryBetaChannel with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``beta channel``: ``RegistryBeta channel``) : Registry = jsNative
+    static member Create (``beta channel``: RegistryBetaChannel) : Registry = jsNative
 
 [<Interface>]
-type ``RegistryBeta channel`` =
+type RegistryBetaChannel =
     abstract model: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (model: string) : ``RegistryBeta channel`` = jsNative
+    static member Create (model: string) : RegistryBetaChannel = jsNative
 
 /// <summary>
 /// Both arms are object shapes, and both are reached at <c>Choice.Either</c>.
