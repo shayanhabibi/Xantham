@@ -7,6 +7,20 @@ module Xantham.Generator.Resolve
 open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 
+/// Writes the frontier's `TypeResponse` values, one per line, to the path named by
+/// `XANTHAM_FRONTIER_DUMP` - a sampling hook for measuring what the depth cutoff discards.
+/// A no-op when the variable is unset, so the default corpus output is untouched.
+let private dumpFrontier (frontier: TypeResponse list) =
+    match System.Environment.GetEnvironmentVariable "XANTHAM_FRONTIER_DUMP" with
+    | null
+    | "" -> ()
+    | path ->
+        let lines =
+            frontier
+            |> List.map (fun ty -> System.Text.Encoding.UTF8.GetString(ProtoJson.serialize ty))
+
+        System.IO.File.AppendAllLines(path, lines)
+
 /// Generations the breadth-first walk follows before recording the rest as deliberately not
 /// followed. The frontier doubles as the cycle boundary - ids already derived are never
 /// re-entered - so this bounds runaway utility-type expansion, not recursion.
@@ -744,6 +758,8 @@ let resolveTypeTable: Pass<ResolveModel> =
                             match fresh with
                             | [] -> return table, notFollowed, findings
                             | fresh when depth > FollowDepth ->
+                                dumpFrontier fresh
+
                                 let notFollowed =
                                     fresh
                                     |> List.fold
