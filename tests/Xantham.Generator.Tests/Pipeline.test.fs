@@ -2414,6 +2414,47 @@ let pipelineTests =
                               "Solo.tag(name)"
                               "the literal that separates nothing is still reported as widened" ])
 
+        // Wave nine lane AP, item 2. A `keyof` bound separates an overload set in TypeScript and
+        // reaches F# erased: .NET keeps constraints out of a method signature, and a key set has
+        // no F# name to stand over. The drop is its own loss rather than a plain collision.
+        yield!
+            fixtureTests
+                "keyof-overload-lab"
+                (handFixture "keyof-overload-lab")
+                GeneratorConfig.Default
+                (fun package ->
+                    [ testCase "a key-set bound reaches the signature erased" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains
+                              source
+                              "abstract find<'K>: selector: 'K -> obj"
+                              "the bound is nowhere in the F# signature"
+
+                          Expect.stringContains
+                              source
+                              "abstract find: selector: string -> Div"
+                              "the overload taking a plain string survives beside it"
+
+                      testCase "a key-set drop and a nominal drop report different losses" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                          let symbolsOf key =
+                              rendered.Findings
+                              |> List.filter (fun finding -> finding.Key = key)
+                              |> List.map _.Symbol
+                              |> List.distinct
+                              |> List.sort
+
+                          Expect.equal (symbolsOf "DO005") [ "Finder.find" ] "the key-set collision reports its own loss"
+
+                          Expect.equal
+                              (symbolsOf "DO001")
+                              [ "Finder.pick" ]
+                              "and a nominal bound erased the same way stays a plain drop" ])
+
+
         // Wave seven lane AG's fixture. A parameter's `?` is a syntactic fact the checker keeps
         // off the symbol, so it is read from the declaration node. The three spellings of
         // presence reach two F# forms, and the pair of findings is what separates them.

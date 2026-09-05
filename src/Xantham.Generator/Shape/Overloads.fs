@@ -36,6 +36,10 @@ let private literalDecl (name: string, text: string, order: DeclOrder option) =
 ///
 /// Retention reads the members of a declaration, so an exported function's overloads arrive
 /// widened and its drops report `DO004` apart from `DO001`.
+///
+/// A set separated in TypeScript by a `keyof` bound alone reaches F# as one signature, since
+/// .NET keeps constraints out of a method signature (`Spec.keyBoundedOverloads`). Those drops
+/// report `DO005`.
 let dedupeOverloads: Pass<ShapeModel> =
     {
         Name = "dedupe-overloads"
@@ -78,6 +82,24 @@ let dedupeOverloads: Pass<ShapeModel> =
                     let signatureKey (parameters: FsParam list) =
                         parameters |> List.map (fun p -> p.Optional, p.Rest, normalize Set.empty p.Type)
 
+                    let keyBounded = keyBoundedOverloads model
+
+                    /// The parameter a dropped overload was separated at in TypeScript alone:
+                    /// one taking a type parameter its key-set bound was erased from.
+                    let keyErasedParameter (owner: string) (m: FsMethodMember) =
+                        if not (Set.contains $"{owner}.{m.Name}" keyBounded) then
+                            None
+                        else
+                            let bare =
+                                m.TypeParameters
+                                |> List.filter (fun p -> p.Constraint.IsNone)
+                                |> List.map (fun p -> FsTypeVar p.Name)
+                                |> Set.ofList
+
+                            m.Parameters
+                            |> List.tryFind (fun p -> Set.contains p.Type bare)
+                            |> Option.map _.Name
+
                     let dedupeMethods (owner: string) (members: FsMember list) =
                         let mutable seen = Set.empty
 
@@ -105,8 +127,12 @@ let dedupeOverloads: Pass<ShapeModel> =
                                 let key = (m.Name, signatureKey m.Parameters).ToString()
 
                                 if Set.contains key seen then
-                                    findings <-
-                                        findings @ [ Finding.make $"{owner}.{m.Name}" DedupeOverloads.OverloadDropped ]
+                                    let dropped =
+                                        match keyErasedParameter owner m with
+                                        | Some parameter -> DedupeOverloads.KeyofConstrainedOverloadDropped parameter
+                                        | None -> DedupeOverloads.OverloadDropped
+
+                                    findings <- findings @ [ Finding.make $"{owner}.{m.Name}" dropped ]
 
                                     false
                                 else
