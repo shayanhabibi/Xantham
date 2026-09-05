@@ -46,6 +46,33 @@ type Factory =
     [<ParamObject; Emit("$0")>]
     static member Create (make: (float -> Func<float, float, string>), makeOne: Func<float, (float -> string)>, makeNone: Func<float, (unit -> string)>, makeThree: (float -> Func<float, float, float, string>), ready: (unit -> string), pair: Func<float, float, string>) : Factory = jsNative
 
+/// <summary>
+/// A union of a callback arm and a non-callback arm, the shape the corpus carries as
+/// <c>EventListenerOrEventListenerObject</c>. The erased union unwraps at runtime, so what crosses is
+/// whichever arm was supplied.
+/// </summary>
+type Listener = U2<string, (float -> string)>
+
+/// <summary>
+/// Union-typed members, at both arities and with the non-callback arm supplied.
+/// </summary>
+[<Interface>]
+type UnionHandlers =
+    abstract one: U2<string, (float -> string)> with get, set
+    abstract two: U2<string, Func<float, float, string>> with get, set
+    abstract text: U2<string, (float -> string)> with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (one: U2<string, (float -> string)>, two: U2<string, Func<float, float, string>>, text: U2<string, (float -> string)>) : UnionHandlers = jsNative
+
+/// <summary>
+/// The object arm of <c>EventListenerOrEventListenerObject</c>, whose method carries the same arity.
+/// </summary>
+[<Interface>]
+type ListenerObject =
+    abstract handleEvent: a: float -> string
+    [<ParamObject; Emit("$0")>]
+    static member Create (handleEvent: (float -> string)) : ListenerObject = jsNative
+
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
@@ -117,3 +144,53 @@ type Exports =
     /// </summary>
     [<Import("drive", "callback-function-lab")>]
     static member drive (factory: Factory) : string = jsNative
+    /// <summary>
+    /// The named union in parameter position, so the abbreviation is what crosses.
+    /// </summary>
+    [<Import("callUnionNamed", "callback-function-lab")>]
+    static member callUnionNamed (listener: Listener) : string = jsNative
+    /// <summary>
+    /// A union arm of arity 0 in parameter position.
+    /// </summary>
+    [<Import("callUnionNone", "callback-function-lab")>]
+    static member callUnionNone (listener: U2<string, (unit -> string)>) : string = jsNative
+    /// <summary>
+    /// A union arm of arity 1 in parameter position.
+    /// </summary>
+    [<Import("callUnionOne", "callback-function-lab")>]
+    static member callUnionOne (listener: U2<string, (float -> string)>) : string = jsNative
+    /// <summary>
+    /// A union arm of arity 2 in parameter position, where the delegate is retained.
+    /// </summary>
+    [<Import("callUnionTwo", "callback-function-lab")>]
+    static member callUnionTwo (listener: U2<string, Func<float, float, string>>) : string = jsNative
+    /// <summary>
+    /// A union arm in return position at arity 1.
+    /// </summary>
+    [<Import("makeUnionOne", "callback-function-lab")>]
+    static member makeUnionOne (seed: float) : U2<string, (float -> string)> = jsNative
+    /// <summary>
+    /// A union arm in return position at arity 2.
+    /// </summary>
+    [<Import("makeUnionTwo", "callback-function-lab")>]
+    static member makeUnionTwo (seed: float) : U2<string, Func<float, float, string>> = jsNative
+    /// <summary>
+    /// A union-typed member object built in JavaScript, for reading a callback arm back into F#.
+    /// </summary>
+    [<Import("unionHandlers", "callback-function-lab")>]
+    static member unionHandlers: UnionHandlers = jsNative
+    /// <summary>
+    /// Reports the arity of each union-typed member of an object built in F#.
+    /// </summary>
+    [<Import("fireUnion", "callback-function-lab")>]
+    static member fireUnion (handlers: UnionHandlers) : string = jsNative
+    /// <summary>
+    /// The corpus shape exactly: a callback arm beside an object arm rather than beside a primitive.
+    /// </summary>
+    [<Import("callUnionObject", "callback-function-lab")>]
+    static member callUnionObject (listener: U2<ListenerObject, (float -> string)>) : string = jsNative
+    /// <summary>
+    /// The same union built in JavaScript, for reading the callback arm back into F#.
+    /// </summary>
+    [<Import("objectUnion", "callback-function-lab")>]
+    static member objectUnion: U2<ListenerObject, (float -> string)> = jsNative

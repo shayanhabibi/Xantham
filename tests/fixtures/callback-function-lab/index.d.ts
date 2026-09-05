@@ -73,3 +73,52 @@ export declare function callNestingOne(outer: (seed: number) => (a: number) => s
 
 /** A `Factory` built in F#, so its callback members cross outward rather than back. */
 export declare function drive(factory: Factory): string;
+
+/**
+ * A union of a callback arm and a non-callback arm, the shape the corpus carries as
+ * `EventListenerOrEventListenerObject`. The erased union unwraps at runtime, so what crosses is
+ * whichever arm was supplied.
+ */
+export type Listener = ((a: number) => string) | string;
+
+/** The named union in parameter position, so the abbreviation is what crosses. */
+export declare function callUnionNamed(listener: Listener): string;
+
+/** A union arm of arity 0 in parameter position. */
+export declare function callUnionNone(listener: (() => string) | string): string;
+
+/** A union arm of arity 1 in parameter position. */
+export declare function callUnionOne(listener: ((a: number) => string) | string): string;
+
+/** A union arm of arity 2 in parameter position, where the delegate is retained. */
+export declare function callUnionTwo(listener: ((a: number, b: number) => string) | string): string;
+
+/** A union arm in return position at arity 1. */
+export declare function makeUnionOne(seed: number): ((a: number) => string) | string;
+
+/** A union arm in return position at arity 2. */
+export declare function makeUnionTwo(seed: number): ((a: number, b: number) => string) | string;
+
+/** Union-typed members, at both arities and with the non-callback arm supplied. */
+export interface UnionHandlers {
+    one: ((a: number) => string) | string;
+    two: ((a: number, b: number) => string) | string;
+    text: ((a: number) => string) | string;
+}
+
+/** A union-typed member object built in JavaScript, for reading a callback arm back into F#. */
+export declare const unionHandlers: UnionHandlers;
+
+/** Reports the arity of each union-typed member of an object built in F#. */
+export declare function fireUnion(handlers: UnionHandlers): string;
+
+/** The object arm of `EventListenerOrEventListenerObject`, whose method carries the same arity. */
+export interface ListenerObject {
+    handleEvent(a: number): string;
+}
+
+/** The corpus shape exactly: a callback arm beside an object arm rather than beside a primitive. */
+export declare function callUnionObject(listener: ((a: number) => string) | ListenerObject): string;
+
+/** The same union built in JavaScript, for reading the callback arm back into F#. */
+export declare const objectUnion: ((a: number) => string) | ListenerObject;

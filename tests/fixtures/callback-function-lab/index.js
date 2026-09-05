@@ -79,3 +79,50 @@ export function drive(factory) {
         String(factory.pair(1, 2)),
     ].join(":");
 }
+
+// A union arm reports the same pair as a bare callback - `length` beside the result of calling it
+// with all its arguments - and reports the value itself when the non-callback arm arrived.
+const describe = (value, ...args) =>
+    typeof value === "function" ? `${value.length}:${String(value(...args))}` : `text:${String(value)}`;
+
+export function callUnionNamed(listener) {
+    return describe(listener, 1);
+}
+
+export function callUnionNone(listener) {
+    return describe(listener);
+}
+
+export function callUnionOne(listener) {
+    return describe(listener, 1);
+}
+
+export function callUnionTwo(listener) {
+    return describe(listener, 1, 2);
+}
+
+export function makeUnionOne(seed) {
+    return (a) => `one:${seed}:${a}`;
+}
+
+export function makeUnionTwo(seed) {
+    return (a, b) => `two:${seed}:${a}:${b}`;
+}
+
+export const unionHandlers = {
+    one: (a) => `js1:${a}`,
+    two: (a, b) => `js2:${a}:${b}`,
+    text: "plain",
+};
+
+export function fireUnion(handlers) {
+    return [describe(handlers.one, 1), describe(handlers.two, 1, 2), describe(handlers.text, 1)].join("|");
+}
+
+export function callUnionObject(listener) {
+    return typeof listener === "function"
+        ? `${listener.length}:${String(listener(1))}`
+        : `object:${listener.handleEvent.length}:${String(listener.handleEvent(1))}`;
+}
+
+export const objectUnion = (a) => `js:${a}`;
