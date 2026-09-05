@@ -305,3 +305,43 @@ code will report a broken tree as green; this one nearly did. Read the summary l
 **`build.fsx -- test` runs fantomas, which writes CRLF on Windows.** Every F# file then reports as
 modified with an empty content diff, so `git status` cannot be used to see a lane's footprint and
 `git merge` refuses to run until the tree is cleaned. Compare with `--ignore-cr-at-eol`.
+
+---
+
+# Item 1, reopened and settled
+
+Lane AE's refusal was correct about the curried spelling and too broad as a conclusion. The
+repository owner pointed out that a function type need not be curried - the parameters can be
+tupled - and that a delegate can still be built wherever the function form cannot express the
+signature. Lane AK measured that.
+
+**Tupled is unsafe, and it fails more quietly than curried.** Three spellings, measured side by
+side on `callback-function-lab` under Fable 5.2, reading `fn.length` and then whether the call
+carried its arguments:
+
+| Position | `Func`/`Action` | Curried | Tupled |
+| --- | --- | --- | --- |
+| parameter, arity 0/1 | ok | ok | same spelling as curried |
+| parameter, arity 2/3; `ParamObject`; abbreviation | ok | ok | length 1, arguments read `undefined`, no throw |
+| member read back, arity 2 | ok | length 1, arity lost | application passes one array |
+| method return, arity 2/3 | ok | `TypeError` | application passes one array |
+| `unit` return, arity 2 | ok | ok | length 1, arguments `NaN` |
+
+Curried throws where it is wrong. Tupled returns wrong values and keeps going, which is the worse
+failure for a consumer. Neither is safe above arity 1.
+
+**What converted.** The arity-0 and arity-1 slice, where the curried and tupled spellings coincide
+and both carry their argument. Lane AK also measured a rule neither earlier lane had: a function
+type may not return a function type, because Fable flattens `A -> (B -> C)`, and this fails even
+when both levels are unary. Delegates are retained above arity 1 and at nested returns, with
+`TR055` naming the position.
+
+Delegates fall from 1,615 to 365 counting `Action` and nesting - cloudflare 795 to 207, animejs 542
+to 117, solid-js 271 to 41, type-fest 7 to 0. `TR055` reaches 330 symbols and is the only finding
+that moved corpus-wide. Tiers 490/1525/783/193 to 479/1540/783/193.
+
+So D5's default survives where it earns its place and yields where it does not. `D5a` in
+`generator-type-mapping.md` carries the measured rule.
+
+**Left for wave eight:** a function type inside `U2<...>` appears in the cloudflare golden and
+compiles, but no run-gate check targets a union arm, so that position is emitted and unproven.
