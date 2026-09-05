@@ -137,6 +137,7 @@ module FindingCodes =
             "TR.ReferencedArityUnconfirmed", "TR054"
             "TR.CallbackKeptAsDelegate", "TR055"
             "TR.StringLiteralKeptForOverload", "TR056"
+            "TR.BareNullToObj", "TR057"
             "TP.UnnamedTypeParameter", "TP001"
             "TP.ConstraintDropped", "TP002"
             "TP.GenericFunctionHoisted", "TP003"
@@ -196,6 +197,8 @@ module FindingCodes =
             "SP.CreateNotSynthesized", "SP003"
             "DO.OverloadDropped", "DO001"
             "DO.OverloadsDistinguishedByLiteral", "DO002"
+            "DO.OverloadsDistinguishedByLiteralUnion", "DO003"
+            "DO.ExportFunctionOverloadDropped", "DO004"
             "RA.GenericAliasDropped", "RA001"
             "RA.ReferenceToDroppedAlias", "RA002"
             "RA.GenericWithoutArguments", "RA003"
@@ -446,6 +449,9 @@ type TypeReference =
     /// Wave seven, lane AF. A string-literal parameter type retains its literal, so the overloads
     /// it separates stay distinct.
     | [<Exact>] StringLiteralKeptForOverload of literal: string
+    /// Wave eight, item 5. A bare `x: null` type widened to `obj`; the absence fact it carried
+    /// is not recorded.
+    | [<Widened>] BareNullToObj
 
     interface IFindingKind with
         member this.Message =
@@ -553,6 +559,7 @@ type TypeReference =
             | CallbackKeptAsDelegate reason -> $"callback kept as a delegate: {reason}"
             | StringLiteralKeptForOverload literal ->
                 $"string literal {literal} kept as a literal type; it separates an overload"
+            | BareNullToObj -> "a bare null type widened to obj; absence is not carried"
 
 /// Type parameter binding: `Shape.typeParamsOf`, `aliasTypeParams`, key variables and erasure.
 [<Prefix "TP">]
@@ -887,6 +894,12 @@ type DedupeOverloads =
     /// Wave seven, lane AF. The overload survives deduplication; a literal-typed parameter
     /// separates it from its siblings.
     | [<Exact>] OverloadsDistinguishedByLiteral of parameter: string
+    /// Wave eight, item 2. An overload set where a literal-typed parameter is a synthesized
+    /// union of literals; the literal typing does not separate it from its siblings.
+    | [<Exact>] OverloadsDistinguishedByLiteralUnion of parameter: string
+    /// Wave eight, item 3. An exported function overload dropped; no parameter separates it
+    /// from an earlier one.
+    | [<Widened>] ExportFunctionOverloadDropped
 
     interface IFindingKind with
         member this.Message =
@@ -894,6 +907,10 @@ type DedupeOverloads =
             | OverloadDropped -> "overload dropped: identical to an earlier one after widening"
             | OverloadsDistinguishedByLiteral parameter ->
                 $"overload kept; parameter {parameter} is literal-typed and separates it"
+            | OverloadsDistinguishedByLiteralUnion parameter ->
+                $"overload kept; parameter {parameter} takes synthesized union literals separates it"
+            | ExportFunctionOverloadDropped ->
+                "exported function overload dropped: no parameter separates from earlier one"
 
 /// `repair-arity`.
 [<Prefix("RA", "repair-arity")>]
