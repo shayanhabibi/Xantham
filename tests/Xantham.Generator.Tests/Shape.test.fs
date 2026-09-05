@@ -1916,6 +1916,36 @@ let shapePassTests =
             | [ FsEnum decl ] -> Expect.equal decl.Cases [ "N0", 0; "N1", 1 ] "integer cases"
             | decls -> failtest $"expected one enum, got %A{decls}"
 
+        testCase "classify-literal-unions sanitises a real enum member name outside the identifier shape"
+        <| fun _ ->
+            let union =
+                { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 7; 8 ] }
+
+            let member1 =
+                { stringLiteral 7 "meta" with SymbolName = Some "@cf/meta" }
+
+            let member2 =
+                { stringLiteral 8 "onetwo" with SymbolName = Some "one-two" }
+
+            let model =
+                { Build.shapeModel [ union; member1; member2 ] with
+                    DeclNames = Map.ofList [ 10, "Kind" ] }
+
+            let shaped, findings = Build.runPass LiteralUnions.classifyLiteralUnions model
+
+            match shaped.Decls with
+            | [ FsStringEnum decl ] ->
+                Expect.equal
+                    (decl.Cases |> List.map (fun c -> c.Name, c.CompiledName))
+                    [ "CfMeta", Some "meta"; "OneTwo", Some "onetwo" ]
+                    "the member's own name is the case, sanitised to the identifier shape; its value is the compiled name"
+            | decls -> failtest $"expected one StringEnum, got %A{decls}"
+
+            Expect.equal
+                (findings |> List.map (fun finding -> finding.Key, finding.Symbol))
+                [ "SY005", "Kind" ]
+                "sanitising `@cf/meta` reuses SY005; `one-two` sanitises the same way the dash/underscore/dot scheme already did, and reports nothing"
+
         testCase "shape-callbacks abbreviates a named callback to its delegate" <| fun _ ->
             let timer = Build.facts (Build.typeResponse 60 TypeFlags.Object)
 
