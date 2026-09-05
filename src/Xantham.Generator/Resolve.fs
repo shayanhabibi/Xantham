@@ -138,6 +138,60 @@ let resolveExportTypes: Pass<ResolveModel> =
                 }
     }
 
+/// The source-file blobs one connection has already been asked for, by snapshot, project and
+/// path - the scope a node handle is meaningful in. Held against the connection itself, so a
+/// finished generation drops its blobs with the compiler process that served them.
+let private blobs =
+    System.Runtime.CompilerServices.ConditionalWeakTable<
+        TscMailbox,
+        System.Collections.Concurrent.ConcurrentDictionary<
+            struct (int * string * string),
+            Lazy<System.Threading.Tasks.Task<Ast.SourceFile voption>>
+         >
+     >()
+
+let private sourceFile (ctx: Context) (path: string) : Async<Ast.SourceFile voption> =
+    blobs
+        .GetOrCreateValue(ctx.Session.Transport)
+        .GetOrAdd(
+            struct (ctx.Session.Snapshot, ctx.Session.Project, path),
+            fun (struct (_, _, path)) ->
+                lazy
+                    (ctx.Session.getSourceFile (DocumentIdentifier.FileName path)
+                     |> Async.StartAsTask)
+        )
+        .Value
+    |> Async.AwaitTask
+
+/// Whether a parameter declares the `?` that makes it omittable.
+///
+/// For a parameter the marker lives on the declaration node alone, reached through the symbol's
+/// handle. `SymbolFlags.Optional` states it for a property, and `CheckFlags.OptionalParameter`
+/// for the synthetic parameters of a combined signature.
+let private declaresQuestionToken (ctx: Context) (parameter: SymbolResponse) : Async<bool> =
+    async {
+        match
+            parameter.Declarations
+            |> ValueOption.defaultValue [||]
+            |> Array.tryHead
+            |> Option.bind (NodeHandle.parse >> ValueOption.toOption)
+        with
+        | None -> return false
+        | Some handle ->
+            let! file = sourceFile ctx handle.Path
+
+            return
+                match file with
+                | ValueNone -> false
+                | ValueSome file ->
+                    let node = Node.ofIndex<AnyNode> file handle.Index
+
+                    node.Kind = SyntaxKind.Parameter
+                    && Node.retag<AnyNode, ParameterDeclaration> node
+                       |> ParameterDeclaration.questionToken
+                       |> ValueOption.isSome
+    }
+
 /// The structure of a type that has members: properties, call and construct signatures, index
 /// signatures, each with the responses it discovered. Object types and the intersections of
 /// them share it, because the checker answers the same questions about both: the properties of
@@ -147,7 +201,9 @@ let private deriveStructure (ctx: Context) (ty: TypeResponse) =
         let! properties = ctx.Session.getPropertiesOfType ty.Id
         let properties = properties |> ValueOption.defaultValue [||]
 
-        let resolveMember readOnlyRelevant (property: SymbolResponse) =
+        // `readonly` is a property's fact and the `?` token a parameter's; each is asked for at
+        // the position that carries it.
+        let resolveMember isProperty (property: SymbolResponse) =
             async {
                 let! propertyType = ctx.Session.getTypeOfSymbol property.Id
                 let! docs = ctx.Session.getDocumentationComment property.Id
@@ -156,10 +212,16 @@ let private deriveStructure (ctx: Context) (ty: TypeResponse) =
                 // `CheckFlags.Readonly` only marks transient symbols; a declared
                 // `readonly` modifier is the checker's to see, so ask it.
                 let! readOnly =
-                    if readOnlyRelevant then
+                    if isProperty then
                         ctx.Session.isReadonlySymbol property.Id
                     else
                         async.Return false
+
+                let! questionToken =
+                    if isProperty then
+                        async.Return false
+                    else
+                        declaresQuestionToken ctx property
 
                 return
                     {
@@ -169,6 +231,7 @@ let private deriveStructure (ctx: Context) (ty: TypeResponse) =
                         Optional =
                             property.Flags.HasFlag SymbolFlags.Optional
                             || property.CheckFlags.HasFlag CheckFlags.OptionalParameter
+                            || questionToken
                         ReadOnly = readOnly
                         TypeId = propertyType.Id
                     },

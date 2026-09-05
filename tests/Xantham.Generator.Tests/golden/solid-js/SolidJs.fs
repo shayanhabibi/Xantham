@@ -1444,7 +1444,7 @@ type Exports =
     /// <remarks>@returns The context that contains the Provider Component and that can be used with <c>useContext</c></remarks>
     /// <remarks>@description https://docs.solidjs.com/reference/component-apis/create-context</remarks>
     [<Import("createContext", "solid-js")>]
-    static member createContext<'T> (defaultValue: unit, ?options: EffectOptions) : Context<'T option> = jsNative
+    static member createContext<'T> (?defaultValue: unit, ?options: EffectOptions) : Context<'T option> = jsNative
     /// <summary>
     /// Creates a Context to handle a state scoped for the children of a component
     /// <code lang="typescript">

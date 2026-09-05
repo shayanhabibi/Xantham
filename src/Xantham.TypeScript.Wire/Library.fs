@@ -1208,3 +1208,55 @@ module Ast =
     /// The name this file is addressed by when it is virtual.
     let virtualFileName (file: SourceFile) =
         sourceFileString file SourceFileRecord.VirtualFileName
+
+/// <summary>
+/// How a checker response names a syntax node: <c>SymbolResponse.Declarations</c>,
+/// <c>SignatureResponse.Declaration</c> and the <c>location</c> argument of every request that
+/// takes one all carry this string. It is <c>RemoteNode.id</c> in the typescript package,
+/// spelled <c>index.kind.path</c>.
+/// </summary>
+/// <remarks>
+/// A handle identifies a node within the program that produced it - the same snapshot and the
+/// same project. Against any other program it points at a different node or at none.
+/// </remarks>
+[<Struct>]
+type NodeHandle =
+    {
+        /// Index of the node's record in its file's blob, as `Node.ofIndex` takes it.
+        Index: int
+        /// The kind the response claims. The blob is the authority; narrow with a view.
+        Kind: SyntaxKind
+        /// Canonical path of the file, as `Ast.path` spells it.
+        Path: string
+    }
+
+[<RequireQualifiedAccess>]
+module NodeHandle =
+
+    /// <summary>
+    /// Decodes a handle. <c>ValueNone</c> where the string is not one.
+    /// </summary>
+    /// <remarks>
+    /// A path carries dots and, on Windows, a drive colon, so only the first two dots separate
+    /// fields; everything after the second is the path.
+    /// </remarks>
+    let parse (handle: string) : NodeHandle voption =
+        if String.IsNullOrEmpty handle then
+            ValueNone
+        else
+            match handle.Split([| '.' |], 3) with
+            | [| index; kind; path |] ->
+                match Int32.TryParse index, UInt32.TryParse kind with
+                | (true, index), (true, kind) when path.Length > 0 ->
+                    ValueSome
+                        {
+                            Index = index
+                            Kind = LanguagePrimitives.EnumOfValue<uint32, SyntaxKind> kind
+                            Path = path
+                        }
+                | _ -> ValueNone
+            | _ -> ValueNone
+
+    /// The string form, for the `location` argument of a checker request.
+    let format (handle: NodeHandle) : string =
+        $"{handle.Index}.{uint32 handle.Kind}.{handle.Path}"

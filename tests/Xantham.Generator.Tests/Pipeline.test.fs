@@ -1965,15 +1965,14 @@ let pipelineTests =
 
                           Expect.equal (absenceAt rendered "fireAndForget") (false, []) "a void return, again"
 
-                          // The wire does not carry the `?` marker on a parameter symbol, so a
-                          // parameter's optionality is inferred back from its hoisted type. The
-                          // two parameter spellings are therefore separated by their hoist and
-                          // nothing else, and `x?: T` is indistinguishable from `x: T | undefined`
-                          // here in a way it is not on a property.
+                          // Wave seven, lane AG: the `?` marker reads the same at a parameter as
+                          // at a property. The checker leaves it off the parameter symbol, so the
+                          // resolve tier follows the symbol's declaration handle into the blob and
+                          // reads the token there.
                           Expect.equal
                               (absenceAt rendered "withOptional(fallback)")
-                              (false, [ "fromUndefined" ])
-                              "an optional parameter reports no ? marker"
+                              (true, [ "fromUndefined" ])
+                              "an optional parameter reports its ? marker beside its hoist"
 
                           Expect.equal
                               (absenceAt rendered "withNullable(fallback)")
@@ -2375,6 +2374,73 @@ let pipelineTests =
                               (symbolsOf "TR006")
                               "Solo.tag(name)"
                               "the literal that separates nothing is still reported as widened" ])
+
+        // Wave seven lane AG's fixture. A parameter's `?` is a syntactic fact the checker keeps
+        // off the symbol, so it is read from the declaration node. The three spellings of
+        // presence reach two F# forms, and the pair of findings is what separates them.
+        yield!
+            fixtureTests
+                "optional-param-lab"
+                (handFixture "optional-param-lab")
+                GeneratorConfig.Default
+                (fun package ->
+                    [ testCase "the ? marker reaches the model, and reaches it alone" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                          let symbolsOf key =
+                              rendered.Findings
+                              |> List.filter (fun finding -> finding.Key = key)
+                              |> List.map _.Symbol
+                              |> List.distinct
+                              |> List.sort
+
+                          Expect.equal
+                              (symbolsOf "MB001")
+                              [ "Station.marked(b)"; "marked(b)"; "markedAny(b)" ]
+                              "every ? in the fixture, at a bare function and at a method"
+
+                          Expect.equal
+                              (symbolsOf "MB006")
+                              [ "Station.unioned(b)"; "unioned(b)" ]
+                              "and the parameters whose type admits undefined without one"
+
+                      testCase "a required parameter carries neither finding" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                          rendered.Findings
+                          |> List.filter (fun finding ->
+                              finding.Symbol.EndsWith "required(b)"
+                              && (finding.Key = "MB001" || finding.Key = "MB006"))
+                          |> Expect.isEmpty
+                          <| "the negative both spellings are read against"
+
+                      testCase "the two optional spellings render as one F# form" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains
+                              source
+                              "abstract marked: a: string * ?b: string -> string"
+                              "the marker reads as an F# optional parameter"
+
+                          Expect.stringContains
+                              source
+                              "abstract unioned: a: string * ?b: string -> string"
+                              "and so does a declared type admitting undefined"
+
+                          Expect.stringContains
+                              source
+                              "abstract required: a: string * b: string -> string"
+                              "a required parameter stays required"
+
+                      testCase "a ? over a type that absorbs undefined is optional on the marker alone" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains
+                              source
+                              "markedAny (a: string, ?b: obj)"
+                              "`any` hoists nothing, so before the marker was read this parameter was required" ])
 
         yield! fixtureTests "animejs" (npmFixture "animejs") GeneratorConfig.Default (fun _ -> [])
 

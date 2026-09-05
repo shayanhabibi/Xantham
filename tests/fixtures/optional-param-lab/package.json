@@ -1,0 +1,6 @@
+{
+    "name": "optional-param-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "description": "Hand-authored fixture for the three ways a parameter states its presence: a ? marker, a declared type admitting undefined, and neither. F# writes the first two the same way, so MB001 and MB006 are what keep them apart. Tracked in git, no npm install."
+}

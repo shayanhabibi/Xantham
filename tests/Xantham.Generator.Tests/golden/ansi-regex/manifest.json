@@ -11,8 +11,8 @@
   "passes": [
     {
       "pass": "SE - shape-exports",
-      "total": 2,
-      "ergonomic": 1,
+      "total": 3,
+      "ergonomic": 2,
       "widened": 1
     },
     {

@@ -11,8 +11,8 @@
   "passes": [
     {
       "pass": "SI - shape-interfaces",
-      "total": 4,
-      "ergonomic": 4
+      "total": 5,
+      "ergonomic": 5
     },
     {
       "pass": "SA - shape-aliases",

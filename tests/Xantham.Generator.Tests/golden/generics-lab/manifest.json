@@ -27,8 +27,8 @@
     },
     {
       "pass": "SE - shape-exports",
-      "total": 1,
-      "ergonomic": 1
+      "total": 2,
+      "ergonomic": 2
     },
     {
       "pass": "SP - synthesize-paramobjects",
