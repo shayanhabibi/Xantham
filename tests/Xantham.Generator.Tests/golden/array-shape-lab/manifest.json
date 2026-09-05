@@ -5,15 +5,10 @@
   "counts": {
     "exact": 4,
     "ergonomic": 1,
-    "widened": 5,
+    "widened": 4,
     "escape": 0
   },
   "passes": [
-    {
-      "pass": "RT - resolve-type-table",
-      "total": 1,
-      "widened": 1
-    },
     {
       "pass": "SI - shape-interfaces",
       "total": 1,

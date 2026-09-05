@@ -157,7 +157,7 @@ reference actually needs:
 | fixture | first `TR002` fires at `FollowDepth` | renderer's deepest reach (generation) | margin to `FollowDepth 12` |
 | --- | --- | --- | --- |
 | `@cloudflare/workers-types` | 10 | 11 | **1** |
-| `solid-js` | 8 | 9 | 4 |
+| `solid-js` | 8 | 9 | 3 |
 | `animejs` | 6 | 7 | 5 |
 | `type-fest` | 5 | 6 | 6 |
 
@@ -175,7 +175,7 @@ container. It is one site.
 
 The margin is **1 generation** for `@cloudflare/workers-types` at the committed `FollowDepth 12` -
 not the 6-generation margin the dispatch brief hypothesized from `type-fest`'s figure. `type-fest`,
-`animejs` and `solid-js` all carry margins of 4-6 generations; `@cloudflare/workers-types` is the
+`animejs` and `solid-js` carry margins of 3-6 generations; `@cloudflare/workers-types` is the
 outlier, and it is the fixture the corpus already flags as the stranding-heaviest one. The margin
 is thin because of one deeply-nested AI response type, not because the frontier's steady-state
 stranding (lane AU's finding) is close to being touched - the 1,815 steady-state stranded ids
@@ -196,3 +196,86 @@ renderer's real use either.
   currently unrealized.
 - No code changed under `Shape/`, `build.fsx`, or `README.md`. `Resolve.fs`'s only durable change
   is the restored `FollowDepth = 12` (the edits made while sweeping were reverted before commit).
+
+## Lane AX: `FollowDepth` raised to 20
+
+Lane AV measured the margin and left the value at 12. This lane picks the replacement by
+measurement and commits it.
+
+### The `solid-js` row was wrong in the fourth column
+
+Re-measured with the same method: `solid-js` carries `TR002 = 1` at `FollowDepth 8` and
+`TR002 = 0` at `FollowDepth 9`. First fire is 8 and the renderer's deepest reach is 9, both as
+lane AV recorded. The margin to `FollowDepth 12` is therefore 3, and the table above now says 3.
+The reach figure was right; the arithmetic in the margin column was not.
+
+`@cloudflare/workers-types` re-measured at the same two rungs to anchor the value the whole
+decision rests on: `TR002 = 1` at `FollowDepth 10`, `TR002 = 0` at `FollowDepth 11`. Reach 11
+confirmed.
+
+### Candidates
+
+Each row is a full `generator e2e` regenerate-and-check at that value, corpus-wide:
+
+| `FollowDepth` | wall-clock | tiers | `RT001` | `TR002` | `TR003` | cloudflare frontier |
+| --- | --- | --- | --- | --- | --- | --- |
+| 12 (baseline) | 185s | 495 / 1552 / 786 / 193 | 7 | 0 | 0 | 1,815 |
+| 16 | 188s | 495 / 1552 / 782 / 193 | 3 | 0 | 0 | 1,848 |
+| 19 | 160s | 495 / 1552 / 782 / 193 | 3 | 0 | 0 | 1,848 |
+| 20 | 249s | 495 / 1552 / 782 / 193 | 3 | 0 | 0 | 1,848 |
+| 24 | 261s | 495 / 1552 / 782 / 193 | 3 | 0 | 0 | 1,848 |
+
+Wall-clock is noisy across these runs and does not separate the candidates. The corpus output is
+identical at 16, 19, 20 and 24: same tier counts, same `RT001` count, same frontier sizes.
+
+### The renderer's reach is fixed, not a function of the cutoff
+
+The open question was whether opening the cutoff lets the renderer reach deeper, so that a margin
+computed at 12 evaporates at 20. It does not. Across 12 → 16 → 19 → 20 → 24 **no generated
+binding file changes** - the golden diff is confined to `manifest.json` and `symbols.jsonl`, and
+within those to the `RT001` payload and the tier row it contributes to. The rendered surface is
+byte-identical, so the deepest generation it references is the same at every value tested, and
+`@cloudflare/workers-types`'s reach of 11 holds at 20. The margin at the committed value is **9
+generations**.
+
+### Frontier convergence
+
+`@cloudflare/workers-types` grows from 1,815 stranded ids at cutoff 12 to 1,848 at 16 and stays at
+1,848 through 24: the walk reaches a fixed frontier size by generation 16 and holds it. Four
+fixtures close entirely once the cutoff passes 12 - `array-shape-lab`, `setter-lab`, `solid-js`
+and `type-fest` each exhaust their frontier and emit no `RT001` at all, which is why the count
+falls from 7 to 3. The three that remain are `@cloudflare/workers-types` (1,848), `chain-lab`
+(11) and `hoist-conditional-lab` (14); those two labs declare deliberately unbounded generic
+chains, so their frontier is a fixed steady state at any cutoff.
+
+### Lab reaches
+
+The four labs that cross the cutoff, swept down to 0, give the reach column that matters for the
+tightest-fixture claim:
+
+| lab | first `TR002` fires at | reach | margin at `FollowDepth 20` |
+| --- | --- | --- | --- |
+| `chain-lab` | 2 | 3 | 17 |
+| `hoist-conditional-lab` | 2 | 3 | 17 |
+| `setter-lab` | 3 | 4 | 16 |
+| `array-shape-lab` | 0 | 1 | 19 |
+
+No lab approaches the cutoff. `@cloudflare/workers-types` at reach 11 is the tightest fixture in
+the corpus by six generations.
+
+`TR003` fired nowhere at any value from 0 to 24, on any fixture, which extends lane AV's sweep
+upward without changing its reading.
+
+### Value chosen
+
+**20.** It is the smallest of the briefed candidates that clears the eight-generation floor
+(20 − 11 = 9). 16 gives 5 and fails the floor. 19 gives exactly 8 and measured no cheaper than 20
+within run-to-run noise, so 20 takes the spare generation. 24 buys four more generations for
+output identical to 20's.
+
+### What moved
+
+`RT001` 7 → 3 and `widened` 786 → 782. The two are the same movement: `RT.FrontierNotResolved` is
+a `[<Widened>]` case, and the four fixtures whose frontier now closes each drop the one finding
+they carried. `exact`, `ergonomic` and `escape` are unchanged, `TR002` and `TR003` are still 0
+corpus-wide, and the run gate still reports 257 checks.

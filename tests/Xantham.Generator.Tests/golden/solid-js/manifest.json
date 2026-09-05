@@ -5,15 +5,10 @@
   "counts": {
     "exact": 19,
     "ergonomic": 64,
-    "widened": 71,
+    "widened": 70,
     "escape": 19
   },
   "passes": [
-    {
-      "pass": "RT - resolve-type-table",
-      "total": 1,
-      "widened": 1
-    },
     {
       "pass": "SY - synthesize-anonymous",
       "total": 54,

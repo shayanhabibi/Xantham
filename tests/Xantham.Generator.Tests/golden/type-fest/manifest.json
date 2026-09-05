@@ -5,7 +5,7 @@
   "counts": {
     "exact": 25,
     "ergonomic": 71,
-    "widened": 204,
+    "widened": 203,
     "escape": 2
   },
   "passes": [
@@ -13,11 +13,6 @@
       "pass": "RE - resolve-export-types",
       "total": 2,
       "escape": 2
-    },
-    {
-      "pass": "RT - resolve-type-table",
-      "total": 1,
-      "widened": 1
     },
     {
       "pass": "SY - synthesize-anonymous",

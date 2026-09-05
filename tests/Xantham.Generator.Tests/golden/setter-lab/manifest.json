@@ -5,15 +5,10 @@
   "counts": {
     "exact": 0,
     "ergonomic": 0,
-    "widened": 5,
+    "widened": 4,
     "escape": 1
   },
   "passes": [
-    {
-      "pass": "RT - resolve-type-table",
-      "total": 1,
-      "widened": 1
-    },
     {
       "pass": "shape-callbacks",
       "total": 21,

@@ -56,8 +56,12 @@ let private channel (trace: Trace option) (name: string) (types: TypeResponse li
 /// Generations the breadth-first walk follows before recording the rest as deliberately not
 /// followed. The frontier doubles as the cycle boundary - ids already derived are never
 /// re-entered - so this bounds runaway utility-type expansion, not recursion.
+///
+/// This value carries nine generations of headroom. The corpus's deepest rendered type
+/// reference sits at generation 11, in `@cloudflare/workers-types`; a rendered reference past
+/// the cutoff widens to `obj` and reports `TR002`.
 [<Literal>]
-let private FollowDepth = 12
+let private FollowDepth = 20
 
 let private hasAny (mask: SymbolFlags) (flags: SymbolFlags) = uint32 (flags &&& mask) <> 0u
 
