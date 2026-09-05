@@ -35,6 +35,18 @@ let fsName (fallback: string) (export: HarvestedExport) =
     else
         export.Symbol.Name
 
+/// The name a shape reached at `segment` of `owner` declares under: `Widget` and `Options` give
+/// `Widget.Options`, which `render-source` writes as `type Options` inside `module Widget`. The
+/// result carries a dot only where both ends take the identifier shape a module opens under;
+/// a JavaScript key like `beta channel` concatenates and stays one backticked name.
+let nestUnder (owner: string) (segment: string) =
+    let leaf = owner.Split '.' |> Array.last
+
+    if Naming.nestable leaf && Naming.nestable segment then
+        $"{owner}.{segment}"
+    else
+        owner + segment
+
 // ---------------------------------------------------------------------------------------------
 // Facts the passes repeatedly ask of a type.
 // ---------------------------------------------------------------------------------------------

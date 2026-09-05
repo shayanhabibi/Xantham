@@ -15,6 +15,11 @@
       "exact": 1
     },
     {
+      "pass": "SY - synthesize-anonymous",
+      "total": 1,
+      "ergonomic": 1
+    },
+    {
       "pass": "SI - shape-interfaces",
       "total": 4,
       "ergonomic": 4

@@ -10,6 +10,11 @@
   },
   "passes": [
     {
+      "pass": "SY - synthesize-anonymous",
+      "total": 1,
+      "ergonomic": 1
+    },
+    {
       "pass": "LU - classify-literal-unions",
       "total": 2,
       "exact": 2

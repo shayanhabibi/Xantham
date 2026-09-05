@@ -703,11 +703,11 @@ let pipelineTests =
                     // hoists the parameter object to a declaration; that declaration binds
                     // nothing of its own, so it is declared over the free variables its members
                     // mention and the parameter position applies them back.
-                    Expect.stringContains source "type EachProps<'T, 'U> =" "the hoisted declaration is generic over what it reads"
+                    Expect.stringContains source "    type Props<'T, 'U> =" "the hoisted declaration is generic over what it reads"
                     Expect.stringContains source "abstract items: 'T[] with get, set" "a member reads the outer variable"
                     Expect.stringContains source "abstract render: Func<'T, float, 'U> with get, set" "so does a callback member"
-                    Expect.stringContains source "static member each<'T, 'U> (props: EachProps<'T, 'U>) : 'U[] = jsNative" "the use applies them back"
-                    Expect.stringContains source "type Handle<'T> = Func<'T> * HandleItem<'T>" "the same inside a generic alias"
+                    Expect.stringContains source "static member each<'T, 'U> (props: Each.Props<'T, 'U>) : 'U[] = jsNative" "the use applies them back"
+                    Expect.stringContains source "type Handle<'T> = Func<'T> * Handle.Item<'T>" "the same inside a generic alias"
 
                   testCase "nothing in the lab widens a type parameter out of scope" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -735,9 +735,9 @@ let pipelineTests =
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                     let source = rendered.Files |> List.head |> snd
 
-                    Expect.stringContains source "type LabelTarget =" "hoisted like an anonymous object"
+                    Expect.stringContains source "    type Target =" "hoisted like an anonymous object"
                     Expect.stringContains source "abstract id: float with get, set" "carrying the anonymous operand's member"
-                    Expect.stringContains source "static member label (target: LabelTarget) : unit" "and applied at the parameter"
+                    Expect.stringContains source "static member label (target: Label.Target) : unit" "and applied at the parameter"
 
                   testCase "a generic intersection alias binds its parameter and reads it" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -903,7 +903,7 @@ let pipelineTests =
                     Expect.equal (inheritsOf source "Labelled") [ "Box<'T>" ] "the parameter travels"
                     Expect.equal (inheritsOf source "Tagged") [ "Box<string>" ] "so does a fixed argument"
                     Expect.equal (inheritsOf source "Leaf") [ "Node" ] "a class base is the instance side's base"
-                    Expect.equal (inheritsOf source "Slim") [ "SlimBase" ] "a utility-type base is what it synthesized"
+                    Expect.equal (inheritsOf source "Slim") [ "Slim.Base" ] "a utility-type base is what it synthesized"
 
                   testCase "a base this run does not declare stays flattened, and says which case it is" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -1531,7 +1531,7 @@ let pipelineTests =
 
                       Expect.equal
                           (keyed "SY001" |> List.map _.Symbol)
-                          [ "NodeExtensionsToVarResult"; "NodeToVarResult"; "VarNodeToVarResult"; "Seed" ]
+                          [ "NodeExtensions.ToVar.Result"; "Node.ToVar.Result"; "VarNode.ToVar.Result"; "Seed" ]
                           "one SY001 per site, named for the declaration that would have been minted"
 
                       // The fallback exists for an application whose arguments cannot be
@@ -1598,9 +1598,9 @@ let pipelineTests =
                       // nothing to be written with and widens instead.
                       Expect.equal
                           (keyed "SY001" |> List.map _.Symbol)
-                          [ "DirectExtensionsToVarResult"
-                            "DirectNodeToVarResult"
-                            "DirectVarNodeToVarResult"
+                          [ "DirectExtensions.ToVar.Result"
+                            "DirectNode.ToVar.Result"
+                            "DirectVarNode.ToVar.Result"
                             "DirectSeed" ]
                           "the control writes an application at every site"
 
@@ -1981,6 +1981,85 @@ let pipelineTests =
                               (absenceAt rendered "Present.always")
                               (false, [])
                               "a present member carries no absence fact" ])
+
+        // Wave six lane AD's fixture. An anonymous shape is named for the position it is
+        // reached through, and that name is a module path rather than a concatenation.
+        yield!
+            fixtureTests
+                "nested-name-lab"
+                (handFixture "nested-name-lab")
+                GeneratorConfig.Default
+                (fun package ->
+                    [ testCase "two owners of one member name declare two nested shapes" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains source "module Widget =" "the first owner opens a module"
+                          Expect.stringContains source "module Gadget =" "and so does the second"
+
+                          Expect.isFalse
+                              (source.Contains "WidgetOptions")
+                              "neither shape takes its owner's name as a prefix"
+
+                          Expect.isFalse (source.Contains "Options2") "and neither takes a numeric suffix"
+
+                      testCase "a shape two positions deep nests two modules deep" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains source "    module Options =" "the second level opens inside the first"
+                          Expect.stringContains source "abstract retry: Widget.Options.Retry" "and is referred to whole"
+
+                      testCase "a nested shape refers to another owner's nested shape" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains
+                              source
+                              "abstract from: Widget.Options"
+                              "a reference across two nests is written from the module root"
+
+                      testCase "a key outside the identifier shape concatenates instead" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains source "``RegistryBeta channel``" "the shape keeps one flat name"
+                          Expect.isFalse (source.Contains "module Registry") "and its owner opens no module"
+
+                      testCase "every nested name is reported under SY004" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                          let nested =
+                              rendered.Findings
+                              |> List.filter (fun finding -> finding.Key = "SY004")
+                              |> List.map _.Symbol
+                              |> List.sort
+
+                          Expect.contains nested "Widget.Options" "the first owner's shape"
+                          Expect.contains nested "Widget.Options.Retry" "the shape below it"
+                          Expect.contains nested "Gadget.Options" "and the second owner's"
+
+                          Expect.isFalse
+                              (nested |> List.exists (fun symbol -> not (symbol.Contains ".")))
+                              "and nothing flat is reported as nested"
+
+                      testCase "a literal union two nests deep is a StringEnum there" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains
+                              source
+                              "abstract backoff: Widget.Options.Retry.Backoff"
+                              "a StringEnum reached through three modules"
+
+                      testCase "two shapes reaching one path keep the numeric suffix" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          // A union's arms share their owner's path, so the second arm to need a
+                          // name has no position of its own to take. This is the residue the
+                          // nesting scheme leaves, and it is deliberate rather than missed.
+                          Expect.stringContains source "Either2" "the second arm disambiguates by number" ])
 
         yield! fixtureTests "animejs" (npmFixture "animejs") GeneratorConfig.Default (fun _ -> [])
 
@@ -2441,14 +2520,27 @@ let pipelineTests =
                         |> List.find (fun (name, _) -> name.EndsWith ".fs")
                         |> snd
 
-                    /// The names a rendered source declares, in emission order. Read off the
-                    /// source: a second declaration of one TypeScript type is only real if it
-                    /// survives to the file the compile gate builds.
+                    /// The names a rendered source declares, in emission order, each qualified by
+                    /// the modules it is written inside. Read off the source: a second declaration
+                    /// of one TypeScript type is only real if it survives to the file the compile
+                    /// gate builds.
                     let declarationsIn (rendered: string) =
+                        let scope = ref []
+
                         rendered.Split('\n')
                         |> Array.choose (fun line ->
-                            if line.StartsWith "type " then
-                                Some(line.Substring(5).Split([| ' '; '<'; '\r' |]).[0])
+                            let body = line.TrimStart ' '
+                            let depth = (line.Length - body.Length) / 4
+
+                            if body.StartsWith "module " && body.TrimEnd('\r').EndsWith "=" then
+                                scope.Value <-
+                                    List.truncate depth scope.Value
+                                    @ [ body.Substring(7).Split(' ').[0] ]
+
+                                None
+                            elif body.StartsWith "type " then
+                                let name = body.Substring(5).Split([| ' '; '<'; '\r' |]).[0]
+                                Some(String.concat "." (List.truncate depth scope.Value @ [ name ]))
                             else
                                 None)
                         |> List.ofArray
@@ -2463,7 +2555,7 @@ let pipelineTests =
 
                           Expect.equal
                               (declarationsIn rendered)
-                              [ "Panel"; "PanelPair"; "DraftPanel"; "Exports" ]
+                              [ "Panel"; "PanelPair"; "Draft.Panel"; "Exports" ]
                               "and the dependency's shape is not re-derived under a second name"
 
                       testCase "the entry package's own alias over an object literal is declared here" <| fun _ ->

@@ -54,12 +54,13 @@ type Timer =
     [<ParamObject; Emit("$0")>]
     static member Create (progress: float, speed: float, play: Func<Timer>, seek: Func<float, bool option, Timer>, tween: Func<float[], Timer>) : Timer = jsNative
 
-[<Interface>]
-type ConfigureSettings =
-    abstract fps: float with get, set
-    abstract muted: bool option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (fps: float, ?muted: bool) : ConfigureSettings = jsNative
+module Configure =
+    [<Interface>]
+    type Settings =
+        abstract fps: float with get, set
+        abstract muted: bool option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (fps: float, ?muted: bool) : Settings = jsNative
 
 /// <summary>
 /// A homogeneous tuple (D7).
@@ -208,7 +209,7 @@ type Exports =
     /// A parameter-position object literal.
     /// </summary>
     [<Import("configure", "phase-b-lab")>]
-    static member configure (settings: ConfigureSettings) : unit = jsNative
+    static member configure (settings: Configure.Settings) : unit = jsNative
     /// <summary>
     /// Reads a discriminated union off its tag - the run gate's proof the erasure agrees with JavaScript.
     /// </summary>

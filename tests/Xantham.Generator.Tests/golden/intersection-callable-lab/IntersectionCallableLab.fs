@@ -25,15 +25,16 @@ type Utils =
 /// </summary>
 [<Interface>]
 type Timers =
-    abstract schedule: TimersSchedule with get, set
+    abstract schedule: Timers.Schedule with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (schedule: TimersSchedule) : Timers = jsNative
+    static member Create (schedule: Timers.Schedule) : Timers = jsNative
 
-[<Interface>]
-type TimersSchedule =
-    abstract cancel: unit -> unit
-    [<ParamObject; Emit("$0")>]
-    static member Create (cancel: Action) : TimersSchedule = jsNative
+module Timers =
+    [<Interface>]
+    type Schedule =
+        abstract cancel: unit -> unit
+        [<ParamObject; Emit("$0")>]
+        static member Create (cancel: Action) : Schedule = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

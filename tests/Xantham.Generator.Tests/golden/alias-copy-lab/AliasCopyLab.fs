@@ -30,13 +30,14 @@ type PanelPair =
     [<ParamObject; Emit("$0")>]
     static member Create (left: Panel, right: Panel) : PanelPair = jsNative
 
-[<Interface>]
-type DraftPanel =
-    abstract widget: AliasCopyDepLab.Widget option with get, set
-    abstract pair: AliasCopyDepLab.WidgetPair option with get, set
-    abstract format: AliasCopyDepLab.Formatter option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (?widget: AliasCopyDepLab.Widget, ?pair: AliasCopyDepLab.WidgetPair, ?format: AliasCopyDepLab.Formatter) : DraftPanel = jsNative
+module Draft =
+    [<Interface>]
+    type Panel =
+        abstract widget: AliasCopyDepLab.Widget option with get, set
+        abstract pair: AliasCopyDepLab.WidgetPair option with get, set
+        abstract format: AliasCopyDepLab.Formatter option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?widget: AliasCopyDepLab.Widget, ?pair: AliasCopyDepLab.WidgetPair, ?format: AliasCopyDepLab.Formatter) : Panel = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
@@ -45,4 +46,4 @@ type Exports =
     /// A mapped type over the entry package's own operand, resolved by content (D6).
     /// </summary>
     [<Import("draft", "alias-copy-lab")>]
-    static member draft (panel: DraftPanel) : unit = jsNative
+    static member draft (panel: Draft.Panel) : unit = jsNative

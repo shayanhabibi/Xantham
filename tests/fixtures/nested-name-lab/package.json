@@ -1,0 +1,6 @@
+{
+    "name": "nested-name-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "description": "Hand-authored fixture pinning the naming of anonymous inline shapes as nested modules under the declaration that owns them (docs/plans/generator-type-mapping.md 4.4, wave six lane AD) - two owners with the same member name, two levels of nesting, cross-references between nests, the shapes that keep a numeric suffix because no owner nests them, and a key that names a type but cannot open a module. Tracked in git, no npm install, so the goldens pin every idiom under the live compiler."
+}

@@ -52,13 +52,14 @@ type Extended =
     [<ParamObject; Emit("$0")>]
     static member Create (name: string, extra: bool) : Extended = jsNative
 
-[<Interface>]
-type LabelTarget =
-    inherit Named
-    abstract name: string with get, set
-    abstract id: float with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (name: string, id: float) : LabelTarget = jsNative
+module Label =
+    [<Interface>]
+    type Target =
+        inherit Named
+        abstract name: string with get, set
+        abstract id: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string, id: float) : Target = jsNative
 
 /// <summary>
 /// A generic intersection alias: <c>T</c> is bound on the alias and a member reads it.
@@ -133,7 +134,7 @@ type Exports =
     /// An intersection reached only at a parameter position: hoisted and named by path.
     /// </summary>
     [<Import("label", "intersection-lab")>]
-    static member label (target: LabelTarget) : unit = jsNative
+    static member label (target: Label.Target) : unit = jsNative
     /// <summary>
     /// Not flattened: a type-parameter operand has no members to read, so it widens loudly.
     /// </summary>

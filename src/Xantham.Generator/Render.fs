@@ -721,6 +721,62 @@ let declName =
     | FsPhantom decl -> Some decl.Name
     | FsExports _ -> None
 
+/// The modules a declaration is written inside, and the name it takes there. A path-derived
+/// name is dotted (`Widget.Options`), so the declaration goes in `module Widget` under the leaf.
+let private nestingOf (name: string) =
+    let segments = name.Split '.'
+    List.ofArray segments[.. segments.Length - 2], segments[segments.Length - 1]
+
+/// The declaration under the name it takes inside the modules it nests in.
+let private underLeaf (name: string) =
+    function
+    | FsInterface decl -> FsInterface { decl with Name = name }
+    | FsStringEnum decl -> FsStringEnum { decl with Name = name }
+    | FsTaggedUnion decl -> FsTaggedUnion { decl with Name = name }
+    | FsEnum decl -> FsEnum { decl with Name = name }
+    | FsAbbrev decl -> FsAbbrev { decl with Name = name }
+    | FsMeasure decl -> FsMeasure { decl with Name = name }
+    | FsPhantom decl -> FsPhantom { decl with Name = name }
+    | FsExports members -> FsExports members
+
+let private indented (indent: string) (line: string) = if line = "" then "" else indent + line
+
+/// One module level's blocks of source text. A declaration with no modules left to enter is
+/// rendered here; a nested module opens at the first declaration that reaches into it and takes
+/// every later one. Order within a level is the order `order-declarations` fixed.
+let rec private nestedBlocks
+    (render: FsDecl -> string list)
+    (indent: string)
+    (entries: (string list * FsDecl) list)
+    : string list list =
+    let opensAt =
+        entries
+        |> List.indexed
+        |> List.fold
+            (fun opened (i, (path, _)) ->
+                match path with
+                | head :: _ when not (Map.containsKey head opened) -> Map.add head i opened
+                | _ -> opened)
+            Map.empty
+
+    entries
+    |> List.indexed
+    |> List.collect (fun (i, (path, decl)) ->
+        match path with
+        | [] -> [ render decl |> List.map (indented indent) ]
+        | head :: _ when Map.find head opensAt = i ->
+            let children =
+                entries
+                |> List.choose (fun (path, nested) ->
+                    match path with
+                    | segment :: rest when segment = head -> Some(rest, nested)
+                    | _ -> None)
+
+            match nestedBlocks render (indent + "    ") children with
+            | [] -> []
+            | first :: rest -> ($"{indent}module {ident head} =" :: first) :: rest
+        | _ -> [])
+
 let private qualifyName (foreign: Map<string, string>) (name: string) =
     Map.tryFind name foreign |> Option.defaultValue name
 
@@ -855,20 +911,29 @@ let private renderModule (group: GroupModule) (foreign: Map<string, string>) =
         else
             group.Decls |> List.map (qualifyDecl foreign)
 
+    let render =
+        function
+        | FsInterface decl ->
+            match decl.Entrypoint with
+            | Some entrypoint -> renderEntrypointClass group.RuntimePackage decl entrypoint
+            | None -> renderInterface group.RuntimePackage decl
+        | FsStringEnum decl -> renderStringEnum decl
+        | FsTaggedUnion decl -> renderTaggedUnion decl
+        | FsEnum decl -> renderEnum decl
+        | FsAbbrev decl -> renderAbbrev decl
+        | FsMeasure decl -> renderMeasure decl
+        | FsPhantom decl -> renderPhantom decl
+        | FsExports members -> renderExports group.RuntimePackage members
+
     let body =
         decls
-        |> List.map (function
-            | FsInterface decl ->
-                match decl.Entrypoint with
-                | Some entrypoint -> renderEntrypointClass group.RuntimePackage decl entrypoint
-                | None -> renderInterface group.RuntimePackage decl
-            | FsStringEnum decl -> renderStringEnum decl
-            | FsTaggedUnion decl -> renderTaggedUnion decl
-            | FsEnum decl -> renderEnum decl
-            | FsAbbrev decl -> renderAbbrev decl
-            | FsMeasure decl -> renderMeasure decl
-            | FsPhantom decl -> renderPhantom decl
-            | FsExports members -> renderExports group.RuntimePackage members)
+        |> List.map (fun decl ->
+            match declName decl with
+            | Some name ->
+                let modules, leaf = nestingOf name
+                modules, underLeaf leaf decl
+            | None -> [], decl)
+        |> nestedBlocks render ""
         |> List.map (String.concat "\n")
         |> String.concat "\n\n"
 
@@ -1002,14 +1067,24 @@ let private ownerOf (findingSymbol: string) =
     | -1 -> findingSymbol
     | cut -> findingSymbol.Substring(0, cut)
 
+/// The declaration a finding is reported under: the longest prefix of the finding's symbol path
+/// that this run declares, with the rest of the path reading as a member within it. Where the
+/// symbol names no declaration - a drop, a table-level finding - the first segment stands.
+let private ownerIn (declared: Set<string>) (findingSymbol: string) =
+    let head =
+        match findingSymbol.IndexOf '(' with
+        | -1 -> findingSymbol
+        | cut -> findingSymbol.Substring(0, cut)
+
+    head.Split '.'
+    |> Array.scan (fun prefix segment -> if prefix = "" then segment else $"{prefix}.{segment}") ""
+    |> Array.filter (fun prefix -> prefix <> "" && Set.contains prefix declared)
+    |> Array.tryLast
+    |> Option.defaultValue (ownerOf findingSymbol)
+
 /// Per-symbol fidelity: every generated declaration in output order, then any finding subjects
 /// that produced no declaration (drops, table-level findings), each with its worst tier.
 let symbolTiers (model: RenderModel) : (string * Tier * Finding list) list =
-    let grouped =
-        model.Findings
-        |> List.groupBy (fun finding -> ownerOf finding.Symbol)
-        |> Map.ofList
-
     let declared =
         model.Decls
         |> List.collect (function
@@ -1022,6 +1097,13 @@ let symbolTiers (model: RenderModel) : (string * Tier * Finding list) list =
             | FsPhantom decl -> [ decl.Name ]
             | FsExports members -> members |> List.map _.Name)
         |> List.distinct
+
+    let declaredSet = Set.ofList declared
+
+    let grouped =
+        model.Findings
+        |> List.groupBy (fun finding -> ownerIn declaredSet finding.Symbol)
+        |> Map.ofList
 
     let row name =
         let findings = grouped |> Map.tryFind name |> Option.defaultValue []

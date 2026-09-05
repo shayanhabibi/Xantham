@@ -1146,7 +1146,7 @@ let shapePassTests =
 
             let named, _ = Build.runPass Anonymous.synthesizeAnonymous model
 
-            Expect.equal (Map.tryFind 40 named.DeclNames) (Some "MakeOptions") "path-derived name"
+            Expect.equal (Map.tryFind 40 named.DeclNames) (Some "Make.Options") "path-derived name"
             Expect.equal (Map.tryFind 41 named.DeclNames) None "the callable itself stays inline"
 
         testCase "synthesize-anonymous prefers a non-exported type's own name" <| fun _ ->

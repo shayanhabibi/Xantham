@@ -168,19 +168,20 @@ type Deferred =
 /// </summary>
 [<Interface>]
 type Slim =
-    inherit SlimBase
+    inherit Slim.Base
     abstract slim: bool with get, set
     abstract name: string option with get, set
     abstract at: float option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (slim: bool, ?name: string, ?at: float) : Slim = jsNative
 
-[<Interface>]
-type SlimBase =
-    abstract name: string option with get, set
-    abstract at: float option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (?name: string, ?at: float) : SlimBase = jsNative
+module Slim =
+    [<Interface>]
+    type Base =
+        abstract name: string option with get, set
+        abstract at: float option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?name: string, ?at: float) : Base = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
