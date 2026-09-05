@@ -4075,22 +4075,42 @@ type KVNamespaceListResult3<'Key, 'Metadata> =
 
 type KVNamespace<'Key> =
     abstract get: key: 'Key * ?options: KVNamespace.Get.Options -> JS.Promise<string option>
-    abstract get: key: 'Key * ``type``: string -> JS.Promise<string option>
-    abstract get: key: 'Key * ?options: KVNamespaceGetOptions<string> -> JS.Promise<string option>
-    abstract get: key: 'Key[] * ``type``: string -> JS.Promise<JS.Map<string, string option>>
+    abstract get: key: 'Key * ``type``: KVNamespace.Text -> JS.Promise<string option>
+    abstract get<'ExpectedValue>: key: 'Key * ``type``: KVNamespace.Json -> JS.Promise<'ExpectedValue option>
+    abstract get: key: 'Key * ``type``: KVNamespace.ArrayBuffer -> JS.Promise<JS.ArrayBuffer option>
+    abstract get: key: 'Key * ``type``: KVNamespace.Stream -> JS.Promise<ReadableStream<obj> option>
+    abstract get: key: 'Key * ?options: KVNamespaceGetOptions<KVNamespace.Text> -> JS.Promise<string option>
+    abstract get<'ExpectedValue>: key: 'Key * ?options: KVNamespaceGetOptions<KVNamespace.Json> -> JS.Promise<'ExpectedValue option>
+    abstract get: key: 'Key * ?options: KVNamespaceGetOptions<KVNamespace.ArrayBuffer> -> JS.Promise<JS.ArrayBuffer option>
+    abstract get: key: 'Key * ?options: KVNamespaceGetOptions<KVNamespace.Stream> -> JS.Promise<ReadableStream<obj> option>
+    abstract get: key: 'Key[] * ``type``: KVNamespace.Text -> JS.Promise<JS.Map<string, string option>>
+    abstract get<'ExpectedValue>: key: 'Key[] * ``type``: KVNamespace.Json -> JS.Promise<JS.Map<string, 'ExpectedValue option>>
     abstract get: key: 'Key[] * ?options: KVNamespace.Get.Options -> JS.Promise<JS.Map<string, string option>>
-    abstract get: key: 'Key[] * ?options: KVNamespaceGetOptions<string> -> JS.Promise<JS.Map<string, string option>>
+    abstract get: key: 'Key[] * ?options: KVNamespaceGetOptions<KVNamespace.Text> -> JS.Promise<JS.Map<string, string option>>
+    abstract get<'ExpectedValue>: key: 'Key[] * ?options: KVNamespaceGetOptions<KVNamespace.Json> -> JS.Promise<JS.Map<string, 'ExpectedValue option>>
     abstract list<'Metadata>: ?options: KVNamespaceListOptions -> JS.Promise<U2<KVNamespace.List.Result.Item<'Key, 'Metadata>, KVNamespace.List.Result.Item2<'Key, 'Metadata>>>
     abstract put: key: 'Key * value: U4<string, JS.ArrayBuffer, JS.ArrayBufferView, ReadableStream<obj>> * ?options: KVNamespacePutOptions -> JS.Promise<unit>
     abstract getWithMetadata<'Metadata>: key: 'Key * ?options: KVNamespace.Get.Options -> JS.Promise<KVNamespaceGetWithMetadataResult<string, 'Metadata>>
-    abstract getWithMetadata<'Metadata>: key: 'Key * ``type``: string -> JS.Promise<KVNamespaceGetWithMetadataResult<string, 'Metadata>>
-    abstract getWithMetadata<'Metadata>: key: 'Key * options: KVNamespaceGetOptions<string> -> JS.Promise<KVNamespaceGetWithMetadataResult<string, 'Metadata>>
-    abstract getWithMetadata<'Metadata>: key: 'Key[] * ``type``: string -> JS.Promise<JS.Map<string, KVNamespaceGetWithMetadataResult<string, 'Metadata>>>
+    abstract getWithMetadata<'Metadata>: key: 'Key * ``type``: KVNamespace.Text -> JS.Promise<KVNamespaceGetWithMetadataResult<string, 'Metadata>>
+    abstract getWithMetadata<'ExpectedValue, 'Metadata>: key: 'Key * ``type``: KVNamespace.Json -> JS.Promise<KVNamespaceGetWithMetadataResult<'ExpectedValue, 'Metadata>>
+    abstract getWithMetadata<'Metadata>: key: 'Key * ``type``: KVNamespace.ArrayBuffer -> JS.Promise<KVNamespaceGetWithMetadataResult<JS.ArrayBuffer, 'Metadata>>
+    abstract getWithMetadata<'Metadata>: key: 'Key * ``type``: KVNamespace.Stream -> JS.Promise<KVNamespaceGetWithMetadataResult<ReadableStream<obj>, 'Metadata>>
+    abstract getWithMetadata<'Metadata>: key: 'Key * options: KVNamespaceGetOptions<KVNamespace.Text> -> JS.Promise<KVNamespaceGetWithMetadataResult<string, 'Metadata>>
+    abstract getWithMetadata<'ExpectedValue, 'Metadata>: key: 'Key * options: KVNamespaceGetOptions<KVNamespace.Json> -> JS.Promise<KVNamespaceGetWithMetadataResult<'ExpectedValue, 'Metadata>>
+    abstract getWithMetadata<'Metadata>: key: 'Key * options: KVNamespaceGetOptions<KVNamespace.ArrayBuffer> -> JS.Promise<KVNamespaceGetWithMetadataResult<JS.ArrayBuffer, 'Metadata>>
+    abstract getWithMetadata<'Metadata>: key: 'Key * options: KVNamespaceGetOptions<KVNamespace.Stream> -> JS.Promise<KVNamespaceGetWithMetadataResult<ReadableStream<obj>, 'Metadata>>
+    abstract getWithMetadata<'Metadata>: key: 'Key[] * ``type``: KVNamespace.Text -> JS.Promise<JS.Map<string, KVNamespaceGetWithMetadataResult<string, 'Metadata>>>
+    abstract getWithMetadata<'ExpectedValue, 'Metadata>: key: 'Key[] * ``type``: KVNamespace.Json -> JS.Promise<JS.Map<string, KVNamespaceGetWithMetadataResult<'ExpectedValue, 'Metadata>>>
     abstract getWithMetadata<'Metadata>: key: 'Key[] * ?options: KVNamespace.Get.Options -> JS.Promise<JS.Map<string, KVNamespaceGetWithMetadataResult<string, 'Metadata>>>
-    abstract getWithMetadata<'Metadata>: key: 'Key[] * ?options: KVNamespaceGetOptions<string> -> JS.Promise<JS.Map<string, KVNamespaceGetWithMetadataResult<string, 'Metadata>>>
+    abstract getWithMetadata<'Metadata>: key: 'Key[] * ?options: KVNamespaceGetOptions<KVNamespace.Text> -> JS.Promise<JS.Map<string, KVNamespaceGetWithMetadataResult<string, 'Metadata>>>
+    abstract getWithMetadata<'ExpectedValue, 'Metadata>: key: 'Key[] * ?options: KVNamespaceGetOptions<KVNamespace.Json> -> JS.Promise<JS.Map<string, KVNamespaceGetWithMetadataResult<'ExpectedValue, 'Metadata>>>
     abstract delete: key: 'Key -> JS.Promise<unit>
 
 module KVNamespace =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type ArrayBuffer =
+        | [<CompiledName("arrayBuffer")>] ArrayBuffer
+
     module Get =
         [<Interface>]
         type Options =
@@ -4098,6 +4118,10 @@ module KVNamespace =
             abstract cacheTtl: float option with get, set
             [<ParamObject; Emit("$0")>]
             static member Create (?``type``: unit, ?cacheTtl: float) : Options = jsNative
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Json =
+        | [<CompiledName("json")>] Json
 
     module List =
         module Result =
@@ -4117,6 +4141,14 @@ module KVNamespace =
                 abstract cacheStatus: string option with get, set
                 [<ParamObject; Emit("$0")>]
                 static member Create (list_complete: bool, keys: KVNamespaceListKey<'Metadata, 'Key>[], ?cacheStatus: string) : Item2<'Key, 'Metadata> = jsNative
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Stream =
+        | [<CompiledName("stream")>] Stream
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Text =
+        | [<CompiledName("text")>] Text
 
 [<Interface>]
 type KVNamespaceListOptions =

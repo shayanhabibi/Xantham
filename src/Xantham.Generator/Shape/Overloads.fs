@@ -5,16 +5,52 @@ open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator.Shape.Spec
 
+/// The single-case `[<StringEnum>]` a retained literal is written as: one case, compiled to the
+/// literal, so `Store.Text.Text` reaches JavaScript as `"text"`.
+let private literalDecl (name: string, text: string, order: DeclOrder option) =
+    let case = Naming.enumCaseOfString text
+
+    FsStringEnum
+        {
+            Name = name
+            Docs = ""
+            Tags = []
+            Order = order
+            Cases =
+                [
+                    {
+                        Name = case
+                        CompiledName = (if text = case then None else Some text)
+                        CompiledValue = None
+                    }
+                ]
+        }
+
 /// Overloads that widened into the same F# signature are duplicates the compiler rejects -
 /// .NET overload resolution sees through type abbreviations and ignores return types. The
 /// first survives; the rest drop with a finding.
+///
+/// A literal-typed parameter keeps its literal as a type of its own where that is what separates
+/// an overload set (`Spec.literalOverloads`), so those signatures arrive here distinct. The types
+/// they read are declared beside them.
 let dedupeOverloads: Pass<ShapeModel> =
     {
         Name = "dedupe-overloads"
         Run =
             fun _ model ->
                 async {
-                    let mutable findings = []
+                    let separated = literalOverloads model
+
+                    let literalDecls =
+                        separated
+                        |> List.collect _.Declared
+                        |> List.distinctBy (fun (name, _, _) -> name)
+                        |> List.map literalDecl
+
+                    let mutable findings =
+                        separated
+                        |> List.map (fun set ->
+                            Finding.make set.Member (DedupeOverloads.OverloadsDistinguishedByLiteral set.Parameter))
 
                     let abbrevs =
                         model.Decls
@@ -109,7 +145,7 @@ let dedupeOverloads: Pass<ShapeModel> =
 
                     let model =
                         { model with
-                            Decls = decls
+                            Decls = decls @ literalDecls
                             ExportMembers = exportMembers
                         }
 
