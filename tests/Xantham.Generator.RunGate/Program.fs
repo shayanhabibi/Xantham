@@ -111,7 +111,7 @@ let private imports () =
         true
         (emitJsExpr fresh "$0.options.duration === 1000")
 
-    PhaseBLab.Exports.configure (PhaseBLab.ConfigureSettings.Create(fps = 60.0))
+    PhaseBLab.Exports.configure (PhaseBLab.Configure.Settings.Create(fps = 60.0))
     // `configured` is a `let` export the runtime assigns: a live binding, read after the call.
     let settings: obj = import "configured" "phase-b-lab"
     equal "a synthesized ParamObject reaches the function as the literal" """{"fps":60}""" (json settings)
@@ -240,6 +240,36 @@ let private heritage () =
         (emitJsExpr (leaf, nodeClass) "$0 instanceof $1")
 
     equal "which the F# upcast agrees with" 3.0 (leaf :> InheritLab.Node).id
+
+/// A declaration nested in a module under the owner that reaches it (§4.4, wave six lane AD).
+/// The nesting is an F# spelling and nothing else: the JavaScript object crossing the boundary
+/// carries no trace of it, and a nested StringEnum is still the bare string its `CompiledName`
+/// names.
+let private nestedNames () =
+    let retry =
+        NestedNameLab.Widget.Options.Retry.Create(3.0, NestedNameLab.Widget.Options.Retry.Backoff.Linear)
+
+    equal
+        "a ParamObject Create inside two nested modules is still the bare object literal"
+        """{"attempts":3,"backoff":"linear"}"""
+        (json retry)
+
+    equal "and the module path reaches JavaScript as nothing at all" "linear" (NestedNameLab.Exports.backoffOf retry)
+
+    let built = NestedNameLab.Exports.defaultRetry ()
+    equal "a JavaScript-built object reads through the nested declaration" 3.0 built.attempts
+
+    equal
+        "including a StringEnum three modules deep"
+        NestedNameLab.Widget.Options.Retry.Backoff.Exponential
+        built.backoff
+
+    NestedNameLab.Exports.configure (NestedNameLab.Configure.Settings.Create true)
+
+    equal
+        "an import binds under a nested parameter type"
+        true
+        (emitJsExpr () "globalThis.__nestedNameLabConfigure.verbose")
 
 let private taggedUnions () =
     let circle = PhaseBLab.Shape.Circle 2.0
@@ -662,6 +692,7 @@ let main _ =
     constructorObjects ()
     heritage ()
     taggedUnions ()
+    nestedNames ()
     workarounds ()
     probes ()
 

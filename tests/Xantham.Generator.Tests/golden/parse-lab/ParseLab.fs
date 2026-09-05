@@ -11,15 +11,16 @@ open Xantham.Fable.Core
 
 [<Interface>]
 type EventMap =
-    abstract click: EventMapClick
+    abstract click: EventMap.Click
     [<ParamObject; Emit("$0")>]
-    static member Create (click: EventMapClick) : EventMap = jsNative
+    static member Create (click: EventMap.Click) : EventMap = jsNative
 
-[<Interface>]
-type EventMapClick =
-    abstract at: float with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (at: float) : EventMapClick = jsNative
+module EventMap =
+    [<Interface>]
+    type Click =
+        abstract at: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (at: float) : Click = jsNative
 
 [<Interface>]
 type Object3D<'TEventMap> =

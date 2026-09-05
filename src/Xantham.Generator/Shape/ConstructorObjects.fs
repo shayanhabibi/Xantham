@@ -60,12 +60,15 @@ let nameConstructorObjects: Pass<ShapeModel> =
                             | ValueNone -> None
                         | None -> None))
 
+            // `pascalSegment` splits on dots, so only a source name passes through it. An
+            // instance side's name and the path are F# names already, and dotted where the
+            // shape nests under its owner.
             let stem =
                 Map.tryFind facts.Response.Id exportNames
                 |> Option.orElseWith (fun () -> facts.SymbolName |> Option.filter (isSyntheticName >> not))
+                |> Option.map Naming.pascalSegment
                 |> Option.orElseWith instanceName
                 |> Option.defaultValue path
-                |> Naming.pascalSegment
 
             // The lib spells its own static sides `ErrorConstructor` already; doubling the
             // suffix would only make the name harder to match against the `.d.ts`.
@@ -114,7 +117,7 @@ let nameConstructorObjects: Pass<ShapeModel> =
                 | None -> ()
                 | Some facts ->
                     for segment, target in positions facts do
-                        consider (path + segment) order target
+                        consider (if segment = "" then path else nestUnder path segment) order target
 
         and consider path order typeId =
             match Map.tryFind typeId model.Types with

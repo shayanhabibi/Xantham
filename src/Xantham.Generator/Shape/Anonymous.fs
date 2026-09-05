@@ -197,7 +197,14 @@ let internal aliasInstantiationOf
 
 /// Walks the type graph reachable from the exports in deterministic order and names what needs
 /// a declaration but has none (§4.4, hash-consed by type id). Non-exported named entry types
-/// keep their name; the anonymous rest take path-derived ones, with a numeric suffix on clash.
+/// keep their name; the anonymous rest take path-derived ones.
+///
+/// A path-derived name is dotted, and `render-source` writes each dot as a module: the shape a
+/// `Widget`'s `options` member reads is `Widget.Options`, declared inside `module Widget`. Two
+/// owners of one member name are two declarations, each under its own owner.
+///
+/// A numeric suffix remains where several shapes reach one path: the arms of an anonymous
+/// union, which share their owner's path, and the parameters of two overloads of one member.
 let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Finding list =
     let mutable names = model.DeclNames
     let mutable orders = model.DeclOrders
@@ -219,6 +226,11 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
         names <- Map.add typeId unique names
         orders <- Map.add typeId order orders
         taken <- Set.add unique taken
+
+        if unique.Contains "." then
+            findings <-
+                findings
+                @ [ Finding.make unique (SynthesizeAnonymous.NameNestedUnderOwner unique) ]
 
     /// A literal union worth a declaration: at least two non-nullish members, all literal,
     /// not just `true | false`, and no already-named union with the same member set.
@@ -338,7 +350,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                 let named = Map.tryFind typeId names
 
                 let into segment =
-                    (named |> Option.defaultValue path) + segment
+                    nestUnder (named |> Option.defaultValue path) segment
 
                 // An instantiation of a named declaration reads only its arguments: its
                 // members are the declaration's, substituted, and shaping happens there.

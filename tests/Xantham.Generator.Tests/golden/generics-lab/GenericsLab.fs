@@ -48,25 +48,27 @@ type Ref<'T> = U2<'T, Action<'T>>
 /// </summary>
 type Source<'S> = U2<'S, Func<'S>> option
 
-[<Interface>]
-type EachProps<'T, 'U> =
-    abstract items: 'T[] with get, set
-    abstract fallback: string option with get, set
-    abstract render: Func<'T, float, 'U> with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (items: 'T[], render: Func<'T, float, 'U>, ?fallback: string) : EachProps<'T, 'U> = jsNative
+module Each =
+    [<Interface>]
+    type Props<'T, 'U> =
+        abstract items: 'T[] with get, set
+        abstract fallback: string option with get, set
+        abstract render: Func<'T, float, 'U> with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (items: 'T[], render: Func<'T, float, 'U>, ?fallback: string) : Props<'T, 'U> = jsNative
 
 /// <summary>
 /// An anonymous object type inside a generic alias.
 /// </summary>
-type Handle<'T> = Func<'T> * HandleItem<'T>
+type Handle<'T> = Func<'T> * Handle.Item<'T>
 
-[<Interface>]
-type HandleItem<'T> =
-    abstract set: Action<'T> with get, set
-    abstract reset: unit -> unit
-    [<ParamObject; Emit("$0")>]
-    static member Create (set: Action<'T>, reset: Action) : HandleItem<'T> = jsNative
+module Handle =
+    [<Interface>]
+    type Item<'T> =
+        abstract set: Action<'T> with get, set
+        abstract reset: unit -> unit
+        [<ParamObject; Emit("$0")>]
+        static member Create (set: Action<'T>, reset: Action) : Item<'T> = jsNative
 
 /// <summary>
 /// A named bound: the only kind of constraint F# can state.
@@ -101,13 +103,14 @@ type Registry<'M> =
 /// </summary>
 [<Interface>]
 type Manifest =
-    abstract flags: ManifestFlags with get, set
+    abstract flags: Manifest.Flags with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (flags: ManifestFlags) : Manifest = jsNative
+    static member Create (flags: Manifest.Flags) : Manifest = jsNative
 
-type ManifestFlags =
-    [<EmitIndexer>]
-    abstract Item: string -> bool with get, set
+module Manifest =
+    type Flags =
+        [<EmitIndexer>]
+        abstract Item: string -> bool with get, set
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
@@ -116,7 +119,7 @@ type Exports =
     /// An anonymous object type inside a generic function - it binds nothing itself and reads the function's parameters.
     /// </summary>
     [<Import("each", "generics-lab")>]
-    static member each<'T, 'U> (props: EachProps<'T, 'U>) : 'U[] = jsNative
+    static member each<'T, 'U> (props: Each.Props<'T, 'U>) : 'U[] = jsNative
     /// <summary>
     /// An optional parameter ahead of a rest parameter: F# has no tail for the <c>?</c>, so it stays required, of option type.
     /// </summary>

@@ -1,23 +1,23 @@
 {
   "schemaVersion": 1,
-  "package": "parse-lab",
-  "module": "ParseLab",
+  "package": "nested-name-lab",
+  "module": "NestedNameLab",
   "counts": {
-    "exact": 0,
-    "ergonomic": 6,
+    "exact": 3,
+    "ergonomic": 14,
     "widened": 0,
     "escape": 0
   },
   "passes": [
     {
       "pass": "SY - synthesize-anonymous",
-      "total": 1,
-      "ergonomic": 1
+      "total": 9,
+      "ergonomic": 9
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 11,
-      "ergonomic": 11
+      "total": 13,
+      "ergonomic": 13
     }
   ]
 }

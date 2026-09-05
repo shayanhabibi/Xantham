@@ -3,8 +3,8 @@
   "package": "type-fest",
   "module": "TypeFest",
   "counts": {
-    "exact": 25,
-    "ergonomic": 71,
+    "exact": 5,
+    "ergonomic": 91,
     "widened": 204,
     "escape": 2
   },
@@ -18,6 +18,11 @@
       "pass": "RT - resolve-type-table",
       "total": 1,
       "widened": 1
+    },
+    {
+      "pass": "SY - synthesize-anonymous",
+      "total": 50,
+      "ergonomic": 50
     },
     {
       "pass": "SI - shape-interfaces",

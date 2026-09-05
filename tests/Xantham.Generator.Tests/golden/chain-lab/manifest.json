@@ -3,7 +3,7 @@
   "package": "chain-lab",
   "module": "ChainLab",
   "counts": {
-    "exact": 5,
+    "exact": 2,
     "ergonomic": 5,
     "widened": 1,
     "escape": 0

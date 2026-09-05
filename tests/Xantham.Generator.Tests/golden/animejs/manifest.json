@@ -3,12 +3,17 @@
   "package": "animejs",
   "module": "Animejs",
   "counts": {
-    "exact": 72,
-    "ergonomic": 82,
+    "exact": 65,
+    "ergonomic": 89,
     "widened": 32,
     "escape": 52
   },
   "passes": [
+    {
+      "pass": "SY - synthesize-anonymous",
+      "total": 28,
+      "ergonomic": 28
+    },
     {
       "pass": "LU - classify-literal-unions",
       "total": 4,

@@ -255,6 +255,13 @@ module Naming =
     let pascalSegment (text: string) =
         segments text |> Array.map capitalize |> String.concat ""
 
+    let private identifierShaped =
+        System.Text.RegularExpressions.Regex @"^[A-Za-z_][A-Za-z0-9_']*$"
+
+    /// True for the plain identifier shape, which is the form a generated name opens a module
+    /// under. A JavaScript key outside it - `beta channel`, `@cf/meta` - names a type only.
+    let nestable (name: string) = identifierShaped.IsMatch name
+
     /// A package's module name: `@scope/pkg-name` -> `Scope.PkgName`.
     ///
     /// The name is taken from the runtime package, so a DefinitelyTyped package is named for the

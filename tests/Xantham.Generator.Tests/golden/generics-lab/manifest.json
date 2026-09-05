@@ -10,6 +10,11 @@
   },
   "passes": [
     {
+      "pass": "SY - synthesize-anonymous",
+      "total": 3,
+      "ergonomic": 3
+    },
+    {
       "pass": "SI - shape-interfaces",
       "total": 7,
       "ergonomic": 6,
