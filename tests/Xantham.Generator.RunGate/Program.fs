@@ -915,7 +915,9 @@ let private callbackGoldenForms () =
     equal
         "a retained Action of arity 2 keeps its arity"
         2.0
-        (CallbackFunctionLab.Exports.callVoidTwo (CallbackFunctionLab.CallVoidTwo.Callback(fun a b -> sawVoidTwo <- a + b)))
+        (CallbackFunctionLab.Exports.callVoidTwo (
+            CallbackFunctionLab.CallVoidTwo.Callback(fun a b -> sawVoidTwo <- a + b)
+        ))
 
     equal "and the runtime's call reached it with both arguments" 15.0 sawVoidTwo
 
@@ -1729,7 +1731,11 @@ let private generatedDelegateForms () =
     let factory = DelegateNameLab.Exports.factory
     equal "a generated delegate read off a property keeps its arity" 2.0 (arity factory.pair)
     equal "and invokes with all its arguments" "pair12" (factory.pair.Invoke(1.0, 2.0))
-    equal "a generated delegate returned from a method invokes with all its arguments" "made312" (factory.make(3.0).Invoke(1.0, 2.0))
+
+    equal
+        "a generated delegate returned from a method invokes with all its arguments"
+        "made312"
+        (factory.make(3.0).Invoke(1.0, 2.0))
 
     let driven =
         DelegateNameLab.Factory.Create(

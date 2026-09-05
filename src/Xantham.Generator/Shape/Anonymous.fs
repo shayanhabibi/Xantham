@@ -309,7 +309,8 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
             // F# has no rank-2 form, so a generic signature can only be approximated by
             // hoisting its variables onto the declaration - and a reference has nothing to
             // apply them back with. Written inline, they stay in the scope that bound them.
-            && facts.CallSignatures |> List.forall (fun signature -> signature.TypeParameters.IsEmpty)
+            && facts.CallSignatures
+               |> List.forall (fun signature -> signature.TypeParameters.IsEmpty)
             // An application of a generic callback alias - `ExportedHandlerFetchHandler<Env,
             // Cf, Props>` at a member of `ExportedHandler` - binds the alias's parameters on
             // its head and gives a reference nothing to apply them with. It expands in place,
@@ -394,9 +395,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                     if isPureCallback facts then
                         findings <-
                             findings
-                            @ [
-                                Finding.make claimed (SynthesizeAnonymous.CallbackDelegateNamed claimed)
-                            ]
+                            @ [ Finding.make claimed (SynthesizeAnonymous.CallbackDelegateNamed claimed) ]
 
                 // An erased alias application: hash-consed onto the declaration it applies,
                 // with the recovered arguments standing in for the parameters a hoisted
