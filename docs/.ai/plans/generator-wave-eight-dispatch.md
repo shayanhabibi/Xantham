@@ -223,3 +223,16 @@ repairing one.
 fact; it records `TR014`. Item 2 assumed the collision was live; it is not. Both were written
 from real observations of wave seven and both were wrong about what followed. Lanes were briefed
 to measure the premise before acting on it, and that is what produced the wave's results.
+
+## Final integration gate, over the whole wave at `aa96f23`
+
+**463 generator tests, 90 wire tests (1 skipped by design under `XANTHAM_TSGO_EXE`), run gate 249
+checks.** Every stage ok, zero failures, and `git status` clean after the run. Baseline entering
+the wave was 460 / 90 / 230.
+
+Corpus over 49 fixtures: `exact 488, ergonomic 1544, widened 785, escape 193`, from
+`479 / 1540 / 783 / 193`. `DO001` 18, `DO002` 4, `DO003` 0, `DO004` 3, `TR055` 360, `TR056` 32,
+`TR057` 0.
+
+The exit code is now evidence rather than decoration: the pipeline reports 0 because it passed,
+and item 9's fix is what makes that sentence mean anything.
