@@ -199,6 +199,7 @@ module FindingCodes =
             "DO.OverloadsDistinguishedByLiteral", "DO002"
             "DO.OverloadsDistinguishedByLiteralUnion", "DO003"
             "DO.ExportFunctionOverloadDropped", "DO004"
+            "DO.KeyofConstrainedOverloadDropped", "DO005"
             "RA.GenericAliasDropped", "RA001"
             "RA.ReferenceToDroppedAlias", "RA002"
             "RA.GenericWithoutArguments", "RA003"
@@ -901,6 +902,9 @@ type DedupeOverloads =
     /// Wave eight, item 3. An exported function overload dropped; no parameter separates it
     /// from an earlier one.
     | [<Widened>] ExportFunctionOverloadDropped
+    /// Wave nine, item 2. An overload dropped where the separating parameter takes a type
+    /// parameter constrained by `keyof`. Every overload in the set maps to one F# parameter type.
+    | [<Widened>] KeyofConstrainedOverloadDropped of parameter: string
 
     interface IFindingKind with
         member this.Message =
@@ -912,6 +916,8 @@ type DedupeOverloads =
                 $"overload kept; parameter {parameter} takes synthesized union literals separates it"
             | ExportFunctionOverloadDropped ->
                 "exported function overload dropped: no parameter separates from earlier one"
+            | KeyofConstrainedOverloadDropped parameter ->
+                $"overload dropped; parameter {parameter} separates only by a keyof-constrained type parameter"
 
 /// `repair-arity`.
 [<Prefix("RA", "repair-arity")>]

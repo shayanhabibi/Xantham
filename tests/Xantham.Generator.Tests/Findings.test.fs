@@ -163,6 +163,7 @@ let findingsTests =
                     "DO.OverloadsDistinguishedByLiteral DO002 exact"
                     "DO.OverloadsDistinguishedByLiteralUnion DO003 exact"
                     "DO.ExportFunctionOverloadDropped DO004 widened"
+                    "DO.KeyofConstrainedOverloadDropped DO005 widened"
                     "RA.GenericAliasDropped RA001 widened"
                     "RA.ReferenceToDroppedAlias RA002 widened"
                     "RA.GenericWithoutArguments RA003 widened"
