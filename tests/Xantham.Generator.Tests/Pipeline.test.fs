@@ -2385,6 +2385,62 @@ let pipelineTests =
                 GeneratorConfig.Default
                 (fun package ->
                     [ testCase "the ? marker reaches the model, and reaches it alone" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                          let symbolsOf key =
+                              rendered.Findings
+                              |> List.filter (fun finding -> finding.Key = key)
+                              |> List.map _.Symbol
+                              |> List.distinct
+                              |> List.sort
+
+                          Expect.equal
+                              (symbolsOf "MB001")
+                              [ "Station.marked(b)"; "marked(b)"; "markedAny(b)" ]
+                              "every ? in the fixture, at a bare function and at a method"
+
+                          Expect.equal
+                              (symbolsOf "MB006")
+                              [ "Station.unioned(b)"; "unioned(b)" ]
+                              "and the parameters whose type admits undefined without one"
+
+                      testCase "a required parameter carries neither finding" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                          rendered.Findings
+                          |> List.filter (fun finding ->
+                              finding.Symbol.EndsWith "required(b)"
+                              && (finding.Key = "MB001" || finding.Key = "MB006"))
+                          |> Expect.isEmpty
+                          <| "the negative both spellings are read against"
+
+                      testCase "the two optional spellings render as one F# form" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains
+                              source
+                              "abstract marked: a: string * ?b: string -> string"
+                              "the marker reads as an F# optional parameter"
+
+                          Expect.stringContains
+                              source
+                              "abstract unioned: a: string * ?b: string -> string"
+                              "and so does a declared type admitting undefined"
+
+                          Expect.stringContains
+                              source
+                              "abstract required: a: string * b: string -> string"
+                              "a required parameter stays required"
+
+                      testCase "a ? over a type that absorbs undefined is optional on the marker alone" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains
+                              source
+                              "markedAny (a: string, ?b: obj)"
+                              "`any` hoists nothing, so before the marker was read this parameter was required" ])
         // Wave seven lane AJ's fixture. A real TS enum's member name becomes a union case name
         // (§4.7), and unlike a literal type's text - which already read through
         // `Naming.enumCaseOfString` - a member name reached the case-name minter as
@@ -2442,55 +2498,10 @@ let pipelineTests =
                               |> List.sort
 
                           Expect.equal
-                              (symbolsOf "MB001")
-                              [ "Station.marked(b)"; "marked(b)"; "markedAny(b)" ]
-                              "every ? in the fixture, at a bare function and at a method"
-
-                          Expect.equal
-                              (symbolsOf "MB006")
-                              [ "Station.unioned(b)"; "unioned(b)" ]
-                              "and the parameters whose type admits undefined without one"
-
-                      testCase "a required parameter carries neither finding" <| fun _ ->
-                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
-
-                          rendered.Findings
-                          |> List.filter (fun finding ->
-                              finding.Symbol.EndsWith "required(b)"
-                              && (finding.Key = "MB001" || finding.Key = "MB006"))
-                          |> Expect.isEmpty
-                          <| "the negative both spellings are read against"
-
-                      testCase "the two optional spellings render as one F# form" <| fun _ ->
-                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
-                          let source = rendered.Files |> List.head |> snd
-
-                          Expect.stringContains
-                              source
-                              "abstract marked: a: string * ?b: string -> string"
-                              "the marker reads as an F# optional parameter"
-
-                          Expect.stringContains
-                              source
-                              "abstract unioned: a: string * ?b: string -> string"
-                              "and so does a declared type admitting undefined"
-
-                          Expect.stringContains
-                              source
-                              "abstract required: a: string * b: string -> string"
-                              "a required parameter stays required"
-
-                      testCase "a ? over a type that absorbs undefined is optional on the marker alone" <| fun _ ->
-                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
-                          let source = rendered.Files |> List.head |> snd
-
-                          Expect.stringContains
-                              source
-                              "markedAny (a: string, ?b: obj)"
-                              "`any` hoists nothing, so before the marker was read this parameter was required" ])
                               (symbolsOf "SY005")
                               [ "Kind" ]
                               "sanitising an enum member's case name reuses the finding a sanitised declaration name reports; `Collide` and `Plain` sanitise the same way the old scheme already did, and report none" ])
+
 
         yield! fixtureTests "animejs" (npmFixture "animejs") GeneratorConfig.Default (fun _ -> [])
 
