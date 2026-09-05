@@ -319,6 +319,64 @@ Two decisions inside that, both settled:
 - Done: the lab pins an implemented hook present and an omitted hook absent **in the run gate**,
   `MB.OptionalHookAsInterface` counted, `MB003` falls by that count, compile gate green.
 
+## Wave record — what landed
+
+Six lanes, all merged on `worktree-generator-wave-six`. Gate on the composed tree: 419 generator
+tests, 85 wire tests, run gate 160 checks, and a `--update` pass that produces no change.
+
+| Lane | Outcome |
+|---|---|
+| Z | Three probes green. Probe 1 licensed AA, probe 3 licensed AD's nesting |
+| Y | Keys are `FindingCodes.table` rows, payloads reach the manifest as fields, manifest splits |
+| AB | `Error` targets `exn`; an entrypoint class over it emits `inherit`, raisable and catchable |
+| AC | `TR032` carries `fromNull`, `fromUndefined`, `fromVoid` |
+| AD | An anonymous shape is named under its owner; `Name2` residue 129 to 124 |
+| AA | An optional hook on an entrypoint class is one opt-in interface |
+
+Every count each lane reported independently survived composition.
+
+| Key | Before | After |
+|---|---|---|
+| `TR023` / `TR025` | 46 / 0 | 38 / 8 |
+| `SI002` / `SI006` | 21 / 0 | 1 / 20 |
+| `MB003` / `MB005` | 3063 / 0 | 3048 / 15 |
+| `TR032` / `SP001` | 3551 / 1292 | 3536 / 1307 |
+| `SY004` / `SC009` | 0 / 0 | 550 / 1 |
+
+Cloudflare tiers move `242/1069/387/110` to `234/1089/381/110`; the corpus moves
+`470/1453/775/191` to `464/1506/773/191`. The symbol count itself falls, because a shape that was
+a standalone symbol now nests under its owner.
+
+Two decisions taken at integration rather than by a lane. `SY004` is `[<Exact>]`, not the
+`[<Ergonomic>]` it was dispatched as: a path-derived name alters no acceptance, `SY001` is already
+exact for the same act, and ergonomic cost 139 symbols their exact tier for a spelling. The
+formatter drift in `Render.fs`, `Shape/Classes.fs` and `Shape/ParamObjects.fs` landed as its own
+commit before dispatch, since every lane running the full gate rewrote the same three files.
+
+### One assumption carried, not established
+
+**Which discovery mode `workerd` performs.** Lane Z proved the F# form is discoverable by access
+and by `in`, and invisible to own-key enumeration, and the plan gated lane AA on exactly that.
+Whether the platform reads a class entrypoint's hooks by access is outside this repository. If
+anything in that path enumerates own keys, the opt-in interface form does not work, and no
+generator change repairs it.
+
+### Found while working, not chased
+
+- **`MB001` never fires on an optional parameter.** The wire does not flag optionality on
+  parameter symbols, so `f(x?: T)` and `f(x: T | undefined)` are one signature and the `?` is
+  unrecoverable there. Pinned as a test by lane AC; repairing it is a wire change.
+- **`TR033` carries no absence alphabet.** A union of absences alone collapses to `unit` with no
+  payload, so it is a sixth absence site the alphabet does not reach.
+- **A member key that is not a legal .NET type name emits `FS0883`.** `"@cf/meta"` renders as
+  ``type `Registry@cf/meta` ``. Pre-existing, identical under both naming schemes, unexercised by
+  the corpus. Reproducer in `docs/.ai/handovers/lane-ad.md`.
+- **Six `Name2` residues are namespaced declarations** a namespace module would resolve. Lane AD
+  answered the question with a number and made no change.
+- **The statics side table was live-wrong, not latent.** A renamed exported class's statics landed
+  on the global interface of the same name. Lane AA resolved the key through `DeclNames`. Zero
+  corpus incidence only because no exported class there is both renamed and carries statics.
+
 ## Deferred
 
 - **Wave five's open items** — `inline` and demand-driven resolve, the `Fable.Core` binding gaps
