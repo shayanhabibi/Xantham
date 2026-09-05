@@ -1,0 +1,6 @@
+{
+    "name": "hook-interface-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "description": "Hand-authored fixture for the optional lifecycle hooks an entrypoint class declares. Each ? method becomes an interface a subclass opts into, so the platform's `typeof instance.fetch === 'function'` holds exactly where the subclass implements it. Tracked in git, no npm install."
+}

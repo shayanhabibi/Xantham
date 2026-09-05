@@ -38,6 +38,8 @@
         <Compile Include="..\Xantham.Generator.Tests\golden\ambient-module-lab\AmbientModuleLab.fs" Link="ambient-module-lab\AmbientModuleLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\error-class-lab\ErrorClassLab.fs" Link="error-class-lab\ErrorClassLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\nested-name-lab\NestedNameLab.fs" Link="nested-name-lab\NestedNameLab.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\hook-interface-lab\HookInterfaceLab.fs" Link="hook-interface-lab\HookInterfaceLab.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\statics-collision-lab\StaticsCollisionLab.fs" Link="statics-collision-lab\StaticsCollisionLab.fs" />
         <Compile Include="Probes.fs" />
         <Compile Include="Program.fs" />
         <None Include="register.mjs" />

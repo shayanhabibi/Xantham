@@ -4,7 +4,7 @@
   "module": "Cloudflare.WorkersTypes",
   "counts": {
     "exact": 234,
-    "ergonomic": 1074,
+    "ergonomic": 1089,
     "widened": 381,
     "escape": 110
   },
@@ -46,9 +46,9 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 7795,
+      "total": 7780,
       "exact": 72,
-      "ergonomic": 6946,
+      "ergonomic": 6931,
       "widened": 626,
       "escape": 151
     },
@@ -75,8 +75,8 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 1949,
-      "ergonomic": 1949
+      "total": 1979,
+      "ergonomic": 1979
     },
     {
       "pass": "DO - dedupe-overloads",

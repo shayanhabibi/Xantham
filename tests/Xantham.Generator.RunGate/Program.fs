@@ -510,6 +510,89 @@ let private entrypointClasses () =
 
     equal "and so does a class whose base this run declares" 2.0 vise.jaw
 
+/// A consumer's subclass over the hook lab's entrypoint, implementing one hook and declining the
+/// other. Declared here rather than inside the check for the reason `Retry` is: `inherit` and
+/// `interface … with` are source constructs, and this type compiling is half of what the
+/// emission claims.
+type private Handled(label: string) =
+    inherit HookInterfaceLab.Station(label)
+
+    override this.run(signal) = $"run:{this.label}:{signal.label}"
+
+    interface HookInterfaceLab.Station.IFetchHandler with
+        member this.fetch(signal) = $"fetch:{this.label}:{signal.label}"
+
+/// The negative of the same claim: a subclass providing no hook at all.
+type private Unhandled(label: string) =
+    inherit HookInterfaceLab.Station(label)
+
+    override this.run(signal) = $"run:{this.label}:{signal.label}"
+
+/// A hook whose interface carries its owner's type parameter.
+type private Forwarder(seed: string) =
+    inherit HookInterfaceLab.Relay<string>(seed)
+
+    interface HookInterfaceLab.Relay.IForwardHandler<string> with
+        member _.forward value = $"forward:{value}"
+
+/// An optional method of an entrypoint class, emitted as an interface a subclass opts into. The
+/// platform reads a hook off the instance, so what the checks measure is what
+/// `typeof instance.fetch` answers for a subclass that implemented it and one that did not.
+let private optionalHooks () =
+    let signal = HookInterfaceLab.Signal.Create "s"
+    let handled = Handled "one"
+
+    check "an implemented hook is present by property access" (emitJsExpr handled "typeof $0.fetch === \"function\"")
+
+    equal
+        "and it dispatches to the implementation the subclass gave"
+        "fetch:one:s"
+        (emitJsExpr (handled, signal) "$0.fetch($1)")
+
+    check
+        "a hook the same subclass declined is absent"
+        (emitJsExpr handled "typeof $0.alarm === \"undefined\" && !(\"alarm\" in $0)")
+
+    check "the hook is no own property of the instance" (emitJsExpr handled "Object.keys($0).indexOf(\"fetch\") === -1")
+
+    let unhandled = Unhandled "two"
+
+    check
+        "a subclass implementing no hook interface carries no hook"
+        (emitJsExpr unhandled "typeof $0.fetch === \"undefined\" && typeof $0.alarm === \"undefined\"")
+
+    equal
+        "while the mandatory slot it overrode still dispatches"
+        "run:two:s"
+        (emitJsExpr (unhandled, signal) "$0.run($1)")
+
+    equal "and the imported base constructor assigned its own member" "two" unhandled.label
+
+    let forwarder = Forwarder "seed"
+
+    equal
+        "a hook interface carrying its owner's type parameter dispatches under the hook's name"
+        "forward:x"
+        (emitJsExpr forwarder "$0.forward(\"x\")")
+
+    equal "and the base constructor's argument arrived" "seed" forwarder.seed
+
+    let asData =
+        HookInterfaceLab.Station.IFetchHandler.Create(Func<_, _>(fun (s: HookInterfaceLab.Signal) -> s.label))
+
+    equal
+        "the hook interface's Create is the object literal a handler map is"
+        "s"
+        (emitJsExpr (asData, signal) "$0.fetch($1)")
+
+/// A class renamed by a name clash: its statics bind through the *export* name and are declared
+/// on the type the instance side took.
+let private renamedStatics () =
+    equal "a renamed class's static reads off the selector its export name spells" 7.0 StaticsCollisionLab.Depot2.LIMIT
+
+    let depot = StaticsCollisionLab.Depot2.``open`` "a"
+    equal "and its static method reaches the same object" "a" depot.slot
+
 /// Wave six's three probes, over the hand-written forms in `Probes.fs`. Each one settles a Fable
 /// emission question a lane is designed against, so each check names the platform behaviour it
 /// licenses rather than the F# it was written from.
@@ -693,6 +776,8 @@ let main _ =
     heritage ()
     taggedUnions ()
     nestedNames ()
+    optionalHooks ()
+    renamedStatics ()
     workarounds ()
     probes ()
 

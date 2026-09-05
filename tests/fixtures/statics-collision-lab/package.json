@@ -1,0 +1,6 @@
+{
+    "name": "statics-collision-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "description": "Hand-authored fixture for a class renamed by a name clash: `shape-classes` keys its statics side table by one name and joins it back by another, and the two coincide only while the exported class keeps its export name. Tracked in git, no npm install."
+}

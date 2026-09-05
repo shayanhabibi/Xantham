@@ -26935,33 +26935,61 @@ type WorkerEntrypoint<'Env, 'Props> (ctx: ExecutionContext<obj>, env: 'Env) =
     member _.env
         with get (): 'Env = jsNative
         and set (_: 'Env): unit = jsNative
-    member _.email
-        with get (): Func<ForwardableEmailMessage, JS.Promise<unit> option> option = jsNative
-        and set (_: Func<ForwardableEmailMessage, JS.Promise<unit> option> option): unit = jsNative
-    member _.fetch
-        with get (): Func<Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, U2<JS.Promise<Response>, Response>> option = jsNative
-        and set (_: Func<Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, U2<JS.Promise<Response>, Response>> option): unit = jsNative
-    member _.connect
-        with get (): Func<Socket, JS.Promise<unit> option> option = jsNative
-        and set (_: Func<Socket, JS.Promise<unit> option> option): unit = jsNative
-    member _.queue
-        with get (): Func<MessageBatch<obj>, JS.Promise<unit> option> option = jsNative
-        and set (_: Func<MessageBatch<obj>, JS.Promise<unit> option> option): unit = jsNative
-    member _.scheduled
-        with get (): Func<ScheduledController, JS.Promise<unit> option> option = jsNative
-        and set (_: Func<ScheduledController, JS.Promise<unit> option> option): unit = jsNative
-    member _.tail
-        with get (): Func<TraceItem[], JS.Promise<unit> option> option = jsNative
-        and set (_: Func<TraceItem[], JS.Promise<unit> option> option): unit = jsNative
-    member _.tailStream
-        with get (): Func<TailEvent2<Onset>, U3<JS.Promise<U2<Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandler.Result.Item>>, Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandler.Result.Item>> option = jsNative
-        and set (_: Func<TailEvent2<Onset>, U3<JS.Promise<U2<Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandler.Result.Item>>, Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandler.Result.Item>> option): unit = jsNative
-    member _.test
-        with get (): Func<TestController, JS.Promise<unit> option> option = jsNative
-        and set (_: Func<TestController, JS.Promise<unit> option> option): unit = jsNative
-    member _.trace
-        with get (): Func<TraceItem[], JS.Promise<unit> option> option = jsNative
-        and set (_: Func<TraceItem[], JS.Promise<unit> option> option): unit = jsNative
+
+module WorkerEntrypoint =
+    [<Interface>]
+    type IConnectHandler =
+        abstract connect: socket: Socket -> JS.Promise<unit> option
+        [<ParamObject; Emit("$0")>]
+        static member Create (connect: Func<Socket, JS.Promise<unit> option>) : IConnectHandler = jsNative
+
+    [<Interface>]
+    type IEmailHandler =
+        abstract email: message: ForwardableEmailMessage -> JS.Promise<unit> option
+        [<ParamObject; Emit("$0")>]
+        static member Create (email: Func<ForwardableEmailMessage, JS.Promise<unit> option>) : IEmailHandler = jsNative
+
+    [<Interface>]
+    type IFetchHandler =
+        abstract fetch: request: Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> -> U2<JS.Promise<Response>, Response>
+        [<ParamObject; Emit("$0")>]
+        static member Create (fetch: Func<Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, U2<JS.Promise<Response>, Response>>) : IFetchHandler = jsNative
+
+    [<Interface>]
+    type IQueueHandler =
+        abstract queue: batch: MessageBatch<obj> -> JS.Promise<unit> option
+        [<ParamObject; Emit("$0")>]
+        static member Create (queue: Func<MessageBatch<obj>, JS.Promise<unit> option>) : IQueueHandler = jsNative
+
+    [<Interface>]
+    type IScheduledHandler =
+        abstract scheduled: controller: ScheduledController -> JS.Promise<unit> option
+        [<ParamObject; Emit("$0")>]
+        static member Create (scheduled: Func<ScheduledController, JS.Promise<unit> option>) : IScheduledHandler = jsNative
+
+    [<Interface>]
+    type ITailHandler =
+        abstract tail: events: TraceItem[] -> JS.Promise<unit> option
+        [<ParamObject; Emit("$0")>]
+        static member Create (tail: Func<TraceItem[], JS.Promise<unit> option>) : ITailHandler = jsNative
+
+    [<Interface>]
+    type ITailStreamHandler =
+        abstract tailStream: ``event``: TailEvent2<Onset> -> U3<JS.Promise<U2<Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandler.Result.Item>>, Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandler.Result.Item>
+        [<ParamObject; Emit("$0")>]
+        static member Create (tailStream: Func<TailEvent2<Onset>, U3<JS.Promise<U2<Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandler.Result.Item>>, Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandler.Result.Item>>) : ITailStreamHandler = jsNative
+
+    [<Interface>]
+    type ITestHandler =
+        abstract test: controller: TestController -> JS.Promise<unit> option
+        [<ParamObject; Emit("$0")>]
+        static member Create (test: Func<TestController, JS.Promise<unit> option>) : ITestHandler = jsNative
+
+    [<Interface>]
+    type ITraceHandler =
+        abstract trace: traces: TraceItem[] -> JS.Promise<unit> option
+        [<ParamObject; Emit("$0")>]
+        static member Create (trace: Func<TraceItem[], JS.Promise<unit> option>) : ITraceHandler = jsNative
 
 [<Import("DurableObject", "cloudflare:workers"); AbstractClass>]
 type DurableObject2<'Env, 'Props> (ctx: DurableObjectState<obj>, env: 'Env) =
@@ -26972,24 +27000,43 @@ type DurableObject2<'Env, 'Props> (ctx: DurableObjectState<obj>, env: 'Env) =
     member _.env
         with get (): 'Env = jsNative
         and set (_: 'Env): unit = jsNative
-    member _.alarm
-        with get (): Func<AlarmInvocationInfo option, JS.Promise<unit> option> option = jsNative
-        and set (_: Func<AlarmInvocationInfo option, JS.Promise<unit> option> option): unit = jsNative
-    member _.fetch
-        with get (): Func<Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, U2<JS.Promise<Response>, Response>> option = jsNative
-        and set (_: Func<Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, U2<JS.Promise<Response>, Response>> option): unit = jsNative
-    member _.connect
-        with get (): Func<Socket, JS.Promise<unit> option> option = jsNative
-        and set (_: Func<Socket, JS.Promise<unit> option> option): unit = jsNative
-    member _.webSocketMessage
-        with get (): Func<WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option> option = jsNative
-        and set (_: Func<WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option> option): unit = jsNative
-    member _.webSocketClose
-        with get (): Func<WebSocket, float, string, bool, JS.Promise<unit> option> option = jsNative
-        and set (_: Func<WebSocket, float, string, bool, JS.Promise<unit> option> option): unit = jsNative
-    member _.webSocketError
-        with get (): Func<WebSocket, obj, JS.Promise<unit> option> option = jsNative
-        and set (_: Func<WebSocket, obj, JS.Promise<unit> option> option): unit = jsNative
+
+module DurableObject2 =
+    [<Interface>]
+    type IAlarmHandler =
+        abstract alarm: ?alarmInfo: AlarmInvocationInfo -> JS.Promise<unit> option
+        [<ParamObject; Emit("$0")>]
+        static member Create (alarm: Func<AlarmInvocationInfo option, JS.Promise<unit> option>) : IAlarmHandler = jsNative
+
+    [<Interface>]
+    type IConnectHandler =
+        abstract connect: socket: Socket -> JS.Promise<unit> option
+        [<ParamObject; Emit("$0")>]
+        static member Create (connect: Func<Socket, JS.Promise<unit> option>) : IConnectHandler = jsNative
+
+    [<Interface>]
+    type IFetchHandler =
+        abstract fetch: request: Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> -> U2<JS.Promise<Response>, Response>
+        [<ParamObject; Emit("$0")>]
+        static member Create (fetch: Func<Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, U2<JS.Promise<Response>, Response>>) : IFetchHandler = jsNative
+
+    [<Interface>]
+    type IWebSocketCloseHandler =
+        abstract webSocketClose: ws: WebSocket * code: float * reason: string * wasClean: bool -> JS.Promise<unit> option
+        [<ParamObject; Emit("$0")>]
+        static member Create (webSocketClose: Func<WebSocket, float, string, bool, JS.Promise<unit> option>) : IWebSocketCloseHandler = jsNative
+
+    [<Interface>]
+    type IWebSocketErrorHandler =
+        abstract webSocketError: ws: WebSocket * error: obj -> JS.Promise<unit> option
+        [<ParamObject; Emit("$0")>]
+        static member Create (webSocketError: Func<WebSocket, obj, JS.Promise<unit> option>) : IWebSocketErrorHandler = jsNative
+
+    [<Interface>]
+    type IWebSocketMessageHandler =
+        abstract webSocketMessage: ws: WebSocket * message: U2<string, JS.ArrayBuffer> -> JS.Promise<unit> option
+        [<ParamObject; Emit("$0")>]
+        static member Create (webSocketMessage: Func<WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option>) : IWebSocketMessageHandler = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type WorkflowDurationLabel =

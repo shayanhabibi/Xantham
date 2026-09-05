@@ -2061,6 +2061,117 @@ let pipelineTests =
                           // nesting scheme leaves, and it is deliberate rather than missed.
                           Expect.stringContains source "Either2" "the second arm disambiguates by number" ])
 
+        // Wave six lane AA's fixture. An entrypoint class's optional method is a lifecycle hook,
+        // and each one becomes an interface a subclass opts into.
+        yield!
+            fixtureTests
+                "hook-interface-lab"
+                (handFixture "hook-interface-lab")
+                GeneratorConfig.Default
+                (fun package ->
+                    [ testCase "each optional method of an entrypoint class is an interface of its own" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains source "module Station =" "the hooks nest under their owner"
+
+                          Expect.stringContains
+                              source
+                              "abstract fetch: signal: Signal -> string"
+                              "the hook is an abstract member, not an option property"
+
+                          Expect.stringContains source "type IFetchHandler =" "under an interface named for it"
+                          Expect.stringContains source "type IAlarmHandler =" "one per hook, never grouped"
+
+                      testCase "the class carries neither the hook nor a settable slot for it" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.isFalse
+                              (source.Contains "member _.fetch")
+                              "a concrete property would make the hook present on every subclass"
+
+                          Expect.stringContains
+                              source
+                              "abstract run: signal: Signal -> string"
+                              "and the mandatory method keeps the abstract slot it already had"
+
+                      testCase "an optional property, and an optional method off an entrypoint, stay options"
+                      <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains source "member _.tag" "an optional data member is still a property"
+                          Expect.stringContains source "abstract ping: Func<Signal, string> option" "a plain interface's optional method is untouched"
+                          Expect.stringContains source "abstract probe: Func<Signal, string> option" "and so is a class the run keeps as an interface"
+
+                          Expect.isFalse (source.Contains "IPingHandler") "no interface is named for either"
+                          Expect.isFalse (source.Contains "IProbeHandler") "no interface is named for either"
+
+                      testCase "a hook mentioning its owner's type parameter carries the owner's head" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains source "type IForwardHandler<'T> =" "the hook binds the variable it reads"
+                          Expect.stringContains source "abstract forward: value: 'T -> 'T" "and reads it in both positions"
+
+                      testCase "every hook is reported under MB005 and none under MB003" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                          let symbolsOf key =
+                              rendered.Findings
+                              |> List.filter (fun finding -> finding.Key = key)
+                              |> List.map _.Symbol
+                              |> List.sort
+
+                          Expect.equal
+                              (symbolsOf "MB005")
+                              [ "Relay.forward"; "Station.alarm"; "Station.fetch" ]
+                              "one finding per hook, at the member it was declared as"
+
+                          let options = symbolsOf "MB003"
+                          Expect.contains options "Station.tag" "the optional data member still reports as an option"
+                          Expect.contains options "Listener.ping" "and so does a plain interface's optional method"
+
+                          Expect.isFalse
+                              (options |> List.exists (fun symbol -> symbol = "Station.fetch"))
+                              "a hook is reported once, as a hook" ])
+
+        // Wave six lane AA's second fixture. `shape-classes` keys its statics side table by the
+        // name the *declaration* takes, which a clash renames away from the export name.
+        yield!
+            fixtureTests
+                "statics-collision-lab"
+                (handFixture "statics-collision-lab")
+                GeneratorConfig.Default
+                (fun package ->
+                    [ testCase "a renamed class's statics land on the class, not on the name it lost" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          let declaration (name: string) =
+                              let start = source.IndexOf $"type {name} ="
+                              Expect.isGreaterThan start -1 $"{name} is declared"
+
+                              let next =
+                                  source.IndexOf("\ntype ", start + 1) |> fun i -> if i < 0 then source.Length else i
+
+                              source.Substring(start, next - start)
+
+                          Expect.stringContains
+                              (declaration "Depot2")
+                              "static member LIMIT"
+                              "the static reaches the declaration the class's instance side took"
+
+                          Expect.stringContains
+                              (declaration "Depot2")
+                              "static member ``open``"
+                              "and so does the static method"
+
+                          Expect.isFalse
+                              ((declaration "Depot").Contains "LIMIT")
+                              "the global interface that kept the export name carries none of them" ])
+
         yield! fixtureTests "animejs" (npmFixture "animejs") GeneratorConfig.Default (fun _ -> [])
 
         // workers-types is a global type library that *replaces* the DOM lib: its README
