@@ -121,11 +121,12 @@ type Vise =
     [<Import("Vise.LIMIT", "ambient-lab:tools")>]
     static member LIMIT: float = jsNative
 
-[<Interface>]
-type Session2 =
-    abstract label: string
-    [<ParamObject; Emit("$0")>]
-    static member Create (label: string) : Session2 = jsNative
+module AmbientLabRuntime =
+    [<Interface>]
+    type Session =
+        abstract label: string
+        [<ParamObject; Emit("$0")>]
+        static member Create (label: string) : Session = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
@@ -179,4 +180,4 @@ type Exports =
     [<Import("version", "ambient-lab:runtime")>]
     static member version: string = jsNative
     [<Import("Session", "ambient-lab:runtime"); EmitConstructor>]
-    static member Session (label: string) : Session2 = jsNative
+    static member Session (label: string) : AmbientLabRuntime.Session = jsNative

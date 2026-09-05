@@ -163,4 +163,23 @@ let classifyTests =
                 (Naming.groupModule config "@cloudedge/sdk" (Dependency "@cloudedge/agents"))
                 "Cloudedge.Agents"
                 "an unlisted sibling"
+
+        testCase "a synthesized name is reduced to what a declaration admits" <| fun _ ->
+            Expect.equal (Naming.identifierName "RegistryCfMeta") "RegistryCfMeta" "an identifier stands"
+            Expect.equal (Naming.identifierName "Widget_2'") "Widget_2'" "including underscore, digit and tick"
+
+            Expect.equal (Naming.identifierName "Registry@cf/meta") "RegistryCfMeta" "@ and / separate segments"
+
+            Expect.equal
+                (Naming.identifierName "Registry@cf/meta/llama-3")
+                "RegistryCfMetaLlama3"
+                "two keys reduce to two names"
+
+            Expect.equal (Naming.identifierName "RegistryBeta channel") "RegistryBetaChannel" "and so does a space"
+            Expect.equal (Naming.identifierName "Registry$ref") "RegistryRef" "a $ drops out"
+
+            // The result heads a declaration, so it opens with a letter and is never empty,
+            // whatever the key spelled.
+            Expect.equal (Naming.identifierName "2fa") "N2fa" "a digit-led result takes a prefix"
+            Expect.equal (Naming.identifierName "@/") "Item" "and a key of separators alone names a position"
     ]

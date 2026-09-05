@@ -100,15 +100,15 @@ module Configure =
 /// </summary>
 [<Interface>]
 type Registry =
-    abstract ``beta channel``: ``RegistryBeta channel`` with get, set
+    abstract ``beta channel``: RegistryBetaChannel with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``beta channel``: ``RegistryBeta channel``) : Registry = jsNative
+    static member Create (``beta channel``: RegistryBetaChannel) : Registry = jsNative
 
 [<Interface>]
-type ``RegistryBeta channel`` =
+type RegistryBetaChannel =
     abstract model: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (model: string) : ``RegistryBeta channel`` = jsNative
+    static member Create (model: string) : RegistryBetaChannel = jsNative
 
 /// <summary>
 /// Both arms are object shapes, and both are reached at <c>Choice.Either</c>.
@@ -134,6 +134,22 @@ module Choice =
         [<ParamObject; Emit("$0")>]
         static member Create (right: string, rightAt: float) : Either2 = jsNative
 
+/// <summary>
+/// The unqualified <c>Node</c>, reached by that name.
+/// </summary>
+[<Interface>]
+type Node =
+    abstract id: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (id: string) : Node = jsNative
+
+module Cluster =
+    [<Interface>]
+    type Node =
+        abstract peers: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (peers: float) : Node = jsNative
+
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
@@ -152,3 +168,8 @@ type Exports =
     /// </summary>
     [<Import("configure", "nested-name-lab")>]
     static member configure (settings: Configure.Settings) : unit = jsNative
+    /// <summary>
+    /// Reaches the namespaced declaration, so the reference position is pinned too.
+    /// </summary>
+    [<Import("joinCluster", "nested-name-lab")>]
+    static member joinCluster (node: Cluster.Node) : Node = jsNative

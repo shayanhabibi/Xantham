@@ -55,7 +55,8 @@ export declare function configure(settings: { verbose: boolean }): void;
 
 // ---------------------------------------------------------------------------
 // A key outside the plain identifier shape. Only an identifier opens a module,
-// so this position concatenates and the name stays one backticked type.
+// so this position concatenates; the concatenation is then reduced to what a
+// declaration name admits, and `key-sanitise-lab` pins that reduction.
 // ---------------------------------------------------------------------------
 
 /** The owner of a member whose JavaScript key does not open a module. */
@@ -72,3 +73,25 @@ export interface Registry {
 export interface Choice {
     either: { left: string; leftAt: number } | { right: string; rightAt: number };
 }
+
+// ---------------------------------------------------------------------------
+// Two declarations of one name, separated by the namespace one of them is
+// written in. TypeScript tells them apart that way and so does F#: the
+// namespaced one nests, and neither takes a number.
+// ---------------------------------------------------------------------------
+
+/** The unqualified `Node`, reached by that name. */
+export interface Node {
+    id: string;
+}
+
+/** A namespace whose `Node` is a second declaration of the name, exported by nothing. */
+declare namespace Cluster {
+    /** Nests as `Cluster.Node`. */
+    interface Node {
+        peers: number;
+    }
+}
+
+/** Reaches the namespaced declaration, so the reference position is pinned too. */
+export declare function joinCluster(node: Cluster.Node): Node;

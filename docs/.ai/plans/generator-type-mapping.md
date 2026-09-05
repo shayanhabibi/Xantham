@@ -707,12 +707,22 @@ Fable F# tuples *are* JS arrays — a happy exact match:
     member reads is `Widget.Options`, `type Options` inside `module Widget`. Two owners with
     one member name are two declarations without a suffix, and every nested name raises
     `SY.NameNestedUnderOwner`. Only the plain identifier shape opens a module, so a
-    JavaScript key like `beta channel` concatenates and stays one backticked type.
+    JavaScript key like `beta channel` concatenates.
+  - **Landed, wave seven lane AI (item 3).** Two declarations of one name that TypeScript
+    separates by the namespace one of them is written in separate the same way here:
+    `declare namespace CloudflareWorkersModule`'s `DurableObject` reads
+    `CloudflareWorkersModule.DurableObject` beside the global one, and `TailStream`'s
+    `TailEvent` reads `TailStream.TailEvent` beside the global class. Both raise
+    `SY.NameNestedUnderOwner`. The nesting is decided over the whole claim list, since the
+    namespaced declaration is as often the first claimant as the second.
+  - **Landed, wave seven lane AI (item 6).** The concatenation a non-nestable key produces is
+    spelled in the plain identifier shape: `Registry@cf/meta` declares as `RegistryCfMeta`,
+    reported as `SY.NameSanitisedForIdentifier`. A member position keeps the key verbatim; a
+    declaration position admits less, and `` type ``Registry@cf/meta`` `` is FS0883.
   - The numeric suffix survives where several shapes reach one path and no position
     separates them: the arms of an anonymous union, the parameters of two overloads of one
-    member, and two exports of one name (`DurableObject` is declared globally and again in
-    `declare namespace CloudflareWorkersModule`). `docs/.ai/handovers/lane-ad.md` carries
-    the corpus counts.
+    member, and two exports of one name with no namespace between them.
+    `docs/.ai/handovers/lane-ad.md` and `lane-ai.md` carry the corpus counts.
 - JSDoc → XML doc comments (`getDocumentationComment`, `getJsDocTags`); `@deprecated` →
   `[<Obsolete>]`; `@see`/`@example` carried into `<remarks>`/`<example>`. The tier
   annotation from §1 also lands here. JSDoc is markdown and XML docs are not, so a fenced

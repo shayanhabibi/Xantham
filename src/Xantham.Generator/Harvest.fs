@@ -8,6 +8,16 @@ open Xantham.TypeScript.Wire.Proto
 
 let private hasAny (mask: SymbolFlags) (flags: SymbolFlags) = uint32 (flags &&& mask) <> 0u
 
+/// The namespace symbols among `symbols`, by id, for the declarations written inside them to
+/// nest under. An ambient module declaration is a namespace symbol whose name is its quoted
+/// specifier (`"cloudflare:workers"`), which heads no F# module, so the map holds only names a
+/// declaration can take a path segment from.
+let private namespacesAmong (symbols: SymbolResponse seq) =
+    symbols
+    |> Seq.filter (fun symbol -> hasAny SymbolFlags.Module symbol.Flags && Naming.isWritableTypeName symbol.Name)
+    |> Seq.map (fun symbol -> symbol.Id, symbol.Name)
+    |> Map.ofSeq
+
 /// The entry module's exports, each followed through `getAliasedSymbol` to its origin so that
 /// re-exports and default-export aliases land on the declaring symbol.
 ///
@@ -57,7 +67,29 @@ let harvestExports: Pass<HarvestModel> =
                                 })
                             |> Array.toList
 
-                        return Advanced { model with Exports = harvested }
+                        // A namespace the entry file declares without exporting is still the
+                        // owner of the types an exported signature reaches through it, so the
+                        // scope at the top of the file is asked for rather than the export list.
+                        let! inScope =
+                            ctx.Session.getSymbolsInScope (
+                                SymbolFlags.Module,
+                                file = DocumentIdentifier.FileName ctx.EntryFile,
+                                position = 0
+                            )
+
+                        let namespaces =
+                            inScope
+                            |> Array.filter (fun symbol ->
+                                Grouping.classify ctx.PackageDir (ValueSome symbol) = EntryPackage)
+                            |> Array.append (resolved |> Array.map snd)
+                            |> namespacesAmong
+
+                        return
+                            Advanced
+                                { model with
+                                    Exports = harvested
+                                    Namespaces = namespaces
+                                }
                 }
     }
 
@@ -172,6 +204,23 @@ let harvestGlobals: Pass<HarvestModel> =
                             |> Array.filter (fun symbol ->
                                 Grouping.classify ctx.PackageDir (ValueSome symbol) = EntryPackage)
 
+                        // A namespace of types alone is neither a type nor a value, so
+                        // `TailStream` arrives under `Module` and nowhere else. Its members
+                        // reach the shape tier through the types that refer to them, and the
+                        // namespace is what separates two declarations of one name.
+                        let! declared =
+                            ctx.Session.getSymbolsInScope (
+                                SymbolFlags.Module,
+                                file = DocumentIdentifier.FileName ctx.EntryFile,
+                                position = 0
+                            )
+
+                        let namespaces =
+                            declared
+                            |> Array.filter (fun symbol ->
+                                Grouping.classify ctx.PackageDir (ValueSome symbol) = EntryPackage)
+                            |> namespacesAmong
+
                         // An ambient module declaration is a global-scope symbol whose name is
                         // its quoted specifier. Its exports are harvested under that specifier;
                         // the specifier itself heads no declaration.
@@ -223,7 +272,11 @@ let harvestGlobals: Pass<HarvestModel> =
                                     [ Finding.make "<module>" (HarvestGlobals.NothingHarvested ctx.EntryFile) ]
                                 )
                         else
-                            let model = { model with Exports = harvested }
+                            let model =
+                                { model with
+                                    Exports = harvested
+                                    Namespaces = namespaces
+                                }
 
                             return
                                 if List.isEmpty findings then

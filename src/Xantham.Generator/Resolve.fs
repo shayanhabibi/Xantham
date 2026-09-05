@@ -495,6 +495,7 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                         Response = ty
                         Origin = origin
                         SymbolName = symbol |> ValueOption.map _.Name |> ValueOption.toOption
+                        SymbolParent = symbol |> ValueOption.bind _.Parent |> ValueOption.toOption
                         Members = structure.Members
                         IndexInfos = structure.IndexInfos
                         CallSignatures = structure.CallSignatures

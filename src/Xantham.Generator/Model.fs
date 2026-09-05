@@ -262,6 +262,25 @@ module Naming =
     /// under. A JavaScript key outside it - `beta channel`, `@cf/meta` - names a type only.
     let nestable (name: string) = identifierShaped.IsMatch name
 
+    /// `name` in the shape an F# declaration admits: characters outside the plain identifier
+    /// separate segments, and every segment after the first is capitalised, so
+    /// `Registry@cf/meta` reads `RegistryCfMeta`. Backticks carry a keyword or a space into a
+    /// declaration name; `` type ``Registry@cf/meta`` `` is FS0883. An identifier-shaped name
+    /// is returned unchanged.
+    let identifierName (name: string) =
+        if nestable name then
+            name
+        else
+            let separated =
+                name
+                |> Seq.map (fun c -> if System.Char.IsLetterOrDigit c then c else '-')
+                |> System.String.Concat
+
+            match pascalSegment separated with
+            | "" -> "Item"
+            | text when System.Char.IsLetter text[0] -> text
+            | text -> "N" + text
+
     /// A package's module name: `@scope/pkg-name` -> `Scope.PkgName`.
     ///
     /// The name is taken from the runtime package, so a DefinitelyTyped package is named for the
@@ -567,9 +586,13 @@ type HarvestedExport =
 type HarvestModel =
     {
         Exports: HarvestedExport list
+        /// The namespaces the entry package declares, by symbol id, under names an F# module
+        /// can be spelled with. A declaration written inside one nests under it where a second
+        /// declaration claims the same name.
+        Namespaces: Map<int, string>
     }
 
-    static member Empty: HarvestModel = { Exports = [] }
+    static member Empty: HarvestModel = { Exports = []; Namespaces = Map.empty }
 
 // ---------------------------------------------------------------------------------------------
 // Tier 2 - Resolve: what the checker says everything is. A type table keyed by TypeResponse.Id.
@@ -633,6 +656,9 @@ type TypeFacts =
         /// Name of the type's own symbol where it has one - what a `reference` emission
         /// templates with, and what a widening finding names.
         SymbolName: string option
+        /// Symbol id of the declaration the type's own symbol is written inside - a namespace,
+        /// where `HarvestModel.Namespaces` has a name for it.
+        SymbolParent: int option
         Members: ResolvedMember list
         /// Index signatures (§4.10). Kept apart from `Members` because they are not properties:
         /// they have no name, and a type may carry one with no members at all.
@@ -673,6 +699,7 @@ module TypeFacts =
             Response = response
             Origin = Unclassified
             SymbolName = None
+            SymbolParent = None
             Members = []
             IndexInfos = []
             CallSignatures = []
