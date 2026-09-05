@@ -97,10 +97,36 @@ constant — so the change regenerates all 50 fixtures and has to be measured, n
 Wall-clock across 12, 16 and 20 was noise-dominated in R4's measurement, so the cost is
 probably small, but "probably" is not a measurement.
 
-**Recommended as a decision, not dispatched.** It moves output across the whole corpus at the
-moment wave ten's alpha is ready to publish, and today's realised loss is zero. Sequencing it
-after the alpha costs nothing; sequencing it before costs a regeneration and a re-review of
-what moved. That is the user's call.
+**Recommended as a decision; the user took it before release.** Lane AX landed it — see below.
+
+### Lane AX — `FollowDepth` 12 → 20, landed
+
+The premise held under test rather than under inference. **No generated binding file changes
+across depths 12, 16, 19, 20 and 24.** The whole diff is confined to `manifest.json` and
+`symbols.jsonl`, and within those to `RT001`'s payload. The rendered surface is byte-identical,
+so the renderer's reach is a property of the declarations and not of the cutoff, and
+cloudflare's reach of 11 holds at 20. Re-anchored directly: `TR002` is 1 at depth 10 and 0 at 11.
+
+20 clears nine generations of margin. 16 clears only five. 19 clears exactly eight and measured
+no cheaper than 20, so 20 takes the spare generation; 24 buys four more generations of walk for
+identical output. Wall-clock across candidates (185s, 188s, 160s, 249s, 261s) is run-to-run
+noise and separates nothing.
+
+**One count moved, with a cause.** `widened` 786 → 782 and `RT001` 7 → 3 are the same movement:
+`RT.FrontierNotResolved` is a `[<Widened>]` case, and `array-shape-lab`, `setter-lab`,
+`solid-js` and `type-fest` each exhaust their frontier past depth 12 and drop the finding they
+carried. `exact`, `ergonomic` and `escape` are unchanged. Four fixtures now resolve completely
+that did not before — a small fidelity gain on top of the margin the change was bought for.
+
+**Margins corrected and completed.** Lane AV's `solid-js` reach of 9 was right and its margin
+cell was wrong: `TR002` is 1 at depth 8 and 0 at 9, so the margin to 12 was 3, not 4. Measured
+renderer reach per fixture: cloudflare 11, solid-js 9, animejs 7, type-fest 6, `setter-lab` 4,
+`chain-lab` 3, `hoist-conditional-lab` 3, `array-shape-lab` 1. Cloudflare is the tightest by six
+generations, and its margin is now 9.
+
+`TR003` fired on no fixture at any depth from 0 to 24, which confirms lane AV's reading: the
+walk's own invariant puts every referenced id into `Types` or `NotFollowed`, so the depth cutoff
+cannot raise it.
 
 ## Instrumentation kept
 
@@ -124,17 +150,43 @@ defect.
 | generator tests | 467 | 467 |
 | wire tests | 90 | 90 |
 | run gate checks | 257 | 257 |
-| exact / ergonomic / widened / escape | 495 / 1552 / 786 / 193 | 495 / 1552 / 786 / 193 |
-| `RT001` | 7 | 7 |
+| exact | 495 | 495 |
+| ergonomic | 1552 | 1552 |
+| widened | 786 | **782** |
+| escape | 193 | 193 |
+| `RT001` | 7 | **3** |
+| `TR002` / `TR003` | 0 / 0 | 0 / 0 |
 | exit code | 0 | 0 |
+
+The two moved counts are one movement, caused above. No `.fs` binding file changed.
+
+## The wave's cost in process
+
+**One dispatch was wasted to the failure wave nine recorded.** The first lane on the
+`FollowDepth` raise ignored its base-SHA gate, worked in the shell's inherited worktree on an
+unrelated branch, ran no pipeline and committed nothing. Nothing was damaged and no branch was
+touched, so the cost was one dispatch — the same cost, and the same cause, as wave nine's.
+
+Stating the gate is not enough, and neither is putting it first among several instructions. The
+retry that worked opened with the gate as its **literal first action**, named the wrong path
+explicitly so a match could be recognised rather than merely a mismatch, and said what the
+previous lane had done. A gate a lane can read past is not a gate.
+
+**A wasted dispatch still returned something.** The failed lane read the committed goldens
+statically and corroborated `TR002 = 0` and cloudflare's `RT001` 1,815 from the opposite
+direction, and it caught `generator-three-rung.md` pricing the cutoff at `RT001` 10,461 and
+`TR002` 5,698 — pre-wave numbers that anything costing this item from that document would still
+be using. It also read stranded counts as renderer reach, which lane AX corrected: `chain-lab`
+strands 11 types but its renderer reaches generation 3.
 
 ## For the next worklist
 
-1. **Raise `FollowDepth`** to restore margin. Priced above; needs a regeneration and a
-   measurement of what moves, not a constant change alone.
-2. **Record the margin, not the frontier count.** `RT001`'s 7 says nothing a reader can act on.
-   The number worth watching is the gap between the renderer's deepest reach and the cutoff,
-   per fixture, and it should be measured whenever a rung is added.
+1. **Record the margin, not the frontier count.** `RT001` says nothing a reader can act on —
+   it counts what the walk declined, which is a steady state at any cutoff. The number worth
+   watching is the gap between the renderer's deepest reach and the cutoff, per fixture. It is
+   now 9 at its tightest, and it should be re-measured whenever a rung is added. The gated
+   `XANTHAM_FRONTIER_DUMP` instrumentation in `Resolve.fs` is what measures it.
+2. **`generator-three-rung.md` is stale on the cutoff** and should be corrected or marked.
 3. **The fidelity queue**, deferred from wave ten: `TR037` 54, `TR036` 72, `TR023` 137,
    `TR018` 82, and group emission ordering. Lane R3's dispatch order in
    `docs/.ai/handovers/lane-r3.md` still stands and needs no re-derivation.
