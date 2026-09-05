@@ -2365,6 +2365,25 @@ let pipelineTests =
                               (source.Contains "Blend.Pick")
                               "and neither arm-set earns a declaration"
 
+                      // Wave eight lane AO, item 3. Retention reads a declaration's members, and
+                      // an exported function has none, so a literal that would have separated the
+                      // set at a member position separates nothing here.
+                      testCase "an exported function's overloads reach deduplication widened" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains
+                              source
+                              "static member emit (kind: string) : unit"
+                              "the literal widens at the exported position"
+
+                          Expect.equal
+                              (rendered.Findings
+                               |> List.filter (fun finding -> finding.Key = "DO004")
+                               |> List.map _.Symbol)
+                              [ "emit" ]
+                              "and the drop reports as an export-function loss rather than DO001"
+
                       testCase "the findings say which literals were kept and which overload sets they separate"
                       <| fun _ ->
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)

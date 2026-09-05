@@ -110,3 +110,13 @@ type Widen =
 /// </summary>
 type Blend =
     abstract pick: kind: string -> unit
+
+/// <summary>The package's value exports, each bound to its import.</summary>
+[<Erase>]
+type Exports =
+    /// <summary>
+    /// Negative: a literal tells these two apart, and retention reads the members of a declaration,
+    /// so an exported function reaches deduplication widened. The second drops as <c>DO004</c>.
+    /// </summary>
+    [<Import("emit", "literal-overload-lab")>]
+    static member emit (kind: string) : unit = jsNative

@@ -33,6 +33,9 @@ let private literalDecl (name: string, text: string, order: DeclOrder option) =
 /// A literal-typed parameter keeps its literal as a type of its own where that is what separates
 /// an overload set (`Spec.literalOverloads`), so those signatures arrive here distinct. The types
 /// they read are declared beside them.
+///
+/// Retention reads the members of a declaration, so an exported function's overloads arrive
+/// widened and its drops report `DO004` apart from `DO001`.
 let dedupeOverloads: Pass<ShapeModel> =
     {
         Name = "dedupe-overloads"
@@ -125,11 +128,13 @@ let dedupeOverloads: Pass<ShapeModel> =
                     let exportMembers =
                         model.ExportMembers
                         |> List.filter (fun (_, m) ->
-                            let key =
+                            let key, dropped =
                                 match m.Body with
-                                | ExportFunction(parameters, _) -> Some("fn", signatureKey parameters)
-                                | ExportConstructor(parameters, _) -> Some("new", signatureKey parameters)
-                                | ExportValue _ -> None
+                                | ExportFunction(parameters, _) ->
+                                    Some("fn", signatureKey parameters), DedupeOverloads.ExportFunctionOverloadDropped
+                                | ExportConstructor(parameters, _) ->
+                                    Some("new", signatureKey parameters), DedupeOverloads.OverloadDropped
+                                | ExportValue _ -> None, DedupeOverloads.OverloadDropped
 
                             match key with
                             | None -> true
@@ -137,7 +142,7 @@ let dedupeOverloads: Pass<ShapeModel> =
                                 let key = (m.Name, key).ToString()
 
                                 if Set.contains key seenExports then
-                                    findings <- findings @ [ Finding.make m.Name DedupeOverloads.OverloadDropped ]
+                                    findings <- findings @ [ Finding.make m.Name dropped ]
 
                                     false
                                 else

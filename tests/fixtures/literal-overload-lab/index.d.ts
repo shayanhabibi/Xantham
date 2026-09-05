@@ -63,3 +63,10 @@ export interface Blend {
   pick(kind: "a" | "b" | (string & {})): void;
   pick(kind: "c" | "d" | (string & {})): void;
 }
+
+/**
+ * Negative: a literal tells these two apart, and retention reads the members of a declaration,
+ * so an exported function reaches deduplication widened. The second drops as `DO004`.
+ */
+export function emit(kind: "start"): void;
+export function emit(kind: "stop"): void;
