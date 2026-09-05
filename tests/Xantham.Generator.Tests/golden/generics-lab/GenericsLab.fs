@@ -53,9 +53,12 @@ module Each =
     type Props<'T, 'U> =
         abstract items: 'T[] with get, set
         abstract fallback: string option with get, set
-        abstract render: Func<'T, float, 'U> with get, set
+        abstract render: Each.Props.Render<'T, 'U> with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (items: 'T[], render: Func<'T, float, 'U>, ?fallback: string) : Props<'T, 'U> = jsNative
+        static member Create (items: 'T[], render: Each.Props.Render<'T, 'U>, ?fallback: string) : Props<'T, 'U> = jsNative
+
+    module Props =
+        type Render<'T, 'U> = delegate of item: 'T * index: float -> 'U
 
 /// <summary>
 /// An anonymous object type inside a generic alias.

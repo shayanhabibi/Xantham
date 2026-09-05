@@ -721,7 +721,10 @@ let pipelineTests =
                     // mention and the parameter position applies them back.
                     Expect.stringContains source "    type Props<'T, 'U> =" "the hoisted declaration is generic over what it reads"
                     Expect.stringContains source "abstract items: 'T[] with get, set" "a member reads the outer variable"
-                    Expect.stringContains source "abstract render: Func<'T, float, 'U> with get, set" "so does a callback member"
+                    Expect.stringContains
+                      source
+                      "abstract render: Each.Props.Render<'T, 'U> with get, set"
+                      "a callback member is a named delegate, declared over the same variables"
                     Expect.stringContains source "static member each<'T, 'U> (props: Each.Props<'T, 'U>) : 'U[] = jsNative" "the use applies them back"
                     Expect.stringContains source "type Handle<'T> = (unit -> 'T) * Handle.Item<'T>" "the same inside a generic alias"
 
@@ -2889,31 +2892,44 @@ let pipelineTests =
                               "finish: (unit -> unit)"
                               "a method member as a ParamObject Create parameter"
 
-                      testCase "a callback of arity 2 or more keeps its delegate" <| fun _ ->
+                      testCase "a callback of arity 2 or more is a named delegate" <| fun _ ->
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                           let source = rendered.Files |> List.head |> snd
 
                           Expect.stringContains
                               source
-                              "static member callTwo (callback: Func<float, float, string>) : string"
+                              "type Callback = delegate of a: float * b: float -> string"
+                              "the declaration carries the parameter names TypeScript spelled"
+
+                          Expect.stringContains
+                              source
+                              "static member callTwo (callback: CallTwo.Callback) : string"
                               "a callback in parameter position"
 
                           Expect.stringContains
                               source
-                              "abstract onTick: Func<float, float, string> with get, set"
+                              "abstract onTick: Handlers.OnTick with get, set"
                               "a callback as an interface member"
 
                           Expect.stringContains
                               source
-                              "abstract make: seed: float -> Func<float, float, string>"
+                              "abstract make: seed: float -> Factory.Make.Result"
                               "a callback returned from a member"
-
-                          Expect.stringContains source "type Formatter = Func<float, float, string>" "a named callback"
 
                           Expect.stringContains
                               source
-                              "callVoidTwo (callback: Action<float, float>)"
+                              "type Formatter = delegate of value: float * digits: float -> string"
+                              "a named callback"
+
+                          Expect.stringContains
+                              source
+                              "type Callback = delegate of a: float * b: float -> unit"
                               "a unit-returning callback of arity 2"
+
+                          Expect.stringContains
+                              source
+                              "callVoidTwo (callback: CallVoidTwo.Callback)"
+                              "and the position that takes it"
 
                       testCase "a callback whose return is a callback keeps its delegate at that level" <| fun _ ->
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -2925,12 +2941,12 @@ let pipelineTests =
                           // the flattening does not reach, converts on its own terms.
                           Expect.stringContains
                               source
-                              "callNestingOne (outer: Func<float, (float -> string)>)"
+                              "type Outer = delegate of seed: float -> (float -> string)"
                               "a unary callback returning a unary callback"
 
                           Expect.stringContains
                               source
-                              "callNesting (outer: (float -> Func<float, float, string>))"
+                              "callNesting (outer: (float -> CallNesting.Outer.Result))"
                               "a unary callback returning a callback of arity 2"
 
                       testCase "every retained delegate is reported with its reason" <| fun _ ->
@@ -2951,6 +2967,16 @@ let pipelineTests =
                                   "callback kept as a delegate: its return is itself a callback"
                               ]
                               "TR055 names the position that refused the conversion" ])
+
+        // Wave twelve lane BB. A retained callback is declared as a named delegate carrying the
+        // parameter names TypeScript spelled, so the consumer reads `x: float * y: float` where
+        // `Func<float, float, string>` gave only a count.
+        yield!
+            fixtureTests
+                "delegate-name-lab"
+                (handFixture "delegate-name-lab")
+                GeneratorConfig.Default
+                (fun _ -> [])
 
         // Wave five lanes T and U (O7). `cross-package-lab` is two packages under one
         // `node_modules`. The dependency half is registered as its own entry package and ships;

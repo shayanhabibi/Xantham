@@ -589,6 +589,35 @@ let internal callbackRef (owner: string) (parameters: FsTypeRef list) (returns: 
     | [ argument ], _ -> FsFunc(argument, returns), []
     | _ -> retainedFor $"it takes {parameters.Length} arguments"
 
+/// Whether a callback is written as an F# function type at a reference position: one argument or
+/// none, and a return that is written the same way (D5a). `names` is the naming in force, because
+/// a callback this run declares under a name of its own is written as that name and a callback
+/// returning one is retained. `seen` cuts a callback reached from its own return.
+let rec private functionShapedCallback
+    (model: ShapeModel)
+    (names: Map<int, string>)
+    (seen: Set<int>)
+    (facts: TypeFacts)
+    =
+    isPureCallback facts
+    && not (Map.containsKey facts.Response.Id names)
+    && not (Set.contains facts.Response.Id seen)
+    && (match facts.CallSignatures with
+        | [] -> false
+        | first :: _ ->
+            let signature = expandTupleRest model first
+
+            signature.Parameters.Length <= 1
+            && (match Map.tryFind signature.ReturnTypeId model.Types with
+                | Some returns -> not (functionShapedCallback model names (Set.add facts.Response.Id seen) returns)
+                | None -> true))
+
+/// Whether `callbackRef` will retain this callback as a delegate rather than write it as an F#
+/// function type. Read before shaping, so `synthesize-anonymous` can declare a name for the ones
+/// that will need it.
+let internal callbackRetainedAsDelegate (model: ShapeModel) (names: Map<int, string>) (facts: TypeFacts) =
+    isPureCallback facts && not (functionShapedCallback model names Set.empty facts)
+
 // ---------------------------------------------------------------------------------------------
 // Literal-typed parameters that separate an overload set (§4.2).
 // ---------------------------------------------------------------------------------------------
@@ -1750,7 +1779,7 @@ let internal declTypeParams (ctx: Context) (model: ShapeModel) (owner: string) (
 /// every signature's uses bind to; a name declared under two bounds keeps a slot per bound, and
 /// `repair-arity` prices the head F# refuses.
 let internal aliasTypeParams (ctx: Context) (model: ShapeModel) (owner: string) (facts: TypeFacts) =
-    let declared = declParamIds facts
+    let declared = declParamIds facts @ freeParamsOf model facts.Response.Id
     let hoisted = facts.CallSignatures |> List.collect _.TypeParameters |> List.distinct
     let ids = declared @ hoisted |> List.distinct
 

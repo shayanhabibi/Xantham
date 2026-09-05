@@ -5,16 +5,17 @@ open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator.Shape.Spec
 
-/// The delegate shape of a named callback, without the self-name lookup that would just return
-/// the abbreviation being defined.
-let private delegateRefFor
+/// The shape of a named callback: the parameters it was declared with, the reference the arity
+/// rule writes for it, and the findings both produce. The self-name lookup is skipped, because it
+/// would return the declaration being written.
+let private delegateShapeFor
     (ctx: Context)
     (model: ShapeModel)
     (name: string)
     (facts: TypeFacts)
-    : FsTypeRef * Finding list =
+    : FsParam list * FsTypeRef * Finding list =
     match facts.CallSignatures with
-    | [] -> FsObj, [ Finding.make name TypeReference.CallableWithoutSignatures ]
+    | [] -> [], FsObj, [ Finding.make name TypeReference.CallableWithoutSignatures ]
     | signature :: rest ->
         let overloadFindings =
             if rest.IsEmpty then
@@ -32,9 +33,12 @@ let private delegateRefFor
 
         let parameterTypes = parameters |> List.map _.Type
         let reference, callbackFindings = callbackRef name parameterTypes returns
-        reference, overloadFindings @ signatureFindings @ callbackFindings
+        parameters, reference, overloadFindings @ signatureFindings @ callbackFindings
 
-/// Abbreviations for named pure-callback types: `type TimerCallback = Action<Timer>` (D5).
+/// A declaration for every named pure-callback type. One the arity rule retains is a named
+/// delegate carrying the parameter names TypeScript spelled - `type TickHandler = delegate of x:
+/// float * y: float -> string` (D5); one that converts is an abbreviation of the F# function type
+/// - `type Formatter = (float -> string)` (D5a).
 let shapeCallbacks: Pass<ShapeModel> =
     {
         Name = "shape-callbacks"
@@ -54,22 +58,45 @@ let shapeCallbacks: Pass<ShapeModel> =
 
                                 // The signature is read under the alias's own parameters, so
                                 // `Callback<T> = (self: T) => void` writes `'T` rather than widening it.
-                                let reference, refFindings =
-                                    delegateRefFor ctx { model with TypeVars = scope } name facts
+                                let parameters, reference, refFindings =
+                                    delegateShapeFor ctx { model with TypeVars = scope } name facts
 
                                 findings <- findings @ parameterFindings @ refFindings
 
-                                Some(
-                                    FsAbbrev
-                                        {
-                                            Name = name
-                                            Docs = ""
-                                            Tags = []
-                                            Order = Map.tryFind typeId model.DeclOrders |> Option.defaultValue None
-                                            TypeParameters = typeParameters
-                                            Target = reference
-                                        }
-                                )
+                                let order = Map.tryFind typeId model.DeclOrders |> Option.defaultValue None
+
+                                match reference with
+                                | FsDelegate(arguments, returns) ->
+                                    Some(
+                                        FsDelegateType
+                                            {
+                                                Name = name
+                                                Docs = ""
+                                                Tags = []
+                                                Order = order
+                                                TypeParameters = typeParameters
+                                                Parameters =
+                                                    List.zip (parameters |> List.map _.Name) arguments
+                                                    |> List.map (fun (parameterName, argument) ->
+                                                        {
+                                                            FsDelegateParam.Name = parameterName
+                                                            Type = argument
+                                                        })
+                                                Return = returns
+                                            }
+                                    )
+                                | _ ->
+                                    Some(
+                                        FsAbbrev
+                                            {
+                                                Name = name
+                                                Docs = ""
+                                                Tags = []
+                                                Order = order
+                                                TypeParameters = typeParameters
+                                                Target = reference
+                                            }
+                                    )
                             | _ -> None)
 
                     let model =

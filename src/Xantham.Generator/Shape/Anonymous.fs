@@ -259,6 +259,8 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                 findings
                 @ [ Finding.make unique (SynthesizeAnonymous.NameNestedUnderOwner unique) ]
 
+        unique
+
     /// A literal union worth a declaration: at least two non-nullish members, all literal,
     /// not just `true | false`, and no already-named union with the same member set.
     let isLiteralUnion (facts: TypeFacts) =
@@ -273,18 +275,54 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
         && not (isBooleanPair model remaining)
         && (namedUnionByMembers { model with DeclNames = names } remaining).IsNone
 
+    /// The type ids a declaration reads through call signatures rather than through a reference
+    /// position: an export's own function type, and a method member's. A delegate declared for
+    /// one of these is written nowhere, so the name is spent for nothing.
+    let signatureShaped =
+        let exported =
+            model.ExportTypes
+            |> Map.toList
+            |> List.collect (fun (_, ids) -> Option.toList ids.Declared @ Option.toList ids.Value)
+
+        let methods =
+            model.Types
+            |> Map.toList
+            |> List.collect (fun (_, facts) ->
+                facts.Members
+                |> List.filter (fun m -> hasAny SymbolFlags.Method m.Symbol.Flags)
+                |> List.map _.TypeId)
+
+        Set.ofList (exported @ methods)
+
     let needsName (facts: TypeFacts) =
         if Map.containsKey facts.Response.Id names then
             false
         elif flag TypeFlags.Union facts && not (flag TypeFlags.Boolean facts) then
             isLiteralUnion facts
-        elif flag TypeFlags.Object facts then
-            // Entry-group object shapes with members become interfaces; callbacks stay
-            // inline as delegates, arrays as arrays, tuples as F# tuples (D7). An anonymous
-            // shape belongs to the entry package whatever file its node sits in (D6).
+        elif flag TypeFlags.Object facts && isPureCallback facts then
+            // A callback the arity rule retains as a delegate is declared under a name of its
+            // own (D5), so the consumer reads `x: float * y: float` where `Func<float, float,
+            // string>` said only how many arguments there are.
             (GeneratorConfig.disposition ctx.Config facts.Origin = Ship
              || facts.SymbolName |> Option.forall isSyntheticName)
-            && not (isPureCallback facts)
+            && not (Set.contains facts.Response.Id signatureShaped)
+            // F# has no rank-2 form, so a generic signature can only be approximated by
+            // hoisting its variables onto the declaration - and a reference has nothing to
+            // apply them back with. Written inline, they stay in the scope that bound them.
+            && facts.CallSignatures |> List.forall (fun signature -> signature.TypeParameters.IsEmpty)
+            // An application of a generic callback alias - `ExportedHandlerFetchHandler<Env,
+            // Cf, Props>` at a member of `ExportedHandler` - binds the alias's parameters on
+            // its head and gives a reference nothing to apply them with. It expands in place,
+            // under the name the alias itself already carries.
+            && declParamIds facts = ownArguments facts
+            && callbackRetainedAsDelegate model names facts
+            && (instantiationOf { model with DeclNames = names } facts).IsNone
+        elif flag TypeFlags.Object facts then
+            // Entry-group object shapes with members become interfaces; arrays stay arrays and
+            // tuples F# tuples (D7). An anonymous shape belongs to the entry package whatever
+            // file its node sits in (D6).
+            (GeneratorConfig.disposition ctx.Config facts.Origin = Ship
+             || facts.SymbolName |> Option.forall isSyntheticName)
             && (arrayElement model facts).IsNone
             && not (isTuple facts)
             && facts.ConstructSignatures.IsEmpty
@@ -336,7 +374,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                             | Some declaredFacts -> hasConditionalOperand model declaredFacts
                             | None -> false)
                         ->
-                        claim None path declared order
+                        claim None path declared order |> ignore
                     | _ -> ()
                 | _ -> ()
 
@@ -348,7 +386,17 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                         | Some name when not (isSyntheticName name) -> Naming.pascalSegment name, namespaceOf facts
                         | _ -> path, None
 
-                    claim owner preferred typeId order
+                    let claimed = claim owner preferred typeId order
+
+                    // The delegate declaration `shape-callbacks` writes for it (D5): the arity
+                    // guarantee `System.Func` gives, under a name whose parameters read as
+                    // TypeScript spelled them.
+                    if isPureCallback facts then
+                        findings <-
+                            findings
+                            @ [
+                                Finding.make claimed (SynthesizeAnonymous.CallbackDelegateNamed claimed)
+                            ]
 
                 // An erased alias application: hash-consed onto the declaration it applies,
                 // with the recovered arguments standing in for the parameters a hoisted
