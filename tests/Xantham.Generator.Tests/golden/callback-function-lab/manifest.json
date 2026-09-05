@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "package": "callback-function-lab",
+  "module": "CallbackFunctionLab",
+  "counts": {
+    "exact": 11,
+    "ergonomic": 3,
+    "widened": 0,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 2,
+      "ergonomic": 2
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 9,
+      "ergonomic": 9
+    }
+  ]
+}

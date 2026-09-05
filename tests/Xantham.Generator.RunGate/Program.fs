@@ -790,6 +790,85 @@ let private errorClasses () =
          with e ->
              e.Message)
 
+/// Lane AE's design gate. Every claim reads the arity JavaScript saw, so a curried chain fails
+/// twice over: `length` reads 1, and the call returns a function where a string was declared.
+let private callbackFunctionForms () =
+    equal
+        "an F# function of arity 0 crosses as a 0-argument function"
+        "0:none"
+        (Probes.CallbackFunctions.callNone (fun () -> "none"))
+
+    equal "arity 1 crosses as a 1-argument function" "1:got:1" (Probes.CallbackFunctions.callOne (fun a -> $"got:{a}"))
+    equal "arity 2 crosses uncurried" "2:got:1:2" (Probes.CallbackFunctions.callTwo (fun a b -> $"got:{a}:{b}"))
+
+    equal
+        "arity 3 crosses uncurried"
+        "3:got:1:2:3"
+        (Probes.CallbackFunctions.callThree (fun a b c -> $"got:{a}:{b}:{c}"))
+
+    let mutable sawVoid = 0.0
+    equal "a unit-returning callback keeps its arity" 1.0 (Probes.CallbackFunctions.callVoid (fun a -> sawVoid <- a))
+    equal "and the runtime's call reached it" 7.0 sawVoid
+
+    equal
+        "a named callback abbreviation crosses uncurried"
+        "2:1.5|2"
+        (Probes.CallbackFunctions.callNamed (fun value digits -> $"{value}|{digits}"))
+
+    let built =
+        Probes.Handlers.Create(onTick = (fun a b -> $"tick:{a}:{b}"), onDone = (fun _ -> ()))
+
+    equal "a callback in a ParamObject literal crosses uncurried" "2:tick:1:2:1" (Probes.CallbackFunctions.fire built)
+
+    let options =
+        Probes.Options.Create(label = "b", transform = (fun a b -> $"t:{a}:{b}"), finish = (fun () -> ()))
+
+    equal
+        "a method-shaped ParamObject parameter crosses uncurried"
+        "b:2:t:1:2:0"
+        (Probes.CallbackFunctions.build options)
+
+    let fromJs = Probes.CallbackFunctions.handlers
+    equal "a callback read off an interface member applies with all its arguments" "js:1:2" (fromJs.onTick 1.0 2.0)
+    // Measured, not wanted. Reading a function-typed member back out hands F# a curry wrapper of
+    // length 1 rather than the JavaScript function itself, so a consumer that passes the value on
+    // to JavaScript passes a unary function. `Func` reads back as the function JavaScript holds.
+    equal
+        "reading a function-typed member back hands F# a unary curry wrapper"
+        1.0
+        (emitJsExpr fromJs.onTick "$0.length")
+
+    let attempt (f: unit -> string) =
+        try
+            f ()
+        with e ->
+            $"threw: {e.Message}"
+
+    let factory = Probes.CallbackFunctions.factory
+
+    // A function-typed *property*: the value is read off the member and applied at the call site.
+    // The wrapper applies correctly from F#; its arity is what is lost.
+    equal "a function-typed property reads back as a unary curry wrapper too" 1.0 (emitJsExpr factory.pair "$0.length")
+    equal "and applies with all its arguments" "pair:1:2" (attempt (fun () -> factory.pair 1.0 2.0))
+    equal "a function-typed member of arity 0 applies" "ready" (attempt factory.ready)
+
+    // The same function, reached through a method call rather than a property read. Fable wraps
+    // nothing here and compiles the call site curried anyway, so the application throws. This is
+    // the position that refuses the conversion.
+    let made = factory.make 5.0
+    equal "a callback returned from a method arrives at its declared arity" 2.0 (emitJsExpr made "$0.length")
+
+    check
+        "but the call site applies it one argument at a time, and throws"
+        ((attempt (fun () -> made 1.0 2.0)).StartsWith "threw:")
+
+    equal "a callback returned from a method applies at arity 1" "one:5:1" (attempt (fun () -> factory.makeOne 5.0 1.0))
+    equal "a callback returned from a method applies at arity 0" "none:5" (attempt (factory.makeNone 5.0))
+
+    check
+        "and throws at arity 3 for the same reason"
+        ((attempt (fun () -> factory.makeThree 5.0 1.0 2.0 3.0)).StartsWith "threw:")
+
 [<EntryPoint>]
 let main _ =
     globals ()
@@ -807,6 +886,7 @@ let main _ =
     renamedStatics ()
     workarounds ()
     probes ()
+    callbackFunctionForms ()
 
     match failures with
     | [] ->

@@ -2435,6 +2435,48 @@ let pipelineTests =
                                |> List.filter (fun f -> f.Key = "SP003" && f.Symbol.StartsWith "Handle"))
                               "a declaration that already has Create members is not reported as missing one" ])
 
+        // Wave seven lane AE. A callback in each position the corpus uses, at arities 0 to 3. The
+        // run gate measures the same positions against F# function types (`Probes.fs`); this pins
+        // what the delegate emission the measurement was taken against actually writes.
+        yield!
+            fixtureTests
+                "callback-function-lab"
+                (handFixture "callback-function-lab")
+                GeneratorConfig.Default
+                (fun package ->
+                    [ testCase "a callback in each position renders as a delegate" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains
+                              source
+                              "static member callTwo (callback: Func<float, float, string>) : string"
+                              "a callback in parameter position"
+
+                          Expect.stringContains
+                              source
+                              "abstract onTick: Func<float, float, string> with get, set"
+                              "a callback as an interface member"
+
+                          Expect.stringContains
+                              source
+                              "abstract make: seed: float -> Func<float, float, string>"
+                              "a callback returned from a member"
+
+                          Expect.stringContains source "type Formatter = Func<float, float, string>" "a named callback"
+
+                          Expect.stringContains
+                              source
+                              "transform: Func<float, float, string>"
+                              "a method member as a ParamObject Create parameter"
+
+                      testCase "no callback site is reported as keeping the delegate under duress" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                          Expect.isEmpty
+                              (rendered.Findings |> List.filter (fun f -> f.Key = "TR055"))
+                              "TR055 fires only where a conversion was attempted and refused" ])
+
         // Wave five lanes T and U (O7). `cross-package-lab` is two packages under one
         // `node_modules`. The dependency half is registered as its own entry package and ships;
         // the entry half carries an `xantham.json` configuring the dependency `reference`, so
