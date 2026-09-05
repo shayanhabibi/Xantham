@@ -434,70 +434,72 @@ module Stages =
                 }
         }
 
-rootCommand fsi.CommandLineArgs[1..] {
-    workingDir Repo.FileSystem.``.``
+exit (
+    rootCommand fsi.CommandLineArgs[1..] {
+        workingDir Repo.FileSystem.``.``
 
-    command "format" {
-        Stages.restore
-        Stages.format
+        command "format" {
+            Stages.restore
+            Stages.format
+        }
+
+        command "bump" {
+            Baked.Pipelines.bumpArgument
+                (Spec.srcProjects |> List.map _.RelativePath)
+                (Options.projects |> InputSpec.map (List.map _.RelativePath))
+        }
+
+        command "build" {
+            Stages.restore
+            Stages.clean
+            Stages.format
+            Stages.build (Options.projects |> InputSpec.map (List.map _.RelativePath))
+        }
+
+        command "generate" {
+            Stages.deps
+            Stages.generate
+        }
+
+        command "docs" {
+            Stages.restore
+            Stages.clean
+            Stages.format
+            Stages.docs
+        }
+
+        command "publish" {
+            Stages.restore
+            Stages.clean
+            Stages.format
+            Stages.build (Options.projects |> InputSpec.map (List.map _.RelativePath))
+            Stages.deps
+            Stages.fixtures
+            Stages.test
+            Stages.pack
+            Stages.publish
+        }
+
+        command "test" {
+            Stages.restore
+            Stages.clean
+            Stages.format
+            Stages.deps
+            Stages.fixtures
+            Stages.test
+        }
+
+        command "findings" { Stages.findings }
+
+        command "pack" {
+            Stages.restore
+            Stages.clean
+            Stages.format
+            Stages.build (Options.projects |> InputSpec.map (List.map _.RelativePath))
+            Stages.deps
+            Stages.fixtures
+            Stages.test
+            Stages.pack
+        }
     }
-
-    command "bump" {
-        Baked.Pipelines.bumpArgument
-            (Spec.srcProjects |> List.map _.RelativePath)
-            (Options.projects |> InputSpec.map (List.map _.RelativePath))
-    }
-
-    command "build" {
-        Stages.restore
-        Stages.clean
-        Stages.format
-        Stages.build (Options.projects |> InputSpec.map (List.map _.RelativePath))
-    }
-
-    command "generate" {
-        Stages.deps
-        Stages.generate
-    }
-
-    command "docs" {
-        Stages.restore
-        Stages.clean
-        Stages.format
-        Stages.docs
-    }
-
-    command "publish" {
-        Stages.restore
-        Stages.clean
-        Stages.format
-        Stages.build (Options.projects |> InputSpec.map (List.map _.RelativePath))
-        Stages.deps
-        Stages.fixtures
-        Stages.test
-        Stages.pack
-        Stages.publish
-    }
-
-    command "test" {
-        Stages.restore
-        Stages.clean
-        Stages.format
-        Stages.deps
-        Stages.fixtures
-        Stages.test
-    }
-
-    command "findings" { Stages.findings }
-
-    command "pack" {
-        Stages.restore
-        Stages.clean
-        Stages.format
-        Stages.build (Options.projects |> InputSpec.map (List.map _.RelativePath))
-        Stages.deps
-        Stages.fixtures
-        Stages.test
-        Stages.pack
-    }
-}
+)
