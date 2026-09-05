@@ -75,6 +75,11 @@ type Exports =
     [<Import("callVoid", "callback-function-lab")>]
     static member callVoid (callback: Action<float>) : float = jsNative
     /// <summary>
+    /// The same arm at arity 2, where <c>Action&lt;A, B&gt;</c> has more than one argument to guarantee.
+    /// </summary>
+    [<Import("callVoidTwo", "callback-function-lab")>]
+    static member callVoidTwo (callback: Action<float, float>) : float = jsNative
+    /// <summary>
     /// The named callback in parameter position, so the abbreviation is what crosses.
     /// </summary>
     [<Import("callNamed", "callback-function-lab")>]

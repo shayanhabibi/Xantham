@@ -25,6 +25,11 @@ export function callVoid(callback) {
     return callback.length;
 }
 
+export function callVoidTwo(callback) {
+    callback(7, 8);
+    return callback.length;
+}
+
 export function callNamed(formatter) {
     return report(formatter, 1.5, 2);
 }

@@ -129,3 +129,71 @@ type CallbackFunctions =
 
     [<Import("factory", "callback-function-lab")>]
     static member factory: Factory = jsNative
+
+    [<Import("callVoidTwo", "callback-function-lab")>]
+    static member callVoidTwo(callback: float -> float -> unit) : float = jsNative
+
+// Probes 9-13 - a callback as a *tupled* F# function type, in the same positions.
+//
+// Lane AK. A tuple is the other function type F# offers, and Fable compiles an F# tuple to a
+// JavaScript array, so the question is whether `(float * float) -> string` crosses as a
+// 2-argument JavaScript function or as a 1-argument function taking an array. Arities 0 and 1
+// have no tupled spelling distinct from the curried one, so probes 4 and 5 above cover them.
+
+/// A named tupled callback type, in the spelling the shape tier would abbreviate.
+type TupledFormatter = (float * float) -> string
+
+/// A tupled callback as an interface member, required and optional.
+[<Interface>]
+type TupledHandlers =
+    abstract onTick: ((float * float) -> string) with get, set
+    abstract onDone: (float -> unit) option with get, set
+
+    [<ParamObject; Emit("$0")>]
+    static member Create(onTick: (float * float) -> string, ?onDone: float -> unit) : TupledHandlers = jsNative
+
+/// A tupled callback as a `ParamObject` Create parameter, which is what a method member binds.
+[<Interface>]
+type TupledOptions =
+    abstract label: string with get, set
+    abstract transform: a: float * b: float -> string
+    abstract finish: unit -> unit
+
+    [<ParamObject; Emit("$0")>]
+    static member Create(label: string, transform: (float * float) -> string, finish: unit -> unit) : TupledOptions =
+        jsNative
+
+/// A tupled callback returned from a method, and read off a function-typed member.
+[<Interface>]
+type TupledFactory =
+    abstract make: seed: float -> ((float * float) -> string)
+    abstract makeThree: seed: float -> ((float * float * float) -> string)
+    abstract ready: (unit -> string)
+    abstract pair: ((float * float) -> string)
+
+[<Erase>]
+type CallbackTuples =
+
+    [<Import("callTwo", "callback-function-lab")>]
+    static member callTwo(callback: (float * float) -> string) : string = jsNative
+
+    [<Import("callThree", "callback-function-lab")>]
+    static member callThree(callback: (float * float * float) -> string) : string = jsNative
+
+    [<Import("callVoidTwo", "callback-function-lab")>]
+    static member callVoidTwo(callback: (float * float) -> unit) : float = jsNative
+
+    [<Import("callNamed", "callback-function-lab")>]
+    static member callNamed(formatter: TupledFormatter) : string = jsNative
+
+    [<Import("fire", "callback-function-lab")>]
+    static member fire(handlers: TupledHandlers) : string = jsNative
+
+    [<Import("handlers", "callback-function-lab")>]
+    static member handlers: TupledHandlers = jsNative
+
+    [<Import("build", "callback-function-lab")>]
+    static member build(options: TupledOptions) : string = jsNative
+
+    [<Import("factory", "callback-function-lab")>]
+    static member factory: TupledFactory = jsNative

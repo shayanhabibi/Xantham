@@ -7,6 +7,7 @@
 {"name":"callTwo","tier":"exact","findings":[]}
 {"name":"callThree","tier":"exact","findings":[]}
 {"name":"callVoid","tier":"exact","findings":[]}
+{"name":"callVoidTwo","tier":"exact","findings":[]}
 {"name":"callNamed","tier":"exact","findings":[]}
 {"name":"fire","tier":"exact","findings":[]}
 {"name":"handlers","tier":"exact","findings":[]}

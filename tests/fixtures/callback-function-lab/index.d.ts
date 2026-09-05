@@ -19,6 +19,9 @@ export declare function callThree(callback: (a: number, b: number, c: number) =>
 /** A callback returning `void`: the arm that renders `Action` today. */
 export declare function callVoid(callback: (a: number) => void): number;
 
+/** The same arm at arity 2, where `Action<A, B>` has more than one argument to guarantee. */
+export declare function callVoidTwo(callback: (a: number, b: number) => void): number;
+
 /** A named callback type, which abbreviates on its own. */
 export type Formatter = (value: number, digits: number) => string;
 

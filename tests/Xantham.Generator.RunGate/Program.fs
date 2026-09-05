@@ -869,6 +869,202 @@ let private callbackFunctionForms () =
         "and throws at arity 3 for the same reason"
         ((attempt (fun () -> factory.makeThree 5.0 1.0 2.0 3.0)).StartsWith "threw:")
 
+/// Lane AK's three-way comparison. `callbackFunctionForms` above measures the curried spelling;
+/// this measures the delegate spelling the corpus emits today, against the same runtime and the
+/// *generated* golden rather than a hand-written mirror, so a change to the emission is measured
+/// here rather than asserted about.
+let private callbackDelegateForms () =
+    let attempt (f: unit -> string) =
+        try
+            f ()
+        with e ->
+            $"threw: {e.Message}"
+
+    equal
+        "a delegate of arity 0 crosses as a 0-argument function"
+        "0:none"
+        (CallbackFunctionLab.Exports.callNone (Func<string>(fun () -> "none")))
+
+    equal
+        "a delegate of arity 1 crosses as a 1-argument function"
+        "1:got:1"
+        (CallbackFunctionLab.Exports.callOne (Func<float, string>(fun a -> $"got:{a}")))
+
+    equal
+        "a delegate of arity 2 crosses at its declared arity"
+        "2:got:1:2"
+        (CallbackFunctionLab.Exports.callTwo (Func<float, float, string>(fun a b -> $"got:{a}:{b}")))
+
+    equal
+        "a delegate of arity 3 crosses at its declared arity"
+        "3:got:1:2:3"
+        (CallbackFunctionLab.Exports.callThree (Func<float, float, float, string>(fun a b c -> $"got:{a}:{b}:{c}")))
+
+    let mutable sawVoid = 0.0
+
+    equal
+        "an Action of arity 1 keeps its arity"
+        1.0
+        (CallbackFunctionLab.Exports.callVoid (Action<float>(fun a -> sawVoid <- a)))
+
+    equal "and the runtime's call reached it" 7.0 sawVoid
+    let mutable sawVoidTwo = 0.0
+
+    equal
+        "an Action of arity 2 keeps its arity"
+        2.0
+        (CallbackFunctionLab.Exports.callVoidTwo (Action<float, float>(fun a b -> sawVoidTwo <- a + b)))
+
+    equal "and the runtime's call reached it with both arguments" 15.0 sawVoidTwo
+
+    equal
+        "a named delegate abbreviation crosses at its declared arity"
+        "2:1.5|2"
+        (CallbackFunctionLab.Exports.callNamed (Func<float, float, string>(fun value digits -> $"{value}|{digits}")))
+
+    let built =
+        CallbackFunctionLab.Handlers.Create(
+            onTick = Func<float, float, string>(fun a b -> $"tick:{a}:{b}"),
+            onDone = Action<float>(fun _ -> ())
+        )
+
+    equal "a delegate in a ParamObject literal crosses at its declared arity" "2:tick:1:2:1" (CallbackFunctionLab.Exports.fire built)
+
+    let options =
+        CallbackFunctionLab.Options.Create(
+            label = "b",
+            transform = Func<float, float, string>(fun a b -> $"t:{a}:{b}"),
+            finish = Action(fun () -> ())
+        )
+
+    equal
+        "a method-shaped ParamObject parameter crosses at its declared arity"
+        "b:2:t:1:2:0"
+        (CallbackFunctionLab.Exports.build options)
+
+    let fromJs = CallbackFunctionLab.Exports.handlers
+
+    equal
+        "a delegate read off an interface member reads back at the arity JavaScript holds"
+        2.0
+        (emitJsExpr fromJs.onTick "$0.length")
+
+    equal "and invokes with all its arguments" "js:1:2" (fromJs.onTick.Invoke(1.0, 2.0))
+    let factory = CallbackFunctionLab.Exports.factory
+
+    equal
+        "a delegate-typed property reads back at the arity JavaScript holds"
+        2.0
+        (emitJsExpr factory.pair "$0.length")
+
+    equal "and invokes with all its arguments" "pair:1:2" (attempt (fun () -> factory.pair.Invoke(1.0, 2.0)))
+    equal "a delegate-typed member of arity 0 invokes" "ready" (attempt factory.ready.Invoke)
+    let made = factory.make 5.0
+    equal "a delegate returned from a method arrives at its declared arity" 2.0 (emitJsExpr made "$0.length")
+    equal "and invokes with all its arguments" "made:5:1:2" (attempt (fun () -> made.Invoke(1.0, 2.0)))
+
+    equal
+        "a delegate returned from a method invokes at arity 3"
+        "three:5:1:2:3"
+        (attempt (fun () -> (factory.makeThree 5.0).Invoke(1.0, 2.0, 3.0)))
+
+/// Lane AK. The tupled function type, in the same positions, against the same runtime. Fable
+/// compiles an F# tuple to a JavaScript array, so each claim below reads the `length` of the
+/// function JavaScript received beside the result of calling it with all its arguments at once.
+let private callbackTupledForms () =
+    let attempt (f: unit -> string) =
+        try
+            f ()
+        with e ->
+            $"threw: {e.Message}"
+
+    let attemptNum (f: unit -> float) =
+        try
+            $"%g{f ()}"
+        with e ->
+            $"threw: {e.Message}"
+
+    // Measured, not wanted. A tupled parameter crosses as a one-argument JavaScript function
+    // taking an array, so the runtime's `fn(1, 2)` binds the array slot to `1` and the
+    // destructuring reads `undefined`. The value is wrong and nothing throws.
+    equal
+        "a tupled function of arity 2 crosses as a unary function over an array"
+        "1:got:undefined:undefined"
+        (attempt (fun () -> Probes.CallbackTuples.callTwo (fun (a, b) -> $"got:{a}:{b}")))
+
+    equal
+        "and arity 3 the same way"
+        "1:got:undefined:undefined:undefined"
+        (attempt (fun () -> Probes.CallbackTuples.callThree (fun (a, b, c) -> $"got:{a}:{b}:{c}")))
+
+    let mutable sawVoidTwo = 0.0
+
+    equal
+        "a tupled unit-returning callback crosses at arity 1"
+        "1"
+        (attemptNum (fun () -> Probes.CallbackTuples.callVoidTwo (fun (a, b) -> sawVoidTwo <- a + b)))
+
+    check "and the arguments the runtime passed arrived as undefined" (Double.IsNaN sawVoidTwo)
+
+    equal
+        "a named tupled abbreviation crosses at arity 1 too"
+        "1:undefined|undefined"
+        (attempt (fun () -> Probes.CallbackTuples.callNamed (fun (value, digits) -> $"{value}|{digits}")))
+
+    let built =
+        Probes.TupledHandlers.Create(onTick = (fun (a, b) -> $"tick:{a}:{b}"), onDone = (fun _ -> ()))
+
+    equal
+        "a tupled callback in a ParamObject literal crosses at arity 1"
+        "1:tick:undefined:undefined:1"
+        (attempt (fun () -> Probes.CallbackTuples.fire built))
+
+    let options =
+        Probes.TupledOptions.Create(label = "b", transform = (fun (a, b) -> $"t:{a}:{b}"), finish = (fun () -> ()))
+
+    equal
+        "a tupled method-shaped ParamObject parameter crosses at arity 1"
+        "b:1:t:undefined:undefined:0"
+        (attempt (fun () -> Probes.CallbackTuples.build options))
+
+    // The read-back direction inverts. Fable inserts no curry wrapper around a tupled member, so
+    // the arity JavaScript holds survives the read - and the F# application passes the tuple as a
+    // single array argument, so the JavaScript function sees one argument where it declared two.
+    let fromJs = Probes.CallbackTuples.handlers
+
+    equal
+        "a tupled callback read off an interface member keeps the arity JavaScript holds"
+        2.0
+        (emitJsExpr fromJs.onTick "$0.length")
+
+    equal
+        "but applying it passes the tuple as one array argument"
+        "js:1,2:undefined"
+        (attempt (fun () -> fromJs.onTick (1.0, 2.0)))
+
+    let factory = Probes.CallbackTuples.factory
+
+    equal
+        "a tupled function-typed property keeps the arity JavaScript holds"
+        2.0
+        (emitJsExpr factory.pair "$0.length")
+
+    equal "and applies as one array argument the same way" "pair:1,2:undefined" (attempt (fun () -> factory.pair (1.0, 2.0)))
+    equal "a tupled function-typed member of arity 0 applies" "ready" (attempt factory.ready)
+    let made = factory.make 5.0
+
+    equal
+        "a tupled callback returned from a method keeps the arity JavaScript holds"
+        2.0
+        (emitJsExpr made "$0.length")
+
+    equal "and applies as one array argument" "made:5:1,2:undefined" (attempt (fun () -> made (1.0, 2.0)))
+
+    equal
+        "a tupled callback returned from a method applies as one array argument at arity 3"
+        "three:5:1,2,3:undefined:undefined"
+        (attempt (fun () -> (factory.makeThree 5.0) (1.0, 2.0, 3.0)))
+
 [<EntryPoint>]
 let main _ =
     globals ()
@@ -887,6 +1083,8 @@ let main _ =
     workarounds ()
     probes ()
     callbackFunctionForms ()
+    callbackDelegateForms ()
+    callbackTupledForms ()
 
     match failures with
     | [] ->
