@@ -98,6 +98,27 @@ let private inheritsOf (source: string) (name: string) =
                 None)
         |> List.ofArray
 
+/// The absence facts a site carries: whether it was written with a `?` marker, and the
+/// spellings its hoist to `option` reported. TypeScript writes absence five ways and F# has
+/// `option` and `unit` for all five, so this pair is the whole distinction a consumer reads.
+let private absenceAt (rendered: RenderModel) (symbol: string) : bool * string list =
+    let findings = rendered.Findings |> List.filter (fun finding -> finding.Symbol = symbol)
+
+    let marker =
+        findings
+        |> List.exists (fun finding -> finding.Key = "MB003" || finding.Key = "MB001")
+
+    let spellings =
+        findings
+        |> List.filter (fun finding -> finding.Key = "TR032")
+        |> List.collect (fun finding ->
+            finding.Payload
+            |> Array.toList
+            |> List.filter (snd >> unbox<bool>)
+            |> List.map fst)
+
+    marker, spellings
+
 /// The version every npm rung is pinned at, from the tracked `tests/fixtures/pins.json`. The
 /// install is untracked, so this file is the only record of what a golden was generated
 /// against; it is JSONC, like every other configuration Xantham reads.
@@ -1790,6 +1811,92 @@ let pipelineTests =
 
                       Expect.equal named.Length 1 "one finding, against the property"
                       Expect.stringContains named.Head.Message "DOMMatrix" "naming the declaration, not a member" ])
+
+        // Wave six lane AC's fixture. Five TypeScript spellings of absence reach two F# forms,
+        // so the separation lives in the findings a site carries rather than in the binding.
+        yield!
+            fixtureTests
+                "absence-alphabet-lab"
+                (handFixture "absence-alphabet-lab")
+                GeneratorConfig.Default
+                (fun package ->
+                    [ testCase "the five shapes of absence carry five distinct signatures" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                          Expect.equal
+                              [
+                                  absenceAt rendered "Absence.optionalOnly"
+                                  absenceAt rendered "Absence.unionUndefined"
+                                  absenceAt rendered "Absence.unionNull"
+                                  absenceAt rendered "Absence.optionalNull"
+                                  absenceAt rendered "Absence.returnsVoid"
+                              ]
+                              [
+                                  true, [ "fromUndefined" ]
+                                  false, [ "fromUndefined" ]
+                                  false, [ "fromNull" ]
+                                  true, [ "fromNull"; "fromUndefined" ]
+                                  false, []
+                              ]
+                              "x?: T, x: T | undefined, x: T | null, x?: T | null, and a void return"
+
+                          // A sixth spelling, and the one that makes the `?` marker load-bearing:
+                          // `x?: T | null` and `x: T | null | undefined` hoist identically, and
+                          // only MB003 separates them.
+                          Expect.equal
+                              (absenceAt rendered "Absence.unionBoth")
+                              (false, [ "fromNull"; "fromUndefined" ])
+                              "x: T | null | undefined"
+
+                      testCase "the alphabet reads the same at return and parameter positions" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                          Expect.equal (absenceAt rendered "getOrNull()") (false, [ "fromNull" ]) "the KV miss"
+
+                          Expect.equal
+                              (absenceAt rendered "getOrUndefined()")
+                              (false, [ "fromUndefined" ])
+                              "the Durable Object storage miss"
+
+                          Expect.equal
+                              (absenceAt rendered "voidOrValue()")
+                              (false, [ "fromVoid" ])
+                              "void inside a union hoists like the other two"
+
+                          Expect.equal (absenceAt rendered "fireAndForget") (false, []) "a void return, again"
+
+                          // The wire does not carry the `?` marker on a parameter symbol, so a
+                          // parameter's optionality is inferred back from its hoisted type. The
+                          // two parameter spellings are therefore separated by their hoist and
+                          // nothing else, and `x?: T` is indistinguishable from `x: T | undefined`
+                          // here in a way it is not on a property.
+                          Expect.equal
+                              (absenceAt rendered "withOptional(fallback)")
+                              (false, [ "fromUndefined" ])
+                              "an optional parameter reports no ? marker"
+
+                          Expect.equal
+                              (absenceAt rendered "withNullable(fallback)")
+                              (false, [ "fromNull" ])
+                              "and a nullable parameter reports only its spelling"
+
+                      testCase "all five shapes render as the same two F# forms" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          for member' in
+                              [ "optionalOnly"; "unionUndefined"; "unionNull"; "optionalNull"; "unionBoth" ] do
+                              Expect.stringContains
+                                  source
+                                  $"abstract {member'}: string option with get, set"
+                                  "the binding collapses the spelling the manifest keeps"
+
+                          Expect.stringContains source "abstract returnsVoid: unit -> unit" "and void reads as unit"
+
+                          Expect.equal
+                              (absenceAt rendered "Present.always")
+                              (false, [])
+                              "a present member carries no absence fact" ])
 
         yield! fixtureTests "animejs" (npmFixture "animejs") GeneratorConfig.Default (fun _ -> [])
 

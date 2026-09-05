@@ -62,23 +62,42 @@ let literalOf (facts: TypeFacts) : FsLiteral option =
     else
         None
 
-let internal isNullish (facts: TypeFacts) =
-    flag TypeFlags.Undefined facts
-    || flag TypeFlags.Null facts
-    || flag TypeFlags.Void facts
+/// The spellings of absence a type is written with. TypeScript keeps `null`, `undefined` and
+/// `void` apart and F# offers one `option` for all three, so the spelling survives here rather
+/// than in the rendered binding: a KV miss reads `null`, a Durable Object storage miss reads
+/// `undefined`, and JSON carries `null` alone. Every field is false for a type that is present.
+type internal Absence =
+    {
+        FromNull: bool
+        FromUndefined: bool
+        FromVoid: bool
+    }
 
-/// Reports which of null, undefined and void appear among the hoisted members.
-let internal absenceOf (model: ShapeModel) hoisted =
-    hoisted
-    |> List.fold
-        (fun (fromNull, fromUndefined, fromVoid) id ->
-            match Map.tryFind id model.Types with
-            | Some facts ->
-                fromNull || flag TypeFlags.Null facts,
-                fromUndefined || flag TypeFlags.Undefined facts,
-                fromVoid || flag TypeFlags.Void facts
-            | None -> fromNull, fromUndefined, fromVoid)
-        (false, false, false)
+    member this.IsAbsent = this.FromNull || this.FromUndefined || this.FromVoid
+
+let internal absenceOf (facts: TypeFacts) =
+    {
+        FromNull = flag TypeFlags.Null facts
+        FromUndefined = flag TypeFlags.Undefined facts
+        FromVoid = flag TypeFlags.Void facts
+    }
+
+/// A type hoists to `option` (D1) exactly where it is written with a spelling of absence.
+/// Defined through `absenceOf`, so the hoist and the spelling reported at the site agree by
+/// construction: a hoisted member sets at least one flag of the finding it raises.
+let internal isNullish (facts: TypeFacts) = (absenceOf facts).IsAbsent
+
+/// Every spelling appearing across a set of types.
+let internal absenceAcross (model: ShapeModel) (ids: int list) : Absence =
+    let spellings =
+        ids
+        |> List.choose (fun id -> Map.tryFind id model.Types |> Option.map absenceOf)
+
+    {
+        FromNull = spellings |> List.exists _.FromNull
+        FromUndefined = spellings |> List.exists _.FromUndefined
+        FromVoid = spellings |> List.exists _.FromVoid
+    }
 
 /// A union's members split into the hoisted nullish part (D1) and everything else.
 let internal splitNullish (model: ShapeModel) (facts: TypeFacts) =
@@ -1216,10 +1235,12 @@ and internal unionRef
                 | FsOption _ -> reference
                 | reference -> FsOption reference
 
-            let fromNull, fromUndefined, fromVoid = absenceOf model hoisted
+            let absence = absenceAcross model hoisted
 
             wrapped,
-            Finding.make owner (TypeReference.NullableHoistedToOption(fromNull, fromUndefined, fromVoid))
+            Finding.make
+                owner
+                (TypeReference.NullableHoistedToOption(absence.FromNull, absence.FromUndefined, absence.FromVoid))
             :: findings
 
     match remaining with
