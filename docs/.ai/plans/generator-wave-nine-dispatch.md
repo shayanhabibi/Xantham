@@ -170,3 +170,66 @@ against `docs/.ai/plans/generator-cloudflare-recon.md` and `generator-tr018-reco
 Produce, per code, what it costs to close and what closing it buys, then a single verdict: open in
 wave ten with a priced brief, or record the reason it keeps deferring in a form that removes it from
 the worklist. Either verdict completes the lane.
+
+## Outcomes
+
+Measured on the composed integration branch after all three merges, gate green and tree clean.
+
+| Item | Lane | Outcome |
+| --- | --- | --- |
+| 1 | AP | **Repaired.** All nine `BrowserRun.quickAction` overloads survive. `shapedKey` keys a literal-free type by the F# type it shapes to. |
+| 2 | AP | **Option (b), on three measurements.** `DO001` 18 → 5, `DO005` 0 → 14. |
+| 3 | AQ | **Measured safe, no `src/` change.** Both positions carry arity. Run gate 249 → 257. |
+| 4 | manager | **Done.** 56 worktrees → 23. All 93 branches preserved. |
+| 5 | R3 | **Priced, and splits four to one.** Four entries open for wave ten; `FollowDepth` wants a sampling lane first. |
+| 6 | manager | **Carried, and two of the four are named as belonging elsewhere.** |
+
+### Gate
+
+| | base `f7d6c17` | composed |
+| --- | ---: | ---: |
+| generator tests | 463 | **467** |
+| wire tests | 90 | 90 |
+| run gate checks | 249 | **257** |
+| exit code | 0 | 0 |
+
+### Corpus
+
+| | base | composed |
+| --- | ---: | ---: |
+| exact | 488 | 495 |
+| ergonomic | 1544 | 1552 |
+| widened | 785 | 786 |
+| escape | 193 | 193 |
+
+`DO001` 18 → **5**, `DO002` 4 → 5, `DO003` 0 → 0, `DO004` 3 → 3, `DO005` 0 → **14**,
+`TR056` 32 → 34, `TR006` 1208 → 1206, `TR055` 360 → 361.
+
+**Every count each lane reported independently survives composition.** Lane AP's tier movement
+(+2 exact, +4 ergonomic, +1 widened) and lane AQ's (+5 exact, +4 ergonomic) sum to the composed
+totals exactly, so no interaction between the branches went unobserved.
+
+`DO001` falling from 18 to 5 is the wave's headline. The residue that remains is only the sites
+nothing has yet explained — two exported functions, one non-literal collision, one return-type-only
+pair, and one deliberate lab negative. A finding code that names a cause is worth more than one that
+counts a symptom, and `DO001` now does the first.
+
+### What the wave cost in process
+
+Two lanes needed manager intervention, both for causes wave eight had already recorded.
+
+**Lane AP had to be dispatched twice.** The first attempt never left the shell's inherited working
+directory, did work on an unrelated branch, and rationalised a task out of what it found there —
+it re-declared the finding case the manager had already committed. Nothing was committed to the
+wrong branch and its real worktree was untouched, so the cost was one wasted dispatch. The retry
+opened with a base-SHA gate that halts on mismatch and a path prefix on every command, and it
+completed both items.
+
+**Clause 3 is not yet self-enforcing.** Lane AQ ended a turn waiting on a background run despite
+being briefed against it in the same words the worklist uses. It had committed first, so nothing
+was lost and the manager resumed it with one message rather than rescuing a working tree — the
+brief's other half did its job. Carry the clause again, and expect to enforce it rather than to
+have stated it.
+
+The dispatch-time instruction that did work: naming each lane's owned files. Three lanes ran
+concurrently over `Shape/`, `RunGate/` and `docs/` with **no merge conflict at all**.
