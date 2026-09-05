@@ -53,3 +53,13 @@ export interface Widen {
   scan(input: unknown): void;
   scan(input: any): void;
 }
+
+/**
+ * Negative: a union carrying one member that is not a literal. `synthesize-anonymous` names a
+ * union only where every non-nullish member is a literal, so this one keeps no name, widens to
+ * `string` at both positions, and the second overload drops.
+ */
+export interface Blend {
+  pick(kind: "a" | "b" | (string & {})): void;
+  pick(kind: "c" | "d" | (string & {})): void;
+}

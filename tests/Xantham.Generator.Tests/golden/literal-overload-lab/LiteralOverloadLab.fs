@@ -102,3 +102,11 @@ module Choice =
 /// </summary>
 type Widen =
     abstract scan: input: obj -> unit
+
+/// <summary>
+/// Negative: a union carrying one member that is not a literal. <c>synthesize-anonymous</c> names a
+/// union only where every non-nullish member is a literal, so this one keeps no name, widens to
+/// <c>string</c> at both positions, and the second overload drops.
+/// </summary>
+type Blend =
+    abstract pick: kind: string -> unit

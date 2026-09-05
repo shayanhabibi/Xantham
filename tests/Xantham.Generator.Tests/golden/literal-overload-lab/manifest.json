@@ -5,7 +5,7 @@
   "counts": {
     "exact": 5,
     "ergonomic": 3,
-    "widened": 4,
+    "widened": 5,
     "escape": 1
   },
   "passes": [
@@ -16,22 +16,22 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 25,
-      "exact": 5,
+      "total": 31,
+      "exact": 7,
       "ergonomic": 13,
-      "widened": 6,
+      "widened": 10,
       "escape": 1
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 9,
-      "ergonomic": 9
+      "total": 10,
+      "ergonomic": 10
     },
     {
       "pass": "DO - dedupe-overloads",
-      "total": 2,
+      "total": 3,
       "exact": 1,
-      "widened": 1
+      "widened": 2
     }
   ]
 }

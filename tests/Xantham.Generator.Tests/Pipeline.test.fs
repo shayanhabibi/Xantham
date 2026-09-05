@@ -2347,6 +2347,24 @@ let pipelineTests =
                               "abstract scan: input: obj -> unit"
                               "a collision no literal is party to still drops an overload"
 
+                      // Wave eight lane AO. `synthesize-anonymous` names a union where every
+                      // non-nullish member is a literal, so `Choice.pick` above separates on its
+                      // own. One non-literal member declines the name, and the loss that follows
+                      // is the boundary a per-arm-set StringEnum would have to repair.
+                      testCase "a union carrying one non-literal member stays nameless, and its overload drops"
+                      <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains
+                              source
+                              "abstract pick: kind: string -> unit"
+                              "the unnamed union widens to string at both positions"
+
+                          Expect.isFalse
+                              (source.Contains "Blend.Pick")
+                              "and neither arm-set earns a declaration"
+
                       testCase "the findings say which literals were kept and which overload sets they separate"
                       <| fun _ ->
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -2367,8 +2385,10 @@ let pipelineTests =
 
                           Expect.equal
                               (symbolsOf "DO001")
-                              [ "Widen.scan" ]
-                              "a collision the literal has no part in is the only overload still dropped"
+                              [ "Blend.pick"; "Widen.scan" ]
+                              "the two collisions no retained literal separates are the overloads still dropped"
+
+                          Expect.equal (symbolsOf "DO003") [] "no overload set is separated by a union of literals"
 
                           Expect.contains
                               (symbolsOf "TR006")
