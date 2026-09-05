@@ -140,7 +140,9 @@ let private conditionalAliasModel (declaredOperands: int list) (appliedOperands:
                   Build.resolvedMember (Build.symbol 301 "tag" SymbolFlags.Property) 2 ] } ]
 
     { Build.shapeModel (table @ Build.primitives) with
-        Harvest = { Exports = [ Build.export "seed" (Build.symbol 400 "seed" SymbolFlags.BlockScopedVariable) ] }
+        Harvest = { Exports = [ Build.export "seed" (Build.symbol 400 "seed" SymbolFlags.BlockScopedVariable) ]
+                    Namespaces = Map.empty
+                  }
         ExportTypes = Map.ofList [ 400, { Declared = None; Value = Some 60 } ]
         DeclNames = Map.ofList [ 50, "Node" ] }
 
@@ -989,7 +991,9 @@ let private ansiRegexShaped () =
         Harvest =
             { Exports =
                 [ Build.export "Options" optionsSymbol
-                  Build.export "default" functionSymbol ] }
+                  Build.export "default" functionSymbol ]
+              Namespaces = Map.empty
+            }
         ExportTypes =
             Map.ofList
                 [ 100, { Declared = Some 20; Value = None }
@@ -1036,7 +1040,9 @@ let shapePassTests =
 
             let model =
                 { Build.shapeModel (bagType :: Build.primitives) with
-                    Harvest = { Exports = [ Build.export "Bag" bagSymbol ] }
+                    Harvest = { Exports = [ Build.export "Bag" bagSymbol ]
+                                Namespaces = Map.empty
+                              }
                     ExportTypes = Map.ofList [ 100, { Declared = Some 20; Value = None } ] }
 
             let named, _ = Build.runPass ExportNames.nameExports model
@@ -1066,7 +1072,9 @@ let shapePassTests =
 
             let model =
                 { Build.shapeModel (bagType :: Build.primitives) with
-                    Harvest = { Exports = [ Build.export "FrozenBag" bagSymbol ] }
+                    Harvest = { Exports = [ Build.export "FrozenBag" bagSymbol ]
+                                Namespaces = Map.empty
+                              }
                     ExportTypes = Map.ofList [ 100, { Declared = Some 20; Value = None } ] }
 
             let named, _ = Build.runPass ExportNames.nameExports model
@@ -1094,7 +1102,9 @@ let shapePassTests =
 
             let model =
                 { Build.shapeModel (bagType :: Build.primitives) with
-                    Harvest = { Exports = [ Build.export "Bag" bagSymbol ] }
+                    Harvest = { Exports = [ Build.export "Bag" bagSymbol ]
+                                Namespaces = Map.empty
+                              }
                     ExportTypes = Map.ofList [ 100, { Declared = Some 20; Value = None } ] }
 
             let named, _ = Build.runPass ExportNames.nameExports model
@@ -1141,7 +1151,9 @@ let shapePassTests =
 
             let model =
                 { Build.shapeModel (anonymous :: makeType :: Build.primitives) with
-                    Harvest = { Exports = [ Build.export "make" (Build.symbol 400 "make" SymbolFlags.Function) ] }
+                    Harvest = { Exports = [ Build.export "make" (Build.symbol 400 "make" SymbolFlags.Function) ]
+                                Namespaces = Map.empty
+                              }
                     ExportTypes = Map.ofList [ 400, { Declared = None; Value = Some 41 } ] }
 
             let named, _ = Build.runPass Anonymous.synthesizeAnonymous model
@@ -1158,12 +1170,118 @@ let shapePassTests =
             let model =
                 { Build.shapeModel (internal' :: Build.primitives) with
                     Harvest =
-                        { Exports = [ Build.export "globals" (Build.symbol 400 "globals" SymbolFlags.BlockScopedVariable) ] }
+                        { Exports = [ Build.export "globals" (Build.symbol 400 "globals" SymbolFlags.BlockScopedVariable) ]
+                          Namespaces = Map.empty
+                        }
                     ExportTypes = Map.ofList [ 400, { Declared = None; Value = Some 40 } ] }
 
             let named, _ = Build.runPass Anonymous.synthesizeAnonymous model
 
             Expect.equal (Map.tryFind 40 named.DeclNames) (Some "Globals") "its own name, not the path"
+
+        testCase "synthesize-anonymous nests a namespaced type under the namespace, not a number" <| fun _ ->
+            // `TailStream.TailEvent` beside the global `TailEvent`: two declarations of one
+            // name, and TypeScript separates them by the namespace one of them is written in.
+            let exported =
+                { Build.facts (Build.typeResponse 40 TypeFlags.Object) with
+                    SymbolName = Some "Event"
+                    Members = [ Build.resolvedMember (Build.symbol 401 "at" SymbolFlags.Property) 2 ] }
+
+            let namespaced =
+                { Build.facts (Build.typeResponse 41 TypeFlags.Object) with
+                    SymbolName = Some "Event"
+                    SymbolParent = Some 900
+                    Members = [ Build.resolvedMember (Build.symbol 402 "seq" SymbolFlags.Property) 2 ] }
+
+            let holder =
+                { Build.facts (Build.typeResponse 42 TypeFlags.Object) with
+                    SymbolName = Some "Holder"
+                    Members =
+                        [ Build.resolvedMember (Build.symbol 403 "first" SymbolFlags.Property) 40
+                          Build.resolvedMember (Build.symbol 404 "second" SymbolFlags.Property) 41 ] }
+
+            let model =
+                { Build.shapeModel (exported :: namespaced :: holder :: Build.primitives) with
+                    Harvest =
+                        { Exports = [ Build.export "holder" (Build.symbol 400 "holder" SymbolFlags.BlockScopedVariable) ]
+                          Namespaces = Map.ofList [ 900, "TailStream" ]
+                        }
+                    ExportTypes = Map.ofList [ 400, { Declared = None; Value = Some 42 } ] }
+
+            let named, findings = Build.runPass Anonymous.synthesizeAnonymous model
+
+            Expect.equal (Map.tryFind 40 named.DeclNames) (Some "Event") "the first claimant keeps the bare name"
+            Expect.equal (Map.tryFind 41 named.DeclNames) (Some "TailStream.Event") "the second nests under its namespace"
+
+            Expect.contains (findings |> List.map _.Key) "SY004" "and the nesting is reported like any other"
+
+        testCase "synthesize-anonymous keeps the number where no namespace names the second" <| fun _ ->
+            // The fallback is still the fallback: a namespace this run has no module name for
+            // separates nothing, so the second claimant disambiguates by number.
+            let exported =
+                { Build.facts (Build.typeResponse 40 TypeFlags.Object) with
+                    SymbolName = Some "Event"
+                    Members = [ Build.resolvedMember (Build.symbol 401 "at" SymbolFlags.Property) 2 ] }
+
+            let namespaced =
+                { Build.facts (Build.typeResponse 41 TypeFlags.Object) with
+                    SymbolName = Some "Event"
+                    SymbolParent = Some 900
+                    Members = [ Build.resolvedMember (Build.symbol 402 "seq" SymbolFlags.Property) 2 ] }
+
+            let holder =
+                { Build.facts (Build.typeResponse 42 TypeFlags.Object) with
+                    SymbolName = Some "Holder"
+                    Members =
+                        [ Build.resolvedMember (Build.symbol 403 "first" SymbolFlags.Property) 40
+                          Build.resolvedMember (Build.symbol 404 "second" SymbolFlags.Property) 41 ] }
+
+            let model =
+                { Build.shapeModel (exported :: namespaced :: holder :: Build.primitives) with
+                    Harvest =
+                        { Exports = [ Build.export "holder" (Build.symbol 400 "holder" SymbolFlags.BlockScopedVariable) ]
+                          Namespaces = Map.empty
+                        }
+                    ExportTypes = Map.ofList [ 400, { Declared = None; Value = Some 42 } ] }
+
+            let named, _ = Build.runPass Anonymous.synthesizeAnonymous model
+
+            Expect.equal (Map.tryFind 41 named.DeclNames) (Some "Event2") "the numeric suffix is what is left"
+
+        testCase "name-exports nests the namespaced claimant of a contested name" <| fun _ ->
+            // `CloudflareWorkersModule.WorkflowSleepDuration` claims the name before the global
+            // declaration of it does, so the nesting is decided over the whole claim list
+            // rather than at the moment of collision.
+            let namespaced =
+                { Build.facts (Build.typeResponse 40 TypeFlags.Object) with
+                    Members = [ Build.resolvedMember (Build.symbol 401 "seq" SymbolFlags.Property) 2 ] }
+
+            let global' =
+                { Build.facts (Build.typeResponse 41 TypeFlags.Object) with
+                    Members = [ Build.resolvedMember (Build.symbol 402 "at" SymbolFlags.Property) 2 ] }
+
+            let inNamespace =
+                { Build.symbol 100 "Event" SymbolFlags.Interface with
+                    Parent = ValueSome 900 }
+
+            let model =
+                { Build.shapeModel (namespaced :: global' :: Build.primitives) with
+                    Harvest =
+                        { Exports =
+                            [ Build.export "Event" inNamespace
+                              Build.export "Event" (Build.symbol 101 "Event" SymbolFlags.Interface) ]
+                          Namespaces = Map.ofList [ 900, "TailStream" ]
+                        }
+                    ExportTypes =
+                        Map.ofList
+                            [ 100, { Declared = Some 40; Value = None }
+                              101, { Declared = Some 41; Value = None } ] }
+
+            let named, findings = Build.runPass ExportNames.nameExports model
+
+            Expect.equal (Map.tryFind 40 named.DeclNames) (Some "TailStream.Event") "the namespaced export nests"
+            Expect.equal (Map.tryFind 41 named.DeclNames) (Some "Event") "and the global one keeps the bare name"
+            Expect.equal (findings |> List.map _.Key) [ "SY004" ] "the nesting is reported once"
 
         testCase "synthesize-anonymous names the generic declaration behind an instantiation, not the instantiation" <| fun _ ->
             // `Ready<T>` is not exported and is reached only as `Ready<U>` from some generic
@@ -1185,7 +1303,9 @@ let shapePassTests =
 
             let model =
                 { Build.shapeModel (declaration :: instantiation :: typeParam 20 "T" :: typeParam 21 "U" :: Build.primitives) with
-                    Harvest = { Exports = [ Build.export "current" (Build.symbol 400 "current" SymbolFlags.BlockScopedVariable) ] }
+                    Harvest = { Exports = [ Build.export "current" (Build.symbol 400 "current" SymbolFlags.BlockScopedVariable) ]
+                                Namespaces = Map.empty
+                              }
                     ExportTypes = Map.ofList [ 400, { Declared = None; Value = Some 31 } ] }
 
             let named, _ = Build.runPass Anonymous.synthesizeAnonymous model
@@ -2296,7 +2416,9 @@ let shapePassTests =
                 { Build.shapeModel (instance :: static' :: Build.primitives) with
                     Harvest =
                         { Exports =
-                            [ Build.export "Timer" (Build.symbol 800 "Timer" (SymbolFlags.Class ||| SymbolFlags.Value)) ] }
+                            [ Build.export "Timer" (Build.symbol 800 "Timer" (SymbolFlags.Class ||| SymbolFlags.Value)) ]
+                          Namespaces = Map.empty
+                        }
                     ExportTypes = Map.ofList [ 800, { Declared = Some 80; Value = Some 81 } ]
                     DeclNames = Map.ofList [ 80, "Timer" ] }
 
@@ -2368,7 +2490,9 @@ let shapePassTests =
                 { Build.shapeModel (instance :: static' :: jsonType :: Build.primitives) with
                     Harvest =
                         { Exports =
-                            [ Build.export "Clash" (Build.symbol 810 "Clash" (SymbolFlags.Class ||| SymbolFlags.Value)) ] }
+                            [ Build.export "Clash" (Build.symbol 810 "Clash" (SymbolFlags.Class ||| SymbolFlags.Value)) ]
+                          Namespaces = Map.empty
+                        }
                     ExportTypes = Map.ofList [ 810, { Declared = Some 80; Value = Some 81 } ]
                     DeclNames = Map.ofList [ 80, "Clash" ]
                     Decls = [ declared ] }
@@ -2438,7 +2562,9 @@ let shapePassTests =
                 { Build.shapeModel (gaugeInstance :: gaugeStatic (Some "Gauge") :: Build.primitives) with
                     Harvest =
                         { Exports =
-                            [ Build.export "Gauge" (Build.symbol 600 "Gauge" (SymbolFlags.Class ||| SymbolFlags.Value)) ] }
+                            [ Build.export "Gauge" (Build.symbol 600 "Gauge" (SymbolFlags.Class ||| SymbolFlags.Value)) ]
+                          Namespaces = Map.empty
+                        }
                     ExportTypes = Map.ofList [ 600, { Declared = Some 60; Value = Some 61 } ]
                     DeclNames = Map.ofList [ 60, "Gauge" ] }
 
@@ -2453,7 +2579,9 @@ let shapePassTests =
                 { Build.shapeModel (gaugeInstance :: gaugeStatic (Some "__type") :: Build.primitives) with
                     Harvest =
                         { Exports =
-                            [ Build.export "widgets" (Build.symbol 600 "widgets" SymbolFlags.BlockScopedVariable) ] }
+                            [ Build.export "widgets" (Build.symbol 600 "widgets" SymbolFlags.BlockScopedVariable) ]
+                          Namespaces = Map.empty
+                        }
                     ExportTypes = Map.ofList [ 600, { Declared = None; Value = Some 61 } ]
                     DeclNames = Map.ofList [ 60, "Gauge" ] }
 
@@ -2569,7 +2697,9 @@ let shapePassTests =
             let model =
                 { Build.shapeModel ((cases |> List.collect (fun (facts, _, _, _) -> facts)) @ Build.primitives) with
                     Harvest =
-                        { Exports = cases |> List.map (fun (_, _, export, _) -> export) }
+                        { Exports = cases |> List.map (fun (_, _, export, _) -> export)
+                          Namespaces = Map.empty
+                        }
                     ExportTypes = cases |> List.map (fun (_, _, _, types) -> types) |> Map.ofList
                     Decls = cases |> List.map (fun (_, declaration, _, _) -> declaration) }
 
@@ -2655,7 +2785,9 @@ let shapePassTests =
                       @ Build.primitives
                   ) with
                     Harvest =
-                        { Exports = cases |> List.map (fun (_, _, export, _) -> export) }
+                        { Exports = cases |> List.map (fun (_, _, export, _) -> export)
+                          Namespaces = Map.empty
+                        }
                     ExportTypes = cases |> List.map (fun (_, _, _, types) -> types) |> Map.ofList
                     Decls = cases |> List.map (fun (_, declaration, _, _) -> declaration) }
 
@@ -2710,7 +2842,9 @@ let shapePassTests =
                     Harvest =
                         { Exports =
                             [ { Build.export "Vise" (Build.symbol 800 "Vise" (SymbolFlags.Class ||| SymbolFlags.Value)) with
-                                  Origin = FromAmbientModule "lab:tools" } ] }
+                                  Origin = FromAmbientModule "lab:tools" } ]
+                          Namespaces = Map.empty
+                        }
                     ExportTypes = Map.ofList [ 800, { Declared = Some 80; Value = Some 81 } ]
                     Decls = [ declaration ] }
 
@@ -2762,7 +2896,9 @@ let shapePassTests =
                         { Exports =
                             [ Build.export
                                   "DOMException"
-                                  (Build.symbol 810 "DOMException" (SymbolFlags.Class ||| SymbolFlags.Value)) ] }
+                                  (Build.symbol 810 "DOMException" (SymbolFlags.Class ||| SymbolFlags.Value)) ]
+                          Namespaces = Map.empty
+                        }
                     ExportTypes = Map.ofList [ 810, { Declared = Some 80; Value = Some 81 } ]
                     DeclNames = Map.ofList [ 80, "DOMException" ]
                     Decls = [ declared ] }
@@ -3663,7 +3799,9 @@ let shapePassTests =
         testCase "audit-coverage reports an export nothing represented" <| fun _ ->
             let model =
                 { Build.shapeModel [] with
-                    Harvest = { Exports = [ Build.export "Gone" (Build.symbol 300 "Gone" SymbolFlags.TypeAlias) ] } }
+                    Harvest = { Exports = [ Build.export "Gone" (Build.symbol 300 "Gone" SymbolFlags.TypeAlias) ]
+                                Namespaces = Map.empty
+                              } }
 
             let _, findings = Build.runPass Coverage.auditCoverage model
 

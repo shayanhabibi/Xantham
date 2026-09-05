@@ -586,9 +586,13 @@ type HarvestedExport =
 type HarvestModel =
     {
         Exports: HarvestedExport list
+        /// The namespaces the entry package declares, by symbol id, under names an F# module
+        /// can be spelled with. A declaration written inside one nests under it where a second
+        /// declaration claims the same name.
+        Namespaces: Map<int, string>
     }
 
-    static member Empty: HarvestModel = { Exports = [] }
+    static member Empty: HarvestModel = { Exports = []; Namespaces = Map.empty }
 
 // ---------------------------------------------------------------------------------------------
 // Tier 2 - Resolve: what the checker says everything is. A type table keyed by TypeResponse.Id.
@@ -652,6 +656,9 @@ type TypeFacts =
         /// Name of the type's own symbol where it has one - what a `reference` emission
         /// templates with, and what a widening finding names.
         SymbolName: string option
+        /// Symbol id of the declaration the type's own symbol is written inside - a namespace,
+        /// where `HarvestModel.Namespaces` has a name for it.
+        SymbolParent: int option
         Members: ResolvedMember list
         /// Index signatures (§4.10). Kept apart from `Members` because they are not properties:
         /// they have no name, and a type may carry one with no members at all.
@@ -692,6 +699,7 @@ module TypeFacts =
             Response = response
             Origin = Unclassified
             SymbolName = None
+            SymbolParent = None
             Members = []
             IndexInfos = []
             CallSignatures = []

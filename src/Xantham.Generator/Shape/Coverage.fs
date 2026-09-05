@@ -29,9 +29,18 @@ let auditCoverage: Pass<ShapeModel> =
 
                     let name = fsName (defaultExportName ctx)
 
+                    // A namespace arrives as the module the declarations written inside it nest
+                    // in, so a name under it stands for the export where no declaration carries
+                    // the export's own name.
+                    let represented (export: HarvestedExport) =
+                        let exported = name export
+
+                        Set.contains exported generated
+                        || generated |> Set.exists (fun declared -> declared.StartsWith(exported + "."))
+
                     let missing =
                         model.Harvest.Exports
-                        |> List.filter (fun export -> not (Set.contains (name export) generated))
+                        |> List.filter (represented >> not)
                         |> List.map (fun export -> Finding.make (name export) AuditCoverage.ExportNotRepresented)
 
                     return

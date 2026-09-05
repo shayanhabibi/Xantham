@@ -16,6 +16,11 @@
       "escape": 2
     },
     {
+      "pass": "name-exports",
+      "total": 1,
+      "exact": 1
+    },
+    {
       "pass": "SI - shape-interfaces",
       "total": 6,
       "exact": 1,

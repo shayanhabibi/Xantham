@@ -215,17 +215,32 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
 
     let aliasForms = aliasDeclarationForms model
 
-    let claim (preferred: string) typeId order =
+    /// The module name a type nests under, where its own symbol is written inside a namespace
+    /// this run names.
+    let namespaceOf (facts: TypeFacts) =
+        facts.SymbolParent
+        |> Option.bind (fun parent -> Map.tryFind parent model.Harvest.Namespaces)
+        |> Option.map Naming.pascalSegment
+
+    let claim (owner: string option) (preferred: string) typeId order =
         // A member key reaches here verbatim, and a declaration name admits less than a member
         // name does: `Registry@cf/meta` is FS0883 with or without backticks.
         let admitted =
             preferred.Split '.' |> Array.map Naming.identifierName |> String.concat "."
 
+        // A name TypeScript separates by the namespace it is written in separates the same way
+        // here, rather than by number: `TailStream`'s `TailEvent` reads `TailStream.TailEvent`
+        // beside the global class of that name.
+        let wanted =
+            match owner with
+            | Some ns when Set.contains admitted taken -> nestUnder ns admitted
+            | _ -> admitted
+
         let unique =
-            if not (Set.contains admitted taken) then
-                admitted
+            if not (Set.contains wanted taken) then
+                wanted
             else
-                Seq.initInfinite (fun i -> $"{admitted}{i + 2}")
+                Seq.initInfinite (fun i -> $"{wanted}{i + 2}")
                 |> Seq.find (fun candidate -> not (Set.contains candidate taken))
 
         names <- Map.add typeId unique names
@@ -321,17 +336,19 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                             | Some declaredFacts -> hasConditionalOperand model declaredFacts
                             | None -> false)
                         ->
-                        claim path declared order
+                        claim None path declared order
                     | _ -> ()
                 | _ -> ()
 
                 if needsName facts then
-                    let preferred =
+                    // A path-derived name already carries its owner, so only a name taken from
+                    // the type's own symbol has a namespace left to fall back on.
+                    let preferred, owner =
                         match facts.SymbolName with
-                        | Some name when not (isSyntheticName name) -> Naming.pascalSegment name
-                        | _ -> path
+                        | Some name when not (isSyntheticName name) -> Naming.pascalSegment name, namespaceOf facts
+                        | _ -> path, None
 
-                    claim preferred typeId order
+                    claim owner preferred typeId order
 
                 // An erased alias application: hash-consed onto the declaration it applies,
                 // with the recovered arguments standing in for the parameters a hoisted

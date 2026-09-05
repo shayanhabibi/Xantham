@@ -540,6 +540,22 @@ let pipelineTests =
                     Expect.stringContains source "[<Global(\"Telemetry\")>]" "a namespace with a value is on globalThis"
                     Expect.isFalse (source.Contains "[<Global(\"Shapes\")>]") "one with only types is not"
 
+                  // Wave seven lane AI, item 3. `AmbientLabRuntime.Session` and the top-level
+                  // `Session` are two declarations of one name, and the namespace is what
+                  // separates them.
+                  testCase "a namespaced declaration nests rather than taking a number" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.stringContains source "module AmbientLabRuntime =" "the namespace opens a module"
+
+                    Expect.stringContains
+                        source
+                        "static member Session (label: string) : AmbientLabRuntime.Session"
+                        "and the constructor hands back the nested declaration"
+
+                    Expect.isFalse (source.Contains "Session2") "so neither declaration takes a suffix"
+
                   testCase "a class an ambient module exports to be derived from is an F# class" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                     let source = rendered.Files |> List.head |> snd
@@ -2063,7 +2079,21 @@ let pipelineTests =
                           // A union's arms share their owner's path, so the second arm to need a
                           // name has no position of its own to take. This is the residue the
                           // nesting scheme leaves, and it is deliberate rather than missed.
-                          Expect.stringContains source "Either2" "the second arm disambiguates by number" ])
+                          Expect.stringContains source "Either2" "the second arm disambiguates by number"
+
+                      testCase "a namespace separates two declarations of one name" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains source "type Node =" "the unqualified declaration keeps the name"
+                          Expect.stringContains source "module Cluster =" "and the namespaced one opens its module"
+
+                          Expect.stringContains
+                              source
+                              "static member joinCluster (node: Cluster.Node) : Node"
+                              "each reference reaches the declaration it named"
+
+                          Expect.isFalse (source.Contains "Node2") "so neither takes a numeric suffix" ])
 
         // Wave seven lane AI's fixture. A member key is written verbatim at the member position
         // and reduced to the identifier shape at the declaration position.

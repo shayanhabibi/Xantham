@@ -73,3 +73,25 @@ export interface Registry {
 export interface Choice {
     either: { left: string; leftAt: number } | { right: string; rightAt: number };
 }
+
+// ---------------------------------------------------------------------------
+// Two declarations of one name, separated by the namespace one of them is
+// written in. TypeScript tells them apart that way and so does F#: the
+// namespaced one nests, and neither takes a number.
+// ---------------------------------------------------------------------------
+
+/** The unqualified `Node`, reached by that name. */
+export interface Node {
+    id: string;
+}
+
+/** A namespace whose `Node` is a second declaration of the name, exported by nothing. */
+declare namespace Cluster {
+    /** Nests as `Cluster.Node`. */
+    interface Node {
+        peers: number;
+    }
+}
+
+/** Reaches the namespaced declaration, so the reference position is pinned too. */
+export declare function joinCluster(node: Cluster.Node): Node;

@@ -87,7 +87,7 @@ let export (name: string) (sym: SymbolResponse) : HarvestedExport =
 /// A shape model over the given type table, everything else empty.
 let shapeModel (table: TypeFacts list) : ShapeModel =
     {
-        Harvest = { Exports = [] }
+        Harvest = HarvestModel.Empty
         ExportTypes = Map.empty
         Types = table |> List.map (fun facts -> facts.Response.Id, facts) |> Map.ofList
         NotFollowed = Map.empty
