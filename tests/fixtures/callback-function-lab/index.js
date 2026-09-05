@@ -126,3 +126,30 @@ export function callUnionObject(listener) {
 }
 
 export const objectUnion = (a) => `js:${a}`;
+
+// A union arm behind an array, matching `U2<...>[]` on animejs's `Scope`.
+export function fireArrayUnion(handlers) {
+    return handlers.steps.map((step) => describe(step, 1)).join("|");
+}
+
+export const arrayUnionHandlers = {
+    steps: [(a) => `js1:${a}`, "plain"],
+};
+
+// A union arm behind an `option`, matching `U2<...> option` on animejs's `repeat`.
+export function fireOptionUnion(handlers) {
+    return handlers.step === undefined ? "none" : describe(handlers.step, 1);
+}
+
+export const optionUnionHandlersSome = {
+    step: (a) => `js1:${a}`,
+};
+
+export const optionUnionHandlersNone = {};
+
+// A union nested inside a two-argument delegate's own type parameter, matching cloudflare's
+// `Action<'Type, U2<(obj -> unit), EventListenerObject<Event>>, ...>` on `EventTarget`'s `Create`.
+export function addListener(register) {
+    register("fn-arm", (x) => {});
+    register("obj-arm", { handleEvent: (x) => {} });
+}
