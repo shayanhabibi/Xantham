@@ -81,4 +81,5 @@
     <File Path="tools/tsc-ast/upstream.json" />
     <File Path="tools/tsc-ast/upstream.lock.json" />
   </Folder>
+  <Project Path="site/site.fsproj" />
 </Solution>
