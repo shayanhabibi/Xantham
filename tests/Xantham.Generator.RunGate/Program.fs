@@ -264,6 +264,23 @@ let private nestedNames () =
         NestedNameLab.Widget.Options.Retry.Backoff.Exponential
         built.backoff
 
+    // The owner refers forward into the module holding its inline shape, and a `ParamObject`
+    // Create at that depth is still a bare object literal. Wave six lane AD proposed the form;
+    // this is the golden it landed as.
+    let options = NestedNameLab.Widget.Options.Create(retry = retry, label = "w")
+    let metrics = NestedNameLab.Widget.Metrics.Create(hits = 1.0)
+    let widget = NestedNameLab.Widget.Create(options = options, metrics = metrics)
+
+    equal
+        "a nested module's type is the object literal its Create built"
+        """{"retry":{"attempts":3,"backoff":"linear"},"label":"w"}"""
+        (json options)
+
+    equal
+        "and the owner carries it under the property the reference named"
+        """{"options":{"retry":{"attempts":3,"backoff":"linear"},"label":"w"},"metrics":{"hits":1}}"""
+        (json widget)
+
     NestedNameLab.Exports.configure (NestedNameLab.Configure.Settings.Create true)
 
     equal
@@ -528,6 +545,19 @@ type private Unhandled(label: string) =
 
     override this.run(signal) = $"run:{this.label}:{signal.label}"
 
+/// A subclass opting into both hooks, so a check can read what Fable emits for a class carrying
+/// more than one interface implementation at once.
+type private HandledBoth(label: string) =
+    inherit HookInterfaceLab.Station(label)
+
+    override this.run(signal) = $"run:{this.label}:{signal.label}"
+
+    interface HookInterfaceLab.Station.IFetchHandler with
+        member this.fetch(signal) = $"fetch:{this.label}:{signal.label}"
+
+    interface HookInterfaceLab.Station.IAlarmHandler with
+        member this.alarm() = $"alarm:{this.label}"
+
 /// A hook whose interface carries its owner's type parameter.
 type private Forwarder(seed: string) =
     inherit HookInterfaceLab.Relay<string>(seed)
@@ -585,6 +615,68 @@ let private optionalHooks () =
         "s"
         (emitJsExpr (asData, signal) "$0.fetch($1)")
 
+    // A subclass opting into both hooks at once, formerly proven only against `Probes.HookedBench`
+    // (wave six lane AA, now `hook-interface-lab`). A platform that discovers hooks by reading
+    // `instance.fetch` walks the prototype chain and finds it; one that enumerates own keys finds
+    // an instance carrying only what the base constructor assigned.
+    let both = HandledBoth "vice"
+    let signalSocket = HookInterfaceLab.Signal.Create "socket"
+
+    check
+        "an interface-implemented hook is reachable by property access on a class implementing more than one"
+        (emitJsExpr both "typeof $0.fetch === \"function\"")
+
+    equal
+        "and it dispatches to the implementation the subclass gave"
+        "fetch:vice:socket"
+        (emitJsExpr (both, signalSocket) "$0.fetch($1)")
+
+    check "and by the `in` operator, which walks the same chain" (emitJsExpr both "\"fetch\" in $0")
+
+    check
+        "the hook is no own property: own-key enumeration does not discover it"
+        (emitJsExpr both "Object.keys($0).indexOf(\"fetch\") === -1")
+
+    check
+        "nor does hasOwnProperty, nor getOwnPropertyNames on the instance"
+        (emitJsExpr
+            both
+            "!Object.prototype.hasOwnProperty.call($0, \"fetch\") && Object.getOwnPropertyNames($0).indexOf(\"fetch\") === -1")
+
+    equal
+        "the instance's own keys are what the base constructor assigned"
+        "label"
+        (emitJsExpr both "Object.keys($0).join(\",\")")
+
+    check
+        "the prototype's methods are non-enumerable, so Object.keys on it discovers nothing either"
+        (emitJsExpr both "Object.keys(Object.getPrototypeOf($0)).length === 0")
+
+    check
+        "which the `in` operator agrees with for a subclass that omits the interface"
+        (emitJsExpr unhandled "!(\"fetch\" in $0)")
+
+    let bareTwo = Unhandled "plain"
+    check "a subclass that omits the interface carries no hook" (emitJsExpr bareTwo "typeof $0.fetch === \"undefined\"")
+
+    equal
+        "and the override it did make still dispatches"
+        "run:plain:socket"
+        (emitJsExpr (bareTwo, signalSocket) "$0.run($1)")
+
+    // The member name Fable emits for an interface implementation on a class. A mangled name is a
+    // method no platform will look up.
+    equal
+        "an interface member on a class is emitted under its declared name, unmangled, once per interface"
+        "constructor,run,fetch,alarm"
+        (emitJsExpr both "Object.getOwnPropertyNames(Object.getPrototypeOf($0)).join(\",\")")
+
+    equal "and the second interface's member dispatches under that name" "alarm:vice" (emitJsExpr both "$0.alarm()")
+
+    check
+        "and the class overriding an abstract base member emits that name too"
+        (emitJsExpr unhandled "Object.getOwnPropertyNames(Object.getPrototypeOf($0)).indexOf(\"run\") >= 0")
+
 /// A class renamed by a name clash: its statics bind through the *export* name and are declared
 /// on the type the instance side took.
 let private renamedStatics () =
@@ -593,85 +685,20 @@ let private renamedStatics () =
     let depot = StaticsCollisionLab.Depot2.``open`` "a"
     equal "and its static method reaches the same object" "a" depot.slot
 
-/// Wave six's three probes, over the hand-written forms in `Probes.fs`. Each one settles a Fable
-/// emission question a lane is designed against, so each check names the platform behaviour it
-/// licenses rather than the F# it was written from.
+/// Wave six's remaining probe, over the hand-written forms in `Probes.fs` that no lab golden yet
+/// carries. The optional-hook and nested-name probes wave six proposed alongside this one moved
+/// onto `hook-interface-lab` and `nested-name-lab` once lanes AA and AD landed; see `optionalHooks`
+/// and `nestedNames` above.
 let private probes () =
     let payload = AmbientModuleLab.Exports.connect "socket"
 
-    // Probe 1. An optional hook carried by an interface the consumer's entrypoint subclass
-    // implements. A platform that discovers hooks by reading `instance.fetch` walks the prototype
-    // chain and finds it; a platform that enumerates own keys finds an instance carrying only
-    // what the base constructor assigned.
-    let hooked = Probes.HookedBench "vice"
-
-    check
-        "an interface-implemented hook is reachable by property access"
-        (emitJsExpr hooked "typeof $0.fetch === \"function\"")
-
-    check "and by the `in` operator, which walks the same chain" (emitJsExpr hooked "\"fetch\" in $0")
-
-    equal
-        "and it dispatches to the implementation the subclass gave"
-        "fetch:vice:socket"
-        (emitJsExpr (hooked, payload) "$0.fetch($1)")
-
-    check
-        "the hook is no own property: own-key enumeration does not discover it"
-        (emitJsExpr hooked "Object.keys($0).indexOf(\"fetch\") === -1")
-
-    check
-        "nor does hasOwnProperty, nor getOwnPropertyNames on the instance"
-        (emitJsExpr
-            hooked
-            "!Object.prototype.hasOwnProperty.call($0, \"fetch\") && Object.getOwnPropertyNames($0).indexOf(\"fetch\") === -1")
-
-    equal
-        "the instance's own keys are what the base constructor assigned"
-        "label"
-        (emitJsExpr hooked "Object.keys($0).join(\",\")")
-
-    check
-        "the prototype's methods are non-enumerable, so Object.keys on it discovers nothing either"
-        (emitJsExpr hooked "Object.keys(Object.getPrototypeOf($0)).length === 0")
-
-    // The negative. A subclass that declines the hook must read as carrying none.
-    let bare = Probes.BareBench "plain"
-    check "a subclass that omits the interface carries no hook" (emitJsExpr bare "typeof $0.fetch === \"undefined\"")
-    check "which the `in` operator agrees with" (emitJsExpr bare "!(\"fetch\" in $0)")
-    equal "and the override it did make still dispatches" "bare:plain:socket" (emitJsExpr (bare, payload) "$0.run($1)")
-
-    // Probe 2. The member name Fable emits for an interface implementation on a class. A mangled
-    // name is a method no platform will look up.
-    equal
-        "an interface member on a class is emitted under its declared name, unmangled, once per interface"
-        "constructor,run,fetch,alarm"
-        (emitJsExpr hooked "Object.getOwnPropertyNames(Object.getPrototypeOf($0)).join(\",\")")
-
-    equal "and the second interface's member dispatches under that name" "alarm:vice" (emitJsExpr hooked "$0.alarm()")
-
-    check
-        "and the class overriding an abstract base member emits that name too"
-        (emitJsExpr bare "Object.getOwnPropertyNames(Object.getPrototypeOf($0)).indexOf(\"run\") >= 0")
-
-    // Probe 3. A module beside a type of the same name, holding the type an inline shape is named
-    // for. The owner refers forward into the module and the nested type refers back out of it,
-    // both under the `module rec` header every golden carries.
+    // Two forms `nested-name-lab` (lane AD) does not carry: a nested inline shape holding a field
+    // of its own owner's type, and an import bound from inside the nested module rather than at
+    // the file's top level. See `Probes.fs`'s header for why these stay hand-written.
     let options =
         Probes.Widget.Options.Create(depth = 2.0, retry = Probes.Widget.Options.Retry.Create(attempts = 3.0))
 
     let widget = Probes.Widget.Create(label = "w", options = options)
-
-    equal
-        "a nested module's type, and one nested two levels down, are the object literals their Creates built"
-        """{"depth":2,"retry":{"attempts":3}}"""
-        (json options)
-
-    equal
-        "and the owner carries it under the property the reference named"
-        """{"label":"w","options":{"depth":2,"retry":{"attempts":3}}}"""
-        (json widget)
-
     widget.options.owner <- Some widget
     equal "the nested type's reference back to its owner reads through" "w" (emitJsExpr widget "$0.options.owner.label")
 
