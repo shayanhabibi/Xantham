@@ -52,4 +52,4 @@ utility-type concentration are in `docs/.ai/plans/generator-followdepth-recon.md
   the two numbers cannot be reconciled against each other since the earlier one was never
   produced by this method.
 
-Final commit: `77c47e3`.
+Final commit: `0738744`.
