@@ -894,8 +894,8 @@ type DedupeOverloads =
     /// Wave seven, lane AF. The overload survives deduplication; a literal-typed parameter
     /// separates it from its siblings.
     | [<Exact>] OverloadsDistinguishedByLiteral of parameter: string
-    /// Wave eight, item 2. An overload set where a literal-typed parameter is a synthesized
-    /// union of literals; the literal typing does not separate it from its siblings.
+    /// Wave eight, item 2. The overload survives deduplication; a parameter typed as a
+    /// synthesized union of literals separates it from its siblings.
     | [<Exact>] OverloadsDistinguishedByLiteralUnion of parameter: string
     /// Wave eight, item 3. An exported function overload dropped; no parameter separates it
     /// from an earlier one.
