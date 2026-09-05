@@ -365,7 +365,7 @@ type Console =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/console/dir_static)
     /// </summary>
-    abstract dir: item: obj * options: obj -> unit
+    abstract dir: ?item: obj * ?options: obj -> unit
     /// <summary>
     /// The **<c>console.dirxml()</c>** static method displays an interactive tree of the descendant elements of the specified XML/HTML element. If it is not possible to display as an element the JavaScript Object view is shown instead. The output is presented as a hierarchical listing of expandable nodes that let you see the contents of child nodes.
     ///
@@ -413,7 +413,7 @@ type Console =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/console/table_static)
     /// </summary>
-    abstract table: tabularData: obj * ?properties: string[] -> unit
+    abstract table: ?tabularData: obj * ?properties: string[] -> unit
     /// <summary>
     /// The **<c>console.time()</c>** static method starts a timer you can use to track how long an operation takes. You give each timer a unique name, and may have up to 10,000 timers running on a given page. When you call console.timeEnd() with the same name, the browser will output the time, in milliseconds, that elapsed since the timer was started.
     ///
@@ -446,7 +446,7 @@ type Console =
     /// </summary>
     abstract warn: [<ParamArray>] data: obj[] -> unit
     [<ParamObject; Emit("$0")>]
-    static member Create (``assert``: Action<bool option, obj[]>, clear: Action, count: Action<string option>, countReset: Action<string option>, debug: Action<obj[]>, dir: Action<obj, obj>, dirxml: Action<obj[]>, error: Action<obj[]>, group: Action<obj[]>, groupCollapsed: Action<obj[]>, groupEnd: Action, info: Action<obj[]>, log: Action<obj[]>, table: Action<obj, string[] option>, time: Action<string option>, timeEnd: Action<string option>, timeLog: Action<string option, obj[]>, timeStamp: Action<string option>, trace: Action<obj[]>, warn: Action<obj[]>) : Console = jsNative
+    static member Create (``assert``: Action<bool option, obj[]>, clear: Action, count: Action<string option>, countReset: Action<string option>, debug: Action<obj[]>, dir: Action<obj option, obj option>, dirxml: Action<obj[]>, error: Action<obj[]>, group: Action<obj[]>, groupCollapsed: Action<obj[]>, groupEnd: Action, info: Action<obj[]>, log: Action<obj[]>, table: Action<obj option, string[] option>, time: Action<string option>, timeEnd: Action<string option>, timeLog: Action<string option, obj[]>, timeStamp: Action<string option>, trace: Action<obj[]>, warn: Action<obj[]>) : Console = jsNative
 
 type BufferSource = U2<JS.ArrayBuffer, JS.ArrayBufferView>
 
@@ -478,7 +478,7 @@ type Global =
 
 type GlobalConstructor =
     [<EmitConstructor>]
-    abstract Create: descriptor: GlobalDescriptor * value: obj -> Global
+    abstract Create: descriptor: GlobalDescriptor * ?value: obj -> Global
 
 [<Interface>]
 type GlobalDescriptor =
@@ -583,14 +583,14 @@ type RuntimeErrorConstructor =
 type Table =
     abstract length: float
     abstract get: index: float -> obj
-    abstract grow: delta: float * value: obj -> float
-    abstract set: index: float * value: obj -> unit
+    abstract grow: delta: float * ?value: obj -> float
+    abstract set: index: float * ?value: obj -> unit
     [<ParamObject; Emit("$0")>]
-    static member Create (length: float, get: Func<float, obj>, grow: Func<float, obj, float>, set: Action<float, obj>) : Table = jsNative
+    static member Create (length: float, get: Func<float, obj>, grow: Func<float, obj option, float>, set: Action<float, obj option>) : Table = jsNative
 
 type TableConstructor =
     [<EmitConstructor>]
-    abstract Create: descriptor: TableDescriptor * value: obj -> Table
+    abstract Create: descriptor: TableDescriptor * ?value: obj -> Table
 
 [<Interface>]
 type TableDescriptor =
@@ -641,7 +641,7 @@ type AbortSignalConstructor =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/AbortSignal/abort_static)
     /// </summary>
-    abstract abort: reason: obj -> AbortSignal
+    abstract abort: ?reason: obj -> AbortSignal
     /// <summary>
     /// The **<c>AbortSignal.timeout()</c>** static method returns an AbortSignal that will automatically abort after a specified time.
     ///
@@ -1171,9 +1171,9 @@ type ExecutionContext<'Props> =
     abstract cache: CacheContext option with get, set
     abstract access: CloudflareAccessContext option
     abstract tracing: Tracing with get, set
-    abstract abort: reason: obj -> unit
+    abstract abort: ?reason: obj -> unit
     [<ParamObject; Emit("$0")>]
-    static member Create (waitUntil: Action<JS.Promise<obj>>, passThroughOnException: Action, exports: obj, props: 'Props, tracing: Tracing, abort: Action<obj>, ?cache: CacheContext, ?access: CloudflareAccessContext) : ExecutionContext<'Props> = jsNative
+    static member Create (waitUntil: Action<JS.Promise<obj>>, passThroughOnException: Action, exports: obj, props: 'Props, tracing: Tracing, abort: Action<obj option>, ?cache: CacheContext, ?access: CloudflareAccessContext) : ExecutionContext<'Props> = jsNative
 
 module Span =
     module SetAttributes =
@@ -2112,9 +2112,9 @@ type AbortController =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/AbortController/abort)
     /// </summary>
-    abstract abort: reason: obj -> unit
+    abstract abort: ?reason: obj -> unit
     [<ParamObject; Emit("$0")>]
-    static member Create (signal: AbortSignal, abort: Action<obj>) : AbortController = jsNative
+    static member Create (signal: AbortSignal, abort: Action<obj option>) : AbortController = jsNative
 
 /// <summary>
 /// The **<c>AbortSignal</c>** interface represents a signal object that allows you to communicate with an asynchronous operation (such as a fetch request) and abort it if required via an AbortController object.
@@ -2169,7 +2169,7 @@ type AbortSignal =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/AbortSignal/abort_static)
     /// </summary>
     [<Global("AbortSignal.abort")>]
-    static member abort (reason: obj) : AbortSignal = jsNative
+    static member abort (?reason: obj) : AbortSignal = jsNative
     /// <summary>
     /// The **<c>AbortSignal.timeout()</c>** static method returns an AbortSignal that will automatically abort after a specified time.
     ///
@@ -2943,7 +2943,7 @@ type DigestStream =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStream/abort)
     /// </summary>
-    abstract abort: reason: obj -> JS.Promise<unit>
+    abstract abort: ?reason: obj -> JS.Promise<unit>
     /// <summary>
     /// The **<c>close()</c>** method of the WritableStream interface closes the associated stream. All chunks written before this method is called are sent before the returned promise is fulfilled.
     ///
@@ -2957,7 +2957,7 @@ type DigestStream =
     /// </summary>
     abstract getWriter: unit -> WritableStreamDefaultWriter<U2<JS.ArrayBuffer, JS.ArrayBufferView>>
     [<ParamObject; Emit("$0")>]
-    static member Create (digest: JS.Promise<JS.ArrayBuffer>, bytesWritten: U2<float, bigint>, locked: bool, abort: Func<obj, JS.Promise<unit>>, close: Func<JS.Promise<unit>>, getWriter: Func<WritableStreamDefaultWriter<U2<JS.ArrayBuffer, JS.ArrayBufferView>>>) : DigestStream = jsNative
+    static member Create (digest: JS.Promise<JS.ArrayBuffer>, bytesWritten: U2<float, bigint>, locked: bool, abort: Func<obj option, JS.Promise<unit>>, close: Func<JS.Promise<unit>>, getWriter: Func<WritableStreamDefaultWriter<U2<JS.ArrayBuffer, JS.ArrayBufferView>>>) : DigestStream = jsNative
 
 [<Interface>]
 type DigestStreamOptions =
@@ -5014,7 +5014,7 @@ type ReadableStream<'R> =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStream/cancel)
     /// </summary>
-    abstract cancel: reason: obj -> JS.Promise<unit>
+    abstract cancel: ?reason: obj -> JS.Promise<unit>
     /// <summary>
     /// The **<c>getReader()</c>** method of the ReadableStream interface creates a reader and locks the stream to it. While the stream is locked, no other reader can be acquired until this one is released.
     ///
@@ -5061,7 +5061,7 @@ type ReadableStreamConstructor =
 [<Interface>]
 type ReadableStreamDefaultReader<'R> =
     abstract closed: JS.Promise<unit>
-    abstract cancel: reason: obj -> JS.Promise<unit>
+    abstract cancel: ?reason: obj -> JS.Promise<unit>
     /// <summary>
     /// The **<c>read()</c>** method of the ReadableStreamDefaultReader interface returns a Promise providing access to the next chunk in the stream's internal queue.
     ///
@@ -5075,7 +5075,7 @@ type ReadableStreamDefaultReader<'R> =
     /// </summary>
     abstract releaseLock: unit -> unit
     [<ParamObject; Emit("$0")>]
-    static member Create (closed: JS.Promise<unit>, cancel: Func<obj, JS.Promise<unit>>, read: Func<JS.Promise<U2<ReadableStreamDefaultReader.Read.Result.Item<'R>, ReadableStreamDefaultReader.Read.Result.Item2>>>, releaseLock: Action) : ReadableStreamDefaultReader<'R> = jsNative
+    static member Create (closed: JS.Promise<unit>, cancel: Func<obj option, JS.Promise<unit>>, read: Func<JS.Promise<U2<ReadableStreamDefaultReader.Read.Result.Item<'R>, ReadableStreamDefaultReader.Read.Result.Item2>>>, releaseLock: Action) : ReadableStreamDefaultReader<'R> = jsNative
 
 /// <summary>
 /// The **<c>ReadableStreamBYOBReader</c>** interface of the Streams API defines a reader for a ReadableStream that supports zero-copy reading from an underlying byte source. It is used for efficient copying from underlying sources where the data is delivered as an "anonymous" sequence of bytes, such as files.
@@ -5085,7 +5085,7 @@ type ReadableStreamDefaultReader<'R> =
 [<Interface>]
 type ReadableStreamBYOBReader =
     abstract closed: JS.Promise<unit>
-    abstract cancel: reason: obj -> JS.Promise<unit>
+    abstract cancel: ?reason: obj -> JS.Promise<unit>
     /// <summary>
     /// The **<c>read()</c>** method of the ReadableStreamBYOBReader interface is used to read data into a view on a user-supplied buffer from an associated readable byte stream. A request for data will be satisfied from the stream's internal queues if there is any data present. If the stream queues are empty, the request may be supplied as a zero-copy transfer from the underlying byte source.
     ///
@@ -5100,7 +5100,7 @@ type ReadableStreamBYOBReader =
     abstract releaseLock: unit -> unit
     abstract readAtLeast<'T when 'T :> JS.ArrayBufferView>: minElements: float * view: 'T -> JS.Promise<U2<ReadableStreamBYOBReader.ReadAtLeast.Result.Item<'T>, ReadableStreamDefaultReader.Read.Result.Item2>>
     [<ParamObject; Emit("$0")>]
-    static member Create (closed: JS.Promise<unit>, cancel: Func<obj, JS.Promise<unit>>, read: Func<'T, JS.Promise<U2<ReadableStreamBYOBReader.Read.Result.Item<'T>, ReadableStreamDefaultReader.Read.Result.Item2>>>, releaseLock: Action, readAtLeast: Func<float, 'T, JS.Promise<U2<ReadableStreamBYOBReader.ReadAtLeast.Result.Item<'T>, ReadableStreamDefaultReader.Read.Result.Item2>>>) : ReadableStreamBYOBReader = jsNative
+    static member Create (closed: JS.Promise<unit>, cancel: Func<obj option, JS.Promise<unit>>, read: Func<'T, JS.Promise<U2<ReadableStreamBYOBReader.Read.Result.Item<'T>, ReadableStreamDefaultReader.Read.Result.Item2>>>, releaseLock: Action, readAtLeast: Func<float, 'T, JS.Promise<U2<ReadableStreamBYOBReader.ReadAtLeast.Result.Item<'T>, ReadableStreamDefaultReader.Read.Result.Item2>>>) : ReadableStreamBYOBReader = jsNative
 
 [<Interface>]
 type ReadableStreamBYOBReaderReadableStreamBYOBReaderReadOptions =
@@ -5240,9 +5240,9 @@ type WritableStreamDefaultController =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultController/error)
     /// </summary>
-    abstract error: reason: obj -> unit
+    abstract error: ?reason: obj -> unit
     [<ParamObject; Emit("$0")>]
-    static member Create (signal: AbortSignal, error: Action<obj>) : WritableStreamDefaultController = jsNative
+    static member Create (signal: AbortSignal, error: Action<obj option>) : WritableStreamDefaultController = jsNative
 
 /// <summary>
 /// The **<c>TransformStreamDefaultController</c>** interface of the Streams API provides methods to manipulate the associated ReadableStream and WritableStream.
@@ -5308,7 +5308,7 @@ type WritableStream<'W> =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStream/abort)
     /// </summary>
-    abstract abort: reason: obj -> JS.Promise<unit>
+    abstract abort: ?reason: obj -> JS.Promise<unit>
     /// <summary>
     /// The **<c>close()</c>** method of the WritableStream interface closes the associated stream. All chunks written before this method is called are sent before the returned promise is fulfilled.
     ///
@@ -5322,7 +5322,7 @@ type WritableStream<'W> =
     /// </summary>
     abstract getWriter: unit -> WritableStreamDefaultWriter<'W>
     [<ParamObject; Emit("$0")>]
-    static member Create (locked: bool, abort: Func<obj, JS.Promise<unit>>, close: Func<JS.Promise<unit>>, getWriter: Func<WritableStreamDefaultWriter<'W>>) : WritableStream<'W> = jsNative
+    static member Create (locked: bool, abort: Func<obj option, JS.Promise<unit>>, close: Func<JS.Promise<unit>>, getWriter: Func<WritableStreamDefaultWriter<'W>>) : WritableStream<'W> = jsNative
 
 /// <summary>
 /// The **<c>WritableStreamDefaultWriter</c>** interface of the Streams API is the object returned by WritableStream.getWriter() and once created locks the writer to the WritableStream ensuring that no other streams can write to the underlying sink.
@@ -5354,7 +5354,7 @@ type WritableStreamDefaultWriter<'W> =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultWriter/abort)
     /// </summary>
-    abstract abort: reason: obj -> JS.Promise<unit>
+    abstract abort: ?reason: obj -> JS.Promise<unit>
     /// <summary>
     /// The **<c>close()</c>** method of the WritableStreamDefaultWriter interface closes the associated writable stream.
     ///
@@ -5374,7 +5374,7 @@ type WritableStreamDefaultWriter<'W> =
     /// </summary>
     abstract releaseLock: unit -> unit
     [<ParamObject; Emit("$0")>]
-    static member Create (closed: JS.Promise<unit>, ready: JS.Promise<unit>, abort: Func<obj, JS.Promise<unit>>, close: Func<JS.Promise<unit>>, write: Func<'W option, JS.Promise<unit>>, releaseLock: Action, ?desiredSize: float) : WritableStreamDefaultWriter<'W> = jsNative
+    static member Create (closed: JS.Promise<unit>, ready: JS.Promise<unit>, abort: Func<obj option, JS.Promise<unit>>, close: Func<JS.Promise<unit>>, write: Func<'W option, JS.Promise<unit>>, releaseLock: Action, ?desiredSize: float) : WritableStreamDefaultWriter<'W> = jsNative
 
 /// <summary>
 /// The **<c>TransformStream</c>** interface of the Streams API represents a concrete implementation of the pipe chain transform stream concept.
@@ -5562,9 +5562,9 @@ type ByteLengthQueuingStrategy =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ByteLengthQueuingStrategy/highWaterMark)
     /// </summary>
     abstract highWaterMark: float
-    abstract size: Func<obj, float>
+    abstract size: Func<obj option, float>
     [<ParamObject; Emit("$0")>]
-    static member Create (highWaterMark: float, size: Func<obj, float>) : ByteLengthQueuingStrategy = jsNative
+    static member Create (highWaterMark: float, size: Func<obj option, float>) : ByteLengthQueuingStrategy = jsNative
 
 /// <summary>
 /// The **<c>CountQueuingStrategy</c>** interface of the Streams API provides a built-in chunk counting queuing strategy that can be used when constructing streams.
@@ -5579,9 +5579,9 @@ type CountQueuingStrategy =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CountQueuingStrategy/highWaterMark)
     /// </summary>
     abstract highWaterMark: float
-    abstract size: Func<obj, float>
+    abstract size: Func<obj option, float>
     [<ParamObject; Emit("$0")>]
-    static member Create (highWaterMark: float, size: Func<obj, float>) : CountQueuingStrategy = jsNative
+    static member Create (highWaterMark: float, size: Func<obj option, float>) : CountQueuingStrategy = jsNative
 
 [<Interface>]
 type QueuingStrategyInit =
@@ -6650,7 +6650,7 @@ type Container =
     abstract running: bool
     abstract start: ?options: ContainerStartupOptions -> unit
     abstract monitor: unit -> JS.Promise<unit>
-    abstract destroy: error: obj -> JS.Promise<unit>
+    abstract destroy: ?error: obj -> JS.Promise<unit>
     abstract signal: signo: float -> unit
     abstract getTcpPort: port: float -> Request.Fetcher
     abstract setInactivityTimeout: durationMs: U2<float, bigint> -> JS.Promise<unit>
@@ -6661,7 +6661,7 @@ type Container =
     abstract interceptOutboundHttps: addr: string * binding: Request.Fetcher -> JS.Promise<unit>
     abstract exec: cmd: string[] * ?options: ContainerExecOptions -> JS.Promise<ExecProcess>
     [<ParamObject; Emit("$0")>]
-    static member Create (running: bool, start: Action<ContainerStartupOptions option>, monitor: Func<JS.Promise<unit>>, destroy: Func<obj, JS.Promise<unit>>, signal: Action<float>, getTcpPort: Func<float, Request.Fetcher>, setInactivityTimeout: Func<U2<float, bigint>, JS.Promise<unit>>, interceptOutboundHttp: Func<string, Request.Fetcher, JS.Promise<unit>>, interceptAllOutboundHttp: Func<Request.Fetcher, JS.Promise<unit>>, snapshotDirectory: Func<ContainerDirectorySnapshotOptions, JS.Promise<ContainerDirectorySnapshot>>, snapshotContainer: Func<ContainerSnapshotOptions, JS.Promise<ContainerSnapshot>>, interceptOutboundHttps: Func<string, Request.Fetcher, JS.Promise<unit>>, exec: Func<string[], ContainerExecOptions option, JS.Promise<ExecProcess>>) : Container = jsNative
+    static member Create (running: bool, start: Action<ContainerStartupOptions option>, monitor: Func<JS.Promise<unit>>, destroy: Func<obj option, JS.Promise<unit>>, signal: Action<float>, getTcpPort: Func<float, Request.Fetcher>, setInactivityTimeout: Func<U2<float, bigint>, JS.Promise<unit>>, interceptOutboundHttp: Func<string, Request.Fetcher, JS.Promise<unit>>, interceptAllOutboundHttp: Func<Request.Fetcher, JS.Promise<unit>>, snapshotDirectory: Func<ContainerDirectorySnapshotOptions, JS.Promise<ContainerDirectorySnapshot>>, snapshotContainer: Func<ContainerSnapshotOptions, JS.Promise<ContainerSnapshot>>, interceptOutboundHttps: Func<string, Request.Fetcher, JS.Promise<unit>>, exec: Func<string[], ContainerExecOptions option, JS.Promise<ExecProcess>>) : Container = jsNative
 
 [<Interface>]
 type ContainerDirectorySnapshot =
@@ -6724,7 +6724,7 @@ type MessagePort =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/MessagePort/postMessage)
     /// </summary>
-    abstract postMessage: data: obj * ?options: U2<obj[], MessagePortPostMessageOptions> -> unit
+    abstract postMessage: ?data: obj * ?options: U2<obj[], MessagePortPostMessageOptions> -> unit
     /// <summary>
     /// The **<c>close()</c>** method of the MessagePort interface disconnects the port, so it is no longer active. This stops the flow of messages to that port.
     ///
@@ -6757,7 +6757,7 @@ type MessagePort =
     /// </summary>
     abstract dispatchEvent: ``event``: Event -> bool
     [<ParamObject; Emit("$0")>]
-    static member Create (postMessage: Action<obj, U2<obj[], MessagePortPostMessageOptions> option>, close: Action, start: Action, onmessage: obj, addEventListener: Action<'Type, U2<Action<Event>, EventListenerObject<Event>>, U2<bool, EventTargetAddEventListenerOptions> option>, removeEventListener: Action<'Type, U2<Action<Event>, EventListenerObject<Event>>, U2<bool, EventTargetEventListenerOptions> option>, dispatchEvent: Func<Event, bool>) : MessagePort = jsNative
+    static member Create (postMessage: Action<obj option, U2<obj[], MessagePortPostMessageOptions> option>, close: Action, start: Action, onmessage: obj, addEventListener: Action<'Type, U2<Action<Event>, EventListenerObject<Event>>, U2<bool, EventTargetAddEventListenerOptions> option>, removeEventListener: Action<'Type, U2<Action<Event>, EventListenerObject<Event>>, U2<bool, EventTargetEventListenerOptions> option>, dispatchEvent: Func<Event, bool>) : MessagePort = jsNative
 
 /// <summary>
 /// The **<c>MessageChannel</c>** interface of the Channel Messaging API allows us to create a new message channel and send data through it via its two MessagePort properties.
@@ -7425,9 +7425,9 @@ type EventCounts =
     abstract entries: unit -> obj
     abstract keys: unit -> obj
     abstract values: unit -> obj
-    abstract forEach: param1: Action<float, string, EventCounts> * param2: obj -> unit
+    abstract forEach: param1: Action<float, string, EventCounts> * ?param2: obj -> unit
     [<ParamObject; Emit("$0")>]
-    static member Create (size: float, get: Func<string, float option>, has: Func<string, bool>, entries: Func<obj>, keys: Func<obj>, values: Func<obj>, forEach: Action<Action<float, string, EventCounts>, obj>) : EventCounts = jsNative
+    static member Create (size: float, get: Func<string, float option>, has: Func<string, bool>, entries: Func<obj>, keys: Func<obj>, values: Func<obj>, forEach: Action<Action<float, string, EventCounts>, obj option>) : EventCounts = jsNative
 
 type SpanConstructor =
     [<EmitConstructor>]
@@ -25943,7 +25943,7 @@ type Flagship =
     /// <remarks>@param flagKey The key of the flag to evaluate.</remarks>
     /// <remarks>@param defaultValue Optional default value returned when evaluation fails.</remarks>
     /// <remarks>@param context Optional evaluation context for targeting rules.</remarks>
-    abstract get: flagKey: string * defaultValue: obj * ?context: FlagshipEvaluationContext -> JS.Promise<obj>
+    abstract get: flagKey: string * ?defaultValue: obj * ?context: FlagshipEvaluationContext -> JS.Promise<obj>
     /// <summary>
     /// Get a boolean flag value.
     /// </summary>
@@ -26001,7 +26001,7 @@ type Flagship =
     /// <remarks>@param context Optional evaluation context for targeting rules.</remarks>
     abstract getObjectDetails<'T>: flagKey: string * defaultValue: 'T * ?context: FlagshipEvaluationContext -> JS.Promise<FlagshipEvaluationDetails<'T>>
     [<ParamObject; Emit("$0")>]
-    static member Create (get: Func<string, obj, FlagshipEvaluationContext option, JS.Promise<obj>>, getBooleanValue: Func<string, bool, FlagshipEvaluationContext option, JS.Promise<bool>>, getStringValue: Func<string, string, FlagshipEvaluationContext option, JS.Promise<string>>, getNumberValue: Func<string, float, FlagshipEvaluationContext option, JS.Promise<float>>, getObjectValue: Func<string, 'T, FlagshipEvaluationContext option, JS.Promise<'T>>, getBooleanDetails: Func<string, bool, FlagshipEvaluationContext option, JS.Promise<FlagshipEvaluationDetails<bool>>>, getStringDetails: Func<string, string, FlagshipEvaluationContext option, JS.Promise<FlagshipEvaluationDetails<string>>>, getNumberDetails: Func<string, float, FlagshipEvaluationContext option, JS.Promise<FlagshipEvaluationDetails<float>>>, getObjectDetails: Func<string, 'T, FlagshipEvaluationContext option, JS.Promise<FlagshipEvaluationDetails<'T>>>) : Flagship = jsNative
+    static member Create (get: Func<string, obj option, FlagshipEvaluationContext option, JS.Promise<obj>>, getBooleanValue: Func<string, bool, FlagshipEvaluationContext option, JS.Promise<bool>>, getStringValue: Func<string, string, FlagshipEvaluationContext option, JS.Promise<string>>, getNumberValue: Func<string, float, FlagshipEvaluationContext option, JS.Promise<float>>, getObjectValue: Func<string, 'T, FlagshipEvaluationContext option, JS.Promise<'T>>, getBooleanDetails: Func<string, bool, FlagshipEvaluationContext option, JS.Promise<FlagshipEvaluationDetails<bool>>>, getStringDetails: Func<string, string, FlagshipEvaluationContext option, JS.Promise<FlagshipEvaluationDetails<string>>>, getNumberDetails: Func<string, float, FlagshipEvaluationContext option, JS.Promise<FlagshipEvaluationDetails<float>>>, getObjectDetails: Func<string, 'T, FlagshipEvaluationContext option, JS.Promise<FlagshipEvaluationDetails<'T>>>) : Flagship = jsNative
 
 /// <summary>
 /// Hello World binding to serve as an explanatory example. DO NOT USE

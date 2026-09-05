@@ -11,8 +11,8 @@
   "passes": [
     {
       "pass": "SI - shape-interfaces",
-      "total": 23,
-      "ergonomic": 13,
+      "total": 31,
+      "ergonomic": 21,
       "widened": 8,
       "escape": 2
     },

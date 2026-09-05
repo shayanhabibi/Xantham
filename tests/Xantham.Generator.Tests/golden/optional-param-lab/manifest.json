@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "package": "optional-param-lab",
+  "module": "OptionalParamLab",
+  "counts": {
+    "exact": 1,
+    "ergonomic": 3,
+    "widened": 0,
+    "escape": 1
+  },
+  "passes": [
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 4,
+      "ergonomic": 4
+    },
+    {
+      "pass": "SE - shape-exports",
+      "total": 6,
+      "ergonomic": 5,
+      "escape": 1
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 4,
+      "ergonomic": 4
+    }
+  ]
+}

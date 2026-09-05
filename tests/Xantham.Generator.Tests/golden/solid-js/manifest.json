@@ -26,8 +26,8 @@
     },
     {
       "pass": "shape-callbacks",
-      "total": 23,
-      "ergonomic": 16,
+      "total": 24,
+      "ergonomic": 17,
       "widened": 7
     },
     {
@@ -48,8 +48,8 @@
     },
     {
       "pass": "SE - shape-exports",
-      "total": 136,
-      "ergonomic": 88,
+      "total": 160,
+      "ergonomic": 112,
       "widened": 46,
       "escape": 2
     },

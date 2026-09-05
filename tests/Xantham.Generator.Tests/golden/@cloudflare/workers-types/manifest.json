@@ -51,9 +51,9 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 7780,
+      "total": 8087,
       "exact": 96,
-      "ergonomic": 6931,
+      "ergonomic": 7238,
       "widened": 602,
       "escape": 151
     },
@@ -65,16 +65,16 @@
     },
     {
       "pass": "SC - shape-classes",
-      "total": 71,
+      "total": 112,
       "exact": 7,
-      "ergonomic": 48,
+      "ergonomic": 89,
       "widened": 8,
       "escape": 8
     },
     {
       "pass": "SE - shape-exports",
-      "total": 57,
-      "ergonomic": 16,
+      "total": 69,
+      "ergonomic": 28,
       "widened": 34,
       "escape": 7
     },

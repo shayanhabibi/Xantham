@@ -1537,9 +1537,9 @@ and optionalRef (optional: bool) (reference: FsTypeRef) =
     | true, FsOption _ -> reference
     | true, reference -> FsOption reference
 
-/// The wire does not flag optional parameters on their symbols, so a parameter whose type
-/// admits `undefined` (already hoisted to option by `typeRef`) is optional too - D1 collapses
-/// the distinction anyway.
+/// A parameter reads as `option` where its declaration marks it `?`, or where its type admits
+/// `undefined` and `typeRef` has already hoisted it. F# spells both the same way; `MB001` and
+/// `MB006` keep the two apart in the manifest.
 and internal isOptionalParam (p: ResolvedMember) (reference: FsTypeRef) =
     p.Optional
     || (match reference with
@@ -1894,6 +1894,8 @@ let internal shapeSignature
 
             if p.Optional then
                 findings <- findings @ [ Finding.make paramOwner Members.OptionalParameterAsOption ]
+            elif admitsOptional then
+                findings <- findings @ [ Finding.make paramOwner Members.OptionalParameterFromUnion ]
 
             {
                 Name = Naming.memberName p.Symbol.Name

@@ -256,27 +256,20 @@ let symbol = session.getSymbolAtPosition(file "main.ts", offset)
 ```
 
 A handle is `"index.kind.path"` — the node's index in its file's blob, its kind ordinal, and the
-file's canonical path. Paths contain dots, so split on the *first two* only:
+file's canonical path, per `RemoteNode.id` in the typescript package. `NodeHandle.parse` decodes
+one and answers `ValueNone` for a string that is not a handle; a path carries dots and, on
+Windows, a drive colon, so only the first two dots separate fields:
 
 ```fsharp
-/// index . kind . path, per `RemoteNode.id` in the typescript package.
-let parseHandle (handle: string) =
-    let first = handle.IndexOf '.'
-    let second = handle.IndexOf('.', first + 1)
-    if first < 0 || second < 0 then failwith $"not a node handle: {handle}"
-
-    {| Index = int (handle.Substring(0, first))
-       Kind =
-        LanguagePrimitives.EnumOfValue<uint32, SyntaxKind>(
-            uint32 (handle.Substring(first + 1, second - first - 1)))
-       Path = handle.Substring(second + 1) |}
+NodeHandle.parse "12.170.c:/packages/some.pkg/index.d.ts"
+// ValueSome { Index = 12; Kind = SyntaxKind.Parameter; Path = "c:/packages/some.pkg/index.d.ts" }
 ```
 
 Resolving a declaration to a node is then: parse the handle, fetch that file, tag the index.
 
 ```fsharp
-for declaration in symbol |> ValueOption.bind _.Declarations |> ValueOption.defaultValue [||] do
-    let declaration = parseHandle declaration
+for handle in symbol |> ValueOption.bind _.Declarations |> ValueOption.defaultValue [||] do
+    let declaration = (NodeHandle.parse handle).Value
 
     match session.getSourceFile(DocumentIdentifier.FileName declaration.Path) with
     | ValueNone -> ()
@@ -298,12 +291,18 @@ Going the other way — you have a node and want to ask the checker about it —
 string, because the `Location` field of the checker requests *is* a handle:
 
 ```fsharp
-let handle = $"{Node.index node}.{uint32 node.Kind}.{Ast.path (Node.file node)}"
+let handle =
+    NodeHandle.format
+        { Index = Node.index node
+          Kind = node.Kind
+          Path = Ast.path (Node.file node) }
+
 session.getTypeAtLocation handle
 ```
 
-There is no handle helper in `Xantham.TypeScript.Wire` yet; the two snippets above are the whole
-of it. When a second caller needs them, they belong beside `Ast.read` in `Library.fs`.
+`NodeHandle` lives beside `Ast` in `Library.fs`. It is the whole bridge: a symbol states a
+property's `?` on its own `Flags`, and states a *parameter's* nowhere, so the generator reads
+that one off `ParameterDeclaration.questionToken` at the node the handle names.
 
 ## Where the truth lives
 
