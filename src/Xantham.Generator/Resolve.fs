@@ -4,17 +4,43 @@
 /// `NotFollowed` with its reason.
 module Xantham.Generator.Resolve
 
+open System.Collections.Concurrent
+
 open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 
-/// Writes the frontier's `TypeResponse` values, one per line, to the path named by
-/// `XANTHAM_FRONTIER_DUMP` - a sampling hook for measuring what the depth cutoff discards.
-/// A no-op when the variable is unset, so the default corpus output is untouched.
+/// The dump path `XANTHAM_FRONTIER_DUMP` names, read once per process. `None` leaves every hook
+/// below inert and the default corpus output untouched.
+let private frontierDump =
+    lazy
+        (match System.Environment.GetEnvironmentVariable "XANTHAM_FRONTIER_DUMP" with
+         | null
+         | "" -> None
+         | path -> Some path)
+
+/// How often each derivation channel discovered a type id, keyed by id and then by channel name.
+let private provenance =
+    ConcurrentDictionary<int, ConcurrentDictionary<string, int>>()
+
+/// The generation each type id reached the frontier at.
+let private generations = ConcurrentDictionary<int, int>()
+
+/// Tags the types one derivation channel discovered and hands them back unchanged, so a
+/// discovery site is wrapped rather than restructured. Inert while the dump path is unset.
+let private channel (name: string) (types: TypeResponse list) =
+    if frontierDump.Value.IsSome then
+        for ty in types do
+            let counts = provenance.GetOrAdd(ty.Id, (fun _ -> ConcurrentDictionary()))
+            counts.AddOrUpdate(name, 1, (fun _ count -> count + 1)) |> ignore
+
+    types
+
+/// Writes the frontier's `TypeResponse` values, one per line, to the dump path - a sampling hook
+/// for measuring what the depth cutoff discards.
 let private dumpFrontier (frontier: TypeResponse list) =
-    match System.Environment.GetEnvironmentVariable "XANTHAM_FRONTIER_DUMP" with
-    | null
-    | "" -> ()
-    | path ->
+    match frontierDump.Value with
+    | None -> ()
+    | Some path ->
         let lines =
             frontier
             |> List.map (fun ty -> System.Text.Encoding.UTF8.GetString(ProtoJson.serialize ty))
@@ -55,6 +81,83 @@ let private attempt (work: Async<'T>) : Async<Result<'T, string>> =
             return Ok value
         with TsGoError(method, message) ->
             return Error $"the compiler could not answer {method} ({complaint message})"
+    }
+
+/// Writes the provenance sidecar beside the frontier dump, at `<dump>.prov`. One `ID` line per
+/// type id the walk reached carries its generation, whether the cutoff stranded it, and the
+/// channels that discovered it. One `TARGET` line per distinct `Target` on the frontier carries
+/// the declaration the group instantiates, which costs two round trips - so the whole function
+/// runs only where a dump path is named.
+let private dumpProvenance (ctx: Context) (frontier: TypeResponse list) =
+    async {
+        match frontierDump.Value with
+        | None -> ()
+        | Some path ->
+            let stuck = frontier |> List.map _.Id |> Set.ofList
+
+            let idLines =
+                [
+                    for entry in generations do
+                        let channels =
+                            match provenance.TryGetValue entry.Key with
+                            | true, counts ->
+                                counts
+                                |> Seq.map (fun kv -> $"{kv.Key}={kv.Value}")
+                                |> Seq.sort
+                                |> String.concat ";"
+                            | _ -> "seed"
+
+                        let onFrontier = if Set.contains entry.Key stuck then 1 else 0
+                        $"ID\t{entry.Key}\t{entry.Value}\t{onFrontier}\t{channels}"
+                ]
+
+            let byTarget =
+                frontier
+                |> List.choose (fun ty ->
+                    match ty.Target with
+                    | ValueSome target -> Some(target, ty)
+                    | ValueNone -> None)
+                |> List.groupBy fst
+                |> List.sortByDescending (snd >> List.length)
+
+            let! targetLines =
+                byTarget
+                |> List.map (fun (target, entries) ->
+                    async {
+                        let representative = (entries |> List.head |> snd).Id
+
+                        // The id on `Target` is a field of a response rather than a handle the
+                        // compiler registered, so it is re-requested through the reference that
+                        // carries it before anything else names it.
+                        let! named =
+                            attempt (
+                                async {
+                                    let! resolved = ctx.Session.getTargetOfType representative
+                                    let! symbol = ctx.Session.getSymbolOfType resolved.Id
+                                    return resolved, symbol
+                                }
+                            )
+
+                        let description =
+                            match named with
+                            | Error reason -> $"\t\t{reason}"
+                            | Ok(resolved, symbol) ->
+                                let name =
+                                    symbol |> ValueOption.map _.Name |> ValueOption.defaultValue "<anonymous>"
+
+                                let declaration =
+                                    symbol
+                                    |> ValueOption.bind _.Declarations
+                                    |> ValueOption.bind (Array.tryHead >> ValueOption.ofOption)
+                                    |> ValueOption.defaultValue "<none>"
+
+                                $"{resolved.Id}\t{name}\t{declaration}"
+
+                        return $"TARGET\t{target}\t{List.length entries}\t{description}"
+                    })
+                |> Async.Sequential
+
+            System.IO.File.AppendAllLines(path + ".prov", idLines @ List.ofArray targetLines)
     }
 
 /// The type ids each export resolves to: the declared type for type-like symbols, the value
@@ -255,6 +358,12 @@ let private deriveStructure (ctx: Context) (ty: TypeResponse) =
         let! members = properties |> Array.map (resolveMember true) |> Async.Parallel
 
         let resolveSignatures kind =
+            let label =
+                if kind = SignatureKind.Call then
+                    "call-signature"
+                else
+                    "construct-signature"
+
             async {
                 let! signatures = ctx.Session.getSignaturesOfType (ty.Id, kind)
 
@@ -281,7 +390,12 @@ let private deriveStructure (ctx: Context) (ty: TypeResponse) =
                                     IsAbstract = signature.Flags.HasFlag SignatureFlags.Abstract
                                     ReturnTypeId = returnType.Id
                                 },
-                                [ yield! parameterFacts |> Array.map snd; yield! typeParameters; returnType ]
+                                [
+                                    yield!
+                                        channel $"{label}-parameter" (parameterFacts |> Array.map snd |> Array.toList)
+                                    yield! channel $"{label}-type-parameter" (typeParameters |> Array.toList)
+                                    yield! channel $"{label}-return" [ returnType ]
+                                ]
                         })
                     |> Async.Parallel
             }
@@ -299,12 +413,17 @@ let private deriveStructure (ctx: Context) (ty: TypeResponse) =
 
         let discovered =
             [
-                yield! members |> Array.map snd
+                yield! channel "member-type" (members |> Array.map snd |> Array.toList)
                 yield! callSignatures |> Array.collect (snd >> List.toArray)
                 yield! constructSignatures |> Array.collect (snd >> List.toArray)
-                for info in indexInfos do
-                    info.KeyType
-                    info.ValueType
+                yield!
+                    channel
+                        "index-info"
+                        [
+                            for info in indexInfos do
+                                info.KeyType
+                                info.ValueType
+                        ]
             ]
 
         return
@@ -352,7 +471,8 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                     UnionMembers = members |> List.map _.Id
                     AliasTypeArguments = aliasTypeArguments |> List.map _.Id
                 },
-                members @ aliasTypeArguments
+                channel "union-members" members
+                @ channel "alias-type-arguments" aliasTypeArguments
         elif has TypeFlags.Intersection then
             // The constituents, followed into the table. A branding intersection (§4.6) is
             // decided by what its object operands *contain* - a marker property or a real
@@ -399,8 +519,8 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                     IntersectionMembers = members |> List.map _.Id
                     AliasTypeArguments = aliasTypeArguments |> List.map _.Id
                 },
-                members
-                @ aliasTypeArguments
+                channel "intersection-members" members
+                @ channel "alias-type-arguments" aliasTypeArguments
                 @ (structure |> Option.map _.Discovered |> Option.defaultValue [])
         elif has TypeFlags.EnumLiteral then
             // An enum member: its symbol names the F# enum case (§4.7); the value is already
@@ -533,7 +653,8 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                         TupleElements = tupleElements
                         AliasTypeArguments = aliasTypeArguments |> List.map _.Id
                     },
-                    typeArguments @ aliasTypeArguments
+                    channel "type-arguments" typeArguments
+                    @ channel "alias-type-arguments" aliasTypeArguments
             else
 
                 // The generic declaration behind an instantiation (§4.9). `Ready<T>` reached only
@@ -561,10 +682,10 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                 let discovered =
                     [
                         yield! structure.Discovered
-                        yield! baseTypes
-                        yield! typeArguments
-                        yield! aliasTypeArguments
-                        yield! target
+                        yield! channel "base-types" baseTypes
+                        yield! channel "type-arguments" typeArguments
+                        yield! channel "alias-type-arguments" aliasTypeArguments
+                        yield! channel "target" target
                     ]
 
                 return
@@ -604,20 +725,23 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                     Constraint = bound |> ValueOption.map _.Id |> ValueOption.toOption
                     Default = fallback |> ValueOption.map _.Id |> ValueOption.toOption
                 },
-                [ yield! ValueOption.toList bound; yield! ValueOption.toList fallback ]
+                [
+                    yield! channel "constraint" (ValueOption.toList bound)
+                    yield! channel "default" (ValueOption.toList fallback)
+                ]
         elif has TypeFlags.Index then
             // `keyof T` at an operand the checker could not finish (§4.10). The operand is the
             // index type's target, and it is what the whole idiom is about - `keyof<'T>` needs
             // a `'T` - so it is followed rather than left dangling.
             let! operand = ctx.Session.getTargetOfType ty.Id
-            return TypeFacts.shallow ty, [ operand ]
+            return TypeFacts.shallow ty, channel "index-operand" [ operand ]
         elif has TypeFlags.IndexedAccess then
             // `T[K]`. Both halves are followed: the index is usually a key variable whose
             // constraint names the object, and reading one without the other cannot tell
             // `T[K]` apart from `T[keyof T]`.
             let! objectType = ctx.Session.getObjectTypeOfType ty.Id
             let! indexType = ctx.Session.getIndexTypeOfType ty.Id
-            return TypeFacts.shallow ty, [ objectType; indexType ]
+            return TypeFacts.shallow ty, channel "indexed-access" [ objectType; indexType ]
         else
             // A conditional, a template literal or an intrinsic string mapping. None of these
             // has a structure to read - each is a type-level computation over an argument the
@@ -648,7 +772,9 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                 |> Array.filter (fun operand -> operand.Flags.HasFlag TypeFlags.TypeParameter)
                 |> Array.toList
 
-            let bound = aliasTypeArguments @ operands
+            let bound =
+                channel "alias-type-arguments" aliasTypeArguments
+                @ channel "template-operands" operands
 
             // A conditional's two branches (§4.11). Both responses are read - choosing between
             // them is what they are for - and only the branch the mapping takes is followed
@@ -725,7 +851,7 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                                     Name = alias |> ValueOption.map _.Name |> ValueOption.toOption
                                     Branch = taken |> Option.map (fun (side, bare) -> side, bare.Id)
                                 },
-                            taken |> Option.map snd |> Option.toList
+                            channel "conditional-branch" (taken |> Option.map snd |> Option.toList)
                     }
                 else
                     async.Return(None, [])
@@ -755,10 +881,15 @@ let resolveTypeTable: Pass<ResolveModel> =
                                 |> List.filter (fun ty -> not (Set.contains ty.Id derived))
                                 |> List.sortBy _.Id
 
+                            if frontierDump.Value.IsSome then
+                                for ty in fresh do
+                                    generations.TryAdd(ty.Id, depth) |> ignore
+
                             match fresh with
                             | [] -> return table, notFollowed, findings
                             | fresh when depth > FollowDepth ->
                                 dumpFrontier fresh
+                                do! dumpProvenance ctx fresh
 
                                 let notFollowed =
                                     fresh
