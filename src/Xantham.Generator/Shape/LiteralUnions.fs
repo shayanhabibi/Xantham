@@ -14,6 +14,19 @@ let private dedupeUnionCases (cases: FsUnionCase list) =
 let private dedupeEnumCases (cases: (string * int) list) =
     List.map2 (fun (_, value) name -> name, value) cases (uniqueCaseNames (cases |> List.map fst))
 
+/// A real TS enum member's own name, as a case name: `Naming.enumCaseOfString` sanitises it the
+/// same way a synthesized declaration name is (SY005), reported only where that sanitisation
+/// changes the name `Naming.pascalSegment` alone would have produced - a plain dash/underscore/dot
+/// name capitalises identically either way and carries no finding.
+let private sanitisedCaseName (owner: string) (symbolName: string) =
+    let legacy = Naming.pascalSegment symbolName
+    let sanitised = Naming.enumCaseOfString symbolName
+
+    if sanitised = legacy then
+        sanitised, None
+    else
+        sanitised, Some(Finding.make owner (SynthesizeAnonymous.NameSanitisedForIdentifier(symbolName, sanitised)))
+
 /// Declarations for named literal unions: StringEnum DUs with `CompiledName` per case, mixed
 /// unions carrying `CompiledValue` cases (D12), all-integer unions as F# enums - including
 /// reassembled TS enums, whose members name their cases (§4.7, §4.2).
@@ -70,7 +83,9 @@ let classifyLiteralUnions: Pass<ShapeModel> =
                                                 let caseName =
                                                     match m.SymbolName with
                                                     | Some symbolName when not (isSyntheticName symbolName) ->
-                                                        Naming.pascalSegment symbolName
+                                                        let sanitised, finding = sanitisedCaseName name symbolName
+                                                        finding |> Option.iter (fun f -> findings <- findings @ [ f ])
+                                                        sanitised
                                                     | _ ->
                                                         match literal with
                                                         | LitNumber value -> Naming.enumCaseOfNumber value
@@ -95,7 +110,9 @@ let classifyLiteralUnions: Pass<ShapeModel> =
                                                 let caseName =
                                                     match m.SymbolName with
                                                     | Some symbolName when not (isSyntheticName symbolName) ->
-                                                        Naming.pascalSegment symbolName
+                                                        let sanitised, finding = sanitisedCaseName name symbolName
+                                                        finding |> Option.iter (fun f -> findings <- findings @ [ f ])
+                                                        sanitised
                                                     | _ ->
                                                         match literal with
                                                         | LitString text -> Naming.enumCaseOfString text

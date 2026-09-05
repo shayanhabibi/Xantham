@@ -2385,6 +2385,53 @@ let pipelineTests =
                 GeneratorConfig.Default
                 (fun package ->
                     [ testCase "the ? marker reaches the model, and reaches it alone" <| fun _ ->
+        // Wave seven lane AJ's fixture. A real TS enum's member name becomes a union case name
+        // (§4.7), and unlike a literal type's text - which already read through
+        // `Naming.enumCaseOfString` - a member name reached the case-name minter as
+        // `Naming.pascalSegment` alone, which does not strip a character outside the plain
+        // identifier shape. Sanitising it has to reuse SY005, the same finding a synthesized
+        // declaration name sanitised for identifier shape reports (lane AI), and the
+        // uniqueness pass still has to separate two member names that sanitise alike.
+        yield!
+            fixtureTests
+                "case-sanitise-lab"
+                (handFixture "case-sanitise-lab")
+                GeneratorConfig.Default
+                (fun package ->
+                    [ testCase "an enum member name outside the plain identifier shape sanitises to a legal case name"
+                      <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains
+                              source
+                              "[<CompiledName(\"meta\")>] CfMeta"
+                              "the `@` and `/` in the member's own name separate segments; its value is untouched"
+
+                          Expect.stringContains
+                              source
+                              "[<CompiledName(\"beta\")>] BetaChannel"
+                              "a space between words separates them the same way"
+
+                          Expect.stringContains
+                              source
+                              "[<CompiledName(\"twofactor\")>] N2fa"
+                              "a leading digit is prefixed, exactly as a declaration name is"
+
+                      testCase "two member names that sanitise to the same identifier still keep separate cases"
+                      <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains source "AB = 1" "the first member to sanitise to `AB` keeps the plain name"
+
+                          Expect.stringContains
+                              source
+                              "AB2 = 2"
+                              "the second takes the numeric suffix `uniqueCaseNames` already hands out"
+
+                      testCase "a member name the dash/underscore/dot scheme already handled reports no finding"
+                      <| fun _ ->
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
 
                           let symbolsOf key =
@@ -2441,6 +2488,9 @@ let pipelineTests =
                               source
                               "markedAny (a: string, ?b: obj)"
                               "`any` hoists nothing, so before the marker was read this parameter was required" ])
+                              (symbolsOf "SY005")
+                              [ "Kind" ]
+                              "sanitising an enum member's case name reuses the finding a sanitised declaration name reports; `Collide` and `Plain` sanitise the same way the old scheme already did, and report none" ])
 
         yield! fixtureTests "animejs" (npmFixture "animejs") GeneratorConfig.Default (fun _ -> [])
 

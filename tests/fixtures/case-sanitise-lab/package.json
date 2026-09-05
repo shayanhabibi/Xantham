@@ -1,0 +1,6 @@
+{
+  "name": "case-sanitise-lab",
+  "type": "module",
+  "types": "index.d.ts",
+  "description": "String-literal case names outside the plain identifier shape, where the overload set that retains them mints a union case from the literal's text."
+}

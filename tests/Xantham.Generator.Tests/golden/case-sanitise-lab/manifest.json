@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "package": "case-sanitise-lab",
+  "module": "CaseSanitiseLab",
+  "counts": {
+    "exact": 1,
+    "ergonomic": 1,
+    "widened": 4,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "LU - classify-literal-unions",
+      "total": 3,
+      "ergonomic": 3
+    },
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 7,
+      "ergonomic": 1,
+      "widened": 6
+    },
+    {
+      "pass": "SA - shape-aliases",
+      "total": 1,
+      "widened": 1
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 3,
+      "ergonomic": 3
+    }
+  ]
+}
