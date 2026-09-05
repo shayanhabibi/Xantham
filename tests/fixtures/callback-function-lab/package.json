@@ -1,0 +1,7 @@
+{
+    "name": "callback-function-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "main": "index.js",
+    "description": "Hand-authored fixture for wave seven lane AE: a callback in every position the corpus uses - a parameter, a ParamObject Create parameter, an interface member, a member's return - at arities 0 to 3, so the run gate can read the arity of the function that actually crossed the Fable boundary."
+}
