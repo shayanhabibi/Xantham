@@ -77,24 +77,21 @@ let shapeInterfaces: Pass<ShapeModel> =
                     // reference site. Everything else it names is unique by construction.
                     let mutable declaredOnce = Set.empty
 
+                    // The instance side of each exported class, which is what decides whether a
+                    // declaration's optional methods are lifecycle hooks (§4.4).
+                    let classSides = exportedClassSides model
+
                     let decls =
                         model.DeclNames
                         |> Map.toList
                         |> List.sortBy fst
-                        |> List.choose (fun (typeId, name) ->
+                        |> List.collect (fun (typeId, name) ->
                             match Map.tryFind typeId model.Types with
                             | Some facts when declaresInterface model facts && not (Set.contains name declaredOnce) ->
                                 declaredOnce <- Set.add name declaredOnce
                                 let typeParameters, scope, parameterFindings = declTypeParams ctx model name facts
 
                                 findings <- findings @ parameterFindings
-
-                                // Members are shaped under the declaration's own parameters, so a
-                                // `T` in a member position names the variable rather than widening.
-                                let members, memberFindings =
-                                    shapeMembers ctx { model with TypeVars = scope } name facts
-
-                                findings <- findings @ memberFindings
 
                                 // §4.4's heritage rule and §4.6's is-a relation through one
                                 // gate: a declared base and an intersection operand are both a
@@ -109,6 +106,61 @@ let shapeInterfaces: Pass<ShapeModel> =
                                         else
                                             Ok(operand, reference, refFindings)
                                     | _ -> Error ShapeInterfaces.BaseMembersFlattened
+
+                                // The optional methods of a declaration `shape-classes` writes as
+                                // an `[<AbstractClass>]` - an ambient module's exported class,
+                                // abstract or based, rendered under an `inherit` line this run
+                                // omits. Each is a lifecycle hook and becomes an interface a
+                                // subclass opts into; an optional method anywhere else stays an
+                                // option property.
+                                let hooks =
+                                    let entrypoint =
+                                        match Map.tryFind typeId classSides with
+                                        | Some(export, valueFacts) ->
+                                            isEntrypoint export valueFacts.ConstructSignatures facts.BaseTypes
+                                        | None -> false
+
+                                    let inheritsSomething () =
+                                        (if flag TypeFlags.Intersection facts then
+                                             facts.IntersectionMembers
+                                         else
+                                             [])
+                                        @ facts.BaseTypes
+                                        |> List.exists (fun operandId ->
+                                            match inheritable operandId with
+                                            | Ok _ -> true
+                                            | Error _ -> false)
+
+                                    if entrypoint && not (inheritsSomething ()) then
+                                        facts.Members
+                                        |> List.filter (isOptionalHook model)
+                                        |> List.map _.Symbol.Name
+                                        |> Set.ofList
+                                    else
+                                        Set.empty
+
+                                // Members are shaped under the declaration's own parameters, so a
+                                // `T` in a member position names the variable rather than widening.
+                                let members, memberFindings =
+                                    shapeMembers ctx { model with TypeVars = scope } hooks name facts
+
+                                findings <- findings @ memberFindings
+
+                                let hookDecls =
+                                    facts.Members
+                                    |> List.filter (fun m -> Set.contains m.Symbol.Name hooks)
+                                    |> List.map (fun m ->
+                                        let decl, hookFindings =
+                                            shapeHook
+                                                ctx
+                                                { model with TypeVars = scope }
+                                                name
+                                                typeParameters
+                                                (Map.tryFind typeId model.DeclOrders |> Option.defaultValue None)
+                                                m
+
+                                        findings <- findings @ hookFindings
+                                        decl)
 
                                 let mutable inherits = []
 
@@ -164,22 +216,21 @@ let shapeInterfaces: Pass<ShapeModel> =
 
                                 let docs, tags = Map.tryFind typeId fallbackDocs |> Option.defaultValue ("", [])
 
-                                Some(
-                                    FsInterface
-                                        {
-                                            Name = name
-                                            Docs = docs
-                                            Tags = tags
-                                            Order = Map.tryFind typeId model.DeclOrders |> Option.defaultValue None
-                                            TypeParameters = typeParameters
-                                            Inherits = inherits |> List.map snd
-                                            Members = members
-                                            Entrypoint = None
-                                            CreateOverloads = []
-                                            Statics = []
-                                        }
-                                )
-                            | _ -> None)
+                                FsInterface
+                                    {
+                                        Name = name
+                                        Docs = docs
+                                        Tags = tags
+                                        Order = Map.tryFind typeId model.DeclOrders |> Option.defaultValue None
+                                        TypeParameters = typeParameters
+                                        Inherits = inherits |> List.map snd
+                                        Members = members
+                                        Entrypoint = None
+                                        CreateOverloads = []
+                                        Statics = []
+                                    }
+                                :: hookDecls
+                            | _ -> [])
 
                     let model =
                         { model with

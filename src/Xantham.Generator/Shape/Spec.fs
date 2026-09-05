@@ -1744,11 +1744,137 @@ let internal agreedMemberType (model: ShapeModel) (facts: TypeFacts) (m: Resolve
                 |> Option.filter (fun agreed -> agreed <> m.TypeId)
             | _ -> None
 
+/// A class an ambient module exports for consumers to derive from: `abstract`, or carrying a
+/// base of its own. F# admits no `inherit` of an interface (FS0946), so this is the one shape
+/// that reaches a consumer's `type Actor(ctx, env) = inherit DurableObject(ctx, env)`. Every
+/// other class keeps the interface form, where the `[<ParamObject>]` Create is the construction
+/// a consumer wants.
+let internal isEntrypoint (export: HarvestedExport) (constructSignatures: ResolvedSignature list) (bases: int list) =
+    match export.Origin with
+    | FromAmbientModule _ -> (constructSignatures |> List.exists _.IsAbstract) || not bases.IsEmpty
+    | FromGlobal
+    | FromModule -> false
+
+/// The instance side of every exported class, keyed by the type id its declaration is written
+/// under, with the constructor object carrying its construct signatures. `shape-classes` turns
+/// the pair into the entrypoint class form (§4.4) and `shape-interfaces` reads it to decide
+/// which optional methods are lifecycle hooks.
+let internal exportedClassSides (model: ShapeModel) : Map<int, HarvestedExport * TypeFacts> =
+    model.Harvest.Exports
+    |> List.choose (fun export ->
+        if not (hasAny SymbolFlags.Class export.Symbol.Flags) then
+            None
+        else
+            match Map.tryFind export.Symbol.Id model.ExportTypes with
+            | Some ids ->
+                match ids.Declared, ids.Value |> Option.bind (fun typeId -> Map.tryFind typeId model.Types) with
+                | Some declared, Some valueFacts -> Some(declared, (export, valueFacts))
+                | _ -> None
+            | None -> None)
+    |> Map.ofList
+
+/// The call signatures a member declares, read off the non-nullish arms where its type is a
+/// union. Under `strictNullChecks` an optional member's type is a union with `undefined`, which
+/// carries call signatures of its own only where every arm does.
+let internal callSignaturesOf (model: ShapeModel) (typeId: int) : ResolvedSignature list =
+    match Map.tryFind typeId model.Types with
+    | None -> []
+    | Some facts when not facts.CallSignatures.IsEmpty -> facts.CallSignatures
+    | Some facts when flag TypeFlags.Union facts ->
+        nonNullishMemberSet model facts
+        |> List.choose (fun id -> Map.tryFind id model.Types)
+        |> List.collect _.CallSignatures
+    | Some _ -> []
+
+/// A *lifecycle hook*: a method a declaration marks `?`, which the platform calls on an object
+/// that provides it. The name is identifier-shaped, because the emission names an interface
+/// after it.
+let internal isOptionalHook (model: ShapeModel) (m: ResolvedMember) =
+    m.Optional
+    && hasAny SymbolFlags.Method m.Symbol.Flags
+    && Naming.nestable (Naming.memberName m.Symbol.Name)
+    && not (callSignaturesOf model m.TypeId).IsEmpty
+
+/// The opt-in interface one lifecycle hook is emitted as: a `fetch?` on `Station` becomes
+/// `Station.IFetchHandler`, carrying `fetch` as an abstract member, one per call signature. A
+/// subclass implements the interfaces it provides, so `typeof instance.fetch === "function"`
+/// holds exactly where it does.
+///
+/// The interface takes the owner's type parameters where the hook's signature mentions any of
+/// them, and none otherwise. One interface per hook: a group is derivable from these by
+/// interface inheritance, where a grouped interface admits no decomposition.
+let internal shapeHook
+    (ctx: Context)
+    (model: ShapeModel)
+    (self: string)
+    (ownerParameters: FsTypeParam list)
+    (order: DeclOrder option)
+    (m: ResolvedMember)
+    : FsDecl * Finding list =
+    let key = Naming.memberName m.Symbol.Name
+    let owner = $"{self}.{key}"
+    let name = nestUnder self $"I{Naming.pascalSegment key}Handler"
+    let mutable findings = []
+
+    let overloads =
+        callSignaturesOf model m.TypeId
+        |> List.map (fun signature ->
+            let typeParameters, parameters, returns, signatureFindings =
+                shapeSignature ctx model (Some self) owner signature
+
+            findings <- findings @ signatureFindings
+
+            {
+                Name = key
+                Docs = ""
+                Tags = []
+                TypeParameters = typeParameters
+                Parameters = parameters
+                Return = returns
+            })
+
+    let mentioned =
+        overloads
+        |> List.fold
+            (fun found overload ->
+                overload.Parameters
+                |> List.fold
+                    (fun acc p -> Set.union acc (typeVarsOf p.Type))
+                    (Set.union found (typeVarsOf overload.Return)))
+            Set.empty
+
+    let bound = ownerParameters |> List.map _.Name |> Set.ofList
+
+    let decl =
+        FsInterface
+            {
+                Name = name
+                Docs = m.Docs
+                Tags = m.Tags
+                Order = order
+                TypeParameters =
+                    (if Set.isEmpty (Set.intersect mentioned bound) then
+                         []
+                     else
+                         ownerParameters)
+                Inherits = []
+                Members = overloads |> List.map FsMethod
+                Entrypoint = None
+                CreateOverloads = []
+                Statics = []
+            }
+
+    decl, findings @ [ Finding.make owner (Members.OptionalHookAsInterface name) ]
+
 /// The interface members of an object type: methods for method symbols (each call signature an
 /// overload), properties otherwise, callbacks as delegate-typed properties (D5).
+///
+/// `hooks` names the members `shape-interfaces` lifts out as opt-in interfaces of their own
+/// (`shapeHook`); the declaration carries none of them.
 let internal shapeMembers
     (ctx: Context)
     (model: ShapeModel)
+    (hooks: Set<string>)
     (self: string)
     (facts: TypeFacts)
     : FsMember list * Finding list =
@@ -1767,6 +1893,10 @@ let internal shapeMembers
             elif isConstructorObject facts && m.Symbol.Name = "prototype" then
                 // On a constructor object, `prototype` is the instance side, which is a
                 // declaration of its own - `shape-classes` drops it for the same reason.
+                false
+            elif Set.contains m.Symbol.Name hooks then
+                // A lifecycle hook is declared by an interface of its own, so the class carries
+                // no member for it and a subclass declining it carries none either.
                 false
             else
                 true)

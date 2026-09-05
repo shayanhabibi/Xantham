@@ -47,22 +47,6 @@ module private Refusal =
     let InheritedBase =
         "the class inherits a base whose constructor arguments have no F# form"
 
-/// The type variables a reference mentions. A primary constructor is written under the
-/// declaration's own head, so its parameters may name those variables and no others.
-let rec private typeVars (reference: FsTypeRef) =
-    match reference with
-    | FsTypeVar name -> Set.singleton name
-    | FsOption inner
-    | FsArray inner
-    | FsBranded(inner, _) -> typeVars inner
-    | FsTuple parts
-    | FsErasedUnion parts
-    | FsApp(_, parts) -> parts |> List.fold (fun found part -> Set.union found (typeVars part)) Set.empty
-    | FsDelegate(parameters, returns) ->
-        returns :: parameters
-        |> List.fold (fun found part -> Set.union found (typeVars part)) Set.empty
-    | _ -> Set.empty
-
 /// The TypeScript base a class derives that F# reaches as `exn`, if it has one. `Error` is the
 /// only lib name bound to F#'s exception type, and only through the compiler-lib table, so a
 /// class whose base is shipped by this run or by a mapped group is not one of these.
@@ -81,17 +65,6 @@ let private exnBase (ctx: Context) (model: ShapeModel) (bases: int list) =
                     | _ -> None
                 | _ -> None
             | None -> None)
-
-/// A class an ambient module exports for consumers to derive from: `abstract`, or carrying a
-/// base of its own. F# admits no `inherit` of an interface (FS0946), so this is the one shape
-/// that reaches a consumer's `type Actor(ctx, env) = inherit DurableObject(ctx, env)`. Every
-/// other class keeps the interface form, where the `[<ParamObject>]` Create is the construction
-/// a consumer wants.
-let private isEntrypoint (export: HarvestedExport) (constructSignatures: ResolvedSignature list) (bases: int list) =
-    match export.Origin with
-    | FromAmbientModule _ -> (constructSignatures |> List.exists _.IsAbstract) || not bases.IsEmpty
-    | FromGlobal
-    | FromModule -> false
 
 /// Constructor members on `Exports` for exported classes: `Exports.Name(...)` is
 /// `new Name(...)` through `[<EmitConstructor>]` (§4.4). The same pass shapes the class's
@@ -252,7 +225,7 @@ let shapeClasses: Pass<ShapeModel> =
 
                             let free =
                                 parameters
-                                |> List.fold (fun found p -> Set.union found (typeVars p.Type)) Set.empty
+                                |> List.fold (fun found p -> Set.union found (typeVarsOf p.Type)) Set.empty
                                 |> fun mentioned -> Set.difference mentioned bound
 
                             if not free.IsEmpty then
@@ -303,6 +276,19 @@ let shapeClasses: Pass<ShapeModel> =
 
                                     []
                                 | Some facts ->
+                                    let declaredId =
+                                        Map.tryFind export.Symbol.Id model.ExportTypes |> Option.bind _.Declared
+
+                                    // The name the *instance* side is declared under, which a clash
+                                    // renames: `cloudflare:workers`'s `DurableObject` class is
+                                    // `DurableObject2` beside the global interface of that name. A
+                                    // class's statics and its class form both belong to the class,
+                                    // so both are keyed here rather than by the export name.
+                                    let declaredName =
+                                        declaredId
+                                        |> Option.bind (fun typeId -> Map.tryFind typeId model.DeclNames)
+                                        |> Option.defaultValue name
+
                                     // `prototype` is the instance side, which the shaping tier
                                     // already declared; a symbol-keyed static is unrepresentable
                                     // for the same reason an instance one is (§4.14).
@@ -315,23 +301,22 @@ let shapeClasses: Pass<ShapeModel> =
                                                 let stable = m.Symbol.Name.Substring(0, m.Symbol.Name.LastIndexOf '@')
 
                                                 emit (
-                                                    Finding.make $"{name}.{stable}" Members.SymbolKeyedMemberDropped
+                                                    Finding.make
+                                                        $"{declaredName}.{stable}"
+                                                        Members.SymbolKeyedMemberDropped
                                                 )
 
                                                 false
                                             else
                                                 true)
-                                        |> List.collect (shapeStatic export name)
+                                        |> List.collect (shapeStatic export declaredName)
 
                                     if not shaped.IsEmpty then
                                         statics <-
                                             Map.add
-                                                name
-                                                ((Map.tryFind name statics |> Option.defaultValue []) @ shaped)
+                                                declaredName
+                                                ((Map.tryFind declaredName statics |> Option.defaultValue []) @ shaped)
                                                 statics
-
-                                    let declaredId =
-                                        Map.tryFind export.Symbol.Id model.ExportTypes |> Option.bind _.Declared
 
                                     let bases =
                                         declaredId
@@ -340,15 +325,7 @@ let shapeClasses: Pass<ShapeModel> =
                                         |> Option.defaultValue []
 
                                     if isEntrypoint export facts.ConstructSignatures bases then
-                                        // The name the *instance* side is declared under, which a
-                                        // clash renames: `cloudflare:workers`'s `DurableObject`
-                                        // class is `DurableObject2` beside the global interface of
-                                        // that name, and the class form belongs to the class.
-                                        let declaredName =
-                                            declaredId
-                                            |> Option.bind (fun typeId -> Map.tryFind typeId model.DeclNames)
-
-                                        admitEntrypoint export facts bases (Option.defaultValue name declaredName)
+                                        admitEntrypoint export facts bases declaredName
 
                                     facts.ConstructSignatures
                                     |> List.map (fun signature ->

@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "package": "hook-interface-lab",
+  "module": "HookInterfaceLab",
+  "counts": {
+    "exact": 1,
+    "ergonomic": 8,
+    "widened": 1,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "HG - harvest-globals",
+      "total": 1,
+      "exact": 1
+    },
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 12,
+      "exact": 1,
+      "ergonomic": 11
+    },
+    {
+      "pass": "SC - shape-classes",
+      "total": 3,
+      "exact": 2,
+      "widened": 1
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 12,
+      "ergonomic": 12
+    }
+  ]
+}
