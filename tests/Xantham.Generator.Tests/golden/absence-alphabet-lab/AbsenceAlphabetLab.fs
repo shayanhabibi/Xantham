@@ -37,7 +37,9 @@ type Absence =
     abstract returnsVoid: unit -> unit
     /// <summary>
     /// <c>x: null</c>. A bare absence rather than a union, so it widens to <c>obj</c> and TR033
-    /// stays silent. The negative for the two members below.
+    /// stays silent. TR014 (<c>TypeFlagsNotMapped</c>, flags <c>Null</c>) fires at this site instead,
+    /// recording the widening under the general unmapped-flags finding rather than an
+    /// absence-specific one. The negative for the two members below.
     /// </summary>
     abstract onlyNull: obj with get, set
     /// <summary>

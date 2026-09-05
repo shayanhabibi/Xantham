@@ -26,7 +26,9 @@ export interface Absence {
     returnsVoid(): void;
 
     /** `x: null`. A bare absence rather than a union, so it widens to `obj` and TR033
-        stays silent. The negative for the two members below. */
+        stays silent. TR014 (`TypeFlagsNotMapped`, flags `Null`) fires at this site instead,
+        recording the widening under the general unmapped-flags finding rather than an
+        absence-specific one. The negative for the two members below. */
     onlyNull: null;
 
     /** `x: null | undefined`. Two absences, and nothing remains beside them. */
