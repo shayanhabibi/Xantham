@@ -234,3 +234,74 @@ Repeated into each brief rather than referenced, because a lane starts cold:
 4. Run the fast loop while iterating; run `dotnet fsi build.fsx -- test` before the final commit.
 5. Write the full report to `docs/.ai/handovers/lane-<id>.md` and return at most fifteen lines.
 6. Never `git push`, never open a PR, never merge into `master`.
+
+---
+
+# Outcomes
+
+Recorded after integration. Every lane's handover sits in `docs/.ai/handovers/`.
+
+Gate over the integrated tree: **456 generator tests, 90 wire tests, run gate 179 checks.**
+Baseline was 419 / 85 / 160.
+
+| Item | Lane | Outcome |
+| --- | --- | --- |
+| 1 | AE | **Refused on evidence.** D5 upheld. Corpus unchanged at 1,245 delegates. |
+| 2 | AF | `DO001` 36 → 18, cloudflare 19 → 3. `KVNamespace.get` reaches all four forms. |
+| 3, 6 | AI | Residue 125 → 118, seven names resolved. `FS0883` closed for type names. |
+| 4 | AG | `MB001` 0 → 610, `MB006` 37. Wire carries parameter optionality. |
+| 5 | — | Closed in the pre-dispatch commit. `TR033` carries its alphabet. |
+| 7 | R1 | `workerd` reads hooks by property access. Lane AA's form stands. |
+| 8 | AH | `Probes.fs` 83 → 43 lines, check count held at 160. |
+| — | AJ | `FS0883` closed for union case names. Pre-existing, found through item 2. |
+
+## What the wave established beyond its items
+
+**Item 1's answer is the wave's most valuable result, and it is a refusal.** Under Fable 5.2 an
+F# function type crosses the boundary correctly in parameter position at every arity, in a
+`ParamObject`, and as a method return at arity 0 and 1. It fails as a method return at arity 2 or
+more: `(factory.make 5.0) 1.0 2.0` compiles to `factory.make(5)(1)(2)` and raises `TypeError`. It
+also fails when a function-typed member is read back, which hands F# a curry wrapper of length 1.
+Both failures type-check and compile. `@cloudflare/workers-types` and `solid-js` both return
+callbacks from methods, so the corpus reaches the failing position. D5's default was right and now
+rests on measurement rather than on expectation.
+
+Lane AE handed back a hybrid — function types in parameter and `ParamObject` position, delegates
+retained on member returns and on function-typed members — with every position it needs already
+measured green. It needs a nesting rule: `Factory.Create` in the lab golden synthesises
+`Func<float, Func<float, float, string>>`. That is the shape of a wave eight lane.
+
+**Two of item 3's six residues were the global declaration, not the namespaced one.** The
+namespaced declaration is declared first in source and claims the bare name first, so `name-exports`
+reads the whole claim list before granting any. Nesting at the collision would have moved the wrong
+declaration.
+
+**A parameter's `?` is syntactic and the checker discards it.** Measured: `SymbolFlags` and
+`CheckFlags` are identical whether the `?` is present or not. It survives only as
+`ParameterDeclaration.questionToken`, so Wire gained `NodeHandle` to follow a symbol's declaration
+into the blob. Emission still collapses `f(x?: T)` and `f(x: T | undefined)` onto `?x: T`, because
+F# has one form and it admits both calls; the `MB001`/`MB006` pair is the record that was missing.
+
+## Carried into wave eight
+
+1. **The hybrid callback emission** lane AE priced. Highest consumer value on the list.
+2. **A retained literal derived from a URL makes a long name** — `"http://www.w3.org/1999/xhtml"`
+   becomes `DrawableSVGGeometry.HttpWwwW3Org1999Xhtml` in animejs. Deterministic and compiling; a
+   naming judgment rather than a defect.
+3. **An anonymous union of literals at a distinguishing position still collides.** No single literal
+   type stands for `"a" | "b"`. Pinned by `literal-overload-lab`'s `Choice`.
+4. **Export-function overloads are uncovered by item 2's fix** — animejs's `$` and `mapRange`, and
+   neither is literal-separated.
+5. **A bare `x: null` records no absence fact.** It is not a union, never reaches `unionRef`, and
+   widens to `obj`. Pinned as the negative in `absence-alphabet-lab`.
+6. The queues items 9, 10 and 11 carried, untouched again.
+
+## Two process facts worth carrying
+
+**`build.fsx` exits 0 when its pipeline fails.** It prints `Error: Pipeline is failed because the
+result is not indicating as successful` and then exits successfully. A wave that trusts the exit
+code will report a broken tree as green; this one nearly did. Read the summary line.
+
+**`build.fsx -- test` runs fantomas, which writes CRLF on Windows.** Every F# file then reports as
+modified with an empty content diff, so `git status` cannot be used to see a lane's footprint and
+`git merge` refuses to run until the tree is cleaned. Compare with `--ignore-cr-at-eol`.
