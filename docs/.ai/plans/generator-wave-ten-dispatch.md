@@ -250,4 +250,80 @@ is that this number grows with nothing watching it. You own `Resolve.fs`. Do not
 
 ## Outcomes
 
-To be filled after composition.
+Measured on the composed integration branch after both merges.
+
+| Item | Lane | Outcome |
+| --- | --- | --- |
+| packaging | P1 | **Shipped.** `Spec.publishable` replaces the `EndsWith("Wire")` filter at both sites. `pack` emits three `.nupkg`: Wire `0.2.0`, `Xantham.Fable.Core` and `Xantham.Cli` at `0.1.0-alpha.1`. |
+| consumer docs | P1 | **Shipped.** `docs/generator-usage.md`, 237 lines, install through compile, with the alpha boundary stated. |
+| ignore rule | P1 | **Shipped.** `xantham-out/` ignored unanchored; the `*lab` fixture re-includes verified intact. |
+| frontier sample | R4 | **Answered, against the hypothesis.** Raising `FollowDepth` recovers nothing. |
+
+### Gate and corpus: unchanged, as designed
+
+| | base `cb6256b` | composed |
+| --- | ---: | ---: |
+| generator tests | 467 | 467 |
+| wire tests | 90 | 90 |
+| run gate checks | 257 | 257 |
+| exact / ergonomic / widened / escape | 495 / 1552 / 786 / 193 | 495 / 1552 / 786 / 193 |
+| exit code | 0 | 0 |
+
+Neither lane was meant to move a count. Lane P1 touched no generator source; lane R4's dump is
+a no-op with `XANTHAM_FRONTIER_DUMP` unset. A moved count here would have been the defect.
+
+### The frontier answer
+
+The item was bought to decide whether a cheap constant raise settles the queue's one correctness
+risk. **It does not.** Measured on `@cloudflare/workers-types`:
+
+| `FollowDepth` | unique frontier type ids |
+| ---: | ---: |
+| 12 | 2,371 |
+| 16 | 2,392 |
+| 20 | 2,397 |
+
+The stuck set does not shrink as the cutoff rises — it grows slightly and flattens. Following
+deeper exposes about as many unresolved types as it resolves, so the wall moves and the count
+stays. `FollowDepth` is not the lever.
+
+What the frontier is made of points at the lever instead. 74.5% of entries carry `Object`, and
+77.8% of those are `Anonymous | Instantiated | CouldContainTypeVariables` — the signature of a
+generic utility type applied to arguments, not a hand-declared interface. Of the 783
+`Reference`-flagged entries carrying a `Target`, 44% point at a single target id, and all of
+them at just 22 ids. A few utility types instantiated across many argument combinations produce
+this frontier; many independent types do not.
+
+So the repair to price is **normalising or memoising utility-type instantiation on its target
+and arguments**, not a constant. That is a wave-sized item and it belongs on the next worklist
+in those terms.
+
+Two things are open, both recorded by the lane rather than hidden. Target id 65 — the single
+largest concentration point — has no declaration name, because checker ids are assigned per
+session and a name needs a further wire lookup that a sampling pass had no scope for. And lane
+R3's carried estimate of ~1,815 does not reconcile against the 2,371 measured here; the earlier
+number was never produced by this method, so the two are not comparable rather than one being
+wrong.
+
+### The wave's cost in process
+
+**No lane needed manager intervention, and no lane stalled.** Both halt gates fired clean at
+`cb6256b`, both lanes committed as they went, and neither ended a turn waiting on a background
+run. The clauses wave nine wrote against — the inherited working directory and the background
+stall — cost nothing this wave. Both were gated rather than merely stated, which is what wave
+nine's own retrospective asked for.
+
+**Lane P1 found a defect the brief did not name.** `pack-Xantham.Fable.Core` failed
+`NETSDK1005`: the run gate's `dotnet fable` restores the support package for `netstandard2.1`
+alone, and `--no-build` implies `--no-restore`. Each pack stage now restores first. A lane that
+had reported "packaging done" without packing would have shipped this to the user.
+
+**One premise correction paid for an item four waves deferred.** Lane R3 priced the frontier
+sample as unaffordable because it read the stuck ids as carrying nothing to attribute. Checking
+that read against `Resolve.fs` before dispatch, rather than carrying it forward, turned a
+refused item into a one-lane answer. A carried estimate is worth re-reading at the site when the
+item it blocks keeps deferring.
+
+**Left as found, outside every brief.** `README.md` and `docs/index.md` carry eight links to
+`docs/plans/…`; that directory does not exist and the files live at `docs/.ai/plans/`. Lane P1
+reported them rather than widening its lane.
