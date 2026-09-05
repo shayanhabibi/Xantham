@@ -147,15 +147,15 @@ passes touch different files, and even the single 3,593-line file that preceded 
 every branch of the last wave. What conflicts is the handful of **append-only lists**. Most have
 since been turned into patterns or made to read the tree, and the ones that remain need care:
 
-- **Finding codes are positional.** A manifest key is its union's `Prefix` plus the case's 1-based
-  declaration position, so `SI005` means "the fifth case of the `ShapeInterfaces` union" and
-  nothing else. **Append your cases to the end of the union, never insert or reorder** — and if
-  the manager pre-declared your cases at dispatch, use those and edit `Findings.fs` no further.
-  Two branches that each append are both correct in isolation and both renumbered by the merge,
-  which is why `Findings.test.fs` snapshots key *and* case name together: that snapshot failing
-  after a merge is the system working. `Pipeline.test.fs` and `Shape.test.fs` pin codes as bare
-  string literals, deliberately, because those codes are published in every manifest — so a
-  renumbering is repaired by hand across all three files.
+- **Finding codes come from a table, not a position.** `FindingCodes.table` in `Findings.fs` maps
+  a case's stable name (`TR.NullableHoistedToOption`) to its numeric code (`TR032`), and a case
+  with no row fails at first use. Appending, retiring or reordering a case moves no other key, and
+  a retired case keeps its row so a number is never handed out twice. **If the manager pre-declared
+  your cases at dispatch, use those and edit `Findings.fs` no further.** A new case costs three
+  edits — the union case, its `FindingCodes.table` row, and its `Findings.test.fs` snapshot line —
+  so one discovered mid-task is a request back to the manager, not a local change. `Pipeline.test.fs`
+  and `Shape.test.fs` pin codes as bare string literals, deliberately, because those codes are
+  published in every manifest.
 - **The run gate is still a two-place addition** — link the golden in
   `Xantham.Generator.RunGate.fsproj` and add the checks to its `Program.fs`. Both are deliberate
   (a check is a judgement about behaviour, not a file listing), so both can conflict. Only add a
@@ -163,22 +163,25 @@ since been turned into patterns or made to read the tree, and the ones that rema
   it compile", and covers it automatically.
 - **Goldens are regenerated, not merged.** Generation is deterministic, so a conflict in a golden
   or a manifest is resolved by taking either side and re-running with `--update`, never by hand.
-- Say in your handover which finding codes you added and which large-fixture counts moved. That
-  is what the managing agent composes; a branch that reports only "green" cannot be composed.
+- Say in your handover file which finding codes you added and which large-fixture counts moved.
+  That is what the managing agent composes; a branch that reports only "green" cannot be composed.
 
 ## For the managing agent
 
 You dispatch the wave, you resolve the merges, and the cost of both is set before any agent
 starts.
 
-**Pre-declare every finding case on the integration branch, before dispatch.** Codes are
-positional, so `Findings.fs` is the one append point no pattern can remove: two agents appending
-correct cases still renumber each other, and the repair spans `Findings.fs`, `Findings.test.fs`,
-`Pipeline.test.fs` and `Shape.test.fs`. Decide from each agent's brief which findings it will
-need, append them all yourself in one commit with the snapshot updated, and hand each agent the
-case names it owns. Agents then raise findings that already exist and leave the union alone, and
-the class of conflict is gone for the wave. A case that turns out unused costs one dead union
-case; a case discovered mid-task is a request back to you, which is cheaper than a renumbering.
+**Pre-declare every finding case on the integration branch, before dispatch.** A case costs three
+edits — the union case, its `FindingCodes.table` row, and its `Findings.test.fs` snapshot line — so
+a case discovered mid-task is a request back to you. Decide from each agent's brief which findings
+it will need, append them all yourself in one commit, and hand each agent the case names and codes
+it owns. A case that turns out unused costs one dead row.
+
+Pre-declaring a *payload* carries a further cost, and it is yours rather than the lane's. Giving an
+existing case a payload breaks its raise sites, and your commit has to leave the tree green because
+every lane branches from it. Thread the real values through rather than a placeholder — a
+placeholder writes wrong data into every golden regenerated before the lane lands — and tell the
+owning lane the plumbing is theirs to redesign.
 
 The rest of the dispatch checklist:
 
@@ -195,6 +198,22 @@ The rest of the dispatch checklist:
 - **Compose the measurements after merging.** Every count each agent reported independently
   should survive composition; one that does not is an interaction between branches, and it is
   yours to find, because no agent could have seen it.
+- **Cap what comes back.** A lane writes its full report to `docs/.ai/handovers/<lane>.md` on its
+  own branch and returns you at most fifteen lines: the counts that moved, its branch and commit
+  SHA, and anything it could not explain. The detail belongs in the repository, where it survives
+  the session and costs nothing to leave unread. A wave of long reports exhausts the managing
+  agent's context before the last lane is dispatched, and the manager is the one participant that
+  cannot be restarted without losing the wave.
+- **Gate at batch boundaries, not per lane.** Every lane gates itself before it commits. Run the
+  full `dotnet fsi build.fsx -- test` once over the composed tree when a batch merges, and once at
+  final integration. Re-running it after each individual merge re-proves what the lane already
+  proved.
+- **Tell every lane to commit as soon as its work is coherent**, rather than carrying a whole
+  change uncommitted to the end. An interruption mid-wave is not rare, and uncommitted work is the
+  only kind that does not survive one.
+- **Verify each agent's branch base before it starts.** An isolated worktree is not guaranteed to
+  fork from the integration branch; a lane built on the wrong base merges as a mess, and the check
+  is one command.
 
 ## Asking for more
 
