@@ -72,6 +72,9 @@ module DurationKeyframes =
         [<EmitIndexer>]
         abstract Item: string -> obj with get, set
 
+    module Item =
+        type Duration = delegate of target: Target option * index: float option * targets: Target[] option * prevTween: Tween option -> FunctionValueReturn
+
 module PercentageKeyframes =
     type Item =
         inherit PercentageKeyframeParams
@@ -149,9 +152,15 @@ module ScrollObserverAxisCallback =
         | [<CompiledName("y")>] Y
 
 module Timeline =
+    module Add =
+        type A3 = delegate of target: Target option * index: float option * targets: Target[] option * prevTween: Tween option * tl: Timeline option -> TimelinePosition
+
     type Labels =
         [<EmitIndexer>]
         abstract Item: string -> float with get, set
+
+module Tween =
+    type Setter = delegate of target: obj * value: float * tween: Tween -> unit
 
 type JSAnimation =
     inherit Timer
@@ -564,12 +573,16 @@ type Transforms =
     /// <remarks>@return</remarks>
     abstract normalizePoint: x: float * y: float -> obj
     /// <remarks>@param cb</remarks>
-    abstract traverseUp: cb: Func<DOMTarget, float, obj> -> unit
+    abstract traverseUp: cb: Transforms.TraverseUp.Cb -> unit
     abstract getMatrix: unit -> obj
     abstract remove: unit -> unit
     abstract revert: unit -> unit
     [<ParamObject; Emit("$0")>]
-    static member Create (``$el``: U3<DOMProxy, Browser.Types.HTMLElement, Browser.Types.SVGElement>, inlineTransforms: obj[], point: obj, inversedMatrix: obj, normalizePoint: Func<float, float, obj>, traverseUp: (Func<DOMTarget, float, obj> -> unit), getMatrix: (unit -> obj), remove: (unit -> unit), revert: (unit -> unit)) : Transforms = jsNative
+    static member Create (``$el``: U3<DOMProxy, Browser.Types.HTMLElement, Browser.Types.SVGElement>, inlineTransforms: obj[], point: obj, inversedMatrix: obj, normalizePoint: Func<float, float, obj>, traverseUp: (Transforms.TraverseUp.Cb -> unit), getMatrix: (unit -> obj), remove: (unit -> unit), revert: (unit -> unit)) : Transforms = jsNative
+
+module Transforms =
+    module TraverseUp =
+        type Cb = delegate of ``$el``: DOMTarget * i: float -> obj
 
 type Eases =
     abstract linear: EasingFunction with get, set
@@ -936,6 +949,8 @@ module AutoLayoutParams =
         [<ParamObject; Emit("$0")>]
         static member Create (``type``: string, defaultValue: obj) : Delay2 = jsNative
 
+    type Ease = delegate of target: Target option * index: float option * targets: Target[] option * prevTween: Tween option -> FunctionValueReturn
+
 [<Interface>]
 type LayoutSnapshot =
     /// <remarks>@type {AutoLayout}</remarks>
@@ -983,37 +998,37 @@ type LayoutChildrenParam = obj
 
 [<Interface>]
 type LayoutAnimationTimingsParams =
-    abstract delay: U2<float, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>> option with get, set
-    abstract duration: U2<float, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>> option with get, set
+    abstract delay: U2<float, AutoLayoutParams.Ease> option with get, set
+    abstract duration: U2<float, AutoLayoutParams.Ease> option with get, set
     abstract ease: obj option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?delay: U2<float, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>>, ?duration: U2<float, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>>, ?ease: obj) : LayoutAnimationTimingsParams = jsNative
+    static member Create (?delay: U2<float, AutoLayoutParams.Ease>, ?duration: U2<float, AutoLayoutParams.Ease>, ?ease: obj) : LayoutAnimationTimingsParams = jsNative
 
 type LayoutStateAnimationProperties =
     [<EmitIndexer>]
-    abstract Item: string -> U3<string, float, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>> with get, set
+    abstract Item: string -> U3<string, float, AutoLayoutParams.Ease> with get, set
 
 type LayoutStateParams =
     inherit LayoutStateAnimationProperties
     inherit LayoutAnimationTimingsParams
-    abstract delay: U2<float, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>> option with get, set
-    abstract duration: U2<float, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>> option with get, set
+    abstract delay: U2<float, AutoLayoutParams.Ease> option with get, set
+    abstract duration: U2<float, AutoLayoutParams.Ease> option with get, set
     abstract ease: obj option with get, set
     [<EmitIndexer>]
-    abstract Item: string -> U3<string, float, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>> with get, set
+    abstract Item: string -> U3<string, float, AutoLayoutParams.Ease> with get, set
 
 [<Interface>]
 type LayoutSpecificAnimationParams =
     abstract id: TimelinePosition option with get, set
-    abstract delay: U2<float, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>> option with get, set
-    abstract duration: U2<float, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>> option with get, set
+    abstract delay: U2<float, AutoLayoutParams.Ease> option with get, set
+    abstract duration: U2<float, AutoLayoutParams.Ease> option with get, set
     abstract ease: obj option with get, set
     abstract playbackEase: EasingParam option with get, set
     abstract swapAt: LayoutStateParams option with get, set
     abstract enterFrom: LayoutStateParams option with get, set
     abstract leaveTo: LayoutStateParams option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?id: TimelinePosition, ?delay: U2<float, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>>, ?duration: U2<float, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>>, ?ease: obj, ?playbackEase: EasingParam, ?swapAt: LayoutStateParams, ?enterFrom: LayoutStateParams, ?leaveTo: LayoutStateParams) : LayoutSpecificAnimationParams = jsNative
+    static member Create (?id: TimelinePosition, ?delay: U2<float, AutoLayoutParams.Ease>, ?duration: U2<float, AutoLayoutParams.Ease>, ?ease: obj, ?playbackEase: EasingParam, ?swapAt: LayoutStateParams, ?enterFrom: LayoutStateParams, ?leaveTo: LayoutStateParams) : LayoutSpecificAnimationParams = jsNative
 
 [<Interface>]
 type LayoutAnimationParams =
@@ -1093,7 +1108,7 @@ type LayoutNodeProperties =
     abstract width: float with get, set
     abstract height: float with get, set
     [<EmitIndexer>]
-    abstract Item: string -> U3<string, float, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>> with get, set
+    abstract Item: string -> U3<string, float, AutoLayoutParams.Ease> with get, set
 
 type LayoutNode =
     abstract id: string with get, set
@@ -1138,7 +1153,7 @@ type LayoutNode =
     abstract _prev: LayoutNode option with get, set
     abstract _next: LayoutNode option with get, set
 
-type LayoutNodeIterator = Action<LayoutNode, float>
+type LayoutNodeIterator = delegate of node: LayoutNode * index: float -> unit
 
 /// <remarks>@import</remarks>
 type Scope =
@@ -1253,19 +1268,32 @@ module DrawableSVGGeometry =
 type Svg =
     abstract createMotionPath: Func<TargetsParam, float option, Svg.CreateMotionPath.Result> with get, set
     abstract createDrawable: Func<TargetsParam, float option, float option, DrawableSVGGeometry[]> with get, set
-    abstract morphTo: Func<TargetsParam, float option, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>> with get, set
+    abstract morphTo: Func<TargetsParam, float option, AutoLayoutParams.Ease> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (createMotionPath: Func<TargetsParam, float option, Svg.CreateMotionPath.Result>, createDrawable: Func<TargetsParam, float option, float option, DrawableSVGGeometry[]>, morphTo: Func<TargetsParam, float option, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>>) : Svg = jsNative
+    static member Create (createMotionPath: Func<TargetsParam, float option, Svg.CreateMotionPath.Result>, createDrawable: Func<TargetsParam, float option, float option, DrawableSVGGeometry[]>, morphTo: Func<TargetsParam, float option, AutoLayoutParams.Ease>) : Svg = jsNative
 
 module Svg =
     module CreateMotionPath =
         [<Interface>]
         type Result =
-            abstract translateX: Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn> with get, set
-            abstract translateY: Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn> with get, set
-            abstract rotate: Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn> with get, set
+            abstract translateX: AutoLayoutParams.Ease with get, set
+            abstract translateY: AutoLayoutParams.Ease with get, set
+            abstract rotate: AutoLayoutParams.Ease with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (translateX: Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>, translateY: Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>, rotate: Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>) : Result = jsNative
+            static member Create (translateX: AutoLayoutParams.Ease, translateY: AutoLayoutParams.Ease, rotate: AutoLayoutParams.Ease) : Result = jsNative
+
+module ScrambleTextParams =
+    type Chars = delegate of arg0: Target * arg1: float * arg2: Target[] -> string
+
+    type Delay = delegate of arg0: Target * arg1: float * arg2: Target[] -> float
+
+    type Duration = delegate of arg0: Target * arg1: float * arg2: Target[] -> float
+
+    type OnChange = delegate of arg0: string * arg1: float -> unit
+
+    type RevealDelay = delegate of arg0: Target * arg1: float * arg2: Target[] -> float
+
+    type Text = delegate of arg0: Target * arg1: float * arg2: Target[] -> string
 
 module SplitTemplateParams =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -1297,9 +1325,13 @@ type Text =
     abstract TextSplitter: TextSplitterConstructor with get, set
     abstract splitText: Func<U4<string, Browser.Types.Element[], Browser.Types.Element, Browser.Types.NodeList>, TextSplitterParams option, TextSplitter> with get, set
     abstract split: Func<U4<string, Browser.Types.HTMLElement[], Browser.Types.HTMLElement, Browser.Types.NodeList>, TextSplitterParams option, TextSplitter> with get, set
-    abstract scrambleText: (ScrambleTextParams option -> Func<Target option, float option, Target[] option, Tween option, ScrambleTextTween>) with get, set
+    abstract scrambleText: (ScrambleTextParams option -> Text.ScrambleText.Result) with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (TextSplitter: TextSplitterConstructor, splitText: Func<U4<string, Browser.Types.Element[], Browser.Types.Element, Browser.Types.NodeList>, TextSplitterParams option, TextSplitter>, split: Func<U4<string, Browser.Types.HTMLElement[], Browser.Types.HTMLElement, Browser.Types.NodeList>, TextSplitterParams option, TextSplitter>, scrambleText: (ScrambleTextParams option -> Func<Target option, float option, Target[] option, Tween option, ScrambleTextTween>)) : Text = jsNative
+    static member Create (TextSplitter: TextSplitterConstructor, splitText: Func<U4<string, Browser.Types.Element[], Browser.Types.Element, Browser.Types.NodeList>, TextSplitterParams option, TextSplitter>, split: Func<U4<string, Browser.Types.HTMLElement[], Browser.Types.HTMLElement, Browser.Types.NodeList>, TextSplitterParams option, TextSplitter>, scrambleText: (ScrambleTextParams option -> Text.ScrambleText.Result)) : Text = jsNative
+
+module Text =
+    module ScrambleText =
+        type Result = delegate of target: Target option * index: float option * targets: Target[] option * prevTween: Tween option -> ScrambleTextTween
 
 type TextSplitterConstructor =
     [<EmitConstructor>]
@@ -1769,8 +1801,8 @@ type DefaultsParams =
     abstract alternate: bool option with get, set
     abstract persist: bool option with get, set
     abstract autoplay: U2<bool, ScrollObserver> option with get, set
-    abstract duration: U2<float, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>> option with get, set
-    abstract delay: U2<float, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>> option with get, set
+    abstract duration: U2<float, DurationKeyframes.Item.Duration> option with get, set
+    abstract delay: U2<float, DurationKeyframes.Item.Duration> option with get, set
     abstract loopDelay: float option with get, set
     abstract ease: obj option with get, set
     abstract composition: U2<float, string> option with get, set
@@ -1783,7 +1815,7 @@ type DefaultsParams =
     abstract onComplete: (Tickable -> obj) option with get, set
     abstract onRender: (Renderable -> obj) option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?id: TimelinePosition, ?keyframes: U2<DurationKeyframes.Item[], PercentageKeyframes>, ?playbackEase: EasingParam, ?playbackRate: float, ?frameRate: float, ?loop: U2<float, bool>, ?reversed: bool, ?alternate: bool, ?persist: bool, ?autoplay: U2<bool, ScrollObserver>, ?duration: U2<float, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>>, ?delay: U2<float, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>>, ?loopDelay: float, ?ease: obj, ?composition: U2<float, string>, ?modifier: (obj -> obj), ?onBegin: (Tickable -> obj), ?onBeforeUpdate: (Tickable -> obj), ?onUpdate: (Tickable -> obj), ?onLoop: (Tickable -> obj), ?onPause: (Tickable -> obj), ?onComplete: (Tickable -> obj), ?onRender: (Renderable -> obj)) : DefaultsParams = jsNative
+    static member Create (?id: TimelinePosition, ?keyframes: U2<DurationKeyframes.Item[], PercentageKeyframes>, ?playbackEase: EasingParam, ?playbackRate: float, ?frameRate: float, ?loop: U2<float, bool>, ?reversed: bool, ?alternate: bool, ?persist: bool, ?autoplay: U2<bool, ScrollObserver>, ?duration: U2<float, DurationKeyframes.Item.Duration>, ?delay: U2<float, DurationKeyframes.Item.Duration>, ?loopDelay: float, ?ease: obj, ?composition: U2<float, string>, ?modifier: (obj -> obj), ?onBegin: (Tickable -> obj), ?onBeforeUpdate: (Tickable -> obj), ?onUpdate: (Tickable -> obj), ?onLoop: (Tickable -> obj), ?onPause: (Tickable -> obj), ?onComplete: (Tickable -> obj), ?onRender: (Renderable -> obj)) : DefaultsParams = jsNative
 
 type Renderable = U2<JSAnimation, Timeline>
 
@@ -2223,7 +2255,7 @@ module CallbackArgument =
         abstract _absoluteEndTime: float with get, set
         abstract _hasFromValue: float with get, set
         abstract _tweenType: float with get, set
-        abstract _setter: Action<obj, float, Tween> option with get, set
+        abstract _setter: Tween.Setter option with get, set
         abstract _valueType: float with get, set
         abstract _composition: float with get, set
         abstract _isOverlapped: float with get, set
@@ -2749,7 +2781,7 @@ module CallbackArgument =
             abstract _absoluteEndTime: float with get, set
             abstract _hasFromValue: float with get, set
             abstract _tweenType: float with get, set
-            abstract _setter: Action<obj, float, Tween> option with get, set
+            abstract _setter: Tween.Setter option with get, set
             abstract _valueType: float with get, set
             abstract _composition: float with get, set
             abstract _isOverlapped: float with get, set
@@ -2926,7 +2958,7 @@ module CallbackArgument =
         abstract _absoluteEndTime: float with get, set
         abstract _hasFromValue: float with get, set
         abstract _tweenType: float with get, set
-        abstract _setter: Action<obj, float, Tween> option with get, set
+        abstract _setter: Tween.Setter option with get, set
         abstract _valueType: float with get, set
         abstract _composition: float with get, set
         abstract _isOverlapped: float with get, set
@@ -2947,7 +2979,9 @@ type TweakRegister =
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, defaultValue: obj) : TweakRegister = jsNative
 
-type StaggerFunction<'T> = Func<Target option, float option, Target[] option, Tween option, Timeline option, 'T>
+type StaggerFunction<'T> = delegate of target: Target option * index: float option * targets: Target[] option * prevTween: Tween option * tl: Timeline option -> 'T
+
+type Method = delegate of target: Target * i: float * length: float -> float
 
 [<Interface>]
 type StaggerParams =
@@ -2956,7 +2990,7 @@ type StaggerParams =
     abstract reversed: bool option with get, set
     abstract grid: U2<bool, float[]> option with get, set
     abstract axis: StaggerParams.Axis option with get, set
-    abstract ``use``: U2<string, Func<Target, float, float, float>> option with get, set
+    abstract ``use``: U2<string, Method> option with get, set
     abstract total: float option with get, set
     abstract ease: EasingParam option with get, set
     abstract modifier: TweenModifier option with get, set
@@ -2974,7 +3008,7 @@ type StaggerParams =
     /// </summary>
     abstract seed: U2<float, bool> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?start: TimelinePosition, ?from: U3<float, string, float[]>, ?reversed: bool, ?grid: U2<bool, float[]>, ?axis: StaggerParams.Axis, ?``use``: U2<string, Func<Target, float, float, float>>, ?total: float, ?ease: EasingParam, ?modifier: TweenModifier, ?jitter: U2<float, (float * float)>, ?seed: U2<float, bool>) : StaggerParams = jsNative
+    static member Create (?start: TimelinePosition, ?from: U3<float, string, float[]>, ?reversed: bool, ?grid: U2<bool, float[]>, ?axis: StaggerParams.Axis, ?``use``: U2<string, Method>, ?total: float, ?ease: EasingParam, ?modifier: TweenModifier, ?jitter: U2<float, (float * float)>, ?seed: U2<float, bool>) : StaggerParams = jsNative
 
 module StaggerParams =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -3072,7 +3106,7 @@ type PowerEasing = (TimelinePosition option -> EasingFunction)
 
 type BackEasing = (TimelinePosition option -> EasingFunction)
 
-type ElasticEasing = Func<TimelinePosition option, TimelinePosition option, EasingFunction>
+type ElasticEasing = delegate of amplitude: TimelinePosition option * period: TimelinePosition option -> EasingFunction
 
 type EasingFunctionWithParams = U3<BackEasing, ElasticEasing, PowerEasing>
 
@@ -3113,7 +3147,7 @@ type SpringParams =
     [<ParamObject; Emit("$0")>]
     static member Create (?mass: float, ?stiffness: float, ?damping: float, ?velocity: float, ?bounce: float, ?duration: float, ?onComplete: (JSAnimation -> obj)) : SpringParams = jsNative
 
-type Callback = (obj -> obj)
+type Callback<'T> = ('T -> obj)
 
 [<Interface>]
 type TickableCallbacks<'T> =
@@ -3173,7 +3207,7 @@ type TimerParams =
 
 type FunctionValueReturn = obj
 
-type FunctionValue<'T> = Func<Target option, float option, Target[] option, Tween option, 'T>
+type FunctionValue<'T> = delegate of target: Target option * index: float option * targets: Target[] option * prevTween: Tween option -> 'T
 
 type TweenModifier = (float -> TimelinePosition)
 
@@ -3207,7 +3241,7 @@ type Tween =
     abstract _absoluteEndTime: float with get, set
     abstract _hasFromValue: float with get, set
     abstract _tweenType: float with get, set
-    abstract _setter: Action<obj, float, Tween> option with get, set
+    abstract _setter: Tween.Setter option with get, set
     abstract _valueType: float with get, set
     abstract _composition: float with get, set
     abstract _isOverlapped: float with get, set
@@ -3394,7 +3428,7 @@ type TimelinePosition = U2<string, float>
 /// - <c>'label'</c> - Label: Position animation at a named label position (e.g., <c>'My Label'</c>)&lt;br&gt;
 /// - <c>stagger(String|Nummber)</c> - Stagger multi-elements animation positions (e.g., 10, 20, 30...)
 /// </summary>
-type TimelineAnimationPosition = U4<string, float, Func<Target option, float option, Target[] option, Tween option, Timeline option, TimelinePosition>, TweakRegister>
+type TimelineAnimationPosition = U4<string, float, Timeline.Add.A3, TweakRegister>
 
 [<Interface>]
 type TimelineOptions =
@@ -3434,7 +3468,7 @@ type TimelineParams =
 
 type WAAPITweenValue = U4<string, float, string[], float[]>
 
-type WAAPIFunctionValue = Func<DOMTarget, float, DOMTarget[], obj>
+type WAAPIFunctionValue = delegate of target: DOMTarget * index: float * targets: DOMTarget[] -> obj
 
 type WAAPIKeyframeValue = obj
 
@@ -3488,7 +3522,7 @@ type WAAPIAnimationParams =
     [<EmitIndexer>]
     abstract Item: string -> obj with get, set
 
-type AnimatablePropertySetter = Func<U2<float, float[]>, float option, EasingParam option, AnimatableObject>
+type AnimatablePropertySetter = delegate of ``to``: U2<float, float[]> * duration: float option * ease: EasingParam option -> AnimatableObject
 
 type AnimatablePropertyGetter = (unit -> U2<float, float[]>)
 
@@ -3678,11 +3712,11 @@ type ScrambleTextParams =
     /// <summary>
     /// - the text to transition to, otherwise uses the original text
     /// </summary>
-    abstract text: U2<string, Func<Target, float, Target[], string>> option with get, set
+    abstract text: U2<string, ScrambleTextParams.Text> option with get, set
     /// <summary>
     /// - the characters used for scramble; named sets: 'lowercase', 'uppercase', 'numbers', 'symbols', 'braille', 'blocks', 'shades'; range syntax: 'A-Z', 'a-z0-9'; defaults to 'a-zA-Z0-9!%#_'
     /// </summary>
-    abstract chars: U2<string, Func<Target, float, Target[], string>> option with get, set
+    abstract chars: U2<string, ScrambleTextParams.Chars> option with get, set
     /// <summary>
     /// - the easing applied to the scramble animation
     /// </summary>
@@ -3726,21 +3760,21 @@ type ScrambleTextParams =
     /// <summary>
     /// - if set to a value greater than 0, overrides the computed duration from interval and settle; if unset or 0, duration is calculated automatically from text length and timing parameters
     /// </summary>
-    abstract duration: U2<float, Func<Target, float, Target[], float>> option with get, set
+    abstract duration: U2<float, ScrambleTextParams.Duration> option with get, set
     /// <summary>
     /// - delay in ms before the reveal wave starts within the scramble animation
     /// </summary>
-    abstract revealDelay: U2<float, Func<Target, float, Target[], float>> option with get, set
+    abstract revealDelay: U2<float, ScrambleTextParams.RevealDelay> option with get, set
     /// <summary>
     /// - delay in ms before the entire scramble animation starts
     /// </summary>
-    abstract delay: U2<float, Func<Target, float, Target[], float>> option with get, set
+    abstract delay: U2<float, ScrambleTextParams.Delay> option with get, set
     /// <summary>
     /// - callback fired each time a character changes during scramble; receives the current scrambled text and the eased progress (0-1)
     /// </summary>
-    abstract onChange: Action<string, float> option with get, set
+    abstract onChange: ScrambleTextParams.OnChange option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?text: U2<string, Func<Target, float, Target[], string>>, ?chars: U2<string, Func<Target, float, Target[], string>>, ?ease: EasingParam, ?from: U2<float, string>, ?reversed: bool, ?cursor: U3<string, float, bool>, ?perturbation: float, ?seed: float, ?``override``: SplitValue, ?revealRate: float, ?settleDuration: float, ?settleRate: float, ?duration: U2<float, Func<Target, float, Target[], float>>, ?revealDelay: U2<float, Func<Target, float, Target[], float>>, ?delay: U2<float, Func<Target, float, Target[], float>>, ?onChange: Action<string, float>) : ScrambleTextParams = jsNative
+    static member Create (?text: U2<string, ScrambleTextParams.Text>, ?chars: U2<string, ScrambleTextParams.Chars>, ?ease: EasingParam, ?from: U2<float, string>, ?reversed: bool, ?cursor: U3<string, float, bool>, ?perturbation: float, ?seed: float, ?``override``: SplitValue, ?revealRate: float, ?settleDuration: float, ?settleRate: float, ?duration: U2<float, ScrambleTextParams.Duration>, ?revealDelay: U2<float, ScrambleTextParams.RevealDelay>, ?delay: U2<float, ScrambleTextParams.Delay>, ?onChange: ScrambleTextParams.OnChange) : ScrambleTextParams = jsNative
 
 type DrawableSVGGeometry =
     /// <summary>
@@ -5350,13 +5384,13 @@ type ChainableUtil =
 
 type ChainedRoundPad = (float -> ChainableUtil)
 
-type ChainedPadStart = Func<float, string, ChainableUtil>
+type ChainedPadStart = delegate of totalLength: float * padString: string -> ChainableUtil
 
-type ChainedPadEnd = Func<float, string, ChainableUtil>
+type ChainedPadEnd = delegate of totalLength: float * padString: string -> ChainableUtil
 
-type ChainedWrap = Func<float, float, ChainableUtil>
+type ChainedWrap = delegate of min: float * max: float -> ChainableUtil
 
-type ChainedMapRange = Func<float, float, float, float, ChainableUtil>
+type ChainedMapRange = delegate of inLow: float * inHigh: float * outLow: float * outHigh: float -> ChainableUtil
 
 type ChainedDegToRad = (unit -> ChainableUtil)
 
@@ -5364,13 +5398,13 @@ type ChainedRadToDeg = (unit -> ChainableUtil)
 
 type ChainedSnap = (U2<float, float[]> -> ChainableUtil)
 
-type ChainedClamp = Func<float, float, ChainableUtil>
+type ChainedClamp = delegate of min: float * max: float -> ChainableUtil
 
 type ChainedRound = (float -> ChainableUtil)
 
-type ChainedLerp = Func<float, float, ChainableUtil>
+type ChainedLerp = delegate of start: float * ``end``: float -> ChainableUtil
 
-type ChainedDamp = Func<float, float, float, ChainableUtil>
+type ChainedDamp = delegate of start: float * ``end``: float * deltaTime: float -> ChainableUtil
 
 type Utils =
     abstract roundPad: Func<TimelinePosition, float, string>
@@ -5432,12 +5466,18 @@ type Utils =
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    abstract stagger: Func<float, StaggerParams option, Func<Target option, float option, Target[] option, Tween option, Timeline option, float>> with get, set
+    abstract stagger: Func<float, StaggerParams option, Utils.Stagger.Result> with get, set
     abstract forEachChildren: Action<obj, JS.Function, bool option, string option, string option> with get, set
     abstract addChild: Action<obj, obj, JS.Function option, string option, string option> with get, set
     abstract removeChild: Action<obj, obj, string option, string option> with get, set
 
-type RandomNumberGenerator = Func<float option, float option, float option, float>
+module Utils =
+    module Stagger =
+        type Result = delegate of target: Target option * index: float option * targets: Target[] option * prevTween: Tween option * tl: Timeline option -> float
+
+        type Result2 = delegate of target: Target option * index: float option * targets: Target[] option * prevTween: Tween option * tl: Timeline option -> string
+
+type RandomNumberGenerator = delegate of min: float option * max: float option * decimalLength: float option -> float
 
 type WAAPIAnimation =
     /// <remarks>@type {DOMTargetsArray} ]</remarks>
@@ -5493,12 +5533,16 @@ type WAAPIAnimation =
     /// <remarks>@return Promise&lt;this&gt;</remarks>
     abstract ``then``: ?callback: (obj -> obj) -> JS.Promise<obj>
 
+type Animate = delegate of targets: DOMTargetsParam * ``params``: WAAPIAnimationParams -> WAAPIAnimation
+
+type EasingToLinear = delegate of fn: EasingFunction * samples: float option -> string
+
 [<Interface>]
 type Waapi =
-    abstract animate: Func<DOMTargetsParam, WAAPIAnimationParams, WAAPIAnimation> with get, set
-    abstract convertEase: Func<EasingFunction, float option, string> with get, set
+    abstract animate: Animate with get, set
+    abstract convertEase: EasingToLinear with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (animate: Func<DOMTargetsParam, WAAPIAnimationParams, WAAPIAnimation>, convertEase: Func<EasingFunction, float option, string>) : Waapi = jsNative
+    static member Create (animate: Animate, convertEase: EasingToLinear) : Waapi = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
@@ -5594,13 +5638,13 @@ type Exports =
     [<Import("svg", "animejs")>]
     static member svg: Svg = jsNative
     [<Import("morphTo", "animejs")>]
-    static member morphTo (path2: TargetsParam, ?precision: float) : Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn> = jsNative
+    static member morphTo (path2: TargetsParam, ?precision: float) : AutoLayoutParams.Ease = jsNative
     [<Import("createMotionPath", "animejs")>]
     static member createMotionPath (path: TargetsParam, ?offset: float) : Svg.CreateMotionPath.Result = jsNative
     [<Import("text", "animejs")>]
     static member text: Text = jsNative
     [<Import("scrambleText", "animejs")>]
-    static member scrambleText (?``params``: ScrambleTextParams) : Func<Target option, float option, Target[] option, Tween option, ScrambleTextTween> = jsNative
+    static member scrambleText (?``params``: ScrambleTextParams) : Text.ScrambleText.Result = jsNative
     /// <summary>
     /// A class that splits text into words and wraps them in span elements while preserving the original HTML structure.
     /// </summary>
@@ -5687,25 +5731,25 @@ type Exports =
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     [<Import("stagger", "animejs")>]
-    static member stagger (``val``: float, ?``params``: StaggerParams) : Func<Target option, float option, Target[] option, Tween option, Timeline option, float> = jsNative
+    static member stagger (``val``: float, ?``params``: StaggerParams) : Utils.Stagger.Result = jsNative
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     [<Import("stagger", "animejs")>]
-    static member stagger (``val``: string, ?``params``: StaggerParams) : Func<Target option, float option, Target[] option, Tween option, Timeline option, string> = jsNative
+    static member stagger (``val``: string, ?``params``: StaggerParams) : Utils.Stagger.Result2 = jsNative
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     [<Import("stagger", "animejs")>]
-    static member stagger (``val``: float * float, ?``params``: StaggerParams) : Func<Target option, float option, Target[] option, Tween option, Timeline option, float> = jsNative
+    static member stagger (``val``: float * float, ?``params``: StaggerParams) : Utils.Stagger.Result = jsNative
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     [<Import("stagger", "animejs")>]
-    static member stagger (``val``: string * string, ?``params``: StaggerParams) : Func<Target option, float option, Target[] option, Tween option, Timeline option, string> = jsNative
+    static member stagger (``val``: string * string, ?``params``: StaggerParams) : Utils.Stagger.Result2 = jsNative
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>

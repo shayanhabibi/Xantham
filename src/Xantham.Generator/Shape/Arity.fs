@@ -84,6 +84,13 @@ let private mapDeclRefs (f: FsTypeRef -> FsTypeRef) (decl: FsDecl) : FsDecl =
                 TypeParameters = d.TypeParameters |> List.map typeParam
                 Carrier = reference d.Carrier
             }
+    | FsDelegateType d ->
+        FsDelegateType
+            { d with
+                TypeParameters = d.TypeParameters |> List.map typeParam
+                Parameters = d.Parameters |> List.map (fun p -> { p with Type = reference p.Type })
+                Return = reference d.Return
+            }
     | FsMeasure d ->
         FsMeasure
             { d with
@@ -126,6 +133,7 @@ let private declName =
     function
     | FsInterface d -> Some d.Name
     | FsAbbrev d -> Some d.Name
+    | FsDelegateType d -> Some d.Name
     | FsPhantom d -> Some d.Name
     | FsMeasure d -> Some d.Name
     | FsTaggedUnion d -> Some d.Name
@@ -194,6 +202,7 @@ let private repaired (model: ShapeModel) =
         |> List.choose (function
             | FsInterface d -> Some(d.Name, d.TypeParameters.Length)
             | FsAbbrev d -> Some(d.Name, d.TypeParameters.Length)
+            | FsDelegateType d -> Some(d.Name, d.TypeParameters.Length)
             | FsPhantom d -> Some(d.Name, d.TypeParameters.Length)
             | _ -> None)
         |> Map.ofList

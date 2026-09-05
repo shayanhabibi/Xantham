@@ -23,6 +23,7 @@ let orderDeclarations: Pass<ShapeModel> =
                 | FsTaggedUnion decl -> orderKey decl.Order decl.Name
                 | FsEnum decl -> orderKey decl.Order decl.Name
                 | FsAbbrev decl -> orderKey decl.Order decl.Name
+                | FsDelegateType decl -> orderKey decl.Order decl.Name
                 | FsPhantom decl -> orderKey decl.Order decl.Name
                 | FsMeasure decl -> orderKey decl.Order decl.Name
                 | FsExports _ -> ("￿", System.Int32.MaxValue), "￿")

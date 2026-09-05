@@ -62,6 +62,7 @@ let shapeAliases: Pass<ShapeModel> =
                             | FsTaggedUnion decl -> [ decl.Name ]
                             | FsEnum decl -> [ decl.Name ]
                             | FsAbbrev decl -> [ decl.Name ]
+                            | FsDelegateType decl -> [ decl.Name ]
                             | FsPhantom decl -> [ decl.Name ]
                             | FsMeasure decl -> [ decl.Name ]
                             | FsExports _ -> [])
@@ -88,6 +89,7 @@ let shapeAliases: Pass<ShapeModel> =
                         |> List.choose (function
                             | FsInterface decl -> Some(decl.Name, decl.TypeParameters)
                             | FsAbbrev decl -> Some(decl.Name, decl.TypeParameters)
+                            | FsDelegateType decl -> Some(decl.Name, decl.TypeParameters)
                             | FsPhantom decl -> Some(decl.Name, decl.TypeParameters)
                             | _ -> None)
                         |> Map.ofList

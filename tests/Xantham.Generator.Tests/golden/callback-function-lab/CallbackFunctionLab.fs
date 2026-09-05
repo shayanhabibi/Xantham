@@ -9,17 +9,29 @@ open Fable.Core
 open Fable.Core.JsInterop
 open Xantham.Fable.Core
 
-type Formatter = Func<float, float, string>
+module CallTwo =
+    type Callback = delegate of a: float * b: float -> string
+
+module CallThree =
+    type Callback = delegate of a: float * b: float * c: float -> string
+
+module CallVoidTwo =
+    type Callback = delegate of a: float * b: float -> unit
+
+type Formatter = delegate of value: float * digits: float -> string
 
 /// <summary>
 /// A callback carried by an interface member, required and optional.
 /// </summary>
 [<Interface>]
 type Handlers =
-    abstract onTick: Func<float, float, string> with get, set
+    abstract onTick: Handlers.OnTick with get, set
     abstract onDone: (float -> unit) option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (onTick: Func<float, float, string>, ?onDone: (float -> unit)) : Handlers = jsNative
+    static member Create (onTick: Handlers.OnTick, ?onDone: (float -> unit)) : Handlers = jsNative
+
+module Handlers =
+    type OnTick = delegate of a: float * b: float -> string
 
 /// <summary>
 /// A method member, which the ParamObject pass binds as a callback-typed Create parameter.
@@ -37,14 +49,30 @@ type Options =
 /// </summary>
 [<Interface>]
 type Factory =
-    abstract make: seed: float -> Func<float, float, string>
+    abstract make: seed: float -> Factory.Make.Result
     abstract makeOne: seed: float -> (float -> string)
     abstract makeNone: seed: float -> (unit -> string)
-    abstract makeThree: seed: float -> Func<float, float, float, string>
+    abstract makeThree: seed: float -> Factory.MakeThree.Result
     abstract ready: (unit -> string)
-    abstract pair: Func<float, float, string>
+    abstract pair: Factory.Pair
     [<ParamObject; Emit("$0")>]
-    static member Create (make: (float -> Func<float, float, string>), makeOne: Func<float, (float -> string)>, makeNone: Func<float, (unit -> string)>, makeThree: (float -> Func<float, float, float, string>), ready: (unit -> string), pair: Func<float, float, string>) : Factory = jsNative
+    static member Create (make: (float -> Factory.Make.Result), makeOne: Func<float, (float -> string)>, makeNone: Func<float, (unit -> string)>, makeThree: (float -> Factory.MakeThree.Result), ready: (unit -> string), pair: Factory.Pair) : Factory = jsNative
+
+module Factory =
+    module Make =
+        type Result = delegate of a: float * b: float -> string
+
+    module MakeThree =
+        type Result = delegate of a: float * b: float * c: float -> string
+
+    type Pair = delegate of a: float * b: float -> string
+
+module CallNesting =
+    module Outer =
+        type Result = delegate of a: float * b: float -> string
+
+module CallNestingOne =
+    type Outer = delegate of seed: float -> (float -> string)
 
 /// <summary>
 /// A union of a callback arm and a non-callback arm, the shape the corpus carries as
@@ -53,16 +81,25 @@ type Factory =
 /// </summary>
 type Listener = U2<string, (float -> string)>
 
+module CallUnionTwo =
+    type Listener = delegate of a: float * b: float -> string
+
+module MakeUnionTwo =
+    type Result = delegate of a: float * b: float -> string
+
 /// <summary>
 /// Union-typed members, at both arities and with the non-callback arm supplied.
 /// </summary>
 [<Interface>]
 type UnionHandlers =
     abstract one: U2<string, (float -> string)> with get, set
-    abstract two: U2<string, Func<float, float, string>> with get, set
+    abstract two: U2<string, UnionHandlers.Two> with get, set
     abstract text: U2<string, (float -> string)> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (one: U2<string, (float -> string)>, two: U2<string, Func<float, float, string>>, text: U2<string, (float -> string)>) : UnionHandlers = jsNative
+    static member Create (one: U2<string, (float -> string)>, two: U2<string, UnionHandlers.Two>, text: U2<string, (float -> string)>) : UnionHandlers = jsNative
+
+module UnionHandlers =
+    type Two = delegate of a: float * b: float -> string
 
 /// <summary>
 /// The object arm of <c>EventListenerOrEventListenerObject</c>, whose method carries the same arity.
@@ -102,6 +139,9 @@ type UnionListenerObject =
     [<ParamObject; Emit("$0")>]
     static member Create (handleEvent: (float -> unit)) : UnionListenerObject = jsNative
 
+module AddListener =
+    type Register = delegate of kind: string * listener: U2<UnionListenerObject, (float -> unit)> -> unit
+
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
@@ -119,12 +159,12 @@ type Exports =
     /// A callback of arity 2 in parameter position.
     /// </summary>
     [<Import("callTwo", "callback-function-lab")>]
-    static member callTwo (callback: Func<float, float, string>) : string = jsNative
+    static member callTwo (callback: CallTwo.Callback) : string = jsNative
     /// <summary>
     /// A callback of arity 3 in parameter position.
     /// </summary>
     [<Import("callThree", "callback-function-lab")>]
-    static member callThree (callback: Func<float, float, float, string>) : string = jsNative
+    static member callThree (callback: CallThree.Callback) : string = jsNative
     /// <summary>
     /// A callback returning <c>void</c>: the arm that renders <c>Action</c> today.
     /// </summary>
@@ -134,7 +174,7 @@ type Exports =
     /// The same arm at arity 2, where <c>Action&lt;A, B&gt;</c> has more than one argument to guarantee.
     /// </summary>
     [<Import("callVoidTwo", "callback-function-lab")>]
-    static member callVoidTwo (callback: Action<float, float>) : float = jsNative
+    static member callVoidTwo (callback: CallVoidTwo.Callback) : float = jsNative
     /// <summary>
     /// The named callback in parameter position, so the abbreviation is what crosses.
     /// </summary>
@@ -162,12 +202,12 @@ type Exports =
     /// nesting the rule has to decide: the outer function and the inner one need not agree.
     /// </summary>
     [<Import("callNesting", "callback-function-lab")>]
-    static member callNesting (outer: (float -> Func<float, float, string>)) : string = jsNative
+    static member callNesting (outer: (float -> CallNesting.Outer.Result)) : string = jsNative
     /// <summary>
     /// The same nesting with a unary inner callback, where both levels are alike.
     /// </summary>
     [<Import("callNestingOne", "callback-function-lab")>]
-    static member callNestingOne (outer: Func<float, (float -> string)>) : string = jsNative
+    static member callNestingOne (outer: CallNestingOne.Outer) : string = jsNative
     /// <summary>
     /// A <c>Factory</c> built in F#, so its callback members cross outward rather than back.
     /// </summary>
@@ -192,7 +232,7 @@ type Exports =
     /// A union arm of arity 2 in parameter position, where the delegate is retained.
     /// </summary>
     [<Import("callUnionTwo", "callback-function-lab")>]
-    static member callUnionTwo (listener: U2<string, Func<float, float, string>>) : string = jsNative
+    static member callUnionTwo (listener: U2<string, CallUnionTwo.Listener>) : string = jsNative
     /// <summary>
     /// A union arm in return position at arity 1.
     /// </summary>
@@ -202,7 +242,7 @@ type Exports =
     /// A union arm in return position at arity 2.
     /// </summary>
     [<Import("makeUnionTwo", "callback-function-lab")>]
-    static member makeUnionTwo (seed: float) : U2<string, Func<float, float, string>> = jsNative
+    static member makeUnionTwo (seed: float) : U2<string, MakeUnionTwo.Result> = jsNative
     /// <summary>
     /// A union-typed member object built in JavaScript, for reading a callback arm back into F#.
     /// </summary>
@@ -256,4 +296,4 @@ type Exports =
     /// once nested inside the delegate's own type parameter is what this measures.
     /// </summary>
     [<Import("addListener", "callback-function-lab")>]
-    static member addListener (register: Action<string, U2<UnionListenerObject, (float -> unit)>>) : unit = jsNative
+    static member addListener (register: AddListener.Register) : unit = jsNative

@@ -83,7 +83,7 @@ let private imports () =
             labels = [| "a"; "b" |],
             duration = 5.0,
             unit = PhaseBLab.TimeUnit.S,
-            onTick = System.Action<float, float option>(fun progress count -> ticks <- ticks @ [ progress, count ])
+            onTick = PhaseBLab.TickCallback(fun progress count -> ticks <- ticks @ [ progress, count ])
         )
 
     equal
@@ -894,12 +894,12 @@ let private callbackGoldenForms () =
     equal
         "a retained delegate of arity 2 crosses at its declared arity"
         "2:got:1:2"
-        (CallbackFunctionLab.Exports.callTwo (Func<float, float, string>(fun a b -> $"got:{a}:{b}")))
+        (CallbackFunctionLab.Exports.callTwo (CallbackFunctionLab.CallTwo.Callback(fun a b -> $"got:{a}:{b}")))
 
     equal
         "a retained delegate of arity 3 crosses at its declared arity"
         "3:got:1:2:3"
-        (CallbackFunctionLab.Exports.callThree (Func<float, float, float, string>(fun a b c -> $"got:{a}:{b}:{c}")))
+        (CallbackFunctionLab.Exports.callThree (CallbackFunctionLab.CallThree.Callback(fun a b c -> $"got:{a}:{b}:{c}")))
 
     // The unit-returning arm, which rendered `Action` before the conversion.
     let mutable sawVoid = 0.0
@@ -915,19 +915,21 @@ let private callbackGoldenForms () =
     equal
         "a retained Action of arity 2 keeps its arity"
         2.0
-        (CallbackFunctionLab.Exports.callVoidTwo (Action<float, float>(fun a b -> sawVoidTwo <- a + b)))
+        (CallbackFunctionLab.Exports.callVoidTwo (
+            CallbackFunctionLab.CallVoidTwo.Callback(fun a b -> sawVoidTwo <- a + b)
+        ))
 
     equal "and the runtime's call reached it with both arguments" 15.0 sawVoidTwo
 
     equal
         "a named callback abbreviation of arity 2 keeps its delegate"
         "2:1.5|2"
-        (CallbackFunctionLab.Exports.callNamed (Func<float, float, string>(fun value digits -> $"{value}|{digits}")))
+        (CallbackFunctionLab.Exports.callNamed (CallbackFunctionLab.Formatter(fun value digits -> $"{value}|{digits}")))
 
     // A ParamObject literal, mixing both spellings in one object.
     let built =
         CallbackFunctionLab.Handlers.Create(
-            onTick = Func<float, float, string>(fun a b -> $"tick:{a}:{b}"),
+            onTick = CallbackFunctionLab.Handlers.OnTick(fun a b -> $"tick:{a}:{b}"),
             onDone = (fun _ -> ())
         )
 
@@ -987,24 +989,25 @@ let private callbackGoldenForms () =
         "1:2:made:5:1:2"
         (attempt (fun () ->
             CallbackFunctionLab.Exports.callNesting (fun seed ->
-                Func<float, float, string>(fun a b -> $"made:{seed}:{a}:{b}"))))
+                CallbackFunctionLab.CallNesting.Outer.Result(fun a b -> $"made:{seed}:{a}:{b}"))))
 
     equal
         "a retained delegate over a converted callback crosses at both declared arities"
         "1:1:one:5:1"
         (attempt (fun () ->
             CallbackFunctionLab.Exports.callNestingOne (
-                Func<float, float -> string>(fun seed -> (fun a -> $"one:{seed}:{a}"))
+                CallbackFunctionLab.CallNestingOne.Outer(fun seed -> (fun a -> $"one:{seed}:{a}"))
             )))
 
     let driven =
         CallbackFunctionLab.Factory.Create(
-            make = (fun seed -> Func<float, float, string>(fun a b -> $"made:{seed}:{a}:{b}")),
+            make = (fun seed -> CallbackFunctionLab.Factory.Make.Result(fun a b -> $"made:{seed}:{a}:{b}")),
             makeOne = Func<float, float -> string>(fun seed -> (fun a -> $"one:{seed}:{a}")),
             makeNone = Func<float, unit -> string>(fun seed -> (fun () -> $"none:{seed}")),
-            makeThree = (fun seed -> Func<float, float, float, string>(fun a b c -> $"three:{seed}:{a}:{b}:{c}")),
+            makeThree =
+                (fun seed -> CallbackFunctionLab.Factory.MakeThree.Result(fun a b c -> $"three:{seed}:{a}:{b}:{c}")),
             ready = (fun () -> "ready"),
-            pair = Func<float, float, string>(fun a b -> $"pair:{a}:{b}")
+            pair = CallbackFunctionLab.Factory.Pair(fun a b -> $"pair:{a}:{b}")
         )
 
     equal
@@ -1213,7 +1216,9 @@ let private callbackUnionArmForms () =
         "a retained delegate arm of arity 2 crosses at its declared arity"
         "2:got:1:2"
         (attempt (fun () ->
-            CallbackFunctionLab.Exports.callUnionTwo (U2.Case2(Func<float, float, string>(fun a b -> $"got:{a}:{b}")))))
+            CallbackFunctionLab.Exports.callUnionTwo (
+                U2.Case2(CallbackFunctionLab.CallUnionTwo.Listener(fun a b -> $"got:{a}:{b}"))
+            )))
 
     equal
         "the non-callback arm of the same union crosses as its own value"
@@ -1289,7 +1294,7 @@ let private callbackUnionArmForms () =
     let built =
         CallbackFunctionLab.UnionHandlers.Create(
             one = U2.Case2(fun a -> $"one:{a}"),
-            two = U2.Case2(Func<float, float, string>(fun a b -> $"two:{a}:{b}")),
+            two = U2.Case2(CallbackFunctionLab.UnionHandlers.Two(fun a b -> $"two:{a}:{b}")),
             text = U2.Case1 "plain"
         )
 
@@ -1401,7 +1406,7 @@ let private callbackUnionNestingForms () =
     let mutable seenObj = ""
 
     CallbackFunctionLab.Exports.addListener (
-        Action<string, U2<CallbackFunctionLab.UnionListenerObject, (float -> unit)>>(fun kind listener ->
+        CallbackFunctionLab.AddListener.Register(fun kind listener ->
             if emitJsExpr listener "typeof $0 === \"function\"" then
                 let fn = unbox<float -> unit> listener
                 let arity = emitJsExpr fn "$0.length"
@@ -1672,6 +1677,85 @@ let private callbackNamedDelegateForms () =
         "a delegate read back from JavaScript carries the runtime's own parameter names"
         ((parametersOf fromJs.onTick).Contains "a")
 
+/// Lane BB: the generator's own named delegates, read off `delegate-name-lab`'s golden. Where
+/// `callbackNamedDelegateForms` measured a hand-written declaration, these are the declarations
+/// `synthesize-anonymous` minted and `shape-callbacks` wrote.
+let private generatedDelegateForms () =
+    let arity (fn: obj) : float = emitJsExpr fn "$0.length"
+
+    // Parameter position, at both arities and unit-returning.
+    equal
+        "a generated delegate of arity 2 crosses at its declared arity"
+        "2:got:1:2"
+        (DelegateNameLab.Exports.callTwo (DelegateNameLab.CallTwo.Handler(fun x y -> $"got:{x}:{y}")))
+
+    equal
+        "a generated delegate of arity 3 crosses at its declared arity"
+        "3:got:1:2:z"
+        (DelegateNameLab.Exports.callThree (DelegateNameLab.CallThree.Handler(fun x y label -> $"got:{x}:{y}:{label}")))
+
+    let mutable sawVoid = 0.0
+
+    equal
+        "a generated unit-returning delegate keeps its arity"
+        "2"
+        (DelegateNameLab.Exports.callVoidTwo (DelegateNameLab.CallVoidTwo.Handler(fun x y -> sawVoid <- x + y)))
+
+    equal "and the runtime's call reached it with both arguments" 3.0 sawVoid
+
+    equal
+        "a delegate declared from a named alias crosses at its declared arity"
+        "2:n:3:4"
+        (DelegateNameLab.Exports.callNamed (DelegateNameLab.TickHandler(fun x y -> $"n:{x}:{y}")))
+
+    // A ParamObject literal built in F#, read by JavaScript.
+    let built =
+        DelegateNameLab.EventTarget.Create(
+            onTick = DelegateNameLab.EventTarget.OnTick(fun x y -> $"tick:{x}:{y}"),
+            onDrag = DelegateNameLab.EventTarget.OnDrag(fun x y -> $"drag:{x}:{y}"),
+            onDone = (fun () -> ())
+        )
+
+    equal
+        "two generated delegates in one ParamObject literal keep their arities"
+        "2:tick:1:2|2:drag:3:4|0"
+        (DelegateNameLab.Exports.fire built)
+
+    // The same members built in JavaScript, read back into F#.
+    let fromJs = DelegateNameLab.Exports.target
+    equal "a generated delegate read off an interface member keeps its arity" 2.0 (arity fromJs.onTick)
+    equal "and invokes with all its arguments" "tick12" (fromJs.onTick.Invoke(1.0, 2.0))
+    equal "and so does the second member of the same shape" "drag12" (fromJs.onDrag.Invoke(1.0, 2.0))
+
+    // Return position, in both directions.
+    let factory = DelegateNameLab.Exports.factory
+    equal "a generated delegate read off a property keeps its arity" 2.0 (arity factory.pair)
+    equal "and invokes with all its arguments" "pair12" (factory.pair.Invoke(1.0, 2.0))
+
+    equal
+        "a generated delegate returned from a method invokes with all its arguments"
+        "made312"
+        (factory.make(3.0).Invoke(1.0, 2.0))
+
+    let driven =
+        DelegateNameLab.Factory.Create(
+            pair = DelegateNameLab.Factory.Pair(fun x y -> $"pair:{x}:{y}"),
+            make = (fun seed -> DelegateNameLab.Factory.Make.Result(fun x y -> $"made:{seed}:{x}:{y}"))
+        )
+
+    equal
+        "a factory built in F# crosses outward at both declared arities"
+        "2:pair:1:2|2:made:9:1:2"
+        (DelegateNameLab.Exports.drive driven)
+
+    // The nesting rule: the outer level is retained and named, the inner one converts.
+    equal
+        "a generated delegate over a converted callback crosses at both declared arities"
+        "1:1:one:7:5"
+        (DelegateNameLab.Exports.callNesting (
+            DelegateNameLab.CallNesting.Outer(fun seed -> (fun x -> $"one:{seed}:{x}"))
+        ))
+
 [<EntryPoint>]
 let main _ =
     globals ()
@@ -1696,6 +1780,7 @@ let main _ =
     callbackUnionArmForms ()
     callbackUnionNestingForms ()
     callbackNamedDelegateForms ()
+    generatedDelegateForms ()
 
     match failures with
     | [] ->

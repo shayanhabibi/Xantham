@@ -86,8 +86,7 @@ let bindFreeTypeParams: Pass<ShapeModel> =
                     (flag TypeFlags.Object facts
                      && GeneratorConfig.disposition ctx.Config facts.Origin = Ship
                      && (arrayElement model facts).IsNone
-                     && not (isTuple facts)
-                     && not (isPureCallback facts))
+                     && not (isTuple facts))
                     || isFlattenable model facts
                     ->
                     let own = declParamIds facts

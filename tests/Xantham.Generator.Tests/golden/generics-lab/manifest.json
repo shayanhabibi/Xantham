@@ -4,20 +4,25 @@
   "module": "GenericsLab",
   "counts": {
     "exact": 5,
-    "ergonomic": 10,
+    "ergonomic": 11,
     "widened": 1,
     "escape": 0
   },
   "passes": [
     {
       "pass": "SY - synthesize-anonymous",
-      "total": 3,
-      "exact": 3
+      "total": 5,
+      "exact": 5
+    },
+    {
+      "pass": "shape-callbacks",
+      "total": 1,
+      "ergonomic": 1
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 8,
-      "ergonomic": 7,
+      "total": 7,
+      "ergonomic": 6,
       "widened": 1
     },
     {

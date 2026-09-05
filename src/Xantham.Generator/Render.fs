@@ -651,6 +651,25 @@ let private renderAbbrev (decl: FsAbbrevDecl) =
         yield $"type {declHead decl.Name decl.TypeParameters} = {printType decl.Target}"
     ]
 
+/// A callback as a named delegate (D5): `type TickHandler = delegate of x: float * y: float ->
+/// string`. It guarantees the arity at the boundary exactly as `System.Func` and `System.Action`
+/// do, and the parameter names reach the consumer's tooling, where the positional spelling gave
+/// only a count. A nullary callback takes `unit`, which is the only argument list F# admits for
+/// one.
+let private renderDelegate (decl: FsDelegateDecl) =
+    let parameters =
+        match decl.Parameters with
+        | [] -> "unit"
+        | parameters ->
+            parameters
+            |> List.map (fun p -> $"{ident p.Name}: {printTypeIn true p.Type}")
+            |> String.concat " * "
+
+    [
+        yield! docLines "" decl.Docs decl.Tags
+        yield $"type {declHead decl.Name decl.TypeParameters} = delegate of {parameters} -> {printType decl.Return}"
+    ]
+
 /// The unit of measure a branding intersection becomes (§4.6, D11). A measure has no body:
 /// the name is the whole of it, and what it brands is written at the uses as `string<Name>`.
 /// The primitive is recorded in the doc comment because the declaration itself cannot say it.
@@ -722,6 +741,7 @@ let declName =
     | FsTaggedUnion decl -> Some decl.Name
     | FsEnum decl -> Some decl.Name
     | FsAbbrev decl -> Some decl.Name
+    | FsDelegateType decl -> Some decl.Name
     | FsMeasure decl -> Some decl.Name
     | FsPhantom decl -> Some decl.Name
     | FsExports _ -> None
@@ -740,6 +760,7 @@ let private underLeaf (name: string) =
     | FsTaggedUnion decl -> FsTaggedUnion { decl with Name = name }
     | FsEnum decl -> FsEnum { decl with Name = name }
     | FsAbbrev decl -> FsAbbrev { decl with Name = name }
+    | FsDelegateType decl -> FsDelegateType { decl with Name = name }
     | FsMeasure decl -> FsMeasure { decl with Name = name }
     | FsPhantom decl -> FsPhantom { decl with Name = name }
     | FsExports members -> FsExports members
@@ -893,6 +914,18 @@ let private qualifyDecl foreign =
                 TypeParameters = qualifyTypeParams foreign decl.TypeParameters
                 Target = qualifyRef foreign decl.Target
             }
+    | FsDelegateType decl ->
+        FsDelegateType
+            { decl with
+                TypeParameters = qualifyTypeParams foreign decl.TypeParameters
+                Parameters =
+                    decl.Parameters
+                    |> List.map (fun p ->
+                        { p with
+                            Type = qualifyRef foreign p.Type
+                        })
+                Return = qualifyRef foreign decl.Return
+            }
     | FsMeasure decl ->
         FsMeasure
             { decl with
@@ -927,6 +960,7 @@ let private renderModule (group: GroupModule) (foreign: Map<string, string>) =
         | FsTaggedUnion decl -> renderTaggedUnion decl
         | FsEnum decl -> renderEnum decl
         | FsAbbrev decl -> renderAbbrev decl
+        | FsDelegateType decl -> renderDelegate decl
         | FsMeasure decl -> renderMeasure decl
         | FsPhantom decl -> renderPhantom decl
         | FsExports members -> renderExports group.RuntimePackage members
@@ -1099,6 +1133,7 @@ let symbolTiers (model: RenderModel) : (string * Tier * Finding list) list =
             | FsTaggedUnion decl -> [ decl.Name ]
             | FsEnum decl -> [ decl.Name ]
             | FsAbbrev decl -> [ decl.Name ]
+            | FsDelegateType decl -> [ decl.Name ]
             | FsMeasure decl -> [ decl.Name ]
             | FsPhantom decl -> [ decl.Name ]
             | FsExports members -> members |> List.map _.Name)
@@ -1276,6 +1311,7 @@ let private declFiles (model: RenderModel) : Map<string, string> =
         | FsTaggedUnion decl -> Some(decl.Name, decl.Order)
         | FsEnum decl -> Some(decl.Name, decl.Order)
         | FsAbbrev decl -> Some(decl.Name, decl.Order)
+        | FsDelegateType decl -> Some(decl.Name, decl.Order)
         | FsMeasure decl -> Some(decl.Name, decl.Order)
         | FsPhantom decl -> Some(decl.Name, decl.Order)
         | FsExports _ -> None)

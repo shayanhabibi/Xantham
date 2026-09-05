@@ -105,6 +105,14 @@ module Event =
             [<EmitIndexer>]
             abstract Item: string -> Event with get, set
 
+module FormData =
+    module ForEach =
+        type Callback = delegate of value: U2<string, File> * key: string * parent: FormData -> unit
+
+module Headers =
+    module ForEach =
+        type Callback = delegate of value: string * key: string * parent: Headers -> unit
+
 module ReadableStreamBYOBReader =
     module Read =
         module Result =
@@ -287,6 +295,10 @@ module Socket =
         | [<CompiledName("off")>] Off
         | [<CompiledName("on")>] On
         | [<CompiledName("starttls")>] Starttls
+
+module URLSearchParams =
+    module ForEach =
+        type Callback = delegate of value: string * key: string * parent: URLSearchParams -> unit
 
 module WebSocket =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -513,6 +525,8 @@ type InstanceConstructor =
     [<EmitConstructor>]
     abstract Create: ``module``: obj * ?imports: WebAssembly.Instance.Imports -> Instance
 
+type Instantiate = delegate of ``module``: obj * imports: WebAssembly.Instance.Imports option -> JS.Promise<Instance>
+
 [<Interface>]
 type Memory =
     abstract buffer: JS.ArrayBuffer
@@ -615,10 +629,10 @@ type WebAssembly =
     abstract Memory: MemoryConstructor with get, set
     abstract Module: ModuleConstructor with get, set
     abstract Table: TableConstructor with get, set
-    abstract instantiate: Func<obj, WebAssembly.Instance.Imports option, JS.Promise<Instance>> with get, set
+    abstract instantiate: Instantiate with get, set
     abstract validate: (BufferSource -> bool) with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (CompileError: CompileErrorConstructor, RuntimeError: RuntimeErrorConstructor, Global: GlobalConstructor, Instance: InstanceConstructor, Memory: MemoryConstructor, Module: ModuleConstructor, Table: TableConstructor, instantiate: Func<obj, WebAssembly.Instance.Imports option, JS.Promise<Instance>>, validate: (BufferSource -> bool)) : WebAssembly = jsNative
+    static member Create (CompileError: CompileErrorConstructor, RuntimeError: RuntimeErrorConstructor, Global: GlobalConstructor, Instance: InstanceConstructor, Memory: MemoryConstructor, Module: ModuleConstructor, Table: TableConstructor, instantiate: Instantiate, validate: (BufferSource -> bool)) : WebAssembly = jsNative
 
 module WebAssembly =
     module Instance =
@@ -766,6 +780,10 @@ type EventConstructor =
     abstract BUBBLING_PHASE: float
     [<EmitConstructor>]
     abstract Create: ``type``: string * ?init: EventInit -> Event
+
+module EventCounts =
+    module ForEach =
+        type Param1 = delegate of param0: float * param1: string * param2: EventCounts -> unit
 
 type EventSourceConstructor =
     abstract CONNECTING: float
@@ -1075,6 +1093,9 @@ type TransformStreamDefaultControllerConstructor =
     [<EmitConstructor>]
     abstract Create<'O>: unit -> TransformStreamDefaultController<'O>
 
+module Transformer =
+    type Transform<'I, 'O> = delegate of chunk: 'I * controller: TransformStreamDefaultController<'O> -> JS.Promise<unit> option
+
 type URLConstructor =
     /// <summary>
     /// The **<c>URL.canParse()</c>** static method of the URL interface returns a boolean indicating whether or not an absolute URL, or a relative URL combined with a base URL, are parsable and valid.
@@ -1110,6 +1131,9 @@ type URLPatternConstructor =
 type URLSearchParamsConstructor =
     [<EmitConstructor>]
     abstract Create: ?init: obj -> URLSearchParams
+
+module UnderlyingSink =
+    type Write<'W> = delegate of chunk: 'W * controller: WritableStreamDefaultController -> JS.Promise<unit> option
 
 type WebSocketRequestResponsePairConstructor =
     [<EmitConstructor>]
@@ -1181,13 +1205,20 @@ module Span =
             [<EmitIndexer>]
             abstract Item: string -> U3<string, float, bool> option with get, set
 
-type ExportedHandlerFetchHandler<'Env, 'CfHostMetadata, 'Props> = Func<Request<'CfHostMetadata, IncomingRequestCfProperties<'CfHostMetadata>>, 'Env, ExecutionContext<'Props>, U2<JS.Promise<Response>, Response>>
+module Tracing =
+    module EnterSpan =
+        type Callback<'A, 'T> = delegate of span: Span * args: 'A -> 'T
 
-type ExportedHandlerConnectHandler<'Env, 'Props> = Func<Socket, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>
+    module StartActiveSpan =
+        type Callback<'A, 'T> = delegate of span: Span * args: 'A -> 'T
 
-type ExportedHandlerTailHandler<'Env, 'Props> = Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>
+type ExportedHandlerFetchHandler<'Env, 'CfHostMetadata, 'Props> = delegate of request: Request<'CfHostMetadata, IncomingRequestCfProperties<'CfHostMetadata>> * env: 'Env * ctx: ExecutionContext<'Props> -> U2<JS.Promise<Response>, Response>
 
-type ExportedHandlerTraceHandler<'Env, 'Props> = Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>
+type ExportedHandlerConnectHandler<'Env, 'Props> = delegate of socket: Socket * env: 'Env * ctx: ExecutionContext<'Props> -> JS.Promise<unit> option
+
+type ExportedHandlerTailHandler<'Env, 'Props> = delegate of events: TraceItem[] * env: 'Env * ctx: ExecutionContext<'Props> -> JS.Promise<unit> option
+
+type ExportedHandlerTraceHandler<'Env, 'Props> = delegate of traces: TraceItem[] * env: 'Env * ctx: ExecutionContext<'Props> -> JS.Promise<unit> option
 
 [<Interface>]
 type AlarmEventInfo =
@@ -1255,7 +1286,7 @@ type Exception =
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, name: string, message: string, ?stack: string) : Exception = jsNative
 
-type ExportedHandlerTailStreamHandler<'Env, 'Props> = Func<TailStream.TailEvent<Onset>, 'Env, ExecutionContext<'Props>, U3<JS.Promise<U2<(TailStream.TailEvent<obj> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>>, (TailStream.TailEvent<obj> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>>
+type ExportedHandlerTailStreamHandler<'Env, 'Props> = delegate of ``event``: TailStream.TailEvent<Onset> * env: 'Env * ctx: ExecutionContext<'Props> -> U3<JS.Promise<U2<(TailStream.TailEvent<obj> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>>, (TailStream.TailEvent<obj> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>
 
 module ExportedHandlerTailStreamHandler =
     module Result =
@@ -1500,11 +1531,11 @@ type TraceEventInfo =
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, traces: string option[]) : TraceEventInfo = jsNative
 
-type ExportedHandlerScheduledHandler<'Env, 'Props> = Func<ScheduledController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>
+type ExportedHandlerScheduledHandler<'Env, 'Props> = delegate of controller: ScheduledController * env: 'Env * ctx: ExecutionContext<'Props> -> JS.Promise<unit> option
 
-type ExportedHandlerQueueHandler<'Env, 'Message, 'Props> = Func<MessageBatch<'Message>, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>
+type ExportedHandlerQueueHandler<'Env, 'Message, 'Props> = delegate of batch: MessageBatch<'Message> * env: 'Env * ctx: ExecutionContext<'Props> -> JS.Promise<unit> option
 
-type ExportedHandlerTestHandler<'Env, 'Props> = Func<TestController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>
+type ExportedHandlerTestHandler<'Env, 'Props> = delegate of controller: TestController * env: 'Env * ctx: ExecutionContext<'Props> -> JS.Promise<unit> option
 
 [<Interface>]
 type EmailAttachment2 =
@@ -1619,11 +1650,17 @@ type DurableObject =
     abstract fetch: request: Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> -> U2<JS.Promise<Response>, Response>
     abstract connect: (Socket -> JS.Promise<unit> option) option with get, set
     abstract alarm: (AlarmInvocationInfo option -> JS.Promise<unit> option) option with get, set
-    abstract webSocketMessage: Func<WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option> option with get, set
-    abstract webSocketClose: Func<WebSocket, float, string, bool, JS.Promise<unit> option> option with get, set
-    abstract webSocketError: Func<WebSocket, obj, JS.Promise<unit> option> option with get, set
+    abstract webSocketMessage: WebSocketMessage option with get, set
+    abstract webSocketClose: WebSocketClose option with get, set
+    abstract webSocketError: WebSocketError option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (fetch: (Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> -> U2<JS.Promise<Response>, Response>), ?connect: (Socket -> JS.Promise<unit> option), ?alarm: (AlarmInvocationInfo option -> JS.Promise<unit> option), ?webSocketMessage: Func<WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option>, ?webSocketClose: Func<WebSocket, float, string, bool, JS.Promise<unit> option>, ?webSocketError: Func<WebSocket, obj, JS.Promise<unit> option>) : DurableObject = jsNative
+    static member Create (fetch: (Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> -> U2<JS.Promise<Response>, Response>), ?connect: (Socket -> JS.Promise<unit> option), ?alarm: (AlarmInvocationInfo option -> JS.Promise<unit> option), ?webSocketMessage: WebSocketMessage, ?webSocketClose: WebSocketClose, ?webSocketError: WebSocketError) : DurableObject = jsNative
+
+type WebSocketClose = delegate of ws: WebSocket * code: float * reason: string * wasClean: bool -> JS.Promise<unit> option
+
+type WebSocketError = delegate of ws: WebSocket * error: obj -> JS.Promise<unit> option
+
+type WebSocketMessage = delegate of ws: WebSocket * message: U2<string, JS.ArrayBuffer> -> JS.Promise<unit> option
 
 [<Erase>]
 type DurableObjectStub<'T> = private DurableObjectStub__ of obj
@@ -3551,7 +3588,7 @@ type FormData =
     abstract entries: unit -> obj
     abstract keys: unit -> obj
     abstract values: unit -> obj
-    abstract forEach<'This>: callback: Action<U2<string, File>, string, FormData> * ?thisArg: 'This -> unit
+    abstract forEach<'This>: callback: FormData.ForEach.Callback * ?thisArg: 'This -> unit
 
 [<Interface>]
 type ContentOptions =
@@ -3836,12 +3873,12 @@ type Headers =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/delete)
     /// </summary>
     abstract delete: name: string -> unit
-    abstract forEach<'This>: callback: Action<string, string, Headers> * ?thisArg: 'This -> unit
+    abstract forEach<'This>: callback: Headers.ForEach.Callback * ?thisArg: 'This -> unit
     abstract entries: unit -> obj
     abstract keys: unit -> obj
     abstract values: unit -> obj
     [<ParamObject; Emit("$0")>]
-    static member Create (get: (string -> string option), getAll: (string -> string[]), getSetCookie: (unit -> string[]), has: (string -> bool), set: Action<string, string>, append: Action<string, string>, delete: (string -> unit), forEach: Action<Action<string, string, Headers>, 'This option>, entries: (unit -> obj), keys: (unit -> obj), values: (unit -> obj)) : Headers = jsNative
+    static member Create (get: (string -> string option), getAll: (string -> string[]), getSetCookie: (unit -> string[]), has: (string -> bool), set: Action<string, string>, append: Action<string, string>, delete: (string -> unit), forEach: Action<Headers.ForEach.Callback, 'This option>, entries: (unit -> obj), keys: (unit -> obj), values: (unit -> obj)) : Headers = jsNative
 
 type BodyInit = obj
 
@@ -4517,7 +4554,7 @@ module R2Bucket =
                 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/delete)
                 /// </summary>
                 abstract delete: name: string -> unit
-                abstract forEach<'This>: callback: Action<string, string, Headers> * ?thisArg: 'This -> unit
+                abstract forEach<'This>: callback: Headers.ForEach.Callback * ?thisArg: 'This -> unit
                 abstract entries: unit -> obj
                 abstract keys: unit -> obj
                 abstract values: unit -> obj
@@ -4527,7 +4564,7 @@ module R2Bucket =
                 abstract uploadedAfter: JS.Date option with get, set
                 abstract secondsGranularity: bool option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (get: (string -> string option), getAll: (string -> string[]), getSetCookie: (unit -> string[]), has: (string -> bool), set: Action<string, string>, append: Action<string, string>, delete: (string -> unit), forEach: Action<Action<string, string, Headers>, 'This option>, entries: (unit -> obj), keys: (unit -> obj), values: (unit -> obj), ?etagMatches: string, ?etagDoesNotMatch: string, ?uploadedBefore: JS.Date, ?uploadedAfter: JS.Date, ?secondsGranularity: bool) : OnlyIf = jsNative
+                static member Create (get: (string -> string option), getAll: (string -> string[]), getSetCookie: (unit -> string[]), has: (string -> bool), set: Action<string, string>, append: Action<string, string>, delete: (string -> unit), forEach: Action<Headers.ForEach.Callback, 'This option>, entries: (unit -> obj), keys: (unit -> obj), values: (unit -> obj), ?etagMatches: string, ?etagDoesNotMatch: string, ?uploadedBefore: JS.Date, ?uploadedAfter: JS.Date, ?secondsGranularity: bool) : OnlyIf = jsNative
 
             [<Interface>]
             type OnlyIf2 =
@@ -4575,12 +4612,12 @@ module R2Bucket =
                 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/delete)
                 /// </summary>
                 abstract delete: name: string -> unit
-                abstract forEach<'This>: callback: Action<string, string, Headers> * ?thisArg: 'This -> unit
+                abstract forEach<'This>: callback: Headers.ForEach.Callback * ?thisArg: 'This -> unit
                 abstract entries: unit -> obj
                 abstract keys: unit -> obj
                 abstract values: unit -> obj
                 [<ParamObject; Emit("$0")>]
-                static member Create (get: (string -> string option), getAll: (string -> string[]), getSetCookie: (unit -> string[]), has: (string -> bool), set: Action<string, string>, append: Action<string, string>, delete: (string -> unit), forEach: Action<Action<string, string, Headers>, 'This option>, entries: (unit -> obj), keys: (unit -> obj), values: (unit -> obj), ?etagMatches: string, ?etagDoesNotMatch: string, ?uploadedBefore: JS.Date, ?uploadedAfter: JS.Date, ?secondsGranularity: bool) : OnlyIf2 = jsNative
+                static member Create (get: (string -> string option), getAll: (string -> string[]), getSetCookie: (unit -> string[]), has: (string -> bool), set: Action<string, string>, append: Action<string, string>, delete: (string -> unit), forEach: Action<Headers.ForEach.Callback, 'This option>, entries: (unit -> obj), keys: (unit -> obj), values: (unit -> obj), ?etagMatches: string, ?etagDoesNotMatch: string, ?uploadedBefore: JS.Date, ?uploadedAfter: JS.Date, ?secondsGranularity: bool) : OnlyIf2 = jsNative
 
     module Put =
         [<Interface>]
@@ -4924,11 +4961,11 @@ type QueuingStrategy<'T> =
 type UnderlyingSink<'W> =
     abstract ``type``: string option with get, set
     abstract start: (WritableStreamDefaultController -> JS.Promise<unit> option) option with get, set
-    abstract write: Func<'W, WritableStreamDefaultController, JS.Promise<unit> option> option with get, set
+    abstract write: UnderlyingSink.Write<'W> option with get, set
     abstract abort: (obj -> JS.Promise<unit> option) option with get, set
     abstract close: (unit -> JS.Promise<unit> option) option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?``type``: string, ?start: (WritableStreamDefaultController -> JS.Promise<unit> option), ?write: Func<'W, WritableStreamDefaultController, JS.Promise<unit> option>, ?abort: (obj -> JS.Promise<unit> option), ?close: (unit -> JS.Promise<unit> option)) : UnderlyingSink<'W> = jsNative
+    static member Create (?``type``: string, ?start: (WritableStreamDefaultController -> JS.Promise<unit> option), ?write: UnderlyingSink.Write<'W>, ?abort: (obj -> JS.Promise<unit> option), ?close: (unit -> JS.Promise<unit> option)) : UnderlyingSink<'W> = jsNative
 
 [<Interface>]
 type UnderlyingByteSource =
@@ -4955,12 +4992,12 @@ type Transformer<'I, 'O> =
     abstract readableType: string option with get, set
     abstract writableType: string option with get, set
     abstract start: (TransformStreamDefaultController<'O> -> JS.Promise<unit> option) option with get, set
-    abstract transform: Func<'I, TransformStreamDefaultController<'O>, JS.Promise<unit> option> option with get, set
+    abstract transform: Transformer.Transform<'I, 'O> option with get, set
     abstract flush: (TransformStreamDefaultController<'O> -> JS.Promise<unit> option) option with get, set
     abstract cancel: (obj -> JS.Promise<unit> option) option with get, set
     abstract expectedLength: float option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?readableType: string, ?writableType: string, ?start: (TransformStreamDefaultController<'O> -> JS.Promise<unit> option), ?transform: Func<'I, TransformStreamDefaultController<'O>, JS.Promise<unit> option>, ?flush: (TransformStreamDefaultController<'O> -> JS.Promise<unit> option), ?cancel: (obj -> JS.Promise<unit> option), ?expectedLength: float) : Transformer<'I, 'O> = jsNative
+    static member Create (?readableType: string, ?writableType: string, ?start: (TransformStreamDefaultController<'O> -> JS.Promise<unit> option), ?transform: Transformer.Transform<'I, 'O>, ?flush: (TransformStreamDefaultController<'O> -> JS.Promise<unit> option), ?cancel: (obj -> JS.Promise<unit> option), ?expectedLength: float) : Transformer<'I, 'O> = jsNative
 
 [<Interface>]
 type StreamPipeOptions =
@@ -6076,10 +6113,10 @@ type URLSearchParams =
     abstract entries: unit -> obj
     abstract keys: unit -> obj
     abstract values: unit -> obj
-    abstract forEach<'This>: callback: Action<string, string, URLSearchParams> * ?thisArg: 'This -> unit
+    abstract forEach<'This>: callback: URLSearchParams.ForEach.Callback * ?thisArg: 'This -> unit
     abstract toString: unit -> string
     [<ParamObject; Emit("$0")>]
-    static member Create (size: float, append: Action<string, string>, delete: Action<string, string option>, get: (string -> string option), getAll: (string -> string[]), has: Func<string, string option, bool>, set: Action<string, string>, sort: (unit -> unit), entries: (unit -> obj), keys: (unit -> obj), values: (unit -> obj), forEach: Action<Action<string, string, URLSearchParams>, 'This option>, toString: (unit -> string)) : URLSearchParams = jsNative
+    static member Create (size: float, append: Action<string, string>, delete: Action<string, string option>, get: (string -> string option), getAll: (string -> string[]), has: Func<string, string option, bool>, set: Action<string, string>, sort: (unit -> unit), entries: (unit -> obj), keys: (unit -> obj), values: (unit -> obj), forEach: Action<URLSearchParams.ForEach.Callback, 'This option>, toString: (unit -> string)) : URLSearchParams = jsNative
 
 /// <summary>
 /// The **<c>URLPattern</c>** interface of the URL Pattern API matches URLs or parts of URLs against a pattern. The pattern can contain capturing groups that extract parts of the matched URL.
@@ -7425,9 +7462,9 @@ type EventCounts =
     abstract entries: unit -> obj
     abstract keys: unit -> obj
     abstract values: unit -> obj
-    abstract forEach: param1: Action<float, string, EventCounts> * ?param2: obj -> unit
+    abstract forEach: param1: EventCounts.ForEach.Param1 * ?param2: obj -> unit
     [<ParamObject; Emit("$0")>]
-    static member Create (size: float, get: (string -> float option), has: (string -> bool), entries: (unit -> obj), keys: (unit -> obj), values: (unit -> obj), forEach: Action<Action<float, string, EventCounts>, obj option>) : EventCounts = jsNative
+    static member Create (size: float, get: (string -> float option), has: (string -> bool), entries: (unit -> obj), keys: (unit -> obj), values: (unit -> obj), forEach: Action<EventCounts.ForEach.Param1, obj option>) : EventCounts = jsNative
 
 type SpanConstructor =
     [<EmitConstructor>]
@@ -7435,12 +7472,12 @@ type SpanConstructor =
 
 [<Interface>]
 type Tracing =
-    abstract enterSpan<'T, 'A>: name: string * callback: Func<Span, 'A, 'T> * [<ParamArray>] args: 'A -> 'T
-    abstract startActiveSpan<'T, 'A>: name: string * callback: Func<Span, 'A, 'T> * [<ParamArray>] args: 'A -> 'T
+    abstract enterSpan<'T, 'A>: name: string * callback: Tracing.EnterSpan.Callback<'A, 'T> * [<ParamArray>] args: 'A -> 'T
+    abstract startActiveSpan<'T, 'A>: name: string * callback: Tracing.StartActiveSpan.Callback<'A, 'T> * [<ParamArray>] args: 'A -> 'T
     abstract startSpan: name: string -> Span
     abstract Span: SpanConstructor with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (enterSpan: Func<string, Func<Span, 'A, 'T>, 'A, 'T>, startActiveSpan: Func<string, Func<Span, 'A, 'T>, 'A, 'T>, startSpan: (string -> Span), Span: SpanConstructor) : Tracing = jsNative
+    static member Create (enterSpan: Func<string, Tracing.EnterSpan.Callback<'A, 'T>, 'A, 'T>, startActiveSpan: Func<string, Tracing.StartActiveSpan.Callback<'A, 'T>, 'A, 'T>, startSpan: (string -> Span), Span: SpanConstructor) : Tracing = jsNative
 
 [<Interface>]
 type Span =
@@ -26052,7 +26089,7 @@ type EmailEvent =
     [<Global("EmailEvent.BUBBLING_PHASE")>]
     static member BUBBLING_PHASE: float = jsNative
 
-type EmailExportedHandler<'Env, 'Props> = Func<ForwardableEmailMessage, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>
+type EmailExportedHandler<'Env, 'Props> = delegate of message: ForwardableEmailMessage * env: 'Env * ctx: ExecutionContext<'Props> -> JS.Promise<unit> option
 
 type EmailMessageConstructor =
     [<EmitConstructor>]
@@ -26953,12 +26990,15 @@ type EventContext<'Env, 'P, 'Data> =
     abstract functionPath: string with get, set
     abstract waitUntil: (JS.Promise<obj> -> unit) with get, set
     abstract passThroughOnException: (unit -> unit) with get, set
-    abstract next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>> option, RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option, JS.Promise<Response>> with get, set
+    abstract next: EventContext.Next with get, set
     abstract env: obj with get, set
     abstract ``params``: obj with get, set
     abstract data: 'Data with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>> option, RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option, JS.Promise<Response>>, env: obj, ``params``: obj, data: 'Data) : EventContext<'Env, 'P, 'Data> = jsNative
+    static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: EventContext.Next, env: obj, ``params``: obj, data: 'Data) : EventContext<'Env, 'P, 'Data> = jsNative
+
+module EventContext =
+    type Next = delegate of input: U2<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>> option * init: RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option -> JS.Promise<Response>
 
 [<Erase>]
 type PagesFunction<'Env, 'Params, 'Data when 'Data :> RequestInitCfProperties.Base> = private PagesFunction__ of (obj -> U2<JS.Promise<Response>, Response>)
@@ -26970,12 +27010,12 @@ module PagesFunction =
         abstract functionPath: string with get, set
         abstract waitUntil: (JS.Promise<obj> -> unit) with get, set
         abstract passThroughOnException: (unit -> unit) with get, set
-        abstract next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>> option, RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option, JS.Promise<Response>> with get, set
+        abstract next: EventContext.Next with get, set
         abstract env: obj with get, set
         abstract ``params``: obj with get, set
         abstract data: 'Data with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>> option, RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option, JS.Promise<Response>>, env: obj, ``params``: obj, data: 'Data) : Context<'Env, 'Params, 'Data> = jsNative
+        static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: EventContext.Next, env: obj, ``params``: obj, data: 'Data) : Context<'Env, 'Params, 'Data> = jsNative
 
 [<Interface>]
 type EventPluginContext<'Env, 'P, 'Data, 'PluginArgs> =
@@ -26983,13 +27023,16 @@ type EventPluginContext<'Env, 'P, 'Data, 'PluginArgs> =
     abstract functionPath: string with get, set
     abstract waitUntil: (JS.Promise<obj> -> unit) with get, set
     abstract passThroughOnException: (unit -> unit) with get, set
-    abstract next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>> option, RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option, JS.Promise<Response>> with get, set
+    abstract next: EventPluginContext.Next with get, set
     abstract env: obj with get, set
     abstract ``params``: obj with get, set
     abstract data: 'Data with get, set
     abstract pluginArgs: 'PluginArgs with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>> option, RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option, JS.Promise<Response>>, env: obj, ``params``: obj, data: 'Data, pluginArgs: 'PluginArgs) : EventPluginContext<'Env, 'P, 'Data, 'PluginArgs> = jsNative
+    static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: EventPluginContext.Next, env: obj, ``params``: obj, data: 'Data, pluginArgs: 'PluginArgs) : EventPluginContext<'Env, 'P, 'Data, 'PluginArgs> = jsNative
+
+module EventPluginContext =
+    type Next = delegate of input: U2<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>> option * init: RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option -> JS.Promise<Response>
 
 [<Erase>]
 type PagesPluginFunction<'Env, 'Params, 'Data, 'PluginArgs when 'Data :> RequestInitCfProperties.Base> = private PagesPluginFunction__ of (obj -> U2<JS.Promise<Response>, Response>)
@@ -27001,13 +27044,13 @@ module PagesPluginFunction =
         abstract functionPath: string with get, set
         abstract waitUntil: (JS.Promise<obj> -> unit) with get, set
         abstract passThroughOnException: (unit -> unit) with get, set
-        abstract next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>> option, RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option, JS.Promise<Response>> with get, set
+        abstract next: EventPluginContext.Next with get, set
         abstract env: obj with get, set
         abstract ``params``: obj with get, set
         abstract data: 'Data with get, set
         abstract pluginArgs: 'PluginArgs with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>> option, RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option, JS.Promise<Response>>, env: obj, ``params``: obj, data: 'Data, pluginArgs: 'PluginArgs) : Context<'Env, 'Params, 'Data, 'PluginArgs> = jsNative
+        static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: EventPluginContext.Next, env: obj, ``params``: obj, data: 'Data, pluginArgs: 'PluginArgs) : Context<'Env, 'Params, 'Data, 'PluginArgs> = jsNative
 
 [<Import("PipelineTransformationEntrypoint", "cloudflare:pipelines"); AbstractClass>]
 type PipelineTransformationEntrypoint<'Env, 'I, 'O when 'I :> PipelineRecord and 'O :> PipelineRecord> (ctx: ExecutionContext<obj>, env: 'Env) =
@@ -27254,6 +27297,12 @@ module CloudflareWorkersModule =
         | [<CompiledName("year")>] Year
 
     type WorkflowSleepDuration = U2<float, string>
+
+type WebSocketClose2 = delegate of ws: WebSocket * code: float * reason: string * wasClean: bool -> JS.Promise<unit> option
+
+type WebSocketError2 = delegate of ws: WebSocket * error: obj -> JS.Promise<unit> option
+
+type WebSocketMessage2 = delegate of ws: WebSocket * message: U2<string, JS.ArrayBuffer> -> JS.Promise<unit> option
 
 type WorkflowDelayDuration = CloudflareWorkersModule.WorkflowSleepDuration
 
@@ -27522,11 +27571,11 @@ type WorkflowStep () =
     abstract ``do``<'T>: name: string * config: WorkflowStepConfigWithStaticDelay * callback: (WorkflowStep.Do.Callback.Ctx -> JS.Promise<'T>) * ?rollbackOptions: obj -> JS.Promise<'T>
     abstract ``do``<'T>: name: string * config: WorkflowStepConfig * callback: (WorkflowStep.Do.Callback.Ctx -> JS.Promise<'T>) * ?rollbackOptions: obj -> JS.Promise<'T>
     member _.sleep
-        with get (): Func<string, CloudflareWorkersModule.WorkflowSleepDuration, JS.Promise<unit>> = jsNative
-        and set (_: Func<string, CloudflareWorkersModule.WorkflowSleepDuration, JS.Promise<unit>>): unit = jsNative
+        with get (): WorkflowStep.Sleep = jsNative
+        and set (_: WorkflowStep.Sleep): unit = jsNative
     member _.sleepUntil
-        with get (): Func<string, U2<float, JS.Date>, JS.Promise<unit>> = jsNative
-        and set (_: Func<string, U2<float, JS.Date>, JS.Promise<unit>>): unit = jsNative
+        with get (): WorkflowStep.SleepUntil = jsNative
+        and set (_: WorkflowStep.SleepUntil): unit = jsNative
     abstract waitForEvent: name: string * options: WorkflowStep.WaitForEvent.Options -> JS.Promise<obj>
 
 module WorkflowStep =
@@ -27634,6 +27683,10 @@ module WorkflowStep =
                     abstract stepName: string with get, set
                     [<ParamObject; Emit("$0")>]
                     static member Create (ctx: WorkflowStep.Do.Callback.Ctx, error: exn, stepName: string, ?output: 'T) : Ctx<'T> = jsNative
+
+    type Sleep = delegate of name: string * duration: CloudflareWorkersModule.WorkflowSleepDuration -> JS.Promise<unit>
+
+    type SleepUntil = delegate of name: string * timestamp: U2<float, JS.Date> -> JS.Promise<unit>
 
     module WaitForEvent =
         [<Interface>]
