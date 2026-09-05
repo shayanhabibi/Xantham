@@ -170,3 +170,56 @@ first wave in which that last clause is true. Corpus over 49 fixtures:
 
 `DO001` 19, `DO002` 4, `TR055` 360, `TR056` 32, `TR014` 1. `TR057`, `DO003` and `DO004` stand at
 zero: one settled unraised, two awaiting lane AO.
+
+## Batch 2
+
+| Item | Lane | Outcome |
+| --- | --- | --- |
+| 2 | AO | **Unreachable in the corpus. Raised nothing.** `DO003` stands at zero and a test asserts it. |
+| 3 | AO | **Option (b), the loss is recorded.** `DO001` 19 → 18, `DO004` 0 → 3. |
+
+**Item 2 was declined on two independent measurements**, not on the manager's suspicion. None of
+the nineteen `DO001` sites is separated by a literal union; and a probe over all 230 overloaded
+members in the corpus found exactly one parameter position taking two or more literals, the lab's
+own `Choice.pick`, which `synthesize-anonymous` already names. The boundary is now exact:
+`isLiteralUnion` declines a name only where a member is not a literal, so `"a" | "b" | string`
+cannot reach the collision — the checker subsumes it — while `"a" | "b" | (string & {})` can. The
+lab's `Blend` pins that, and the mechanism lane AF rejected stays rejected.
+
+**Item 3 took the recorded loss.** Extending retention to export functions repairs nothing,
+because neither animejs site is literal-separated. `DO004` reports the drop instead;
+`ExportConstructor` keeps `DO001`.
+
+The split of the nineteen, which is the measurement that decided it: export functions 2
+(`$`, `mapRange`), `DrawableSVGGeometry` keyof type parameter 13, `Ai.run` 1, `AutoRAG.aiSearch`
+1, `BrowserRun.quickAction` 1, lab `Widen.scan` 1.
+
+`DO001` reconciles per fixture rather than in aggregate: animejs 15 → 13 with two moving to
+`DO004`, the lab 1 → 2 gaining `Blend` and contributing one `DO004` for `emit`, and
+`@cloudflare/workers-types` unchanged at 3 because its three sites are members rather than
+exported functions.
+
+# Carried into wave nine
+
+1. **`BrowserRun.quickAction` is a literal-separated loss that lane AF's mechanism misses**, and
+   it is the wave's one newly found defect. `BrowserRunContentOptions` and
+   `BrowserRunMarkdownOptions` are distinct type ids that render as an abbreviation pair, so
+   `literalErasedKey` never groups them while `normalize` collides them. The general shape:
+   retention groups by type id, dedupe compares normalised F# signatures, and the two disagree.
+   Repair belongs in `Shape/Spec.fs`.
+2. **Two callback positions lane AM did not measure** — a union arm under an array or an
+   `option`, and `U2<...>` nested inside a delegate's type parameter.
+3. The fidelity queue and the small items, items 11 and 12, carried untouched for a fourth wave.
+
+## What this wave establishes about its own method
+
+**Three of the five priced items closed with no generator code**, and none of the three was
+skipped. Item 4 was answered from the committed goldens, item 5 by disproving the worklist's
+premise, and item 2 by measuring that the shape it repairs does not occur. The wave changed
+generator behaviour in exactly one place, item 3, and that change records a loss rather than
+repairing one.
+
+**A worklist premise is a hypothesis.** Item 5 asserted that a bare `x: null` records no absence
+fact; it records `TR014`. Item 2 assumed the collision was live; it is not. Both were written
+from real observations of wave seven and both were wrong about what followed. Lanes were briefed
+to measure the premise before acting on it, and that is what produced the wave's results.
