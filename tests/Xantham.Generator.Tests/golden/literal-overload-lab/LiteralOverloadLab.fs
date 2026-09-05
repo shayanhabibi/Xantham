@@ -102,3 +102,21 @@ module Choice =
 /// </summary>
 type Widen =
     abstract scan: input: obj -> unit
+
+/// <summary>
+/// Negative: a union carrying one member that is not a literal. <c>synthesize-anonymous</c> names a
+/// union only where every non-nullish member is a literal, so this one keeps no name, widens to
+/// <c>string</c> at both positions, and the second overload drops.
+/// </summary>
+type Blend =
+    abstract pick: kind: string -> unit
+
+/// <summary>The package's value exports, each bound to its import.</summary>
+[<Erase>]
+type Exports =
+    /// <summary>
+    /// Negative: a literal tells these two apart, and retention reads the members of a declaration,
+    /// so an exported function reaches deduplication widened. The second drops as <c>DO004</c>.
+    /// </summary>
+    [<Import("emit", "literal-overload-lab")>]
+    static member emit (kind: string) : unit = jsNative

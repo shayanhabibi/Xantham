@@ -3331,6 +3331,52 @@ let shapePassTests =
                 [ "Store.Json", [ "Json", Some "json" ]; "Store.Text", [ "Text", Some "text" ] ]
                 "one declaration per literal, each compiled to the literal it stands for"
 
+        // Wave eight, item 3. Retention reads the members of a declaration, so an exported
+        // function's overloads arrive widened and `DO004` prices the drop as its own loss.
+        testCase "dedupe-overloads reports an exported function's dropped overload as DO004" <| fun _ ->
+            let export name body =
+                0,
+                {
+                    Name = name
+                    Docs = ""
+                    Tags = []
+                    TypeParameters = []
+                    Binding = ImportNamed name
+                    Body = body
+                    Settable = false
+                }
+
+            let parameter name =
+                {
+                    Name = name
+                    Type = FsString
+                    Optional = false
+                    Rest = false
+                }
+
+            let model =
+                { Build.shapeModel [] with
+                    ExportMembers =
+                        [
+                            export "emit" (ExportFunction([ parameter "kind" ], FsUnit))
+                            export "emit" (ExportFunction([ parameter "kind" ], FsUnit))
+                            export "make" (ExportConstructor([ parameter "url" ], FsObj))
+                            export "make" (ExportConstructor([ parameter "url" ], FsObj))
+                        ]
+                }
+
+            let shaped, findings = Build.runPass Overloads.dedupeOverloads model
+
+            Expect.equal
+                (findings |> List.map (fun f -> f.Tier, f.Key, f.Symbol))
+                [ Widened, "DO004", "emit"; Widened, "DO001", "make" ]
+                "the function drop is an export-function loss; a constructor drop stays DO001"
+
+            Expect.equal
+                (shaped.ExportMembers |> List.map (fun (_, m) -> m.Name))
+                [ "emit"; "make" ]
+                "one of each survives"
+
         testCase "detect-tagged-unions reads the arms' fields, not the arm types" <| fun _ ->
             // The arm properties become the case fields, because that is what Fable's erasure
             // writes: `Circle(radius = 2.0)` -> `{ kind: "circle", radius: 2 }`. The tag itself
