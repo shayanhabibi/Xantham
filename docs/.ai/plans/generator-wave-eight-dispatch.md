@@ -88,3 +88,33 @@ Repeated into each brief rather than referenced, because a lane starts cold:
 7. Never `git push`, never open a PR, never merge into `master` or into the integration branch.
 8. A lane that measures and refuses has succeeded. Say so in the brief, and price refusal as an
    available outcome.
+
+### Item 4 — a retained literal derived from a URL: left uncapped
+
+Answered by recon R2 from the committed goldens, before item 2 was dispatched. No code changed.
+
+The corpus holds **10** derived names in total, across three fixtures — four in
+`@cloudflare/workers-types` under `KVNamespace`, three in `animejs` under `DrawableSVGGeometry`,
+three in `literal-overload-lab` under `Store`. The longest is 26 characters
+(`HttpWwwW3Org1998MathMathML`). One name exceeds 24 characters and none exceeds 32. The name that
+prompted the item, `HttpWwwW3Org1999Xhtml`, is 21 characters: the qualified path reads long, the
+identifier does not.
+
+Truncation collisions within a scope, at caps of 24, 32 and 40: **zero at every cap**. The three
+URL-derived names under `DrawableSVGGeometry` diverge at characters 13 to 16, on the year segment,
+well before any cap reaches them.
+
+So the hash tail of option (c) guards nothing measurable, and the cap of option (b) would truncate
+exactly one name in the corpus. Both add a mechanism that must itself be tested and that yields
+identifiers no consumer can read back to their literal. All ten names are single-case
+`[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]` unions reached through completion rather
+than typed by hand, so length is nearly free where it occurs.
+
+R2's caveat is recorded and it argues the same way: the corpus contains no pair of literals that
+differ only past character 24, so it cannot demonstrate that truncation is safe in general — only
+that nothing here truncates. A cap shipped on that evidence would be an untested mechanism
+answering a hypothetical.
+
+Left uncapped. The threshold that would change this answer is a fixture producing either a name
+past roughly 32 characters or two literals in one scope sharing a long prefix; the measurement
+above is what a future wave re-runs rather than re-deriving.
