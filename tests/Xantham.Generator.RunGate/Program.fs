@@ -1416,6 +1416,262 @@ let private callbackUnionNestingForms () =
 
     equal "and the object arm nested the same way carries its method at arity 1" "obj-arm:obj:1" seenObj
 
+// Lane BA. The same callback positions again, with the retained delegate spelled as a *named* F#
+// delegate rather than `System.Func`/`System.Action`. Naming the delegate is what would let a
+// parameter carry a name across the boundary, and the feature rests on the named form behaving as
+// the framework one does; each claim below reads the `length` of the function JavaScript received
+// beside the result of calling it with all its arguments at once. Arity 4 runs against
+// `index.js`'s runtime-only `callFour`/`makeFour`, with a hand-written `Func` control beside it.
+
+/// A callback of arity 2 whose parameters carry names.
+type TickHandler = delegate of x: float * y: float -> string
+
+type TripleHandler = delegate of a: float * b: float * c: float -> string
+
+type QuadHandler = delegate of a: float * b: float * c: float * d: float -> string
+
+/// The unit-returning arm, which renders `Action` today.
+type VoidHandler = delegate of x: float * y: float -> unit
+
+/// The named-abbreviation position: the lab's own `Formatter`.
+type FormatterHandler = delegate of value: float * digits: float -> string
+
+/// A named delegate whose return is a converted callback - the outer level of a nesting.
+type SeedHandler = delegate of seed: float -> (float -> string)
+
+/// The lab's `Handlers` with its arity 2 member named.
+[<Interface>]
+type DelegateHandlers =
+    abstract onTick: TickHandler with get, set
+    abstract onDone: (float -> unit) option with get, set
+
+    [<ParamObject; Emit("$0")>]
+    static member Create(onTick: TickHandler, ?onDone: (float -> unit)) : DelegateHandlers = jsNative
+
+/// The lab's `Options`, whose method member the ParamObject pass binds as a callback-typed Create
+/// parameter.
+[<Interface>]
+type DelegateOptions =
+    abstract label: string with get, set
+    abstract transform: a: float * b: float -> string
+    abstract finish: unit -> unit
+
+    [<ParamObject; Emit("$0")>]
+    static member Create(label: string, transform: TickHandler, finish: (unit -> unit)) : DelegateOptions = jsNative
+
+/// The lab's `Factory`, every member of arity 2 or wider named.
+[<Interface>]
+type DelegateFactory =
+    abstract make: seed: float -> TickHandler
+    abstract makeOne: seed: float -> (float -> string)
+    abstract makeNone: seed: float -> (unit -> string)
+    abstract makeThree: seed: float -> TripleHandler
+    abstract ready: (unit -> string)
+    abstract pair: TickHandler
+
+    [<ParamObject; Emit("$0")>]
+    static member Create
+        (
+            make: (float -> TickHandler),
+            makeOne: Func<float, (float -> string)>,
+            makeNone: Func<float, (unit -> string)>,
+            makeThree: (float -> TripleHandler),
+            ready: (unit -> string),
+            pair: TickHandler
+        ) : DelegateFactory =
+        jsNative
+
+[<Erase>]
+type NamedDelegates =
+
+    [<Import("callTwo", "callback-function-lab")>]
+    static member callTwo(callback: TickHandler) : string = jsNative
+
+    [<Import("callThree", "callback-function-lab")>]
+    static member callThree(callback: TripleHandler) : string = jsNative
+
+    [<Import("callFour", "callback-function-lab")>]
+    static member callFour(callback: QuadHandler) : string = jsNative
+
+    /// The framework delegate at the same arity, so arity 4 has its own control.
+    [<Import("callFour", "callback-function-lab")>]
+    static member callFourFunc(callback: Func<float, float, float, float, string>) : string = jsNative
+
+    [<Import("callVoidTwo", "callback-function-lab")>]
+    static member callVoidTwo(callback: VoidHandler) : float = jsNative
+
+    [<Import("callNamed", "callback-function-lab")>]
+    static member callNamed(formatter: FormatterHandler) : string = jsNative
+
+    [<Import("fire", "callback-function-lab")>]
+    static member fire(handlers: DelegateHandlers) : string = jsNative
+
+    [<Import("handlers", "callback-function-lab")>]
+    static member handlers: DelegateHandlers = jsNative
+
+    [<Import("build", "callback-function-lab")>]
+    static member build(options: DelegateOptions) : string = jsNative
+
+    [<Import("factory", "callback-function-lab")>]
+    static member factory: DelegateFactory = jsNative
+
+    [<Import("makeFour", "callback-function-lab")>]
+    static member makeFour(seed: float) : QuadHandler = jsNative
+
+    [<Import("makeFour", "callback-function-lab")>]
+    static member makeFourFunc(seed: float) : Func<float, float, float, float, string> = jsNative
+
+    [<Import("callNesting", "callback-function-lab")>]
+    static member callNesting(outer: float -> TickHandler) : string = jsNative
+
+    [<Import("callNestingOne", "callback-function-lab")>]
+    static member callNestingOne(outer: SeedHandler) : string = jsNative
+
+    [<Import("drive", "callback-function-lab")>]
+    static member drive(factory: DelegateFactory) : string = jsNative
+
+/// Lane BA's measurement, position by position against `callbackGoldenForms` above.
+let private callbackNamedDelegateForms () =
+    let attempt (f: unit -> string) =
+        try
+            f ()
+        with e ->
+            $"threw: {e.Message}"
+
+    // Parameter position, at every arity the framework delegate is retained for.
+    equal
+        "a named delegate of arity 2 crosses at its declared arity"
+        "2:got:1:2"
+        (NamedDelegates.callTwo (TickHandler(fun a b -> $"got:{a}:{b}")))
+
+    equal
+        "a named delegate of arity 3 crosses at its declared arity"
+        "3:got:1:2:3"
+        (NamedDelegates.callThree (TripleHandler(fun a b c -> $"got:{a}:{b}:{c}")))
+
+    equal
+        "a named delegate of arity 4 crosses at its declared arity"
+        "4:got:1:2:3:4"
+        (NamedDelegates.callFour (QuadHandler(fun a b c d -> $"got:{a}:{b}:{c}:{d}")))
+
+    equal
+        "and the framework delegate reads the same at arity 4"
+        "4:got:1:2:3:4"
+        (NamedDelegates.callFourFunc (Func<float, float, float, float, string>(fun a b c d -> $"got:{a}:{b}:{c}:{d}")))
+
+    // The unit-returning arm, which renders `Action`.
+    let mutable sawVoid = 0.0
+
+    equal
+        "a named unit-returning delegate of arity 2 keeps its arity"
+        2.0
+        (NamedDelegates.callVoidTwo (VoidHandler(fun a b -> sawVoid <- a + b)))
+
+    equal "and the runtime's call reached it with both arguments" 15.0 sawVoid
+
+    equal
+        "a named delegate in the abbreviation position crosses at its declared arity"
+        "2:1.5|2"
+        (NamedDelegates.callNamed (FormatterHandler(fun value digits -> $"{value}|{digits}")))
+
+    // A ParamObject literal, and the method-shaped Create parameter beside it.
+    let built =
+        DelegateHandlers.Create(onTick = TickHandler(fun a b -> $"tick:{a}:{b}"), onDone = (fun _ -> ()))
+
+    equal
+        "a named delegate in a ParamObject literal crosses at its declared arity"
+        "2:tick:1:2:1"
+        (NamedDelegates.fire built)
+
+    let options =
+        DelegateOptions.Create(label = "b", transform = TickHandler(fun a b -> $"t:{a}:{b}"), finish = (fun () -> ()))
+
+    equal
+        "a named delegate as a method-shaped ParamObject parameter crosses at its declared arity"
+        "b:2:t:1:2:0"
+        (NamedDelegates.build options)
+
+    // Read-back: JavaScript to F#.
+    let fromJs = NamedDelegates.handlers
+    equal "a named delegate read off an interface member keeps its arity" 2.0 (emitJsExpr fromJs.onTick "$0.length")
+    equal "and invokes with all its arguments" "js:1:2" (fromJs.onTick.Invoke(1.0, 2.0))
+
+    let factory = NamedDelegates.factory
+    equal "a named delegate property keeps its arity" 2.0 (emitJsExpr factory.pair "$0.length")
+    equal "and invokes with all its arguments" "pair:1:2" (attempt (fun () -> factory.pair.Invoke(1.0, 2.0)))
+
+    let made = factory.make 5.0
+    equal "a named delegate returned from a method keeps its arity" 2.0 (emitJsExpr made "$0.length")
+    equal "and invokes with all its arguments" "made:5:1:2" (attempt (fun () -> made.Invoke(1.0, 2.0)))
+
+    equal
+        "a named delegate returned from a method invokes at arity 3"
+        "three:5:1:2:3"
+        (attempt (fun () -> (factory.makeThree 5.0).Invoke(1.0, 2.0, 3.0)))
+
+    let madeFour = NamedDelegates.makeFour 5.0
+    equal "a named delegate returned from a method keeps arity 4" 4.0 (emitJsExpr madeFour "$0.length")
+
+    equal
+        "and invokes with all four arguments"
+        "four:5:1:2:3:4"
+        (attempt (fun () -> madeFour.Invoke(1.0, 2.0, 3.0, 4.0)))
+
+    equal
+        "the framework delegate reads back the same at arity 4"
+        "four:5:1:2:3:4"
+        (attempt (fun () -> (NamedDelegates.makeFourFunc 5.0).Invoke(1.0, 2.0, 3.0, 4.0)))
+
+    // Nesting, both ways round.
+    equal
+        "a converted callback over a named delegate crosses at both declared arities"
+        "1:2:made:5:1:2"
+        (attempt (fun () -> NamedDelegates.callNesting (fun seed -> TickHandler(fun a b -> $"made:{seed}:{a}:{b}"))))
+
+    equal
+        "a named delegate over a converted callback crosses at both declared arities"
+        "1:1:one:5:1"
+        (attempt (fun () -> NamedDelegates.callNestingOne (SeedHandler(fun seed -> (fun a -> $"one:{seed}:{a}")))))
+
+    // Outward: a whole object of named delegates built in F#.
+    let driven =
+        DelegateFactory.Create(
+            make = (fun seed -> TickHandler(fun a b -> $"made:{seed}:{a}:{b}")),
+            makeOne = Func<float, float -> string>(fun seed -> (fun a -> $"one:{seed}:{a}")),
+            makeNone = Func<float, unit -> string>(fun seed -> (fun () -> $"none:{seed}")),
+            makeThree = (fun seed -> TripleHandler(fun a b c -> $"three:{seed}:{a}:{b}:{c}")),
+            ready = (fun () -> "ready"),
+            pair = TickHandler(fun a b -> $"pair:{a}:{b}")
+        )
+
+    equal
+        "a factory of named delegates built in F# crosses outward at every declared arity"
+        "1:2:made:5:1:2:0:ready:2:pair:1:2"
+        (attempt (fun () -> NamedDelegates.drive driven))
+
+    // What the names buy. The delegate declares `x` and `y`; every lambda below binds `a` and `b`,
+    // so the two are told apart by inspection. On the F# side the declared names are the ones
+    // `Invoke` accepts as named arguments. In JavaScript the parameters are the binders of
+    // whichever lambda made the function, so the declared names are an F#-side affordance.
+    let named = TickHandler(fun a b -> $"named:{a}:{b}")
+    equal "the delegate's parameter names are usable at the F# call site" "named:1:2" (named.Invoke(x = 1.0, y = 2.0))
+
+    let parametersOf (fn: obj) =
+        let source: string = emitJsExpr fn "$0.toString()"
+        source.Substring(0, source.IndexOf "=>")
+
+    let builtParameters = parametersOf named
+
+    check
+        "and are absent from the emitted JavaScript"
+        (not (builtParameters.Contains "x" || builtParameters.Contains "y"))
+
+    check "which carries the lambda's binders instead" (builtParameters.Contains "a" && builtParameters.Contains "b")
+
+    check
+        "a delegate read back from JavaScript carries the runtime's own parameter names"
+        ((parametersOf fromJs.onTick).Contains "a")
+
 [<EntryPoint>]
 let main _ =
     globals ()
@@ -1439,6 +1695,7 @@ let main _ =
     callbackMixedForms ()
     callbackUnionArmForms ()
     callbackUnionNestingForms ()
+    callbackNamedDelegateForms ()
 
     match failures with
     | [] ->
