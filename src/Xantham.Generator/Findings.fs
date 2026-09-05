@@ -449,8 +449,9 @@ type TypeReference =
     /// Wave seven, lane AF. A string-literal parameter type retains its literal, so the overloads
     /// it separates stay distinct.
     | [<Exact>] StringLiteralKeptForOverload of literal: string
-    /// Wave eight, item 5. A bare `x: null` type widened to `obj`; the absence fact it carried
-    /// is not recorded.
+    /// Wave eight, item 5. No pass constructs this. A bare `x: null` reaches `typeRefOnPath`'s
+    /// catch-all, so the site already carries `TR014` with `flags=Null` and the widening is
+    /// recorded once. Retained rather than retired, so `TR057` is never handed out twice.
     | [<Widened>] BareNullToObj
 
     interface IFindingKind with
