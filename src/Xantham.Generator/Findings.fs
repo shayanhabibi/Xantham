@@ -170,6 +170,7 @@ module FindingCodes =
             "SY.IntersectionOperandNotHoisted", "SY003"
             "SY.NameNestedUnderOwner", "SY004"
             "SY.NameSanitisedForIdentifier", "SY005"
+            "SY.CallbackDelegateNamed", "SY006"
             "SI.HybridLosesCallSignatures", "SI001"
             "SI.BaseMembersFlattened", "SI002"
             "SI.IntersectionFlattened", "SI003"
@@ -727,6 +728,10 @@ type SynthesizeAnonymous =
     /// admits; the source key spells them differently.
     | [<Ergonomic>] NameSanitisedForIdentifier of key: string * sanitised: string
 
+    /// Wave twelve, lane BB. A multi-argument callback declared as a named delegate. Its
+    /// parameters carry the names TypeScript spelled, and its arity stays guaranteed.
+    | [<Exact>] CallbackDelegateNamed of declaredAs: string
+
     interface IFindingKind with
         member this.Message =
             match this with
@@ -736,6 +741,7 @@ type SynthesizeAnonymous =
             | IntersectionOperandNotHoisted name ->
                 $"{name} intersects an operand no declaration names; that operand's members are dropped"
             | NameNestedUnderOwner nestedAs -> $"anonymous shape named {nestedAs} under the declaration that owns it"
+            | CallbackDelegateNamed declaredAs -> $"callback declared as the named delegate {declaredAs}"
             | NameSanitisedForIdentifier(key, sanitised) ->
                 $"member key {key} declared as {sanitised}; the key spells characters a declaration name refuses"
 

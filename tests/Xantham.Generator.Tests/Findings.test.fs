@@ -134,6 +134,7 @@ let findingsTests =
                     "SY.IntersectionOperandNotHoisted SY003 widened"
                     "SY.NameNestedUnderOwner SY004 exact"
                     "SY.NameSanitisedForIdentifier SY005 ergonomic"
+                    "SY.CallbackDelegateNamed SY006 exact"
                     "SI.HybridLosesCallSignatures SI001 widened"
                     "SI.BaseMembersFlattened SI002 ergonomic"
                     "SI.IntersectionFlattened SI003 ergonomic"
