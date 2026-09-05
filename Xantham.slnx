@@ -18,6 +18,7 @@
   </Folder>
 <!--          DOCUMENTATION         -->
   <Folder Name="/docs/">
+    <File Path="docs/generator-usage.md" />
     <File Path="docs/index.md" />
     <File Path="docs/wire-hand-written.md" />
     <File Path="docs/wire-navigation.md" />
