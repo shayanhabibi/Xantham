@@ -17,6 +17,13 @@ module Spec =
     let srcProjects = projects |> List.filter _.RelativePath.StartsWith("src")
     let testProjects = projects |> List.filter _.RelativePath.StartsWith("test")
 
+    /// The three projects `pack` emits and `publish` pushes. `Xantham.Cli` packs as a tool and
+    /// carries `Xantham.Generator`'s assembly inside its own package.
+    let publishable =
+        let names = set [ "Xantham.TypeScript.Wire"; "Xantham.Fable.Core"; "Xantham.Cli" ]
+
+        srcProjects |> List.filter (fun project -> names.Contains project.Name)
+
 module Options =
     let quick =
         Input.option<bool> "--quick"
@@ -32,7 +39,7 @@ module Options =
         Spec.srcProjects
         |> List.map _.Name
         |> Baked.Input.Project.target
-        |> Input.def (Spec.srcProjects |> List.filter _.Name.EndsWith("Wire") |> List.map _.Name)
+        |> Input.def (Spec.publishable |> List.map _.Name)
         |> Input.customParser (fun res ->
             res.Tokens
             |> Seq.map (fun token ->
@@ -45,7 +52,7 @@ module Options =
             Spec.srcProjects
             |> List.filter (_.RelativePath >> List.contains >> fun fn -> fn projects)
             |> function
-                | [] -> Spec.srcProjects |> List.filter _.Name.EndsWith("Wire")
+                | [] -> Spec.publishable
                 | projects -> projects)
 
     let watch =
@@ -413,6 +420,10 @@ module Stages =
 
                     for project in projects do
                         stage $"pack-{project.Name}" {
+                            // `dotnet fable` in the run gate restores the support package for
+                            // netstandard2.1 alone, and `--no-build` implies `--no-restore`.
+                            // The restore puts every target framework back into the assets file.
+                            run (cmd $"dotnet restore {project.Path} -v q")
                             run (cmd $"dotnet pack {project.Path} -c {config} --no-build --no-restore -v q -o bin")
                         }
                 }

@@ -8,7 +8,10 @@
         <PackAsTool>true</PackAsTool>
         <ToolCommandName>xantham</ToolCommandName>
         <PackageId>Xantham.Cli</PackageId>
+        <Version>0.1.0-alpha.1</Version>
+        <Authors>Shayan Habibi</Authors>
         <Description>Command line driver for the Xantham TypeScript-to-F# bindings generator.</Description>
+        <PackageTags>typescript;fsharp;fable;bindings;codegen;dotnet-tool</PackageTags>
     </PropertyGroup>
 
     <ItemGroup>

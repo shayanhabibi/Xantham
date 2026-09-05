@@ -10,12 +10,22 @@
              net8.0 compile gate can reference the package without a downgrade. -->
         <TargetFrameworks>netstandard2.1;net8.0</TargetFrameworks>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <Version>0.1.0-alpha.1</Version>
+        <AssemblyVersion>0.0.0.0</AssemblyVersion>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <PackageId>Xantham.Fable.Core</PackageId>
+        <Authors>Shayan Habibi</Authors>
+        <Description>The support library every Xantham-generated Fable binding opens. Erased F# forms for the TypeScript type-system idioms F# lacks a spelling for: keyof, indexed access, T[keyof T], index-signature objects and nominal brands. Every type erases at runtime and costs nothing in the emitted JavaScript.</Description>
+        <PackageTags>fable;fsharp;typescript;bindings;keyof;erased</PackageTags>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
     <ItemGroup>
         <Compile Include="Brand.fs"/>
         <Compile Include="Library.fs"/>
-        <Content Include="README.md" />
+        <None Include="README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 
     <ItemGroup>

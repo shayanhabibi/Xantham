@@ -19,6 +19,10 @@ node_modules/
 # Decoder-era ephemeral run artifacts (per-run temp.d.ts written into .xantham/run_<id>/).
 .xantham/
 
+# Where `xantham generate` writes by default (`-o`, default ./xantham-out), under whichever
+# directory the command was run from.
+xantham-out/
+
 # Tests
 tests/**/output.json
 tests/**/package-lock.json

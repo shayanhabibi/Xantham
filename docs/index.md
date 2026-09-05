@@ -44,6 +44,8 @@ Targets `net10.0`, `net8.0` and `netstandard2.1`. See the
 - [The wire protocol](plans/tsgo-protocol.md) — framing, error model and the binary AST
   format, verified against live byte traces.
 - [Remaining work](plans/wire-remaining-work.md) — what is still outstanding, in phases.
+- [Generating F# bindings](generator-usage.md) — install the tool, pin a compiler, write
+  `xantham.json`, and compile the output.
 - [Generator architecture](plans/generator-architecture.md) — the nano-pass pipeline, its
   decisions, and what each phase landed.
 - [Type mapping](plans/generator-type-mapping.md) — how each TypeScript construct becomes F#,
@@ -104,8 +106,8 @@ Xantham works today.
 | Component | Status | Notes |
 |-----------|:------:|-------|
 | **Wire** (`Xantham.TypeScript.Wire`) | 🟢 Shipped | Generated from the compiler's own schema; packaged for NuGet. |
-| **Generator** (`Xantham.Generator`) | 🟡 In progress | Phases A–C landed; phase D (erased idioms) is most of the way through. Not yet packaged. |
-| **Support** (`Xantham.Fable.Core`) | 🟡 In progress | Erased `keyof`/`typekeyof` and brand helpers, revived from the archive. Not yet packaged. |
+| **Generator** (`Xantham.Generator`) | 🟡 Alpha | Phases A–C landed; phase D (erased idioms) is most of the way through. Ships as the `Xantham.Cli` dotnet tool at `0.1.0-alpha.1` — see [Generating F# bindings](generator-usage.md). |
+| **Support** (`Xantham.Fable.Core`) | 🟡 Alpha | Erased `keyof`/`typekeyof` and brand helpers, revived from the archive. Packaged as `Xantham.Fable.Core` at `0.1.0-alpha.1`. |
 
 ---
 
