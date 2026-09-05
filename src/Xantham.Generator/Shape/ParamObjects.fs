@@ -59,9 +59,9 @@ let private refusal (decl: FsInterfaceDecl) =
     else
         None
 
-/// The `Create` parameter a member binds. A method binds the delegate that a function-valued
+/// The `Create` parameter a member binds. A method binds the callback that a function-valued
 /// property of the same signature carries (D5), and binds it as a required parameter.
-let private parameterFor (m: FsMember) : FsParam =
+let private parameterFor (owner: string) (m: FsMember) : FsParam * Finding list =
     match m with
     | FsProperty p ->
         {
@@ -72,14 +72,19 @@ let private parameterFor (m: FsMember) : FsParam =
                 | _ -> false
             Rest = false
             Type = p.Type
-        }
+        },
+        []
     | FsMethod method' ->
+        let reference, findings =
+            callbackRef $"{owner}.{method'.Name}" (method'.Parameters |> List.map _.Type) method'.Return
+
         {
             Name = method'.Name
             Optional = false
             Rest = false
-            Type = FsDelegate(method'.Parameters |> List.map _.Type, method'.Return)
-        }
+            Type = reference
+        },
+        findings
     | FsIndexer _
     | FsConstructor _ -> failwith "unreachable: refused above"
 
@@ -111,7 +116,9 @@ let synthesizeParamObjects: Pass<ShapeModel> =
 
                                     FsInterface decl
                                 | None ->
-                                    let parameters = decl.Members |> List.map parameterFor
+                                    let parameters, callbacks =
+                                        decl.Members |> List.map (parameterFor decl.Name) |> List.unzip
+
                                     let required, optional = parameters |> List.partition (fun p -> not p.Optional)
 
                                     let carried =
@@ -129,6 +136,7 @@ let synthesizeParamObjects: Pass<ShapeModel> =
                                         findings
                                         @ [ Finding.make decl.Name SynthesizeParamObjects.ParamObjectSynthesized ]
                                         @ carried
+                                        @ List.concat callbacks
 
                                     FsInterface
                                         { decl with

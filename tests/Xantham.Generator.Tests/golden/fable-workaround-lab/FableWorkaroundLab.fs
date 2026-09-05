@@ -61,7 +61,7 @@ type Listener =
     abstract name: string with get, set
     abstract notify: count: float -> string
     [<ParamObject; Emit("$0")>]
-    static member Create (name: string, notify: Func<float, string>) : Listener = jsNative
+    static member Create (name: string, notify: (float -> string)) : Listener = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

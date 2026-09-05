@@ -28,4 +28,4 @@ type WidgetPair =
     [<ParamObject; Emit("$0")>]
     static member Create (left: Widget, right: Widget) : WidgetPair = jsNative
 
-type Formatter = Func<string, string>
+type Formatter = (string -> string)

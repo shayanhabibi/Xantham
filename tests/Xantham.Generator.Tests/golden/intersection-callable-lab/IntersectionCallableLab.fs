@@ -9,7 +9,7 @@ open Fable.Core
 open Fable.Core.JsInterop
 open Xantham.Fable.Core
 
-type Chained = Func<float, float>
+type Chained = (float -> float)
 
 /// <summary>
 /// Member position: the property's type is an intersection of two callables.
@@ -34,7 +34,7 @@ module Timers =
     type Schedule =
         abstract cancel: unit -> unit
         [<ParamObject; Emit("$0")>]
-        static member Create (cancel: Action) : Schedule = jsNative
+        static member Create (cancel: (unit -> unit)) : Schedule = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

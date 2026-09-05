@@ -31,7 +31,8 @@ let private delegateRefFor
             shapeSignature ctx model None name signature
 
         let parameterTypes = parameters |> List.map _.Type
-        FsDelegate(parameterTypes, returns), overloadFindings @ signatureFindings
+        let reference, callbackFindings = callbackRef name parameterTypes returns
+        reference, overloadFindings @ signatureFindings @ callbackFindings
 
 /// Abbreviations for named pure-callback types: `type TimerCallback = Action<Timer>` (D5).
 let shapeCallbacks: Pass<ShapeModel> =

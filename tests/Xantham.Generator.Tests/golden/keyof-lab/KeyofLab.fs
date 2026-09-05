@@ -63,7 +63,7 @@ type Accessor<'T> =
     abstract read<'R>: key: typekeyof<'T, 'R> -> 'R
     abstract all: unit -> keyof<'T>[]
     [<ParamObject; Emit("$0")>]
-    static member Create (read: Func<typekeyof<'T, 'R>, 'R>, all: Func<keyof<'T>[]>) : Accessor<'T> = jsNative
+    static member Create (read: (typekeyof<'T, 'R> -> 'R), all: (unit -> keyof<'T>[])) : Accessor<'T> = jsNative
 
 /// <summary>
 /// A string index signature.

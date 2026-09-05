@@ -20,6 +20,7 @@ let rec private mapRef (f: FsTypeRef -> FsTypeRef) (reference: FsTypeRef) : FsTy
     | FsTuple elements -> FsTuple(elements |> List.map recur)
     | FsErasedUnion arms -> FsErasedUnion(arms |> List.map recur)
     | FsDelegate(arguments, returns) -> FsDelegate(arguments |> List.map recur, recur returns)
+    | FsFunc(argument, returns) -> FsFunc(recur argument, recur returns)
     | FsApp(name, arguments) -> FsApp(name, arguments |> List.map recur)
     | other -> other
 

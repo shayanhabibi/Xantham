@@ -567,10 +567,27 @@ let rec internal typeSpelling (reference: FsTypeRef) : string =
     | FsTuple items -> spell " * " items
     | FsErasedUnion arms -> $"U{arms.Length}<{commas arms}>"
     | FsDelegate(arguments, returns) -> $"Func<{commas (arguments @ [ returns ])}>"
+    | FsFunc(argument, returns) -> $"({typeSpelling argument} -> {typeSpelling returns})"
     | FsTypeVar name -> $"'{name}"
     | FsApp(name, arguments) -> $"{name}<{commas arguments}>"
     | FsBranded(primitive, measure) -> $"{typeSpelling primitive}<{measure}>"
     | FsNamed name -> name
+
+/// The spelling a callback takes (D5, revised by D5a). An F# function type carries the declared
+/// arity across the Fable boundary in both directions for one argument or none, and only where the
+/// return is not itself a callback: Fable flattens `A -> (B -> C)` into a single JavaScript
+/// function of the summed arity, and compiles a call site of two or more arguments one argument at
+/// a time. `System.Func`/`System.Action` guarantee the arity everywhere else, and the finding
+/// records the cost.
+let internal callbackRef (owner: string) (parameters: FsTypeRef list) (returns: FsTypeRef) =
+    let retainedFor reason =
+        FsDelegate(parameters, returns), [ Finding.make owner (TypeReference.CallbackKeptAsDelegate reason) ]
+
+    match parameters, returns with
+    | _, FsFunc _ -> retainedFor "its return is itself a callback"
+    | [], _ -> FsFunc(FsUnit, returns), []
+    | [ argument ], _ -> FsFunc(argument, returns), []
+    | _ -> retainedFor $"it takes {parameters.Length} arguments"
 
 // ---------------------------------------------------------------------------------------------
 // Literal-typed parameters that separate an overload set (§4.2).
@@ -1442,7 +1459,8 @@ and internal delegateRef
         let returns, returnFindings =
             typeRef ctx model self $"{owner}()" signature.ReturnTypeId
 
-        FsDelegate(parameters, returns), findings @ returnFindings
+        let reference, callbackFindings = callbackRef owner parameters returns
+        reference, findings @ returnFindings @ callbackFindings
 
 /// A union hoists its `null`/`undefined` members into `option` (D1). What remains resolves as
 /// a single member, a named literal union (classified by `classify-literal-unions`), or widens
@@ -1719,6 +1737,7 @@ let rec internal typeVarsOf (reference: FsTypeRef) : Set<string> =
     | FsTuple items
     | FsErasedUnion items -> union items
     | FsDelegate(arguments, returns) -> Set.union (union arguments) (typeVarsOf returns)
+    | FsFunc(argument, returns) -> Set.union (typeVarsOf argument) (typeVarsOf returns)
     | FsApp(_, arguments) -> union arguments
     | _ -> Set.empty
 

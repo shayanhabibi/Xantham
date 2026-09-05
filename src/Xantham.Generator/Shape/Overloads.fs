@@ -69,6 +69,7 @@ let dedupeOverloads: Pass<ShapeModel> =
                         | FsArray element -> FsArray(normalize visited element)
                         | FsDelegate(args, ret) ->
                             FsDelegate(args |> List.map (normalize visited), normalize visited ret)
+                        | FsFunc(argument, ret) -> FsFunc(normalize visited argument, normalize visited ret)
                         | other -> other
 
                     let signatureKey (parameters: FsParam list) =

@@ -433,7 +433,7 @@ let private workarounds () =
     // Wave four lane O: `Listener.notify` is carried into Create as a delegate parameter, so the
     // literal above is reached under the typechecker rather than through the unchecked cast.
     let viaCreate =
-        FableWorkaroundLab.Listener.Create("cr", System.Func<float, string>(fun count -> $"cr:{count}"))
+        FableWorkaroundLab.Listener.Create("cr", (fun count -> $"cr:{count}"))
 
     equal
         "a Create carrying a method is that same plain object, type-checked"
@@ -523,7 +523,7 @@ let private entrypointClasses () =
     equal "a global abstract class keeps its ParamObject Create" 9.0 anvil.mass
 
     let vise =
-        AmbientModuleLab.Vise.Create(2.0, 5.0, Func<_, _>(fun (p: AmbientModuleLab.Payload) -> p.label))
+        AmbientModuleLab.Vise.Create(2.0, 5.0, (fun (p: AmbientModuleLab.Payload) -> p.label))
 
     equal "and so does a class whose base this run declares" 2.0 vise.jaw
 
@@ -608,7 +608,7 @@ let private optionalHooks () =
     equal "and the base constructor's argument arrived" "seed" forwarder.seed
 
     let asData =
-        HookInterfaceLab.Station.IFetchHandler.Create(Func<_, _>(fun (s: HookInterfaceLab.Signal) -> s.label))
+        HookInterfaceLab.Station.IFetchHandler.Create(fun (s: HookInterfaceLab.Signal) -> s.label)
 
     equal
         "the hook interface's Create is the object literal a handler map is"
@@ -869,104 +869,148 @@ let private callbackFunctionForms () =
         "and throws at arity 3 for the same reason"
         ((attempt (fun () -> factory.makeThree 5.0 1.0 2.0 3.0)).StartsWith "threw:")
 
-/// Lane AK's three-way comparison. `callbackFunctionForms` above measures the curried spelling;
-/// this measures the delegate spelling the corpus emits today, against the same runtime and the
-/// *generated* golden rather than a hand-written mirror, so a change to the emission is measured
-/// here rather than asserted about.
-let private callbackDelegateForms () =
+/// The emission itself, position by position, on the generated golden rather than a hand-written
+/// mirror. Each callback below is either an F# function type or a delegate according to the rule
+/// `Shape.Spec.callbackRef` applies, and every claim reads the `length` of the function JavaScript
+/// received beside the result of calling it with all its arguments at once.
+let private callbackGoldenForms () =
     let attempt (f: unit -> string) =
         try
             f ()
         with e ->
             $"threw: {e.Message}"
 
+    // Parameter position. Arity 0 and 1 convert; arity 2 and 3 keep the delegate.
     equal
-        "a delegate of arity 0 crosses as a 0-argument function"
+        "a converted callback of arity 0 crosses as a 0-argument function"
         "0:none"
-        (CallbackFunctionLab.Exports.callNone (Func<string>(fun () -> "none")))
+        (CallbackFunctionLab.Exports.callNone (fun () -> "none"))
 
     equal
-        "a delegate of arity 1 crosses as a 1-argument function"
+        "a converted callback of arity 1 crosses as a 1-argument function"
         "1:got:1"
-        (CallbackFunctionLab.Exports.callOne (Func<float, string>(fun a -> $"got:{a}")))
+        (CallbackFunctionLab.Exports.callOne (fun a -> $"got:{a}"))
 
     equal
-        "a delegate of arity 2 crosses at its declared arity"
+        "a retained delegate of arity 2 crosses at its declared arity"
         "2:got:1:2"
         (CallbackFunctionLab.Exports.callTwo (Func<float, float, string>(fun a b -> $"got:{a}:{b}")))
 
     equal
-        "a delegate of arity 3 crosses at its declared arity"
+        "a retained delegate of arity 3 crosses at its declared arity"
         "3:got:1:2:3"
         (CallbackFunctionLab.Exports.callThree (Func<float, float, float, string>(fun a b c -> $"got:{a}:{b}:{c}")))
 
+    // The unit-returning arm, which rendered `Action` before the conversion.
     let mutable sawVoid = 0.0
 
     equal
-        "an Action of arity 1 keeps its arity"
+        "a converted unit-returning callback keeps its arity"
         1.0
-        (CallbackFunctionLab.Exports.callVoid (Action<float>(fun a -> sawVoid <- a)))
+        (CallbackFunctionLab.Exports.callVoid (fun a -> sawVoid <- a))
 
     equal "and the runtime's call reached it" 7.0 sawVoid
     let mutable sawVoidTwo = 0.0
 
     equal
-        "an Action of arity 2 keeps its arity"
+        "a retained Action of arity 2 keeps its arity"
         2.0
         (CallbackFunctionLab.Exports.callVoidTwo (Action<float, float>(fun a b -> sawVoidTwo <- a + b)))
 
     equal "and the runtime's call reached it with both arguments" 15.0 sawVoidTwo
 
     equal
-        "a named delegate abbreviation crosses at its declared arity"
+        "a named callback abbreviation of arity 2 keeps its delegate"
         "2:1.5|2"
         (CallbackFunctionLab.Exports.callNamed (Func<float, float, string>(fun value digits -> $"{value}|{digits}")))
 
+    // A ParamObject literal, mixing both spellings in one object.
     let built =
         CallbackFunctionLab.Handlers.Create(
             onTick = Func<float, float, string>(fun a b -> $"tick:{a}:{b}"),
-            onDone = Action<float>(fun _ -> ())
+            onDone = (fun _ -> ())
         )
 
-    equal "a delegate in a ParamObject literal crosses at its declared arity" "2:tick:1:2:1" (CallbackFunctionLab.Exports.fire built)
+    equal
+        "a ParamObject literal mixing a delegate and a converted optional crosses at both arities"
+        "2:tick:1:2:1"
+        (CallbackFunctionLab.Exports.fire built)
 
     let options =
         CallbackFunctionLab.Options.Create(
             label = "b",
             transform = Func<float, float, string>(fun a b -> $"t:{a}:{b}"),
-            finish = Action(fun () -> ())
+            finish = (fun () -> ())
         )
 
     equal
-        "a method-shaped ParamObject parameter crosses at its declared arity"
+        "a method-shaped ParamObject parameter crosses at its declared arity in both spellings"
         "b:2:t:1:2:0"
         (CallbackFunctionLab.Exports.build options)
 
+    // Read-back. A delegate arrives as the function JavaScript holds; a converted callback of
+    // arity 0 or 1 arrives as a wrapper whose length is that same arity.
     let fromJs = CallbackFunctionLab.Exports.handlers
-
-    equal
-        "a delegate read off an interface member reads back at the arity JavaScript holds"
-        2.0
-        (emitJsExpr fromJs.onTick "$0.length")
-
+    equal "a retained delegate read off an interface member keeps its arity" 2.0 (emitJsExpr fromJs.onTick "$0.length")
     equal "and invokes with all its arguments" "js:1:2" (fromJs.onTick.Invoke(1.0, 2.0))
+
+    match fromJs.onDone with
+    | None -> check "a converted optional member reads back present" false
+    | Some onDone ->
+        equal "a converted optional member reads back at arity 1" 1.0 (emitJsExpr onDone "$0.length")
+        onDone 3.0
+        check "and applies" true
+
     let factory = CallbackFunctionLab.Exports.factory
-
-    equal
-        "a delegate-typed property reads back at the arity JavaScript holds"
-        2.0
-        (emitJsExpr factory.pair "$0.length")
-
+    equal "a retained delegate property keeps its arity" 2.0 (emitJsExpr factory.pair "$0.length")
     equal "and invokes with all its arguments" "pair:1:2" (attempt (fun () -> factory.pair.Invoke(1.0, 2.0)))
-    equal "a delegate-typed member of arity 0 invokes" "ready" (attempt factory.ready.Invoke)
+    equal "a converted property of arity 0 reads back at arity 0" 0.0 (emitJsExpr factory.ready "$0.length")
+    equal "and applies" "ready" (attempt factory.ready)
+
+    // Member returns. This is where the curried spelling threw: a converted return is measured
+    // here at arity 0 and 1, and the delegate carries arity 2 and 3.
     let made = factory.make 5.0
-    equal "a delegate returned from a method arrives at its declared arity" 2.0 (emitJsExpr made "$0.length")
+    equal "a retained delegate returned from a method keeps its arity" 2.0 (emitJsExpr made "$0.length")
     equal "and invokes with all its arguments" "made:5:1:2" (attempt (fun () -> made.Invoke(1.0, 2.0)))
+    equal "a converted return of arity 1 applies" "one:5:1" (attempt (fun () -> factory.makeOne 5.0 1.0))
+    equal "a converted return of arity 0 applies" "none:5" (attempt (factory.makeNone 5.0))
 
     equal
-        "a delegate returned from a method invokes at arity 3"
+        "a retained delegate returned from a method invokes at arity 3"
         "three:5:1:2:3"
         (attempt (fun () -> (factory.makeThree 5.0).Invoke(1.0, 2.0, 3.0)))
+
+    // Nesting. A callback whose own return is a callback keeps whichever level the rule refuses,
+    // and the two levels need not agree.
+    equal
+        "a converted callback over a retained delegate crosses at both declared arities"
+        "1:2:made:5:1:2"
+        (attempt (fun () ->
+            CallbackFunctionLab.Exports.callNesting (fun seed ->
+                Func<float, float, string>(fun a b -> $"made:{seed}:{a}:{b}"))))
+
+    equal
+        "a retained delegate over a converted callback crosses at both declared arities"
+        "1:1:one:5:1"
+        (attempt (fun () ->
+            CallbackFunctionLab.Exports.callNestingOne (
+                Func<float, float -> string>(fun seed -> (fun a -> $"one:{seed}:{a}"))
+            )))
+
+    let driven =
+        CallbackFunctionLab.Factory.Create(
+            make = (fun seed -> Func<float, float, string>(fun a b -> $"made:{seed}:{a}:{b}")),
+            makeOne = Func<float, float -> string>(fun seed -> (fun a -> $"one:{seed}:{a}")),
+            makeNone = Func<float, unit -> string>(fun seed -> (fun () -> $"none:{seed}")),
+            makeThree = (fun seed -> Func<float, float, float, string>(fun a b c -> $"three:{seed}:{a}:{b}:{c}")),
+            ready = (fun () -> "ready"),
+            pair = Func<float, float, string>(fun a b -> $"pair:{a}:{b}")
+        )
+
+    equal
+        "a Factory built in F# crosses outward at every declared arity"
+        "1:2:made:5:1:2:0:ready:2:pair:1:2"
+        (attempt (fun () -> CallbackFunctionLab.Exports.drive driven))
 
 /// Lane AK. The tupled function type, in the same positions, against the same runtime. Fable
 /// compiles an F# tuple to a JavaScript array, so each claim below reads the `length` of the
@@ -1044,19 +1088,17 @@ let private callbackTupledForms () =
 
     let factory = Probes.CallbackTuples.factory
 
-    equal
-        "a tupled function-typed property keeps the arity JavaScript holds"
-        2.0
-        (emitJsExpr factory.pair "$0.length")
+    equal "a tupled function-typed property keeps the arity JavaScript holds" 2.0 (emitJsExpr factory.pair "$0.length")
 
-    equal "and applies as one array argument the same way" "pair:1,2:undefined" (attempt (fun () -> factory.pair (1.0, 2.0)))
+    equal
+        "and applies as one array argument the same way"
+        "pair:1,2:undefined"
+        (attempt (fun () -> factory.pair (1.0, 2.0)))
+
     equal "a tupled function-typed member of arity 0 applies" "ready" (attempt factory.ready)
     let made = factory.make 5.0
 
-    equal
-        "a tupled callback returned from a method keeps the arity JavaScript holds"
-        2.0
-        (emitJsExpr made "$0.length")
+    equal "a tupled callback returned from a method keeps the arity JavaScript holds" 2.0 (emitJsExpr made "$0.length")
 
     equal "and applies as one array argument" "made:5:1,2:undefined" (attempt (fun () -> made (1.0, 2.0)))
 
@@ -1078,7 +1120,8 @@ let private callbackMixedForms () =
         "a unary function returning a delegate crosses at arity 1 over a 2-argument delegate"
         "1:2:made:5:1:2"
         (attempt (fun () ->
-            Probes.CallbackMixed.callNesting (fun seed -> System.Func<float, float, string>(fun a b -> $"made:{seed}:{a}:{b}"))))
+            Probes.CallbackMixed.callNesting (fun seed ->
+                System.Func<float, float, string>(fun a b -> $"made:{seed}:{a}:{b}"))))
 
     // Measured, not wanted. Where a function type's own return is a function type, Fable flattens
     // the two levels into one JavaScript function of the summed arity, so the runtime's first
@@ -1088,12 +1131,12 @@ let private callbackMixedForms () =
     check
         "a function type returning a curried function flattens into one JavaScript function"
         ((attempt (fun () -> Probes.CallbackMixed.callNestingCurried (fun seed a b -> $"made:{seed}:{a}:{b}")))
-            .StartsWith "threw:")
+            .StartsWith
+            "threw:")
 
     check
         "and flattens with both levels unary too"
-        ((attempt (fun () -> Probes.CallbackMixed.callNestingOne (fun seed a -> $"one:{seed}:{a}")))
-            .StartsWith "threw:")
+        ((attempt (fun () -> Probes.CallbackMixed.callNestingOne (fun seed a -> $"one:{seed}:{a}"))).StartsWith "threw:")
 
     let mixed =
         Probes.MixedFactory.Create(
@@ -1111,14 +1154,17 @@ let private callbackMixedForms () =
         "a delegate returning a unary function crosses at arity 1 twice"
         "1:1:one:5:1"
         (attempt (fun () ->
-            Probes.CallbackMixed.callNestingOneMixed (System.Func<float, float -> string>(fun seed -> (fun a -> $"one:{seed}:{a}")))))
+            Probes.CallbackMixed.callNestingOneMixed (
+                System.Func<float, float -> string>(fun seed -> (fun a -> $"one:{seed}:{a}"))
+            )))
 
     equal
         "a delegate returning a unary delegate crosses at arity 1 twice"
         "1:1:one:5:1"
         (attempt (fun () ->
             Probes.CallbackMixed.callNestingOneDelegate (
-                System.Func<float, System.Func<float, string>>(fun seed -> System.Func<float, string>(fun a -> $"one:{seed}:{a}"))
+                System.Func<float, System.Func<float, string>>(fun seed ->
+                    System.Func<float, string>(fun a -> $"one:{seed}:{a}"))
             )))
 
     equal
@@ -1159,7 +1205,7 @@ let main _ =
     workarounds ()
     probes ()
     callbackFunctionForms ()
-    callbackDelegateForms ()
+    callbackGoldenForms ()
     callbackTupledForms ()
     callbackMixedForms ()
 

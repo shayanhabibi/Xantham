@@ -21,7 +21,7 @@ type Counter =
     abstract value: float
     abstract bump: by: float -> Counter
     [<ParamObject; Emit("$0")>]
-    static member Create (value: float, bump: Func<float, Counter>) : Counter = jsNative
+    static member Create (value: float, bump: (float -> Counter)) : Counter = jsNative
     /// <summary>
     /// A const-like static: <c>readonly</c>, so F#'s get-only static is exact.
     /// </summary>
@@ -66,7 +66,7 @@ type Doubling =
     abstract value: float
     abstract bump: by: float -> Counter
     [<ParamObject; Emit("$0")>]
-    static member Create (double: Func<Doubling>, value: float, bump: Func<float, Counter>) : Doubling = jsNative
+    static member Create (double: (unit -> Doubling), value: float, bump: (float -> Counter)) : Doubling = jsNative
     /// <summary>
     /// A const-like static: <c>readonly</c>, so F#'s get-only static is exact.
     /// </summary>
@@ -134,7 +134,7 @@ type Clash =
     /// </summary>
     abstract url: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (json: Func<float>, status: float, text: Func<string>, url: string) : Clash = jsNative
+    static member Create (json: (unit -> float), status: float, text: (unit -> string), url: string) : Clash = jsNative
     [<Import("Clash.json", "statics-lab")>]
     static member json (body: float) : Clash = jsNative
 

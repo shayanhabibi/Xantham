@@ -26,13 +26,13 @@
     },
     {
       "pass": "shape-callbacks",
-      "total": 2,
-      "ergonomic": 2
+      "total": 3,
+      "ergonomic": 3
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 13,
-      "ergonomic": 11,
+      "total": 14,
+      "ergonomic": 12,
       "widened": 2
     },
     {
@@ -53,8 +53,8 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 13,
-      "ergonomic": 13
+      "total": 14,
+      "ergonomic": 14
     }
   ]
 }

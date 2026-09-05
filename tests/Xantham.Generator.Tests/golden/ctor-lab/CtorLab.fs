@@ -21,7 +21,7 @@ type Widget =
     abstract label: string
     abstract resize: by: float -> Widget
     [<ParamObject; Emit("$0")>]
-    static member Create (label: string, resize: Func<float, Widget>) : Widget = jsNative
+    static member Create (label: string, resize: (float -> Widget)) : Widget = jsNative
 
 type WidgetConstructor =
     /// <summary>
@@ -81,7 +81,7 @@ type Parcel<'T> =
 type Solo =
     abstract tag: unit -> string
     [<ParamObject; Emit("$0")>]
-    static member Create (tag: Func<string>) : Solo = jsNative
+    static member Create (tag: (unit -> string)) : Solo = jsNative
 
 /// <summary>
 /// A negative: <c>typeof</c> over a plain value is that value's type, not a constructor object.

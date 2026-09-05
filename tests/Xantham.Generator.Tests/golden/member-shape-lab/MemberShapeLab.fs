@@ -21,23 +21,23 @@ type Deferred =
     /// <remarks>@param onfulfilled The callback to execute when the Promise is resolved.</remarks>
     /// <remarks>@param onrejected The callback to execute when the Promise is rejected.</remarks>
     /// <remarks>@returns A Promise for the completion of which ever callback is executed.</remarks>
-    abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: Func<string, U2<'TResult1, JS.Promise<'TResult1>>> * ?onrejected: Func<obj, U2<'TResult2, JS.Promise<'TResult2>>> -> JS.Promise<U2<'TResult1, 'TResult2>>
+    abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (string -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
     /// <summary>
     /// Attaches a callback for only the rejection of the Promise.
     /// </summary>
     /// <remarks>@param onrejected The callback to execute when the Promise is rejected.</remarks>
     /// <remarks>@returns A Promise for the completion of the callback.</remarks>
-    abstract catch<'TResult>: ?onrejected: Func<obj, U2<'TResult, JS.Promise<'TResult>>> -> JS.Promise<U2<string, 'TResult>>
+    abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<string, 'TResult>>
     /// <summary>
     /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
     /// resolved value cannot be modified from the callback.
     /// </summary>
     /// <remarks>@param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).</remarks>
     /// <remarks>@returns A Promise for the completion of the callback.</remarks>
-    abstract ``finally``: ?onfinally: Action -> JS.Promise<string>
+    abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<string>
     abstract tag: string
     [<ParamObject; Emit("$0")>]
-    static member Create (``then``: Func<Func<string, U2<'TResult1, JS.Promise<'TResult1>>> option, Func<obj, U2<'TResult2, JS.Promise<'TResult2>>> option, JS.Promise<U2<'TResult1, 'TResult2>>>, catch: Func<Func<obj, U2<'TResult, JS.Promise<'TResult>>> option, JS.Promise<U2<string, 'TResult>>>, ``finally``: Func<Action option, JS.Promise<string>>, tag: string) : Deferred = jsNative
+    static member Create (``then``: Func<(string -> U2<'TResult1, JS.Promise<'TResult1>>) option, (obj -> U2<'TResult2, JS.Promise<'TResult2>>) option, JS.Promise<U2<'TResult1, 'TResult2>>>, catch: ((obj -> U2<'TResult, JS.Promise<'TResult>>) option -> JS.Promise<U2<string, 'TResult>>), ``finally``: ((unit -> unit) option -> JS.Promise<string>), tag: string) : Deferred = jsNative
 
 /// <summary>
 /// The same reach by heritage rather than intersection.
@@ -64,7 +64,7 @@ type Recorder =
     /// </summary>
     abstract removeEventListener: ``type``: string * ?callback: obj * ?options: obj -> unit
     [<ParamObject; Emit("$0")>]
-    static member Create (channel: string, addEventListener: Action<string, obj option, U2<bool, Browser.Types.AddEventListenerOptions> option>, dispatchEvent: Func<Browser.Types.Event, bool>, removeEventListener: Action<string, obj option, obj option>) : Recorder = jsNative
+    static member Create (channel: string, addEventListener: Action<string, obj option, U2<bool, Browser.Types.AddEventListenerOptions> option>, dispatchEvent: (Browser.Types.Event -> bool), removeEventListener: Action<string, obj option, obj option>) : Recorder = jsNative
 
 /// <summary>
 /// A lib declaration at a reference position: a shipped package binds it, and the binding stands

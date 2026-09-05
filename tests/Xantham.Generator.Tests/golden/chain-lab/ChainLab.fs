@@ -11,17 +11,17 @@ open Xantham.Fable.Core
 
 [<Interface>]
 type NodeExtensions<'TNodeType> =
-    abstract toVar: Func<string option, VarNode<'TNodeType, NodeExtensions<'TNodeType>>> with get, set
+    abstract toVar: (string option -> VarNode<'TNodeType, NodeExtensions<'TNodeType>>) with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (toVar: Func<string option, VarNode<'TNodeType, NodeExtensions<'TNodeType>>>) : NodeExtensions<'TNodeType> = jsNative
+    static member Create (toVar: (string option -> VarNode<'TNodeType, NodeExtensions<'TNodeType>>)) : NodeExtensions<'TNodeType> = jsNative
 
 [<Interface>]
 type Node<'TNodeType> =
     inherit NodeExtensions<'TNodeType>
     abstract isNode: bool
-    abstract toVar: Func<string option, VarNode<'TNodeType, Node<'TNodeType>>> with get, set
+    abstract toVar: (string option -> VarNode<'TNodeType, Node<'TNodeType>>) with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (isNode: bool, toVar: Func<string option, VarNode<'TNodeType, Node<'TNodeType>>>) : Node<'TNodeType> = jsNative
+    static member Create (isNode: bool, toVar: (string option -> VarNode<'TNodeType, Node<'TNodeType>>)) : Node<'TNodeType> = jsNative
 
 [<Interface>]
 type VarNodeInterface<'TNode> =
@@ -35,18 +35,18 @@ type VarNode<'TNodeType, 'TNode> =
     inherit NodeExtensions<'TNodeType>
     inherit VarNodeInterface<'TNode>
     abstract isNode: bool
-    abstract toVar: Func<string option, VarNode<'TNodeType, VarNode<'TNodeType, 'TNode>>> with get, set
+    abstract toVar: (string option -> VarNode<'TNodeType, VarNode<'TNodeType, 'TNode>>) with get, set
     abstract node: 'TNode with get, set
     abstract isVarNode: bool
     [<ParamObject; Emit("$0")>]
-    static member Create (isNode: bool, toVar: Func<string option, VarNode<'TNodeType, VarNode<'TNodeType, 'TNode>>>, node: 'TNode, isVarNode: bool) : VarNode<'TNodeType, 'TNode> = jsNative
+    static member Create (isNode: bool, toVar: (string option -> VarNode<'TNodeType, VarNode<'TNodeType, 'TNode>>), node: 'TNode, isVarNode: bool) : VarNode<'TNodeType, 'TNode> = jsNative
 
 [<Interface>]
 type Plain<'TValue> =
     abstract wrap: value: 'TValue -> VarNodeInterface<'TValue>
     abstract self: unit -> Plain<'TValue>
     [<ParamObject; Emit("$0")>]
-    static member Create (wrap: Func<'TValue, VarNodeInterface<'TValue>>, self: Func<Plain<'TValue>>) : Plain<'TValue> = jsNative
+    static member Create (wrap: ('TValue -> VarNodeInterface<'TValue>), self: (unit -> Plain<'TValue>)) : Plain<'TValue> = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

@@ -39,7 +39,7 @@ type Caster =
     abstract intersectObject<'TIntersected when 'TIntersected :> Object3D<EventMap>> : ``object``: Object3D<EventMap> -> Intersection<'TIntersected>[]
     abstract intersectPair<'TFirst, 'TSecond when 'TFirst :> Object3D<EventMap> and 'TSecond :> Object3D<EventMap>> : first: 'TFirst * second: 'TSecond -> Intersection<'TFirst>[]
     [<ParamObject; Emit("$0")>]
-    static member Create (intersectObject: Func<Object3D<EventMap>, Intersection<'TIntersected>[]>, intersectPair: Func<'TFirst, 'TSecond, Intersection<'TFirst>[]>) : Caster = jsNative
+    static member Create (intersectObject: (Object3D<EventMap> -> Intersection<'TIntersected>[]), intersectPair: Func<'TFirst, 'TSecond, Intersection<'TFirst>[]>) : Caster = jsNative
 
 [<Interface>]
 type Plain =
@@ -47,7 +47,7 @@ type Plain =
     abstract echo<'T>: value: 'T -> 'T
     abstract on<'T when 'T :> EventMap>: handler: 'T -> unit
     [<ParamObject; Emit("$0")>]
-    static member Create (ping: Action<float>, echo: Func<'T, 'T>, on: Action<'T>) : Plain = jsNative
+    static member Create (ping: (float -> unit), echo: ('T -> 'T), on: ('T -> unit)) : Plain = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

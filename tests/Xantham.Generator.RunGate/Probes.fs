@@ -213,8 +213,11 @@ type MixedFactory =
 
     [<ParamObject; Emit("$0")>]
     static member Create
-        (make: float -> System.Func<float, float, string>, ready: unit -> string, pair: System.Func<float, float, string>)
-        : MixedFactory =
+        (
+            make: float -> System.Func<float, float, string>,
+            ready: unit -> string,
+            pair: System.Func<float, float, string>
+        ) : MixedFactory =
         jsNative
 
 [<Erase>]

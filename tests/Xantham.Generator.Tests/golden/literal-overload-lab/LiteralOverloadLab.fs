@@ -58,7 +58,7 @@ module Store =
 type Solo =
     abstract tag: name: string -> unit
     [<ParamObject; Emit("$0")>]
-    static member Create (tag: Action<string>) : Solo = jsNative
+    static member Create (tag: (string -> unit)) : Solo = jsNative
 
 /// <summary>
 /// Negative: a property typed by a literal the overload set above also carries. The checker

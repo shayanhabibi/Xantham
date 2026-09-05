@@ -11,9 +11,9 @@ open Xantham.Fable.Core
 
 [<Interface>]
 type CondExtensions<'TNodeType> =
-    abstract toVar: Func<string option, obj> with get, set
+    abstract toVar: (string option -> obj) with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (toVar: Func<string option, obj>) : CondExtensions<'TNodeType> = jsNative
+    static member Create (toVar: (string option -> obj)) : CondExtensions<'TNodeType> = jsNative
 
 [<Erase>]
 type CondNode<'TNodeType> = private CondNode__ of obj
@@ -30,17 +30,17 @@ type CondVarNode<'TNodeType, 'TNode> = private CondVarNode__ of obj
 
 [<Interface>]
 type DirectExtensions<'TNodeType> =
-    abstract toVar: Func<string option, DirectVarNode<'TNodeType, DirectExtensions<'TNodeType>>> with get, set
+    abstract toVar: (string option -> DirectVarNode<'TNodeType, DirectExtensions<'TNodeType>>) with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (toVar: Func<string option, DirectVarNode<'TNodeType, DirectExtensions<'TNodeType>>>) : DirectExtensions<'TNodeType> = jsNative
+    static member Create (toVar: (string option -> DirectVarNode<'TNodeType, DirectExtensions<'TNodeType>>)) : DirectExtensions<'TNodeType> = jsNative
 
 [<Interface>]
 type DirectNode<'TNodeType> =
     inherit DirectExtensions<'TNodeType>
     abstract isNode: bool
-    abstract toVar: Func<string option, DirectVarNode<'TNodeType, DirectNode<'TNodeType>>> with get, set
+    abstract toVar: (string option -> DirectVarNode<'TNodeType, DirectNode<'TNodeType>>) with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (isNode: bool, toVar: Func<string option, DirectVarNode<'TNodeType, DirectNode<'TNodeType>>>) : DirectNode<'TNodeType> = jsNative
+    static member Create (isNode: bool, toVar: (string option -> DirectVarNode<'TNodeType, DirectNode<'TNodeType>>)) : DirectNode<'TNodeType> = jsNative
 
 [<Interface>]
 type DirectVarNodeInterface<'TNode> =
@@ -54,11 +54,11 @@ type DirectVarNode<'TNodeType, 'TNode> =
     inherit DirectExtensions<'TNodeType>
     inherit DirectVarNodeInterface<'TNode>
     abstract isNode: bool
-    abstract toVar: Func<string option, DirectVarNode<'TNodeType, DirectVarNode<'TNodeType, 'TNode>>> with get, set
+    abstract toVar: (string option -> DirectVarNode<'TNodeType, DirectVarNode<'TNodeType, 'TNode>>) with get, set
     abstract node: 'TNode with get, set
     abstract isVarNode: bool
     [<ParamObject; Emit("$0")>]
-    static member Create (isNode: bool, toVar: Func<string option, DirectVarNode<'TNodeType, DirectVarNode<'TNodeType, 'TNode>>>, node: 'TNode, isVarNode: bool) : DirectVarNode<'TNodeType, 'TNode> = jsNative
+    static member Create (isNode: bool, toVar: (string option -> DirectVarNode<'TNodeType, DirectVarNode<'TNodeType, 'TNode>>), node: 'TNode, isVarNode: bool) : DirectVarNode<'TNodeType, 'TNode> = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
