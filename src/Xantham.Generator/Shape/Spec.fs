@@ -1256,7 +1256,15 @@ and internal unionRef
             :: findings
 
     match remaining with
-    | [] -> FsUnit, [ Finding.make owner TypeReference.OnlyNullUndefinedToUnit ]
+    | [] ->
+        let absence = absenceAcross model hoisted
+
+        FsUnit,
+        [
+            Finding.make
+                owner
+                (TypeReference.OnlyNullUndefinedToUnit(absence.FromNull, absence.FromUndefined, absence.FromVoid))
+        ]
     | [ single ] ->
         let inner, findings = typeRef ctx model self owner single
         wrap inner findings

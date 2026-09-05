@@ -4,15 +4,16 @@
   "module": "AbsenceAlphabetLab",
   "counts": {
     "exact": 1,
-    "ergonomic": 7,
-    "widened": 0,
+    "ergonomic": 6,
+    "widened": 1,
     "escape": 0
   },
   "passes": [
     {
       "pass": "SI - shape-interfaces",
-      "total": 7,
-      "ergonomic": 7
+      "total": 10,
+      "ergonomic": 7,
+      "widened": 3
     },
     {
       "pass": "SE - shape-exports",
@@ -23,6 +24,11 @@
       "pass": "SP - synthesize-paramobjects",
       "total": 4,
       "ergonomic": 4
+    },
+    {
+      "pass": "RA - repair-arity",
+      "total": 2,
+      "ergonomic": 2
     }
   ]
 }

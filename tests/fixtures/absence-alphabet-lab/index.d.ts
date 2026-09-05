@@ -24,6 +24,16 @@ export interface Absence {
     unionBoth: string | null | undefined;
     /** A `void`-returning method. `void` sits in a return position, not in a union. */
     returnsVoid(): void;
+
+    /** `x: null`. A bare absence rather than a union, so it widens to `obj` and TR033
+        stays silent. The negative for the two members below. */
+    onlyNull: null;
+
+    /** `x: null | undefined`. Two absences, and nothing remains beside them. */
+    onlyNullUndefined: null | undefined;
+
+    /** `x: void | null`. `void` in a union, with nothing remaining. */
+    onlyVoidNull: void | null;
 }
 
 // ---------------------------------------------------------------------------

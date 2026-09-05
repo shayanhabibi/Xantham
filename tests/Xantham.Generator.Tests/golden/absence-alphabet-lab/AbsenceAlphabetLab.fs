@@ -35,8 +35,21 @@ type Absence =
     /// A <c>void</c>-returning method. <c>void</c> sits in a return position, not in a union.
     /// </summary>
     abstract returnsVoid: unit -> unit
+    /// <summary>
+    /// <c>x: null</c>. A bare absence rather than a union, so it widens to <c>obj</c> and TR033
+    /// stays silent. The negative for the two members below.
+    /// </summary>
+    abstract onlyNull: obj with get, set
+    /// <summary>
+    /// <c>x: null | undefined</c>. Two absences, and nothing remains beside them.
+    /// </summary>
+    abstract onlyNullUndefined: unit
+    /// <summary>
+    /// <c>x: void | null</c>. <c>void</c> in a union, with nothing remaining.
+    /// </summary>
+    abstract onlyVoidNull: unit
     [<ParamObject; Emit("$0")>]
-    static member Create (returnsVoid: Action, ?optionalOnly: string, ?unionUndefined: string, ?unionNull: string, ?optionalNull: string, ?unionBoth: string) : Absence = jsNative
+    static member Create (returnsVoid: Action, onlyNull: obj, ?optionalOnly: string, ?unionUndefined: string, ?unionNull: string, ?optionalNull: string, ?unionBoth: string) : Absence = jsNative
 
 [<Interface>]
 type Present =

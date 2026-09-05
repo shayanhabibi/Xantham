@@ -135,6 +135,8 @@ module FindingCodes =
             "TR.AnonymousInMappedGroup", "TR052"
             "TR.MappedNameArityMismatch", "TR053"
             "TR.ReferencedArityUnconfirmed", "TR054"
+            "TR.CallbackKeptAsDelegate", "TR055"
+            "TR.StringLiteralKeptForOverload", "TR056"
             "TP.UnnamedTypeParameter", "TP001"
             "TP.ConstraintDropped", "TP002"
             "TP.GenericFunctionHoisted", "TP003"
@@ -149,6 +151,7 @@ module FindingCodes =
             "MB.OptionalMemberAsOption", "MB003"
             "MB.IndexSignatureAsIndexer", "MB004"
             "MB.OptionalHookAsInterface", "MB005"
+            "MB.OptionalParameterFromUnion", "MB006"
             "HG.AmbientModuleDropped", "HG001"
             "HG.UnwritableGlobalDropped", "HG002"
             "HG.NothingHarvested", "HG003"
@@ -165,6 +168,7 @@ module FindingCodes =
             "SY.HoistArgumentsNotRecovered", "SY002"
             "SY.IntersectionOperandNotHoisted", "SY003"
             "SY.NameNestedUnderOwner", "SY004"
+            "SY.NameSanitisedForIdentifier", "SY005"
             "SI.HybridLosesCallSignatures", "SI001"
             "SI.BaseMembersFlattened", "SI002"
             "SI.IntersectionFlattened", "SI003"
@@ -191,6 +195,7 @@ module FindingCodes =
             "SP.MethodMemberAsCreateParameter", "SP002"
             "SP.CreateNotSynthesized", "SP003"
             "DO.OverloadDropped", "DO001"
+            "DO.OverloadsDistinguishedByLiteral", "DO002"
             "RA.GenericAliasDropped", "RA001"
             "RA.ReferenceToDroppedAlias", "RA002"
             "RA.GenericWithoutArguments", "RA003"
@@ -388,7 +393,7 @@ type TypeReference =
     | [<Widened>] CallableWithoutSignatures
     | [<Widened>] CallbackOverloadsFromFirst of overloads: int
     | [<Ergonomic>] NullableHoistedToOption of fromNull: bool * fromUndefined: bool * fromVoid: bool
-    | [<Widened>] OnlyNullUndefinedToUnit
+    | [<Widened>] OnlyNullUndefinedToUnit of fromNull: bool * fromUndefined: bool * fromVoid: bool
     | [<Widened>] EmptyUnionToObj
     | [<Widened>] UnionWithObjArm
     | [<Widened>] UnionTooWide of arms: int * cap: int
@@ -435,6 +440,12 @@ type TypeReference =
     /// Wave five, lane U. A reference into a `reference` group applies type arguments, and the
     /// group's declaration is resolved by identity only.
     | [<Escape>] ReferencedArityUnconfirmed of name: string * given: int
+    /// Wave seven, lane AE. The callback retains its delegate form; a curried F# function is
+    /// unavailable at this position.
+    | [<Ergonomic>] CallbackKeptAsDelegate of reason: string
+    /// Wave seven, lane AF. A string-literal parameter type retains its literal, so the overloads
+    /// it separates stay distinct.
+    | [<Exact>] StringLiteralKeptForOverload of literal: string
 
     interface IFindingKind with
         member this.Message =
@@ -490,7 +501,19 @@ type TypeReference =
                     |> String.concat "/"
 
                 $"{spelled} union members hoisted to option"
-            | OnlyNullUndefinedToUnit -> "union of only null/undefined members maps to unit"
+            | OnlyNullUndefinedToUnit(fromNull, fromUndefined, fromVoid) ->
+                let spelled =
+                    [
+                        if fromNull then
+                            "null"
+                        if fromUndefined then
+                            "undefined"
+                        if fromVoid then
+                            "void"
+                    ]
+                    |> String.concat "/"
+
+                $"union of only {spelled} members maps to unit"
             | EmptyUnionToObj -> "empty union widened to obj"
             | UnionWithObjArm -> "union with an obj arm widened to obj (an erased union over obj is no safer)"
             | UnionTooWide(arms, cap) ->
@@ -527,6 +550,9 @@ type TypeReference =
                 $"{name} is applied to {given} type arguments that its mapped destination does not take; widened to obj"
             | ReferencedArityUnconfirmed(name, given) ->
                 $"{name} is referenced with {given} type arguments against a group resolved by identity only; the arity is unverified"
+            | CallbackKeptAsDelegate reason -> $"callback kept as a delegate: {reason}"
+            | StringLiteralKeptForOverload literal ->
+                $"string literal {literal} kept as a literal type; it separates an overload"
 
 /// Type parameter binding: `Shape.typeParamsOf`, `aliasTypeParams`, key variables and erasure.
 [<Prefix "TP">]
@@ -580,6 +606,9 @@ type Members =
     | [<Ergonomic>] OptionalMemberAsOption
     | [<Ergonomic>] IndexSignatureAsIndexer
     | [<Ergonomic>] OptionalHookAsInterface of asInterface: string
+    /// Wave seven, lane AG. The parameter admits `undefined` through its declared type rather
+    /// than through a `?` token.
+    | [<Ergonomic>] OptionalParameterFromUnion
 
     interface IFindingKind with
         member this.Message =
@@ -590,6 +619,7 @@ type Members =
             | IndexSignatureAsIndexer -> "index signature reads as an EmitIndexer Item member (§4.10)"
             | OptionalHookAsInterface asInterface ->
                 $"optional method emitted as the opt-in interface {asInterface} a subclass implements"
+            | OptionalParameterFromUnion -> "parameter admits undefined through its type; reads as option"
 
 // -------------------------------------------------------------------------------------------------
 // Per-pass unions, in pipeline order. Append-only.
@@ -684,6 +714,9 @@ type SynthesizeAnonymous =
     /// named, so the reference carries the named operands and widens the rest.
     | [<Widened>] IntersectionOperandNotHoisted of name: string
     | [<Exact>] NameNestedUnderOwner of nestedAs: string
+    /// Wave seven, lane AI. The synthesized name carries characters an F# declaration name
+    /// admits; the source key spells them differently.
+    | [<Ergonomic>] NameSanitisedForIdentifier of key: string * sanitised: string
 
     interface IFindingKind with
         member this.Message =
@@ -694,6 +727,8 @@ type SynthesizeAnonymous =
             | IntersectionOperandNotHoisted name ->
                 $"{name} intersects an operand no declaration names; that operand's members are dropped"
             | NameNestedUnderOwner nestedAs -> $"anonymous shape named {nestedAs} under the declaration that owns it"
+            | NameSanitisedForIdentifier(key, sanitised) ->
+                $"member key {key} declared as {sanitised}; the key spells characters a declaration name refuses"
 
 /// `shape-interfaces`.
 [<Prefix("SI", "shape-interfaces")>]
@@ -849,11 +884,16 @@ type SynthesizeParamObjects =
 [<Prefix("DO", "dedupe-overloads")>]
 type DedupeOverloads =
     | [<Widened>] OverloadDropped
+    /// Wave seven, lane AF. The overload survives deduplication; a literal-typed parameter
+    /// separates it from its siblings.
+    | [<Exact>] OverloadsDistinguishedByLiteral of parameter: string
 
     interface IFindingKind with
         member this.Message =
             match this with
             | OverloadDropped -> "overload dropped: identical to an earlier one after widening"
+            | OverloadsDistinguishedByLiteral parameter ->
+                $"overload kept; parameter {parameter} is literal-typed and separates it"
 
 /// `repair-arity`.
 [<Prefix("RA", "repair-arity")>]
