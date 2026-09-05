@@ -12,7 +12,7 @@
     {
       "pass": "SY - synthesize-anonymous",
       "total": 1,
-      "ergonomic": 1
+      "exact": 1
     },
     {
       "pass": "SP - synthesize-paramobjects",

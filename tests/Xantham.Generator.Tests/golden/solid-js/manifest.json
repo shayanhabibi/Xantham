@@ -3,8 +3,8 @@
   "package": "solid-js",
   "module": "SolidJs",
   "counts": {
-    "exact": 15,
-    "ergonomic": 68,
+    "exact": 19,
+    "ergonomic": 64,
     "widened": 71,
     "escape": 19
   },
@@ -17,7 +17,7 @@
     {
       "pass": "SY - synthesize-anonymous",
       "total": 54,
-      "ergonomic": 54
+      "exact": 54
     },
     {
       "pass": "DT - detect-tagged-unions",

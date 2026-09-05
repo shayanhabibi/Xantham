@@ -683,7 +683,7 @@ type SynthesizeAnonymous =
     /// Wave three, lane J. One operand of an intersection resists hoisting while the others are
     /// named, so the reference carries the named operands and widens the rest.
     | [<Widened>] IntersectionOperandNotHoisted of name: string
-    | [<Ergonomic>] NameNestedUnderOwner of nestedAs: string
+    | [<Exact>] NameNestedUnderOwner of nestedAs: string
 
     interface IFindingKind with
         member this.Message =

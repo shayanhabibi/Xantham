@@ -128,7 +128,7 @@ let findingsTests =
                     "SY.InstantiationNamedOnce SY001 exact"
                     "SY.HoistArgumentsNotRecovered SY002 widened"
                     "SY.IntersectionOperandNotHoisted SY003 widened"
-                    "SY.NameNestedUnderOwner SY004 ergonomic"
+                    "SY.NameNestedUnderOwner SY004 exact"
                     "SI.HybridLosesCallSignatures SI001 widened"
                     "SI.BaseMembersFlattened SI002 ergonomic"
                     "SI.IntersectionFlattened SI003 ergonomic"

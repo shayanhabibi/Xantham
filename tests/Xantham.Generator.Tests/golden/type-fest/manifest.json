@@ -3,8 +3,8 @@
   "package": "type-fest",
   "module": "TypeFest",
   "counts": {
-    "exact": 5,
-    "ergonomic": 91,
+    "exact": 25,
+    "ergonomic": 71,
     "widened": 204,
     "escape": 2
   },
@@ -22,7 +22,7 @@
     {
       "pass": "SY - synthesize-anonymous",
       "total": 50,
-      "ergonomic": 50
+      "exact": 50
     },
     {
       "pass": "SI - shape-interfaces",

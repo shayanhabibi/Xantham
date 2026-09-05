@@ -3,8 +3,8 @@
   "package": "nested-name-lab",
   "module": "NestedNameLab",
   "counts": {
-    "exact": 3,
-    "ergonomic": 14,
+    "exact": 4,
+    "ergonomic": 13,
     "widened": 0,
     "escape": 0
   },
@@ -12,7 +12,7 @@
     {
       "pass": "SY - synthesize-anonymous",
       "total": 9,
-      "ergonomic": 9
+      "exact": 9
     },
     {
       "pass": "SP - synthesize-paramobjects",

@@ -12,7 +12,7 @@
     {
       "pass": "SY - synthesize-anonymous",
       "total": 3,
-      "ergonomic": 3
+      "exact": 3
     },
     {
       "pass": "SI - shape-interfaces",

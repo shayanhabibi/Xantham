@@ -3,8 +3,8 @@
   "package": "@cloudflare/workers-types",
   "module": "Cloudflare.WorkersTypes",
   "counts": {
-    "exact": 137,
-    "ergonomic": 1171,
+    "exact": 234,
+    "ergonomic": 1074,
     "widened": 381,
     "escape": 110
   },
@@ -23,8 +23,7 @@
     {
       "pass": "SY - synthesize-anonymous",
       "total": 560,
-      "exact": 9,
-      "ergonomic": 550,
+      "exact": 559,
       "widened": 1
     },
     {
