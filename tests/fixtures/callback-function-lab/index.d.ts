@@ -122,3 +122,48 @@ export declare function callUnionObject(listener: ((a: number) => string) | List
 
 /** The same union built in JavaScript, for reading the callback arm back into F#. */
 export declare const objectUnion: ((a: number) => string) | ListenerObject;
+
+/**
+ * A union-typed member one level deeper: behind an array, matching
+ * `U2<ScopeConstructorCallback, (Scope -> Tickable)>[]` on `animejs`'s `Scope`.
+ */
+export interface ArrayUnionHandlers {
+    steps: (((a: number) => string) | string)[];
+}
+
+/** Reports the arity of each element of the array member built in F#. */
+export declare function fireArrayUnion(handlers: ArrayUnionHandlers): string;
+
+/** The same array member built in JavaScript, for reading its callback arm back into F#. */
+export declare const arrayUnionHandlers: ArrayUnionHandlers;
+
+/**
+ * A union-typed member one level deeper: behind an `option`, matching
+ * `U2<bool, (ScrollObserver -> bool)> option` on `animejs`'s `repeat`.
+ */
+export interface OptionUnionHandlers {
+    step?: ((a: number) => string) | string;
+}
+
+/** Reports the arity of the optional member built in F#, or its absence. */
+export declare function fireOptionUnion(handlers: OptionUnionHandlers): string;
+
+/** The optional member present, built in JavaScript. */
+export declare const optionUnionHandlersSome: OptionUnionHandlers;
+
+/** The optional member absent, built in JavaScript. */
+export declare const optionUnionHandlersNone: OptionUnionHandlers;
+
+/** The object arm of the nested union below, matching `EventListenerObject<Event>` in shape. */
+export interface UnionListenerObject {
+    handleEvent(x: number): void;
+}
+
+/**
+ * A two-argument void callback whose second parameter is itself a union of a function arm and an
+ * object arm - the shape `Action<'Type, U2<(obj -> unit), EventListenerObject<Event>>, ...>`
+ * carries on `EventTarget`'s `Create` in `@cloudflare/workers-types`. The outer callback converts
+ * to `Action` by the arity rule already measured; whether the inner union arm keeps its own arity
+ * once nested inside the delegate's own type parameter is what this measures.
+ */
+export declare function addListener(register: (kind: string, listener: ((x: number) => void) | UnionListenerObject) => void): void;

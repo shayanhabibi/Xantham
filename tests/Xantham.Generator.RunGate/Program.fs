@@ -1327,6 +1327,95 @@ let private callbackUnionArmForms () =
             else
                 "the object arm"))
 
+/// Lane AQ. The two positions lane AM left unreached: a function-typed union arm one level
+/// deeper than a direct union child (behind an array, behind an `option`), and a `U2<...>`
+/// nested inside a delegate's own type parameter (`Action<string, U2<UnionListenerObject,
+/// (float -> unit)>>`, the shape `Action<'Type, U2<(obj -> unit), EventListenerObject<Event>>,
+/// ...>` carries in `@cloudflare/workers-types`).
+let private callbackUnionNestingForms () =
+    let attempt (f: unit -> string) =
+        try
+            f ()
+        with e ->
+            $"threw: {e.Message}"
+
+    // Array of union: parameter direction, a `ParamObject` literal carrying a converted arm
+    // beside a non-callback arm.
+    let arrayHandlers =
+        CallbackFunctionLab.ArrayUnionHandlers.Create(steps = [| U2.Case2(fun a -> $"js1:{a}"); U2.Case1 "plain" |])
+
+    equal
+        "a converted callback arm behind an array in a ParamObject literal crosses at arity 1"
+        "1:js1:1|text:plain"
+        (attempt (fun () -> CallbackFunctionLab.Exports.fireArrayUnion arrayHandlers))
+
+    // Array of union: read-back direction, the array built in JavaScript.
+    let fromJsArray = CallbackFunctionLab.Exports.arrayUnionHandlers
+
+    equal
+        "and a converted callback arm behind an array reads back at arity 1"
+        "1:js1:1|text:plain"
+        (attempt (fun () -> CallbackFunctionLab.Exports.fireArrayUnion fromJsArray))
+
+    // Option of union: parameter direction, present and absent.
+    let optionSome =
+        CallbackFunctionLab.OptionUnionHandlers.Create(step = U2.Case2(fun a -> $"js1:{a}"))
+
+    equal
+        "a converted callback arm behind an option in a ParamObject literal crosses at arity 1"
+        "1:js1:1"
+        (attempt (fun () -> CallbackFunctionLab.Exports.fireOptionUnion optionSome))
+
+    let optionNone = CallbackFunctionLab.OptionUnionHandlers.Create()
+
+    equal
+        "and an absent option carrying the same union reports its absence"
+        "none"
+        (attempt (fun () -> CallbackFunctionLab.Exports.fireOptionUnion optionNone))
+
+    // Option of union: read-back direction, both built in JavaScript.
+    let fromJsSome = CallbackFunctionLab.Exports.optionUnionHandlersSome
+    let fromJsNone = CallbackFunctionLab.Exports.optionUnionHandlersNone
+
+    equal
+        "and a converted callback arm behind an option reads back at arity 1"
+        "1:js1:1"
+        (attempt (fun () -> CallbackFunctionLab.Exports.fireOptionUnion fromJsSome))
+
+    equal
+        "and the JavaScript-built absent option reports its absence too"
+        "none"
+        (attempt (fun () -> CallbackFunctionLab.Exports.fireOptionUnion fromJsNone))
+
+    // `U2<...>` nested inside a delegate's own type parameter. `register` is a two-argument
+    // void callback, so it converts to `Action` by the arity rule; its second parameter is
+    // itself the union under test. JavaScript calls `register` once with the function arm and
+    // once with the object arm, and the F# lambda records what it received directly - no
+    // round trip through JavaScript is needed to read the arity off a parameter.
+    //
+    // Discriminating by pattern-matching `U2.Case1`/`U2.Case2` here hits the same pre-existing
+    // erased-union limitation lane AM recorded: the interface arm's runtime type test folds to
+    // `false` at compile time, so the match always takes the function arm. Discriminating in
+    // JavaScript with `typeof`, as the fixture's other object-arm checks already do, sidesteps it.
+    let mutable seenFn = ""
+    let mutable seenObj = ""
+
+    CallbackFunctionLab.Exports.addListener (
+        Action<string, U2<CallbackFunctionLab.UnionListenerObject, (float -> unit)>>(fun kind listener ->
+            if emitJsExpr listener "typeof $0 === \"function\"" then
+                let fn = unbox<float -> unit> listener
+                let arity = emitJsExpr fn "$0.length"
+                seenFn <- $"{kind}:{arity}"
+            else
+                let obj = unbox<CallbackFunctionLab.UnionListenerObject> listener
+                let arity = emitJsExpr obj.handleEvent "$0.length"
+                seenObj <- $"{kind}:obj:{arity}")
+    )
+
+    equal "the function arm nested inside the delegate's own type parameter keeps arity 1" "fn-arm:1" seenFn
+
+    equal "and the object arm nested the same way carries its method at arity 1" "obj-arm:obj:1" seenObj
+
 [<EntryPoint>]
 let main _ =
     globals ()
@@ -1349,6 +1438,7 @@ let main _ =
     callbackTupledForms ()
     callbackMixedForms ()
     callbackUnionArmForms ()
+    callbackUnionNestingForms ()
 
     match failures with
     | [] ->

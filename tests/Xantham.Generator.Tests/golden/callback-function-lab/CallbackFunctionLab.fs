@@ -73,6 +73,35 @@ type ListenerObject =
     [<ParamObject; Emit("$0")>]
     static member Create (handleEvent: (float -> string)) : ListenerObject = jsNative
 
+/// <summary>
+/// A union-typed member one level deeper: behind an array, matching
+/// <c>U2&lt;ScopeConstructorCallback, (Scope -&gt; Tickable)&gt;[]</c> on <c>animejs</c>'s <c>Scope</c>.
+/// </summary>
+[<Interface>]
+type ArrayUnionHandlers =
+    abstract steps: U2<string, (float -> string)>[] with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (steps: U2<string, (float -> string)>[]) : ArrayUnionHandlers = jsNative
+
+/// <summary>
+/// A union-typed member one level deeper: behind an <c>option</c>, matching
+/// <c>U2&lt;bool, (ScrollObserver -&gt; bool)&gt; option</c> on <c>animejs</c>'s <c>repeat</c>.
+/// </summary>
+[<Interface>]
+type OptionUnionHandlers =
+    abstract step: U2<string, (float -> string)> option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?step: U2<string, (float -> string)>) : OptionUnionHandlers = jsNative
+
+/// <summary>
+/// The object arm of the nested union below, matching <c>EventListenerObject&lt;Event&gt;</c> in shape.
+/// </summary>
+[<Interface>]
+type UnionListenerObject =
+    abstract handleEvent: x: float -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (handleEvent: (float -> unit)) : UnionListenerObject = jsNative
+
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
@@ -194,3 +223,37 @@ type Exports =
     /// </summary>
     [<Import("objectUnion", "callback-function-lab")>]
     static member objectUnion: U2<ListenerObject, (float -> string)> = jsNative
+    /// <summary>
+    /// Reports the arity of each element of the array member built in F#.
+    /// </summary>
+    [<Import("fireArrayUnion", "callback-function-lab")>]
+    static member fireArrayUnion (handlers: ArrayUnionHandlers) : string = jsNative
+    /// <summary>
+    /// The same array member built in JavaScript, for reading its callback arm back into F#.
+    /// </summary>
+    [<Import("arrayUnionHandlers", "callback-function-lab")>]
+    static member arrayUnionHandlers: ArrayUnionHandlers = jsNative
+    /// <summary>
+    /// Reports the arity of the optional member built in F#, or its absence.
+    /// </summary>
+    [<Import("fireOptionUnion", "callback-function-lab")>]
+    static member fireOptionUnion (handlers: OptionUnionHandlers) : string = jsNative
+    /// <summary>
+    /// The optional member present, built in JavaScript.
+    /// </summary>
+    [<Import("optionUnionHandlersSome", "callback-function-lab")>]
+    static member optionUnionHandlersSome: OptionUnionHandlers = jsNative
+    /// <summary>
+    /// The optional member absent, built in JavaScript.
+    /// </summary>
+    [<Import("optionUnionHandlersNone", "callback-function-lab")>]
+    static member optionUnionHandlersNone: OptionUnionHandlers = jsNative
+    /// <summary>
+    /// A two-argument void callback whose second parameter is itself a union of a function arm and an
+    /// object arm - the shape <c>Action&lt;'Type, U2&lt;(obj -&gt; unit), EventListenerObject&lt;Event&gt;&gt;, ...&gt;</c>
+    /// carries on <c>EventTarget</c>'s <c>Create</c> in <c>@cloudflare/workers-types</c>. The outer callback converts
+    /// to <c>Action</c> by the arity rule already measured; whether the inner union arm keeps its own arity
+    /// once nested inside the delegate's own type parameter is what this measures.
+    /// </summary>
+    [<Import("addListener", "callback-function-lab")>]
+    static member addListener (register: Action<string, U2<UnionListenerObject, (float -> unit)>>) : unit = jsNative
