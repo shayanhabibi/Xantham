@@ -160,8 +160,83 @@ Baseline, measured on this branch at the fork, reproducing wave twelve's recorde
 | `DO001` | 5 | |
 | `DT001` / `DT002` | 2 / 14 | |
 | `RT001` | 3 | |
-| exit code | 0 | |
+| exit code | 0 | 0 |
 
-`DO001` is 5 corpus-wide rather than the 14 the cloudflare recon predicted lane Q1 would recover,
-so that half of the dedup has already landed under another wave. `TR037` 54 is the whole of lane
-CA's first target.
+Composed at `01b0db4`, gated once over the merged tree with
+`dotnet fsi build.fsx -- test --update`: every stage ok, run gate 300 checks, exit 0, and
+**regeneration moved not one golden line** — the three branches composed without interacting.
+
+| | wave twelve `ffacc3d` | composed |
+| --- | ---: | ---: |
+| generator tests | 469 | 472 |
+| wire tests | 90 | 90 |
+| run gate checks | 297 | 300 |
+| exact | 513 | 530 |
+| ergonomic | 1616 | 1633 |
+| widened | 790 | **776** |
+| escape | 195 | 195 |
+| total findings | 17,928 | **16,870** |
+| `TR018` | 82 | 59 |
+| `TR020` | 69 | 69 |
+| `TR023` | 137 | 136 |
+| `TR036` | 72 | **9** |
+| `TR037` | 54 | 15 |
+| `DT002` / `DT003` / `DT004` | 14 / 0 / 0 | 17 / 1 / 1 |
+| `DO001` / `RT001` | 5 / 3 | 5 / 3 |
+
+### Composition was checked, not assumed
+
+Each lane's independently measured delta survives composition exactly. Lane CA alone reported
+tiers 527/1630/762/195 at 16,826 findings; lane CB alone reported +3 exact, +3 ergonomic, +14
+widened and +44 findings, all of them its new fixture's own. The composed tree is 530/1633/776/195
+at 16,870 — CA's numbers plus CB's deltas, to the unit. No interaction between branches to find.
+
+### The headline number is mostly re-keying, and says so
+
+Findings fall by 1,058. That is overwhelmingly lane CA's dedup removing duplicate *reports* of
+losses already counted, not losses recovered: the change emits no golden line at all. The fidelity
+gains are `TR036` 72 → 9, `TR023` 137 → 136, and the tier movement — widened falls by 14 with
+nothing entering escape.
+
+`TR018`'s fall from 82 to 59 is the same dedup reaching a key nobody targeted, predicted by lane CC
+before it happened. **Lane CC's corrected site table was therefore stale on arrival**: the standing
+figure is 59 corpus-wide and 13 on animejs. Any lane opened against CC's table re-reads it against
+this tree.
+
+## Outcomes, and what carries forward
+
+1. **The threshold is at 9 and the histogram is on the record.** Arity 5 holds 32 of the 69 widened
+   sites, so the first step off 4 buys nearly half the win; the step from 8 to 9 buys one site. The
+   remaining 9 sit at arity 10, 11 and 14 and no cap `Fable.Core` can express would reach them. If
+   D4's ergonomic argument is to be honoured more closely, 6 recovers 47 of 69 and is a one-integer
+   change plus a regeneration.
+2. **Lane CB's fold is built and reaches no corpus site,** because the managing agent scoped recon
+   §5.3 out. `TailStream.EventType` arrives as an inline union at callback-parameter position and
+   `detectTaggedUnions` iterates `model.DeclNames`, so §5.3 is not a separate nicety — it is the
+   gate on `DT003`/`DT004` ever firing. It is repriced and goes back on the worklist as the lane
+   that makes CB's work reachable, not as one recorded site.
+3. **`TR018` is 73-out-of-82 contract.** Lane CC's remeasurement closed it rather than opening it.
+   The one recoverable cluster is nine sites: `this & { then: null }` is TypeScript's
+   uninhabited-intersection reduction to `never`, arriving flagged Intersection with no members,
+   and the current message is false at all nine. A lane for those nine needs
+   `TR.UninhabitedIntersectionReduced of property: string` pre-declared; `TR058` is the next free
+   code.
+4. **The recon's `Log` reproducer does not reach the pass.** The checker distributes the
+   intersection into arms flagged `Intersection` while `isObjectMember` tests `TypeFlags.Object`;
+   their members are populated, so only the flag rejects them. Admitting intersections there moves
+   discriminated-union detection corpus-wide and is unpriced. `shared-tag-lab` pins today's
+   behaviour as the standing reproducer.
+5. **Narrow the pattern before grepping a large `symbols.jsonl`.** Lane CB spent avoidable context
+   on three very long lines. The rule permits the grep; briefs should ask for a narrowed pattern.
+
+## Batch two
+
+| Lane | Work | Owns | Pre-declared case |
+| --- | --- | --- | --- |
+| CD | `TR020` 69, indexed access over a concrete operand (recon lane Q3) | `indexedAccessRef`, `Shape/Spec.fs` | none |
+| CE | The nine uninhabited-intersection sites | `intersectionRef`, `Shape/Spec.fs` | `TR058` |
+| CF | Recon §5.3, inline discriminated unions at member position | `Shape/TaggedUnions.fs`, `Shape/Anonymous.fs` | none — `DT003`/`DT004` already exist |
+
+`indexedAccessRef` and `intersectionRef` sit far apart in `Shape/Spec.fs` and merge by hunk, as
+CA and CB did this wave. CD was held out of batch one because raising the arity cap moves its sites
+between keys rather than down; that raise has now landed, so `TR020` 69 is a true baseline.
