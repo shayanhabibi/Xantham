@@ -5082,7 +5082,7 @@ type ReadableStream<'R> =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStream/tee)
     /// </summary>
     abstract tee: unit -> ReadableStream<'R> * ReadableStream<'R>
-    abstract values: ?options: ReadableStreamValuesOptions -> obj
+    abstract values: ?options: ReadableStreamValuesOptions -> JS.AsyncIterable<'R>
 
 type ReadableStreamConstructor =
     [<EmitConstructor>]

@@ -395,6 +395,13 @@ module Naming =
                 "AsyncIterator", ("JS.AsyncIterator", 1, None)
                 "AsyncGenerator", ("JS.AsyncGenerator", 1, None)
                 "IteratorResult", ("JS.IteratorResult", 1, None)
+                // `Fable.Core` has no name for the combined shape; `JS.AsyncIterable` carries
+                // only `Symbol.asyncIterator`, not the `next`/`return`/`throw` methods an
+                // iterator adds.
+                "AsyncIterableIterator",
+                ("JS.AsyncIterable",
+                 1,
+                 Some "AsyncIterableIterator reads as JS.AsyncIterable; its next/return/throw methods are not on it")
             ]
             |> Map.ofList
 
