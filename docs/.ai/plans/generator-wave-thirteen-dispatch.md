@@ -205,11 +205,22 @@ this tree.
 
 ## Outcomes, and what carries forward
 
-1. **The threshold is at 9 and the histogram is on the record.** Arity 5 holds 32 of the 69 widened
-   sites, so the first step off 4 buys nearly half the win; the step from 8 to 9 buys one site. The
-   remaining 9 sit at arity 10, 11 and 14 and no cap `Fable.Core` can express would reach them. If
-   D4's ergonomic argument is to be honoured more closely, 6 recovers 47 of 69 and is a one-integer
-   change plus a regeneration.
+1. **The threshold is settled at 9, and the way past it is closed.** Arity 5 holds 32 of the 69
+   widened sites, so the first step off 4 buys nearly half the win; the step from 8 to 9 buys one
+   site. The remaining 9 sit at arity 10, 11 and 14, above anything `Fable.Core` ships.
+
+   Uncapping to 100 was directed, scoped and then withdrawn on cost. It would have meant
+   generating `U10`-`U100` into `Xantham.Fable.Core` under the `Fable.Core` namespace - 5,005 union
+   cases and 5,005 `op_ErasedCast` overloads - and every `!^` in consumer code would resolve
+   against one overload per case of the target type. The lane was stopped before it wrote anything.
+   **The arity ceiling is what `Fable.Core` ships**, and the nine sites above it widen to `obj`.
+
+   The proof obligation that lane would have carried is worth recording even though it went
+   unspent: a `U10` this repository declares is erased by the `[<Erase>]` attribute, which is a
+   general mechanism, so it *should* behave as `U9` does - but an erased union that is not actually
+   erased fails silently at runtime, which is the failure mode wave twelve's lane BA exists
+   because of. Any future attempt at this must prove `U10` at the run gate beside a `U9` control
+   before generating the other ninety.
 2. **Lane CB's fold is built and reaches no corpus site,** because the managing agent scoped recon
    §5.3 out. `TailStream.EventType` arrives as an inline union at callback-parameter position and
    `detectTaggedUnions` iterates `model.DeclNames`, so §5.3 is not a separate nicety — it is the

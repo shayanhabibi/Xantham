@@ -299,6 +299,13 @@ Order of preference, decided per union after §4.2's categorization:
    lane CA, on a corpus-wide arity histogram of `UnionTooWide` sites: arity 5 - 32, 6 - 15,
    7 - 6, 8 - 6, 9 - 1, above 9 - 9. Raising the cap to 9 recovers 60 of the corpus's 69
    widened sites; the remaining 9 sit at arity 10, 11 or 14 and stay `obj`).
+
+   **Nine is a ceiling, not a preference.** Generating `U10`-`U100` into `Xantham.Fable.Core`
+   under the `Fable.Core` namespace was proposed and rejected in wave thirteen: every `!^` cast
+   resolves against one `op_ErasedCast` overload per case, so a range to 100 would add 5,005
+   overloads and pay for them at every use site in consumer code. The arity ceiling is what
+   `Fable.Core` ships, and a union above it widens to `obj` rather than to a type this repository
+   mints.
 5. Larger / open unions → dedicated erased union type with static constructors per case
    (`[<Erase>] type Shade = static member inline ofString (s:string) : Shade = !!s` …), or
    `obj` at the Escape tier.
