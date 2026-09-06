@@ -248,3 +248,39 @@ type CallbackMixed =
 
     [<Import("callNesting", "callback-function-lab")>]
     static member callNestingDelegate(outer: System.Func<float, System.Func<float, float, string>>) : string = jsNative
+
+// Probes 17-18 - lane CP, wave fourteen. Lane CN's exclusive-arm fold (batch two) carries
+// exclusivity on `Create` overloads rather than on the type; both forms below mirror the two
+// real pairs the corpus holds today as separate minted interfaces (`AiSearchSearchRequest2`/`3`
+// and `Container.Start.Options`/`Options2`), folded into one type by hand. Nothing generates
+// either type; the fold moves whichever probe it lands onto a lab golden and out of here.
+
+/// Probe 17 - `AiSearchSearchRequest`'s shape: both arms carry a required member the other
+/// lacks (`query` against `messages`), so each `Create` overload gets one.
+[<Interface>]
+type SearchOptions =
+    abstract query: string option with get, set
+    abstract messages: string array option with get, set
+    abstract shared: float with get, set
+
+    [<ParamObject; Emit("$0")>]
+    static member Create(query: string, shared: float) : SearchOptions = jsNative
+
+    [<ParamObject; Emit("$0")>]
+    static member Create(messages: string array, shared: float) : SearchOptions = jsNative
+
+/// Probe 18 - `Container.Start.Options`/`Options2`'s shape: one arm (`image`) carries a required
+/// member the other lacks, and the other arm's own distinguishing member (`snapshot`) is
+/// optional in the TypeScript source, so its overload holds no required member of its own beyond
+/// the member the two arms share.
+[<Interface>]
+type ContainerLikeOptions =
+    abstract enableInternet: bool with get, set
+    abstract image: string option with get, set
+    abstract snapshot: string option with get, set
+
+    [<ParamObject; Emit("$0")>]
+    static member Create(enableInternet: bool, image: string, ?snapshot: unit) : ContainerLikeOptions = jsNative
+
+    [<ParamObject; Emit("$0")>]
+    static member Create(enableInternet: bool, ?image: unit, ?snapshot: string) : ContainerLikeOptions = jsNative

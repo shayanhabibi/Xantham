@@ -3563,4 +3563,39 @@ let pipelineTests =
                               "abstract entries: Xantham.Fable.Core.Record<string, float>"
                               "and the support package's Record is reached fully qualified beside it" ])
 
+        yield!
+            fixtureTests "paramobject-overload-lab" (handFixture "paramobject-overload-lab") GeneratorConfig.Default (fun package ->
+                // Pins today's baseline for the exclusive-arm shape lane CN's batch-two fold
+                // targets: each arm mints its own interface, and its own ParamObject Create,
+                // rather than the one type with an exclusive Create overload per arm the fold
+                // will produce. The Fable capability the fold rests on is proven separately, in
+                // `Xantham.Generator.RunGate`'s hand-written probes 17-18 (docs/.ai/handovers/lane-cp.md).
+                [ testCase "an exclusive-arm union mints one interface per arm, each with its own Create" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.stringContains source "type QueryOptions =" "the query arm keeps its own name"
+                    Expect.stringContains source "type MessagesOptions =" "and so does the messages arm"
+
+                    // Both `query` and `messages` are themselves optional here (§4.2's D5 does
+                    // not yet fold this shape), so today's `shared` is the one required
+                    // parameter each arm's own Create carries.
+                    Expect.stringContains
+                        source
+                        "static member Create (shared: float, ?query: string, ?messages: unit) : QueryOptions = jsNative"
+                        "the query arm's own Create, its excluded member typed unit"
+
+                    Expect.stringContains
+                        source
+                        "static member Create (shared: float, ?query: unit, ?messages: string[]) : MessagesOptions = jsNative"
+                        "and the messages arm's, on the other interface"
+
+                    Expect.equal
+                        (rendered.Findings
+                         |> List.filter (fun finding -> finding.Key = "SP001")
+                         |> List.map _.Symbol
+                         |> List.sort)
+                        [ "MessagesOptions"; "QueryOptions" ]
+                        "one synthesized Create per arm, not one shared between them" ])
+
     ]
