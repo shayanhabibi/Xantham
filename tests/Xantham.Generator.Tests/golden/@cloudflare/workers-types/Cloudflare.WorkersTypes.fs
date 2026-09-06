@@ -1708,34 +1708,6 @@ type DurableObjectNamespaceGetDurableObjectOptions =
 [<Erase>]
 type DurableObjectClass<'_T> = private DurableObjectClass__ of obj
 
-module Container =
-    module Start =
-        [<Interface>]
-        type Options =
-            abstract entrypoint: string[] option with get, set
-            abstract enableInternet: bool with get, set
-            abstract env: Xantham.Fable.Core.Record<string, string> option with get, set
-            abstract instance: U2<string, ContainerStartResources> option with get, set
-            abstract labels: Xantham.Fable.Core.Record<string, string> option with get, set
-            abstract directorySnapshots: ContainerDirectorySnapshotRestoreParams[] option with get, set
-            abstract image: string with get, set
-            abstract containerSnapshot: unit option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (enableInternet: bool, image: string, ?entrypoint: string[], ?env: Xantham.Fable.Core.Record<string, string>, ?instance: U2<string, ContainerStartResources>, ?labels: Xantham.Fable.Core.Record<string, string>, ?directorySnapshots: ContainerDirectorySnapshotRestoreParams[], ?containerSnapshot: unit) : Options = jsNative
-
-        [<Interface>]
-        type Options2 =
-            abstract entrypoint: string[] option with get, set
-            abstract enableInternet: bool with get, set
-            abstract env: Xantham.Fable.Core.Record<string, string> option with get, set
-            abstract instance: U2<string, ContainerStartResources> option with get, set
-            abstract labels: Xantham.Fable.Core.Record<string, string> option with get, set
-            abstract directorySnapshots: ContainerDirectorySnapshotRestoreParams[] option with get, set
-            abstract image: unit option with get, set
-            abstract containerSnapshot: ContainerSnapshotRestoreParams option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (enableInternet: bool, ?entrypoint: string[], ?env: Xantham.Fable.Core.Record<string, string>, ?instance: U2<string, ContainerStartResources>, ?labels: Xantham.Fable.Core.Record<string, string>, ?directorySnapshots: ContainerDirectorySnapshotRestoreParams[], ?image: unit, ?containerSnapshot: ContainerSnapshotRestoreParams) : Options2 = jsNative
-
 [<Interface>]
 type ContainerDirectorySnapshotRestoreParams2 =
     abstract snapshot: ContainerDirectorySnapshot with get, set
@@ -6710,7 +6682,20 @@ type ContainerSnapshotOptions =
     [<ParamObject; Emit("$0")>]
     static member Create (?name: string) : ContainerSnapshotOptions = jsNative
 
-type ContainerStartupOptions = U2<Container.Start.Options, Container.Start.Options2>
+[<Interface>]
+type ContainerStartupOptions =
+    abstract entrypoint: string[] option with get, set
+    abstract enableInternet: bool with get, set
+    abstract env: Xantham.Fable.Core.Record<string, string> option with get, set
+    abstract instance: U2<string, ContainerStartResources> option with get, set
+    abstract labels: Xantham.Fable.Core.Record<string, string> option with get, set
+    abstract directorySnapshots: ContainerDirectorySnapshotRestoreParams[] option with get, set
+    abstract image: string option with get, set
+    abstract containerSnapshot: ContainerSnapshotRestoreParams option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (enableInternet: bool, image: string, ?entrypoint: string[], ?env: Xantham.Fable.Core.Record<string, string>, ?instance: U2<string, ContainerStartResources>, ?labels: Xantham.Fable.Core.Record<string, string>, ?directorySnapshots: ContainerDirectorySnapshotRestoreParams[]) : ContainerStartupOptions = jsNative
+    [<ParamObject; Emit("$0")>]
+    static member Create (enableInternet: bool, ?entrypoint: string[], ?env: Xantham.Fable.Core.Record<string, string>, ?instance: U2<string, ContainerStartResources>, ?labels: Xantham.Fable.Core.Record<string, string>, ?directorySnapshots: ContainerDirectorySnapshotRestoreParams[], ?containerSnapshot: ContainerSnapshotRestoreParams) : ContainerStartupOptions = jsNative
 
 [<Interface>]
 type ContainerStartResources =
@@ -8073,29 +8058,21 @@ module VectorizeVectorMetadataFilter =
 /// Request body for single-instance search.
 /// Exactly one of <c>query</c> or <c>messages</c> must be provided.
 /// </summary>
-type AiSearchSearchRequest = U2<AiSearchSearchRequest2, AiSearchSearchRequest3>
-
 [<Interface>]
-type AiSearchSearchRequest2 =
+type AiSearchSearchRequest =
+    abstract ai_search_options: AiSearchOptions option with get, set
     /// <summary>
     /// Simple query string.
     /// </summary>
-    abstract query: string with get, set
-    abstract messages: unit option with get, set
-    abstract ai_search_options: AiSearchOptions option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (query: string, ?messages: unit, ?ai_search_options: AiSearchOptions) : AiSearchSearchRequest2 = jsNative
-
-[<Interface>]
-type AiSearchSearchRequest3 =
-    abstract query: unit option with get, set
+    abstract query: string option with get, set
     /// <summary>
     /// Conversation-style input. At least one user message with non-empty content is required.
     /// </summary>
-    abstract messages: AiSearchMessage[] with get, set
-    abstract ai_search_options: AiSearchOptions option with get, set
+    abstract messages: AiSearchMessage[] option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (messages: AiSearchMessage[], ?query: unit, ?ai_search_options: AiSearchOptions) : AiSearchSearchRequest3 = jsNative
+    static member Create (query: string, ?ai_search_options: AiSearchOptions) : AiSearchSearchRequest = jsNative
+    [<ParamObject; Emit("$0")>]
+    static member Create (messages: AiSearchMessage[], ?ai_search_options: AiSearchOptions) : AiSearchSearchRequest = jsNative
 
 type AiSearchChatCompletionsRequest =
     abstract messages: AiSearchMessage[] with get, set
@@ -8126,29 +8103,21 @@ type AiSearchMultiSearchOptions =
 /// <c>ai_search_options</c> is required and must include <c>instance_ids</c>.
 /// Exactly one of <c>query</c> or <c>messages</c> must be provided.
 /// </summary>
-type AiSearchMultiSearchRequest = U2<AiSearchMultiSearchRequest2, AiSearchMultiSearchRequest3>
-
 [<Interface>]
-type AiSearchMultiSearchRequest2 =
+type AiSearchMultiSearchRequest =
+    abstract ai_search_options: AiSearchMultiSearchOptions with get, set
     /// <summary>
     /// Simple query string.
     /// </summary>
-    abstract query: string with get, set
-    abstract messages: unit option with get, set
-    abstract ai_search_options: AiSearchMultiSearchOptions with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (query: string, ai_search_options: AiSearchMultiSearchOptions, ?messages: unit) : AiSearchMultiSearchRequest2 = jsNative
-
-[<Interface>]
-type AiSearchMultiSearchRequest3 =
-    abstract query: unit option with get, set
+    abstract query: string option with get, set
     /// <summary>
     /// Conversation-style input.
     /// </summary>
-    abstract messages: AiSearchMessage[] with get, set
-    abstract ai_search_options: AiSearchMultiSearchOptions with get, set
+    abstract messages: AiSearchMessage[] option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (messages: AiSearchMessage[], ai_search_options: AiSearchMultiSearchOptions, ?query: unit) : AiSearchMultiSearchRequest3 = jsNative
+    static member Create (ai_search_options: AiSearchMultiSearchOptions, query: string) : AiSearchMultiSearchRequest = jsNative
+    [<ParamObject; Emit("$0")>]
+    static member Create (ai_search_options: AiSearchMultiSearchOptions, messages: AiSearchMessage[]) : AiSearchMultiSearchRequest = jsNative
 
 /// <summary>
 /// A search result chunk tagged with the instance it originated from.

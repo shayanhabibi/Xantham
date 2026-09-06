@@ -3795,4 +3795,67 @@ let pipelineTests =
                         [ "MessagesOptions"; "QueryOptions" ]
                         "one synthesized Create per arm, not one shared between them" ])
 
+        yield!
+            fixtureTests "exclusive-arms-lab" (handFixture "exclusive-arms-lab") GeneratorConfig.Default (fun package ->
+                // Wave fourteen lane CN, batch two, item 4: the exclusive-arm fold itself.
+                // `SeparableOptions` and `AnchoredOptions` fold into one interface named after
+                // the union, `never` members off the surface entirely rather than left as
+                // `unit`; `DisagreeingOptions` is not this construct and is untouched.
+                // Both pairs fold into one interface named after the union, `SeparableOptions`
+                // through `AnchoredOptions`, ending each arm's own declaration. Only the fixture's
+                // third pair - `WidgetArm`/`GadgetArm`, which the fold declines - still declares
+                // its `never` members as `unit`, so a "no `unit` anywhere" check is scoped to
+                // between the two folded types, before that decline shows up.
+                [ testCase "both arms anchoring their own required member fold, TR060" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+                    let foldStart = source.IndexOf "type SeparableOptions ="
+                    let foldEnd = source.IndexOf "type AnchoredOptions ="
+                    let foldedBlock = source.Substring(foldStart, foldEnd - foldStart)
+
+                    Expect.isGreaterThan foldStart -1 "the fold is named after the union"
+                    Expect.isFalse (source.Contains "type QueryArm =") "the query arm no longer mints its own name"
+                    Expect.isFalse (source.Contains "type MessagesArm =") "nor does the messages arm"
+                    Expect.stringContains source "abstract query: string option" "query kept optional, not unit"
+                    Expect.stringContains source "abstract messages: string[] option" "messages kept optional, not unit"
+
+                    Expect.isFalse
+                        (foldedBlock.Contains ": unit")
+                        "no `never` member survives as a unit placeholder on this fold"
+
+                  testCase "one arm's own required member anchors the other's optional one, TR060" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains source "type AnchoredOptions =" "the fold is named after the union"
+                      Expect.isFalse (source.Contains "type ImageArm =") "the image arm no longer mints its own name"
+                      Expect.isFalse (source.Contains "type SnapshotArm =") "nor does the snapshot arm"
+
+                      // Both of the anchored pair's own distinguishers (`image`, `snapshot`) are
+                      // real members reaching the fold - the placeholder `unit` that
+                      // `ContainerLikeOptions` still carries is `Create`-overload plumbing this
+                      // fold's own arms never contribute, so this pair folds clean too.
+                      let foldStart = source.IndexOf "type AnchoredOptions ="
+                      let foldEnd = source.IndexOf "type WidgetArm ="
+                      let foldedBlock = source.Substring(foldStart, foldEnd - foldStart)
+
+                      Expect.isFalse
+                          (foldedBlock.Contains ": unit")
+                          "the anchored pair's own members are real on both sides, so no `unit` survives"
+
+                  testCase "a shared member disagreeing in type is not this construct" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains source "type WidgetArm =" "each arm still mints its own name"
+                      Expect.stringContains source "type GadgetArm =" "on both sides"
+
+                      Expect.equal
+                          (rendered.Findings
+                           |> List.filter (fun finding -> finding.Key = "TR060" || finding.Key = "TR061")
+                           |> List.map _.Symbol
+                           |> List.sort)
+                          [ "AnchoredOptions"; "SeparableOptions" ]
+                          "the disagreeing pair raises neither TR060 nor TR061" ])
+
     ]

@@ -3,16 +3,16 @@
   "package": "paramobject-overload-lab",
   "module": "ParamobjectOverloadLab",
   "counts": {
-    "exact": 2,
-    "ergonomic": 2,
+    "exact": 1,
+    "ergonomic": 3,
     "widened": 0,
     "escape": 0
   },
   "passes": [
     {
       "pass": "SI - shape-interfaces",
-      "total": 6,
-      "ergonomic": 6
+      "total": 7,
+      "ergonomic": 7
     },
     {
       "pass": "SP - synthesize-paramobjects",

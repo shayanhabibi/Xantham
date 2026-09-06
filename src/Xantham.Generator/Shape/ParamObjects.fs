@@ -112,8 +112,14 @@ let synthesizeParamObjects: Pass<ShapeModel> =
                         model.Decls
                         |> List.map (function
                             // The `Create` members of a constructor object come from its
-                            // construct signatures (§4.4).
-                            | FsInterface decl when not (decl.Members |> List.exists isConstructor) ->
+                            // construct signatures (§4.4). An interface already carrying
+                            // overloads of its own - the exclusive-arm fold's one `Create` per
+                            // arm (wave fourteen item 4) - keeps them rather than being
+                            // collapsed to the single overload this pass synthesizes.
+                            | FsInterface decl when
+                                not (decl.Members |> List.exists isConstructor)
+                                && List.isEmpty decl.CreateOverloads
+                                ->
                                 // A hybrid's `Invoke` reads its own call signatures (§4.4); `Create`
                                 // binds only the properties and methods beside it.
                                 let members = decl.Members |> List.filter (isInvoke >> not)

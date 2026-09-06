@@ -60,10 +60,38 @@ let shapeInterfaces: Pass<ShapeModel> =
                             |> Option.map (fun typeId -> typeId, (export.Docs, export.Tags)))
                         |> Map.ofList
 
+                    // A union whose arms agree on every member except which ones they declare
+                    // `never` (wave fourteen item 4): folded into one interface named after the
+                    // union itself, with the exclusive members optional and one `Create`
+                    // overload per arm. Declined pairs are reported and otherwise untouched -
+                    // each arm keeps minting its own interface, as today.
+                    let exclusiveUnions =
+                        model.DeclNames
+                        |> Map.toList
+                        |> List.choose (fun (typeId, name) ->
+                            match Map.tryFind typeId model.Types with
+                            | Some facts when flag TypeFlags.Union facts && not (flag TypeFlags.Boolean facts) ->
+                                match exclusiveArmShape model facts with
+                                | NotExclusiveArms -> None
+                                | ExclusiveArmsFold(shared, arms) -> Some(typeId, name, Choice1Of2(shared, arms))
+                                | ExclusiveArmsDecline arms -> Some(typeId, name, Choice2Of2 arms)
+                            | _ -> None)
+
+                    let foldedArmIds =
+                        exclusiveUnions
+                        |> List.collect (fun (_, _, outcome) ->
+                            match outcome with
+                            | Choice1Of2(_, arms) -> arms |> List.map (fun a -> a.Facts.Response.Id)
+                            | Choice2Of2 _ -> [])
+                        |> Set.ofList
+
+                    let declNames =
+                        model.DeclNames |> Map.filter (fun id _ -> not (Set.contains id foldedArmIds))
+
                     // The names this pass declares, known ahead of the declarations: what a
                     // flattened intersection may inherit.
                     let interfaceNames =
-                        model.DeclNames
+                        declNames
                         |> Map.toList
                         |> List.choose (fun (typeId, name) ->
                             match Map.tryFind typeId model.Types with
@@ -87,7 +115,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                     let classSides = exportedClassSides model
 
                     let decls =
-                        model.DeclNames
+                        declNames
                         |> Map.toList
                         |> List.sortBy fst
                         |> List.collect (fun (typeId, name) ->
@@ -286,9 +314,96 @@ let shapeInterfaces: Pass<ShapeModel> =
                                 :: hookDecls
                             | _ -> [])
 
+                    // Every arm's own `Create` overload carries only its own members and the
+                    // shared ones - never a `never`-typed placeholder for the other arm's
+                    // exclusive member - so a folded pair's overloads carry no `unit` parameter.
+                    let buildParam (owner: string) (m: ResolvedMember) =
+                        let reference, refFindings = typeRef ctx model None owner m.TypeId
+
+                        {
+                            Name = Naming.memberName m.Symbol.Name
+                            Optional = m.Optional
+                            Rest = false
+                            Type = reference
+                        },
+                        refFindings
+
+                    let buildMember (owner: string) (optional: bool) (m: ResolvedMember) =
+                        let reference, refFindings = typeRef ctx model None owner m.TypeId
+
+                        FsProperty
+                            {
+                                Name = Naming.memberName m.Symbol.Name
+                                Docs = m.Docs
+                                Tags = m.Tags
+                                ReadOnly = m.ReadOnly
+                                Type = optionalRef optional reference
+                            },
+                        refFindings
+
+                    let foldedDecls, foldedFindings =
+                        exclusiveUnions
+                        |> List.map (fun (typeId, name, outcome) ->
+                            match outcome with
+                            | Choice2Of2 arms ->
+                                [], [ Finding.make name (TypeReference.ExclusiveArmsNotFoldable arms) ]
+                            | Choice1Of2(shared, arms) ->
+                                let sharedMembers, sharedFindings =
+                                    shared |> List.map (buildMember name false) |> List.unzip
+
+                                let exclusiveMembers, exclusiveFindings =
+                                    arms
+                                    |> List.collect (fun a -> a.Own)
+                                    |> List.map (buildMember name true)
+                                    |> List.unzip
+
+                                let overloads, overloadFindings =
+                                    arms
+                                    |> List.map (fun arm ->
+                                        let sharedParams, sharedParamFindings =
+                                            shared |> List.map (buildParam name) |> List.unzip
+
+                                        let ownParams, ownParamFindings =
+                                            arm.Own |> List.map (buildParam name) |> List.unzip
+
+                                        let required, optional =
+                                            (sharedParams @ ownParams) |> List.partition (fun p -> not p.Optional)
+
+                                        required @ optional,
+                                        List.concat sharedParamFindings @ List.concat ownParamFindings)
+                                    |> List.unzip
+
+                                let docs, tags = Map.tryFind typeId fallbackDocs |> Option.defaultValue ("", [])
+                                let order = Map.tryFind typeId model.DeclOrders |> Option.defaultValue None
+
+                                [
+                                    FsInterface
+                                        {
+                                            Name = name
+                                            Docs = docs
+                                            Tags = tags
+                                            Order = order
+                                            TypeParameters = []
+                                            Inherits = []
+                                            Members = sharedMembers @ exclusiveMembers
+                                            Entrypoint = None
+                                            CreateOverloads = overloads
+                                            Statics = []
+                                        }
+                                ],
+                                (List.concat sharedFindings
+                                 @ List.concat exclusiveFindings
+                                 @ List.concat overloadFindings
+                                 @ [ Finding.make name (TypeReference.ExclusiveArmsFolded arms.Length) ]))
+                        |> List.unzip
+                        |> fun (ds, fs) -> List.concat ds, List.concat fs
+
+                    let findings = findings @ foldedFindings
+
                     let model =
                         { model with
-                            Decls = model.Decls @ decls
+                            Decls = model.Decls @ decls @ foldedDecls
+                            DeclNames = declNames
                         }
 
                     return

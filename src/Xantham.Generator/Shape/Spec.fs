@@ -426,6 +426,128 @@ let internal taggedUnionShape (model: ShapeModel) (facts: TypeFacts) : TaggedSha
                 else
                     Discriminated(tag, groups, folded)
 
+/// One arm's own contribution to an exclusive-arm union: the arm's facts, and the members it
+/// carries a real type for where every other arm marks the same name `never`.
+type internal ExclusiveArm =
+    {
+        Facts: TypeFacts
+        Own: ResolvedMember list
+    }
+
+/// A union of object arms exclusive on some of their members (§4.5, wave fourteen item 4):
+/// every arm agrees, by name, type and optionality, on every member it shares with the rest,
+/// and every member exclusive to one arm is typed `never` on every other arm that carries it -
+/// never silently absent. `ExclusiveArmsFold` carries at least one arm whose own member is
+/// required in that arm, giving F# a required-arity fact to resolve `Create` overloads on;
+/// `ExclusiveArmsDecline` is the same shape where every arm's own members are optional, so no
+/// such fact exists anywhere in the union.
+type internal ExclusiveArmsShape =
+    | NotExclusiveArms
+    | ExclusiveArmsFold of shared: ResolvedMember list * arms: ExclusiveArm list
+    | ExclusiveArmsDecline of arms: int
+
+// An optional property typed `never` is not carrying `TypeFlags.Never` by the time it reaches
+// here: the checker's own union rule collapses `never | undefined` (the type an optional
+// property widens to) to plain `undefined`, so the placeholder surfaces as `TypeFlags.Undefined`
+// alone. `m.Optional` rules out a genuinely required `undefined`-typed member reaching the same
+// branch.
+let private isNeverTyped (model: ShapeModel) (m: ResolvedMember) =
+    m.Optional
+    && (match Map.tryFind m.TypeId model.Types with
+        | Some facts -> flag TypeFlags.Never facts || flag TypeFlags.Undefined facts
+        | None -> false)
+
+let internal exclusiveArmShape (model: ShapeModel) (facts: TypeFacts) : ExclusiveArmsShape =
+    let arms =
+        facts.UnionMembers
+        |> List.choose (fun id -> Map.tryFind id model.Types)
+        |> List.filter (isNullish >> not)
+
+    let isObjectArm (m: TypeFacts) =
+        (flag TypeFlags.Object m || flag TypeFlags.Intersection m)
+        && not m.Members.IsEmpty
+
+    if arms.Length < 2 || not (arms |> List.forall isObjectArm) then
+        NotExclusiveArms
+    else
+        let names =
+            arms
+            |> List.collect (fun a -> a.Members |> List.map (fun m -> m.Symbol.Name))
+            |> List.filter (isSymbolKeyed >> not)
+            |> List.distinct
+
+        let declaredBy (name: string) (arm: TypeFacts) =
+            arm.Members |> List.tryFind (fun m -> m.Symbol.Name = name)
+
+        // `None` here means the whole shape falls outside this construct: a member silent on
+        // some arm cannot be told apart from one that arm marks `never`, two arms cannot both
+        // carry a member's own type with disagreeing shapes, and a member shared by every arm
+        // must read identically everywhere.
+        let classify (name: string) =
+            let onArm = arms |> List.map (fun arm -> arm, declaredBy name arm)
+
+            if onArm |> List.exists (snd >> Option.isNone) then
+                None
+            else
+                let real, never =
+                    onArm
+                    |> List.map (fun (arm, m) -> arm, Option.get m)
+                    |> List.partition (fun (_, m) -> not (isNeverTyped model m))
+
+                if real.IsEmpty then
+                    None
+                else
+                    let first = snd (List.head real)
+
+                    if not (real |> List.forall (fun (_, m) -> m.TypeId = first.TypeId)) then
+                        None
+                    elif never.IsEmpty then
+                        if real |> List.forall (fun (_, m) -> m.Optional = first.Optional) then
+                            Some(Choice1Of2 first)
+                        else
+                            None
+                    else
+                        Some(Choice2Of2(real |> List.map (fun (arm, m) -> arm.Response.Id, m)))
+
+        let classified = names |> List.map classify
+
+        if classified |> List.exists Option.isNone then
+            NotExclusiveArms
+        else
+            let shared =
+                classified
+                |> List.choose (function
+                    | Some(Choice1Of2 m) -> Some m
+                    | _ -> None)
+
+            let exclusive =
+                classified
+                |> List.choose (function
+                    | Some(Choice2Of2 owners) -> Some owners
+                    | _ -> None)
+
+            let ownFor (arm: TypeFacts) =
+                exclusive
+                |> List.choose (List.tryFind (fst >> (=) arm.Response.Id) >> Option.map snd)
+
+            let armShapes = arms |> List.map (fun arm -> { Facts = arm; Own = ownFor arm })
+
+            // An arm contributing nothing of its own is not exclusive - it is the same shape
+            // as another arm, reached twice, and belongs to `namedUnionByMembers` instead.
+            if armShapes |> List.exists (fun a -> a.Own.IsEmpty) then
+                NotExclusiveArms
+            // Folds the moment one arm's own member is required: that fact alone gives F# a
+            // required-arity anchor to resolve the whole set of `Create` overloads on, even
+            // where every other arm's own member stays optional (`ContainerLikeOptions`,
+            // `docs/.ai/handovers/lane-cp.md`). Declines only where no arm anywhere has one.
+            elif
+                armShapes
+                |> List.exists (fun a -> a.Own |> List.exists (fun m -> not m.Optional))
+            then
+                ExclusiveArmsFold(shared, armShapes)
+            else
+                ExclusiveArmsDecline arms.Length
+
 /// A property that exists only to make a type nominal: keyed by a unique symbol, spelled with a
 /// leading underscore, or typed `never`. An object of only these carries nothing at runtime,
 /// separating a branding intersection from a shape (§4.6).
