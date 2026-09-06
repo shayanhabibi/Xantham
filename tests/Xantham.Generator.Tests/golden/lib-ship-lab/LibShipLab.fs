@@ -48,4 +48,4 @@ type Exports =
     [<Global("VarDate"); EmitConstructor>]
     static member VarDate () : TypeScript.Lib.Dom.VarDate = jsNative
     [<Global("globalThis")>]
-    static member globalThis: TypeScript.Lib.GlobalThis = jsNative
+    static member globalThis: TypeScript.Lib.Es.GlobalThis = jsNative

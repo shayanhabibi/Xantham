@@ -435,7 +435,7 @@ let pipelineTests =
                       let rendered = Async.RunSynchronously(Pipeline.generate config package)
                       let source = rendered.Files |> List.find (fst >> (=) "AnsiRegex.fs") |> snd
 
-                      Expect.stringContains source ": TypeScript.Lib.RegExp = jsNative" "the return is templated (O7)"
+                      Expect.stringContains source ": TypeScript.Lib.Es.RegExp = jsNative" "the return is templated (O7)"
 
                       Expect.isEmpty
                           (rendered.Findings |> List.filter (fun finding -> finding.Message.Contains "RegExp"))
@@ -1569,11 +1569,18 @@ let pipelineTests =
                           // `HG003` escape finding and nothing else.
                           let group =
                               rendered.Files
-                              |> List.tryFind (fun (path, _) -> path.Contains "TypeScript.Lib.Dom")
+                              |> List.tryFind (fun (path, _) -> path = "groups/TypeScript.Lib.fs")
 
-                          Expect.isSome group "the compiler-lib group renders its DOM file, not just the entry module"
+                          Expect.isSome group "the compiler-lib group renders its own file, not just the entry module"
 
                           let source = group |> Option.get |> snd
+
+                          // The two families are sibling modules under one `namespace rec`, so
+                          // the ECMAScript module's `GlobalThis` reads DOM types and the DOM
+                          // module reads ECMAScript ones from one file.
+                          Expect.stringContains source "namespace rec TypeScript.Lib" "the shared namespace"
+                          Expect.stringContains source "module Es =" "the ECMAScript module"
+                          Expect.stringContains source "module Dom =" "the DOM module"
 
                           Expect.stringContains source "type ActiveXObject" "a scripthost interface is shaped, not widened away"
                           Expect.stringContains source "type TextStreamReader" "and more than one of them"

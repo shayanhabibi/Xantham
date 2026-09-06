@@ -308,14 +308,21 @@ module Naming =
         |> Array.map pascalSegment
         |> String.concat "."
 
-    /// The compiler-lib group's module.
+    /// The compiler-lib group's namespace. Its two modules are written into one file under it.
     [<Literal>]
     let CompilerLibModule = "TypeScript.Lib"
 
-    /// The compiler-lib group's DOM module: the browser and worker libs, written after the
-    /// ECMAScript module they read.
+    /// The compiler-lib group's ECMAScript module.
+    [<Literal>]
+    let CompilerLibEsModule = "TypeScript.Lib.Es"
+
+    /// The compiler-lib group's DOM module: the browser, worker and script-host libs.
     [<Literal>]
     let CompilerLibDomModule = "TypeScript.Lib.Dom"
+
+    /// The compiler-lib module a family (`Grouping.libFamily`) is written into.
+    let compilerLibFamilyModule (family: string) =
+        if family = "Dom" then CompilerLibDomModule else CompilerLibEsModule
 
     /// A package's module under a namespace: `FSharp.CloudEdge` over `@cloudedge/agents` is
     /// `FSharp.CloudEdge.Agents`.

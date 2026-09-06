@@ -898,7 +898,7 @@ let typeRefTests =
 
             Expect.equal
                 (Spec.typeRef context (Build.shapeModel [ external ]) None "x" 21)
-                (FsNamed "TypeScript.Lib.RegExp", [])
+                (FsNamed "TypeScript.Lib.Es.RegExp", [])
                 "the O7 template"
 
         testCase "an anonymous type in a referenced group still widens, with a finding" <| fun _ ->
