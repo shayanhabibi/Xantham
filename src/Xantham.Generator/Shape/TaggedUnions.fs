@@ -42,22 +42,7 @@ let detectTaggedUnions: Pass<ShapeModel> =
 
                                         None
                                     | Discriminated(tag, tagged, folded) ->
-                                        // Fable writes the discriminant itself, so the tag property is
-                                        // not a field; everything else on the arm is.
-                                        let fieldsOf (arm: TypeFacts) =
-                                            arm.Members
-                                            |> List.filter (fun m ->
-                                                m.Symbol.Name <> tag && not (isSymbolKeyed m.Symbol.Name))
-
-                                        let isPlainData (arm: TypeFacts) =
-                                            arm.CallSignatures.IsEmpty
-                                            && arm.ConstructSignatures.IsEmpty
-                                            && (fieldsOf arm
-                                                |> List.forall (fun m ->
-                                                    not (hasAny SymbolFlags.Method m.Symbol.Flags)))
-                                            && (fieldsOf arm).Length <= TaggedCaseFieldBudget
-
-                                        if not (tagged |> List.forall (fst >> isPlainData)) then
+                                        if not (tagged |> List.forall (fst >> isTaggedCaseData tag)) then
                                             findings <-
                                                 findings
                                                 @ [ Finding.make name (DetectTaggedUnions.ArmNotPlainData tag) ]
@@ -72,7 +57,7 @@ let detectTaggedUnions: Pass<ShapeModel> =
                                                 List.map2
                                                     (fun (arm, value) caseName ->
                                                         let fields =
-                                                            fieldsOf arm
+                                                            taggedCaseFields tag arm
                                                             |> List.map (fun m ->
                                                                 let reference, refFindings =
                                                                     typeRef

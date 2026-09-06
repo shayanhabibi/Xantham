@@ -136,3 +136,115 @@ type Loose3 =
     abstract b: float
     [<ParamObject; Emit("$0")>]
     static member Create (kind: string, b: float) : Loose3 = jsNative
+
+[<Interface>]
+type FetchInfo =
+    abstract ``type``: string
+    abstract url: string
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, url: string) : FetchInfo = jsNative
+
+[<Interface>]
+type AlarmInfo =
+    abstract ``type``: string
+    abstract scheduledTime: float
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, scheduledTime: float) : AlarmInfo = jsNative
+
+[<Interface>]
+type JsRpcInfo =
+    abstract ``type``: string
+    abstract methodName: string
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, methodName: string) : JsRpcInfo = jsNative
+
+[<Interface>]
+type ScheduledInfo =
+    abstract ``type``: string
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string) : ScheduledInfo = jsNative
+
+[<Interface>]
+type QueueInfo =
+    abstract ``type``: string
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string) : QueueInfo = jsNative
+
+[<Interface>]
+type EmailInfo =
+    abstract ``type``: string
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string) : EmailInfo = jsNative
+
+[<Interface>]
+type TraceInfo =
+    abstract ``type``: string
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string) : TraceInfo = jsNative
+
+[<Interface>]
+type SocketInfo =
+    abstract ``type``: string
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string) : SocketInfo = jsNative
+
+[<Interface>]
+type CustomInfo =
+    abstract ``type``: string
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string) : CustomInfo = jsNative
+
+[<Interface>]
+type ConnectInfo =
+    abstract ``type``: string
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string) : ConnectInfo = jsNative
+
+[<Interface>]
+type Wide =
+    abstract ``event``: Wide.Event
+    [<ParamObject; Emit("$0")>]
+    static member Create (``event``: Wide.Event) : Wide = jsNative
+
+module Wide =
+    [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+    type Event =
+        | [<CompiledName("alarm")>] Alarm of scheduledTime: float
+        | [<CompiledName("connect")>] Connect
+        | [<CompiledName("custom")>] Custom
+        | [<CompiledName("email")>] Email
+        | [<CompiledName("fetch")>] Fetch of url: string
+        | [<CompiledName("jsrpc")>] Jsrpc of methodName: string
+        | [<CompiledName("queue")>] Queue
+        | [<CompiledName("scheduled")>] Scheduled
+        | [<CompiledName("socket")>] Socket
+        | [<CompiledName("trace")>] Trace
+
+type OnWide = (Wide.Event -> unit)
+
+[<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+type Named =
+    | [<CompiledName("alarm")>] Alarm of scheduledTime: float
+    | [<CompiledName("fetch")>] Fetch of url: string
+    | [<CompiledName("jsrpc")>] Jsrpc of methodName: string
+
+[<Interface>]
+type Alias =
+    abstract ``event``: Named
+    [<ParamObject; Emit("$0")>]
+    static member Create (``event``: Named) : Alias = jsNative
+
+[<Interface>]
+type Narrow =
+    abstract ``event``: Narrow.Event
+    [<ParamObject; Emit("$0")>]
+    static member Create (``event``: Narrow.Event) : Narrow = jsNative
+
+module Narrow =
+    [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+    type Event =
+        | [<CompiledName("email")>] Email
+        | [<CompiledName("queue")>] Queue
+        | [<CompiledName("scheduled")>] Scheduled
+
+type OnEvent = (obj -> unit)

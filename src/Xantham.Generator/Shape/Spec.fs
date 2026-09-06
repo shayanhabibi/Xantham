@@ -411,6 +411,21 @@ let internal ErasedUnionArity = 9
 [<Literal>]
 let internal TaggedCaseFieldBudget = 12
 
+/// An arm's fields: every member but the discriminant, which Fable writes from the case itself.
+let internal taggedCaseFields (tag: string) (arm: TypeFacts) =
+    arm.Members
+    |> List.filter (fun m -> m.Symbol.Name <> tag && not (isSymbolKeyed m.Symbol.Name))
+
+/// Whether an arm carries data a DU case can bind: properties within the budget, and neither a
+/// method nor a signature.
+let internal isTaggedCaseData (tag: string) (arm: TypeFacts) =
+    let fields = taggedCaseFields tag arm
+
+    arm.CallSignatures.IsEmpty
+    && arm.ConstructSignatures.IsEmpty
+    && (fields |> List.forall (fun m -> not (hasAny SymbolFlags.Method m.Symbol.Flags)))
+    && fields.Length <= TaggedCaseFieldBudget
+
 /// A tuple element the checker marked `...rest` or variadic. F# tuples are fixed-arity, so a
 /// tuple carrying one has no tuple form at all.
 let internal isVariadicElement (flags: ElementFlags) =
