@@ -311,3 +311,127 @@ requires the user's permission and a stated reason; none has been requested.
 
 Plus whatever lanes CJ, CK and CM price into existence. Batch two is written after batch one
 composes, against the numbers batch one leaves behind rather than against these.
+
+---
+
+## Batch one, composed and gated
+
+Composed at `5dc7127`: **517 generator tests, 90 wire tests (1 skipped by design), run gate 323
+checks, every stage ok, exit 0.** Eight lanes, all dispatched on `sonnet`.
+
+| | fork `8d3a4fa` | composed |
+| --- | ---: | ---: |
+| exact | 535 | 543 |
+| ergonomic | 1603 | 1620 |
+| widened | 797 | **794** |
+| escape | 200 | 202 |
+| total findings | 17,040 | 17,122 |
+| generator tests | 490 | 517 |
+| run gate checks | 309 | 323 |
+| `TR031` | 61 | **35** |
+| `TR062` | 0 | 1 |
+| `SI001` | 11 | **1** |
+| `SI008` | 0 | 17 |
+| `TR050` | 44 | **30** |
+| `DT002` / `DT003` / `DT004` | 24 / 1 / 1 | 26 / 2 / 3 |
+| `DO001` | 5 | 10 |
+| `HG003` | 0 | 1 |
+
+### The honest headline is widened -8, and the rise is four new labs
+
+Per fixture, the corpus totals decompose without remainder:
+
+| fixture | exact | ergonomic | widened | escape |
+| --- | ---: | ---: | ---: | ---: |
+| `@cloudflare/workers-types` | 0 | +2 | **-2** | **+1** |
+| `animejs` | 0 | +1 | **-1** | 0 |
+| `solid-js` | 0 | +1 | **-1** | 0 |
+| `shared-tag-lab` | 0 | +2 | **-1** | 0 |
+| `intersection-callable-lab` | 0 | +2 | **-2** | 0 |
+| `intersection-lab` | 0 | +1 | **-1** | 0 |
+| `callable-hybrid-lab` *(new)* | +6 | +6 | +3 | 0 |
+| `paramobject-overload-lab` *(new)* | +2 | +2 | 0 | 0 |
+| `callback-overload-lab` *(new)* | 0 | 0 | +2 | 0 |
+| `dom-shadow-lab` *(new)* | 0 | 0 | 0 | +1 |
+
+**Every existing fixture's widened count fell, eight between them, and no existing fixture gained
+an exact or lost one.** The +5 widened and +1 escape in the corpus totals belong entirely to four
+labs that did not exist at the start of the wave, and a lab exists to carry hard cases.
+
+**The one escape symbol on an existing fixture is a mapping improvement.** Lane CS's newly named
+ten-case union exposes a `TR.AnyToObj` that the unnamed arm carried invisibly; the loss is not new,
+its owner is. `TR008` reads 574 to 575 for that reason alone.
+
+### Composition found two defects that no lane could
+
+Both were invisible on every branch taken alone, and both were found by regenerating and gating the
+merged tree rather than by re-reading a lane's report.
+
+1. **`HG.NothingHarvested` embedded an absolute path in a golden.** The case carried `ctx.EntryFile`
+   whole, so `dom-shadow-lab/symbols.jsonl` recorded the worktree that generated it and differed on
+   every machine. Latent since the case was written: no committed fixture raised `HG003` until lane
+   CQ's lab, whose whole point is total shadowing. One golden of 58 was affected; the other 57
+   already spell files relative. Fixed by `underPackage` at `abecfbd`, and the golden reads
+   `index.d.ts`.
+2. **`signatureKey`'s arity.** Lane CL gave it a type-parameter argument to stop two overloads
+   differing only in a type parameter's source name erasing to one CLR signature. Lane CR added the
+   `FsInvoke` case against the one-argument shape it forked from. Both branches gated green alone;
+   the textual merge does not type-check, and `FS0001` at `Overloads.fs:167` is the whole symptom.
+   Passing `c.TypeParameters c.Parameters` rather than `[]` is what extends CL's fix to CR's
+   construct - a generic `Invoke` overload set would otherwise reach the `FS0438` CL closed, and an
+   empty list would have compiled and been silently wrong.
+
+Regeneration over the composed tree then moved three manifests that neither lane produced alone:
+`animejs` 1,968 findings to 1,935 with widened 169 to 155, `solid-js` 463 to 511, and
+`intersection-callable-lab`'s last widened symbol to ergonomic. **`TR050` fell 44 to 30 in the
+composition**, not on either branch.
+
+### What each lane settled
+
+| Lane | Outcome |
+| --- | --- |
+| CI | **Item 3 is not a defect.** The gap reproduces at 25,933 lines against 30,235 and is the documented contract: `Lib = None` loads the DOM, and a global type library's DOM-redeclaring names then belong to the compiler lib. The CLI with an equivalent `--config` is byte-identical to the golden. |
+| CJ | **`TR008` 574 is a floor.** All 574 attributed across eight clusters; 295 are one `animejs` alias, `Callback<T> = { method(self: T): any }["method"]`, whose return the library discards. |
+| CK | **`TR006`'s literal-union half does not exist.** `namedUnionByMembers` names a pure literal union before the raise site can see it. Split A 271 / B 0 / C 31. |
+| CL | `TR031` 61 to 35. Residual reconciled 17 genuine floor / 16 recoverable and scoped out. |
+| CM | Priced item 1 at 75 sites and recommended taking it; lane CS then took it. |
+| CP | Overloaded `ParamObject` statics are **feasible**, proved at the run gate. |
+| CQ | The CLI names a package whose declarations the default lib absorbs. |
+| CR | All eleven callable hybrids reach their call signatures through `Invoke`. |
+| CS | Intersection arms admitted; `TailStream.EventType` folds into a ten-case union. |
+
+### Carried to wave fifteen
+
+1. **`Invoke` lifts lane CL's named-declaration floor, and neither lane could see it.** CR was
+   scoped to call signatures *beside* properties, CL to call signatures *alone*. Between them sits
+   a named alias with several call signatures - `AnimatableProperty = Setter & Getter` keeps its
+   setter and drops its getter - which an interface carrying overloaded `Invoke` members would
+   hold. The trade is real and needs pricing: `type X = Func<...>` accepts a lambda literal and an
+   `Invoke` interface does not.
+2. **Lane CL's 16 recoverable sites.** `animejs`'s `LayoutAnimationParams` and `AutoLayoutParams`
+   reach `shapeMembers` as an `Intersection` reporting zero call signatures, so `isPureCallback`
+   declines and only `intersectionRef` finds the two signatures, by which point `typeRef` must
+   return one type. Recoverable, and it restructures the shape-decision entry point.
+3. **A named alias whose whole definition is one string literal.** `type DurableObjectRoutingMode =
+   "primary-only"` widens to `string` and the single legal value is lost. Distinct from a
+   single-literal member, and hiding inside lane CK's bucket A of 271.
+4. **A discarded callback return reads `obj`, not `unit`.** 295 `animejs` sites make an F# caller
+   produce a value the library throws away. An ergonomics question rather than a fidelity one, and
+   it wants stating as its own item before anyone prices it.
+5. **`claim`'s naming walk renamed two `@cloudflare` symbols.** Deterministic rather than unstable,
+   and `Shape/Ordering.fs` runs after naming so it is not the fix point. Pinning it is a
+   collision-policy redesign.
+6. **`unionRef`'s self-name lookup misses `ConcreteBranch`** (`Spec.fs:1946`), found by lane CK.
+7. **Item 4, the exclusive-arm fold, is unspent and now unblocked.** Lane CP proved the capability;
+   `TR060` and `TR061` are declared and unused. **Probe 18 carries a caveat the lane understated:**
+   the container pair separates on `unit`-typed placeholders rather than on required parameters, so
+   an arm whose distinguisher is optional in source folds only by keeping the `never` members on
+   the surface - which is the cleanup item 4 exists to get. `AiSearchSearchRequest`'s pair has no
+   such problem.
+
+### A process note
+
+Lane CL gated with `--quick` and its `Overloads.fs` edit reached the integration branch unformatted;
+the composed gate's `format` stage caught it. `--quick` skips `format`, and a lane that never runs
+the unflagged gate has not been gated. The brief already says so and the lane did it anyway, so the
+check belongs at the merge rather than in the instruction.
