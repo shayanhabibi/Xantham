@@ -29,18 +29,18 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 2555,
-      "exact": 29,
-      "ergonomic": 1438,
-      "widened": 758,
+      "total": 1978,
+      "exact": 27,
+      "ergonomic": 1418,
+      "widened": 203,
       "escape": 330
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 125,
-      "exact": 9,
+      "total": 28,
+      "exact": 8,
       "ergonomic": 4,
-      "widened": 112
+      "widened": 16
     },
     {
       "pass": "SC - shape-classes",

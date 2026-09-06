@@ -1634,6 +1634,8 @@ and internal erasedUnionRef
             reference)
         |> List.distinct
 
+    let findings = findings |> List.distinct
+
     match arms with
     | [] -> FsObj, findings @ [ Finding.make owner TypeReference.EmptyUnionToObj ]
     | [ single ] -> single, findings

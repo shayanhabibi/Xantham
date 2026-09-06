@@ -45,23 +45,23 @@
     },
     {
       "pass": "shape-callbacks",
-      "total": 84,
-      "ergonomic": 59,
-      "widened": 25
+      "total": 67,
+      "ergonomic": 58,
+      "widened": 9
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 8068,
+      "total": 7996,
       "exact": 98,
-      "ergonomic": 7233,
-      "widened": 586,
+      "ergonomic": 7231,
+      "widened": 516,
       "escape": 151
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 88,
-      "ergonomic": 32,
-      "widened": 56
+      "total": 71,
+      "ergonomic": 31,
+      "widened": 40
     },
     {
       "pass": "SC - shape-classes",
@@ -73,9 +73,9 @@
     },
     {
       "pass": "SE - shape-exports",
-      "total": 69,
+      "total": 68,
       "ergonomic": 28,
-      "widened": 34,
+      "widened": 33,
       "escape": 7
     },
     {

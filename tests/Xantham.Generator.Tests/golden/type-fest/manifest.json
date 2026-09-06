@@ -21,17 +21,17 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 679,
+      "total": 640,
       "exact": 5,
       "ergonomic": 625,
-      "widened": 49
+      "widened": 10
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 632,
+      "total": 627,
       "exact": 1,
-      "ergonomic": 237,
-      "widened": 394
+      "ergonomic": 236,
+      "widened": 390
     },
     {
       "pass": "SP - synthesize-paramobjects",
