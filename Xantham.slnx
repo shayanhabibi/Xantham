@@ -50,6 +50,8 @@
   <Folder Name="/src/">
     <Project Path="src/Xantham.TypeScript.Wire/Xantham.TypeScript.Wire.fsproj" />
     <Project Path="src/Xantham.Generator/Xantham.Generator.fsproj" />
+    <Project Path="src/xantham-libs/Xantham.Fable.Lib.Dom/Xantham.Fable.Lib.Dom.fsproj" />
+    <Project Path="src/xantham-libs/Xantham.Fable.Lib.Es/Xantham.Fable.Lib.Es.fsproj" />
     <Project Path="src/Xantham.Cli/Xantham.Cli.fsproj" />
     <Project Path="src/Xantham.Fable.Core/Xantham.Fable.Core.fsproj" />
   </Folder>
@@ -65,21 +67,7 @@
     <File Path="tools/probe-method-existence.mjs" />
     <File Path="tools/workspace.fsx" />
     <File Path="tools/xantham-fixtures.fsx" />
-  </Folder>
-  <Folder Name="/tools/proto-gen/">
-    <File Path="tools/proto-gen/generate.mjs" />
-  </Folder>
-  <Folder Name="/tools/session-gen/">
-    <File Path="tools/session-gen/generate.mjs" />
-  </Folder>
-  <Folder Name="/tools/tsc-ast/">
-    <File Path="tools/tsc-ast/enums.mts" />
-    <File Path="tools/tsc-ast/fsharp.mjs" />
-    <File Path="tools/tsc-ast/generate-ast.mts" />
-    <File Path="tools/tsc-ast/kinds.mts" />
-    <File Path="tools/tsc-ast/record.mts" />
-    <File Path="tools/tsc-ast/upstream.json" />
-    <File Path="tools/tsc-ast/upstream.lock.json" />
+    <Project Path="tools/tools.fsproj" />
   </Folder>
   <Project Path="site/site.fsproj" />
 </Solution>

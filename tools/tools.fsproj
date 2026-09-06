@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <IsPackable>false</IsPackable>
+        <TargetFramework>netstandard2.0</TargetFramework>
+    </PropertyGroup>
+    <ItemGroup>
+        <None Include="tsc-ast/**/*" />
+        <None Include="browser-gen/**/*" />
+        <None Include="proto-gen/**/*" />
+        <None Include="session-gen/**/*" />
+    </ItemGroup>
+
+</Project>
