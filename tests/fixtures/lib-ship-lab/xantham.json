@@ -1,0 +1,10 @@
+{
+    // Overrides the compiler's default lib set entirely, to one small file: `lib.scripthost.d.ts`
+    // (320 lines, plain interfaces and `declare var`s, no generics). Small enough to commit a
+    // golden for; `lib.dom.d.ts` is 333,937 emitted lines and stays a measurement, never a fixture.
+    "lib": ["scripthost"],
+
+    // The compiler-lib group ships rather than widens: its declarations are harvested and shaped
+    // in full (item 1f), the same as this package's own would be.
+    "groups": { "typescript/lib": "ship" }
+}

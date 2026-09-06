@@ -633,9 +633,11 @@ type HarvestModel =
         Namespaces: Map<int, string>
         /// Count of the entry package's own declared names that a `lib.*.d.ts` declaration of
         /// the same name precedes: `harvest-globals` groups such a name as the compiler lib
-        /// (`Grouping.classify`) and it does not reach `Exports`. Zero for a package that
-        /// harvests through `harvest-exports` instead - the count is meaningful only for a
-        /// global type library, which is the shape `harvest-globals` runs against.
+        /// (`Grouping.classify`) and it does not reach `Exports` - unless the compiler-lib
+        /// group's own disposition ships it, in which case those names are harvested rather
+        /// than shadowed and this count excludes them. Zero for a package that harvests through
+        /// `harvest-exports` instead - the count is meaningful only for a global type library,
+        /// which is the shape `harvest-globals` runs against.
         ShadowedByLib: int
     }
 

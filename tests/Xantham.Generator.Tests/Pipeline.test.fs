@@ -1528,6 +1528,38 @@ let pipelineTests =
                               "the compiler's own lib is named as the group the discarded symbols came from" ])
 
         yield!
+            fixtureTests
+                "lib-ship-lab"
+                (handFixture "lib-ship-lab")
+                (handConfig (handFixture "lib-ship-lab"))
+                (fun package ->
+                    [ testCase "the compiler-lib group ships its own declarations, entry package or not"
+                      <| fun _ ->
+                          let rendered =
+                              Async.RunSynchronously(Pipeline.generate (handConfig (handFixture "lib-ship-lab")) package)
+
+                          // The entry declares nothing; every declaration comes from
+                          // `lib.scripthost.d.ts`, classified `CompilerLib` (`Grouping.classify`)
+                          // rather than `EntryPackage`. `"typescript/lib": "ship"` is what makes
+                          // `harvest-globals` admit it (item 1f) - without that setting this fixture
+                          // would produce `dom-shadow-lab` and `lib-reference-lab`'s own single
+                          // `HG003` escape finding and nothing else.
+                          let group =
+                              rendered.Files
+                              |> List.tryFind (fun (path, _) -> path.Contains "TypeScript.Lib")
+
+                          Expect.isSome group "the compiler-lib group renders its own file, not just the entry module"
+
+                          let source = group |> Option.get |> snd
+
+                          Expect.stringContains source "type ActiveXObject" "a scripthost interface is shaped, not widened away"
+                          Expect.stringContains source "type TextStreamReader" "and more than one of them"
+
+                          Expect.isFalse
+                              (rendered.Findings |> List.exists (fun f -> f.Key = "HG003"))
+                              "harvest-globals finds something to harvest, so it never reaches NothingHarvested" ])
+
+        yield!
             fixtureTests "group-map-lab" groupMapLab (handConfig groupMapLab) (fun package ->
                 [ testCase "a mapped group is redirected to the bindings its table names" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate (handConfig groupMapLab) package)

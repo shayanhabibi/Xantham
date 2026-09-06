@@ -1,0 +1,6 @@
+{
+    "name": "lib-ship-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "description": "an entry package with no declarations of its own, whose xantham.json ships the compiler-lib group (item 1f, wave fifteen): the scripthost lib file's own declarations are what this run harvests and shapes."
+}

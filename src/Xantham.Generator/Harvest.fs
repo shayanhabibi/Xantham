@@ -225,20 +225,31 @@ let harvestGlobals: Pass<HarvestModel> =
                                 position = 0
                             )
 
+                        // A run that ships the compiler-lib group (`xantham.json`'s
+                        // `"typescript/lib": "ship"`) harvests its declarations alongside the
+                        // entry package's own: the shape tier already renders such a name in
+                        // full rather than through `libBinding` (`Shape/Spec.fs`), so a
+                        // declaration this pass withholds never reaches anything downstream that
+                        // could act on it.
+                        let shipsCompilerLib = GeneratorConfig.disposition ctx.Config CompilerLib = Ship
+
+                        let admits origin =
+                            origin = EntryPackage || (origin = CompilerLib && shipsCompilerLib)
+
                         let ours =
                             symbols
-                            |> Array.filter (fun symbol ->
-                                Grouping.classify ctx.PackageDir (ValueSome symbol) = EntryPackage)
+                            |> Array.filter (fun symbol -> admits (Grouping.classify ctx.PackageDir (ValueSome symbol)))
 
                         // A name a `lib.*.d.ts` declaration precedes classifies as the compiler
                         // lib (`Grouping.classify` reads only the first declaration), so such a
-                        // symbol never reaches `ours` above. This still finds it: any of the
-                        // symbol's declarations sitting under the package directory is this
-                        // package's own contribution to the merge, lost to `Exports` all the same.
+                        // symbol never reaches `ours` above, unless `shipsCompilerLib` admitted it
+                        // there already. This still finds the rest: any of the symbol's
+                        // declarations sitting under the package directory is this package's own
+                        // contribution to the merge, lost to `Exports` all the same.
                         let shadowedByLib =
                             symbols
                             |> Array.filter (fun symbol ->
-                                Grouping.classify ctx.PackageDir (ValueSome symbol) <> EntryPackage
+                                not (admits (Grouping.classify ctx.PackageDir (ValueSome symbol)))
                                 && Grouping.declaresUnderPackage ctx.PackageDir symbol)
                             |> Array.length
 
@@ -255,8 +266,7 @@ let harvestGlobals: Pass<HarvestModel> =
 
                         let namespaces =
                             declared
-                            |> Array.filter (fun symbol ->
-                                Grouping.classify ctx.PackageDir (ValueSome symbol) = EntryPackage)
+                            |> Array.filter (fun symbol -> admits (Grouping.classify ctx.PackageDir (ValueSome symbol)))
                             |> namespacesAmong
 
                         // An ambient module declaration is a global-scope symbol whose name is
