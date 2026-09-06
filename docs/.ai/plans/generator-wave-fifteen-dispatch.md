@@ -148,3 +148,45 @@ This is wave fourteen's lane CH and lane CN failure repeating across a wave boun
 it beyond a lane-local surprise: **a brief saying "never `--quick`" does not stop a lane using it,
 and a completion notification is not evidence of completion.** Both checks belong to the managing
 agent at merge. The lane was re-sent with the correction rather than re-briefed from scratch.
+
+---
+
+## Batch two
+
+Re-planned on lane DA's measurement. The worklist ordered 1b before 1c; DA inverted that, so the
+DOM half goes first and the ECMAScript half waits on a diagnosis.
+
+| Lane | Item | Kind | Model |
+| --- | --- | --- | --- |
+| DD | the silent empty harvest | implementation | sonnet |
+| DE | why the ECMAScript lib does not complete | read-only diagnosis | sonnet |
+| DF | `CompilerLib` carries a `Ship` disposition, DOM end to end | implementation | to dispatch after DD |
+
+DF waits for DD rather than running beside it: both edit `Harvest.fs`, and DD's subject is what
+happens when harvest finds nothing while DF changes what harvest finds. The collision is textual
+rather than semantic, and sequencing costs less than composing it.
+
+### The design 1f implements, established before briefing it
+
+Read off the tree rather than left to the lane, because wave fourteen showed a brief that asks for
+analysis first gets analysis and no change:
+
+- `PackageId.CompilerLib` exists, and `Grouping.classify` already returns it. It recognises the
+  default libs three ways, because the compiler serves them three ways: the platform package
+  (`node_modules/@typescript/typescript-<rid>/lib/lib.*.d.ts`), `typescript/lib`, and `bundled:`
+  pseudo-paths.
+- The group already has its `xantham.json` key (`typescript/lib`, `Model.fs:245`) and its module
+  name (`Naming.CompilerLibModule`, `"TypeScript.Lib"`, `Model.fs:313`).
+- **The shape tier already branches on the disposition.** `Shape/Classes.fs:56` and
+  `Shape/Spec.fs:1742` both consult `GeneratorConfig.disposition ctx.Config CompilerLib = Ship`
+  and behave differently when it is set.
+
+So the disposition is plumbed from configuration through to shaping, and setting it changes
+behaviour today. **What is missing is the harvest tier.** `Harvest.harvestGlobals` keeps symbols
+whose classification equals `EntryPackage` and nothing else, so a run with `typescript/lib` set to
+`ship` still harvests no compiler-lib declaration and the shape tier's branch never has anything
+to act on.
+
+That is the gap 1f closes, and it is narrower than lane DA's workaround implied. Entry-package
+impersonation was necessary only because harvest admits one group; it is not the shape of the fix.
+
