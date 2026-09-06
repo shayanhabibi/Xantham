@@ -1756,6 +1756,23 @@ let private generatedDelegateForms () =
             DelegateNameLab.CallNesting.Outer(fun seed -> (fun x -> $"one:{seed}:{x}"))
         ))
 
+/// A case folded from arms sharing a tag value agrees on the tag alone, so it carries no field.
+/// What the fold claims is that the tag still reaches JavaScript from a payload-free case.
+let private foldedTaggedCases () =
+    equal
+        "a folded case carrying no field still erases to the tagged object"
+        """{"state":"done"}"""
+        (json SharedTagLab.Terminal.Done)
+
+    equal
+        "and a sibling case the fold left alone carries its own tag"
+        """{"state":"pending"}"""
+        (json SharedTagLab.Terminal.Pending)
+
+    match SharedTagLab.Terminal.Done with
+    | SharedTagLab.Terminal.Done -> check "a folded case matches itself on the tag" true
+    | SharedTagLab.Terminal.Pending -> check "a folded case matched Pending" false
+
 [<EntryPoint>]
 let main _ =
     globals ()
@@ -1768,6 +1785,7 @@ let main _ =
     constructorObjects ()
     heritage ()
     taggedUnions ()
+    foldedTaggedCases ()
     nestedNames ()
     optionalHooks ()
     renamedStatics ()

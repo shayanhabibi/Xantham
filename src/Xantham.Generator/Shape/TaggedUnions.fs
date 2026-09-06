@@ -8,6 +8,8 @@ open Xantham.Generator.Shape.Spec
 /// Declarations for the unions the checker proves are discriminated (D4, §4.5(2)): an F# DU of
 /// one payload per case, erased by Fable back to the object - `Circle(radius = 2.0)` becomes
 /// `{ kind: "circle", radius: 2 }`. An arm that is not plain data is left to `shape-aliases`.
+/// Arms sharing a tag value fold into one case carrying the members they agree on; a fold
+/// leaving a single case leaves the union to `shape-aliases` too.
 let detectTaggedUnions: Pass<ShapeModel> =
     {
         Name = "detect-tagged-unions"
@@ -32,8 +34,14 @@ let detectTaggedUnions: Pass<ShapeModel> =
                                 else
 
                                     match taggedUnionShape model facts with
-                                    | None -> None
-                                    | Some(tag, tagged) ->
+                                    | Untagged -> None
+                                    | TagCollides(tag, value) ->
+                                        findings <-
+                                            findings
+                                            @ [ Finding.make name (DetectTaggedUnions.TagValueShared(tag, value)) ]
+
+                                        None
+                                    | Discriminated(tag, tagged, folded) ->
                                         // Fable writes the discriminant itself, so the tag property is
                                         // not a field; everything else on the arm is.
                                         let fieldsOf (arm: TypeFacts) =
@@ -91,7 +99,14 @@ let detectTaggedUnions: Pass<ShapeModel> =
                                                     caseNames
 
                                             findings <-
-                                                findings @ [ Finding.make name (DetectTaggedUnions.TaggedUnion tag) ]
+                                                findings
+                                                @ [
+                                                    for value in folded ->
+                                                        Finding.make
+                                                            name
+                                                            (DetectTaggedUnions.ArmsMergedOnSharedTag(tag, value))
+                                                ]
+                                                @ [ Finding.make name (DetectTaggedUnions.TaggedUnion tag) ]
 
                                             Some(
                                                 FsTaggedUnion
