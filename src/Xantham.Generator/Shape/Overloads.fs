@@ -164,7 +164,7 @@ let dedupeOverloads: Pass<ShapeModel> =
                                 // `Invoke` overloads collide the same way `Create` overloads do: two
                                 // call signatures that widen to the same F# parameter types are one
                                 // .NET member, not two.
-                                let key = ("Invoke", signatureKey c.Parameters).ToString()
+                                let key = ("Invoke", signatureKey c.TypeParameters c.Parameters).ToString()
 
                                 if Set.contains key seen then
                                     findings <-

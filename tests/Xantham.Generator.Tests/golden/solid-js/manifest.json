@@ -28,9 +28,9 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 463,
+      "total": 511,
       "exact": 14,
-      "ergonomic": 358,
+      "ergonomic": 406,
       "widened": 56,
       "escape": 35
     },
