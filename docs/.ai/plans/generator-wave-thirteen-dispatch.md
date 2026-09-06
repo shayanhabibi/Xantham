@@ -303,6 +303,45 @@ findings with 502 widened, against the 7,989 and 507 the taken side carried. Fiv
 exist on neither branch alone — lane CD resolves indexed accesses that lane CF's newly named unions
 then answer for. That is the case for gating a batch as a batch rather than per lane.
 
+## Batch three - lane CH, composed and gated
+
+An object whose whole content is one index signature references
+`Xantham.Fable.Core.Record<'Key,'Value>` rather than minting an interface. `MB004` falls 140 to
+63; `TR059` reads 221, counted per reference site where `MB004` counted per declaration. Composed
+totals: tiers 535/1603/797/200 over 3,135 symbols, 17,040 findings, `SY004` 726. Tests 490, wire
+90, run gate 309 with five new `recordIndex()` checks. Gate green, tree clean.
+
+### The widened column rose and no mapping got worse
+
+Widened reads 792 to 797 and three symbols reach escape. Both read as regressions and neither is
+one. Sixty-seven declarations vanish; five were widened, four were escape, and every one carried
+`MB004`, `SP003` and `SY004` - a minted anonymous type. Their marks reattached to the sites
+referencing them.
+
+The escape three are exact. `DynamicDispatchOptions.Outbound`, `DispatchNamespace.Get.Args` and
+`animejs`'s `Scope.Data` each owned a `TR008` for an `any`-valued index signature; inlined as
+`Record<string, obj>`, that `TR008` lands on `DynamicDispatchOptions`, `DispatchNamespace` and
+`Scope`. The fourth, `solid-js`'s `SharedConfig.Resources`, moved nothing, because `SharedConfig`
+was already escape. The widened five reach twelve sites the same way -
+`FunctionDefinition.parameters` read `RequestInitCfProperties.Base` and now reads
+`Record<string, obj>`, the same `obj` written where the caller can see it.
+
+One declaration serves many references, so re-attribution raises a count while improving the
+surface: five widened declarations become twelve widened sites. **The widened column is not
+comparable across this merge.**
+
+The lane reported the net `+5` and set it aside as below its effort budget. The gross is twelve
+and the escape movement went unreported; both were attributed at merge, from the per-symbol tiers
+in `symbols.jsonl` across the fork and the lane tip.
+
+### The third sighting was confirmed
+
+Lane CH was briefed to expect lane CF's rule again and met it. A real declaration keeps its name
+and only a `synthesize-anonymous` claim does not, tested through `SymbolName` syntheticity.
+Generic index signatures needed no `FreeTypeParams.fs` change but did need two empirical
+exclusions: unused declared type parameters, and self or mutual recursion, which would otherwise
+reach FS0953. `Record` is always written fully qualified, so no collision path exists.
+
 ## Carried forward
 
 1. **`isObjectMember` rejects intersection arms.** `TailStream.EventType`'s three sites are all
