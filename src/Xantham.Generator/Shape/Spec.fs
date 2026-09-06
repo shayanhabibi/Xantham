@@ -368,8 +368,11 @@ let internal taggedUnionShape (model: ShapeModel) (facts: TypeFacts) : TaggedSha
         |> List.choose (fun id -> Map.tryFind id model.Types)
         |> List.filter (isNullish >> not)
 
+    /// An intersection distributed over a union arrives flagged `Intersection` rather than
+    /// `Object`, with its members already resolved onto the arm.
     let isObjectMember (m: TypeFacts) =
-        flag TypeFlags.Object m && not m.Members.IsEmpty
+        (flag TypeFlags.Object m || flag TypeFlags.Intersection m)
+        && not m.Members.IsEmpty
 
     if members.Length < 2 || not (members |> List.forall isObjectMember) then
         Untagged

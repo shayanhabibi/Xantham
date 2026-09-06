@@ -4,9 +4,9 @@
   "module": "Cloudflare.WorkersTypes",
   "counts": {
     "exact": 240,
-    "ergonomic": 1056,
-    "widened": 387,
-    "escape": 110
+    "ergonomic": 1058,
+    "widened": 385,
+    "escape": 111
   },
   "passes": [
     {
@@ -27,8 +27,8 @@
     },
     {
       "pass": "SY - synthesize-anonymous",
-      "total": 549,
-      "exact": 548,
+      "total": 550,
+      "exact": 549,
       "widened": 1
     },
     {
@@ -38,23 +38,24 @@
     },
     {
       "pass": "DT - detect-tagged-unions",
-      "total": 48,
-      "exact": 16,
-      "ergonomic": 29,
-      "widened": 3
+      "total": 63,
+      "exact": 17,
+      "ergonomic": 42,
+      "widened": 3,
+      "escape": 1
     },
     {
       "pass": "shape-callbacks",
-      "total": 71,
+      "total": 70,
       "ergonomic": 62,
-      "widened": 9
+      "widened": 8
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 8132,
+      "total": 8130,
       "exact": 95,
       "ergonomic": 7366,
-      "widened": 521,
+      "widened": 519,
       "escape": 150
     },
     {
