@@ -674,7 +674,7 @@ type Members =
 type HarvestGlobals =
     | [<Escape>] AmbientModuleDropped
     | [<Escape>] UnwritableGlobalDropped
-    | [<Escape>] NothingHarvested of entryFile: string
+    | [<Escape>] NothingHarvested of entryFile: string * inScope: int * elsewhere: string
     | [<Exact>] AmbientModuleHarvested of specifier: string * exports: int
     | [<Escape>] AmbientModuleWildcard of specifier: string
     | [<Exact>] NamespaceIsModuleBody of ns: string * specifier: string
@@ -684,8 +684,11 @@ type HarvestGlobals =
             match this with
             | AmbientModuleDropped -> "global dropped - an ambient module declaration that exports nothing"
             | UnwritableGlobalDropped -> "global dropped - its name cannot be written as an F# declaration"
-            | NothingHarvested entryFile ->
+            | NothingHarvested(entryFile, 0, _) ->
                 $"{entryFile} declares neither a module nor any ambient global - nothing harvested"
+            | NothingHarvested(entryFile, inScope, elsewhere) ->
+                $"{entryFile} declares neither a module nor any ambient global - {inScope} in-scope \
+                  symbol(s) resolve to {elsewhere} rather than this package, nothing harvested"
             | AmbientModuleHarvested(specifier, exports) ->
                 $"{exports} exports harvested from ambient module \"{specifier}\"; each binds with [<Import(name, \"{specifier}\")>]"
             | AmbientModuleWildcard specifier ->

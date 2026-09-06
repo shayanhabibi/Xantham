@@ -1496,6 +1496,36 @@ let pipelineTests =
                       Expect.isTrue (says "PromiseLike reads as JS.Promise") "a thenable is not a promise"
                       Expect.isTrue (says "ReadonlyMap reads as JS.Map") "and readonly is not carried" ])
 
+        yield!
+            fixtureTests
+                "lib-reference-lab"
+                (handFixture "lib-reference-lab")
+                (handConfig (handFixture "lib-reference-lab"))
+                (fun package ->
+                    [ testCase "an entry reaching content only through a lib reference reports what it discarded"
+                      <| fun _ ->
+                          let rendered =
+                              Async.RunSynchronously(Pipeline.generate (handConfig (handFixture "lib-reference-lab")) package)
+
+                          // `/// <reference lib="dom" />` resolves against the compiler's own bundled
+                          // copy, never against this package (item 1a), so every symbol it brings into
+                          // scope classifies away from `EntryPackage` and `harvest-globals` finds
+                          // nothing of the package's own to harvest.
+                          Expect.equal
+                              (rendered.Findings |> List.filter (fun f -> f.Tier = Escape) |> List.length)
+                              1
+                              "harvest-globals's own single escape finding"
+
+                          let says fragment =
+                              rendered.Findings |> List.exists (fun f -> f.Message.Contains(fragment: string))
+
+                          Expect.isTrue
+                              (says "in-scope symbol(s) resolve to")
+                              "the finding names how many symbols were in scope and where they resolved"
+
+                          Expect.isTrue
+                              (says "in typescript/lib")
+                              "the compiler's own lib is named as the group the discarded symbols came from" ])
 
         yield!
             fixtureTests "group-map-lab" groupMapLab (handConfig groupMapLab) (fun package ->

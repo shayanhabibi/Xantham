@@ -8,6 +8,22 @@ open Xantham.TypeScript.Wire.Proto
 
 let private hasAny (mask: SymbolFlags) (flags: SymbolFlags) = uint32 (flags &&& mask) <> 0u
 
+/// Where the entry file's whole in-scope environment resolved, grouped and counted, for a run
+/// where none of it classified as the entry package (reading `Grouping.classify`'s existing
+/// groups, not adding one). Most populous group first, so a reference chain dominated by one
+/// group names that group up front.
+let private elsewhere (packageDir: string) (symbols: SymbolResponse[]) =
+    symbols
+    |> Array.countBy (fun symbol -> Grouping.classify packageDir (ValueSome symbol))
+    |> Array.sortByDescending snd
+    |> Array.map (fun (origin, count) ->
+        let label =
+            GeneratorConfig.groupKey origin
+            |> Option.defaultValue "unclassified declarations"
+
+        $"{count} in {label}")
+    |> String.concat ", "
+
 /// `path` spelled relative to `packageDir` with forward separators, so a finding that carries a
 /// file reads the same on every machine. A path outside the package keeps its own spelling.
 let internal underPackage (packageDir: string) (path: string) =
@@ -296,7 +312,11 @@ let harvestGlobals: Pass<HarvestModel> =
                                     [
                                         Finding.make
                                             "<module>"
-                                            (HarvestGlobals.NothingHarvested(underPackage ctx.PackageDir ctx.EntryFile))
+                                            (HarvestGlobals.NothingHarvested(
+                                                underPackage ctx.PackageDir ctx.EntryFile,
+                                                symbols.Length,
+                                                elsewhere ctx.PackageDir symbols
+                                            ))
                                     ]
                                 )
                         else
