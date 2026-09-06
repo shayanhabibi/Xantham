@@ -804,6 +804,20 @@ let rec private functionShapedCallback
 let internal callbackRetainedAsDelegate (model: ShapeModel) (names: Map<int, string>) (facts: TypeFacts) =
     isPureCallback facts && not (functionShapedCallback model names Set.empty facts)
 
+/// A call signature's parameter types, in order, ahead of any type resolution: the identity an
+/// overload set separates on everywhere but its return type.
+let private overloadParameterKey (model: ShapeModel) (signature: ResolvedSignature) : int list =
+    (expandTupleRest model signature).Parameters |> List.map _.TypeId
+
+/// Whether every call signature on a callback is distinguishable from every other by parameter
+/// count and parameter types alone (§4.2's overload separation, extended to callbacks): two
+/// signatures of the same arity and identical parameter types, differing only in their return
+/// type, collapse to one key and make the whole set inseparable - .NET overload resolution never
+/// consults a return type.
+let internal callSignaturesSeparable (model: ShapeModel) (facts: TypeFacts) =
+    let keys = facts.CallSignatures |> List.map (overloadParameterKey model)
+    List.distinct keys |> List.length = List.length keys
+
 // ---------------------------------------------------------------------------------------------
 // Literal-typed parameters that separate an overload set (§4.2).
 // ---------------------------------------------------------------------------------------------
@@ -1845,9 +1859,13 @@ and internal delegateRef
         let mutable findings =
             if rest.IsEmpty then
                 []
-            else
+            elif callSignaturesSeparable model facts then
                 [
                     Finding.make owner (TypeReference.CallbackOverloadsFromFirst(rest.Length + 1))
+                ]
+            else
+                [
+                    Finding.make owner (TypeReference.CallbackOverloadsNotSeparable(rest.Length + 1))
                 ]
 
         let signature = expandTupleRest model first
@@ -2587,8 +2605,10 @@ let internal shapeMembers
                 true)
         |> List.collect (fun m ->
             let owner = $"{self}.{m.Symbol.Name}"
+            let agreed = agreedMemberType model facts m
+            let effectiveTypeId = agreed |> Option.defaultValue m.TypeId
 
-            let asMethod =
+            let methodFacts =
                 if not (hasAny SymbolFlags.Method m.Symbol.Flags) then
                     None
                 else
@@ -2596,8 +2616,27 @@ let internal shapeMembers
                     | Some memberFacts when not memberFacts.CallSignatures.IsEmpty -> Some memberFacts
                     | _ -> None
 
-            match asMethod with
-            | Some memberFacts ->
+            // A property carrying a pure callback of two or more signatures separable by
+            // parameter count and type (§4.2, extended to callbacks): F# admits the overload set
+            // as one method per signature under the property's own name, so no name is minted for
+            // it (Callbacks.fs's TR031/TR062 floor is for the callback's own declaration, not for
+            // a member that merely holds one). An optional member is excluded - F#'s method form
+            // has no way to carry the option that `m.Optional` demands.
+            let recoverableCallbackFacts =
+                if methodFacts.IsSome || m.Optional then
+                    None
+                else
+                    match Map.tryFind effectiveTypeId model.Types with
+                    | Some memberFacts when
+                        isPureCallback memberFacts
+                        && memberFacts.CallSignatures.Length > 1
+                        && callSignaturesSeparable model memberFacts
+                        ->
+                        Some memberFacts
+                    | _ -> None
+
+            match methodFacts, recoverableCallbackFacts with
+            | Some memberFacts, _ ->
                 memberFacts.CallSignatures
                 |> List.map (fun signature ->
                     let typeParameters, parameters, returns, signatureFindings =
@@ -2614,11 +2653,28 @@ let internal shapeMembers
                             Parameters = parameters
                             Return = returns
                         })
-            | None ->
-                let agreed = agreedMemberType model facts m
+            | None, Some memberFacts ->
+                if agreed.IsSome then
+                    emit (Finding.make owner TypeReference.IntersectionOperandsIdentical)
 
-                let reference, refFindings =
-                    typeRef ctx model (Some self) owner (agreed |> Option.defaultValue m.TypeId)
+                memberFacts.CallSignatures
+                |> List.map (fun signature ->
+                    let typeParameters, parameters, returns, signatureFindings =
+                        shapeSignature ctx model (Some self) owner signature
+
+                    findings <- findings @ signatureFindings
+
+                    FsMethod
+                        {
+                            Name = Naming.memberName m.Symbol.Name
+                            Docs = m.Docs
+                            Tags = m.Tags
+                            TypeParameters = typeParameters
+                            Parameters = parameters
+                            Return = returns
+                        })
+            | None, None ->
+                let reference, refFindings = typeRef ctx model (Some self) owner effectiveTypeId
 
                 findings <- findings @ refFindings
 

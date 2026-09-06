@@ -20,9 +20,13 @@ let private delegateShapeFor
         let overloadFindings =
             if rest.IsEmpty then
                 []
-            else
+            elif callSignaturesSeparable model facts then
                 [
                     Finding.make name (TypeReference.CallbackOverloadsFromFirst(rest.Length + 1))
+                ]
+            else
+                [
+                    Finding.make name (TypeReference.CallbackOverloadsNotSeparable(rest.Length + 1))
                 ]
 
         // The signature's own parameters are discarded here rather than written: a delegate

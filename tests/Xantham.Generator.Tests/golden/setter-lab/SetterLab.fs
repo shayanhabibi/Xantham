@@ -21,12 +21,13 @@ type Single<'T, 'U> = private Single__ of ('U -> 'U)
 /// <summary>
 /// Reference positions, including the empty-tuple rest <c>Setter&lt;string | undefined&gt;</c> reaches.
 /// </summary>
-[<Interface>]
 type Holder =
-    abstract setter: (obj -> obj) with get, set
-    abstract optional: (unit -> unit) with get, set
-    abstract distinct: (obj -> obj) with get, set
+    abstract setter<'U>: args: U2<'U, (string -> 'U)> -> 'U
+    abstract setter<'U>: value: (string -> 'U) -> 'U
+    abstract setter<'U>: value: 'U -> 'U
+    abstract optional: unit -> unit
+    abstract optional<'U>: value: (string option -> 'U) -> 'U
+    abstract optional<'U>: value: 'U -> 'U
+    abstract distinct<'A>: value: 'A -> 'A
     abstract single: (obj -> obj) with get, set
-    abstract divergent: (obj -> obj) with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (setter: (obj -> obj), optional: (unit -> unit), distinct: (obj -> obj), single: (obj -> obj), divergent: (obj -> obj)) : Holder = jsNative
+    abstract divergent<'U>: value: 'U -> 'U

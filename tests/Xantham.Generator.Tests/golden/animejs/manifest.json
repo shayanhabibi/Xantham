@@ -28,10 +28,10 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 1952,
+      "total": 1919,
       "exact": 27,
-      "ergonomic": 1424,
-      "widened": 172,
+      "ergonomic": 1405,
+      "widened": 158,
       "escape": 329
     },
     {
@@ -61,9 +61,9 @@
     },
     {
       "pass": "DO - dedupe-overloads",
-      "total": 15,
+      "total": 17,
       "exact": 1,
-      "widened": 14
+      "widened": 16
     }
   ]
 }

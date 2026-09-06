@@ -854,17 +854,19 @@ let pipelineTests =
 
                         Expect.stringContains
                             source
-                            "abstract round: Func<float, float, float>"
-                            "the member reads the first signature rather than obj"
+                            "abstract round: value: float * length: float -> float"
+                            "the first operand's signature, as a method overload"
+
+                        Expect.stringContains
+                            source
+                            "abstract round: length: float -> float"
+                            "and the second, under the same member name"
 
                         Expect.isFalse (source.Contains "abstract round: obj") "and no longer widens"
 
-                        Expect.equal
-                            (rendered.Findings
-                             |> List.filter (fun finding -> finding.Key = "TR050")
-                             |> List.map (fun finding -> finding.Symbol, finding.Message))
-                            [ "Utils.round", "intersection of callable operands rendered from its 2 call signatures" ]
-                            "the member position is the one site, and it counts both signatures"
+                        Expect.isEmpty
+                            (rendered.Findings |> List.filter (fun finding -> finding.Symbol.StartsWith "Utils.round"))
+                            "arity separates the two signatures, so nothing is dropped and no name is minted"
 
                       testCase "the export position already rendered both signatures, and still does" <| fun _ ->
                         let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -1905,16 +1907,66 @@ let pipelineTests =
 
                   testCase "a tuple-typed rest parameter reads as the parameters it stands for" <| fun _ ->
                       // Wave two's second handback: `Setter<string | undefined>` reached the
-                      // empty tuple and rendered `Action<obj[]>`.
+                      // empty tuple and rendered `Action<obj[]>`. Wave fourteen's lane CL recovers
+                      // `Holder`'s members as separable overloads (§4.2 extended to callbacks), so
+                      // the first signature - the one this test pins - now reads as one overload
+                      // among several under the same member name, rather than as the delegate the
+                      // whole property once collapsed to.
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                       let source = rendered.Files |> List.head |> snd
 
-                      Expect.stringContains source "abstract optional: (unit -> unit) with" "no parameter at all"
-                      Expect.stringContains source "abstract setter: (obj -> obj) with" "and one for a one-element tuple"
+                      Expect.stringContains source "abstract optional: unit -> unit" "no parameter at all"
+                      Expect.stringContains
+                          source
+                          "abstract setter<'U>: args: U2<'U, (string -> 'U)> -> 'U"
+                          "and one for a one-element tuple"
 
                       Expect.isEmpty
                           (rendered.Findings |> List.filter (fun f -> f.Key = "TR029"))
                           "neither arity is a tuple the renderer has to widen" ])
+
+        yield!
+            fixtureTests "callback-overload-lab" (handFixture "callback-overload-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a member's separable overloads become one method per signature" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains source "abstract round: value: float -> float" "the one-argument signature"
+                      Expect.stringContains
+                          source
+                          "abstract round: value: float * precision: float -> float"
+                          "and the two-argument signature, both under one name"
+
+                      Expect.isEmpty
+                          (rendered.Findings
+                           |> List.filter (fun f -> (f.Key = "TR031" || f.Key = "TR062") && f.Symbol.StartsWith "Holder.round"))
+                          "recovered in full: no name minted, nothing dropped"
+
+                  testCase "same arity and parameter types, differing only in return, is not separable" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                      Expect.equal
+                          (rendered.Findings |> List.filter (fun f -> f.Symbol = "Holder.parse") |> List.map _.Key)
+                          [ "TR062" ]
+                          ".NET overload resolution never consults a return type"
+
+                  testCase "an optional member's overloads stay on the floor" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                      Expect.equal
+                          (rendered.Findings
+                           |> List.filter (fun f -> f.Symbol = "Holder.measure" && f.Key = "TR031")
+                           |> List.length)
+                          1
+                          "F#'s method form has no way to carry the option `?` demands"
+
+                  testCase "a named declaration's own overloads are a floor, not a member to recover" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                      Expect.equal
+                          (rendered.Findings |> List.filter (fun f -> f.Symbol = "Formatter") |> List.map _.Key)
+                          [ "TR031" ]
+                          "a `type X = delegate of ...` holds one signature" ])
 
         yield!
             fixtureTests "constraint-arg-lab" (handFixture "constraint-arg-lab") GeneratorConfig.Default (fun package ->

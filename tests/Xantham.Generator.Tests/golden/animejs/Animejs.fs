@@ -4434,7 +4434,7 @@ type DrawableSVGGeometry =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/setAttribute)
     /// </summary>
-    abstract setAttribute: Action<string, string> with get, set
+    abstract setAttribute: qualifiedName: string * value: string -> unit
     /// <summary>
     /// The **<c>setAttributeNS()</c>** method of the Element interface adds a new attribute or changes the value of an attribute with the given namespace and name.
     ///
@@ -5364,18 +5364,29 @@ type ChainedLerp = delegate of start: float * ``end``: float -> ChainableUtil
 type ChainedDamp = delegate of start: float * ``end``: float * deltaTime: float -> ChainableUtil
 
 type Utils =
-    abstract roundPad: Func<TimelinePosition, float, string>
-    abstract padStart: Func<float, float, string, string>
-    abstract padEnd: Func<float, float, string, string>
-    abstract wrap: Func<float, float, float, float>
-    abstract mapRange: Func<float, float, float, float, float, float>
-    abstract degToRad: (float -> float)
-    abstract radToDeg: (float -> float)
-    abstract snap: Func<float, U2<float, float[]>, float>
-    abstract clamp: Func<float, float, float, float>
-    abstract round: Func<float, float, float>
-    abstract lerp: Func<float, float, float, float>
-    abstract damp: Func<float, float, float, float, float>
+    abstract roundPad: v: TimelinePosition * decimalLength: float -> string
+    abstract roundPad: decimalLength: float -> ChainableUtil
+    abstract padStart: v: float * totalLength: float * padString: string -> string
+    abstract padStart: totalLength: float * padString: string -> ChainableUtil
+    abstract padEnd: v: float * totalLength: float * padString: string -> string
+    abstract padEnd: totalLength: float * padString: string -> ChainableUtil
+    abstract wrap: v: float * min: float * max: float -> float
+    abstract wrap: min: float * max: float -> ChainableUtil
+    abstract mapRange: value: float * inLow: float * inHigh: float * outLow: float * outHigh: float -> float
+    abstract degToRad: degrees: float -> float
+    abstract degToRad: unit -> ChainableUtil
+    abstract radToDeg: radians: float -> float
+    abstract radToDeg: unit -> ChainableUtil
+    abstract snap: v: float * increment: U2<float, float[]> -> float
+    abstract snap: increment: U2<float, float[]> -> ChainableUtil
+    abstract clamp: v: float * min: float * max: float -> float
+    abstract clamp: min: float * max: float -> ChainableUtil
+    abstract round: v: float * decimalLength: float -> float
+    abstract round: decimalLength: float -> ChainableUtil
+    abstract lerp: start: float * ``end``: float * factor: float -> float
+    abstract lerp: start: float * ``end``: float -> ChainableUtil
+    abstract damp: start: float * ``end``: float * deltaTime: float * factor: float -> float
+    abstract damp: start: float * ``end``: float * deltaTime: float -> ChainableUtil
     /// <summary>
     /// Generates a random number between min and max (inclusive) with optional decimal precision
     /// </summary>
@@ -5414,8 +5425,97 @@ type Utils =
     /// <remarks>@param targetSelector</remarks>
     /// <remarks>@param propName</remarks>
     /// <remarks>@param unit</remarks>
-    abstract get: Func<DOMTargetSelector, string, string> with get, set
-    abstract ``$``: (DOMTargetsParam -> DOMTarget[]) with get, set
+    abstract get: targetSelector: DOMTargetSelector * propName: string -> string
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@param targetSelector</remarks>
+    /// <remarks>@param propName</remarks>
+    /// <remarks>@param unit</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@param targetSelector</remarks>
+    /// <remarks>@param propName</remarks>
+    /// <remarks>@param unit</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@param targetSelector</remarks>
+    /// <remarks>@param propName</remarks>
+    /// <remarks>@param unit</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@param targetSelector</remarks>
+    /// <remarks>@param propName</remarks>
+    /// <remarks>@param unit</remarks>
+    abstract get: targetSelector: JSTargetsParam * propName: string -> TimelinePosition
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@param targetSelector</remarks>
+    /// <remarks>@param propName</remarks>
+    /// <remarks>@param unit</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@param targetSelector</remarks>
+    /// <remarks>@param propName</remarks>
+    /// <remarks>@param unit</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@param targetSelector</remarks>
+    /// <remarks>@param propName</remarks>
+    /// <remarks>@param unit</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@param targetSelector</remarks>
+    /// <remarks>@param propName</remarks>
+    /// <remarks>@param unit</remarks>
+    abstract get: targetSelector: DOMTargetsParam * propName: string * unit: string -> string
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@param targetSelector</remarks>
+    /// <remarks>@param propName</remarks>
+    /// <remarks>@param unit</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@param targetSelector</remarks>
+    /// <remarks>@param propName</remarks>
+    /// <remarks>@param unit</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@param targetSelector</remarks>
+    /// <remarks>@param propName</remarks>
+    /// <remarks>@param unit</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@param targetSelector</remarks>
+    /// <remarks>@param propName</remarks>
+    /// <remarks>@param unit</remarks>
+    abstract get: targetSelector: TargetsParam * propName: string * unit: bool -> float
+    abstract ``$``: targets: DOMTargetsParam -> DOMTarget[]
+    abstract ``$``: targets: JSTargetsParam -> JSTarget[]
+    abstract ``$``: targets: TargetsParam -> Target[]
     abstract set: Func<TargetsParam, AnimationParams, JSAnimation> with get, set
     abstract remove: Func<TargetsParam, U3<JSAnimation, Timeline, WAAPIAnimation> option, string option, Target[]> with get, set
     abstract cleanInlineStyles: (Renderable -> Renderable) with get, set
@@ -5423,7 +5523,22 @@ type Utils =
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    abstract stagger: Func<float, StaggerParams option, Utils.Stagger.Result> with get, set
+    abstract stagger: ``val``: float * ?``params``: StaggerParams -> Utils.Stagger.Result
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    abstract stagger: ``val``: string * ?``params``: StaggerParams -> Utils.Stagger.Result2
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    abstract stagger: ``val``: float * float * ?``params``: StaggerParams -> Utils.Stagger.Result
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    abstract stagger: ``val``: string * string * ?``params``: StaggerParams -> Utils.Stagger.Result2
     abstract forEachChildren: Action<obj, JS.Function, bool option, string option, string option> with get, set
     abstract addChild: Action<obj, obj, JS.Function option, string option, string option> with get, set
     abstract removeChild: Action<obj, obj, string option, string option> with get, set
