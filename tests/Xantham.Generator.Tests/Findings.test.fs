@@ -143,6 +143,7 @@ let findingsTests =
                     "SY.NameSanitisedForIdentifier SY005 ergonomic"
                     "SY.CallbackDelegateNamed SY006 exact"
                     "SI.HybridLosesCallSignatures SI001 widened"
+                    "SI.HybridCallSignaturesAsInvoke SI008 ergonomic"
                     "SI.BaseMembersFlattened SI002 ergonomic"
                     "SI.IntersectionFlattened SI003 ergonomic"
                     "SI.ConstructorObjectDeclared SI004 ergonomic"

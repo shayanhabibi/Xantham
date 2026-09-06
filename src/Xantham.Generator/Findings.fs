@@ -185,6 +185,7 @@ module FindingCodes =
             "SI.BaseInherited", "SI005"
             "SI.BaseNotDeclaredHere", "SI006"
             "SI.BaseWouldCycle", "SI007"
+            "SI.HybridCallSignaturesAsInvoke", "SI008"
             "SA.BrandAsMeasure", "SA001"
             "SA.PhantomComputation", "SA002"
             "SA.AbbreviationNameTaken", "SA003"
@@ -791,6 +792,9 @@ type SynthesizeAnonymous =
 [<Prefix("SI", "shape-interfaces")>]
 type ShapeInterfaces =
     | [<Widened>] HybridLosesCallSignatures
+    /// A hybrid's call signatures reached through an `Invoke` member carrying `Emit("$0($1...)")`.
+    /// The value is callable; the call is spelled `x.Invoke(a)` where TypeScript spells `x(a)`.
+    | [<Ergonomic>] HybridCallSignaturesAsInvoke of signatures: int
     /// The undifferentiated case the three below split out of: a base with no F# name at this
     /// position at all. Its members are still flattened in, so nothing of the member set is
     /// lost - only the upcast.
@@ -821,6 +825,8 @@ type ShapeInterfaces =
             match this with
             | HybridLosesCallSignatures ->
                 "callable-and-properties hybrid loses its call signatures (Invoke emission is future work)"
+            | HybridCallSignaturesAsInvoke signatures ->
+                $"callable-and-properties hybrid reaches its {signatures} call signatures through Invoke; the call is spelled x.Invoke(a)"
             | BaseMembersFlattened ->
                 "base has no F# name at this position; its members are flattened in and the is-a relation is not emitted (§4.4)"
             | IntersectionFlattened operands ->
