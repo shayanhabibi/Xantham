@@ -1,0 +1,7 @@
+{
+    "name": "paramobject-overload-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "main": "index.js",
+    "description": "Hand-authored fixture for wave fourteen lane CP: an exclusive-arm union, pinning today's unfolded baseline (each arm mints its own interface and Create) ahead of lane CN's fold onto one type with an exclusive Create overload per arm."
+}

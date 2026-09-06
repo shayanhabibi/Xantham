@@ -707,6 +707,48 @@ let private probes () =
         6.0
         (Probes.Widget.Exports.measure payload)
 
+/// Lane CP, wave fourteen: proves the assumption lane CN's exclusive-arm fold (batch two) rests
+/// on, over the two hand-written forms in `Probes.fs`'s probes 17-18. Fable accepts a type
+/// carrying two `[<ParamObject; Emit("$0")>]` `Create` statics distinguished only by which
+/// parameters are required, in both shapes the corpus holds today - the pair where each arm has
+/// a required member of its own (`SearchOptions`), and the pair where one arm's distinguishing
+/// member is optional in source (`ContainerLikeOptions`) - and each overload's emitted object
+/// literal holds exactly the arguments passed at that call site.
+let private paramObjectOverloads () =
+    let byQuery = Probes.SearchOptions.Create(query = "hello", shared = 1.0)
+    equal "the query arm's object carries the query key" """{"query":"hello","shared":1}""" (json byQuery)
+
+    let byMessages =
+        Probes.SearchOptions.Create(messages = [| "a"; "b" |], shared = 2.0)
+
+    equal
+        "the messages arm's object carries the messages key, and not the query key"
+        """{"messages":["a","b"],"shared":2}"""
+        (json byMessages)
+
+    let byImage =
+        Probes.ContainerLikeOptions.Create(enableInternet = true, image = "img")
+
+    equal
+        "the required-arm object carries only its own key beside the shared one"
+        """{"enableInternet":true,"image":"img"}"""
+        (json byImage)
+
+    let bySnapshot =
+        Probes.ContainerLikeOptions.Create(enableInternet = true, snapshot = "snap")
+
+    equal
+        "the optional-arm object carries only its own key too, though its distinguishing member is optional in source"
+        """{"enableInternet":true,"snapshot":"snap"}"""
+        (json bySnapshot)
+
+    let bare = Probes.ContainerLikeOptions.Create(enableInternet = true)
+
+    equal
+        "omitting both arms' distinguishing members still resolves, to the optional arm"
+        """{"enableInternet":true}"""
+        (json bare)
+
 /// A consumer's class over the entrypoint the error lab's ambient module exports. Declared here
 /// for the reason `Bench` is: `inherit` is a source construct, and this type compiling at all is
 /// what the flattened form could not reach. `Fault` inherits `exn`, so `Retry` is an F# exception
@@ -1855,6 +1897,7 @@ let main _ =
     renamedStatics ()
     workarounds ()
     probes ()
+    paramObjectOverloads ()
     callbackFunctionForms ()
     callbackGoldenForms ()
     callbackTupledForms ()
