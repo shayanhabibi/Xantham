@@ -155,6 +155,7 @@ let toRender (ctx: Context) (shape: ShapeModel) (findings: Finding list) : Rende
         Decls = shape.Decls
         Findings = findings @ namespaceFindings ctx shape
         Files = []
+        ShadowedByLib = shape.Harvest.ShadowedByLib
     }
 
 /// Runs the whole pipeline against a package directory and returns the rendered model without
@@ -210,5 +211,6 @@ let run (config: GeneratorConfig) (packageDir: string) (outDir: string) : Async<
                 OutputFiles = rendered.Files |> List.map fst
                 Findings = rendered.Findings
                 Counts = Render.counts (Render.symbolTiers rendered)
+                ShadowedByLib = rendered.ShadowedByLib
             }
     }

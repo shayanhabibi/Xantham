@@ -218,4 +218,49 @@ let generationTests =
                     Expect.equal code 0 "the command reports success"
                     Expect.equal err "" "nothing on standard error"
                     Expect.stringContains out "PhaseBLab.fs" "the binding is still listed"
+
+            testCase "a package whose own declarations shadow the default lib is warned about" <| fun _ ->
+                invoke [ "generate"; Path.Combine(root, "tests", "fixtures", "dom-shadow-lab") ]
+                <| fun (code, _, err, _) ->
+                    Expect.equal code 0 "the command reports success"
+                    Expect.stringContains err "share a name with a default-lib declaration" "the warning names the mechanism"
+                    Expect.stringContains err "lib" "the warning names the remedy"
+
+            testCase "an ordinary global-script package is not warned about" <| fun _ ->
+                invoke [ "generate"; Path.Combine(root, "tests", "fixtures", "globals-lab") ]
+                <| fun (code, _, err, _) ->
+                    Expect.equal code 0 "the command reports success"
+                    Expect.isFalse (err.Contains "default-lib declaration") "none of its names collide with the default lib"
+
+            testCase "an ordinary module-based package is not warned about" <| fun _ ->
+                invoke [ "generate"; Path.Combine(root, "tests", "fixtures", "lab") ]
+                <| fun (code, _, err, _) ->
+                    Expect.equal code 0 "the command reports success"
+                    Expect.isFalse (err.Contains "default-lib declaration") "it harvests through exports, not globals"
+
+            testCase "--quiet suppresses the warning along with the rest of standard error" <| fun _ ->
+                invoke [ "generate"; Path.Combine(root, "tests", "fixtures", "dom-shadow-lab"); "--quiet" ]
+                <| fun (code, _, err, _) ->
+                    Expect.equal code 0 "the command reports success"
+                    Expect.equal err "" "nothing on standard error, warning included"
+
+            testCase "configuring `lib` is the remedy the warning names, and it silences the warning" <| fun _ ->
+                let config =
+                    Path.Combine(Path.GetTempPath(), "xantham-cli-cfg-" + Guid.NewGuid().ToString "N")
+
+                Directory.CreateDirectory config |> ignore
+
+                try
+                    File.WriteAllText(Path.Combine(config, "xantham.json"), """{ "lib": ["esnext"] }""")
+
+                    invoke
+                        [ "generate"
+                          Path.Combine(root, "tests", "fixtures", "dom-shadow-lab")
+                          "--config"
+                          config ]
+                    <| fun (code, _, err, _) ->
+                        Expect.equal code 0 "the command reports success"
+                        Expect.isFalse (err.Contains "default-lib declaration") "no default lib loaded, nothing shadowed"
+                finally
+                    Directory.Delete(config, true)
         ]

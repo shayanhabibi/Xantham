@@ -597,9 +597,20 @@ type HarvestModel =
         /// can be spelled with. A declaration written inside one nests under it where a second
         /// declaration claims the same name.
         Namespaces: Map<int, string>
+        /// Count of the entry package's own declared names that a `lib.*.d.ts` declaration of
+        /// the same name precedes: `harvest-globals` groups such a name as the compiler lib
+        /// (`Grouping.classify`) and it does not reach `Exports`. Zero for a package that
+        /// harvests through `harvest-exports` instead - the count is meaningful only for a
+        /// global type library, which is the shape `harvest-globals` runs against.
+        ShadowedByLib: int
     }
 
-    static member Empty: HarvestModel = { Exports = []; Namespaces = Map.empty }
+    static member Empty: HarvestModel =
+        {
+            Exports = []
+            Namespaces = Map.empty
+            ShadowedByLib = 0
+        }
 
 // ---------------------------------------------------------------------------------------------
 // Tier 2 - Resolve: what the checker says everything is. A type table keyed by TypeResponse.Id.
@@ -1177,6 +1188,9 @@ type RenderModel =
         /// Rendered output: file name -> content. Written to disk by `Pipeline.run`, not here,
         /// so rendering stays pure.
         Files: (string * string) list
+        /// `HarvestModel.ShadowedByLib`, carried through for the CLI's own diagnostics - no
+        /// tier past harvest reads or changes it.
+        ShadowedByLib: int
     }
 
 type TierCounts =
@@ -1194,6 +1208,9 @@ type RunReport =
         OutputFiles: string list
         Findings: Finding list
         Counts: TierCounts
+        /// Count of the entry package's own declared names a `lib.*.d.ts` declaration of the
+        /// same name shadowed (`HarvestModel.ShadowedByLib`).
+        ShadowedByLib: int
     }
 
 // ---------------------------------------------------------------------------------------------
@@ -1270,3 +1287,27 @@ module Grouping =
                     | parts when parts.Length > 1 && parts[0].StartsWith "@" -> Dependency $"{parts[0]}/{parts[1]}"
                     | parts when parts.Length > 0 -> Dependency parts[0]
                     | _ -> Unclassified
+
+    /// Whether any of `symbol`'s declarations sits under `packageDir`, by the same root test
+    /// `classify` applies to only the first. Declaration merging can carry a symbol's list past
+    /// its own file: a `lib.*.d.ts` declaration first in the list sends `classify` to
+    /// `CompilerLib`, and this is what still finds the entry package's own declaration among
+    /// the rest.
+    let declaresUnderPackage (packageDir: string) (symbol: SymbolResponse) : bool =
+        let root = packageDir.Replace('\\', '/').TrimEnd '/' + "/"
+
+        let underRoot (path: string) =
+            let path = path.Replace('\\', '/')
+            let installedAt = path.LastIndexOf "/node_modules/"
+
+            path.StartsWith(root, System.StringComparison.OrdinalIgnoreCase)
+            && installedAt < root.Length - 1
+
+        symbol.Declarations
+        |> ValueOption.map (fun handles ->
+            handles
+            |> Array.exists (fun handle ->
+                match handle.Split([| '.' |], 3) with
+                | [| _; _; path |] -> underRoot path
+                | _ -> false))
+        |> ValueOption.defaultValue false

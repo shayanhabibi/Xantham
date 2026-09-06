@@ -17,7 +17,8 @@ let private baseModel =
       PackageDir = "/pkg/test-pkg"
       Decls = []
       Findings = []
-      Files = [] }
+      Files = []
+      ShadowedByLib = 0 }
 
 [<Tests>]
 let renderTests =
