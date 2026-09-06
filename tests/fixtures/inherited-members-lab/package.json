@@ -1,0 +1,7 @@
+{
+    "name": "inherited-members-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "main": "index.js",
+    "description": "Hand-authored fixture for inherited members: a member a declared base carries at the same signature is written once, on the base, down a three-deep chain and across a diamond; a member each level narrows is redeclared at each. Tracked in git, no npm install."
+}

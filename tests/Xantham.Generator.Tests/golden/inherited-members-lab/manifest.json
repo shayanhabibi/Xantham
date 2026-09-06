@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "package": "inherited-members-lab",
+  "module": "InheritedMembersLab",
+  "counts": {
+    "exact": 0,
+    "ergonomic": 8,
+    "widened": 0,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 17,
+      "exact": 6,
+      "ergonomic": 11
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 15,
+      "ergonomic": 15
+    }
+  ]
+}

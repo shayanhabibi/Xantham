@@ -31,6 +31,7 @@
         <Compile Include="Shape\Classes.fs" />
         <Compile Include="Shape\Exports.fs" />
         <Compile Include="Shape\ParamObjects.fs" />
+        <Compile Include="Shape\Inherited.fs" />
         <Compile Include="Shape\Overloads.fs" />
         <Compile Include="Shape\Arity.fs" />
         <Compile Include="Shape\Ordering.fs" />

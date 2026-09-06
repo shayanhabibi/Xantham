@@ -27,8 +27,6 @@ type Base =
 type Derived =
     inherit Base
     abstract extra: bool with get, set
-    abstract name: string with get, set
-    abstract at: float with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (extra: bool, name: string, at: float) : Derived = jsNative
 
@@ -39,8 +37,6 @@ type Derived =
 [<Interface>]
 type Narrowed =
     inherit Base
-    abstract name: string with get, set
-    abstract at: float with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (name: string, at: float) : Narrowed = jsNative
 
@@ -58,7 +54,6 @@ type Loud =
 type Pitched =
     inherit Loud
     abstract pitch: float with get, set
-    abstract volume: float with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (pitch: float, volume: float) : Pitched = jsNative
 
@@ -67,8 +62,6 @@ type Both =
     inherit Loud
     inherit Pitched
     abstract label: string with get, set
-    abstract volume: float with get, set
-    abstract pitch: float with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (label: string, volume: float, pitch: float) : Both = jsNative
 
@@ -85,7 +78,6 @@ type Box<'T> =
 type Labelled<'T> =
     inherit Box<'T>
     abstract label: string with get, set
-    abstract value: 'T with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (label: string, value: 'T) : Labelled<'T> = jsNative
 
@@ -113,7 +105,6 @@ type Node =
 type Leaf =
     inherit Node
     abstract leafy: bool
-    abstract id: float
     [<ParamObject; Emit("$0")>]
     static member Create (leafy: bool, id: float) : Leaf = jsNative
 
@@ -170,8 +161,6 @@ type Deferred =
 type Slim =
     inherit Slim.Base
     abstract slim: bool with get, set
-    abstract name: string option with get, set
-    abstract at: float option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (slim: bool, ?name: string, ?at: float) : Slim = jsNative
 

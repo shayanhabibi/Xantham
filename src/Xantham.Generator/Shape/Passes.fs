@@ -20,6 +20,7 @@ let passes: Pass<ShapeModel> list =
         Classes.shapeClasses
         Exports.shapeExports
         ParamObjects.synthesizeParamObjects
+        Inherited.dropInherited
         Overloads.dedupeOverloads
         Ordering.orderDeclarations
         Arity.repairArity
