@@ -18,6 +18,15 @@ let private frontierDump =
          | "" -> None
          | path -> Some path)
 
+/// Whether `XANTHAM_RESOLVE_COUNTERS` is set, read once per process. Gates the type-table
+/// walk's cost counters below so a normal run pays nothing for them.
+let private resolveCountersEnabled =
+    lazy
+        (match System.Environment.GetEnvironmentVariable "XANTHAM_RESOLVE_COUNTERS" with
+         | null
+         | "" -> false
+         | _ -> true)
+
 /// One walk's record of where the types it reached came from: how often each derivation channel
 /// discovered a type id, and the generation each id reached the frontier at. A checker id is
 /// assigned in the order answers arrive, so an id means nothing outside the walk that saw it and
@@ -915,6 +924,12 @@ let resolveTypeTable: Pass<ResolveModel> =
                 async {
                     let trace = Trace.start ()
 
+                    // Counts how many times the frontier admits a type for derivation (one per
+                    // distinct id, across every generation) - gated by `XANTHAM_RESOLVE_COUNTERS`
+                    // so it costs nothing on a normal run. The final table size is read off
+                    // `table` once the walk closes.
+                    let mutable expansions = 0
+
                     let rec walk table derived notFollowed findings frontier depth =
                         async {
                             let fresh =
@@ -922,6 +937,9 @@ let resolveTypeTable: Pass<ResolveModel> =
                                 |> List.distinctBy (fun (ty: TypeResponse) -> ty.Id)
                                 |> List.filter (fun ty -> not (Set.contains ty.Id derived))
                                 |> List.sortBy _.Id
+
+                            if resolveCountersEnabled.Value then
+                                expansions <- expansions + fresh.Length
 
                             match trace with
                             | None -> ()
@@ -1013,6 +1031,9 @@ let resolveTypeTable: Pass<ResolveModel> =
 
                     let! table, notFollowed, findings =
                         walk model.Types Set.empty model.NotFollowed [] seeds 0
+
+                    if resolveCountersEnabled.Value then
+                        eprintfn "[resolve-counters] frontier-expansions=%d table-size=%d" expansions (Map.count table)
 
                     let model =
                         { model with
