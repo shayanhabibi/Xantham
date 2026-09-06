@@ -167,6 +167,7 @@ module FindingCodes =
             "RE.FacetNotResolved", "RE001"
             "RT.FrontierNotResolved", "RT001"
             "RT.TypeNotResolved", "RT002"
+            "RT.FrontierTooWide", "RT003"
             "LU.NonStringLiteralCase", "LU001"
             "DT.ArmNotPlainData", "DT001"
             "DT.TaggedUnion", "DT002"
@@ -711,6 +712,11 @@ type ResolveExportTypes =
 type ResolveTypeTable =
     | [<Widened>] FrontierNotResolved of count: int * depth: int
     | [<Widened>] TypeNotResolved of reason: string
+    /// Wave fifteen, lane DI. A generic method whose return type applies its own enclosing
+    /// interface to a fresh type parameter (`Foo<T>.map<U>(...): Foo<U>`) mints a distinct
+    /// instantiation id every generation, so one generation of the frontier can outgrow this
+    /// cutoff at any depth.
+    | [<Widened>] FrontierTooWide of count: int * limit: int
 
     interface IFindingKind with
         member this.Message =
@@ -718,6 +724,8 @@ type ResolveTypeTable =
             | FrontierNotResolved(count, depth) ->
                 $"{count} types not resolved: beyond the depth cutoff ({depth}) - the frontier of instantiations still growing after that many generations"
             | TypeNotResolved reason -> $"not resolved: {reason}"
+            | FrontierTooWide(count, limit) ->
+                $"{count} types not resolved: beyond the frontier width cutoff ({limit}) - one generation of instantiations grew past it"
 
 /// `classify-literal-unions`.
 [<Prefix("LU", "classify-literal-unions")>]

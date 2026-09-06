@@ -1,0 +1,6 @@
+{
+  "name": "frontier-width-lab",
+  "type": "module",
+  "types": "index.d.ts",
+  "description": "Wave fifteen, lane DI: a generic interface whose own methods return the interface applied to a fresh method-level type parameter (`Foo<T>.map<U>(...): Foo<U>`), the `Array<T>`-shaped pattern that drives the frontier's width past any depth cutoff. Exercises the width cutoff (RT003) directly and fast, standing in for the `lib.dom` measurement that only a live run reproduces."
+}
