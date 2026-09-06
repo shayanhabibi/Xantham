@@ -8,6 +8,16 @@ open Xantham.TypeScript.Wire.Proto
 
 let private hasAny (mask: SymbolFlags) (flags: SymbolFlags) = uint32 (flags &&& mask) <> 0u
 
+/// `path` spelled relative to `packageDir` with forward separators, so a finding that carries a
+/// file reads the same on every machine. A path outside the package keeps its own spelling.
+let internal underPackage (packageDir: string) (path: string) =
+    let relative = System.IO.Path.GetRelativePath(packageDir, path)
+
+    if relative.StartsWith ".." then
+        path.Replace('\\', '/')
+    else
+        relative.Replace('\\', '/')
+
 /// The namespace symbols among `symbols`, by id, for the declarations written inside them to
 /// nest under. An ambient module declaration is a namespace symbol whose name is its quoted
 /// specifier (`"cloudflare:workers"`), which heads no F# module, so the map holds only names a
@@ -283,7 +293,11 @@ let harvestGlobals: Pass<HarvestModel> =
                                     { model with
                                         ShadowedByLib = shadowedByLib
                                     },
-                                    [ Finding.make "<module>" (HarvestGlobals.NothingHarvested ctx.EntryFile) ]
+                                    [
+                                        Finding.make
+                                            "<module>"
+                                            (HarvestGlobals.NothingHarvested(underPackage ctx.PackageDir ctx.EntryFile))
+                                    ]
                                 )
                         else
                             let model =
