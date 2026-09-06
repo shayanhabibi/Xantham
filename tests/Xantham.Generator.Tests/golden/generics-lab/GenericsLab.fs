@@ -7,7 +7,7 @@ module rec GenericsLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 /// <summary>
 /// A generic interface that is not exported: it is reached only through instantiations.
@@ -106,9 +106,9 @@ type Registry<'M> =
 /// </summary>
 [<Interface>]
 type Manifest =
-    abstract flags: Xantham.Fable.Core.Record<string, bool> with get, set
+    abstract flags: Record<string, bool> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (flags: Xantham.Fable.Core.Record<string, bool>) : Manifest = jsNative
+    static member Create (flags: Record<string, bool>) : Manifest = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

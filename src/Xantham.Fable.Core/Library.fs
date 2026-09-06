@@ -1,5 +1,5 @@
 ﻿[<AutoOpen>]
-module Fable.Core.JsInterop.XanthamExtensions
+module Fable.Core.JS.JS
 
 open System.Runtime.CompilerServices
 open Fable.Core
@@ -353,7 +353,7 @@ type Record<'Key, 'Value> =
 type ReadonlyRecord<'Key, 'Value> =
     [<EmitIndexer>]
     abstract Item: 'Key -> 'Value
-    
+
 /// <summary>A record implementation that allows you to access properties using a property key</summary>
 type PropertyRecord<'T, 'K> =
     [<EmitIndexer>]

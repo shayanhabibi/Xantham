@@ -1558,9 +1558,10 @@ let pipelineTests =
                       Expect.stringContains source "abstract get: id: string<UserId> -> string" "and its uses carry it"
 
                       // Numbers take a measure natively; the other primitives go through the
-                      // support package's abbreviations, which is why the open is emitted.
+                      // support package's abbreviations, which the support package shadows into
+                      // `Fable.Core.JsInterop`.
                       Expect.stringContains source "at: float<Millis>" "a numeric brand needs no support"
-                      Expect.stringContains source "open Xantham.Fable.Core" "the abbreviations are in scope"
+                      Expect.stringContains source "open Fable.Core.JsInterop" "the abbreviations are in scope"
 
                       // Under an array, under an option, and on a bare exported function.
                       Expect.stringContains source "abstract ids: unit -> string<UserId>[]" "a brand under an array"
@@ -1852,7 +1853,7 @@ let pipelineTests =
                       let source = rendered.Files |> List.head |> snd
 
                       // `Narrow` and `Wide` are both pure index signatures (§4.10), so they
-                      // read as `Xantham.Fable.Core.Record<...>` references rather than minted
+                      // read as `Record<...>` references rather than minted
                       // interfaces - and a bound of that shape proves nothing nominal for any
                       // named argument, `Wide`'s own default included, so it is TP002 rather
                       // than TP008: no F# form the constraint could hold, not one that fails to
@@ -3678,7 +3679,7 @@ let pipelineTests =
 
                           Expect.stringContains
                               source
-                              "abstract entries: Xantham.Fable.Core.Record<string, float>"
+                              "abstract entries: JS.Record<string, float>"
                               "a string-keyed inline index signature reads a Record reference"
 
                           Expect.equal
@@ -3690,12 +3691,12 @@ let pipelineTests =
 
                           Expect.stringContains
                               source
-                              "abstract rows: Xantham.Fable.Core.Record<float, string>"
+                              "abstract rows: JS.Record<float, string>"
                               "a numeric-keyed inline index signature reads a Record reference too"
 
                           Expect.stringContains
                               source
-                              "abstract values: Xantham.Fable.Core.ReadonlyRecord<string, bool>"
+                              "abstract values: ReadonlyRecord<string, bool>"
                               "a readonly inline index signature reads ReadonlyRecord, with no setter"
 
                       testCase "a named index-signature declaration keeps minting its own name" <| fun _ ->
@@ -3745,10 +3746,10 @@ let pipelineTests =
 
                           Expect.stringContains
                               source
-                              "static member tag<'T> (value: Xantham.Fable.Core.Record<string, 'T>) : unit"
+                              "static member tag<'T> (value: JS.Record<string, 'T>) : unit"
                               "the index signature's value type is the function's own free type parameter"
 
-                      testCase "the package's own Record does not shadow the qualified reference" <| fun _ ->
+                      testCase "the package's own Record does not shadow the support package's" <| fun _ ->
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                           let source = rendered.Files |> List.head |> snd
 
@@ -3757,8 +3758,8 @@ let pipelineTests =
 
                           Expect.stringContains
                               source
-                              "abstract entries: Xantham.Fable.Core.Record<string, float>"
-                              "and the support package's Record is reached fully qualified beside it" ])
+                              "abstract entries: JS.Record<string, float>"
+                              "and the support package's Record is reached qualified beside it" ])
 
         yield!
             fixtureTests "paramobject-overload-lab" (handFixture "paramobject-overload-lab") GeneratorConfig.Default (fun package ->

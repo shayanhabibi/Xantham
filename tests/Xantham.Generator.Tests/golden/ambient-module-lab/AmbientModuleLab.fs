@@ -7,7 +7,7 @@ module rec AmbientModuleLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 /// <summary>
 /// A global type every module below refers to.

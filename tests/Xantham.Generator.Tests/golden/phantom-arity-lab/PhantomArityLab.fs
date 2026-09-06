@@ -7,7 +7,7 @@ module rec PhantomArityLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 [<Erase>]
 type SurplusParameter<'T, 'Reserved> = private SurplusParameter__ of ('T -> unit)

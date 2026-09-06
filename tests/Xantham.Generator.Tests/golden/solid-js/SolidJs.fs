@@ -7,7 +7,7 @@ module rec SolidJs
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 type JSXElement = U5<float, bool, obj[], Browser.Types.Node, string> option
 
@@ -864,7 +864,7 @@ module ErrorBoundary =
 [<Interface>]
 type SharedConfig =
     abstract context: SharedConfig.Context option with get, set
-    abstract resources: Xantham.Fable.Core.Record<string, obj> option with get, set
+    abstract resources: Record<string, obj> option with get, set
     abstract load: (string -> obj) option with get, set
     abstract has: (string -> bool) option with get, set
     abstract gather: (string -> unit) option with get, set
@@ -875,7 +875,7 @@ type SharedConfig =
     abstract getContextId: unit -> string
     abstract getNextContextId: unit -> string
     [<ParamObject; Emit("$0")>]
-    static member Create (getContextId: (unit -> string), getNextContextId: (unit -> string), ?context: SharedConfig.Context, ?resources: Xantham.Fable.Core.Record<string, obj>, ?load: (string -> obj), ?has: (string -> bool), ?gather: (string -> unit), ?registry: JS.Map<string, Browser.Types.Element>, ?``done``: bool, ?count: float, ?effects: Computation<obj, obj>[]) : SharedConfig = jsNative
+    static member Create (getContextId: (unit -> string), getNextContextId: (unit -> string), ?context: SharedConfig.Context, ?resources: Record<string, obj>, ?load: (string -> obj), ?has: (string -> bool), ?gather: (string -> unit), ?registry: JS.Map<string, Browser.Types.Element>, ?``done``: bool, ?count: float, ?effects: Computation<obj, obj>[]) : SharedConfig = jsNative
 
 module SharedConfig =
     [<Interface>]

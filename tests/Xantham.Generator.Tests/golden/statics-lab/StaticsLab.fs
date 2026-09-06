@@ -7,7 +7,7 @@ module rec StaticsLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 /// <summary>
 /// A class carrying the const-like statics that almost every DOM class does.

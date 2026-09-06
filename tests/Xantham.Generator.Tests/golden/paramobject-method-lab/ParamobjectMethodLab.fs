@@ -7,7 +7,7 @@ module rec ParamobjectMethodLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 /// <summary>
 /// A method beside a required and an optional property. The method's parameter is required, so

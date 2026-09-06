@@ -7,7 +7,7 @@ module rec StaticsCollisionLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 /// <summary>
 /// A global interface holding the name the exported class below also carries. The class's

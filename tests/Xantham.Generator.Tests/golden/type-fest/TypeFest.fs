@@ -7,7 +7,7 @@ module rec TypeFest
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 /// <summary>
 /// Returns the absolute value of the specified number or bigint.
@@ -6171,11 +6171,11 @@ type PackageJson =
     ///
     /// [Read more.](https://nodejs.org/api/packages.html#subpath-imports)
     /// </summary>
-    abstract imports: Xantham.Fable.Core.Record<string, U3<string, U2<string, PackageJson.Exports.Item>[], PackageJson.Exports.Item> option> option with get, set
+    abstract imports: Record<string, U3<string, U2<string, PackageJson.Exports.Item>[], PackageJson.Exports.Item> option> option with get, set
     /// <summary>
     /// The executable files that should be installed into the <c>PATH</c>.
     /// </summary>
-    abstract bin: U2<string, Xantham.Fable.Core.Record<string, string option>> option with get, set
+    abstract bin: U2<string, Record<string, string option>> option with get, set
     /// <summary>
     /// Filenames to put in place for the <c>man</c> program to find.
     /// </summary>
@@ -6199,23 +6199,23 @@ type PackageJson =
     /// <summary>
     /// The dependencies of the package.
     /// </summary>
-    abstract dependencies: Xantham.Fable.Core.Record<string, string option> option with get, set
+    abstract dependencies: Record<string, string option> option with get, set
     /// <summary>
     /// Additional tooling dependencies that are not required for the package to work. Usually test, build, or documentation tooling.
     /// </summary>
-    abstract devDependencies: Xantham.Fable.Core.Record<string, string option> option with get, set
+    abstract devDependencies: Record<string, string option> option with get, set
     /// <summary>
     /// Dependencies that are skipped if they fail to install.
     /// </summary>
-    abstract optionalDependencies: Xantham.Fable.Core.Record<string, string option> option with get, set
+    abstract optionalDependencies: Record<string, string option> option with get, set
     /// <summary>
     /// Dependencies that will usually be required by the package user directly or via another dependency.
     /// </summary>
-    abstract peerDependencies: Xantham.Fable.Core.Record<string, string option> option with get, set
+    abstract peerDependencies: Record<string, string option> option with get, set
     /// <summary>
     /// Indicate peer dependencies that are optional.
     /// </summary>
-    abstract peerDependenciesMeta: Xantham.Fable.Core.Record<string, PackageJson.PeerDependenciesMeta.Item option> option with get, set
+    abstract peerDependenciesMeta: Record<string, PackageJson.PeerDependenciesMeta.Item option> option with get, set
     /// <summary>
     /// Package names that are bundled when the package is published.
     /// </summary>
@@ -6284,7 +6284,7 @@ type PackageJson =
     /// <summary>
     /// A hint to JavaScript bundlers or component tools when packaging modules for client side use.
     /// </summary>
-    abstract browser: U2<string, Xantham.Fable.Core.Record<string, U2<string, bool> option>> option with get, set
+    abstract browser: U2<string, Record<string, U2<string, bool> option>> option with get, set
     /// <summary>
     /// Denote which files in your project are "pure" and therefore safe for Webpack to prune if unused.
     ///
@@ -6298,7 +6298,7 @@ type PackageJson =
     /// <summary>
     /// Version selection map of TypeScript.
     /// </summary>
-    abstract typesVersions: Xantham.Fable.Core.Record<string, Xantham.Fable.Core.Record<string, string[] option> option> option with get, set
+    abstract typesVersions: Record<string, Record<string, string[] option> option> option with get, set
     /// <summary>
     /// Location of the bundled TypeScript declaration file. Alias of <c>types</c>.
     /// </summary>
@@ -6312,7 +6312,7 @@ type PackageJson =
     /// <summary>
     /// Selective version resolutions. Allows the definition of custom package versions inside dependencies without manual edits in the <c>yarn.lock</c> file.
     /// </summary>
-    abstract resolutions: Xantham.Fable.Core.Record<string, string option> option with get, set
+    abstract resolutions: Record<string, string option> option with get, set
     /// <summary>
     /// JSPM configuration.
     /// </summary>
@@ -10101,7 +10101,7 @@ module TsConfigJson =
         /// <summary>
         /// Specify path mapping to be computed relative to baseUrl option.
         /// </summary>
-        abstract paths: Xantham.Fable.Core.Record<string, string[]> option with get, set
+        abstract paths: Record<string, string[]> option with get, set
         /// <summary>
         /// List of TypeScript language server plugins to load.
         /// </summary>

@@ -7,7 +7,7 @@ module rec LibLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 /// <summary>
 /// A generated interface whose members are lib types throughout.

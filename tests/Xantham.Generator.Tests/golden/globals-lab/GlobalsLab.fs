@@ -7,7 +7,7 @@ module rec GlobalsLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 /// <summary>
 /// A global type. A type reads the same wherever its name lives.
@@ -59,9 +59,9 @@ type Loose<'P> =
 /// </summary>
 [<Interface>]
 type Bag =
-    abstract loose: Xantham.Fable.Core.Record<string, string> with get, set
+    abstract loose: Record<string, string> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (loose: Xantham.Fable.Core.Record<string, string>) : Bag = jsNative
+    static member Create (loose: Record<string, string>) : Bag = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

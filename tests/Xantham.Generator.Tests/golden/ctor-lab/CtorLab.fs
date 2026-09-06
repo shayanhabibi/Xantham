@@ -7,7 +7,7 @@ module rec CtorLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 /// <summary>
 /// The instance side, written as an interface, of the <c>declare const</c> spelling.

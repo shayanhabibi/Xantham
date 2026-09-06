@@ -1005,7 +1005,7 @@ let private renderModule (group: GroupModule) (foreign: Map<string, string>) =
             "open System"
             "open Fable.Core"
             "open Fable.Core.JsInterop"
-            "open Xantham.Fable.Core"
+            "open Fable.Core.JS"
             ""
             body
             ""

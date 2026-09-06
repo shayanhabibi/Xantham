@@ -7,34 +7,34 @@ module rec RecordIndexLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 /// <summary>
 /// An inline string-keyed index signature, in property position.
 /// </summary>
 [<Interface>]
 type Cache =
-    abstract entries: Xantham.Fable.Core.Record<string, float> with get, set
+    abstract entries: JS.Record<string, float> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (entries: Xantham.Fable.Core.Record<string, float>) : Cache = jsNative
+    static member Create (entries: JS.Record<string, float>) : Cache = jsNative
 
 /// <summary>
 /// An inline numeric-keyed index signature, in property position.
 /// </summary>
 [<Interface>]
 type Grid =
-    abstract rows: Xantham.Fable.Core.Record<float, string> with get, set
+    abstract rows: JS.Record<float, string> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (rows: Xantham.Fable.Core.Record<float, string>) : Grid = jsNative
+    static member Create (rows: JS.Record<float, string>) : Grid = jsNative
 
 /// <summary>
 /// An inline readonly index signature, in property position - <c>ReadonlyRecord</c>.
 /// </summary>
 [<Interface>]
 type Frozen =
-    abstract values: Xantham.Fable.Core.ReadonlyRecord<string, bool> with get, set
+    abstract values: ReadonlyRecord<string, bool> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (values: Xantham.Fable.Core.ReadonlyRecord<string, bool>) : Frozen = jsNative
+    static member Create (values: ReadonlyRecord<string, bool>) : Frozen = jsNative
 
 /// <summary>
 /// A pure index signature declared under its own name.
@@ -65,9 +65,9 @@ type Record =
 /// </summary>
 [<Interface>]
 type Ledger =
-    abstract entries: Xantham.Fable.Core.Record<string, float> with get, set
+    abstract entries: JS.Record<string, float> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (entries: Xantham.Fable.Core.Record<string, float>) : Ledger = jsNative
+    static member Create (entries: JS.Record<string, float>) : Ledger = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
@@ -76,4 +76,4 @@ type Exports =
     /// An inline index signature keyed by a generic function's own type parameter.
     /// </summary>
     [<Import("tag", "record-index-lab")>]
-    static member tag<'T> (value: Xantham.Fable.Core.Record<string, 'T>) : unit = jsNative
+    static member tag<'T> (value: JS.Record<string, 'T>) : unit = jsNative

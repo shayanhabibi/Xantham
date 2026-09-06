@@ -7,7 +7,7 @@ module rec LiteralOverloadLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 /// <summary>
 /// Options an overload selects with a literal type argument rather than a literal parameter.

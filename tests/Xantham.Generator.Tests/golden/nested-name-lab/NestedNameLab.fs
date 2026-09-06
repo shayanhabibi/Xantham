@@ -7,7 +7,7 @@ module rec NestedNameLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 /// <summary>
 /// The first owner of an <c>options</c> shape.

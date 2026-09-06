@@ -7,7 +7,7 @@ module rec NestedDepLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 /// <summary>
 /// A reading the entry package declares over a dependency's type.

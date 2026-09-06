@@ -7,7 +7,7 @@ module rec PhaseBLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type TimeUnit =

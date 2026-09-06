@@ -7,7 +7,7 @@ module rec NominalLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 [<Interface>]
 type Attr =
@@ -21,9 +21,9 @@ type GLAttr =
     [<ParamObject; Emit("$0")>]
     static member Create (kind: string) : GLAttr = jsNative
 
-type Narrow = Xantham.Fable.Core.Record<string, Attr>
+type Narrow = Record<string, Attr>
 
-type Wide = Xantham.Fable.Core.Record<string, Wide.Item>
+type Wide = Record<string, Wide.Item>
 
 module Wide =
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]

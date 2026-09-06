@@ -7,7 +7,7 @@ module rec DelegateNameLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 module CallTwo =
     type Handler = delegate of x: float * y: float -> string

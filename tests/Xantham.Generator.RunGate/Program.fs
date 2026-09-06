@@ -1846,7 +1846,7 @@ let private mintedTaggedCases () =
     | SharedTagLab.Narrow.Event.Email -> check "a union claimed below the cap matches on its tag too" true
     | _ -> check "a JavaScript-built email reached another case" false
 
-/// §4.10's pure index signatures, resolved to `Xantham.Fable.Core.Record`/`ReadonlyRecord`
+/// §4.10's pure index signatures, resolved to `Record`/`ReadonlyRecord`
 /// rather than a minted interface. Every property below is one of those types; reading and
 /// writing through the F# indexer (`.[key]` / `.[key] <- value`) round-trips against the
 /// underlying JavaScript object, and one write is cross-checked by a direct `emitJsExpr`

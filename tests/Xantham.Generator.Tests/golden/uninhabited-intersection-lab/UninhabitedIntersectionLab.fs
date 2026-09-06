@@ -7,7 +7,7 @@ module rec UninhabitedIntersectionLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 /// <summary>
 /// The positive: a method's own class collides with a <c>{ then: null }</c> marker on itself.

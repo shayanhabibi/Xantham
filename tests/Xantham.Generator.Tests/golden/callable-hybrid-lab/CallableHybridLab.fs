@@ -7,7 +7,7 @@ module rec CallableHybridLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 /// <summary>
 /// A hybrid reached at a member position: the property's type is an anonymous object that is

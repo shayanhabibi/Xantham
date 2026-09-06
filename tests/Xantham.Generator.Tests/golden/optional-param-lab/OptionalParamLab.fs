@@ -7,7 +7,7 @@ module rec OptionalParamLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 /// <summary>
 /// The same three at method positions, where the owner is an interface rather than a module.

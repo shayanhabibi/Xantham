@@ -7,7 +7,7 @@ module rec IntersectionEmptyLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 /// <summary>
 /// The idiom itself: an empty object operand beside a primitive, inside a union.

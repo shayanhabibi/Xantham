@@ -2013,9 +2013,8 @@ and internal delegateRef
 /// A pure index signature with no name of its own, resolved through the support package
 /// rather than minted a declaration (§4.10, TR059): `Record<'Key, 'Value>` for a writable
 /// index, `ReadonlyRecord<'Key, 'Value>` for a readonly one - the get-only form a readonly
-/// index signature already renders as `MB.IndexSignatureAsIndexer`. Always qualified: a
-/// generated module opens both `Xantham.Fable.Core` and `Fable.Core`, and the entry package
-/// is free to declare its own `Record`.
+/// index signature already renders as `MB.IndexSignatureAsIndexer`. Both names reach a
+/// generated module through `open Fable.Core.JS`, which the support package shadows.
 and internal recordRef
     (ctx: Context)
     (model: ShapeModel)
@@ -2027,11 +2026,7 @@ and internal recordRef
     let key, keyFindings = typeRef ctx model self owner info.KeyTypeId
     let value, valueFindings = typeRef ctx model self owner info.ValueTypeId
 
-    let name =
-        if info.IsReadonly then
-            "Xantham.Fable.Core.ReadonlyRecord"
-        else
-            "Xantham.Fable.Core.Record"
+    let name = if info.IsReadonly then "ReadonlyRecord" else "Record"
 
     FsApp(name, [ key; value ]),
     keyFindings
@@ -2194,7 +2189,7 @@ let internal typeParamsOf
                     //
                     // TypeScript reads `'T extends { [key: K]: V }` structurally: any shape
                     // whose properties satisfy `V` proves the bound, named interface or not.
-                    // `Xantham.Fable.Core.Record<K, V>` only proves it for a type that
+                    // `Record<K, V>` only proves it for a type that
                     // implements that exact interface, which a plain named interface with its
                     // own explicit members never does - so the bound goes unexpressed here the
                     // same way a union's does, rather than rejecting every argument TypeScript

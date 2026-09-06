@@ -7,7 +7,7 @@ module rec ArrayShapeLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 /// <summary>
 /// An array reached through an interface of its own: the symbol is <c>Chapters</c>, not <c>Array</c>.

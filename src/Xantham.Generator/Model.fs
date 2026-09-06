@@ -347,6 +347,27 @@ module Naming =
     /// map exactly; a lib type carrying *more* arguments than Fable's binding maps with the
     /// extras dropped and a finding; one carrying fewer is not this type at all and widens.
     ///
+    /// The names `Xantham.Fable.Core` shadows into `Fable.Core.JS`. A generated module reaches
+    /// them unqualified through the `open Fable.Core.JS` it carries. Where a package declares
+    /// one of these names itself, the package's declaration takes the unqualified spelling and
+    /// the support package's is reached as `JS.<name>`, repaired in `repair-arity`.
+    module SupportBindings =
+        let private names =
+            set
+                [
+                    "Record"
+                    "ReadonlyRecord"
+                    "PropertyRecord"
+                    "NoInfer"
+                    "keyof"
+                    "typekeyof"
+                ]
+
+        let shadows (name: string) = Set.contains name names
+
+        /// The spelling that reaches the support package's declaration past a package's own.
+        let qualify (name: string) = $"JS.{name}"
+
     /// The DOM half (`HTMLElement`, `EventTarget`, `Blob`, ...) is not here: it is four hundred
     /// names, so it is generated rather than transcribed, and it lives in `BrowserBindings`
     /// below. What stays hand-written here is what has a hand-judged loss note attached.

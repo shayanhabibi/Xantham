@@ -7,7 +7,7 @@ module rec ErrorClassLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 /// <summary>
 /// A class no specifier exports: <c>globalThis.Mishap</c> is not a module entrypoint, so it keeps the

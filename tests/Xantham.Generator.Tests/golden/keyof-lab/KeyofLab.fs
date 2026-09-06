@@ -7,7 +7,7 @@ module rec KeyofLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 /// <summary>
 /// The operand every keyof in this fixture is taken over.
@@ -82,7 +82,7 @@ type Slots =
 /// <summary>
 /// <c>Record</c> over concrete operands.
 /// </summary>
-type Registry = Xantham.Fable.Core.Record<string, float>
+type Registry = Record<string, float>
 
 /// <summary>
 /// A readonly string index signature.

@@ -7,7 +7,7 @@ module rec GroupMapLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 /// <summary>
 /// A declaration of our own, so a mapped name can be seen passing through a generic.

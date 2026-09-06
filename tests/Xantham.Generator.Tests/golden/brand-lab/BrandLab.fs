@@ -7,7 +7,7 @@ module rec BrandLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 /// <summary>
 /// The common hand-rolled brand: a primitive and a literal-typed marker property.

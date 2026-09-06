@@ -7,7 +7,7 @@ module rec CallbackFunctionLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 module CallTwo =
     type Callback = delegate of a: float * b: float -> string

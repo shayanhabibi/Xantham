@@ -1,11 +1,13 @@
-/// The support-package half of the compile gate. Generated bindings will carry
-/// `open Xantham.Fable.Core`, which brings the measure-annotated abbreviations into scope
-/// over code that uses `string`, `bool` and `char` on nearly every line. That the primitives
-/// still resolve under that open is a property of the abbreviation, not an obvious one, so
-/// it is gated rather than assumed.
+﻿/// The support-package half of the compile gate. `Xantham.Fable.Core` shadows its names into
+/// `Fable.Core.JS`, so a generated binding reaches the measure-annotated abbreviations
+/// through the `open Fable.Core.JS` it already carries. Two facts are gated here: the
+/// shadow resolves through that open, and `string`, `bool` and `char` still resolve to the
+/// primitives under it.
 module Xantham.Generator.CompileGate.BrandIdioms
 
-open Xantham.Fable.Core
+open Fable.Core
+open Fable.Core.JsInterop
+open Fable.Core.JS
 
 [<Measure>]
 type UserId

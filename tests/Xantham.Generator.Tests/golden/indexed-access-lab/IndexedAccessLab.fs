@@ -7,7 +7,7 @@ module rec IndexedAccessLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 /// <summary>
 /// The event the <c>fetch</c> key selects.

@@ -7,7 +7,7 @@ module rec AliasCopyDepLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 /// <summary>
 /// A shape whose own symbol names it, so it reaches the O7 shortcut unaided.

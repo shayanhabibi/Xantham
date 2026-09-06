@@ -7,7 +7,7 @@ module rec HoistConditionalLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 [<Interface>]
 type CondExtensions<'TNodeType> =

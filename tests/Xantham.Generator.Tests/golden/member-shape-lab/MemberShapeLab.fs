@@ -7,7 +7,7 @@ module rec MemberShapeLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 /// <summary>
 /// An intersection over a compiler-lib type: <c>then</c> / <c>catch</c> / <c>finally</c> arrive as method

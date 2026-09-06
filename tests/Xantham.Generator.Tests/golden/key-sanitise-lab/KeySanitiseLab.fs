@@ -7,7 +7,7 @@ module rec KeySanitiseLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 /// <summary>
 /// The owner of members whose JavaScript keys are not F# declaration names.

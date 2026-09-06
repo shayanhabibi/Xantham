@@ -7,7 +7,7 @@ module rec CrossPackageLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 /// <summary>
 /// A member of each referenced shape, so the O7 templated name is read at three arities of use.

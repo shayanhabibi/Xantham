@@ -271,6 +271,14 @@ let private repaired (model: ShapeModel) =
                 | FsApp(name, _) when Set.contains name dropped -> widen (RepairArity.ReferenceToDroppedAlias name)
                 | FsNamed name when Map.tryFind name arity |> Option.exists (fun n -> n > 0) ->
                     widen (RepairArity.GenericWithoutArguments name)
+                // A package free to declare `Record` takes the unqualified name; the support
+                // package's declaration of the same name is still reachable, so the reference
+                // is qualified rather than widened.
+                | FsApp(name, arguments) when
+                    Naming.SupportBindings.shadows name
+                    && Map.tryFind name arity |> Option.exists (fun n -> n <> arguments.Length)
+                    ->
+                    FsApp(Naming.SupportBindings.qualify name, arguments)
                 | FsApp(name, arguments) when Map.tryFind name arity |> Option.exists (fun n -> n <> arguments.Length) ->
                     widen (RepairArity.ArityMismatch(name, arguments.Length, arity[name]))
                 | other -> other)

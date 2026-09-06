@@ -7,7 +7,7 @@ module rec FlagsLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 /// <summary>
 /// Alias position: the declaration itself is a template literal.

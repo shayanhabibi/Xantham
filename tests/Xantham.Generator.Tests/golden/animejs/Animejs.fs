@@ -7,19 +7,19 @@ module rec Animejs
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 /// <remarks>@import ;</remarks>
 [<Interface>]
 type Animatable =
     abstract targets: Target[] with get, set
     /// <remarks>@type {Record&lt;String, JSAnimation&gt;}</remarks>
-    abstract animations: Xantham.Fable.Core.Record<string, JSAnimation> with get, set
+    abstract animations: Record<string, JSAnimation> with get, set
     /// <remarks>@type {JSAnimation|null}</remarks>
     abstract callbacks: JSAnimation option with get, set
     abstract revert: unit -> Animatable
     [<ParamObject; Emit("$0")>]
-    static member Create (targets: Target[], animations: Xantham.Fable.Core.Record<string, JSAnimation>, revert: (unit -> Animatable), ?callbacks: JSAnimation) : Animatable = jsNative
+    static member Create (targets: Target[], animations: Record<string, JSAnimation>, revert: (unit -> Animatable), ?callbacks: JSAnimation) : Animatable = jsNative
 
 [<Interface>]
 type Clock =
@@ -998,7 +998,7 @@ type LayoutAnimationTimingsParams =
     [<ParamObject; Emit("$0")>]
     static member Create (?delay: U2<float, AutoLayoutParams.Ease>, ?duration: U2<float, AutoLayoutParams.Ease>, ?ease: U5<string, EasingFunction, AutoLayoutParams.Ease, Spring, TweakRegister>) : LayoutAnimationTimingsParams = jsNative
 
-type LayoutStateAnimationProperties = Xantham.Fable.Core.Record<string, U3<string, float, AutoLayoutParams.Ease>>
+type LayoutStateAnimationProperties = Record<string, U3<string, float, AutoLayoutParams.Ease>>
 
 type LayoutStateParams =
     inherit LayoutAnimationTimingsParams
@@ -1169,13 +1169,13 @@ type Scope =
     /// <remarks>@type {Number}</remarks>
     abstract onceIndex: float with get, set
     /// <remarks>@type {Record&lt;String, ScopeMethod&gt;}</remarks>
-    abstract methods: Xantham.Fable.Core.Record<string, ScopeMethod> with get, set
+    abstract methods: Record<string, ScopeMethod> with get, set
     /// <remarks>@type {Record&lt;String, Boolean&gt;}</remarks>
-    abstract matches: Xantham.Fable.Core.Record<string, bool> with get, set
+    abstract matches: Record<string, bool> with get, set
     /// <remarks>@type {Record&lt;String, MediaQueryList&gt;}</remarks>
-    abstract mediaQueryLists: Xantham.Fable.Core.Record<string, Browser.Types.MediaQueryList> with get, set
+    abstract mediaQueryLists: Record<string, Browser.Types.MediaQueryList> with get, set
     /// <remarks>@type {Record&lt;String, any&gt;}</remarks>
-    abstract data: Xantham.Fable.Core.Record<string, obj> with get, set
+    abstract data: Record<string, obj> with get, set
     /// <remarks>@param revertible</remarks>
     abstract register: revertible: Revertible -> unit
     /// <remarks>@template T</remarks>
@@ -1377,7 +1377,7 @@ type Segmenter =
 type Timeline =
     inherit Timer
     /// <remarks>@type {Record&lt;String, Number&gt;}</remarks>
-    abstract labels: Xantham.Fable.Core.Record<string, float> with get, set
+    abstract labels: Record<string, float> with get, set
     /// <remarks>@type {DefaultsParams}</remarks>
     abstract defaults: DefaultsParams with get, set
     /// <remarks>@type {Boolean}</remarks>
@@ -1958,7 +1958,7 @@ type CallbackArgument =
     /// <remarks>@return</remarks>
     abstract refresh: (unit -> CallbackArgument) with get, set
     /// <remarks>@type {Record&lt;String, Number&gt;}</remarks>
-    abstract labels: Xantham.Fable.Core.Record<string, float> with get, set
+    abstract labels: Record<string, float> with get, set
     /// <remarks>@type {DefaultsParams}</remarks>
     abstract defaults: DefaultsParams with get, set
     /// <remarks>@type {Boolean}</remarks>
@@ -2241,7 +2241,7 @@ module CallbackArgument =
             inherit Timeline
             inherit JSAnimation
             /// <remarks>@type {Record&lt;String, Number&gt;}</remarks>
-            abstract labels: Xantham.Fable.Core.Record<string, float> with get, set
+            abstract labels: Record<string, float> with get, set
             /// <remarks>@type {DefaultsParams}</remarks>
             abstract defaults: DefaultsParams with get, set
             /// <remarks>@type {Boolean}</remarks>
@@ -2495,7 +2495,7 @@ module CallbackArgument =
             inherit Timeline
             inherit Tween
             /// <remarks>@type {Record&lt;String, Number&gt;}</remarks>
-            abstract labels: Xantham.Fable.Core.Record<string, float> with get, set
+            abstract labels: Record<string, float> with get, set
             /// <remarks>@type {DefaultsParams}</remarks>
             abstract defaults: DefaultsParams with get, set
             /// <remarks>@type {Boolean}</remarks>
@@ -2988,7 +2988,7 @@ module StaggerParams =
 
 type DOMTarget = U2<Browser.Types.HTMLElement, Browser.Types.SVGElement>
 
-type JSTarget = Xantham.Fable.Core.Record<string, obj>
+type JSTarget = Record<string, obj>
 
 type Target = U3<Browser.Types.HTMLElement, JSTarget, Browser.Types.SVGElement>
 
@@ -3258,7 +3258,7 @@ type TweenPropertySiblings =
     [<ParamObject; Emit("$0")>]
     static member Create (?_head: Tween, ?_tail: Tween) : TweenPropertySiblings = jsNative
 
-type TweenLookups = Xantham.Fable.Core.Record<string, TweenPropertySiblings>
+type TweenLookups = Record<string, TweenPropertySiblings>
 
 type TweenReplaceLookups = JS.WeakMap<Target, TweenLookups>
 
@@ -3321,9 +3321,9 @@ type PercentageKeyframeOptions =
     [<ParamObject; Emit("$0")>]
     static member Create (?ease: EasingParam) : PercentageKeyframeOptions = jsNative
 
-type PercentageKeyframeParams = Xantham.Fable.Core.Record<string, TweenParamValue>
+type PercentageKeyframeParams = Record<string, TweenParamValue>
 
-type PercentageKeyframes = Xantham.Fable.Core.Record<string, PercentageKeyframes.Item>
+type PercentageKeyframes = Record<string, PercentageKeyframes.Item>
 
 type DurationKeyframes = DurationKeyframes.Item[]
 
@@ -3493,7 +3493,7 @@ type AnimatableObject =
     inherit Animatable
     abstract targets: Target[] with get, set
     /// <remarks>@type {Record&lt;String, JSAnimation&gt;}</remarks>
-    abstract animations: Xantham.Fable.Core.Record<string, JSAnimation> with get, set
+    abstract animations: Record<string, JSAnimation> with get, set
     /// <remarks>@type {JSAnimation|null}</remarks>
     abstract callbacks: JSAnimation option with get, set
     abstract revert: unit -> AnimatableObject
@@ -3543,9 +3543,9 @@ type AngularRef =
 type ScopeParams =
     abstract root: U6<string, AngularRef, Browser.Types.HTMLElement, Browser.Types.NodeList, ReactRef, Browser.Types.SVGElement> option with get, set
     abstract defaults: DefaultsParams option with get, set
-    abstract mediaQueries: Xantham.Fable.Core.Record<string, string> option with get, set
+    abstract mediaQueries: Record<string, string> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?root: U6<string, AngularRef, Browser.Types.HTMLElement, Browser.Types.NodeList, ReactRef, Browser.Types.SVGElement>, ?defaults: DefaultsParams, ?mediaQueries: Xantham.Fable.Core.Record<string, string>) : ScopeParams = jsNative
+    static member Create (?root: U6<string, AngularRef, Browser.Types.HTMLElement, Browser.Types.NodeList, ReactRef, Browser.Types.SVGElement>, ?defaults: DefaultsParams, ?mediaQueries: Record<string, string>) : ScopeParams = jsNative
 
 type ScopedCallback<'T> = (Scope -> 'T)
 

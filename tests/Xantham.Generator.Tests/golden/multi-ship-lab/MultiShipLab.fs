@@ -7,7 +7,7 @@ module rec MultiShipLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 /// <summary>
 /// A crate the entry package declares over a dependency's type.

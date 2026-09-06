@@ -7,7 +7,7 @@ module rec AliasCopyLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 /// <summary>
 /// One member per referenced shape, so each dependency name is read exactly once.

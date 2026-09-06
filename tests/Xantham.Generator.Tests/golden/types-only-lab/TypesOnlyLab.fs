@@ -7,7 +7,7 @@ module rec TypesOnlyLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
-open Xantham.Fable.Core
+open Fable.Core.JS
 
 /// <summary>
 /// A class, whose static is bound at the renderer's other specifier-writing call site.
