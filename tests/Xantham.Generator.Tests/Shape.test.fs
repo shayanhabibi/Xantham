@@ -301,8 +301,9 @@ let typeRefTests =
                 [ Ergonomic ]
                 "the hoist is reported; the erased union is not a widening"
 
-        testCase "a union wider than the erased arity still widens to obj" <| fun _ ->
-            // Ten distinct arms, one past `Fable.Core`'s widest `U9`.
+        testCase "a union wider than Fable.Core's shipped arity renders inline, uncapped" <| fun _ ->
+            // Ten distinct arms, one past `Fable.Core`'s widest `U9`: the render tier owns a
+            // `U10` in the emitting file's own footer, so the shape tier keeps every arm.
             let named id name =
                 { Build.facts (Build.typeResponse id TypeFlags.Object) with SymbolName = Some name }
 
@@ -321,8 +322,22 @@ let typeRefTests =
 
             let reference, findings = Spec.typeRef Build.context model None "x" 10
 
-            Expect.equal reference FsObj "ten members, ten arms"
-            Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
+            Expect.equal
+                reference
+                (FsErasedUnion
+                    [ FsString
+                      FsFloat
+                      FsBool
+                      FsNamed "A"
+                      FsNamed "B"
+                      FsNamed "C"
+                      FsNamed "D"
+                      FsNamed "E"
+                      FsNamed "F"
+                      FsNamed "G" ])
+                "ten members, ten arms"
+
+            Expect.equal (findings |> List.map _.Tier) [] "no widening finding - the union renders exactly"
 
         testCase "a fixed tuple maps to an F# tuple (D7)" <| fun _ ->
             let model =

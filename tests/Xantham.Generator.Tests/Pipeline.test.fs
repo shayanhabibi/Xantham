@@ -3601,8 +3601,9 @@ let pipelineTests =
         // Wave thirteen lane CD. `T[K]` widened to `obj` wherever the operand was not a type
         // variable the signature bound as `typekeyof`. An operand whose own keys confine the
         // index now resolves to the union of the value types those keys select; the shapes where
-        // the index reaches past those keys stay widened, and a value union past the
-        // erased-union cap re-keys the loss to `TR036`.
+        // the index reaches past those keys stay widened. Wave fifteen item 3 lifted the
+        // erased-union cap, so a value union past `Fable.Core`'s shipped arity renders against
+        // a `U<n>` this file's own footer declares, rather than widening to `obj`.
         yield!
             fixtureTests "indexed-access-lab" (handFixture "indexed-access-lab") GeneratorConfig.Default (fun package ->
                 [ testCase "an access confined to the operand's own keys resolves to the value union" <| fun _ ->
@@ -3631,8 +3632,14 @@ let pipelineTests =
                       // signature: the bound's value type is what any key selects.
                       Expect.stringContains source "abstract dispatchEvent: ``event``: WorkerEvent -> bool" "the bound's value"
 
-                  testCase "a value union past the cap re-keys the loss rather than reporting it twice" <| fun _ ->
+                  testCase "a value union past Fable.Core's shipped arity renders against the file's own U<n>" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains
+                          source
+                          "handler: (U12<E01, E02, E03, E04, E05, E06, E07, E08, E09, E10, E11, E12> -> unit)"
+                          "the twelve-member value union, against a footer-declared U12"
 
                       let keysFor symbol =
                           rendered.Findings
@@ -3641,8 +3648,8 @@ let pipelineTests =
 
                       Expect.equal
                           (keysFor "onWide(handler)(event)")
-                          [ "TR036", "union of 12 distinct types widened to obj (D4 caps the erased union at 9)" ]
-                          "the access resolves, and the union it resolved to is what widens"
+                          []
+                          "the access resolves, and the union it resolved to renders exactly rather than widening"
 
                   testCase "an index reaching past the operand's own keys stays widened" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)

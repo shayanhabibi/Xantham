@@ -4,8 +4,8 @@
   "module": "IndexedAccessLab",
   "counts": {
     "exact": 0,
-    "ergonomic": 25,
-    "widened": 3,
+    "ergonomic": 26,
+    "widened": 2,
     "escape": 0
   },
   "passes": [
@@ -27,9 +27,9 @@
     },
     {
       "pass": "SE - shape-exports",
-      "total": 7,
+      "total": 6,
       "ergonomic": 4,
-      "widened": 3
+      "widened": 2
     },
     {
       "pass": "SP - synthesize-paramobjects",
