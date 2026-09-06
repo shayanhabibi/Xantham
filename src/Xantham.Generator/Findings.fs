@@ -165,6 +165,8 @@ module FindingCodes =
             "LU.NonStringLiteralCase", "LU001"
             "DT.ArmNotPlainData", "DT001"
             "DT.TaggedUnion", "DT002"
+            "DT.TagValueShared", "DT003"
+            "DT.ArmsMergedOnSharedTag", "DT004"
             "SY.InstantiationNamedOnce", "SY001"
             "SY.HoistArgumentsNotRecovered", "SY002"
             "SY.IntersectionOperandNotHoisted", "SY003"
@@ -697,12 +699,21 @@ type ClassifyLiteralUnions =
 type DetectTaggedUnions =
     | [<Ergonomic>] ArmNotPlainData of tag: string
     | [<Exact>] TaggedUnion of tag: string
+    /// Two arms of a uniformly tagged union carry the same tag value, so a `match` on the tag
+    /// could not tell them apart. The union is retained as an erased union.
+    | [<Ergonomic>] TagValueShared of tag: string * value: string
+    /// Arms sharing a tag value folded into one case, which carries the members they agree on.
+    | [<Ergonomic>] ArmsMergedOnSharedTag of tag: string * value: string
 
     interface IFindingKind with
         member this.Message =
             match this with
             | ArmNotPlainData tag -> $"discriminated by '{tag}', but an arm is not plain data; left as an erased union"
             | TaggedUnion tag -> $"discriminated union on '{tag}' (D4)"
+            | TagValueShared(tag, value) ->
+                $"discriminated by '{tag}', but two arms carry '{value}'; left as an erased union"
+            | ArmsMergedOnSharedTag(tag, value) ->
+                $"arms sharing '{tag}' = '{value}' merged into one case, carrying the members they agree on"
 
 /// `shape-interfaces`.
 /// `synthesize-anonymous`. Wave two, lane A: the pass had no findings of its own, because until

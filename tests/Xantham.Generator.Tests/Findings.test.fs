@@ -129,6 +129,8 @@ let findingsTests =
                     "LU.NonStringLiteralCase LU001 exact"
                     "DT.ArmNotPlainData DT001 ergonomic"
                     "DT.TaggedUnion DT002 exact"
+                    "DT.TagValueShared DT003 ergonomic"
+                    "DT.ArmsMergedOnSharedTag DT004 ergonomic"
                     "SY.InstantiationNamedOnce SY001 exact"
                     "SY.HoistArgumentsNotRecovered SY002 widened"
                     "SY.IntersectionOperandNotHoisted SY003 widened"
