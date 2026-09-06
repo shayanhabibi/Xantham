@@ -489,6 +489,16 @@ let pipelineTests =
                           "the ambient module's export carries its own specifier" ])
 
         yield!
+            fixtureTests "dom-shadow-lab" (handFixture "dom-shadow-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "declarations reusing a DOM lib name count as shadowed" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                      Expect.isGreaterThanOrEqual
+                          rendered.ShadowedByLib
+                          20
+                          "every interface in this fixture reuses a name the default DOM lib already declares" ])
+
+        yield!
             fixtureTests "ambient-module-lab" (handFixture "ambient-module-lab") GeneratorConfig.Default (fun package ->
                 [ testCase "an ambient module's exports bind to its specifier" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)

@@ -123,6 +123,25 @@ let private summary (report: RunReport) =
             $"  {key} {count}"
     ]
 
+/// Below this count, a run's `ShadowedByLib` reads as ordinary declaration merging (a polyfill
+/// augmenting one or two global interfaces); at or above it, as a global type library whose own
+/// declarations are being lost to the compiler's default lib wholesale.
+let private shadowedByLibThreshold = 20
+
+/// A run's own diagnostic for a package that looks like a global type library with no `lib`
+/// configured: the compiler's default DOM lib loaded, and this many of the package's own
+/// declarations share a name with a DOM declaration and merged into it instead of reaching the
+/// binding. Silent whenever `lib` is already configured, since that is the fix this names.
+let private libShadowWarning (config: GeneratorConfig) (report: RunReport) : string option =
+    if config.Lib.IsSome || report.ShadowedByLib < shadowedByLibThreshold then
+        None
+    else
+        Some
+            $"xantham: {report.ShadowedByLib} declarations in this package share a name with a \
+              default-lib declaration (e.g. the DOM lib) and merged into it instead of reaching \
+              {report.ModuleName} - set \"lib\" in xantham.json to the set this package's own \
+              documentation prescribes"
+
 /// Why a package directory is refused before a compiler session starts.
 let private refusePackage (packageDir: string) =
     if not (Directory.Exists packageDir) then
@@ -151,6 +170,10 @@ let private emit (out: TextWriter) (err: TextWriter) (options: GenerateOptions) 
 
             for line in summary report do
                 err.WriteLine line
+
+            match libShadowWarning config report with
+            | Some warning -> err.WriteLine warning
+            | None -> ()
 
         Exit.Generated
     with e ->

@@ -142,6 +142,7 @@ let private conditionalAliasModel (declaredOperands: int list) (appliedOperands:
     { Build.shapeModel (table @ Build.primitives) with
         Harvest = { Exports = [ Build.export "seed" (Build.symbol 400 "seed" SymbolFlags.BlockScopedVariable) ]
                     Namespaces = Map.empty
+                    ShadowedByLib = 0
                   }
         ExportTypes = Map.ofList [ 400, { Declared = None; Value = Some 60 } ]
         DeclNames = Map.ofList [ 50, "Node" ] }
@@ -1047,6 +1048,7 @@ let private ansiRegexShaped () =
                 [ Build.export "Options" optionsSymbol
                   Build.export "default" functionSymbol ]
               Namespaces = Map.empty
+              ShadowedByLib = 0
             }
         ExportTypes =
             Map.ofList
@@ -1097,6 +1099,7 @@ let shapePassTests =
                 { Build.shapeModel (bagType :: Build.primitives) with
                     Harvest = { Exports = [ Build.export "Bag" bagSymbol ]
                                 Namespaces = Map.empty
+                                ShadowedByLib = 0
                               }
                     ExportTypes = Map.ofList [ 100, { Declared = Some 20; Value = None } ] }
 
@@ -1130,6 +1133,7 @@ let shapePassTests =
                 { Build.shapeModel (bagType :: Build.primitives) with
                     Harvest = { Exports = [ Build.export "FrozenBag" bagSymbol ]
                                 Namespaces = Map.empty
+                                ShadowedByLib = 0
                               }
                     ExportTypes = Map.ofList [ 100, { Declared = Some 20; Value = None } ] }
 
@@ -1160,6 +1164,7 @@ let shapePassTests =
                 { Build.shapeModel (bagType :: Build.primitives) with
                     Harvest = { Exports = [ Build.export "Bag" bagSymbol ]
                                 Namespaces = Map.empty
+                                ShadowedByLib = 0
                               }
                     ExportTypes = Map.ofList [ 100, { Declared = Some 20; Value = None } ] }
 
@@ -1209,6 +1214,7 @@ let shapePassTests =
                 { Build.shapeModel (anonymous :: makeType :: Build.primitives) with
                     Harvest = { Exports = [ Build.export "make" (Build.symbol 400 "make" SymbolFlags.Function) ]
                                 Namespaces = Map.empty
+                                ShadowedByLib = 0
                               }
                     ExportTypes = Map.ofList [ 400, { Declared = None; Value = Some 41 } ] }
 
@@ -1228,6 +1234,7 @@ let shapePassTests =
                     Harvest =
                         { Exports = [ Build.export "globals" (Build.symbol 400 "globals" SymbolFlags.BlockScopedVariable) ]
                           Namespaces = Map.empty
+                          ShadowedByLib = 0
                         }
                     ExportTypes = Map.ofList [ 400, { Declared = None; Value = Some 40 } ] }
 
@@ -1261,6 +1268,7 @@ let shapePassTests =
                     Harvest =
                         { Exports = [ Build.export "holder" (Build.symbol 400 "holder" SymbolFlags.BlockScopedVariable) ]
                           Namespaces = Map.ofList [ 900, "TailStream" ]
+                          ShadowedByLib = 0
                         }
                     ExportTypes = Map.ofList [ 400, { Declared = None; Value = Some 42 } ] }
 
@@ -1297,6 +1305,7 @@ let shapePassTests =
                     Harvest =
                         { Exports = [ Build.export "holder" (Build.symbol 400 "holder" SymbolFlags.BlockScopedVariable) ]
                           Namespaces = Map.empty
+                          ShadowedByLib = 0
                         }
                     ExportTypes = Map.ofList [ 400, { Declared = None; Value = Some 42 } ] }
 
@@ -1327,6 +1336,7 @@ let shapePassTests =
                             [ Build.export "Event" inNamespace
                               Build.export "Event" (Build.symbol 101 "Event" SymbolFlags.Interface) ]
                           Namespaces = Map.ofList [ 900, "TailStream" ]
+                          ShadowedByLib = 0
                         }
                     ExportTypes =
                         Map.ofList
@@ -1361,6 +1371,7 @@ let shapePassTests =
                 { Build.shapeModel (declaration :: instantiation :: typeParam 20 "T" :: typeParam 21 "U" :: Build.primitives) with
                     Harvest = { Exports = [ Build.export "current" (Build.symbol 400 "current" SymbolFlags.BlockScopedVariable) ]
                                 Namespaces = Map.empty
+                                ShadowedByLib = 0
                               }
                     ExportTypes = Map.ofList [ 400, { Declared = None; Value = Some 31 } ] }
 
@@ -2505,6 +2516,7 @@ let shapePassTests =
                         { Exports =
                             [ Build.export "Timer" (Build.symbol 800 "Timer" (SymbolFlags.Class ||| SymbolFlags.Value)) ]
                           Namespaces = Map.empty
+                          ShadowedByLib = 0
                         }
                     ExportTypes = Map.ofList [ 800, { Declared = Some 80; Value = Some 81 } ]
                     DeclNames = Map.ofList [ 80, "Timer" ] }
@@ -2579,6 +2591,7 @@ let shapePassTests =
                         { Exports =
                             [ Build.export "Clash" (Build.symbol 810 "Clash" (SymbolFlags.Class ||| SymbolFlags.Value)) ]
                           Namespaces = Map.empty
+                          ShadowedByLib = 0
                         }
                     ExportTypes = Map.ofList [ 810, { Declared = Some 80; Value = Some 81 } ]
                     DeclNames = Map.ofList [ 80, "Clash" ]
@@ -2651,6 +2664,7 @@ let shapePassTests =
                         { Exports =
                             [ Build.export "Gauge" (Build.symbol 600 "Gauge" (SymbolFlags.Class ||| SymbolFlags.Value)) ]
                           Namespaces = Map.empty
+                          ShadowedByLib = 0
                         }
                     ExportTypes = Map.ofList [ 600, { Declared = Some 60; Value = Some 61 } ]
                     DeclNames = Map.ofList [ 60, "Gauge" ] }
@@ -2668,6 +2682,7 @@ let shapePassTests =
                         { Exports =
                             [ Build.export "widgets" (Build.symbol 600 "widgets" SymbolFlags.BlockScopedVariable) ]
                           Namespaces = Map.empty
+                          ShadowedByLib = 0
                         }
                     ExportTypes = Map.ofList [ 600, { Declared = None; Value = Some 61 } ]
                     DeclNames = Map.ofList [ 60, "Gauge" ] }
@@ -2786,6 +2801,7 @@ let shapePassTests =
                     Harvest =
                         { Exports = cases |> List.map (fun (_, _, export, _) -> export)
                           Namespaces = Map.empty
+                          ShadowedByLib = 0
                         }
                     ExportTypes = cases |> List.map (fun (_, _, _, types) -> types) |> Map.ofList
                     Decls = cases |> List.map (fun (_, declaration, _, _) -> declaration) }
@@ -2874,6 +2890,7 @@ let shapePassTests =
                     Harvest =
                         { Exports = cases |> List.map (fun (_, _, export, _) -> export)
                           Namespaces = Map.empty
+                          ShadowedByLib = 0
                         }
                     ExportTypes = cases |> List.map (fun (_, _, _, types) -> types) |> Map.ofList
                     Decls = cases |> List.map (fun (_, declaration, _, _) -> declaration) }
@@ -2931,6 +2948,7 @@ let shapePassTests =
                             [ { Build.export "Vise" (Build.symbol 800 "Vise" (SymbolFlags.Class ||| SymbolFlags.Value)) with
                                   Origin = FromAmbientModule "lab:tools" } ]
                           Namespaces = Map.empty
+                          ShadowedByLib = 0
                         }
                     ExportTypes = Map.ofList [ 800, { Declared = Some 80; Value = Some 81 } ]
                     Decls = [ declaration ] }
@@ -2985,6 +3003,7 @@ let shapePassTests =
                                   "DOMException"
                                   (Build.symbol 810 "DOMException" (SymbolFlags.Class ||| SymbolFlags.Value)) ]
                           Namespaces = Map.empty
+                          ShadowedByLib = 0
                         }
                     ExportTypes = Map.ofList [ 810, { Declared = Some 80; Value = Some 81 } ]
                     DeclNames = Map.ofList [ 80, "DOMException" ]
@@ -4024,6 +4043,7 @@ let shapePassTests =
                 { Build.shapeModel [] with
                     Harvest = { Exports = [ Build.export "Gone" (Build.symbol 300 "Gone" SymbolFlags.TypeAlias) ]
                                 Namespaces = Map.empty
+                                ShadowedByLib = 0
                               } }
 
             let _, findings = Build.runPass Coverage.auditCoverage model

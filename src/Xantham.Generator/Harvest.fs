@@ -204,6 +204,18 @@ let harvestGlobals: Pass<HarvestModel> =
                             |> Array.filter (fun symbol ->
                                 Grouping.classify ctx.PackageDir (ValueSome symbol) = EntryPackage)
 
+                        // A name a `lib.*.d.ts` declaration precedes classifies as the compiler
+                        // lib (`Grouping.classify` reads only the first declaration), so such a
+                        // symbol never reaches `ours` above. This still finds it: any of the
+                        // symbol's declarations sitting under the package directory is this
+                        // package's own contribution to the merge, lost to `Exports` all the same.
+                        let shadowedByLib =
+                            symbols
+                            |> Array.filter (fun symbol ->
+                                Grouping.classify ctx.PackageDir (ValueSome symbol) <> EntryPackage
+                                && Grouping.declaresUnderPackage ctx.PackageDir symbol)
+                            |> Array.length
+
                         // A namespace of types alone is neither a type nor a value, so
                         // `TailStream` arrives under `Module` and nowhere else. Its members
                         // reach the shape tier through the types that refer to them, and the
@@ -268,7 +280,9 @@ let harvestGlobals: Pass<HarvestModel> =
                         if List.isEmpty harvested && List.isEmpty findings then
                             return
                                 Degraded(
-                                    model,
+                                    { model with
+                                        ShadowedByLib = shadowedByLib
+                                    },
                                     [ Finding.make "<module>" (HarvestGlobals.NothingHarvested ctx.EntryFile) ]
                                 )
                         else
@@ -276,6 +290,7 @@ let harvestGlobals: Pass<HarvestModel> =
                                 { model with
                                     Exports = harvested
                                     Namespaces = namespaces
+                                    ShadowedByLib = shadowedByLib
                                 }
 
                             return
