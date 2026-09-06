@@ -659,6 +659,7 @@ let private deriveFacts
                 { TypeFacts.shallow ty with
                     Origin = Grouping.classify ctx.PackageDir symbol
                     SymbolName = symbol |> ValueOption.map _.Name |> ValueOption.toOption
+                    DeclFile = Grouping.declFile symbol
                 },
                 []
         elif has TypeFlags.Object then
@@ -777,6 +778,7 @@ let private deriveFacts
                     { TypeFacts.shallow ty with
                         Origin = origin
                         SymbolName = shapeName
+                        DeclFile = Grouping.declFile symbol
                         TypeArguments = typeArguments |> List.map _.Id
                         TupleElements = tupleElements
                         AliasTypeArguments = aliasTypeArguments |> List.map _.Id
@@ -845,6 +847,7 @@ let private deriveFacts
                         { TypeFacts.shallow ty with
                             Origin = origin
                             SymbolName = symbol |> ValueOption.map _.Name |> ValueOption.toOption
+                            DeclFile = Grouping.declFile symbol
                             SymbolParent = symbol |> ValueOption.bind _.Parent |> ValueOption.toOption
                             TypeArguments = typeArguments |> List.map _.Id
                             AliasTypeArguments = aliasTypeArguments |> List.map _.Id
@@ -876,6 +879,7 @@ let private deriveFacts
                             Response = ty
                             Origin = origin
                             SymbolName = symbol |> ValueOption.map _.Name |> ValueOption.toOption
+                            DeclFile = Grouping.declFile symbol
                             SymbolParent = symbol |> ValueOption.bind _.Parent |> ValueOption.toOption
                             Members = structure.Members
                             IndexInfos = structure.IndexInfos
@@ -906,6 +910,7 @@ let private deriveFacts
             return
                 { TypeFacts.shallow ty with
                     SymbolName = symbol |> ValueOption.map _.Name |> ValueOption.toOption
+                    DeclFile = Grouping.declFile symbol
                     Constraint = bound |> ValueOption.map _.Id |> ValueOption.toOption
                     Default = fallback |> ValueOption.map _.Id |> ValueOption.toOption
                 },

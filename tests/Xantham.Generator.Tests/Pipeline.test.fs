@@ -1546,9 +1546,9 @@ let pipelineTests =
                           // `HG003` escape finding and nothing else.
                           let group =
                               rendered.Files
-                              |> List.tryFind (fun (path, _) -> path.Contains "TypeScript.Lib")
+                              |> List.tryFind (fun (path, _) -> path.Contains "TypeScript.Lib.Dom")
 
-                          Expect.isSome group "the compiler-lib group renders its own file, not just the entry module"
+                          Expect.isSome group "the compiler-lib group renders its DOM file, not just the entry module"
 
                           let source = group |> Option.get |> snd
 

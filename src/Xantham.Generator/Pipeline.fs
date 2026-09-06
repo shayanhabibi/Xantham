@@ -97,6 +97,19 @@ let private declOrigins (ctx: Context) (shape: ShapeModel) : Map<string, Package
             | _ -> origins)
         Map.empty
 
+/// The compiler-lib family of each declared name, read off the file of the type it declares.
+let private declFamilies (shape: ShapeModel) : Map<string, string> =
+    shape.DeclNames
+    |> Map.toList
+    |> List.sortBy fst
+    |> List.fold
+        (fun families (typeId, name) ->
+            match Map.tryFind name families, Map.tryFind typeId shape.Types with
+            | None, Some { Origin = CompilerLib; DeclFile = Some file } ->
+                Map.add name (Grouping.libFamily file) families
+            | _ -> families)
+        Map.empty
+
 /// The group a declaration is written into: its own where that group ships, the entry package's
 /// otherwise. An anonymous shape belongs to the entry package whatever file its node sits in
 /// (D6).
@@ -130,10 +143,31 @@ let groupModules (ctx: Context) (shape: ShapeModel) : Render.GroupModule list =
         |> Option.defaultValue Unclassified
         |> emittingGroup ctx
 
-    let placed = shape.Decls |> List.groupBy groupOf |> Map.ofList
+    // The compiler lib ships as two modules: the ECMAScript libs, and the DOM libs that read
+    // them. A declaration's family is its own symbol's file; a hoisted name takes its root's.
+    let families = declFamilies shape
 
-    let moduleOf (origin: PackageId) : Render.GroupModule =
-        let decls = placed |> Map.tryFind origin |> Option.defaultValue []
+    let rec familyOf (name: string) =
+        match Map.tryFind name families with
+        | Some family -> family
+        | None ->
+            match name.LastIndexOf '.' with
+            | -1 -> "Es"
+            | at -> familyOf (name.Substring(0, at))
+
+    let placementOf decl =
+        match groupOf decl with
+        | CompilerLib ->
+            let family =
+                Render.declName decl |> Option.map familyOf |> Option.defaultValue "Es"
+
+            CompilerLib, family
+        | origin -> origin, ""
+
+    let placed = shape.Decls |> List.groupBy placementOf |> Map.ofList
+
+    let moduleOf (origin: PackageId, family: string) : Render.GroupModule =
+        let decls = placed |> Map.tryFind (origin, family) |> Option.defaultValue []
 
         match GeneratorConfig.groupKey origin with
         | None ->
@@ -148,7 +182,11 @@ let groupModules (ctx: Context) (shape: ShapeModel) : Render.GroupModule list =
             {
                 Group = key
                 IsEntry = false
-                Module = Naming.groupModule ctx.Config ctx.PackageName origin
+                Module =
+                    if family = "Dom" then
+                        Naming.CompilerLibDomModule
+                    else
+                        Naming.groupModule ctx.Config ctx.PackageName origin
                 RuntimePackage = GeneratorConfig.derivedRuntimePackage key
                 Decls = decls
             }
@@ -157,10 +195,10 @@ let groupModules (ctx: Context) (shape: ShapeModel) : Render.GroupModule list =
         placed
         |> Map.toList
         |> List.map fst
-        |> List.filter (fun origin -> origin <> EntryPackage)
+        |> List.filter (fun (origin, _) -> origin <> EntryPackage)
         |> List.map moduleOf
 
-    moduleOf EntryPackage :: shipped
+    moduleOf (EntryPackage, "") :: shipped
 
 /// One finding per group this run names from the configured namespace rather than from the
 /// pinned derivation. The name is an assertion about a run nobody here performs, so it carries

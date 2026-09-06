@@ -312,6 +312,11 @@ module Naming =
     [<Literal>]
     let CompilerLibModule = "TypeScript.Lib"
 
+    /// The compiler-lib group's DOM module: the browser and worker libs, written after the
+    /// ECMAScript module they read.
+    [<Literal>]
+    let CompilerLibDomModule = "TypeScript.Lib.Dom"
+
     /// A package's module under a namespace: `FSharp.CloudEdge` over `@cloudedge/agents` is
     /// `FSharp.CloudEdge.Agents`.
     let private underNamespace (ns: string) (packageName: string) =
@@ -710,6 +715,8 @@ type TypeFacts =
         /// Name of the type's own symbol where it has one - what a `reference` emission
         /// templates with, and what a widening finding names.
         SymbolName: string option
+        /// File of the type's own symbol's first declaration, as the wire reports it.
+        DeclFile: string option
         /// Symbol id of the declaration the type's own symbol is written inside - a namespace,
         /// where `HarvestModel.Namespaces` has a name for it.
         SymbolParent: int option
@@ -758,6 +765,7 @@ module TypeFacts =
             Response = response
             Origin = Unclassified
             SymbolName = None
+            DeclFile = None
             SymbolParent = None
             Members = []
             IndexInfos = []
@@ -1279,6 +1287,27 @@ module Grouping =
                 | _ -> None
             | _ -> None
         | _ -> None
+
+    /// The file of a symbol's first declaration.
+    let declFile (symbol: SymbolResponse voption) : string option =
+        symbol
+        |> ValueOption.bind (fun s -> declOrder s.Declarations |> ValueOption.ofOption)
+        |> ValueOption.map (fun order -> order.File.Replace('\\', '/'))
+        |> ValueOption.toOption
+
+    /// The compiler-lib family a declaration file belongs to: `Dom` for the browser and worker
+    /// libs, `Es` for the ECMAScript libs.
+    let libFamily (file: string) : string =
+        let name = file.Substring(file.LastIndexOf '/' + 1)
+
+        if
+            name.StartsWith "lib.dom"
+            || name.StartsWith "lib.webworker"
+            || name.StartsWith "lib.scripthost"
+        then
+            "Dom"
+        else
+            "Es"
 
     /// Classifies a symbol's origin group (O7) from its first declaration's file path: under the
     /// package directory and outside any `node_modules` below it is the entry package; the
