@@ -275,6 +275,31 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
         && not (isBooleanPair model remaining)
         && (namedUnionByMembers { model with DeclNames = names } remaining).IsNone
 
+    /// A union `detect-tagged-unions` will declare (D4, §4.5(2)): every arm an object type
+    /// carrying the same string-literal discriminant, and data a DU case can bind. That pass
+    /// reads `DeclNames`, so a name minted here is what offers an inline union to it, and one
+    /// spelling of a union maps as the other does.
+    ///
+    /// The erased union standing in otherwise is written rather than read: Fable type-tests a
+    /// primitive alone, so `match` over `U3<Close, Error, Message>` reaches one arm for every
+    /// value (the run gate's `workarounds`, item 1), and above the cap the site reads `obj`.
+    ///
+    /// A union another declaration answers for by member set is left to that name -
+    /// `ResponseInputContent` is declared in two files of one package, and the second reads as
+    /// the first.
+    ///
+    /// A union `detect-tagged-unions` declines stays a reference: a name minted for it would be
+    /// written at every site and declared at none.
+    let becomesTaggedUnion (facts: TypeFacts) =
+        let nullish, remaining = splitNullish model facts
+
+        List.isEmpty nullish
+        && (namedUnionByMembers { model with DeclNames = names } remaining).IsNone
+        && (match taggedUnionShape { model with DeclNames = names } facts with
+            | Discriminated(tag, tagged, _) -> tagged |> List.forall (fst >> isTaggedCaseData tag)
+            | TagCollides _
+            | Untagged -> false)
+
     /// The type ids a declaration reads through call signatures rather than through a reference
     /// position: an export's own function type, and a method member's. A delegate declared for
     /// one of these is written nowhere, so the name is spent for nothing.
@@ -298,7 +323,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
         if Map.containsKey facts.Response.Id names then
             false
         elif flag TypeFlags.Union facts && not (flag TypeFlags.Boolean facts) then
-            isLiteralUnion facts
+            isLiteralUnion facts || becomesTaggedUnion facts
         elif flag TypeFlags.Object facts && isPureCallback facts then
             // A callback the arity rule retains as a delegate is declared under a name of its
             // own (D5), so the consumer reads `x: float * y: float` where `Func<float, float,

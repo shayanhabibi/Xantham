@@ -3289,6 +3289,53 @@ let pipelineTests =
                               []
                               $"{name} is not considered a tagged union at all"
 
-                      Expect.stringContains source "type Log = U2<Log2, Log3>" "and Log stays an erased union" ])
+                      Expect.stringContains source "type Log = U2<Log2, Log3>" "and Log stays an erased union"
+
+                  testCase "a union written inline is named under its owner and claimed from there"
+                  <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      let keysFor symbol =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Symbol = symbol)
+                          |> List.map _.Key
+                          |> List.distinct
+                          |> List.sort
+
+                      // Ten arms at a member position, above the erased-union cap. The member read
+                      // `obj` until the union carried a name.
+                      Expect.stringContains source "abstract ``event``: Wide.Event" "the member reads a declaration"
+                      Expect.stringContains source "TypeScriptTaggedUnion(\"type\", CaseRules.None)" "declared as a DU"
+                      Expect.stringContains source "| [<CompiledName(\"fetch\")>] Fetch of url: string" "carrying the arm's fields"
+                      Expect.stringContains source "| [<CompiledName(\"queue\")>] Queue" "and a tag-only arm as a bare case"
+                      Expect.equal (keysFor "Wide.Event") [ "DT002"; "SY004" ] "the mint is reported under the name it claimed"
+
+                      // The same union at a callback parameter: one type id, one declaration.
+                      Expect.stringContains source "type OnWide = (Wide.Event -> unit)" "a callback parameter reads the same declaration"
+
+                      Expect.hasLength
+                          (rendered.Findings |> List.filter (fun f -> f.Symbol = "Wide.Event" && f.Key = "DT002"))
+                          1
+                          "declared once for both positions"
+
+                      // Below the cap the mapping is the same: an erased union of interface arms
+                      // is written but not read.
+                      Expect.stringContains source "abstract ``event``: Narrow.Event" "a three-arm union is claimed too"
+                      Expect.equal (keysFor "Narrow.Event") [ "DT002"; "SY004" ] "and reported the same way"
+
+                      // A union another declaration answers for by member set is left to it.
+                      Expect.stringContains source "abstract ``event``: Named" "an inline spelling of a declared union reads that name"
+                      Expect.isFalse (source.Contains "Alias.Event") "and mints nothing of its own"
+
+                      // The `TailStream.EventType` spelling: an intersection arm carries no
+                      // `Object` flag, so no candidate discriminant is uniform.
+                      Expect.stringContains source "type OnEvent = (obj -> unit)" "a union with an intersection arm widens"
+
+                      Expect.equal
+                          (rendered.Findings
+                           |> List.filter (fun f -> f.Symbol.StartsWith "OnEvent" && f.Pass = "detect-tagged-unions"))
+                          []
+                          "and is offered no name to be claimed under" ])
 
     ]

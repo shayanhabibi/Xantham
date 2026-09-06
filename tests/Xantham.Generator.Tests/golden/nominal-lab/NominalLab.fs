@@ -27,7 +27,13 @@ type Narrow =
 
 type Wide =
     [<EmitIndexer>]
-    abstract Item: string -> U2<Attr, GLAttr> with get, set
+    abstract Item: string -> Wide.Item with get, set
+
+module Wide =
+    [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
+    type Item =
+        | [<CompiledName("attr")>] Attr
+        | [<CompiledName("gl")>] Gl
 
 [<Interface>]
 type Geometry<'Attributes> =

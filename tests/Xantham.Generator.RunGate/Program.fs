@@ -1773,6 +1773,37 @@ let private foldedTaggedCases () =
     | SharedTagLab.Terminal.Done -> check "a folded case matches itself on the tag" true
     | SharedTagLab.Terminal.Pending -> check "a folded case matched Pending" false
 
+/// A union written inline at a member position, declared under a name of its own. What the mint
+/// claims is the read: `workarounds` item 1 measures an erased union over interface arms
+/// reaching one arm for every value, and a case list keyed on the tag reaches the arm the value
+/// carries.
+let private mintedTaggedCases () =
+    equal
+        "a case minted from an inline union erases to the tagged object"
+        """{"type":"fetch","url":"/x"}"""
+        (json (SharedTagLab.Wide.Event.Fetch "/x"))
+
+    equal
+        "and an arm carrying the tag alone erases to it alone"
+        """{"type":"queue"}"""
+        (json SharedTagLab.Wide.Event.Queue)
+
+    let above: SharedTagLab.Wide.Event =
+        emitJsExpr () """({ type: "jsrpc", methodName: "ping" })"""
+
+    match above with
+    | SharedTagLab.Wide.Event.Jsrpc methodName ->
+        equal "a JavaScript-built object reaches the case its tag names" "ping" methodName
+    | _ -> check "a JavaScript-built jsrpc reached another case" false
+
+    // Three arms, below the erased-union cap: the arm an erased union would have written under
+    // its own name is reachable here because the tag is what the match reads.
+    let below: SharedTagLab.Narrow.Event = emitJsExpr () """({ type: "email" })"""
+
+    match below with
+    | SharedTagLab.Narrow.Event.Email -> check "a union claimed below the cap matches on its tag too" true
+    | _ -> check "a JavaScript-built email reached another case" false
+
 [<EntryPoint>]
 let main _ =
     globals ()
@@ -1786,6 +1817,7 @@ let main _ =
     heritage ()
     taggedUnions ()
     foldedTaggedCases ()
+    mintedTaggedCases ()
     nestedNames ()
     optionalHooks ()
     renamedStatics ()

@@ -1361,9 +1361,16 @@ type Header =
 [<Interface>]
 type HibernatableWebSocketEventInfo =
     abstract ``type``: string
-    abstract info: U3<HibernatableWebSocketEventInfoClose, HibernatableWebSocketEventInfoError, HibernatableWebSocketEventInfoMessage>
+    abstract info: HibernatableWebSocketEventInfo.Info
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, info: U3<HibernatableWebSocketEventInfoClose, HibernatableWebSocketEventInfoError, HibernatableWebSocketEventInfoMessage>) : HibernatableWebSocketEventInfo = jsNative
+    static member Create (``type``: string, info: HibernatableWebSocketEventInfo.Info) : HibernatableWebSocketEventInfo = jsNative
+
+module HibernatableWebSocketEventInfo =
+    [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+    type Info =
+        | [<CompiledName("close")>] Close of code: float * wasClean: bool
+        | [<CompiledName("error")>] Error
+        | [<CompiledName("message")>] Message
 
 [<Interface>]
 type HibernatableWebSocketEventInfoClose =
@@ -1404,9 +1411,23 @@ type Onset =
     abstract scriptTags: string[] option
     abstract scriptVersion: TailStream.ScriptVersion option
     abstract preview: TailStream.TracePreviewInfo option
-    abstract info: obj
+    abstract info: Onset.Info
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, attributes: Attribute[], spanId: string, executionModel: string, info: obj, ?dispatchNamespace: string, ?entrypoint: string, ?durableObjectId: string, ?scriptName: string, ?scriptTags: string[], ?scriptVersion: TailStream.ScriptVersion, ?preview: TailStream.TracePreviewInfo) : Onset = jsNative
+    static member Create (``type``: string, attributes: Attribute[], spanId: string, executionModel: string, info: Onset.Info, ?dispatchNamespace: string, ?entrypoint: string, ?durableObjectId: string, ?scriptName: string, ?scriptTags: string[], ?scriptVersion: TailStream.ScriptVersion, ?preview: TailStream.TracePreviewInfo) : Onset = jsNative
+
+module Onset =
+    [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+    type Info =
+        | [<CompiledName("alarm")>] Alarm of scheduledTime: JS.Date
+        | [<CompiledName("connect")>] Connect
+        | [<CompiledName("custom")>] Custom
+        | [<CompiledName("email")>] Email of mailFrom: string * rcptTo: string * rawSize: float
+        | [<CompiledName("fetch")>] Fetch of ``method``: string * url: string * cfJson: obj option * headers: Header[]
+        | [<CompiledName("hibernatableWebSocket")>] HibernatableWebSocket of info: HibernatableWebSocketEventInfo.Info
+        | [<CompiledName("jsrpc")>] Jsrpc
+        | [<CompiledName("queue")>] Queue of queueName: string * batchSize: float
+        | [<CompiledName("scheduled")>] Scheduled of scheduledTime: JS.Date * cron: string
+        | [<CompiledName("trace")>] Trace of traces: string option[]
 
 [<Interface>]
 type Outcome =
@@ -10581,6 +10602,13 @@ module ResponseInputItemMessage =
         | [<CompiledName("system")>] System
         | [<CompiledName("user")>] User
 
+module ResponseOutputMessage =
+    module Content =
+        [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+        type Item =
+            | [<CompiledName("refusal")>] Refusal of refusal: string
+            | [<CompiledName("output_text")>] OutputText of text: string * logprobs: Logprob[] option
+
 module ResponsesFunctionTool =
     type Parameters =
         [<EmitIndexer>]
@@ -10974,7 +11002,7 @@ type ResponseItem = U4<ResponseFunctionToolCallItem, ResponseFunctionToolCallOut
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ResponseOutputItem =
     | [<CompiledName("function_call")>] FunctionCall of arguments: string * call_id: string * name: string * id: string option * status: ResponseFunctionToolCall.Status option
-    | [<CompiledName("message")>] Message of id: string * content: U2<ResponseOutputRefusal, ResponseOutputText>[] * role: string * status: ResponseFunctionToolCall.Status
+    | [<CompiledName("message")>] Message of id: string * content: ResponseOutputMessage.Content.Item[] * role: string * status: ResponseFunctionToolCall.Status
     | [<CompiledName("reasoning")>] Reasoning of id: string * summary: ResponseReasoningSummaryItem[] * content: ResponseReasoningContentItem[] option * encrypted_content: string option * status: ResponseFunctionToolCall.Status option
 
 [<Interface>]
@@ -10998,12 +11026,12 @@ type ResponseOutputItemDoneEvent =
 [<Interface>]
 type ResponseOutputMessage =
     abstract id: string with get, set
-    abstract content: U2<ResponseOutputRefusal, ResponseOutputText>[] with get, set
+    abstract content: ResponseOutputMessage.Content.Item[] with get, set
     abstract role: string with get, set
     abstract status: ResponseFunctionToolCall.Status with get, set
     abstract ``type``: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (id: string, content: U2<ResponseOutputRefusal, ResponseOutputText>[], role: string, status: ResponseFunctionToolCall.Status, ``type``: string) : ResponseOutputMessage = jsNative
+    static member Create (id: string, content: ResponseOutputMessage.Content.Item[], role: string, status: ResponseFunctionToolCall.Status, ``type``: string) : ResponseOutputMessage = jsNative
 
 [<Interface>]
 type ResponseOutputRefusal =
