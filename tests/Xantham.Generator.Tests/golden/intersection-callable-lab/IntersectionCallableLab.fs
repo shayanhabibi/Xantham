@@ -14,11 +14,9 @@ type Chained = (float -> float)
 /// <summary>
 /// Member position: the property's type is an intersection of two callables.
 /// </summary>
-[<Interface>]
 type Utils =
-    abstract round: Func<float, float, float> with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (round: Func<float, float, float>) : Utils = jsNative
+    abstract round: value: float * length: float -> float
+    abstract round: length: float -> float
 
 /// <summary>
 /// Call signatures beside a property: the member set flattens and the signature is the loss.

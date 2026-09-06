@@ -1,0 +1,1 @@
+{ "name": "callback-overload-lab", "type": "module", "types": "index.d.ts", "description": "Wave fourteen lab: TR031/TR062, a callback declared with two or more call signatures, at both raise sites - a member reference and a named declaration." }

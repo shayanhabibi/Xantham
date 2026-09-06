@@ -356,12 +356,12 @@ type Unresolved =
 
 type InitializedResource<'T> = U3<Errored, Ready<'T>, Refreshing<'T>>
 
-[<Interface>]
 type ResourceActions<'T, 'R> =
-    abstract mutate: (obj -> obj) with get, set
+    abstract mutate: [<ParamArray>] args: obj -> obj
+    abstract mutate<'U>: value: ('T -> 'U) -> 'U
+    abstract mutate<'U>: value: 'U -> 'U
+    abstract mutate<'U>: value: U2<('T -> 'U), 'U> -> 'U
     abstract refetch: ('R option -> U2<'T, JS.Promise<'T>> option) with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (mutate: (obj -> obj), refetch: ('R option -> U2<'T, JS.Promise<'T>> option)) : ResourceActions<'T, 'R> = jsNative
 
 type ResourceSource<'S> = U3<bool, 'S, (unit -> U2<bool, 'S> option)> option
 
@@ -433,23 +433,23 @@ module InitializedResourceOptions =
 type ResourceReturn<'T, 'R> = private ResourceReturn__ of U5<Errored, Pending, Ready<'T>, Refreshing<'T>, Unresolved> * obj
 
 module ResourceReturn =
-    [<Interface>]
     type Item<'R, 'T> =
-        abstract mutate: (obj[] -> unit) with get, set
+        abstract mutate: [<ParamArray>] args: obj[] -> unit
+        abstract mutate<'U>: value: ('T option -> 'U) -> 'U
+        abstract mutate<'U>: value: 'U -> 'U
+        abstract mutate<'U>: value: U2<('T option -> 'U), 'U> -> 'U
         abstract refetch: ('R option -> U2<'T, JS.Promise<'T option>> option) with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (mutate: (obj[] -> unit), refetch: ('R option -> U2<'T, JS.Promise<'T option>> option)) : Item<'R, 'T> = jsNative
 
 [<Erase>]
 type InitializedResourceReturn<'T, 'R> = private InitializedResourceReturn__ of U3<Errored, Ready<'T>, Refreshing<'T>> * obj
 
 module InitializedResourceReturn =
-    [<Interface>]
     type Item<'T, 'R> =
-        abstract mutate: (obj -> obj) with get, set
+        abstract mutate: [<ParamArray>] args: obj -> obj
+        abstract mutate<'U>: value: ('T -> 'U) -> 'U
+        abstract mutate<'U>: value: 'U -> 'U
+        abstract mutate<'U>: value: U2<('T -> 'U), 'U> -> 'U
         abstract refetch: ('R option -> U2<'T, JS.Promise<'T>> option) with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (mutate: (obj -> obj), refetch: ('R option -> U2<'T, JS.Promise<'T>> option)) : Item<'T, 'R> = jsNative
 
 module CreateResource =
     type Fetcher<'I, 'T, 'R> = delegate of k: bool * info: obj -> U2<'T, JS.Promise<'T>>
@@ -571,33 +571,33 @@ module CreateResource =
                 static member Create (?value: obj) : Info = jsNative
 
     module Result =
-        [<Interface>]
         type Item<'R, 'I, 'T> =
-            abstract mutate: (obj -> obj) with get, set
+            abstract mutate: [<ParamArray>] args: obj -> obj
+            abstract mutate<'U>: value: (U2<'I, 'T> -> 'U) -> 'U
+            abstract mutate<'U>: value: 'U -> 'U
+            abstract mutate<'U>: value: U2<(U2<'I, 'T> -> 'U), 'U> -> 'U
             abstract refetch: ('R option -> U3<'I, 'T, JS.Promise<U2<'I, 'T>>> option) with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (mutate: (obj -> obj), refetch: ('R option -> U3<'I, 'T, JS.Promise<U2<'I, 'T>>> option)) : Item<'R, 'I, 'T> = jsNative
 
-        [<Interface>]
         type Item2<'R, 'T> =
-            abstract mutate: (obj[] -> unit) with get, set
+            abstract mutate: [<ParamArray>] args: obj[] -> unit
+            abstract mutate<'U>: value: ('T option -> 'U) -> 'U
+            abstract mutate<'U>: value: 'U -> 'U
+            abstract mutate<'U>: value: U2<('T option -> 'U), 'U> -> 'U
             abstract refetch: ('R option -> U2<'T, JS.Promise<'T option>> option) with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (mutate: (obj[] -> unit), refetch: ('R option -> U2<'T, JS.Promise<'T option>> option)) : Item2<'R, 'T> = jsNative
 
-        [<Interface>]
         type Item3<'R, 'I, 'T> =
-            abstract mutate: (obj -> obj) with get, set
+            abstract mutate: [<ParamArray>] args: obj -> obj
+            abstract mutate<'U>: value: (U2<'I, 'T> -> 'U) -> 'U
+            abstract mutate<'U>: value: 'U -> 'U
+            abstract mutate<'U>: value: U2<(U2<'I, 'T> -> 'U), 'U> -> 'U
             abstract refetch: ('R option -> U3<'I, 'T, JS.Promise<U2<'I, 'T>>> option) with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (mutate: (obj -> obj), refetch: ('R option -> U3<'I, 'T, JS.Promise<U2<'I, 'T>>> option)) : Item3<'R, 'I, 'T> = jsNative
 
-        [<Interface>]
         type Item4<'R, 'T> =
-            abstract mutate: (obj[] -> unit) with get, set
+            abstract mutate: [<ParamArray>] args: obj[] -> unit
+            abstract mutate<'U>: value: ('T option -> 'U) -> 'U
+            abstract mutate<'U>: value: 'U -> 'U
+            abstract mutate<'U>: value: U2<('T option -> 'U), 'U> -> 'U
             abstract refetch: ('R option -> U2<'T, JS.Promise<'T option>> option) with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (mutate: (obj[] -> unit), refetch: ('R option -> U2<'T, JS.Promise<'T option>> option)) : Item4<'R, 'T> = jsNative
 
 [<Interface>]
 type DeferredOptions<'T> =
