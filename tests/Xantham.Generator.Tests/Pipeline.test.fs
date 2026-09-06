@@ -2487,9 +2487,12 @@ let pipelineTests =
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                           let source = rendered.Files |> List.head |> snd
 
+                          // `HtmlTags[K]` resolves to the union of the map's value types (lane
+                          // CD); the bound `K` was taken over is still nowhere in the signature,
+                          // which is what makes the two overloads collide.
                           Expect.stringContains
                               source
-                              "abstract find<'K>: selector: 'K -> obj"
+                              "abstract find<'K>: selector: 'K -> U2<Div, Span>"
                               "the bound is nowhere in the F# signature"
 
                           Expect.stringContains
@@ -3347,5 +3350,65 @@ let pipelineTests =
                               $"{name} is not considered a tagged union at all"
 
                       Expect.stringContains source "type Log = U2<Log2, Log3>" "and Log stays an erased union" ])
+
+        // Wave thirteen lane CD. `T[K]` widened to `obj` wherever the operand was not a type
+        // variable the signature bound as `typekeyof`. An operand whose own keys confine the
+        // index now resolves to the union of the value types those keys select; the shapes where
+        // the index reaches past those keys stay widened, and a value union past the
+        // erased-union cap re-keys the loss to `TR036`.
+        yield!
+            fixtureTests "indexed-access-lab" (handFixture "indexed-access-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "an access confined to the operand's own keys resolves to the value union" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      // `Concrete[Type]` under `Type extends keyof Concrete`, in the three
+                      // positions the corpus writes it: a parameter, a callback's parameter, and
+                      // a return.
+                      Expect.stringContains
+                          source
+                          "static member addEventListener<'Type> (``type``: 'Type, handler: (U3<FetchEvent, QueueEvent, ScheduledEvent> -> unit)) : unit"
+                          "the map's value types, as an erased union"
+
+                      Expect.stringContains
+                          source
+                          "static member lastEvent<'Type> (``type``: 'Type) : U3<FetchEvent, QueueEvent, ScheduledEvent>"
+                          "and the same union returned"
+
+                      Expect.stringContains
+                          source
+                          "abstract on<'Type>: ``type``: 'Type * handler: (U3<FetchEvent, QueueEvent, ScheduledEvent> -> unit) -> unit"
+                          "and on a member"
+
+                      // `EventMap[keyof EventMap]` over a parameter bounded by an index
+                      // signature: the bound's value type is what any key selects.
+                      Expect.stringContains source "abstract dispatchEvent: ``event``: WorkerEvent -> bool" "the bound's value"
+
+                  testCase "a value union past the cap re-keys the loss rather than reporting it twice" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                      let keysFor symbol =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Symbol = symbol && (f.Key = "TR020" || f.Key = "TR036"))
+                          |> List.map (fun f -> f.Key, f.Message)
+
+                      Expect.equal
+                          (keysFor "onWide(handler)(event)")
+                          [ "TR036", "union of 12 distinct types widened to obj (D4 caps the erased union at 9)" ]
+                          "the access resolves, and the union it resolved to is what widens"
+
+                  testCase "an index reaching past the operand's own keys stays widened" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                      // The regression guard on the soundness boundary. A nested access has no
+                      // operand whose keys can be enumerated, and `EventMap["fetch"]` names a key
+                      // the bound `Record<string, WorkerEvent>` does not declare.
+                      Expect.equal
+                          (rendered.Findings
+                           |> List.filter (fun f -> f.Key = "TR020")
+                           |> List.map _.Symbol
+                           |> List.sort)
+                          [ "Feed.take(event)"; "runModel()"; "runModel(input)" ]
+                          "and these three are the only accesses left widened" ])
 
     ]

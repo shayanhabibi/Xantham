@@ -39,7 +39,7 @@ type Finder =
     /// <summary>
     /// Separated by which key set the parameter is bounded to, and by nothing else.
     /// </summary>
-    abstract find<'K>: selector: 'K -> obj
+    abstract find<'K>: selector: 'K -> U2<Div, Span>
     /// <summary>
     /// Separated by which key set the parameter is bounded to, and by nothing else.
     /// </summary>

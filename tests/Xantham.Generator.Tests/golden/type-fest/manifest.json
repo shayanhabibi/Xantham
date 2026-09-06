@@ -30,8 +30,8 @@
       "pass": "SA - shape-aliases",
       "total": 625,
       "exact": 1,
-      "ergonomic": 236,
-      "widened": 388
+      "ergonomic": 237,
+      "widened": 387
     },
     {
       "pass": "SP - synthesize-paramobjects",
