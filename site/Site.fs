@@ -5,23 +5,25 @@ open Nacara.Core
 open Nacara.Plugins
 open Nacara.Theme
 
-let versions = [SiteVersion.root "1.0"]
+let versions = [ SiteVersion.root "1.0" ]
 
 let navbar =
-    Theme.navbar [
-        NavbarSection("Guide", "guide", "/guide/introduction/")
-        NavbarSection("Wire", "wire", "/wire/")
-    ]
-    >> Theme.navbarEnd [
-        NavbarDynamicWidget(Versions.switcher (Versions.versions versions Versions.defaults))
-        NavbarIcon("GitHub", "https://github.com/shayanhabibi/xantham", Icons.github)
-    ]
+    Theme.navbar
+        [
+            NavbarSection("Guide", "guide", "/guide/introduction/")
+            NavbarSection("Wire", "wire", "/wire/")
+        ]
+    >> Theme.navbarEnd
+        [
+            NavbarDynamicWidget(Versions.switcher (Versions.versions versions Versions.defaults))
+            NavbarIcon("GitHub", "https://github.com/shayanhabibi/xantham", Icons.github)
+        ]
 
 let theme =
     Theme.defaults
     |> navbar
     |> Theme.editUrl "https://github.com/shayanhabibi/xantham/edit/main/docs"
-    |> Theme.footer (Html.p [Html.text "Built with Nacara"])
+    |> Theme.footer (Html.p [ Html.text "Built with Nacara" ])
 
 let site =
     Site.create "Xantham"
