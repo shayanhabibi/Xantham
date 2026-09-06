@@ -140,6 +140,9 @@ module FindingCodes =
             "TR.BareNullToObj", "TR057"
             "TR.UninhabitedIntersectionReduced", "TR058"
             "TR.IndexSignatureAsRecord", "TR059"
+            "TR.ExclusiveArmsFolded", "TR060"
+            "TR.ExclusiveArmsNotFoldable", "TR061"
+            "TR.CallbackOverloadsNotSeparable", "TR062"
             "TP.UnnamedTypeParameter", "TP001"
             "TP.ConstraintDropped", "TP002"
             "TP.GenericFunctionHoisted", "TP003"
@@ -466,6 +469,15 @@ type TypeReference =
     /// An object type whose whole content is one index signature, written as the support
     /// library's `Record`/`ReadonlyRecord` rather than minted a name of its own.
     | [<Ergonomic>] IndexSignatureAsRecord of key: string * value: string
+    /// A union whose arms agree on every member except which ones they declare `never`, written
+    /// as one interface with the exclusive members optional. Exclusivity holds at construction:
+    /// each arm keeps a `Create` overload, and both setters stay reachable on a folded instance.
+    | [<Ergonomic>] ExclusiveArmsFolded of arms: int
+    /// Exclusive arms that separate on no required parameter, so F# resolves no overload between
+    /// them. The union is written erased.
+    | [<Ergonomic>] ExclusiveArmsNotFoldable of arms: int
+    /// A callback whose overloads separate on no F# form. The first signature shapes it.
+    | [<Widened>] CallbackOverloadsNotSeparable of overloads: int
 
     interface IFindingKind with
         member this.Message =
@@ -578,6 +590,12 @@ type TypeReference =
                 $"an index signature alone reads as Record<{key}, {value}>; F# indexes it through Item"
             | UninhabitedIntersectionReduced property ->
                 $"'{property}' collides across the intersection's operands and TypeScript reduces the whole type to never; the operand that does not mark '{property}' nullable is the type"
+            | ExclusiveArmsFolded arms ->
+                $"{arms} exclusive arms folded into one interface; exclusivity holds at construction, not for the life of the value"
+            | ExclusiveArmsNotFoldable arms ->
+                $"{arms} exclusive arms separate on no required parameter; the union is written erased"
+            | CallbackOverloadsNotSeparable overloads ->
+                $"callback with {overloads} overloads separates on no F# form; the first signature shapes it"
 
 /// Type parameter binding: `Shape.typeParamsOf`, `aliasTypeParams`, key variables and erasure.
 [<Prefix "TP">]
