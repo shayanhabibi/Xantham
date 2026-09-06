@@ -20,17 +20,21 @@ blocks both, located precisely and not fixed.
 Integration branch `worktree-generator-wave-fifteen`. Every merge below was gated with
 `XANTHAM_REQUIRE_TSC=1 dotnet fsi build.fsx -- test` in the foreground, exit 0, tree clean.
 
-| | at item zero | now |
+| | at item zero | closed |
 | --- | ---: | ---: |
-| exact | 543 | 545 |
-| ergonomic | 1623 | 1630 |
-| widened | 793 | **789** |
-| escape | 206 | 206 |
-| generator tests | 522 | 532 |
+| exact | 543 | 549 |
+| ergonomic | 1623 | 1647 |
+| widened | 793 | **791** |
+| escape | 206 | 212 |
+| symbols | 3,165 | 3,199 |
+| generator tests | 522 | 535 |
 | run gate checks | 323 | 323 |
 
 Seven symbols moved, all of them better, none worse, verified per symbol against the baseline at
-each merge. **Widened fell 0.5%.**
+each merge. **Widened fell by two.** The thirty-four added symbols and the whole of the escape
+column's rise are four new lab fixtures - `noinfer-lab`, `lib-reference-lab`, `lib-ship-lab` and
+`frontier-width-lab` - which did not exist when the wave opened. No existing fixture regressed in
+any column.
 
 ## What shipped
 
@@ -86,7 +90,8 @@ collapse to one table entry — and every one moved output.
 | 2 | `getTargetOfType` dedup | doubled arity on multi-heritage interfaces, same fixtures |
 | 3 | declaration name + argument symbol ids | merged members across unrelated declarations |
 | 4 | as 3, plus a second round-trip confirming argument openness | resolved a `this` type through a hoisted intersection to a concrete substitution where the golden deliberately renders `obj` |
-| 5 | **frontier width bound** — the depth mechanism copied | in flight as lane DI when this was written |
+| 5 | **frontier width bound** — the depth mechanism copied | shipped, and a safety valve rather than a fix: `lib.dom` completes by widening 78.6% of its frontier to `obj` |
+| 5a | width bound admitting a generation's first 4096, sorted on `TypeResponse.Id` | withdrawn by its own lane: ids are assigned in arrival order and are not stable run to run, so selecting a subset by id made the resolved-and-widened split nondeterministic, and one fixture rendered differently across two runs |
 
 **The identity the frontier needs is not one the checker's responses carry.** Three of the four
 memoization attempts died on `hoist-conditional-lab`. A fifth key is not the next thing to try.
@@ -174,3 +179,29 @@ Ranked.
 - Compose a batch and regenerate goldens before gating — wave thirteen found symbols that existed
   on neither branch alone; this wave's batch one found none, which is worth knowing either way.
 - Briefs lead with the change. Lanes briefed to establish and report will report and build nothing.
+
+## Closed
+
+Final tip: 535 generator tests, 90 wire, run gate 323, exit 0, tree clean. exact 549, ergonomic
+1647, widened 791, escape 212 over 3,199 symbols. Seven symbols moved against the item-zero
+baseline and every one improved; the added symbols and the whole escape rise are four new lab
+fixtures.
+
+Lane DI closed the wave by bounding the frontier's width at `FollowWidth = 4096`, derived from the
+corpus's measured widest real frontier of 2,091. `lib.dom` went from killed at 171s and 6,025MB to
+completing in 11 to 16 seconds at about 614MB, with corpus output unmoved.
+
+**That ends the crash and ships nothing.** 78.6% of `lib.dom`'s frontier widens to `obj`.
+
+DI also withdrew its own first draft after catching a defect that would otherwise have shipped.
+That draft admitted a generation's first 4096 types sorted on `TypeResponse.Id` - a value the file
+already documents as assigned in arrival order and unstable run to run - so the resolved-and-widened
+split was itself nondeterministic and two runs of one fixture rendered differently. Deferring the
+generation whole removes the selection.
+
+That withdrawn draft is also the best remaining lead: it would have widened about 41% rather than
+78.6%. A stable partial admission, ordered by declaration identity rather than by a transient id,
+is worth roughly half the loss and was not attempted.
+
+**Total cost: approximately 2.6M subagent tokens across ten lane dispatches**, for seven shipped
+items, a net movement of two in the widened column, and a defect located but not fixed.

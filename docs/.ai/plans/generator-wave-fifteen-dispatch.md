@@ -275,3 +275,73 @@ Two negative results are worth keeping, because both were paid for:
   pair the emitter already uses to decide whether two responses are the same named declaration -
   **and** the type arguments applied at the reference. Collapsing to either alone is what breaks.
 
+---
+
+## Wave fifteen, closed
+
+Final tip gated with `XANTHAM_REQUIRE_TSC=1 dotnet fsi build.fsx -- test`: **535 generator tests,
+90 wire (1 skipped by design), run gate 323 checks, exit 0**, tree clean.
+
+| | at item zero | closed |
+| --- | ---: | ---: |
+| exact | 543 | 549 |
+| ergonomic | 1623 | 1647 |
+| widened | 793 | **791** |
+| escape | 206 | 212 |
+| symbols | 3,165 | 3,199 |
+| generator tests | 522 | 535 |
+| `TR036` | 6 | **0** |
+| `TR020` | 53 | **36** |
+
+Reconciled per symbol against `a9f2aeb`. **Seven symbols moved and every one improved; nothing
+regressed and nothing was removed.** The thirty-four added symbols and the whole of the escape
+column's rise belong to four new lab fixtures - `noinfer-lab`, `lib-reference-lab`, `lib-ship-lab`
+and `frontier-width-lab` - which did not exist when the wave opened. No existing fixture's escape
+count moved.
+
+### What the wave was for, and what it returned
+
+It was opened to publish Fable bindings for the compiler's own lib: the DOM half as
+`Xantham.Fable.Browser`, the ECMAScript half into `Xantham.Fable.Core`. **Neither exists.**
+
+Seven items shipped, none of them that one:
+
+| | Item |
+| --- | --- |
+| item zero | the support package shadows into `Fable.Core.JS`; generated output carries no Xantham-named token |
+| 3 | erased-union arity above nine, declared per file at the footer; `TR036` closed at 6 of 6 |
+| 4 | `NoInfer` reaches a type behind `resolveNoInfer`; `TR020` 53 to 36 |
+| DD | `HG003` names what it discarded rather than only that it found nothing |
+| 1f | the compiler-lib group is harvested when its disposition ships, gated by `lib-ship-lab` |
+| DH | frontier expansions and table size counted behind `XANTHAM_RESOLVE_COUNTERS` |
+| DI | the frontier's width is bounded; the generator no longer exhausts memory |
+
+Items 1b, 1c, 1d and 2 did not start. `TR023` 136 and `TR024` 147 are untouched, and
+`fable-binding-gaps.md` is still unanswered.
+
+### Why they did not start
+
+One defect, found by this wave and not fixed by it. **A generic method whose return type applies
+its enclosing interface to that method's own fresh type parameter costs the resolve tier
+disproportionately** - 24 frontier expansions against 39,908 for inputs of the same length.
+`Array<T>` has that shape, so the ECMAScript libs never complete, and `lib.dom` reached 6GB before
+lane DI bounded the width.
+
+DI's bound ends the crash and is not a fix: `lib.dom` completes by widening 78.6% of its frontier
+to `obj`. A DOM binding four fifths widened is not a DOM binding.
+
+**Six approaches were tried. Five changed the frontier's identity and all five moved output**;
+three died on `hoist-conditional-lab`. The sixth, the width bound, is the one that shipped, and it
+is a safety valve. The identity the frontier needs is not one the checker's responses carry, and
+finding it is a design problem rather than a lane brief.
+
+### Wave sixteen opens on this
+
+1. **The resolve tier's identity model** - how a type reference is keyed when its arguments are
+   open. Written design first. Every attempt in this wave is catalogued in
+   `docs/.ai/handovers/wave-fifteen-management.md` so the seventh is not a repeat. The nearest
+   lead: DI's withdrawn partial admission would have widened about 41% rather than 78.6%, so a
+   stable partial cut ordered by declaration identity rather than by a transient checker id is
+   worth roughly half the loss.
+2. **Then** items 1b, 1c, 1d and 2, which are blocked behind it and were fully briefed here.
+3. **Wave fourteen's six carried items**, deferred twice now and listed in the worklist.
