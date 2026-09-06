@@ -5,9 +5,41 @@ open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator.Shape.Spec
 
+/// The export that owns each declared type's generated definition. Keep harvest order within
+/// one group; across shipped groups, prefer the defining symbol over an alias of it.
+let declarationExports (ctx: Context) (model: ShapeModel) =
+    model.Harvest.Exports
+    |> List.choose (fun export ->
+        if not (hasAny SymbolFlags.Type export.Symbol.Flags) then
+            None
+        else
+            Map.tryFind export.Symbol.Id model.ExportTypes
+            |> Option.bind _.Declared
+            |> Option.map (fun typeId -> typeId, export))
+    |> List.groupBy fst
+    |> List.map (fun (typeId, candidates) ->
+        let exports = candidates |> List.map snd
+        let first = List.head exports
+        let firstOrigin = Grouping.classify ctx.PackageDir (ValueSome first.Symbol)
+
+        let defining =
+            exports
+            |> List.tryFind (fun export ->
+                let origin = Grouping.classify ctx.PackageDir (ValueSome export.Symbol)
+
+                origin <> firstOrigin
+                && GeneratorConfig.disposition ctx.Config origin = Ship
+                && (Map.tryFind typeId model.Types
+                    |> Option.exists (fun facts -> facts.Response.Symbol = ValueSome export.Symbol.Id)))
+            |> Option.defaultValue first
+
+        typeId, defining)
+
 /// Names every type-like export before anything refers to one, so later passes see references
 /// as `FsNamed` instead of expansions. Keys are type ids; when two exports share a declared
-/// type the first in harvest order names it and `shape-aliases` abbreviates the rest.
+/// type the first in harvest order names it and `shape-aliases` abbreviates the rest. Across
+/// shipped groups, the defining symbol takes precedence so an entry alias cannot make the
+/// shared declaration depend on its consumer.
 ///
 /// Two exports of two *different* types under one name are two declarations, and F# admits one
 /// name per declaration. Where TypeScript separates them by the namespace one of them is
@@ -43,22 +75,10 @@ let nameExports: Pass<ShapeModel> =
                     // namespaced declaration is as often the first claimant as the second - it is
                     // the one with somewhere else to go either way.
                     let claimants =
-                        model.Harvest.Exports
-                        |> List.fold
-                            (fun (claimants, seen) export ->
-                                if not (hasAny SymbolFlags.Type export.Symbol.Flags) then
-                                    claimants, seen
-                                else
-                                    match Map.tryFind export.Symbol.Id model.ExportTypes |> Option.bind _.Declared with
-                                    | Some typeId when
-                                        not (Map.containsKey typeId model.DeclNames) && not (Set.contains typeId seen)
-                                        ->
-                                        claimants
-                                        @ [ typeId, export.Order, fsName fallback export, namespaceOf export ],
-                                        Set.add typeId seen
-                                    | _ -> claimants, seen)
-                            ([], Set.empty)
-                        |> fst
+                        declarationExports ctx model
+                        |> List.filter (fun (typeId, _) -> not (Map.containsKey typeId model.DeclNames))
+                        |> List.map (fun (typeId, export) ->
+                            typeId, export.Order, fsName fallback export, namespaceOf export)
 
                     let declared = model.DeclNames |> Map.toList |> List.map snd |> Set.ofList
 

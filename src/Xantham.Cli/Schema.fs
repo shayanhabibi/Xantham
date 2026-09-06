@@ -46,10 +46,21 @@ let private configKeys =
           applies, which includes the DOM. A global type library that redeclares DOM names sets this to \
           what its README prescribes.")
 
+            "Entry",
+            ("entry",
+             "The TypeScript input file, relative to the package directory passed to generate, even when \
+          the configuration lives elsewhere. Must name an existing .ts, .tsx, .mts or .cts file \
+          (including declarations) within that directory. Omitted, \
+          selects types, typings, a root-export types string, then index.d.ts. An exports map without a \
+          root requires an explicit entry. Set runtime separately for a public JavaScript subpath; each \
+          invocation generates from one entry.")
+
             "RuntimePackage",
             ("runtime",
-             "The npm package the generated `[<Import(…)>]` attributes name. Defaults to the package name \
-          with DefinitelyTyped's `@types/` convention undone, so `@types/three` imports from `three`.")
+             "The public JavaScript module or subpath used by generated `[<Import(…)>]` attributes. \
+          Must be a nonempty string when provided. Independent of the entry declaration path. \
+          Defaults to the package name with DefinitelyTyped's \
+          `@types/` convention undone, so `@types/three` imports from `three`.")
 
             "ResolveNoInfer",
             ("resolveNoInfer",

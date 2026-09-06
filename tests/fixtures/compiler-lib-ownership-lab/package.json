@@ -1,0 +1,6 @@
+{
+    "name": "compiler-lib-ownership-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "description": "Entry aliases and the program global environment stay outside the shipped compiler library."
+}

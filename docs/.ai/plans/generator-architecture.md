@@ -268,6 +268,13 @@ New projects (names step around the archive, which is invisible to the solution 
   that emission refuses to skip. `dotnet fsi build.fsx -- generate --only schema` regenerates
   it, and `Cli.test.fs` fails when the committed text and the record disagree.
 
+  *Extended (2026-09-06):* `entry` selects one existing TypeScript file relative to the
+  package directory, independently of the `runtime` import and F# `module` name. The default
+  lookup checks root declarations; a package exposing only named subpaths requires an explicit
+  input. Conditional environment selection remains the caller's responsibility. Bootstrap,
+  CLI, schema and `entry-selection-lab` tests cover selection and refusal paths, including
+  `.d.mts` and `.d.cts`. See [entry selection](../../generator-usage.md#select-a-declaration-entry).
+
   Two things `load` still leaves to a caller. It is addressed by *directory*, so `--config`
   pointing at a file under another name reads it through a staged copy; a `loadFile` taking
   the path would remove that. And it signals every refusal with `failwith`, so the CLI
@@ -1172,6 +1179,25 @@ section above.
   442 ms against `widen`'s 443 ms on the same fixture. These numbers price `inline`, which
   has to resolve the 61 names the corpus references rather than the 20,000 a group walk
   reaches, and has to scope `Unclassified` shapes as well as named group members.
+
+  *Updated (2026-09-06):* the later combined compiler-library producer supersedes the
+  shipping restriction above. Its `Es` and `Dom` modules share `namespace rec TypeScript.Lib`.
+  The clean `esnext`/`dom` profile compiles for `netstandard2.1` and `net8.0`; the retained split
+  snapshots are outside the solution. The [packaging record](../handovers/wave-sixteen-management.md#compiler-library-packaging-after-this-handover)
+  gives the input pins and measurements.
+
+  Declaration placement now follows the defining export, with synthesized nested declarations
+  following their parent. A secondary alias keeps its own export's owner. These distinctions
+  prevent an application alias from renaming or relocating a shared compiler type. A complete
+  program-source check permits reusable `GlobalThis` only when compiler libraries are accompanied
+  by empty sources or empty exports. Application declarations and referenced augmentations keep
+  that global object in the application. Ownership tests cover these cases; the independent ES5
+  golden profile compiles with its consumer in a separate gate project.
+
+  This establishes the clean producer and the tested ownership cases. An application-enriched
+  DOM scope can still introduce a dependency from core to application; its reproduction remains
+  in `compiler-lib-ownership-lab`. General augmentation handling and closure across arbitrary
+  separately generated groups remain further work.
 
   *Settled (wave five lane T):* the compile gate takes closed configurations only, with the
   **corpus** as the unit of closure rather than the run. `cross-package-lab` and

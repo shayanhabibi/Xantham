@@ -100,6 +100,38 @@ The schema is emitted from the generator's own configuration record, so it descr
 installed tool reads. A copy generated from `master` is committed at the repository root as
 [`xantham.schema.json`](https://github.com/shayanhabibi/Xantham/blob/master/xantham.schema.json).
 
+### Select a declaration entry
+
+Each invocation generates from one TypeScript input. By default, the generator selects the
+manifest's `types`, then `typings`, then the first `types` string under the root export's
+conditions, then `index.d.ts`. In an `exports` map, the root is `"."`; named subpaths such as
+`"./adapter"` are separate inputs. A map without a root, an empty map, or an explicitly blocked
+`".": null` requires an explicit `entry`, even when `types`, `typings` or `index.d.ts` exists.
+An absent or top-level `null` `exports` field uses the default lookup.
+
+Use `entry` to select a particular declaration file, including a condition-specific `.d.mts`
+or `.d.cts` file. Choose the environment or import/require variant explicitly; the default
+root-condition scan is a declaration lookup. The path is relative to the package directory passed
+to `generate`, including when `--config` points elsewhere. It must be nonempty, remain within that
+directory, and name an existing TypeScript file (`.ts`, `.tsx`, `.mts` or `.cts`, including declarations).
+
+```jsonc
+{
+  "entry": "dist/adapter.d.ts",
+  "runtime": "example-package/adapter",
+  "module": "Example.Adapter"
+}
+```
+
+`runtime` controls the public JavaScript import used in generated `Import` attributes; `module`
+controls the F# module name. A supplied `runtime` must be a nonempty string; omitting it keeps
+the derived package import. Set these names for the selected entry. The declaration path is a file
+inside the installed package; the runtime import is the package's public module specifier.
+For a package with no public root, supply `runtime` when generating value imports: an explicit
+declaration input still leaves the default runtime import at the package root.
+Generate other public entries with separate configurations and output directories. Conditional
+npm resolution and automatic generation of every subpath are outside this selection mechanism.
+
 ### The four group dispositions
 
 `groups` is keyed by npm name, with the compiler's own library as `typescript/lib`.

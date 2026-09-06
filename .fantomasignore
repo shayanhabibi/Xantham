@@ -4,9 +4,18 @@
 # Ignore the golden corpus
 **/golden/**/*.fs
 
+# Retained diagnostic snapshots use the superseded split compiler-library layout.
+src/xantham-libs/
+
 # Ignore archive files
 .archive/
+
+# Each linked worktree runs its own formatting gate.
+.claude/worktrees/
 
 # Ignore expecto style
 *.tests.fs
 *.test.fs
+
+# Retained generation experiments are diagnostic output.
+**/.partition-work/

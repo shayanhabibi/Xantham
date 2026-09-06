@@ -69,6 +69,9 @@ type GeneratorConfig =
         /// the DOM loaded, every such name merges with the lib's declaration, is grouped as the
         /// compiler lib by its first declaration, and is not the package's to harvest.
         Lib: string list option
+        /// The TypeScript input file, relative to the package directory. `None` selects the
+        /// manifest's root declaration entry. Set `RuntimePackage` separately for a public subpath.
+        Entry: string option
         /// Overrides the npm package the generated `[<Import(…)>]` attributes name. `None`
         /// derives it from the package name (`GeneratorConfig.runtimePackage`), which is right
         /// for every package that ships its own JavaScript and for the DefinitelyTyped naming
@@ -88,6 +91,7 @@ type GeneratorConfig =
             Namespace = None
             Groups = Map.empty
             Lib = None
+            Entry = None
             RuntimePackage = None
             ResolveNoInfer = false
         }
@@ -166,6 +170,24 @@ module GeneratorConfig =
                 | true, _ -> failwith $"xantham.json: {name} must be a boolean"
                 | _ -> defaultValue
 
+            let entry =
+                match doc.RootElement.TryGetProperty "entry" with
+                | true, value when value.ValueKind = JsonValueKind.String -> Some(value.GetString())
+                | true, _ -> failwith "xantham.json: entry must be a string"
+                | _ -> None
+
+            let runtime =
+                match doc.RootElement.TryGetProperty "runtime" with
+                | true, value when value.ValueKind = JsonValueKind.String ->
+                    let name = value.GetString()
+
+                    if System.String.IsNullOrWhiteSpace name then
+                        failwith "xantham.json: runtime must be a nonempty string"
+
+                    Some name
+                | true, _ -> failwith "xantham.json: runtime must be a string"
+                | _ -> None
+
             let groups =
                 match doc.RootElement.TryGetProperty "groups" with
                 | true, v when v.ValueKind = JsonValueKind.Object ->
@@ -193,7 +215,8 @@ module GeneratorConfig =
                 Namespace = field "namespace"
                 Groups = groups
                 Lib = lib
-                RuntimePackage = field "runtime"
+                Entry = entry
+                RuntimePackage = runtime
                 ResolveNoInfer = boolField "resolveNoInfer" GeneratorConfig.Default.ResolveNoInfer
             }
 
@@ -322,7 +345,10 @@ module Naming =
 
     /// The compiler-lib module a family (`Grouping.libFamily`) is written into.
     let compilerLibFamilyModule (family: string) =
-        if family = "Dom" then CompilerLibDomModule else CompilerLibEsModule
+        if family = "Dom" then
+            CompilerLibDomModule
+        else
+            CompilerLibEsModule
 
     /// A package's module under a namespace: `FSharp.CloudEdge` over `@cloudedge/agents` is
     /// `FSharp.CloudEdge.Agents`.
@@ -1316,7 +1342,7 @@ module Grouping =
         else
             "Es"
 
-    /// Classifies a symbol's origin group (O7) from its first declaration's file path: under the
+    /// Classifies a declaration's origin group (O7) from its file path: under the
     /// package directory and outside any `node_modules` below it is the entry package; the
     /// compiler's default libs are the compiler-lib group; under a `node_modules` entry is that
     /// dependency, at whatever depth npm installed it; anything else - including anonymous
@@ -1329,6 +1355,36 @@ module Grouping =
     /// rather than unclassified: unclassified means Ship, and full derivation of a mistaken
     /// standard-lib file is the expensive failure, while a mis-grouped oddball is a visible
     /// finding.
+    let classifyFile (packageDir: string) (filePath: string) : PackageId =
+        let path = filePath.Replace('\\', '/')
+        let root = packageDir.Replace('\\', '/').TrimEnd '/' + "/"
+        let file = path.Substring(path.LastIndexOf '/' + 1)
+        let isLibFile = file.StartsWith "lib." && file.EndsWith ".d.ts"
+        let installedAt = path.LastIndexOf "/node_modules/"
+
+        // npm installs a package's dependencies under the package's own `node_modules`, so
+        // a dependency's path carries the entry package's directory as a prefix. The
+        // deepest `node_modules` boundary decides the group: one below the entry directory
+        // separates a dependency from its host, one at or above it is the entry package's
+        // own installation.
+        if
+            path.StartsWith(root, System.StringComparison.OrdinalIgnoreCase)
+            && installedAt < root.Length - 1
+        then
+            EntryPackage
+        else
+            match installedAt with
+            | -1 -> if isLibFile then CompilerLib else Unclassified
+            | at ->
+                match path.Substring(at + "/node_modules/".Length).Split '/' with
+                | parts when parts.Length > 0 && (parts[0] = "typescript" || parts[0] = "@typescript") -> CompilerLib
+                | _ when isLibFile -> CompilerLib
+                | parts when parts.Length > 1 && parts[0].StartsWith "@" -> Dependency $"{parts[0]}/{parts[1]}"
+                | parts when parts.Length > 0 -> Dependency parts[0]
+                | _ -> Unclassified
+
+    /// A symbol's origin, using its first declaration. The synthetic global environment has
+    /// no declaration; compiler-lib disposition controls whether resolve follows its members.
     let classify (packageDir: string) (symbol: SymbolResponse voption) : PackageId =
         match
             symbol
@@ -1341,34 +1397,7 @@ module Grouping =
         // so it groups with the compiler lib and widens with a name, identity only.
         | ValueNone when symbol |> ValueOption.exists (fun s -> s.Name = "globalThis") -> CompilerLib
         | ValueNone -> Unclassified
-        | ValueSome order ->
-            let path = order.File.Replace('\\', '/')
-            let root = packageDir.Replace('\\', '/').TrimEnd '/' + "/"
-            let file = path.Substring(path.LastIndexOf '/' + 1)
-            let isLibFile = file.StartsWith "lib." && file.EndsWith ".d.ts"
-            let installedAt = path.LastIndexOf "/node_modules/"
-
-            // npm installs a package's dependencies under the package's own `node_modules`, so
-            // a dependency's path carries the entry package's directory as a prefix. The
-            // deepest `node_modules` boundary decides the group: one below the entry directory
-            // separates a dependency from its host, one at or above it is the entry package's
-            // own installation.
-            if
-                path.StartsWith(root, System.StringComparison.OrdinalIgnoreCase)
-                && installedAt < root.Length - 1
-            then
-                EntryPackage
-            else
-                match installedAt with
-                | -1 -> if isLibFile then CompilerLib else Unclassified
-                | at ->
-                    match path.Substring(at + "/node_modules/".Length).Split '/' with
-                    | parts when parts.Length > 0 && (parts[0] = "typescript" || parts[0] = "@typescript") ->
-                        CompilerLib
-                    | _ when isLibFile -> CompilerLib
-                    | parts when parts.Length > 1 && parts[0].StartsWith "@" -> Dependency $"{parts[0]}/{parts[1]}"
-                    | parts when parts.Length > 0 -> Dependency parts[0]
-                    | _ -> Unclassified
+        | ValueSome order -> classifyFile packageDir order.File
 
     /// Whether any of `symbol`'s declarations sits under `packageDir`, by the same root test
     /// `classify` applies to only the first. Declaration merging can carry a symbol's list past

@@ -1,0 +1,5 @@
+{
+  "entry": "dist/adapter.d.ts",
+  "runtime": "entry-selection-lab/adapter",
+  "module": "EntrySelectionLab.Adapter"
+}

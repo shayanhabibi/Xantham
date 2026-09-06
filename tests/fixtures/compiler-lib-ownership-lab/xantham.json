@@ -1,0 +1,4 @@
+{
+    "lib": ["es5"],
+    "groups": { "typescript/lib": "ship" }
+}

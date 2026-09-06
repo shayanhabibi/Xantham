@@ -7,6 +7,54 @@ module Xantham.Generator.Pipeline
 open System
 open System.IO
 open Xantham.TypeScript.Wire
+open Xantham.TypeScript.Wire.Proto
+
+/// A complete program-source check, independent of which exports happened to be harvested.
+/// Empty sources and `export {}` add no declarations. Other non-library sources leave the
+/// global scope unverified, including sources imported only for their augmentations.
+let private compilerOnlyScope (ctx: Context) =
+    let contributesNothing (file: Ast.SourceFile) =
+        SourceFile.statements (Node.root file)
+        |> Seq.forall (fun statement ->
+            if statement.Kind <> SyntaxKind.ExportDeclaration then
+                false
+            else
+                let export = Node.retag<Statement, ExportDeclaration> statement
+
+                ValueOption.isNone (ExportDeclaration.moduleSpecifier export)
+                && (match ExportDeclaration.exportClause export with
+                    | ValueSome clause when clause.Kind = SyntaxKind.NamedExports ->
+                        NamedExports.elements (Node.retag<NamedExportBindings, NamedExports> clause)
+                        |> Seq.isEmpty
+                    | _ -> false))
+
+    async {
+        if GeneratorConfig.disposition ctx.Config CompilerLib <> Ship then
+            return false
+        else
+            try
+                let! files = ctx.Session.getSourceFileNames ()
+
+                let! verified =
+                    files
+                    |> Array.map (fun path ->
+                        async {
+                            let file = DocumentIdentifier.FileName path
+                            let! metadata = ctx.Session.getSourceFileMetadata file
+
+                            match metadata with
+                            | ValueSome metadata when metadata.IsDefaultLibrary -> return true, true
+                            | ValueSome _ ->
+                                let! source = ctx.Session.getSourceFile file
+                                return false, source |> ValueOption.exists contributesNothing
+                            | ValueNone -> return false, false
+                        })
+                    |> Async.Parallel
+
+                return Array.exists fst verified && Array.forall snd verified
+            with TsGoError _ ->
+                return false
+    }
 
 /// Folds a tier: each pass advances the model, findings are stamped with the pass that made
 /// them, and the tier hands back both.
@@ -55,13 +103,18 @@ let toShape (resolve: ResolveModel) : ShapeModel =
 let moduleName (ctx: Context) =
     Naming.groupModule ctx.Config ctx.PackageName EntryPackage
 
-/// The group each generated declaration belongs to (O7), read off the type the shape tier named
-/// it from. A name carried by two type ids takes the smaller id's group.
-/// The group of each declared name: the origin of the type it declares, or, for a type with no
-/// origin of its own - a union or an intersection stays `Unclassified` - the group of the export
-/// it is the declared type of (`type PropertyKey = string | number | symbol` in the compiler
-/// lib).
-let private declOrigins (ctx: Context) (shape: ShapeModel) : Map<string, PackageId> =
+/// The declaration owner of each exported type, using the same selected export that named it.
+/// The underlying type can belong elsewhere: `type Items = Array<Item>` is an entry declaration.
+let private exportedDeclarations (ctx: Context) (shape: ShapeModel) =
+    Shape.ExportNames.declarationExports ctx shape
+    |> List.choose (fun (typeId, export) -> Map.tryFind typeId shape.DeclNames |> Option.map (fun name -> name, export))
+    |> Map.ofList
+
+/// Origin of each named type that was reached while shaping declarations. Explicit exports
+/// supply their declaration ownership; other named types keep their own symbol origin.
+let private declOrigins compilerOnly (ctx: Context) (shape: ShapeModel) : Map<string, PackageId> =
+    let declared = exportedDeclarations ctx shape
+
     let exportOrigins =
         shape.Harvest.Exports
         |> List.fold
@@ -89,9 +142,14 @@ let private declOrigins (ctx: Context) (shape: ShapeModel) : Map<string, Package
             match Map.tryFind name origins, Map.tryFind typeId shape.Types with
             | None, Some facts ->
                 let origin =
-                    match facts.Origin with
-                    | Unclassified -> Map.tryFind typeId exportOrigins |> Option.defaultValue Unclassified
-                    | origin -> origin
+                    match Map.tryFind name declared, facts.SymbolName, facts.DeclFile, facts.Origin with
+                    // A global object belongs to reusable core only when the complete source
+                    // inventory certifies that this program adds no declarations to it.
+                    | _, Some "globalThis", None, _ when compilerOnly -> CompilerLib
+                    | _, Some "globalThis", None, _ -> EntryPackage
+                    | Some export, _, _, _ -> Grouping.classify ctx.PackageDir (ValueSome export.Symbol)
+                    | _, _, _, Unclassified -> Map.tryFind typeId exportOrigins |> Option.defaultValue Unclassified
+                    | _, _, _, origin -> origin
 
                 Map.add name origin origins
             | _ -> origins)
@@ -105,8 +163,11 @@ let private declFamilies (shape: ShapeModel) : Map<string, string> =
     |> List.fold
         (fun families (typeId, name) ->
             match Map.tryFind name families, Map.tryFind typeId shape.Types with
-            | None, Some { Origin = CompilerLib; DeclFile = Some file } ->
-                Map.add name (Grouping.libFamily file) families
+            | None,
+              Some {
+                       Origin = CompilerLib
+                       DeclFile = Some file
+                   } -> Map.add name (Grouping.libFamily file) families
             | _ -> families)
         Map.empty
 
@@ -120,28 +181,51 @@ let private emittingGroup (ctx: Context) (origin: PackageId) =
     | origin when GeneratorConfig.disposition ctx.Config origin = Ship -> origin
     | _ -> EntryPackage
 
+/// A secondary alias has no type-table name of its own. Its order comes from the alias export,
+/// unlike ordering keys transported through anonymous traversal.
+let private secondaryAliasOrder =
+    function
+    | FsAbbrev decl -> decl.Order
+    | _ -> None
+
 /// The modules a run writes: the entry package's, plus one per shipped group a declaration
 /// reached.
-let groupModules (ctx: Context) (shape: ShapeModel) : Render.GroupModule list =
-    let origins = declOrigins ctx shape
+let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel) : Render.GroupModule list =
+    let origins = declOrigins compilerOnly ctx shape
+    let declared = exportedDeclarations ctx shape
 
     // A hoisted name (`NumberFormatOptions.UnitDisplay`, §4.9) is written beside the
     // declaration at its root: a shipped group's file compiles before the entry module and
     // has to carry every shape its own declarations read.
+    let rec ownerOf (name: string) =
+        match name.LastIndexOf '.' with
+        | -1 -> None
+        | at ->
+            let parent = name.Substring(0, at)
+
+            if Map.containsKey parent origins then
+                Some parent
+            else
+                ownerOf parent
+
     let rec originOf (name: string) =
-        match Map.tryFind name origins with
-        | Some(EntryPackage | Unclassified)
-        | None ->
-            match name.LastIndexOf '.' with
-            | -1 -> Unclassified
-            | at -> originOf (name.Substring(0, at))
-        | Some origin -> origin
+        if Map.containsKey name declared then
+            Map.find name origins
+        else
+            match ownerOf name with
+            | Some owner -> originOf owner
+            | None -> Map.tryFind name origins |> Option.defaultValue Unclassified
 
     let groupOf decl =
-        Render.declName decl
-        |> Option.map originOf
-        |> Option.defaultValue Unclassified
-        |> emittingGroup ctx
+        let origin =
+            match Render.declName decl with
+            | Some name when Map.containsKey name origins -> originOf name
+            | name ->
+                secondaryAliasOrder decl
+                |> Option.map (fun order -> Grouping.classifyFile ctx.PackageDir order.File)
+                |> Option.defaultWith (fun () -> name |> Option.map originOf |> Option.defaultValue Unclassified)
+
+        emittingGroup ctx origin
 
     // The compiler lib ships as two modules under one `namespace rec`: the ECMAScript libs and
     // the DOM libs. A declaration's family is its own symbol's file; a hoisted name takes its
@@ -160,7 +244,16 @@ let groupModules (ctx: Context) (shape: ShapeModel) : Render.GroupModule list =
         match groupOf decl with
         | CompilerLib ->
             let family =
-                Render.declName decl |> Option.map familyOf |> Option.defaultValue "Es"
+                match Render.declName decl with
+                | Some name when Map.containsKey name origins ->
+                    Map.tryFind name declared
+                    |> Option.bind _.Order
+                    |> Option.map (fun order -> Grouping.libFamily order.File)
+                    |> Option.defaultWith (fun () -> familyOf name)
+                | name ->
+                    secondaryAliasOrder decl
+                    |> Option.map (fun order -> Grouping.libFamily order.File)
+                    |> Option.defaultWith (fun () -> name |> Option.map familyOf |> Option.defaultValue "Es")
 
             CompilerLib, family
         | origin -> origin, ""
@@ -203,6 +296,10 @@ let groupModules (ctx: Context) (shape: ShapeModel) : Render.GroupModule list =
         |> List.map moduleOf
 
     moduleOf (EntryPackage, "") :: shipped
+
+/// Placement without a compiler-session certificate conservatively retains program globals
+/// in the entry module. `generate` verifies its complete source inventory before placement.
+let groupModules (ctx: Context) (shape: ShapeModel) : Render.GroupModule list = groupModulesForScope false ctx shape
 
 /// One finding per group this run names from the configured namespace rather than from the
 /// pinned derivation. The name is an assertion about a run nobody here performs, so it carries
@@ -251,6 +348,7 @@ let generate (config: GeneratorConfig) (packageDir: string) : Async<RenderModel>
         let! harvest, harvestFindings = runTier ctx Harvest.passes HarvestModel.Empty
         let! resolve, resolveFindings = runTier ctx Resolve.passes (toResolve harvest)
         let! shape, shapeFindings = runTier ctx Shape.Passes.passes (toShape resolve)
+        let! compilerOnly = compilerOnlyScope ctx
 
         let render = toRender ctx shape (harvestFindings @ resolveFindings @ shapeFindings)
 
@@ -258,7 +356,7 @@ let generate (config: GeneratorConfig) (packageDir: string) : Async<RenderModel>
         // emission found: a pass reads the findings the model carries, not the ones the fold
         // is still accumulating.
         let! sourced, sourceFindings =
-            runTier ctx [ Render.renderSources (groupModules ctx shape) ] render
+            runTier ctx [ Render.renderSources (groupModulesForScope compilerOnly ctx shape) ] render
 
         let! rendered, manifestFindings =
             runTier

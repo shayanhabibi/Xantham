@@ -784,7 +784,8 @@ let pipelineTests =
                     let source = rendered.Files |> List.head |> snd
 
                     Expect.stringContains source "type LoudPitched =" "operands sharing a member declare once"
-                    Expect.equal (source.Split("abstract volume: float").Length - 1) 3 "volume once per declaration that has it"
+                    Expect.equal (inheritsOf source "LoudPitched") [ "Loud"; "Pitched" ] "the intersection preserves both bases"
+                    Expect.equal (source.Split("abstract volume: float").Length - 1) 2 "volume is declared on each operand and inherited by the intersection"
                     Expect.stringContains source "type Bag =" "an index-signature operand"
                     Expect.stringContains source "abstract Item: string -> obj with get, set" "carries its indexer"
                     Expect.stringContains source "type Loose =" "a mapped operand expands under D6"
@@ -1109,7 +1110,10 @@ let pipelineTests =
                     Expect.equal (count "abstract hidden: bool") 1 "an HTMLElement member on HTMLElement alone"
                     Expect.equal (count "abstract align: string") 1 "and the leaf keeps its own"
 
-                    Expect.equal (count "abstract cloneNode: ") 3 "a member narrowed at each level is redeclared at each"
+                    Expect.equal (count "abstract cloneNode: ") 4 "the root signature and three successive narrowings are preserved"
+
+                    for owner in [ "Node"; "Element"; "HTMLElement"; "HTMLDivElement" ] do
+                        Expect.stringContains source $"abstract cloneNode: ?deep: bool -> {owner}" "each level keeps its own return type"
 
                     Expect.stringContains source "abstract cloneNode: ?deep: bool -> HTMLDivElement" "at the leaf's own type"
 
@@ -1552,6 +1556,61 @@ let pipelineTests =
 
         yield!
             fixtureTests
+                "compiler-lib-ownership-lab"
+                (handFixture "compiler-lib-ownership-lab")
+                (handConfig (handFixture "compiler-lib-ownership-lab"))
+                (fun package ->
+                    [ testCase "compiler-lib ownership keeps the shared core independent of its consumer"
+                      <| fun _ ->
+                          let rendered =
+                              Async.RunSynchronously(
+                                  Pipeline.generate (handConfig (handFixture "compiler-lib-ownership-lab")) package)
+
+                          let core = rendered.Files |> List.find (fun (path, _) -> path = "groups/TypeScript.Lib.fs") |> snd
+                          let entry = rendered.Files |> List.find (fun (path, _) -> path = "CompilerLibOwnershipLab.fs") |> snd
+
+                          [ "type Items"; "type Brief"; "type LocalDate"; "type GlobalThis" ]
+                          |> List.map (fun name -> name, entry.Contains name, core.Contains name)
+                          |> Flip.Expect.equal "entry-owned declarations stay in the entry module"
+                              [ "type Items", true, false
+                                "type Brief", true, false
+                                "type LocalDate", true, false
+                                "type GlobalThis", true, false ]
+
+                          core.Contains "CompilerLibOwnershipLab."
+                          |> Flip.Expect.equal "the core file compiles before the entry file" false
+
+                          core.Contains "type Date ="
+                          |> Flip.Expect.equal "an entry alias leaves the actual core declaration in place" true
+
+                          entry.Contains "inherit GlobalThis"
+                          |> Flip.Expect.equal "WindowLike.self retains its program-global intersection operand" true
+
+                      testCase "compiler-lib ownership certifies the global scope of a clean producer" <| fun _ ->
+                          let config =
+                              { handConfig (handFixture "compiler-lib-ownership-lab") with Entry = Some "clean.d.ts" }
+                          let rendered = Async.RunSynchronously(Pipeline.generate config package)
+                          let core = rendered.Files |> List.find (fun (path, _) -> path = "groups/TypeScript.Lib.fs") |> snd
+                          let entry = rendered.Files |> List.find (fun (path, _) -> path = "CompilerLibOwnershipLab.fs") |> snd
+
+                          (core.Contains "type GlobalThis", entry.Contains "type GlobalThis")
+                          |> Flip.Expect.equal "only compiler-library declarations contribute to this scope" (true, false)
+
+                          core.Contains "CompilerLibOwnershipLab."
+                          |> Flip.Expect.equal "the certified global object is reusable with its core" false
+
+                      testCase "compiler-lib ownership checks referenced augmentation files too" <| fun _ ->
+                          let config =
+                              { handConfig (handFixture "compiler-lib-ownership-lab") with Entry = Some "referenced-augmentation.d.ts" }
+                          let rendered = Async.RunSynchronously(Pipeline.generate config package)
+                          let core = rendered.Files |> List.find (fun (path, _) -> path = "groups/TypeScript.Lib.fs") |> snd
+                          let entry = rendered.Files |> List.find (fun (path, _) -> path = "CompilerLibOwnershipLab.fs") |> snd
+
+                          (core.Contains "type GlobalThis", entry.Contains "type GlobalThis")
+                          |> Flip.Expect.equal "an empty export root does not certify an augmented compiler interface" (false, true) ])
+
+        yield!
+            fixtureTests
                 "lib-ship-lab"
                 (handFixture "lib-ship-lab")
                 (handConfig (handFixture "lib-ship-lab"))
@@ -1575,12 +1634,15 @@ let pipelineTests =
 
                           let source = group |> Option.get |> snd
 
-                          // The two families are sibling modules under one `namespace rec`, so
-                          // the ECMAScript module's `GlobalThis` reads DOM types and the DOM
-                          // module reads ECMAScript ones from one file.
+                          // This empty producer contributes no globals, so its global object
+                          // belongs to the shared compiler-only scope beside the DOM family.
                           Expect.stringContains source "namespace rec TypeScript.Lib" "the shared namespace"
-                          Expect.stringContains source "module Es =" "the ECMAScript module"
+                          Expect.stringContains source "module Es =" "the certified global environment's module"
                           Expect.stringContains source "module Dom =" "the DOM module"
+
+                          let entry = rendered.Files |> List.find (fun (path, _) -> path = "LibShipLab.fs") |> snd
+                          (source.Contains "type GlobalThis", entry.Contains "type GlobalThis")
+                          |> Flip.Expect.equal "the clean producer's scope belongs to its shared core" (true, false)
 
                           Expect.stringContains source "type ActiveXObject" "a scripthost interface is shaped, not widened away"
                           Expect.stringContains source "type TextStreamReader" "and more than one of them"
@@ -1588,6 +1650,22 @@ let pipelineTests =
                           Expect.isFalse
                               (rendered.Findings |> List.exists (fun f -> f.Key = "HG003"))
                               "harvest-globals finds something to harvest, so it never reaches NothingHarvested" ])
+
+        yield!
+            fixtureTests
+                "entry-selection-lab"
+                (handFixture "entry-selection-lab")
+                (handConfig (handFixture "entry-selection-lab"))
+                (fun package ->
+                    [ testCase "configured entry selects a secondary declaration surface" <| fun _ ->
+                          let rendered =
+                              Async.RunSynchronously(
+                                  Pipeline.generate (handConfig (handFixture "entry-selection-lab")) package)
+
+                          let source = rendered.Files |> List.find (fun (path, _) -> path = "EntrySelectionLab.Adapter.fs") |> snd
+                          [ "type AdapterOptions"; "adapterValue"; "rootValue" ]
+                          |> List.map source.Contains
+                          |> Flip.Expect.equal "only the configured adapter's API is generated" [ true; true; false ] ])
 
         yield!
             fixtureTests "group-map-lab" groupMapLab (handConfig groupMapLab) (fun package ->

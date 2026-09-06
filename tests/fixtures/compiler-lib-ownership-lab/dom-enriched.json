@@ -1,0 +1,5 @@
+{
+    "entry": "index.d.ts",
+    "lib": ["esnext", "dom"],
+    "groups": { "typescript/lib": "ship" }
+}

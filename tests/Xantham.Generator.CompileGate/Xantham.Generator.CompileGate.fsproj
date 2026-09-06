@@ -50,11 +50,13 @@
              docs/plans/generator-wave-five.md records why stub assemblies were refused. The
              corpus carries no such golden today - the exclusion is the policy an open
              configuration would be admitted under. -->
+        <!-- Independent compiler-lib profiles define the same module names. The ES5
+             ownership profile is compiled in Xantham.Generator.CompilerLibCompileGate. -->
         <Compile Include="..\Xantham.Generator.Tests\golden\**\groups\*.fs"
-                 Exclude="..\Xantham.Generator.Tests\golden\**\*.open.fs"
+                 Exclude="..\Xantham.Generator.Tests\golden\**\*.open.fs;..\Xantham.Generator.Tests\golden\compiler-lib-ownership-lab\**\*.fs"
                  Link="golden\%(RecursiveDir)%(Filename)%(Extension)" />
         <Compile Include="..\Xantham.Generator.Tests\golden\**\*.fs"
-                 Exclude="..\Xantham.Generator.Tests\golden\**\groups\*.fs;..\Xantham.Generator.Tests\golden\**\*.open.fs"
+                 Exclude="..\Xantham.Generator.Tests\golden\**\groups\*.fs;..\Xantham.Generator.Tests\golden\**\*.open.fs;..\Xantham.Generator.Tests\golden\compiler-lib-ownership-lab\**\*.fs"
                  Link="golden\%(RecursiveDir)%(Filename)%(Extension)" />
     </ItemGroup>
 

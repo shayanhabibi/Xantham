@@ -1137,12 +1137,17 @@ let private renderFooter (decls: FsDecl list) =
 let private renderModule (group: GroupModule) (foreign: Map<string, string>) =
     let body, decls = renderBody group foreign ""
 
-    String.concat "\n" (fileHeader group.Group $"module rec {group.Module}" @ [ body; renderFooter decls ])
+    String.concat
+        "\n"
+        (fileHeader group.Group $"module rec {group.Module}"
+         @ [ body; renderFooter decls ])
 
 /// One `.fs` file holding every group of a namespace, each as a nested module under
 /// `namespace rec`, so the modules reference each other's types in both directions.
 let private renderNamespace (ns: string) (groups: GroupModule list) (foreignTo: GroupModule -> Map<string, string>) =
-    let rendered = groups |> List.map (fun group -> group, renderBody group (foreignTo group) "    ")
+    let rendered =
+        groups
+        |> List.map (fun group -> group, renderBody group (foreignTo group) "    ")
 
     let modules =
         rendered

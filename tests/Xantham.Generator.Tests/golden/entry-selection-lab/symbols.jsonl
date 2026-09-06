@@ -1,0 +1,2 @@
+{"name":"AdapterOptions","file":"dist/adapter.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"AdapterOptions","message":"ParamObject Create synthesized (D3)"}]}
+{"name":"adapterValue","tier":"exact","findings":[]}

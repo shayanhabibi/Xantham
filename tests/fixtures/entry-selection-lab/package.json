@@ -1,0 +1,15 @@
+{
+  "name": "entry-selection-lab",
+  "version": "1.0.0",
+  "types": "dist/root.d.ts",
+  "exports": {
+    "./adapter": {
+      "types": "./dist/adapter.d.ts",
+      "default": "./dist/adapter.js"
+    },
+    ".": {
+      "types": "./dist/root.d.ts",
+      "default": "./dist/root.js"
+    }
+  }
+}
