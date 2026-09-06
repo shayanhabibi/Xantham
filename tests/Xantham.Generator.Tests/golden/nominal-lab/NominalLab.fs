@@ -47,7 +47,6 @@ type Base =
 type Derived =
     inherit Base
     abstract extra: float
-    abstract tag: string
     [<ParamObject; Emit("$0")>]
     static member Create (extra: float, tag: string) : Derived = jsNative
 

@@ -43,7 +43,6 @@ type HeldArray = Holder<Lengthy>
 type Sized =
     inherit Lengthy
     abstract name: string
-    abstract length: float
     [<ParamObject; Emit("$0")>]
     static member Create (name: string, length: float) : Sized = jsNative
 

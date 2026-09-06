@@ -114,8 +114,6 @@ type Snag (message: string) =
 type Vise =
     inherit Hammer
     abstract jaw: float
-    abstract weight: float
-    abstract strike: payload: Payload -> string
     [<ParamObject; Emit("$0")>]
     static member Create (jaw: float, weight: float, strike: (Payload -> string)) : Vise = jsNative
     [<Import("Vise.LIMIT", "ambient-lab:tools")>]

@@ -59,11 +59,6 @@ type Clock =
 module DurationKeyframes =
     type Item =
         inherit TweenParamsOptions
-        abstract duration: TweenParamValue option with get, set
-        abstract delay: TweenParamValue option with get, set
-        abstract ease: U5<string, EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister> option with get, set
-        abstract modifier: TweenModifier option with get, set
-        abstract composition: TweenComposition option with get, set
         [<EmitIndexer>]
         abstract Item: string -> U10<string, float, bool, U8<string, float, EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister, (TweenParamValue * TweenParamValue), TweenKeyValue>[], EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister, TweenModifier, TweenKeyValue> with get, set
 
@@ -73,7 +68,6 @@ module DurationKeyframes =
 module PercentageKeyframes =
     type Item =
         inherit PercentageKeyframeOptions
-        abstract ease: EasingParam option with get, set
         [<EmitIndexer>]
         abstract Item: string -> TweenParamValue with get, set
 
@@ -177,45 +171,6 @@ type JSAnimation =
     /// <remarks>@param callback</remarks>
     /// <remarks>@return Promise&lt;this&gt;</remarks>
     abstract ``then``: ?callback: (JSAnimation -> obj) -> JS.Promise<obj>
-    /// <remarks>@type {Number}</remarks>
-    abstract deltaTime: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _currentTime: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _lastTickTime: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _startTime: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _lastTime: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _frameDuration: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _fps: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _speed: float with get, set
-    /// <remarks>@type {Boolean}</remarks>
-    abstract _hasChildren: bool with get, set
-    abstract fps: float with get, set
-    abstract speed: float with get, set
-    /// <remarks>@param time</remarks>
-    /// <remarks>@return</remarks>
-    abstract requestTick: time: float -> float
-    /// <remarks>@param time</remarks>
-    /// <remarks>@return</remarks>
-    abstract computeDeltaTime: time: float -> float
-    /// <remarks>@type {String|Number}</remarks>
-    abstract id: TimelinePosition with get, set
-    /// <remarks>@type {Timeline}</remarks>
-    abstract parent: Timeline with get, set
-    abstract duration: float with get, set
-    /// <remarks>@type {Boolean}</remarks>
-    abstract backwards: bool with get, set
-    /// <remarks>@type {Boolean}</remarks>
-    abstract paused: bool with get, set
-    /// <remarks>@type {Boolean}</remarks>
-    abstract began: bool with get, set
-    /// <remarks>@type {Boolean}</remarks>
-    abstract completed: bool with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
     abstract onBegin: (JSAnimation -> obj) with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
@@ -228,47 +183,6 @@ type JSAnimation =
     abstract onPause: (JSAnimation -> obj) with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
     abstract onComplete: (JSAnimation -> obj) with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract iterationDuration: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract iterationCount: float with get, set
-    /// <remarks>@type {Boolean|ScrollObserver}</remarks>
-    abstract _autoplay: U2<bool, ScrollObserver> with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _offset: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _delay: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _loopDelay: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _iterationTime: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _currentIteration: float with get, set
-    /// <remarks>@type {Function}</remarks>
-    abstract _resolve: JS.Function with get, set
-    /// <remarks>@type {Boolean}</remarks>
-    abstract _running: bool with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _reversed: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _reverse: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _cancelled: float with get, set
-    /// <remarks>@type {Boolean}</remarks>
-    abstract _alternate: bool with get, set
-    /// <remarks>@type {Renderable}</remarks>
-    abstract _prev: Renderable with get, set
-    /// <remarks>@type {Renderable}</remarks>
-    abstract _next: Renderable with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _priority: float with get, set
-    abstract cancelled: bool with get, set
-    abstract currentTime: float with get, set
-    abstract iterationCurrentTime: float with get, set
-    abstract progress: float with get, set
-    abstract iterationProgress: float with get, set
-    abstract currentIteration: float with get, set
-    abstract reversed: bool with get, set
     /// <remarks>@param softReset</remarks>
     /// <remarks>@return</remarks>
     abstract reset: ?softReset: bool -> JSAnimation
@@ -678,18 +592,6 @@ type Spring =
 
 type Engine =
     inherit Clock
-    /// <remarks>@type {Number}</remarks>
-    abstract deltaTime: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _currentTime: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _lastTickTime: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _startTime: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _lastTime: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _frameDuration: float with get, set
     abstract useDefaultMainLoop: bool with get, set
     abstract pauseOnDocumentHidden: bool with get, set
     /// <remarks>@type {DefaultsParams}</remarks>
@@ -703,24 +605,6 @@ type Engine =
     abstract resume: unit -> Engine
     abstract timeUnit: Engine.TimeUnit with get, set
     abstract precision: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _fps: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _speed: float with get, set
-    /// <remarks>@type {Boolean}</remarks>
-    abstract _hasChildren: bool with get, set
-    /// <remarks>@type {Tickable|Tween}</remarks>
-    abstract _head: U4<JSAnimation, Timeline, Timer, Tween> with get, set
-    /// <remarks>@type {Tickable|Tween}</remarks>
-    abstract _tail: U4<JSAnimation, Timeline, Timer, Tween> with get, set
-    abstract fps: float with get, set
-    abstract speed: float with get, set
-    /// <remarks>@param time</remarks>
-    /// <remarks>@return</remarks>
-    abstract requestTick: time: float -> float
-    /// <remarks>@param time</remarks>
-    /// <remarks>@return</remarks>
-    abstract computeDeltaTime: time: float -> float
 
 module Engine =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -895,49 +779,12 @@ type AutoLayout =
 module AutoLayoutParams =
     type Delay =
         inherit Spring
-        abstract timeStep: float with get, set
-        abstract restThreshold: float with get, set
-        abstract restDuration: float with get, set
-        abstract maxDuration: float with get, set
-        abstract maxRestSteps: float with get, set
-        abstract maxIterations: float with get, set
-        abstract bn: float with get, set
-        abstract pd: float with get, set
-        abstract m: float with get, set
-        abstract s: float with get, set
-        abstract d: float with get, set
-        abstract v: float with get, set
-        abstract w0: float with get, set
-        abstract zeta: float with get, set
-        abstract wd: float with get, set
-        abstract b: float with get, set
-        abstract completed: bool with get, set
-        abstract solverDuration: float with get, set
-        abstract settlingDuration: float with get, set
-        /// <remarks>@type {JSAnimation}</remarks>
-        abstract parent: JSAnimation with get, set
-        /// <remarks>@type {Callback&lt;JSAnimation&gt;}</remarks>
-        abstract onComplete: (JSAnimation -> obj) with get, set
-        /// <remarks>@type {EasingFunction}</remarks>
-        abstract ease: EasingFunction with get, set
-        abstract solve: time: float -> float
-        abstract calculateSDFromBD: unit -> unit
-        abstract calculateBDFromSD: unit -> unit
-        abstract compute: unit -> unit
-        abstract bounce: float with get, set
-        abstract duration: float with get, set
-        abstract stiffness: float with get, set
-        abstract damping: float with get, set
-        abstract mass: float with get, set
-        abstract velocity: float with get, set
         [<Emit("$0($1...)")>]
         abstract Invoke: ?target: Target * ?index: float * ?targets: Target[] * ?prevTween: Tween -> FunctionValueReturn
 
     [<Interface>]
     type Delay2 =
         inherit TweakRegister
-        abstract ``type``: string with get, set
-        abstract defaultValue: obj with get, set
         [<Emit("$0($1...)")>]
         abstract Invoke: ?target: Target * ?index: float * ?targets: Target[] * ?prevTween: Tween -> FunctionValueReturn
         [<ParamObject; Emit("$0")>]
@@ -1002,9 +849,6 @@ type LayoutStateAnimationProperties = Record<string, U3<string, float, AutoLayou
 
 type LayoutStateParams =
     inherit LayoutAnimationTimingsParams
-    abstract delay: U2<float, AutoLayoutParams.Ease> option with get, set
-    abstract duration: U2<float, AutoLayoutParams.Ease> option with get, set
-    abstract ease: U5<string, EasingFunction, AutoLayoutParams.Ease, Spring, TweakRegister> option with get, set
     [<EmitIndexer>]
     abstract Item: string -> U3<string, float, AutoLayoutParams.Ease> with get, set
 
@@ -1025,22 +869,8 @@ type LayoutSpecificAnimationParams =
 type LayoutAnimationParams =
     inherit LayoutSpecificAnimationParams
     inherit TimerOptions
-    abstract id: TimelinePosition option with get, set
     abstract delay: obj option with get, set
     abstract duration: obj option with get, set
-    abstract ease: U5<string, EasingFunction, AutoLayoutParams.Ease, Spring, TweakRegister> option with get, set
-    abstract playbackEase: EasingParam option with get, set
-    abstract swapAt: LayoutStateParams option with get, set
-    abstract enterFrom: LayoutStateParams option with get, set
-    abstract leaveTo: LayoutStateParams option with get, set
-    abstract loopDelay: float option with get, set
-    abstract reversed: bool option with get, set
-    abstract alternate: bool option with get, set
-    abstract loop: U2<float, bool> option with get, set
-    abstract autoplay: U2<bool, ScrollObserver> option with get, set
-    abstract frameRate: float option with get, set
-    abstract playbackRate: float option with get, set
-    abstract priority: float option with get, set
     abstract onBegin: (Timer -> obj) option with get, set
     abstract onBeforeUpdate: (Timer -> obj) option with get, set
     abstract onUpdate: (Timer -> obj) option with get, set
@@ -1062,22 +892,8 @@ type AutoLayoutParams =
     inherit LayoutSpecificAnimationParams
     inherit TimerOptions
     inherit LayoutOptions
-    abstract id: TimelinePosition option with get, set
     abstract delay: obj option with get, set
     abstract duration: obj option with get, set
-    abstract ease: U5<string, EasingFunction, AutoLayoutParams.Ease, Spring, TweakRegister> option with get, set
-    abstract playbackEase: EasingParam option with get, set
-    abstract swapAt: LayoutStateParams option with get, set
-    abstract enterFrom: LayoutStateParams option with get, set
-    abstract leaveTo: LayoutStateParams option with get, set
-    abstract loopDelay: float option with get, set
-    abstract reversed: bool option with get, set
-    abstract alternate: bool option with get, set
-    abstract loop: U2<float, bool> option with get, set
-    abstract autoplay: U2<bool, ScrollObserver> option with get, set
-    abstract frameRate: float option with get, set
-    abstract playbackRate: float option with get, set
-    abstract priority: float option with get, set
     abstract onBegin: (Timer -> obj) option with get, set
     abstract onBeforeUpdate: (Timer -> obj) option with get, set
     abstract onUpdate: (Timer -> obj) option with get, set
@@ -1085,8 +901,6 @@ type AutoLayoutParams =
     abstract onPause: (Timer -> obj) option with get, set
     abstract onComplete: (Timer -> obj) option with get, set
     abstract onRender: (Timeline -> obj) option with get, set
-    abstract children: LayoutChildrenParam option with get, set
-    abstract properties: string[] option with get, set
 
 type LayoutNodeProperties =
     abstract transform: string with get, set
@@ -1482,49 +1296,6 @@ type Timeline =
     /// <remarks>@param callback</remarks>
     /// <remarks>@return Promise&lt;this&gt;</remarks>
     abstract ``then``: ?callback: (Timeline -> obj) -> JS.Promise<obj>
-    /// <remarks>@type {Number}</remarks>
-    abstract deltaTime: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _currentTime: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _lastTickTime: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _startTime: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _lastTime: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _frameDuration: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _fps: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _speed: float with get, set
-    /// <remarks>@type {Boolean}</remarks>
-    abstract _hasChildren: bool with get, set
-    /// <remarks>@type {Tickable|Tween}</remarks>
-    abstract _head: U4<JSAnimation, Timeline, Timer, Tween> with get, set
-    /// <remarks>@type {Tickable|Tween}</remarks>
-    abstract _tail: U4<JSAnimation, Timeline, Timer, Tween> with get, set
-    abstract fps: float with get, set
-    abstract speed: float with get, set
-    /// <remarks>@param time</remarks>
-    /// <remarks>@return</remarks>
-    abstract requestTick: time: float -> float
-    /// <remarks>@param time</remarks>
-    /// <remarks>@return</remarks>
-    abstract computeDeltaTime: time: float -> float
-    /// <remarks>@type {String|Number}</remarks>
-    abstract id: TimelinePosition with get, set
-    /// <remarks>@type {Timeline}</remarks>
-    abstract parent: Timeline with get, set
-    abstract duration: float with get, set
-    /// <remarks>@type {Boolean}</remarks>
-    abstract backwards: bool with get, set
-    /// <remarks>@type {Boolean}</remarks>
-    abstract paused: bool with get, set
-    /// <remarks>@type {Boolean}</remarks>
-    abstract began: bool with get, set
-    /// <remarks>@type {Boolean}</remarks>
-    abstract completed: bool with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
     abstract onBegin: (Timeline -> obj) with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
@@ -1537,47 +1308,6 @@ type Timeline =
     abstract onPause: (Timeline -> obj) with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
     abstract onComplete: (Timeline -> obj) with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract iterationDuration: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract iterationCount: float with get, set
-    /// <remarks>@type {Boolean|ScrollObserver}</remarks>
-    abstract _autoplay: U2<bool, ScrollObserver> with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _offset: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _delay: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _loopDelay: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _iterationTime: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _currentIteration: float with get, set
-    /// <remarks>@type {Function}</remarks>
-    abstract _resolve: JS.Function with get, set
-    /// <remarks>@type {Boolean}</remarks>
-    abstract _running: bool with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _reversed: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _reverse: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _cancelled: float with get, set
-    /// <remarks>@type {Boolean}</remarks>
-    abstract _alternate: bool with get, set
-    /// <remarks>@type {Renderable}</remarks>
-    abstract _prev: Renderable with get, set
-    /// <remarks>@type {Renderable}</remarks>
-    abstract _next: Renderable with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _priority: float with get, set
-    abstract cancelled: bool with get, set
-    abstract currentTime: float with get, set
-    abstract iterationCurrentTime: float with get, set
-    abstract progress: float with get, set
-    abstract iterationProgress: float with get, set
-    abstract currentIteration: float with get, set
-    abstract reversed: bool with get, set
     /// <remarks>@param softReset</remarks>
     /// <remarks>@return</remarks>
     abstract reset: ?softReset: bool -> Timeline
@@ -1617,36 +1347,6 @@ type Timeline =
 /// </summary>
 type Timer =
     inherit Clock
-    /// <remarks>@type {Number}</remarks>
-    abstract deltaTime: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _currentTime: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _lastTickTime: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _startTime: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _lastTime: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _frameDuration: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _fps: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _speed: float with get, set
-    /// <remarks>@type {Boolean}</remarks>
-    abstract _hasChildren: bool with get, set
-    /// <remarks>@type {Tickable|Tween}</remarks>
-    abstract _head: U4<JSAnimation, Timeline, Timer, Tween> with get, set
-    /// <remarks>@type {Tickable|Tween}</remarks>
-    abstract _tail: U4<JSAnimation, Timeline, Timer, Tween> with get, set
-    abstract fps: float with get, set
-    abstract speed: float with get, set
-    /// <remarks>@param time</remarks>
-    /// <remarks>@return</remarks>
-    abstract requestTick: time: float -> float
-    /// <remarks>@param time</remarks>
-    /// <remarks>@return</remarks>
-    abstract computeDeltaTime: time: float -> float
     /// <remarks>@type {String|Number}</remarks>
     abstract id: TimelinePosition with get, set
     /// <remarks>@type {Timeline}</remarks>
@@ -1794,51 +1494,12 @@ type CallbackArgument =
     inherit Timer
     inherit JSAnimation
     inherit Timeline
-    /// <remarks>@type {Number}</remarks>
-    abstract deltaTime: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _currentTime: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _lastTickTime: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _startTime: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _lastTime: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _frameDuration: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _fps: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _speed: float with get, set
-    /// <remarks>@type {Boolean}</remarks>
-    abstract _hasChildren: bool with get, set
     /// <remarks>@type {Tickable|Tween}</remarks>
     /// <remarks>@type {Tween}</remarks>
     abstract _head: U4<Tween, CallbackArgument.Head, CallbackArgument.Head.Prev, CallbackArgument.Head2> with get, set
     /// <remarks>@type {Tickable|Tween}</remarks>
     /// <remarks>@type {Tween}</remarks>
     abstract _tail: U4<Tween, CallbackArgument.Head, CallbackArgument.Head.Prev, CallbackArgument.Head2> with get, set
-    abstract fps: float with get, set
-    abstract speed: float with get, set
-    /// <remarks>@param time</remarks>
-    /// <remarks>@return</remarks>
-    abstract requestTick: time: float -> float
-    /// <remarks>@param time</remarks>
-    /// <remarks>@return</remarks>
-    abstract computeDeltaTime: time: float -> float
-    /// <remarks>@type {String|Number}</remarks>
-    abstract id: TimelinePosition with get, set
-    /// <remarks>@type {Timeline}</remarks>
-    abstract parent: Timeline with get, set
-    abstract duration: float with get, set
-    /// <remarks>@type {Boolean}</remarks>
-    abstract backwards: bool with get, set
-    /// <remarks>@type {Boolean}</remarks>
-    abstract paused: bool with get, set
-    /// <remarks>@type {Boolean}</remarks>
-    abstract began: bool with get, set
-    /// <remarks>@type {Boolean}</remarks>
-    abstract completed: bool with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
     abstract onBegin: (CallbackArgument -> obj) with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
@@ -1851,47 +1512,6 @@ type CallbackArgument =
     abstract onPause: (CallbackArgument -> obj) with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
     abstract onComplete: (CallbackArgument -> obj) with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract iterationDuration: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract iterationCount: float with get, set
-    /// <remarks>@type {Boolean|ScrollObserver}</remarks>
-    abstract _autoplay: U2<bool, ScrollObserver> with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _offset: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _delay: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _loopDelay: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _iterationTime: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _currentIteration: float with get, set
-    /// <remarks>@type {Function}</remarks>
-    abstract _resolve: JS.Function with get, set
-    /// <remarks>@type {Boolean}</remarks>
-    abstract _running: bool with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _reversed: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _reverse: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _cancelled: float with get, set
-    /// <remarks>@type {Boolean}</remarks>
-    abstract _alternate: bool with get, set
-    /// <remarks>@type {Renderable}</remarks>
-    abstract _prev: Renderable with get, set
-    /// <remarks>@type {Renderable}</remarks>
-    abstract _next: Renderable with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _priority: float with get, set
-    abstract cancelled: bool with get, set
-    abstract currentTime: float with get, set
-    abstract iterationCurrentTime: float with get, set
-    abstract progress: float with get, set
-    abstract iterationProgress: float with get, set
-    abstract currentIteration: float with get, set
-    abstract reversed: bool with get, set
     /// <remarks>@param softReset</remarks>
     /// <remarks>@return</remarks>
     abstract reset: ?softReset: bool -> CallbackArgument
@@ -1947,22 +1567,12 @@ type CallbackArgument =
     /// <remarks>@param callback</remarks>
     /// <remarks>@return Promise&lt;this&gt;</remarks>
     abstract ``then``: ((obj -> obj) option -> JS.Promise<obj>) with get, set
-    /// <remarks>@type {TargetsArray}</remarks>
-    abstract targets: Target[] with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
     abstract onRender: (CallbackArgument -> obj) with get, set
-    /// <remarks>@type {EasingFunction}</remarks>
-    abstract _ease: EasingFunction with get, set
     /// <remarks>@return</remarks>
     /// <remarks>@return</remarks>
     abstract refresh: (unit -> CallbackArgument) with get, set
-    /// <remarks>@type {Record&lt;String, Number&gt;}</remarks>
-    abstract labels: Record<string, float> with get, set
-    /// <remarks>@type {DefaultsParams}</remarks>
-    abstract defaults: DefaultsParams with get, set
-    /// <remarks>@type {Boolean}</remarks>
-    abstract composition: bool with get, set
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@param a1</remarks>
@@ -2055,16 +1665,8 @@ module CallbackArgument =
     type Head =
         inherit JSAnimation
         inherit Tween
-        /// <remarks>@type {Tween}</remarks>
-        abstract _head: Tween with get, set
-        /// <remarks>@type {Tween}</remarks>
-        abstract _tail: Tween with get, set
-        /// <remarks>@type {TargetsArray}</remarks>
-        abstract targets: Target[] with get, set
         /// <remarks>@type {Callback&lt;this&gt;}</remarks>
         abstract onRender: (CallbackArgument.Head -> obj) with get, set
-        /// <remarks>@type {EasingFunction}</remarks>
-        abstract _ease: EasingFunction with get, set
         /// <remarks>@param newDuration</remarks>
         /// <remarks>@return</remarks>
         abstract stretch: newDuration: float -> CallbackArgument.Head
@@ -2075,48 +1677,8 @@ module CallbackArgument =
         /// </summary>
         /// <remarks>@return</remarks>
         abstract revert: unit -> CallbackArgument.Head
-        /// <remarks>@param callback</remarks>
-        /// <remarks>@return Promise&lt;this&gt;</remarks>
-        abstract ``then``: ?callback: (JSAnimation -> obj) -> JS.Promise<obj>
-        /// <remarks>@type {Number}</remarks>
-        abstract deltaTime: float with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract _currentTime: float with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract _lastTickTime: float with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract _startTime: float with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract _lastTime: float with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract _frameDuration: float with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract _fps: float with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract _speed: float with get, set
-        /// <remarks>@type {Boolean}</remarks>
-        abstract _hasChildren: bool with get, set
-        abstract fps: float with get, set
-        abstract speed: float with get, set
-        /// <remarks>@param time</remarks>
-        /// <remarks>@return</remarks>
-        abstract requestTick: time: float -> float
-        /// <remarks>@param time</remarks>
-        /// <remarks>@return</remarks>
-        abstract computeDeltaTime: time: float -> float
-        /// <remarks>@type {String|Number}</remarks>
-        abstract id: float with get, set
         /// <remarks>@type {Timeline}</remarks>
         abstract parent: CallbackArgument.Head.Parent with get, set
-        abstract duration: float with get, set
-        /// <remarks>@type {Boolean}</remarks>
-        abstract backwards: bool with get, set
-        /// <remarks>@type {Boolean}</remarks>
-        abstract paused: bool with get, set
-        /// <remarks>@type {Boolean}</remarks>
-        abstract began: bool with get, set
-        /// <remarks>@type {Boolean}</remarks>
-        abstract completed: bool with get, set
         /// <remarks>@type {Callback&lt;this&gt;}</remarks>
         abstract onBegin: (CallbackArgument.Head -> obj) with get, set
         /// <remarks>@type {Callback&lt;this&gt;}</remarks>
@@ -2129,47 +1691,10 @@ module CallbackArgument =
         abstract onPause: (CallbackArgument.Head -> obj) with get, set
         /// <remarks>@type {Callback&lt;this&gt;}</remarks>
         abstract onComplete: (CallbackArgument.Head -> obj) with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract iterationDuration: float with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract iterationCount: float with get, set
-        /// <remarks>@type {Boolean|ScrollObserver}</remarks>
-        abstract _autoplay: U2<bool, ScrollObserver> with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract _offset: float with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract _delay: float with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract _loopDelay: float with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract _iterationTime: float with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract _currentIteration: float with get, set
-        /// <remarks>@type {Function}</remarks>
-        abstract _resolve: JS.Function with get, set
-        /// <remarks>@type {Boolean}</remarks>
-        abstract _running: bool with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract _reversed: float with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract _reverse: float with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract _cancelled: float with get, set
-        /// <remarks>@type {Boolean}</remarks>
-        abstract _alternate: bool with get, set
         /// <remarks>@type {Renderable}</remarks>
         abstract _prev: U2<CallbackArgument.Head, CallbackArgument.Head.Prev> with get, set
         /// <remarks>@type {Renderable}</remarks>
         abstract _next: U2<CallbackArgument.Head, CallbackArgument.Head.Prev> with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract _priority: float with get, set
-        abstract cancelled: bool with get, set
-        abstract currentTime: float with get, set
-        abstract iterationCurrentTime: float with get, set
-        abstract progress: float with get, set
-        abstract iterationProgress: float with get, set
-        abstract currentIteration: float with get, set
-        abstract reversed: bool with get, set
         /// <remarks>@param softReset</remarks>
         /// <remarks>@return</remarks>
         abstract reset: ?softReset: bool -> CallbackArgument.Head
@@ -2203,54 +1728,14 @@ module CallbackArgument =
         /// <remarks>@param muteCallbacks</remarks>
         /// <remarks>@return</remarks>
         abstract complete: ?muteCallbacks: U2<float, bool> -> CallbackArgument.Head
-        abstract property: string with get, set
-        abstract target: Target with get, set
-        abstract _value: obj with get, set
-        abstract _toFunc: JS.Function option with get, set
-        abstract _fromFunc: JS.Function option with get, set
-        abstract _fromNumbers: float[] with get, set
-        abstract _toNumbers: float[] with get, set
-        abstract _strings: string[] with get, set
-        abstract _fromNumber: float with get, set
-        abstract _toNumber: float with get, set
-        abstract _numbers: float[] with get, set
-        abstract _number: float with get, set
-        abstract _unit: string with get, set
-        abstract _modifier: TweenModifier with get, set
-        abstract _updateDuration: float with get, set
-        abstract _changeDuration: float with get, set
-        abstract _absoluteStartTime: float with get, set
-        abstract _absoluteUpdateStartTime: float with get, set
-        abstract _absoluteEndTime: float with get, set
-        abstract _hasFromValue: float with get, set
-        abstract _tweenType: float with get, set
-        abstract _setter: Tween.Setter option with get, set
-        abstract _valueType: float with get, set
-        abstract _composition: float with get, set
-        abstract _isOverlapped: float with get, set
-        abstract _isOverridden: float with get, set
-        abstract _renderTransforms: float with get, set
-        abstract _inlineValue: string with get, set
-        abstract _prevRep: Tween with get, set
-        abstract _nextRep: Tween with get, set
-        abstract _prevAdd: Tween with get, set
-        abstract _nextAdd: Tween with get, set
 
     module Head =
         type Parent =
             inherit Timeline
             inherit JSAnimation
-            /// <remarks>@type {Record&lt;String, Number&gt;}</remarks>
-            abstract labels: Record<string, float> with get, set
-            /// <remarks>@type {DefaultsParams}</remarks>
-            abstract defaults: DefaultsParams with get, set
-            /// <remarks>@type {Boolean}</remarks>
-            abstract composition: bool with get, set
             /// <remarks>@type {Callback&lt;this&gt;}</remarks>
             /// <remarks>@type {Callback&lt;this&gt;}</remarks>
             abstract onRender: (CallbackArgument.Head.Parent -> obj) with get, set
-            /// <remarks>@type {EasingFunction}</remarks>
-            abstract _ease: EasingFunction with get, set
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@param a1</remarks>
@@ -2357,51 +1842,12 @@ module CallbackArgument =
             /// <remarks>@param callback</remarks>
             /// <remarks>@return Promise&lt;this&gt;</remarks>
             abstract ``then``: ((obj -> obj) option -> JS.Promise<obj>) with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract deltaTime: float with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract _currentTime: float with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract _lastTickTime: float with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract _startTime: float with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract _lastTime: float with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract _frameDuration: float with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract _fps: float with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract _speed: float with get, set
-            /// <remarks>@type {Boolean}</remarks>
-            abstract _hasChildren: bool with get, set
             /// <remarks>@type {Tickable|Tween}</remarks>
             /// <remarks>@type {Tween}</remarks>
             abstract _head: U4<Tween, CallbackArgument.Head, CallbackArgument.Head.Prev, CallbackArgument.Head2> with get, set
             /// <remarks>@type {Tickable|Tween}</remarks>
             /// <remarks>@type {Tween}</remarks>
             abstract _tail: U4<Tween, CallbackArgument.Head, CallbackArgument.Head.Prev, CallbackArgument.Head2> with get, set
-            abstract fps: float with get, set
-            abstract speed: float with get, set
-            /// <remarks>@param time</remarks>
-            /// <remarks>@return</remarks>
-            abstract requestTick: time: float -> float
-            /// <remarks>@param time</remarks>
-            /// <remarks>@return</remarks>
-            abstract computeDeltaTime: time: float -> float
-            /// <remarks>@type {String|Number}</remarks>
-            abstract id: TimelinePosition with get, set
-            /// <remarks>@type {Timeline}</remarks>
-            abstract parent: Timeline with get, set
-            abstract duration: float with get, set
-            /// <remarks>@type {Boolean}</remarks>
-            abstract backwards: bool with get, set
-            /// <remarks>@type {Boolean}</remarks>
-            abstract paused: bool with get, set
-            /// <remarks>@type {Boolean}</remarks>
-            abstract began: bool with get, set
-            /// <remarks>@type {Boolean}</remarks>
-            abstract completed: bool with get, set
             /// <remarks>@type {Callback&lt;this&gt;}</remarks>
             abstract onBegin: (CallbackArgument.Head.Parent -> obj) with get, set
             /// <remarks>@type {Callback&lt;this&gt;}</remarks>
@@ -2414,47 +1860,6 @@ module CallbackArgument =
             abstract onPause: (CallbackArgument.Head.Parent -> obj) with get, set
             /// <remarks>@type {Callback&lt;this&gt;}</remarks>
             abstract onComplete: (CallbackArgument.Head.Parent -> obj) with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract iterationDuration: float with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract iterationCount: float with get, set
-            /// <remarks>@type {Boolean|ScrollObserver}</remarks>
-            abstract _autoplay: U2<bool, ScrollObserver> with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract _offset: float with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract _delay: float with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract _loopDelay: float with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract _iterationTime: float with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract _currentIteration: float with get, set
-            /// <remarks>@type {Function}</remarks>
-            abstract _resolve: JS.Function with get, set
-            /// <remarks>@type {Boolean}</remarks>
-            abstract _running: bool with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract _reversed: float with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract _reverse: float with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract _cancelled: float with get, set
-            /// <remarks>@type {Boolean}</remarks>
-            abstract _alternate: bool with get, set
-            /// <remarks>@type {Renderable}</remarks>
-            abstract _prev: Renderable with get, set
-            /// <remarks>@type {Renderable}</remarks>
-            abstract _next: Renderable with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract _priority: float with get, set
-            abstract cancelled: bool with get, set
-            abstract currentTime: float with get, set
-            abstract iterationCurrentTime: float with get, set
-            abstract progress: float with get, set
-            abstract iterationProgress: float with get, set
-            abstract currentIteration: float with get, set
-            abstract reversed: bool with get, set
             /// <remarks>@param softReset</remarks>
             /// <remarks>@return</remarks>
             abstract reset: ?softReset: bool -> CallbackArgument.Head.Parent
@@ -2488,21 +1893,12 @@ module CallbackArgument =
             /// <remarks>@param muteCallbacks</remarks>
             /// <remarks>@return</remarks>
             abstract complete: ?muteCallbacks: U2<float, bool> -> CallbackArgument.Head.Parent
-            /// <remarks>@type {TargetsArray}</remarks>
-            abstract targets: Target[] with get, set
 
         type Prev =
             inherit Timeline
             inherit Tween
-            /// <remarks>@type {Record&lt;String, Number&gt;}</remarks>
-            abstract labels: Record<string, float> with get, set
-            /// <remarks>@type {DefaultsParams}</remarks>
-            abstract defaults: DefaultsParams with get, set
-            /// <remarks>@type {Boolean}</remarks>
-            abstract composition: bool with get, set
             /// <remarks>@type {Callback&lt;this&gt;}</remarks>
             abstract onRender: (CallbackArgument.Head.Prev -> obj) with get, set
-            abstract _ease: EasingFunction with get, set
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@param a1</remarks>
@@ -2597,52 +1993,8 @@ module CallbackArgument =
             abstract refresh: unit -> CallbackArgument.Head.Prev
             /// <remarks>@return</remarks>
             abstract revert: unit -> CallbackArgument.Head.Prev
-            /// <remarks>@param callback</remarks>
-            /// <remarks>@return Promise&lt;this&gt;</remarks>
-            abstract ``then``: ?callback: (Timeline -> obj) -> JS.Promise<obj>
-            /// <remarks>@type {Number}</remarks>
-            abstract deltaTime: float with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract _currentTime: float with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract _lastTickTime: float with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract _startTime: float with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract _lastTime: float with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract _frameDuration: float with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract _fps: float with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract _speed: float with get, set
-            /// <remarks>@type {Boolean}</remarks>
-            abstract _hasChildren: bool with get, set
-            /// <remarks>@type {Tickable|Tween}</remarks>
-            abstract _head: U4<JSAnimation, Timeline, Timer, Tween> with get, set
-            /// <remarks>@type {Tickable|Tween}</remarks>
-            abstract _tail: U4<JSAnimation, Timeline, Timer, Tween> with get, set
-            abstract fps: float with get, set
-            abstract speed: float with get, set
-            /// <remarks>@param time</remarks>
-            /// <remarks>@return</remarks>
-            abstract requestTick: time: float -> float
-            /// <remarks>@param time</remarks>
-            /// <remarks>@return</remarks>
-            abstract computeDeltaTime: time: float -> float
-            /// <remarks>@type {String|Number}</remarks>
-            abstract id: float with get, set
             /// <remarks>@type {Timeline}</remarks>
             abstract parent: CallbackArgument.Head.Parent with get, set
-            abstract duration: float with get, set
-            /// <remarks>@type {Boolean}</remarks>
-            abstract backwards: bool with get, set
-            /// <remarks>@type {Boolean}</remarks>
-            abstract paused: bool with get, set
-            /// <remarks>@type {Boolean}</remarks>
-            abstract began: bool with get, set
-            /// <remarks>@type {Boolean}</remarks>
-            abstract completed: bool with get, set
             /// <remarks>@type {Callback&lt;this&gt;}</remarks>
             abstract onBegin: (CallbackArgument.Head.Prev -> obj) with get, set
             /// <remarks>@type {Callback&lt;this&gt;}</remarks>
@@ -2655,47 +2007,10 @@ module CallbackArgument =
             abstract onPause: (CallbackArgument.Head.Prev -> obj) with get, set
             /// <remarks>@type {Callback&lt;this&gt;}</remarks>
             abstract onComplete: (CallbackArgument.Head.Prev -> obj) with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract iterationDuration: float with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract iterationCount: float with get, set
-            /// <remarks>@type {Boolean|ScrollObserver}</remarks>
-            abstract _autoplay: U2<bool, ScrollObserver> with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract _offset: float with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract _delay: float with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract _loopDelay: float with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract _iterationTime: float with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract _currentIteration: float with get, set
-            /// <remarks>@type {Function}</remarks>
-            abstract _resolve: JS.Function with get, set
-            /// <remarks>@type {Boolean}</remarks>
-            abstract _running: bool with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract _reversed: float with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract _reverse: float with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract _cancelled: float with get, set
-            /// <remarks>@type {Boolean}</remarks>
-            abstract _alternate: bool with get, set
             /// <remarks>@type {Renderable}</remarks>
             abstract _prev: U2<CallbackArgument.Head, CallbackArgument.Head.Prev> with get, set
             /// <remarks>@type {Renderable}</remarks>
             abstract _next: U2<CallbackArgument.Head, CallbackArgument.Head.Prev> with get, set
-            /// <remarks>@type {Number}</remarks>
-            abstract _priority: float with get, set
-            abstract cancelled: bool with get, set
-            abstract currentTime: float with get, set
-            abstract iterationCurrentTime: float with get, set
-            abstract progress: float with get, set
-            abstract iterationProgress: float with get, set
-            abstract currentIteration: float with get, set
-            abstract reversed: bool with get, set
             /// <remarks>@param softReset</remarks>
             /// <remarks>@return</remarks>
             abstract reset: ?softReset: bool -> CallbackArgument.Head.Prev
@@ -2729,85 +2044,12 @@ module CallbackArgument =
             /// <remarks>@param muteCallbacks</remarks>
             /// <remarks>@return</remarks>
             abstract complete: ?muteCallbacks: U2<float, bool> -> CallbackArgument.Head.Prev
-            abstract property: string with get, set
-            abstract target: Target with get, set
-            abstract _value: obj with get, set
-            abstract _toFunc: JS.Function option with get, set
-            abstract _fromFunc: JS.Function option with get, set
-            abstract _fromNumbers: float[] with get, set
-            abstract _toNumbers: float[] with get, set
-            abstract _strings: string[] with get, set
-            abstract _fromNumber: float with get, set
-            abstract _toNumber: float with get, set
-            abstract _numbers: float[] with get, set
-            abstract _number: float with get, set
-            abstract _unit: string with get, set
-            abstract _modifier: TweenModifier with get, set
-            abstract _updateDuration: float with get, set
-            abstract _changeDuration: float with get, set
-            abstract _absoluteStartTime: float with get, set
-            abstract _absoluteUpdateStartTime: float with get, set
-            abstract _absoluteEndTime: float with get, set
-            abstract _hasFromValue: float with get, set
-            abstract _tweenType: float with get, set
-            abstract _setter: Tween.Setter option with get, set
-            abstract _valueType: float with get, set
-            abstract _composition: float with get, set
-            abstract _isOverlapped: float with get, set
-            abstract _isOverridden: float with get, set
-            abstract _renderTransforms: float with get, set
-            abstract _inlineValue: string with get, set
-            abstract _prevRep: Tween with get, set
-            abstract _nextRep: Tween with get, set
-            abstract _prevAdd: Tween with get, set
-            abstract _nextAdd: Tween with get, set
 
     type Head2 =
         inherit Timer
         inherit Tween
-        /// <remarks>@type {Number}</remarks>
-        abstract deltaTime: float with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract _currentTime: float with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract _lastTickTime: float with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract _startTime: float with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract _lastTime: float with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract _frameDuration: float with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract _fps: float with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract _speed: float with get, set
-        /// <remarks>@type {Boolean}</remarks>
-        abstract _hasChildren: bool with get, set
-        /// <remarks>@type {Tickable|Tween}</remarks>
-        abstract _head: U4<JSAnimation, Timeline, Timer, Tween> with get, set
-        /// <remarks>@type {Tickable|Tween}</remarks>
-        abstract _tail: U4<JSAnimation, Timeline, Timer, Tween> with get, set
-        abstract fps: float with get, set
-        abstract speed: float with get, set
-        /// <remarks>@param time</remarks>
-        /// <remarks>@return</remarks>
-        abstract requestTick: time: float -> float
-        /// <remarks>@param time</remarks>
-        /// <remarks>@return</remarks>
-        abstract computeDeltaTime: time: float -> float
-        /// <remarks>@type {String|Number}</remarks>
-        abstract id: float with get, set
         /// <remarks>@type {Timeline}</remarks>
         abstract parent: CallbackArgument.Head.Parent with get, set
-        abstract duration: float with get, set
-        /// <remarks>@type {Boolean}</remarks>
-        abstract backwards: bool with get, set
-        /// <remarks>@type {Boolean}</remarks>
-        abstract paused: bool with get, set
-        /// <remarks>@type {Boolean}</remarks>
-        abstract began: bool with get, set
-        /// <remarks>@type {Boolean}</remarks>
-        abstract completed: bool with get, set
         /// <remarks>@type {Callback&lt;this&gt;}</remarks>
         abstract onBegin: (CallbackArgument.Head2 -> obj) with get, set
         /// <remarks>@type {Callback&lt;this&gt;}</remarks>
@@ -2820,47 +2062,10 @@ module CallbackArgument =
         abstract onPause: (CallbackArgument.Head2 -> obj) with get, set
         /// <remarks>@type {Callback&lt;this&gt;}</remarks>
         abstract onComplete: (CallbackArgument.Head2 -> obj) with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract iterationDuration: float with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract iterationCount: float with get, set
-        /// <remarks>@type {Boolean|ScrollObserver}</remarks>
-        abstract _autoplay: U2<bool, ScrollObserver> with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract _offset: float with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract _delay: float with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract _loopDelay: float with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract _iterationTime: float with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract _currentIteration: float with get, set
-        /// <remarks>@type {Function}</remarks>
-        abstract _resolve: JS.Function with get, set
-        /// <remarks>@type {Boolean}</remarks>
-        abstract _running: bool with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract _reversed: float with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract _reverse: float with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract _cancelled: float with get, set
-        /// <remarks>@type {Boolean}</remarks>
-        abstract _alternate: bool with get, set
         /// <remarks>@type {Renderable}</remarks>
         abstract _prev: U2<CallbackArgument.Head, CallbackArgument.Head.Prev> with get, set
         /// <remarks>@type {Renderable}</remarks>
         abstract _next: U2<CallbackArgument.Head, CallbackArgument.Head.Prev> with get, set
-        /// <remarks>@type {Number}</remarks>
-        abstract _priority: float with get, set
-        abstract cancelled: bool with get, set
-        abstract currentTime: float with get, set
-        abstract iterationCurrentTime: float with get, set
-        abstract progress: float with get, set
-        abstract iterationProgress: float with get, set
-        abstract currentIteration: float with get, set
-        abstract reversed: bool with get, set
         /// <remarks>@param softReset</remarks>
         /// <remarks>@return</remarks>
         abstract reset: ?softReset: bool -> CallbackArgument.Head2
@@ -2902,42 +2107,6 @@ module CallbackArgument =
         /// <remarks>@param muteCallbacks</remarks>
         /// <remarks>@return</remarks>
         abstract complete: ?muteCallbacks: U2<float, bool> -> CallbackArgument.Head2
-        /// <remarks>@param callback</remarks>
-        /// <remarks>@return Promise&lt;this&gt;</remarks>
-        abstract ``then``: ?callback: (Timer -> obj) -> JS.Promise<obj>
-        abstract property: string with get, set
-        abstract target: Target with get, set
-        abstract _value: obj with get, set
-        abstract _toFunc: JS.Function option with get, set
-        abstract _fromFunc: JS.Function option with get, set
-        abstract _ease: EasingFunction with get, set
-        abstract _fromNumbers: float[] with get, set
-        abstract _toNumbers: float[] with get, set
-        abstract _strings: string[] with get, set
-        abstract _fromNumber: float with get, set
-        abstract _toNumber: float with get, set
-        abstract _numbers: float[] with get, set
-        abstract _number: float with get, set
-        abstract _unit: string with get, set
-        abstract _modifier: TweenModifier with get, set
-        abstract _updateDuration: float with get, set
-        abstract _changeDuration: float with get, set
-        abstract _absoluteStartTime: float with get, set
-        abstract _absoluteUpdateStartTime: float with get, set
-        abstract _absoluteEndTime: float with get, set
-        abstract _hasFromValue: float with get, set
-        abstract _tweenType: float with get, set
-        abstract _setter: Tween.Setter option with get, set
-        abstract _valueType: float with get, set
-        abstract _composition: float with get, set
-        abstract _isOverlapped: float with get, set
-        abstract _isOverridden: float with get, set
-        abstract _renderTransforms: float with get, set
-        abstract _inlineValue: string with get, set
-        abstract _prevRep: Tween with get, set
-        abstract _nextRep: Tween with get, set
-        abstract _prevAdd: Tween with get, set
-        abstract _nextAdd: Tween with get, set
 
 type Revertible = U10<Animatable, AutoLayout, Draggable, JSAnimation, Scope, ScrollObserver, TextSplitter, Timeline, Timer, WAAPIAnimation>
 
@@ -3152,17 +2321,6 @@ type TimerOptions =
 [<Interface>]
 type TimerParams =
     inherit TimerOptions
-    abstract id: TimelinePosition option with get, set
-    abstract duration: TweenParamValue option with get, set
-    abstract delay: TweenParamValue option with get, set
-    abstract loopDelay: float option with get, set
-    abstract reversed: bool option with get, set
-    abstract alternate: bool option with get, set
-    abstract loop: U2<float, bool> option with get, set
-    abstract autoplay: U2<bool, ScrollObserver> option with get, set
-    abstract frameRate: float option with get, set
-    abstract playbackRate: float option with get, set
-    abstract priority: float option with get, set
     abstract onBegin: (Timer -> obj) option with get, set
     abstract onBeforeUpdate: (Timer -> obj) option with get, set
     abstract onUpdate: (Timer -> obj) option with get, set
@@ -3292,14 +2450,6 @@ type TweenValues =
 type TweenKeyValue =
     inherit TweenParamsOptions
     inherit TweenValues
-    abstract duration: TweenParamValue option with get, set
-    abstract delay: TweenParamValue option with get, set
-    abstract ease: U5<string, EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister> option with get, set
-    abstract modifier: TweenModifier option with get, set
-    abstract composition: TweenComposition option with get, set
-    abstract from: TweenParamValue option with get, set
-    abstract ``to``: TweenPropValue option with get, set
-    abstract fromTo: TweenPropValue option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?duration: TweenParamValue, ?delay: TweenParamValue, ?ease: U5<string, EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister>, ?modifier: TweenModifier, ?composition: TweenComposition, ?from: TweenParamValue, ?``to``: TweenPropValue, ?fromTo: TweenPropValue) : TweenKeyValue = jsNative
 
@@ -3338,22 +2488,6 @@ type AnimationParams =
     inherit TimerOptions
     inherit AnimationOptions
     inherit TweenParamsOptions
-    abstract id: TimelinePosition option with get, set
-    abstract duration: TweenParamValue option with get, set
-    abstract delay: TweenParamValue option with get, set
-    abstract loopDelay: float option with get, set
-    abstract reversed: bool option with get, set
-    abstract alternate: bool option with get, set
-    abstract loop: U2<float, bool> option with get, set
-    abstract autoplay: U2<bool, ScrollObserver> option with get, set
-    abstract frameRate: float option with get, set
-    abstract playbackRate: float option with get, set
-    abstract priority: float option with get, set
-    abstract keyframes: U2<DurationKeyframes.Item[], PercentageKeyframes> option with get, set
-    abstract playbackEase: EasingParam option with get, set
-    abstract ease: U5<string, EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister> option with get, set
-    abstract modifier: TweenModifier option with get, set
-    abstract composition: TweenComposition option with get, set
     abstract onBegin: (JSAnimation -> obj) option with get, set
     abstract onBeforeUpdate: (JSAnimation -> obj) option with get, set
     abstract onUpdate: (JSAnimation -> obj) option with get, set
@@ -3403,20 +2537,6 @@ type TimelineOptions =
 type TimelineParams =
     inherit TimerOptions
     inherit TimelineOptions
-    abstract id: TimelinePosition option with get, set
-    abstract duration: TweenParamValue option with get, set
-    abstract delay: TweenParamValue option with get, set
-    abstract loopDelay: float option with get, set
-    abstract reversed: bool option with get, set
-    abstract alternate: bool option with get, set
-    abstract loop: U2<float, bool> option with get, set
-    abstract autoplay: U2<bool, ScrollObserver> option with get, set
-    abstract frameRate: float option with get, set
-    abstract playbackRate: float option with get, set
-    abstract priority: float option with get, set
-    abstract defaults: DefaultsParams option with get, set
-    abstract playbackEase: EasingParam option with get, set
-    abstract composition: bool option with get, set
     abstract onBegin: (Timeline -> obj) option with get, set
     abstract onBeforeUpdate: (Timeline -> obj) option with get, set
     abstract onUpdate: (Timeline -> obj) option with get, set
@@ -3469,17 +2589,6 @@ type WAAPIAnimationOptions =
 
 type WAAPIAnimationParams =
     inherit WAAPIAnimationOptions
-    abstract loop: U2<float, bool> option with get, set
-    abstract Reversed: bool option with get, set
-    abstract Alternate: bool option with get, set
-    abstract autoplay: U2<bool, ScrollObserver> option with get, set
-    abstract playbackRate: float option with get, set
-    abstract duration: U2<float, WAAPIFunctionValue> option with get, set
-    abstract delay: U2<float, WAAPIFunctionValue> option with get, set
-    abstract ease: U5<string, EasingFunction, Spring, TweakRegister, WAAPIFunctionValue> option with get, set
-    abstract composition: WAAPITweenOptions.Composition option with get, set
-    abstract persist: bool option with get, set
-    abstract onComplete: (WAAPIAnimation -> obj) option with get, set
     [<EmitIndexer>]
     abstract Item: string -> U14<string, float, bool, U3<string, float, WAAPIFunctionValue>[], string[], float[], EasingFunction, ScrollObserver, Spring, TweakRegister, WAAPIAnimationOptions, WAAPIFunctionValue, WAAPITweenOptions, (WAAPIAnimation -> obj)> with get, set
 
@@ -3491,11 +2600,6 @@ type AnimatableProperty = Func<U2<float, float[]>, float option, EasingParam opt
 
 type AnimatableObject =
     inherit Animatable
-    abstract targets: Target[] with get, set
-    /// <remarks>@type {Record&lt;String, JSAnimation&gt;}</remarks>
-    abstract animations: Record<string, JSAnimation> with get, set
-    /// <remarks>@type {JSAnimation|null}</remarks>
-    abstract callbacks: JSAnimation option with get, set
     abstract revert: unit -> AnimatableObject
     [<EmitIndexer>]
     abstract Item: string -> Func<U2<float, float[]>, float option, EasingParam option, AnimatableObject> with get, set
@@ -3512,11 +2616,6 @@ type AnimatablePropertyParamsOptions =
 
 type AnimatableParams =
     inherit AnimatablePropertyParamsOptions
-    abstract unit: string option with get, set
-    abstract duration: TweenParamValue option with get, set
-    abstract ease: EasingParam option with get, set
-    abstract modifier: TweenModifier option with get, set
-    abstract composition: TweenComposition option with get, set
     abstract onBegin: (JSAnimation -> obj) option with get, set
     abstract onBeforeUpdate: (JSAnimation -> obj) option with get, set
     abstract onUpdate: (JSAnimation -> obj) option with get, set
@@ -5328,18 +4427,6 @@ type ChainedUtilsResult = (float -> float)
 [<Interface>]
 type ChainableUtil =
     inherit ChainablesMap
-    abstract clamp: ChainedClamp with get, set
-    abstract round: ChainedRound with get, set
-    abstract snap: ChainedSnap with get, set
-    abstract wrap: ChainedWrap with get, set
-    abstract lerp: ChainedLerp with get, set
-    abstract damp: ChainedDamp with get, set
-    abstract mapRange: ChainedMapRange with get, set
-    abstract roundPad: ChainedRoundPad with get, set
-    abstract padStart: ChainedPadStart with get, set
-    abstract padEnd: ChainedPadEnd with get, set
-    abstract degToRad: ChainedDegToRad with get, set
-    abstract radToDeg: ChainedRadToDeg with get, set
     [<Emit("$0($1...)")>]
     abstract Invoke: value: float -> float
     [<ParamObject; Emit("$0")>]

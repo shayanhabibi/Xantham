@@ -33,7 +33,6 @@ type Shape =
 type Circle =
     inherit Shape
     abstract radius: float with get, set
-    abstract area: float with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (radius: float, area: float) : Circle = jsNative
 
