@@ -643,7 +643,7 @@ module WebAssembly =
         module Imports =
             type Item =
                 [<EmitIndexer>]
-                abstract Item: string -> obj with get, set
+                abstract Item: string -> U5<float, JS.Function, Global, Memory, Table> with get, set
 
 type AbortControllerConstructor =
     [<EmitConstructor>]
@@ -1230,9 +1230,9 @@ type AlarmEventInfo =
 [<Interface>]
 type Attribute =
     abstract name: string
-    abstract value: obj
+    abstract value: U8<string, float, bigint, bool, string[], float[], bigint[], bool[]>
     [<ParamObject; Emit("$0")>]
-    static member Create (name: string, value: obj) : Attribute = jsNative
+    static member Create (name: string, value: U8<string, float, bigint, bool, string[], float[], bigint[], bool[]>) : Attribute = jsNative
 
 [<Interface>]
 type Attributes =
@@ -2811,7 +2811,7 @@ type CryptoKey =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CryptoKey/algorithm)
     /// </summary>
-    abstract algorithm: obj
+    abstract algorithm: U6<CryptoKeyAesKeyAlgorithm, CryptoKeyArbitraryKeyAlgorithm, CryptoKeyEllipticKeyAlgorithm, CryptoKeyHmacKeyAlgorithm, CryptoKeyKeyAlgorithm, CryptoKeyRsaKeyAlgorithm>
     /// <summary>
     /// The read-only **<c>usages</c>** property of the CryptoKey interface indicates what can be done with the key.
     ///
@@ -2819,7 +2819,7 @@ type CryptoKey =
     /// </summary>
     abstract usages: string[]
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, extractable: bool, algorithm: obj, usages: string[]) : CryptoKey = jsNative
+    static member Create (``type``: string, extractable: bool, algorithm: U6<CryptoKeyAesKeyAlgorithm, CryptoKeyArbitraryKeyAlgorithm, CryptoKeyEllipticKeyAlgorithm, CryptoKeyHmacKeyAlgorithm, CryptoKeyKeyAlgorithm, CryptoKeyRsaKeyAlgorithm>, usages: string[]) : CryptoKey = jsNative
 
 [<Interface>]
 type CryptoKeyPair =
@@ -4494,8 +4494,8 @@ type R2Bucket =
     abstract head: key: string -> JS.Promise<R2Object option>
     abstract get: key: string * options: R2Bucket.Get.Options -> JS.Promise<U2<R2Object, R2ObjectBody> option>
     abstract get: key: string * ?options: R2GetOptions -> JS.Promise<R2ObjectBody option>
-    abstract put: key: string * ?value: obj * ?options: R2Bucket.Put.Options -> JS.Promise<R2Object option>
-    abstract put: key: string * ?value: obj * ?options: R2PutOptions -> JS.Promise<R2Object>
+    abstract put: key: string * ?value: U5<string, JS.ArrayBuffer, JS.ArrayBufferView, Blob, ReadableStream<obj>> * ?options: R2Bucket.Put.Options -> JS.Promise<R2Object option>
+    abstract put: key: string * ?value: U5<string, JS.ArrayBuffer, JS.ArrayBufferView, Blob, ReadableStream<obj>> * ?options: R2PutOptions -> JS.Promise<R2Object>
     abstract createMultipartUpload: key: string * ?options: R2MultipartOptions -> JS.Promise<R2MultipartUpload>
     abstract resumeMultipartUpload: key: string * uploadId: string -> R2MultipartUpload
     abstract delete: keys: U2<string, string[]> -> JS.Promise<unit>
@@ -4678,11 +4678,11 @@ type R2Objects3 =
 type R2MultipartUpload =
     abstract key: string
     abstract uploadId: string
-    abstract uploadPart: partNumber: float * value: obj * ?options: R2UploadPartOptions -> JS.Promise<R2UploadedPart>
+    abstract uploadPart: partNumber: float * value: U5<string, JS.ArrayBuffer, JS.ArrayBufferView, Blob, ReadableStream<obj>> * ?options: R2UploadPartOptions -> JS.Promise<R2UploadedPart>
     abstract abort: unit -> JS.Promise<unit>
     abstract complete: uploadedParts: R2UploadedPart[] -> JS.Promise<R2Object>
     [<ParamObject; Emit("$0")>]
-    static member Create (key: string, uploadId: string, uploadPart: Func<float, obj, R2UploadPartOptions option, JS.Promise<R2UploadedPart>>, abort: (unit -> JS.Promise<unit>), complete: (R2UploadedPart[] -> JS.Promise<R2Object>)) : R2MultipartUpload = jsNative
+    static member Create (key: string, uploadId: string, uploadPart: Func<float, U5<string, JS.ArrayBuffer, JS.ArrayBufferView, Blob, ReadableStream<obj>>, R2UploadPartOptions option, JS.Promise<R2UploadedPart>>, abort: (unit -> JS.Promise<unit>), complete: (R2UploadedPart[] -> JS.Promise<R2Object>)) : R2MultipartUpload = jsNative
 
 [<Interface>]
 type R2UploadedPart =
@@ -10922,7 +10922,7 @@ type ResponseInputImageContent =
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, ?detail: ChatCompletionContentPartImage.ImageUrl.Detail, ?image_url: string) : ResponseInputImageContent = jsNative
 
-type ResponseInputItem = obj
+type ResponseInputItem = U6<EasyInputMessage, ResponseFunctionToolCall, ResponseInputItemFunctionCallOutput, ResponseInputItemMessage, ResponseOutputMessage, ResponseReasoningItem>
 
 [<Interface>]
 type ResponseInputItemFunctionCallOutput =
@@ -28745,7 +28745,7 @@ type VectorizeVectorMetadataValue = U4<string, float, bool, string[]>
 /// <summary>
 /// Additional information to associate with a vector.
 /// </summary>
-type VectorizeVectorMetadata = obj
+type VectorizeVectorMetadata = U5<string, float, bool, string[], VectorizeVectorMetadata2>
 
 type VectorizeVectorMetadata2 =
     [<EmitIndexer>]
@@ -28779,7 +28779,7 @@ type VectorizeVectorMetadataFilterCollectionOp =
 /// </summary>
 type VectorizeVectorMetadataFilter =
     [<EmitIndexer>]
-    abstract Item: string -> obj option with get, set
+    abstract Item: string -> U5<string, float, bool, VectorizeVectorMetadataFilter.Item, VectorizeVectorMetadataFilter.Item2> option with get, set
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type VectorizeDistanceMetric =

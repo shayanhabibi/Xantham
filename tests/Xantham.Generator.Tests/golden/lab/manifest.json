@@ -3,9 +3,9 @@
   "package": "phase-b-lab",
   "module": "PhaseBLab",
   "counts": {
-    "exact": 17,
+    "exact": 18,
     "ergonomic": 11,
-    "widened": 4,
+    "widened": 3,
     "escape": 0
   },
   "passes": [
@@ -37,9 +37,9 @@
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 3,
+      "total": 2,
       "ergonomic": 1,
-      "widened": 2
+      "widened": 1
     },
     {
       "pass": "SC - shape-classes",

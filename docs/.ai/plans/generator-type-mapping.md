@@ -293,8 +293,12 @@ Order of preference, decided per union after §4.2's categorization:
    with a unique literal type) → **`[<TypeScriptTaggedUnion>]`** (Exact, pattern-matchable —
    by far the best consumer experience; detect aggressively).
 3. Nullability hoisted + a *single* remaining member → `option`-wrapped member.
-4. Two-to-four heterogeneous members → `U2`–`U4` (Exact for writing; reading requires
-   runtime tests the consumer writes). **Decided (D4):** the `U_n` threshold is 4.
+4. Two-to-nine heterogeneous members → `U2`–`U9` (Exact for writing; reading requires
+   runtime tests the consumer writes). **Decided (D4):** the `U_n` threshold is 9, one
+   `U_n` type for every arity `Fable.Core` 5.2.0 ships (raised from 4 in wave thirteen,
+   lane CA, on a corpus-wide arity histogram of `UnionTooWide` sites: arity 5 - 32, 6 - 15,
+   7 - 6, 8 - 6, 9 - 1, above 9 - 9. Raising the cap to 9 recovers 60 of the corpus's 69
+   widened sites; the remaining 9 sit at arity 10, 11 or 14 and stay `obj`).
 5. Larger / open unions → dedicated erased union type with static constructors per case
    (`[<Erase>] type Shade = static member inline ofString (s:string) : Shade = !!s` …), or
    `obj` at the Escape tier.

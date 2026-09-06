@@ -3,9 +3,9 @@
   "package": "animejs",
   "module": "Animejs",
   "counts": {
-    "exact": 68,
-    "ergonomic": 104,
-    "widened": 32,
+    "exact": 79,
+    "ergonomic": 107,
+    "widened": 18,
     "escape": 54
   },
   "passes": [
@@ -21,26 +21,25 @@
     },
     {
       "pass": "shape-callbacks",
-      "total": 140,
+      "total": 139,
       "exact": 1,
       "ergonomic": 130,
-      "widened": 1,
       "escape": 8
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 1978,
+      "total": 1954,
       "exact": 27,
       "ergonomic": 1418,
-      "widened": 203,
+      "widened": 179,
       "escape": 330
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 28,
+      "total": 17,
       "exact": 8,
       "ergonomic": 4,
-      "widened": 16
+      "widened": 5
     },
     {
       "pass": "SC - shape-classes",
@@ -61,9 +60,9 @@
     },
     {
       "pass": "DO - dedupe-overloads",
-      "total": 16,
+      "total": 15,
       "exact": 1,
-      "widened": 15
+      "widened": 14
     }
   ]
 }

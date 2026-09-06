@@ -350,10 +350,10 @@ let rec internal brandedPrimitive (model: ShapeModel) (facts: TypeFacts) =
                 Some primitive
             | _ -> None
 
-/// The widest erased union D4 allows. Fable ships `U2`-`U9`; the decision is four, because
-/// past that the consumer is doing runtime tests the type no longer helps them write.
+/// The widest erased union D4 allows: every arity `Fable.Core` 5.2.0 ships a `U`-type for,
+/// `U2` through `U9`.
 [<Literal>]
-let internal ErasedUnionArity = 4
+let internal ErasedUnionArity = 9
 
 /// The widest tagged-union case worth generating. A DU case binds its fields positionally, so
 /// past a dozen every `match` clause is a wall of wildcards and the erased union over the arm
