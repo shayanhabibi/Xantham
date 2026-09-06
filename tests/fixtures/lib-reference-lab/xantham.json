@@ -1,0 +1,6 @@
+{
+    // Suppresses the implicit default lib, so the DOM names the entry file's own
+    // `/// <reference lib="dom" />` directive brings into scope are the only ones present -
+    // not a default-lib load this fixture would get regardless of the directive.
+    "lib": []
+}

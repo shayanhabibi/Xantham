@@ -1,0 +1,1 @@
+{"name":"lib-reference-lab","type":"module","types":"index.d.ts","description":"a package whose entry declares nothing itself, only a /// <reference lib=\"X\" /> directive"}

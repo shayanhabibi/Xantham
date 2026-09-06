@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "package": "lib-reference-lab",
+  "module": "LibReferenceLab",
+  "counts": {
+    "exact": 0,
+    "ergonomic": 0,
+    "widened": 0,
+    "escape": 1
+  },
+  "passes": [
+    {
+      "pass": "HG - harvest-globals",
+      "total": 1,
+      "escape": 1
+    }
+  ]
+}
