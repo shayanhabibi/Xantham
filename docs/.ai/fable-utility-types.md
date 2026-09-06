@@ -87,6 +87,10 @@ abstract buffer: JS.ArrayBufferView with get, set
 where TypeScript declared `ArrayBufferView<SharedArrayBuffer>`.
 
 [//]: # (ANSWER)
+FSharp allows two types to exist with disparate typar arity. Therefore we should implement the other arities as
+utilities for keeping typescript information, and just lose the extra typars where they serve no purpose.
+
+The extra arities must be implemented in the same way that is discussed IN THE NEXT TWO ANSWERS.
 
 [//]: # (ANSWER END)
 
@@ -157,6 +161,20 @@ references several of those packages. So the ask may be "which `Fable.Browser.*`
 generator's lib table point at" rather than "please add these names".
 
 [//]: # (ANSWER)
+SEE NEXT ANSWER.
+
+We should be creating our own Fable.Browser implementation. Where we descend into recursion and lose information
+compared to the original implementation, we will simply copy the original implementations code/binding.
+
+This has been asked for MULTIPLE TIMES. And is consistently deferred.
+
+I don't care if these would ship with every library that asks for them. That wouldn't be the case if
+what we require from the agents was done. ONE corpus that generates the library bindings that we will publish
+and ALL other user generations will bind on.
+
+It will ALWAYS be published and handled from this repository.
+
+It will ALWAYS maintain the same naming scheme as upstream Fable.Browser (SEE NEXT ANSWER).
 
 [//]: # (ANSWER END)
 
@@ -183,6 +201,22 @@ Two questions, and they are yours rather than Fable's to answer first:
    permanently?
 
 [//]: # (ANSWER)
+($REF1)
+EXPLICITLY: Always assume it is located at Fable.Core.
+It is NOT YET shipped upstream, because it requires THIS to be published and require
+the upstream changes. We are acting as the proof for the changes. Therefor, for the moment, WE MUST
+publish our own version in the Xantham.Fable.Core  project.
+
+Something that all agents have mishandled, is that the `Brand` and `Record` implementations landed in
+a separate file to the `Xantham.Fable.Core/Library.fs` file. The `Brand` and `Record` implementations are
+subsequently under the namespace `namespace Xantham.Fable.Core`. This is INCORRECT.
+
+We MUST shadow into `Fable.Core` or `Fable.Core.JsInterop`.
+
+This is done in `Xantham.Fable.Core/Library.fs` using `module [<AutoOpen>] Fable.Core.JsInterop.XanthamExtensions`.
+THAT is the shape to follow.
+
+THIS ALSO APPLIES TO BROWSER/LIB IMPLEMENTATIONS.
 
 [//]: # (ANSWER END)
 
@@ -216,6 +250,12 @@ premise that F# cannot defer — not any Fable capability.
 
 [//]: # (ANSWER — only if you disagree with the decline)
 
+Added to our Xantham.Fable.Core/Library.fs.
+I've forcefully done this for Measures, Record and for NoInfer since the implementation instructions
+have been screwed up multiple times. NoInfer we should just be dropping
+to its typar instead of `obj`. Other utilities we will have to just drop if we can't find better
+implementations that are close.
+
 [//]: # (ANSWER END)
 
 ---
@@ -241,6 +281,15 @@ actually erased fails silently at runtime, so a `U10` must be proven at the run 
 control before the other ninety are generated.
 
 [//]: # (ANSWER)
+Whenever a shipped file/package creates a union type with arity greater than 9, it must be generated
+inline at the footer of the file.
+
+IE. If a package uses arity 12, then a U12 implementation is shipped at the bottom of the file.
+
+Don't price this, just do it. I don't need you to test the (!^) semantics or whatever. If it doesn't work,
+it's cheap for me to tell you to get rid of it. It's expensive to have the team cycling on it.
+
+This is NON-NEGOTIABLE.
 
 [//]: # (ANSWER END)
 
