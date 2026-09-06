@@ -319,6 +319,37 @@ then answer for. That is the case for gating a batch as a batch rather than per 
 4. **`TR023` 136 is a floor.** Lane CA took the one recoverable row; `Iterable`,
    `IterableIterator` and `BigUint64Array` are verified absent from the pinned `Fable.Core`.
 
+5. **Exclusive-arm object unions mint one interface per arm.** A union whose arms differ only in
+   which members are `?: never` is emitted as a `U2` alias over two minted interfaces with
+   identical shared members. `ContainerStartupOptions` is
+   `U2<Container.Start.Options, Container.Start.Options2>`, seven shared members written twice;
+   `AiSearchSearchRequest` is `U2<AiSearchSearchRequest2, AiSearchSearchRequest3>`. Sixteen types
+   in the `@cloudflare` golden carry a `never`-typed member, rendered
+   `abstract image: unit option with get, set` and `?image: unit` in `Create`.
+
+   **Fold the arms into one interface and carry the exclusivity on `Create` instead.** One name,
+   every member of the union present, exclusive members optional, and one
+   `[<ParamObject; Emit("$0")>]` `Create` overload per arm holding that arm's required members and
+   omitting the members that arm declares `never`. Call sites drop the `!^` cast into an arm and
+   the `unit` members leave the surface.
+
+   Exclusivity then holds at construction rather than for the life of the value: both setters stay
+   reachable on a folded instance. That is the trade being asked for.
+
+   Four things to settle before dispatch:
+   - **Arms must differ by a required parameter.** `Container.Start.Options2`'s
+     `containerSnapshot` is optional in the source, so its overload holds no required member the
+     other lacks and F# cannot separate the two. `AiSearchSearchRequest`'s `query`/`messages` pair
+     can be separated; the container pair needs a decision.
+   - **Shared members must agree.** Fold where arms carry the same member set modulo `never` with
+     matching types on the shared ones. Disagreement widens, so it declines.
+   - **Fable must accept overloaded `[<ParamObject; Emit("$0")>]` statics.** Run-gate check
+     required, not assumed.
+   - `D1Response.error: unit option` has no sibling arm. A lone `never` member comes from some
+     other mechanism and this item does not cover it.
+
+   Needs a new `Ergonomic` case at `TR060`; `TR059` belongs to lane CH.
+
 ## What this wave says about the generator
 
 Two lanes independently found the same boundary. Wave twelve's lane BB reverted naming
