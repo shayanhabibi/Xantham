@@ -251,3 +251,84 @@ this tree.
 `indexedAccessRef` and `intersectionRef` sit far apart in `Shape/Spec.fs` and merge by hunk, as
 CA and CB did this wave. CD was held out of batch one because raising the arity cap moves its sites
 between keys rather than down; that raise has now landed, so `TR020` 69 is a true baseline.
+
+---
+
+## Batch two, composed and gated
+
+Composed at `93abc84`: **304 run-gate checks, every stage ok, exit 0.**
+
+| | wave twelve `ffacc3d` | batch one | batch two |
+| --- | ---: | ---: | ---: |
+| run gate checks | 297 | 300 | **304** |
+| exact | 513 | 530 | 536 |
+| ergonomic | 1616 | 1633 | 1665 |
+| widened | 790 | 776 | 792 |
+| escape | 195 | 195 | 201 |
+| total findings | 17,928 | 16,870 | 16,994 |
+| `TR018` | 82 | 59 | **53** |
+| `TR020` | 69 | 69 | **53** |
+| `TR023` | 137 | 136 | 136 |
+| `TR036` | 72 | 9 | 10 |
+| `TR037` | 54 | 15 | 15 |
+| `TR058` | — | 0 | 10 |
+| `DT002` | 14 | 17 | 24 |
+
+### The tier rise is four new lab fixtures, and it was checked
+
+`widened` rose 2 and `escape` rose 6 against batch one, which is the shape a new loss takes. Per
+fixture, it is not one:
+
+| fixture | exact | ergonomic | widened | escape |
+| --- | ---: | ---: | ---: | ---: |
+| `@cloudflare/workers-types` | +3 | +5 | **−5** | 0 |
+| `animejs` | +11 | +3 | **−14** | 0 |
+| `solid-js` | 0 | +7 | **−7** | 0 |
+| `phase-b-lab` | +1 | 0 | **−1** | 0 |
+| `nominal-lab` | +1 | 0 | 0 | 0 |
+| `indexed-access-lab` *(new)* | 0 | +25 | +3 | 0 |
+| `shared-tag-lab` *(new)* | +7 | +6 | +25 | 0 |
+| `uninhabited-intersection-lab` *(new)* | 0 | +3 | +1 | +6 |
+
+**Every existing fixture's widened count fell — 27 between them — and not one existing fixture's
+escape count moved at all.** The whole of the +2 widened and +6 escape belongs to lab fixtures that
+did not exist at the start of the wave, and a lab exists precisely to carry hard cases. The honest
+headline for the corpus is: **widened −27, escape unchanged.**
+
+### Composition found something no lane could
+
+The `@cloudflare` manifest conflicted between lanes CD and CF. Resolved by taking one side and
+regenerating, and the regeneration was **not** a no-op: `shape-interfaces` settles at 7,984
+findings with 502 widened, against the 7,989 and 507 the taken side carried. Five widened symbols
+exist on neither branch alone — lane CD resolves indexed accesses that lane CF's newly named unions
+then answer for. That is the case for gating a batch as a batch rather than per lane.
+
+## Carried forward
+
+1. **`isObjectMember` rejects intersection arms.** `TailStream.EventType`'s three sites are all
+   that stand between lane CB's shared-tag fold and the site that motivated it. The checker
+   distributes the intersection into arms flagged `Intersection` while the pass tests
+   `TypeFlags.Object`; their members are populated, so only the flag rejects them. Admitting
+   intersections moves discriminated-union detection corpus-wide and is unpriced.
+2. **The resolve tier does not follow lib interface members.** `animejs`'s 13 remaining `TR020`
+   sites are lane CD's own shape over `lib.dom`'s `HTMLElementTagNameMap`, which reaches the type
+   table carrying zero members. Resolve-tier follow policy, not a `Shape/` change.
+3. **The CLI emits less than the harness.** `dotnet run --project src/Xantham.Cli -- generate` over
+   `@cloudflare/workers-types` produces 26k lines where the harness produces 30k. The CLI is the
+   user-facing entry point, so this is a candidate defect rather than a probing caveat.
+4. **`TR023` 136 is a floor.** Lane CA took the one recoverable row; `Iterable`,
+   `IterableIterator` and `BigUint64Array` are verified absent from the pinned `Fable.Core`.
+
+## What this wave says about the generator
+
+Two lanes independently found the same boundary. Wave twelve's lane BB reverted naming
+*applications of generic callback aliases* because it widened nine members to `obj`; lane CF had to
+guard against renaming `ResponseInputContent`, a union another declaration already answers for by
+member set. Both are the same rule discovered twice, in different passes: **a shape another
+declaration answers for should not be given a second name.** Lane CH is briefed to expect it a
+third time, for index-signature objects a package has already named.
+
+The arity threshold looked like the wave's central question and was not. Lane CF measured that
+gating an inline union claim on "only above the cap" claims exactly one union corpus-wide, and lane
+CD found that no resolved indexed access in the whole corpus reaches ten arms. Width is rarely the
+thing that decides a mapping; provenance is.
