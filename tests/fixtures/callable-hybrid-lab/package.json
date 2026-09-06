@@ -1,0 +1,7 @@
+{
+    "name": "callable-hybrid-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "main": "index.js",
+    "description": "Hand-authored lab: callable-and-properties hybrids reach their call signatures through an Invoke member (§4.4's counterpart for the call side)."
+}

@@ -206,9 +206,58 @@ let shapeInterfaces: Pass<ShapeModel> =
                                                     facts.ConstructSignatures.Length)
                                         ]
 
+                                // A hybrid's call signatures reach through an `Invoke` member (§4.4's
+                                // counterpart for the *call* side): `[<Emit("$0($1...)")>]` applies the
+                                // receiver to the arguments, so `x.Invoke(a)` is `x(a)`. A member the
+                                // interface already declares under that exact name would collide with
+                                // it, so that one case keeps the loss honest instead.
+                                let invokeCollides =
+                                    members
+                                    |> List.exists (function
+                                        | FsProperty p -> p.Name = "Invoke"
+                                        | FsMethod m -> m.Name = "Invoke"
+                                        | FsIndexer _
+                                        | FsConstructor _
+                                        | FsInvoke _ -> false)
+
+                                let invokes =
+                                    if invokeCollides then
+                                        []
+                                    else
+                                        facts.CallSignatures
+                                        |> List.map (fun signature ->
+                                            let typeParameters, parameters, returns, signatureFindings =
+                                                shapeSignature
+                                                    ctx
+                                                    { model with TypeVars = scope }
+                                                    (Some name)
+                                                    $"{name}.Invoke"
+                                                    signature
+
+                                            findings <- findings @ signatureFindings
+
+                                            FsInvoke
+                                                {
+                                                    Docs = ""
+                                                    Tags = []
+                                                    TypeParameters = typeParameters
+                                                    Parameters = parameters
+                                                    Return = returns
+                                                })
+
                                 if not facts.CallSignatures.IsEmpty then
-                                    findings <-
-                                        findings @ [ Finding.make name ShapeInterfaces.HybridLosesCallSignatures ]
+                                    if invokeCollides then
+                                        findings <-
+                                            findings @ [ Finding.make name ShapeInterfaces.HybridLosesCallSignatures ]
+                                    else
+                                        findings <-
+                                            findings
+                                            @ [
+                                                Finding.make
+                                                    name
+                                                    (ShapeInterfaces.HybridCallSignaturesAsInvoke
+                                                        facts.CallSignatures.Length)
+                                            ]
 
                                 if flag TypeFlags.Intersection facts then
                                     findings <-
@@ -229,7 +278,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                                         Order = Map.tryFind typeId model.DeclOrders |> Option.defaultValue None
                                         TypeParameters = typeParameters
                                         Inherits = inherits |> List.map snd
-                                        Members = members
+                                        Members = members @ invokes
                                         Entrypoint = None
                                         CreateOverloads = []
                                         Statics = []

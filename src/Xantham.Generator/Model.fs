@@ -891,6 +891,10 @@ type FsMember =
     | FsMethod of FsMethodMember
     | FsIndexer of FsIndexerMember
     | FsConstructor of FsConstructorMember
+    /// A hybrid's call signature, reached through `[<Emit("$0($1...)")>]`: `x.Invoke(a)` applies
+    /// the receiver to the arguments, so it reaches JavaScript as `x(a)` (§4.4's counterpart for
+    /// the call side). Shares `FsConstructorMember`'s shape - the name is fixed the same way.
+    | FsInvoke of FsConstructorMember
 
 /// How a value export is bound to its JavaScript module.
 type ImportBinding =

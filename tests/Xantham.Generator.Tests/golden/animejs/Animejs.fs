@@ -930,12 +930,16 @@ module AutoLayoutParams =
         abstract damping: float with get, set
         abstract mass: float with get, set
         abstract velocity: float with get, set
+        [<Emit("$0($1...)")>]
+        abstract Invoke: ?target: Target * ?index: float * ?targets: Target[] * ?prevTween: Tween -> FunctionValueReturn
 
     [<Interface>]
     type Delay2 =
         inherit TweakRegister
         abstract ``type``: string with get, set
         abstract defaultValue: obj with get, set
+        [<Emit("$0($1...)")>]
+        abstract Invoke: ?target: Target * ?index: float * ?targets: Target[] * ?prevTween: Tween -> FunctionValueReturn
         [<ParamObject; Emit("$0")>]
         static member Create (``type``: string, defaultValue: obj) : Delay2 = jsNative
 
@@ -5336,6 +5340,8 @@ type ChainableUtil =
     abstract padEnd: ChainedPadEnd with get, set
     abstract degToRad: ChainedDegToRad with get, set
     abstract radToDeg: ChainedRadToDeg with get, set
+    [<Emit("$0($1...)")>]
+    abstract Invoke: value: float -> float
     [<ParamObject; Emit("$0")>]
     static member Create (clamp: ChainedClamp, round: ChainedRound, snap: ChainedSnap, wrap: ChainedWrap, lerp: ChainedLerp, damp: ChainedDamp, mapRange: ChainedMapRange, roundPad: ChainedRoundPad, padStart: ChainedPadStart, padEnd: ChainedPadEnd, degToRad: ChainedDegToRad, radToDeg: ChainedRadToDeg) : ChainableUtil = jsNative
 

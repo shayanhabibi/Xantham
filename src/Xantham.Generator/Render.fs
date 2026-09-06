@@ -449,6 +449,15 @@ let private renderMember (m: FsMember) =
             let head = declHead "Create" c.TypeParameters
             yield $"    abstract {head}{memberColon head} {renderAbstractSignature c.Parameters c.Return}"
         ]
+    | FsInvoke c ->
+        // `Emit("$0($1...)")` applies the receiver to the arguments, so `x.Invoke(a)` compiles to
+        // the call `x(a)` rather than to `x.Invoke(a)` (§4.4's counterpart for the call side).
+        [
+            yield! docLines "    " c.Docs c.Tags
+            yield "    [<Emit(\"$0($1...)\")>]"
+            let head = declHead "Invoke" c.TypeParameters
+            yield $"    abstract {head}{memberColon head} {renderAbstractSignature c.Parameters c.Return}"
+        ]
 
 /// One binding attribute at `indent`, optionally carrying a second attribute inside the same
 /// brackets. A global names its own path off `globalThis`; an import names its specifier - the
@@ -857,6 +866,13 @@ let private qualifyMember foreign =
             }
     | FsConstructor m ->
         FsConstructor
+            { m with
+                TypeParameters = qualifyTypeParams foreign m.TypeParameters
+                Parameters = m.Parameters |> List.map (qualifyParam foreign)
+                Return = qualifyRef foreign m.Return
+            }
+    | FsInvoke m ->
+        FsInvoke
             { m with
                 TypeParameters = qualifyTypeParams foreign m.TypeParameters
                 Parameters = m.Parameters |> List.map (qualifyParam foreign)

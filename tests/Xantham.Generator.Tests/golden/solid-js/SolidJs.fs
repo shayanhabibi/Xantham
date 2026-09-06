@@ -313,6 +313,8 @@ type Errored =
     abstract loading: bool with get, set
     abstract error: obj with get, set
     abstract latest: unit
+    [<Emit("$0($1...)")>]
+    abstract Invoke: unit -> unit
     [<ParamObject; Emit("$0")>]
     static member Create (state: string, loading: bool, error: obj) : Errored = jsNative
 
@@ -322,6 +324,8 @@ type Pending =
     abstract loading: bool with get, set
     abstract error: unit
     abstract latest: unit
+    [<Emit("$0($1...)")>]
+    abstract Invoke: unit -> unit
     [<ParamObject; Emit("$0")>]
     static member Create (state: string, loading: bool) : Pending = jsNative
 
@@ -331,6 +335,8 @@ type Ready<'T> =
     abstract loading: bool with get, set
     abstract error: unit
     abstract latest: 'T with get, set
+    [<Emit("$0($1...)")>]
+    abstract Invoke: unit -> 'T
     [<ParamObject; Emit("$0")>]
     static member Create (state: string, loading: bool, latest: 'T) : Ready<'T> = jsNative
 
@@ -340,6 +346,8 @@ type Refreshing<'T> =
     abstract loading: bool with get, set
     abstract error: unit
     abstract latest: 'T with get, set
+    [<Emit("$0($1...)")>]
+    abstract Invoke: unit -> 'T
     [<ParamObject; Emit("$0")>]
     static member Create (state: string, loading: bool, latest: 'T) : Refreshing<'T> = jsNative
 
@@ -351,6 +359,8 @@ type Unresolved =
     abstract loading: bool with get, set
     abstract error: unit
     abstract latest: unit
+    [<Emit("$0($1...)")>]
+    abstract Invoke: unit -> unit
     [<ParamObject; Emit("$0")>]
     static member Create (state: string, loading: bool) : Unresolved = jsNative
 
@@ -672,6 +682,8 @@ type ResolvedChildren = U5<float, bool, ResolvedJSXElement option[], Browser.Typ
 [<Interface>]
 type ChildrenReturn =
     abstract toArray: (unit -> ResolvedJSXElement option[]) with get, set
+    [<Emit("$0($1...)")>]
+    abstract Invoke: unit -> ResolvedChildren option
     [<ParamObject; Emit("$0")>]
     static member Create (toArray: (unit -> ResolvedJSXElement option[])) : ChildrenReturn = jsNative
 

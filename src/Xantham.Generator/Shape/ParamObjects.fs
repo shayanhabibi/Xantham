@@ -38,23 +38,30 @@ let private isIndexer =
     | FsIndexer _ -> true
     | _ -> false
 
-/// Why the declaration carries no `Create`, or `None` where one is synthesized.
-let private refusal (decl: FsInterfaceDecl) =
+let private isInvoke =
+    function
+    | FsInvoke _ -> true
+    | _ -> false
+
+/// Why the declaration carries no `Create`, or `None` where one is synthesized. `members` is the
+/// property/method set the `Create` binds - a hybrid's `Invoke` reads its own call signatures
+/// and carries no `Create` parameter of its own.
+let private refusal (decl: FsInterfaceDecl) (members: FsMember list) =
     let methodNames =
-        decl.Members
+        members
         |> List.choose (function
             | FsMethod m -> Some m.Name
             | _ -> None)
 
     if decl.Entrypoint.IsSome then
         Some Reason.EntrypointClass
-    elif List.isEmpty decl.Members then
+    elif List.isEmpty members then
         Some Reason.NoMembers
-    elif decl.Members |> List.exists isIndexer then
+    elif members |> List.exists isIndexer then
         Some Reason.IndexSignature
     elif (List.distinct methodNames).Length <> methodNames.Length then
         Some Reason.OverloadedMethod
-    elif decl.Members.Length > CreateParameterBudget then
+    elif members.Length > CreateParameterBudget then
         Some Reason.OverBudget
     else
         None
@@ -86,7 +93,8 @@ let private parameterFor (owner: string) (m: FsMember) : FsParam * Finding list 
         },
         findings
     | FsIndexer _
-    | FsConstructor _ -> failwith "unreachable: refused above"
+    | FsConstructor _
+    | FsInvoke _ -> failwith "unreachable: refused above, or excluded from the members Create binds"
 
 /// Construction ergonomics (D3, §4.4): an interface gains a `[<ParamObject; Emit("$0")>]`
 /// Create overload mirroring its members, required members first, so consumers never hand-build
@@ -106,7 +114,11 @@ let synthesizeParamObjects: Pass<ShapeModel> =
                             // The `Create` members of a constructor object come from its
                             // construct signatures (§4.4).
                             | FsInterface decl when not (decl.Members |> List.exists isConstructor) ->
-                                match refusal decl with
+                                // A hybrid's `Invoke` reads its own call signatures (§4.4); `Create`
+                                // binds only the properties and methods beside it.
+                                let members = decl.Members |> List.filter (isInvoke >> not)
+
+                                match refusal decl members with
                                 | Some reason ->
                                     findings <-
                                         findings
@@ -117,12 +129,12 @@ let synthesizeParamObjects: Pass<ShapeModel> =
                                     FsInterface decl
                                 | None ->
                                     let parameters, callbacks =
-                                        decl.Members |> List.map (parameterFor decl.Name) |> List.unzip
+                                        members |> List.map (parameterFor decl.Name) |> List.unzip
 
                                     let required, optional = parameters |> List.partition (fun p -> not p.Optional)
 
                                     let carried =
-                                        decl.Members
+                                        members
                                         |> List.choose (function
                                             | FsMethod method' ->
                                                 Some(

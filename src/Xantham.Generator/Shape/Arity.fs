@@ -56,6 +56,12 @@ let private mapDeclRefs (f: FsTypeRef -> FsTypeRef) (decl: FsDecl) : FsDecl =
                     Parameters = c.Parameters |> List.map parameter
                     Return = reference c.Return
                 }
+        | FsInvoke c ->
+            FsInvoke
+                { c with
+                    Parameters = c.Parameters |> List.map parameter
+                    Return = reference c.Return
+                }
 
     match decl with
     | FsInterface d ->
