@@ -190,3 +190,41 @@ to act on.
 That is the gap 1f closes, and it is narrower than lane DA's workaround implied. Entry-package
 impersonation was necessary only because harvest admits one group; it is not the shape of the fix.
 
+### The ECMAScript surface is one surface, at the modern lib level
+
+Decided with the user during batch two, and it settles the packaging question the worklist left
+open.
+
+`lib.esnext.d.ts` references `es2025`, which chains down through every year to `es5`, and each
+year's feature files reopen the interfaces the earlier years declared. The libs describe a runtime
+that keeps backward compatibility, so a later year augments rather than replaces: **the modern
+`Array` is all eight of its declarations merged.** Targeting only the modern lib is therefore the
+full transitive closure, not a subset of it.
+
+Two consequences, in opposite directions.
+
+**It settles the shipping layout.** One ECMAScript surface, not a package per lib year. This is
+also the only layout F# can express: F# cannot reopen an interface, so a symbol merged across lib
+levels has to be emitted once at its fully merged shape. A split putting `Array`'s es5
+declarations in one package and its es2015 additions in another is not expressible; a split
+putting all of `Array` in one package and all of `Intl` in another is. Lane DE's lib-level
+bisection is a diagnostic instrument and must not be read as a candidate layout.
+
+**It does not reduce merge depth, so it does not avoid what lane DA hit.** "Modern only" is
+precisely DA's failing input. If the cost scales with declarations merged per symbol, it is paid
+in full at `esnext`. What the decision does buy is that the fix is needed once, for one target
+surface, rather than per lib level.
+
+### Lane DD, landed
+
+`HG.NothingHarvested` carries the in-scope count and where those symbols went, grouped by
+`Grouping.classify` and ordered by population, so an entry whose declarations are classified away
+names `typescript/lib` as their destination instead of reporting only that it found nothing.
+
+Exit code stays 0, and the reasoning is worth keeping: `dom-shadow-lab` is an existing gated
+fixture that reaches this path correctly, since a global-script package whose declarations are
+pure declaration-merge additions has nothing of its own to export. Failing on zero declarations
+would break a correct case to catch a confusing one. The defect was diagnostic quality.
+
+No tier movement in either direction, verified per symbol at merge.
+
