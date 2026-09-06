@@ -4036,24 +4036,24 @@ type KVNamespaceListKey<'Metadata, 'Key> =
     [<ParamObject; Emit("$0")>]
     static member Create (name: 'Key, ?expiration: float, ?metadata: 'Metadata) : KVNamespaceListKey<'Metadata, 'Key> = jsNative
 
-type KVNamespaceListResult<'Metadata, 'Key> = U2<KVNamespaceListResult2<'Key, 'Metadata>, KVNamespaceListResult3<'Key, 'Metadata>>
+type KVNamespaceListResult<'Metadata, 'Key> = U2<KVNamespaceListResult2<'Metadata, 'Key>, KVNamespaceListResult3<'Metadata, 'Key>>
 
 [<Interface>]
-type KVNamespaceListResult2<'Key, 'Metadata> =
+type KVNamespaceListResult2<'Metadata, 'Key> =
     abstract list_complete: bool with get, set
     abstract keys: KVNamespaceListKey<'Metadata, 'Key>[] with get, set
     abstract cursor: string with get, set
     abstract cacheStatus: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (list_complete: bool, keys: KVNamespaceListKey<'Metadata, 'Key>[], cursor: string, ?cacheStatus: string) : KVNamespaceListResult2<'Key, 'Metadata> = jsNative
+    static member Create (list_complete: bool, keys: KVNamespaceListKey<'Metadata, 'Key>[], cursor: string, ?cacheStatus: string) : KVNamespaceListResult2<'Metadata, 'Key> = jsNative
 
 [<Interface>]
-type KVNamespaceListResult3<'Key, 'Metadata> =
+type KVNamespaceListResult3<'Metadata, 'Key> =
     abstract list_complete: bool with get, set
     abstract keys: KVNamespaceListKey<'Metadata, 'Key>[] with get, set
     abstract cacheStatus: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (list_complete: bool, keys: KVNamespaceListKey<'Metadata, 'Key>[], ?cacheStatus: string) : KVNamespaceListResult3<'Key, 'Metadata> = jsNative
+    static member Create (list_complete: bool, keys: KVNamespaceListKey<'Metadata, 'Key>[], ?cacheStatus: string) : KVNamespaceListResult3<'Metadata, 'Key> = jsNative
 
 type KVNamespace<'Key> =
     abstract get: key: 'Key * ?options: KVNamespace.Get.Options -> JS.Promise<string option>
@@ -4070,7 +4070,7 @@ type KVNamespace<'Key> =
     abstract get: key: 'Key[] * ?options: KVNamespace.Get.Options -> JS.Promise<JS.Map<string, string option>>
     abstract get: key: 'Key[] * ?options: KVNamespaceGetOptions<KVNamespace.Text> -> JS.Promise<JS.Map<string, string option>>
     abstract get<'ExpectedValue>: key: 'Key[] * ?options: KVNamespaceGetOptions<KVNamespace.Json> -> JS.Promise<JS.Map<string, 'ExpectedValue option>>
-    abstract list<'Metadata>: ?options: KVNamespaceListOptions -> JS.Promise<U2<KVNamespace.List.Result.Item<'Key, 'Metadata>, KVNamespace.List.Result.Item2<'Key, 'Metadata>>>
+    abstract list<'Metadata>: ?options: KVNamespaceListOptions -> JS.Promise<U2<KVNamespace.List.Result.Item<'Metadata, 'Key>, KVNamespace.List.Result.Item2<'Metadata, 'Key>>>
     abstract put: key: 'Key * value: U4<string, JS.ArrayBuffer, JS.ArrayBufferView, ReadableStream<obj>> * ?options: KVNamespacePutOptions -> JS.Promise<unit>
     abstract getWithMetadata<'Metadata>: key: 'Key * ?options: KVNamespace.Get.Options -> JS.Promise<KVNamespaceGetWithMetadataResult<string, 'Metadata>>
     abstract getWithMetadata<'Metadata>: key: 'Key * ``type``: KVNamespace.Text -> JS.Promise<KVNamespaceGetWithMetadataResult<string, 'Metadata>>
@@ -4108,21 +4108,21 @@ module KVNamespace =
     module List =
         module Result =
             [<Interface>]
-            type Item<'Key, 'Metadata> =
+            type Item<'Metadata, 'Key> =
                 abstract list_complete: bool with get, set
                 abstract keys: KVNamespaceListKey<'Metadata, 'Key>[] with get, set
                 abstract cursor: string with get, set
                 abstract cacheStatus: string option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (list_complete: bool, keys: KVNamespaceListKey<'Metadata, 'Key>[], cursor: string, ?cacheStatus: string) : Item<'Key, 'Metadata> = jsNative
+                static member Create (list_complete: bool, keys: KVNamespaceListKey<'Metadata, 'Key>[], cursor: string, ?cacheStatus: string) : Item<'Metadata, 'Key> = jsNative
 
             [<Interface>]
-            type Item2<'Key, 'Metadata> =
+            type Item2<'Metadata, 'Key> =
                 abstract list_complete: bool with get, set
                 abstract keys: KVNamespaceListKey<'Metadata, 'Key>[] with get, set
                 abstract cacheStatus: string option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (list_complete: bool, keys: KVNamespaceListKey<'Metadata, 'Key>[], ?cacheStatus: string) : Item2<'Key, 'Metadata> = jsNative
+                static member Create (list_complete: bool, keys: KVNamespaceListKey<'Metadata, 'Key>[], ?cacheStatus: string) : Item2<'Metadata, 'Key> = jsNative
 
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
     type Stream =

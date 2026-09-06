@@ -1,0 +1,6 @@
+{
+  "name": "instantiation-operand-lab",
+  "type": "module",
+  "types": "index.d.ts",
+  "description": "Wave sixteen: an instantiation of a generic declaration met first at a reference position (identity) and later as a union operand (re-derived in full). Pins that the resolve tier's operand register promotes an identity-only instantiation, so the tagged-union pass reads the arm's members whichever position the walk met first."
+}

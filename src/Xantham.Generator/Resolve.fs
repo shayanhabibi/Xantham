@@ -75,17 +75,42 @@ let private FollowDepth = 20
 /// Distinct types one generation of the frontier may hold before the whole generation is
 /// recorded as not followed rather than derived - not a per-type admission cutoff, since a
 /// checker id is assigned in the order answers arrived and a prefix chosen by id would differ
-/// run to run. The frontier doubles as the cycle boundary, so depth alone does not bound it: a
-/// method whose return type applies its own enclosing generic to a fresh type parameter
-/// (`Array<T>.map<U>(...): Array<U>`) mints a distinct instantiation id every time the checker
-/// answers, and every one of those ids discovers the same shape again under its own fresh
-/// parameter - width grows generation over generation at any depth, not just past the cutoff.
-///
-/// The corpus's widest generation seen live sits at 2091 (`@cloudflare/workers-types`,
-/// generation 10, `XANTHAM_RESOLVE_COUNTERS` measured); this value carries roughly double
-/// that as headroom.
+/// run to run. A safety valve: the widest generation seen live is 10,218 (`lib.dom` shipped
+/// whole, generation 1, `XANTHAM_RESOLVE_COUNTERS` measured), and this value carries three
+/// times that as headroom.
 [<Literal>]
-let private FollowWidth = 4096
+let private FollowWidth = 32768
+
+/// One walk's registers, filled as derivation meets the ids and read before the next generation
+/// derives them: a generation is derived whole before the types it discovered reach the
+/// frontier, so every id below is registered before the walk derives anything over it.
+type private Registers =
+    {
+        /// Type parameters a signature declared. A signature's parameter is cloned afresh every
+        /// time the checker instantiates the signature, so an instantiation written over one is
+        /// never the same type twice.
+        SignatureParameters: ConcurrentDictionary<int, bool>
+        /// Types the shape tier reads for their structure: the seeds, and every operand of a
+        /// union or an intersection.
+        Structural: ConcurrentDictionary<int, bool>
+        /// Instantiations derived as identity alone. One a later generation reads as an
+        /// operand is re-derived in full.
+        IdentityOnly: ConcurrentDictionary<int, bool>
+    }
+
+module private Registers =
+    let start () =
+        {
+            SignatureParameters = ConcurrentDictionary()
+            Structural = ConcurrentDictionary()
+            IdentityOnly = ConcurrentDictionary()
+        }
+
+    let structural (registers: Registers) (types: TypeResponse list) =
+        for ty in types do
+            registers.Structural.TryAdd(ty.Id, true) |> ignore
+
+        types
 
 let private hasAny (mask: SymbolFlags) (flags: SymbolFlags) = uint32 (flags &&& mask) <> 0u
 
@@ -355,7 +380,7 @@ let private declaresQuestionToken (ctx: Context) (parameter: SymbolResponse) : A
 /// signatures, each with the responses it discovered. Object types and the intersections of
 /// them share it, because the checker answers the same questions about both: the properties of
 /// `A & B` are both sets, a property both declare typed as the intersection of its two types.
-let private deriveStructure (ctx: Context) (trace: Trace option) (ty: TypeResponse) =
+let private deriveStructure (ctx: Context) (trace: Trace option) (registers: Registers) (ty: TypeResponse) =
     async {
         let! properties = ctx.Session.getPropertiesOfType ty.Id
         let properties = properties |> ValueOption.defaultValue [||]
@@ -424,6 +449,9 @@ let private deriveStructure (ctx: Context) (trace: Trace option) (ty: TypeRespon
                             let! typeParameters = ctx.Session.getTypeParametersOfSignature signature.Id
                             let typeParameters = typeParameters |> ValueOption.defaultValue [||]
 
+                            for parameter in typeParameters do
+                                registers.SignatureParameters.TryAdd(parameter.Id, true) |> ignore
+
                             return
                                 {
                                     Parameters = parameterFacts |> Array.map fst |> Array.toList
@@ -489,8 +517,52 @@ let private deriveStructure (ctx: Context) (trace: Trace option) (ty: TypeRespon
             |}
     }
 
+/// Whether a type argument applies a type parameter a signature declares, directly or under a
+/// union, intersection or nested reference up to `depth` levels down.
+let rec private appliesSignatureParameter
+    (ctx: Context)
+    (registers: Registers)
+    (depth: int)
+    (argument: TypeResponse)
+    : Async<bool> =
+    async {
+        let has flag = argument.Flags.HasFlag(flag: TypeFlags)
+
+        let isReference =
+            argument.ObjectFlags
+            |> ValueOption.map (fun flags -> flags.HasFlag ObjectFlags.Reference)
+            |> ValueOption.defaultValue false
+
+        let rec any (candidates: TypeResponse list) =
+            async {
+                match candidates with
+                | [] -> return false
+                | candidate :: rest ->
+                    let! applies = appliesSignatureParameter ctx registers (depth - 1) candidate
+                    if applies then return true else return! any rest
+            }
+
+        if has TypeFlags.TypeParameter then
+            return registers.SignatureParameters.ContainsKey argument.Id
+        elif depth = 0 then
+            return false
+        elif has TypeFlags.Union || has TypeFlags.Intersection then
+            let! operands = ctx.Session.getTypesOfType argument.Id
+            return! any (operands |> ValueOption.defaultValue [||] |> Array.toList)
+        elif has TypeFlags.Object && isReference then
+            let! arguments = ctx.Session.getTypeArguments argument.Id
+            return! any (arguments |> ValueOption.defaultValue [||] |> Array.toList)
+        else
+            return false
+    }
+
 /// Derives one type's facts and reports the responses it discovered, for the next frontier.
-let private deriveFacts (ctx: Context) (trace: Trace option) (ty: TypeResponse) : Async<TypeFacts * TypeResponse list> =
+let private deriveFacts
+    (ctx: Context)
+    (trace: Trace option)
+    (registers: Registers)
+    (ty: TypeResponse)
+    : Async<TypeFacts * TypeResponse list> =
     async {
         let has flag = ty.Flags.HasFlag(flag: TypeFlags)
 
@@ -498,7 +570,12 @@ let private deriveFacts (ctx: Context) (trace: Trace option) (ty: TypeResponse) 
         // primitive, so its members are not worth a round trip.
         if has TypeFlags.Union && not (has TypeFlags.Boolean) then
             let! members = ctx.Session.getTypesOfType ty.Id
-            let members = members |> ValueOption.map Array.toList |> ValueOption.defaultValue []
+
+            let members =
+                members
+                |> ValueOption.map Array.toList
+                |> ValueOption.defaultValue []
+                |> Registers.structural registers
 
             // A generic union alias binds its parameter on the alias, exactly as an object or
             // conditional alias does: `type Ref<T> = T | ((value: T) => void)` has nowhere
@@ -524,7 +601,12 @@ let private deriveFacts (ctx: Context) (trace: Trace option) (ty: TypeResponse) 
             // decided by what its object operands *contain* - a marker property or a real
             // one - so the operands are resolved in full rather than identified.
             let! members = ctx.Session.getTypesOfType ty.Id
-            let members = members |> ValueOption.map Array.toList |> ValueOption.defaultValue []
+
+            let members =
+                members
+                |> ValueOption.map Array.toList
+                |> ValueOption.defaultValue []
+                |> Registers.structural registers
 
             // The alias's arguments, for the same reason an object alias needs them: a
             // flattened intersection is declared over them (§4.6), and a phantom is worth
@@ -550,7 +632,7 @@ let private deriveFacts (ctx: Context) (trace: Trace option) (ty: TypeResponse) 
                     && members |> List.forall (fun m -> m.Flags.HasFlag TypeFlags.Object)
                 then
                     async {
-                        let! structure = deriveStructure ctx trace ty
+                        let! structure = deriveStructure ctx trace registers ty
                         return Some structure
                     }
                 else
@@ -710,52 +792,107 @@ let private deriveFacts (ctx: Context) (trace: Trace option) (ty: TypeResponse) 
                 // is not theirs. Entry group only: a lib or dependency target is identity at
                 // most, and the reference already carries that. A tuple's target is its generic
                 // carrier and is deliberately read for its flags and dropped, above.
+                let isInstantiation =
+                    isReference
+                    && ty.IsTupleType <> ValueSome true
+                    && (match ty.Target with
+                        | ValueSome target -> target <> ty.Id
+                        | ValueNone -> false)
+
                 let! target =
-                    match ty.Target with
-                    | ValueSome target when isReference && target <> ty.Id && ty.IsTupleType <> ValueSome true ->
+                    if isInstantiation then
                         async {
                             let! target = ctx.Session.getTargetOfType ty.Id
                             return [ target ]
                         }
-                    | _ -> async.Return []
+                    else
+                        async.Return []
 
-                let! structure = deriveStructure ctx trace ty
-                let! baseTypes = ctx.Session.getBaseTypes ty.Id
+                // An instantiation at a reference position is identity: the declaration
+                // applied to the arguments, which is how the shape tier writes it
+                // (`instantiationOf`). Its members are read only where it stands as an operand
+                // of a union or an intersection (`Ready<T>` inside `type Resource<T> = Ready<T>
+                // | ...`, which the tagged-union and exclusive-arm passes read) or as a seed;
+                // every other instantiation carries the declaration's members under
+                // substitution, and deriving them is what widens the frontier: `lib.dom` applies
+                // `Array<T>` to hundreds of element types, each dragging Array's methods and
+                // their closure in, and `Array<T>.map<U>(...): Array<U>` is a distinct
+                // instantiation every time the checker answers, each carrying the same methods
+                // under a fresh parameter of its own - the latter is identity even as an
+                // operand.
+                let! isOpenOverSignature =
+                    if isInstantiation then
+                        async {
+                            let! applies =
+                                typeArguments
+                                |> List.map (appliesSignatureParameter ctx registers 3)
+                                |> Async.Sequential
 
-                let baseTypes =
-                    baseTypes |> ValueOption.map Array.toList |> ValueOption.defaultValue []
+                            return Array.exists id applies
+                        }
+                    else
+                        async.Return false
 
-                let discovered =
-                    [
-                        yield! structure.Discovered
-                        yield! channel trace "base-types" baseTypes
-                        yield! channel trace "type-arguments" typeArguments
-                        yield! channel trace "alias-type-arguments" aliasTypeArguments
-                        yield! channel trace "target" target
-                    ]
+                let asIdentity =
+                    isInstantiation
+                    && (isOpenOverSignature || not (registers.Structural.ContainsKey ty.Id))
 
-                return
-                    {
-                        Response = ty
-                        Origin = origin
-                        SymbolName = symbol |> ValueOption.map _.Name |> ValueOption.toOption
-                        SymbolParent = symbol |> ValueOption.bind _.Parent |> ValueOption.toOption
-                        Members = structure.Members
-                        IndexInfos = structure.IndexInfos
-                        CallSignatures = structure.CallSignatures
-                        ConstructSignatures = structure.ConstructSignatures
-                        BaseTypes = baseTypes |> List.map _.Id
-                        TypeArguments = typeArguments |> List.map _.Id
-                        TupleElements = tupleElements
-                        AliasTypeArguments = aliasTypeArguments |> List.map _.Id
-                        IntersectionMembers = []
-                        Constraint = None
-                        Default = None
-                        Conditional = None
-                        UnionMembers = []
-                        AliasIdentity = None
-                    },
-                    discovered
+                if asIdentity then
+                    if not isOpenOverSignature then
+                        registers.IdentityOnly.TryAdd(ty.Id, true) |> ignore
+
+                    return
+                        { TypeFacts.shallow ty with
+                            Origin = origin
+                            SymbolName = symbol |> ValueOption.map _.Name |> ValueOption.toOption
+                            SymbolParent = symbol |> ValueOption.bind _.Parent |> ValueOption.toOption
+                            TypeArguments = typeArguments |> List.map _.Id
+                            AliasTypeArguments = aliasTypeArguments |> List.map _.Id
+                        },
+                        [
+                            yield! channel trace "type-arguments" typeArguments
+                            yield! channel trace "alias-type-arguments" aliasTypeArguments
+                            yield! channel trace "target" target
+                        ]
+                else
+
+                    let! structure = deriveStructure ctx trace registers ty
+                    let! baseTypes = ctx.Session.getBaseTypes ty.Id
+
+                    let baseTypes =
+                        baseTypes |> ValueOption.map Array.toList |> ValueOption.defaultValue []
+
+                    let discovered =
+                        [
+                            yield! structure.Discovered
+                            yield! channel trace "base-types" baseTypes
+                            yield! channel trace "type-arguments" typeArguments
+                            yield! channel trace "alias-type-arguments" aliasTypeArguments
+                            yield! channel trace "target" target
+                        ]
+
+                    return
+                        {
+                            Response = ty
+                            Origin = origin
+                            SymbolName = symbol |> ValueOption.map _.Name |> ValueOption.toOption
+                            SymbolParent = symbol |> ValueOption.bind _.Parent |> ValueOption.toOption
+                            Members = structure.Members
+                            IndexInfos = structure.IndexInfos
+                            CallSignatures = structure.CallSignatures
+                            ConstructSignatures = structure.ConstructSignatures
+                            BaseTypes = baseTypes |> List.map _.Id
+                            TypeArguments = typeArguments |> List.map _.Id
+                            TupleElements = tupleElements
+                            AliasTypeArguments = aliasTypeArguments |> List.map _.Id
+                            IntersectionMembers = []
+                            Constraint = None
+                            Default = None
+                            Conditional = None
+                            UnionMembers = []
+                            AliasIdentity = None
+                        },
+                        discovered
         elif has TypeFlags.TypeParameter && ty.IsThisType <> ValueSome true then
             // A type parameter is named by its own symbol - `T`, not the declaration's - and
             // the response carries only the symbol's id, so the name costs a round trip. The
@@ -948,8 +1085,24 @@ let resolveTypeTable: Pass<ResolveModel> =
                     let mutable expansions = 0
                     let mutable maxWidth = 0
 
+                    let registers = Registers.start ()
+
                     let rec walk table derived notFollowed findings frontier depth =
                         async {
+                            // An instantiation derived as identity that a union or an
+                            // intersection has since read as an operand is derived again, in
+                            // full; its table entry is replaced.
+                            let promoted =
+                                frontier
+                                |> List.filter (fun (ty: TypeResponse) ->
+                                    registers.IdentityOnly.ContainsKey ty.Id
+                                    && registers.Structural.ContainsKey ty.Id)
+
+                            for ty in promoted do
+                                registers.IdentityOnly.TryRemove ty.Id |> ignore
+
+                            let derived = promoted |> List.fold (fun set ty -> Set.remove ty.Id set) derived
+
                             let fresh =
                                 frontier
                                 |> List.distinctBy (fun (ty: TypeResponse) -> ty.Id)
@@ -1024,7 +1177,7 @@ let resolveTypeTable: Pass<ResolveModel> =
                                     fresh
                                     |> List.map (fun ty ->
                                         async {
-                                            let! result = attempt (deriveFacts ctx trace ty)
+                                            let! result = attempt (deriveFacts ctx trace registers ty)
                                             return ty, result
                                         })
                                     |> Async.Parallel
@@ -1074,7 +1227,11 @@ let resolveTypeTable: Pass<ResolveModel> =
                                 return! walk table derived notFollowed findings discovered (depth + 1)
                         }
 
-                    let seeds = model.Types |> Map.toList |> List.map (fun (_, facts) -> facts.Response)
+                    let seeds =
+                        model.Types
+                        |> Map.toList
+                        |> List.map (fun (_, facts) -> facts.Response)
+                        |> Registers.structural registers
 
                     let! table, notFollowed, findings =
                         walk model.Types Set.empty model.NotFollowed [] seeds 0

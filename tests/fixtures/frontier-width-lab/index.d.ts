@@ -1,9 +1,10 @@
-// Wave fifteen, lane DI. `Frontier<T>`'s own generic methods each return the interface applied
-// to a fresh method-level type parameter (`map<U>(...): Frontier<U>`, the `Array<T>` shape) -
-// every generation the walk re-derives the same members under a new instantiation id, so the
-// frontier's width doubles generation over generation at any depth. This is the smallest shape
-// that outgrows the width cutoff (RT003) inside a few seconds, standing in for the `lib.dom`
-// measurement only a live run against the real library reproduces.
+﻿// Wave fifteen, lane DI, and wave sixteen. `Frontier<T>`'s own generic methods each return the
+// interface applied to a fresh method-level type parameter (`map<U>(...): Frontier<U>`, the
+// `Array<T>` shape). The checker clones the parameter per instantiation, so deriving each
+// instantiation's members re-derived the same methods under a new id every generation, and the
+// frontier's width doubled generation over generation until the width cutoff (RT003) deferred a
+// whole generation. `Resolve.fs` now derives such an instantiation as identity, and the walk
+// closes in a handful of generations with `map` rendered as `Frontier<'U>`.
 interface Frontier<T> {
     every<S extends T>(
         predicate: (value: T, index: number, array: Frontier<T>) => value is S,

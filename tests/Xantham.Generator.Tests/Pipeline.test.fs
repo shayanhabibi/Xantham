@@ -3957,27 +3957,53 @@ let pipelineTests =
 
         yield!
             fixtureTests "frontier-width-lab" (handFixture "frontier-width-lab") GeneratorConfig.Default (fun package ->
-                // Wave fifteen, lane DI: `Resolve.fs`'s width cutoff (`FollowWidth`), bounding a
-                // generation of the frontier the same way `FollowDepth` already bounds its
-                // recursion. `Frontier<T>.map<U>`'s return type mints a fresh `Frontier<U>`
-                // instantiation every generation, so the walk's width doubles generation over
-                // generation independent of depth; this fixture is small enough for that to
-                // outgrow the cutoff in one test run rather than only under the `lib.dom`
-                // measurement.
-                [ testCase "a generation past the width cutoff is not resolved, RT003" <| fun _ ->
+                // Wave sixteen: `Frontier<T>.map<U>`'s return type applies the interface to the
+                // method's own type parameter, which the checker clones afresh per
+                // instantiation. `Resolve.fs` derives such an instantiation as identity, so the
+                // walk closes in a handful of generations; before that it doubled every
+                // generation until the width cutoff (`FollowWidth`, RT003) deferred a whole
+                // generation to `obj`.
+                [ testCase "an instantiation over a method's own type parameter closes the frontier" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
 
-                    let tooWide =
+                    let cutoffs =
                         rendered.Findings
                         |> List.choose (fun finding ->
                             match finding.Kind with
                             | :? ResolveTypeTable as kind ->
                                 match kind with
-                                | ResolveTypeTable.FrontierTooWide(count, limit) -> Some(count, limit)
+                                | ResolveTypeTable.FrontierTooWide(count, _)
+                                | ResolveTypeTable.FrontierNotResolved(count, _) -> Some count
                                 | _ -> None
                             | _ -> None)
 
-                    Expect.isNonEmpty tooWide "at least one generation of the frontier outgrows the width cutoff"
-                    Expect.allEqual (tooWide |> List.map snd) 4096 "every finding names the same width limit" ])
+                    Expect.isEmpty cutoffs "neither the width nor the depth cutoff fires"
+
+                    Expect.stringContains
+                        (rendered.Files |> List.find (fst >> (=) "FrontierWidthLab.fs") |> snd)
+                        "-> Frontier<'U>"
+                        "map's return is the interface applied to the method's own parameter" ])
+
+        yield!
+            fixtureTests
+                "instantiation-operand-lab"
+                (handFixture "instantiation-operand-lab")
+                GeneratorConfig.Default
+                (fun package ->
+                    // Wave sixteen: `Ok<string>` is met as `Api.last`'s type a generation before
+                    // `Outcome` reads it as an arm, so the walk derives it as identity first and
+                    // in full once the union registers it as an operand. The fold below is what
+                    // the re-derivation buys; without it the arm has no members to read a tag
+                    // from and `Outcome` stays an abbreviation over `U2`.
+                    [ testCase "an arm met first at a reference position still folds" <| fun _ ->
+                        let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                        let source =
+                            rendered.Files |> List.find (fst >> (=) "InstantiationOperandLab.fs") |> snd
+
+                        Expect.stringContains
+                            source
+                            "| [<CompiledName(\"ok\")>] Ok of value: string"
+                            "the generic arm's members were read after it was met as a reference" ])
 
     ]
