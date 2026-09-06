@@ -30,8 +30,8 @@
       "pass": "SI - shape-interfaces",
       "total": 1954,
       "exact": 27,
-      "ergonomic": 1418,
-      "widened": 179,
+      "ergonomic": 1425,
+      "widened": 172,
       "escape": 330
     },
     {

@@ -1,0 +1,6 @@
+{
+    "name": "uninhabited-intersection-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "description": "Hand-authored fixture exercising the uninhabited-intersection reduction of docs/plans/generator-type-mapping.md 4.6 - a shared property collides where one operand marks it a nullable marker, which TypeScript reduces to `never` rather than typing the property itself `never`. Tracked in git, no npm install, so the goldens pin the reduction under the live compiler."
+}
