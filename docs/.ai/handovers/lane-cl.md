@@ -77,6 +77,84 @@ pre-fix widened `Func<...>` output and a `TR050` loss finding for `Utils.round`;
 that symbol is now fully recovered as two same-name overloads with **no**
 finding at all, so the test was rewritten to assert the recovered shape.
 
+## Reconciliation of the residual 33 (added after coordinator review)
+
+The first pass of this handover reported 61→33 without accounting for every
+residual site by mechanism. Reconciled below, per symbol, using a temporary
+`eprintfn` probe on `effectiveTypeId`'s facts in `shapeMembers` (added,
+inspected, and reverted — never committed) plus direct reads of the upstream
+`.d.ts` sources.
+
+**Genuine floor — no member/interface list exists at that exact position, so
+no restructuring recovers it (17 of 33):**
+
+- *Named-declaration target* (Callbacks.fs's already-documented floor,
+  reached here through the generic alias/`typeRef` dispatch because the
+  alias's RHS is an intersection or tuple rather than a literal
+  `{ (a): T; (b): T }` object, so `Callbacks.fs`'s dedicated `FsDelegateType`
+  pass never sees it): `AnimatableProperty` (animejs, 1 — RHS is
+  `AnimatablePropertySetter & AnimatablePropertyGetter`, two different-arity
+  function aliases intersected); `Setter` (solid-js, 1 — `Setter<T>` is a
+  four-signature rank-2 alias, structurally identical to the lab's own
+  `Setter`/`Distinct`/`DivergentBound`); `Setter`, `Distinct`, `DivergentBound`
+  (setter-lab, 3 — the alias declarations themselves, independent of
+  `Holder`'s member positions that reference them and *do* recover). Subtotal: 5.
+- *Nested position* (a parameter, a tuple element, or a nested return type —
+  a single-type slot with no enclosing member or alias at that exact
+  recursion frame to spread onto, even when something further out happens to
+  have a name): `Signal` (solid-js, 1 — `type Signal<T> = [get: Accessor<T>,
+  set: Setter<T>]`, the tuple's second element); `From.Producer(setter)` /
+  `From.Producer3(setter)` (solid-js, 2 — the `setter` parameter of
+  `Producer<T>`'s function arm is itself `Setter<T>`); `*.storage()` (solid-js,
+  6 — `storage?: (init) => [Accessor<...>, Setter<...>]`, the same tuple
+  position, four times through `ResourceOptions`/`InitializedResourceOptions`
+  and twice more through `createResource`'s per-overload instantiations);
+  `createSignal()` (solid-js, 2 — one per exported overload, since
+  `createSignal`'s return type is `Signal<T>`, hitting the same tuple
+  position at the export's return type). Subtotal: 11.
+- *Index-signature / `Record` value position* (`Record<'Key,'Value>` admits
+  exactly one `'Value`, so an index signature can never host a sibling):
+  `AnimatableObject.[]` (animejs, 1 — `Animatable & Record<string,
+  AnimatableProperty>`). Subtotal: 1.
+
+**Recoverable in principle, deliberately not built (16 of 33):**
+`LayoutAnimationParams.{delay, duration, onBeforeUpdate, onBegin, onComplete,
+onLoop, onPause, onUpdate}` and the same eight on `AutoLayoutParams` (which
+re-derives from `LayoutAnimationParams`). Probed directly: at each of these,
+`effectiveTypeId` resolves to a genuine `Intersection` type (TS's own
+resolved type for a member repeated across intersection operands with
+different declared types) whose *own* facts report zero call signatures,
+zero members, zero index infos — `isPureCallback` correctly reads this as
+"not a callback" at `shapeMembers`'s gate, so it falls through to the
+generic, single-type-returning `typeRef` → `intersectionRef` path. Only
+several calls deeper, inside `intersectionRef`'s own operand decomposition,
+does it discover that each operand's declared union (`number | FunctionValue`
+on one side, `TweenParamValue` — itself pulling in `EasingParam` and
+therefore `EasingFunction` — on the other) contributes a distinct
+function-shaped arm, and only then does it call `delegateRef` with those two
+arms as separable signatures. By that point control is inside `typeRef`,
+which returns one `FsTypeRef`, not a member list — there is no path back up
+to `shapeMembers` to spread the two arms across two same-name `FsMethod`
+declarations the way `Holder.round`'s literal case does.
+
+The same same-name-overload mechanism that already recovers a literal
+object-with-call-signatures at a member position would recover this too, if
+`shapeMembers`'s early gate ran the same intersection/union-arm decomposition
+`intersectionRef` performs before deciding property-vs-method-list, rather
+than checking only the top-level facts. That is a restructuring of
+`shapeMembers`'s gate (in `Spec.fs`, not blocked by file ownership — this is
+not a cross-file limitation), not a small extension, and it is explicitly
+**not built here**: it changes the shape-decision entry point for every
+interface member, not just callback-typed ones, and needs its own scoped
+pass to avoid disturbing unrelated recovered/widened members. Stopping point
+for whoever picks this up: `shapeMembers`'s `recoverableCallbackFacts` check
+in `Spec.fs`, which would need to attempt `intersectionRef`'s operand-arm
+extraction (or a shared helper) before its `isPureCallback` gate rather than
+only inspecting `effectiveTypeId`'s own facts.
+
+5 + 11 + 1 + 16 = 33. Confirmed exhaustive against the symbol-level TR031
+listing in both goldens' `symbols.jsonl`.
+
 ## Corpus movement (findings, `dotnet fsi build.fsx -- findings`)
 
 Tiers, corpus-wide: exact 535→535, ergonomic 1603→1604, widened 797→798,
