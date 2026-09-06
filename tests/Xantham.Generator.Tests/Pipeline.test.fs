@@ -3402,16 +3402,22 @@ let pipelineTests =
                           [ "discriminated by 'type', but two arms carry 'log'; left as an erased union" ]
                           "the refusal names the candidate that came closest"
 
-                      // The negatives. `Log` writes the same collision as an intersection over a
-                      // union, and the checker distributes it into arms flagged `Intersection`
-                      // rather than `Object`, so the union never reaches the discriminant test.
-                      // `Loose` has no uniform string-literal property to test.
-                      for name in [ "Log"; "Loose" ] do
-                          Expect.equal
-                              (rendered.Findings
-                               |> List.filter (fun f -> f.Symbol = name && f.Pass = "detect-tagged-unions"))
-                              []
-                              $"{name} is not considered a tagged union at all"
+                      // `Loose` is still a negative: `kind` is a bare string on one arm, so no
+                      // candidate is uniform and the union is never considered a tagged one.
+                      Expect.equal
+                          (rendered.Findings
+                           |> List.filter (fun f -> f.Symbol = "Loose" && f.Pass = "detect-tagged-unions"))
+                          []
+                          "Loose is not considered a tagged union at all"
+
+                      // `Log` writes the same collision as an intersection over a union. The
+                      // checker distributes the intersection into arms flagged `Intersection`,
+                      // and those now reach the discriminant test the same way `Onset`'s flat
+                      // spelling does - the fold is refused for the same reason.
+                      Expect.equal
+                          (messagesFor "Log" "DT003")
+                          [ "discriminated by 'type', but two arms carry 'log'; left as an erased union" ]
+                          "Log's intersection arms reach the same refusal Onset's flat arms do"
 
                       Expect.stringContains source "type Log = U2<Log2, Log3>" "and Log stays an erased union"
 
@@ -3452,15 +3458,12 @@ let pipelineTests =
                       Expect.stringContains source "abstract ``event``: Named" "an inline spelling of a declared union reads that name"
                       Expect.isFalse (source.Contains "Alias.Event") "and mints nothing of its own"
 
-                      // The `TailStream.EventType` spelling: an intersection arm carries no
-                      // `Object` flag, so no candidate discriminant is uniform.
-                      Expect.stringContains source "type OnEvent = (obj -> unit)" "a union with an intersection arm widens"
-
-                      Expect.equal
-                          (rendered.Findings
-                           |> List.filter (fun f -> f.Symbol.StartsWith "OnEvent" && f.Pass = "detect-tagged-unions"))
-                          []
-                          "and is offered no name to be claimed under" ])
+                      // The `TailStream.EventType` spelling: nine arms discriminate cleanly and
+                      // the `Log` intersection's two arms fold into the tenth, the same fold
+                      // `Terminal` and `Onset` exercise on flat arms.
+                      Expect.stringContains source "type OnEvent = (OnEvent.Event -> unit)" "the intersection arm no longer blocks the fold"
+                      Expect.stringContains source "| [<CompiledName(\"log\")>] Log of level: string" "the two Log arms fold into one case"
+                      Expect.equal (keysFor "OnEvent.Event") [ "DT002"; "DT004"; "SY004" ] "discriminated, folded once, and named under its owner" ])
 
         // Wave thirteen lane CD. `T[K]` widened to `obj` wherever the operand was not a type
         // variable the signature bound as `typekeyof`. An operand whose own keys confine the

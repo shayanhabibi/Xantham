@@ -247,4 +247,18 @@ module Narrow =
         | [<CompiledName("queue")>] Queue
         | [<CompiledName("scheduled")>] Scheduled
 
-type OnEvent = (obj -> unit)
+type OnEvent = (OnEvent.Event -> unit)
+
+module OnEvent =
+    [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+    type Event =
+        | [<CompiledName("alarm")>] Alarm of scheduledTime: float
+        | [<CompiledName("custom")>] Custom
+        | [<CompiledName("email")>] Email
+        | [<CompiledName("fetch")>] Fetch of url: string
+        | [<CompiledName("jsrpc")>] Jsrpc of methodName: string
+        | [<CompiledName("queue")>] Queue
+        | [<CompiledName("scheduled")>] Scheduled
+        | [<CompiledName("socket")>] Socket
+        | [<CompiledName("trace")>] Trace
+        | [<CompiledName("log")>] Log of level: string

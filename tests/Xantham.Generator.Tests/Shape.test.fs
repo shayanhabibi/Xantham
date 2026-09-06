@@ -3476,6 +3476,41 @@ let shapePassTests =
 
             Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "the missed match is reported"
 
+        // Wave fourteen. The checker distributes an intersection over a union, so an arm
+        // reached this way carries `TypeFlags.Intersection` rather than `TypeFlags.Object`
+        // even though its members are already resolved onto it.
+        testCase "detect-tagged-unions admits an arm the checker flagged Intersection" <| fun _ ->
+            let arm id tag extra =
+                { Build.facts (Build.typeResponse id TypeFlags.Intersection) with
+                    Members =
+                        [ Build.resolvedMember (Build.symbol (id * 10) "kind" SymbolFlags.Property) tag
+                          Build.resolvedMember (Build.symbol (id * 10 + 1) extra SymbolFlags.Property) 2 ] }
+
+            let union =
+                { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 20; 21 ] }
+
+            let model =
+                { Build.shapeModel (
+                      union
+                      :: arm 20 7 "radius"
+                      :: arm 21 8 "width"
+                      :: stringLiteral 7 "circle"
+                      :: stringLiteral 8 "round-rect"
+                      :: Build.primitives
+                  ) with
+                    DeclNames = Map.ofList [ 10, "Shape" ] }
+
+            let shaped, findings = Build.runPass TaggedUnions.detectTaggedUnions model
+
+            match shaped.Decls |> List.pick (function FsTaggedUnion d -> Some d | _ -> None) with
+            | decl ->
+                Expect.equal
+                    (decl.Cases |> List.map (fun c -> c.Name, c.CompiledName))
+                    [ "Circle", Some "circle"; "RoundRect", Some "round-rect" ]
+                    "an Intersection-flagged arm discriminates the same way an Object-flagged one does"
+
+            Expect.equal (findings |> List.map _.Tier) [ Exact ] "a tagged union costs no fidelity"
+
         testCase "shape-aliases twin unions chain to the smallest id, never cycle" <| fun _ ->
             // Two declared unions over the same member set: only the smaller id is canonical.
             // The larger abbreviates to it; the smaller resolves structurally. An A <-> B

@@ -1236,7 +1236,7 @@ type Exception =
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, name: string, message: string, ?stack: string) : Exception = jsNative
 
-type ExportedHandlerTailStreamHandler<'Env, 'Props> = delegate of ``event``: TailStream.TailEvent<Onset> * env: 'Env * ctx: ExecutionContext<'Props> -> U3<JS.Promise<U2<(TailStream.TailEvent<obj> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>>, (TailStream.TailEvent<obj> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>
+type ExportedHandlerTailStreamHandler<'Env, 'Props> = delegate of ``event``: TailStream.TailEvent<Onset> * env: 'Env * ctx: ExecutionContext<'Props> -> U3<JS.Promise<U2<(TailStream.TailEvent<ExportedHandlerTailStreamHandler.Result.Item.Event.Item> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>>, (TailStream.TailEvent<ExportedHandlerTailStreamHandler.Result.Item.Event.Item> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>
 
 module ExportedHandlerTailStreamHandler =
     module Result =
@@ -1247,25 +1247,38 @@ module ExportedHandlerTailStreamHandler =
             abstract spanClose: (TailStream.TailEvent<SpanClose> -> JS.Promise<unit> option) option with get, set
             abstract diagnosticChannel: (TailStream.TailEvent<DiagnosticChannelEvent> -> JS.Promise<unit> option) option with get, set
             abstract ``exception``: (TailStream.TailEvent<Exception> -> JS.Promise<unit> option) option with get, set
-            abstract log: (TailStream.TailEvent<U2<ExportedHandlerTailStreamHandler.Result.Item.Event.Item, ExportedHandlerTailStreamHandler.Result.Item.Event.Item2>> -> JS.Promise<unit> option) option with get, set
+            abstract log: (TailStream.TailEvent<U2<ExportedHandlerTailStreamHandler.Result.Item.Event.Item2, ExportedHandlerTailStreamHandler.Result.Item.Event.Item3>> -> JS.Promise<unit> option) option with get, set
             abstract ``return``: (TailStream.TailEvent<Return> -> JS.Promise<unit> option) option with get, set
             abstract attributes: (TailStream.TailEvent<Attributes> -> JS.Promise<unit> option) option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?outcome: (TailStream.TailEvent<Outcome> -> JS.Promise<unit> option), ?spanOpen: (TailStream.TailEvent<SpanOpen> -> JS.Promise<unit> option), ?spanClose: (TailStream.TailEvent<SpanClose> -> JS.Promise<unit> option), ?diagnosticChannel: (TailStream.TailEvent<DiagnosticChannelEvent> -> JS.Promise<unit> option), ?``exception``: (TailStream.TailEvent<Exception> -> JS.Promise<unit> option), ?log: (TailStream.TailEvent<U2<ExportedHandlerTailStreamHandler.Result.Item.Event.Item, ExportedHandlerTailStreamHandler.Result.Item.Event.Item2>> -> JS.Promise<unit> option), ?``return``: (TailStream.TailEvent<Return> -> JS.Promise<unit> option), ?attributes: (TailStream.TailEvent<Attributes> -> JS.Promise<unit> option)) : Item = jsNative
+            static member Create (?outcome: (TailStream.TailEvent<Outcome> -> JS.Promise<unit> option), ?spanOpen: (TailStream.TailEvent<SpanOpen> -> JS.Promise<unit> option), ?spanClose: (TailStream.TailEvent<SpanClose> -> JS.Promise<unit> option), ?diagnosticChannel: (TailStream.TailEvent<DiagnosticChannelEvent> -> JS.Promise<unit> option), ?``exception``: (TailStream.TailEvent<Exception> -> JS.Promise<unit> option), ?log: (TailStream.TailEvent<U2<ExportedHandlerTailStreamHandler.Result.Item.Event.Item2, ExportedHandlerTailStreamHandler.Result.Item.Event.Item3>> -> JS.Promise<unit> option), ?``return``: (TailStream.TailEvent<Return> -> JS.Promise<unit> option), ?attributes: (TailStream.TailEvent<Attributes> -> JS.Promise<unit> option)) : Item = jsNative
 
         module Item =
             module Event =
-                [<Interface>]
+                [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
                 type Item =
+                    | [<CompiledName("attributes")>] Attributes of info: Attribute[]
+                    | [<CompiledName("diagnosticChannel")>] DiagnosticChannel of channel: string * message: obj
+                    | [<CompiledName("exception")>] Exception of name: string * message: string * stack: string option
+                    | [<CompiledName("onset")>] Onset of attributes: Attribute[] * spanId: string * dispatchNamespace: string option * entrypoint: string option * executionModel: string * durableObjectId: string option * scriptName: string option * scriptTags: string[] option * scriptVersion: TailStream.ScriptVersion option * preview: TailStream.TracePreviewInfo option * info: Onset.Info
+                    | [<CompiledName("outcome")>] Outcome of outcome: Outcome.Outcome * cpuTime: float * wallTime: float
+                    | [<CompiledName("return")>] Return of info: FetchResponseInfo option
+                    | [<CompiledName("spanClose")>] SpanClose of outcome: Outcome.Outcome
+                    | [<CompiledName("spanOpen")>] SpanOpen of name: string * spanId: string * info: U3<Attributes, FetchEventInfo, JsRpcEventInfo> option
+                    | [<CompiledName("streamDiagnostic")>] StreamDiagnostic of diagnostic: DroppedEventsDiagnostic
+                    | [<CompiledName("log")>] Log of level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item2.Level * errorInfo: TailStreamErrorInfo option[] option
+
+                [<Interface>]
+                type Item2 =
                     abstract ``type``: string
-                    abstract level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Level
+                    abstract level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item2.Level
                     abstract errorInfo: TailStreamErrorInfo option[] option
                     abstract message: obj
                     abstract truncated: bool option
                     [<ParamObject; Emit("$0")>]
-                    static member Create (``type``: string, level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Level, message: obj, ?errorInfo: TailStreamErrorInfo option[], ?truncated: bool) : Item = jsNative
+                    static member Create (``type``: string, level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item2.Level, message: obj, ?errorInfo: TailStreamErrorInfo option[], ?truncated: bool) : Item2 = jsNative
 
-                module Item =
+                module Item2 =
                     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
                     type Level =
                         | [<CompiledName("debug")>] Debug
@@ -1275,14 +1288,14 @@ module ExportedHandlerTailStreamHandler =
                         | [<CompiledName("warn")>] Warn
 
                 [<Interface>]
-                type Item2 =
+                type Item3 =
                     abstract ``type``: string
-                    abstract level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Level
+                    abstract level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item2.Level
                     abstract errorInfo: TailStreamErrorInfo option[] option
                     abstract message: string
                     abstract truncated: bool
                     [<ParamObject; Emit("$0")>]
-                    static member Create (``type``: string, level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Level, message: string, truncated: bool, ?errorInfo: TailStreamErrorInfo option[]) : Item2 = jsNative
+                    static member Create (``type``: string, level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item2.Level, message: string, truncated: bool, ?errorInfo: TailStreamErrorInfo option[]) : Item3 = jsNative
 
 [<Interface>]
 type FetchEventInfo =
@@ -1534,13 +1547,13 @@ type ExportedHandler<'Env, 'QueueHandlerMessage, 'CfHostMetadata, 'Props> =
     abstract connect: Func<Socket, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
     abstract tail: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
     abstract trace: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
-    abstract tailStream: Func<TailStream.TailEvent<Onset>, 'Env, ExecutionContext<'Props>, U3<JS.Promise<U2<(TailStream.TailEvent<obj> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>>, (TailStream.TailEvent<obj> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>> option with get, set
+    abstract tailStream: Func<TailStream.TailEvent<Onset>, 'Env, ExecutionContext<'Props>, U3<JS.Promise<U2<(TailStream.TailEvent<ExportedHandlerTailStreamHandler.Result.Item.Event.Item> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>>, (TailStream.TailEvent<ExportedHandlerTailStreamHandler.Result.Item.Event.Item> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>> option with get, set
     abstract scheduled: Func<ScheduledController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
     abstract test: Func<TestController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
     abstract email: Func<ForwardableEmailMessage, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
     abstract queue: Func<MessageBatch<'QueueHandlerMessage>, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?fetch: Func<Request<'CfHostMetadata, IncomingRequestCfProperties<'CfHostMetadata>>, 'Env, ExecutionContext<'Props>, U2<JS.Promise<Response>, Response>>, ?connect: Func<Socket, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?tail: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?trace: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?tailStream: Func<TailStream.TailEvent<Onset>, 'Env, ExecutionContext<'Props>, U3<JS.Promise<U2<(TailStream.TailEvent<obj> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>>, (TailStream.TailEvent<obj> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>>, ?scheduled: Func<ScheduledController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?test: Func<TestController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?email: Func<ForwardableEmailMessage, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?queue: Func<MessageBatch<'QueueHandlerMessage>, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>) : ExportedHandler<'Env, 'QueueHandlerMessage, 'CfHostMetadata, 'Props> = jsNative
+    static member Create (?fetch: Func<Request<'CfHostMetadata, IncomingRequestCfProperties<'CfHostMetadata>>, 'Env, ExecutionContext<'Props>, U2<JS.Promise<Response>, Response>>, ?connect: Func<Socket, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?tail: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?trace: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?tailStream: Func<TailStream.TailEvent<Onset>, 'Env, ExecutionContext<'Props>, U3<JS.Promise<U2<(TailStream.TailEvent<ExportedHandlerTailStreamHandler.Result.Item.Event.Item> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>>, (TailStream.TailEvent<ExportedHandlerTailStreamHandler.Result.Item.Event.Item> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>>, ?scheduled: Func<ScheduledController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?test: Func<TestController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?email: Func<ForwardableEmailMessage, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?queue: Func<MessageBatch<'QueueHandlerMessage>, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>) : ExportedHandler<'Env, 'QueueHandlerMessage, 'CfHostMetadata, 'Props> = jsNative
 
 [<Interface>]
 type StructuredSerializeOptions =
@@ -27040,9 +27053,9 @@ module WorkerEntrypoint =
 
     [<Interface>]
     type ITailStreamHandler =
-        abstract tailStream: ``event``: TailStream.TailEvent<Onset> -> U3<JS.Promise<U2<(TailStream.TailEvent<obj> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>>, (TailStream.TailEvent<obj> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>
+        abstract tailStream: ``event``: TailStream.TailEvent<Onset> -> U3<JS.Promise<U2<(TailStream.TailEvent<ExportedHandlerTailStreamHandler.Result.Item.Event.Item> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>>, (TailStream.TailEvent<ExportedHandlerTailStreamHandler.Result.Item.Event.Item> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>
         [<ParamObject; Emit("$0")>]
-        static member Create (tailStream: (TailStream.TailEvent<Onset> -> U3<JS.Promise<U2<(TailStream.TailEvent<obj> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>>, (TailStream.TailEvent<obj> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>)) : ITailStreamHandler = jsNative
+        static member Create (tailStream: (TailStream.TailEvent<Onset> -> U3<JS.Promise<U2<(TailStream.TailEvent<ExportedHandlerTailStreamHandler.Result.Item.Event.Item> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>>, (TailStream.TailEvent<ExportedHandlerTailStreamHandler.Result.Item.Event.Item> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>)) : ITailStreamHandler = jsNative
 
     [<Interface>]
     type ITestHandler =
