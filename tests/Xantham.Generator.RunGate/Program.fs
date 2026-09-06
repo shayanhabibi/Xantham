@@ -1836,6 +1836,54 @@ let private recordIndex () =
             ()
             "globalThis.__recordIndexLabTagCalls.length === 1 && globalThis.__recordIndexLabTagCalls[0].x === 1")
 
+/// §4.4's call side: a hybrid's own call signature reaches Invoke, so `x.Invoke(a)` compiles to
+/// `x(a)` rather than a method call named `Invoke`, mirroring `[<EmitConstructor>]` on the
+/// construct side. `widget.handler` is the one value in this fixture reached at a member
+/// position, so it is the one case that still exposes an explicit `.Invoke` to call through;
+/// every other export is itself the callable value, so `Exports` (unrelated to this pass) already
+/// renders it as a direct static function rather than an object carrying an `Invoke` member.
+let private callableHybrids () =
+    let widget = CallableHybridLab.Exports.widget
+
+    equal
+        "a member-position hybrid's Invoke reaches the function it is read off"
+        "handled:ping"
+        (widget.handler.Invoke "ping")
+
+    equal "and its sibling property still reads off the same object" true widget.handler.enabled
+
+    equal
+        "a named-declaration hybrid's export calls straight through to the same function"
+        42.0
+        (CallableHybridLab.Exports.trigger 21.0)
+
+    equal
+        "an overloaded hybrid's export reaches the two-argument arity"
+        7.0
+        (CallableHybridLab.Exports.multi (3.0, 4.0))
+
+    equal "and the one-argument arity" 4.0 (CallableHybridLab.Exports.multi 3.0)
+
+    equal
+        "a hybrid whose overloads collided still calls the surviving arity"
+        30.0
+        (CallableHybridLab.Exports.ambiguous 3.0)
+
+    equal
+        "a call signature's own type parameter reaches through generically"
+        "id"
+        (CallableHybridLab.Exports.identity "id")
+
+    equal
+        "a generic interface's call signature reads its own type parameter"
+        42.0
+        (CallableHybridLab.Exports.boxedNumber ())
+
+    equal
+        "a hybrid whose member is already named Invoke keeps the plain call"
+        6.0
+        (CallableHybridLab.Exports.collides 5.0)
+
 [<EntryPoint>]
 let main _ =
     globals ()
@@ -1864,6 +1912,7 @@ let main _ =
     callbackNamedDelegateForms ()
     generatedDelegateForms ()
     recordIndex ()
+    callableHybrids ()
 
     match failures with
     | [] ->

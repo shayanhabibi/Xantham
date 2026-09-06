@@ -1504,7 +1504,8 @@ let shapePassTests =
                      | FsProperty p -> p.Name
                      | FsMethod m -> m.Name
                      | FsConstructor _ -> "Create"
-                     | FsIndexer _ -> "Item"))
+                     | FsIndexer _ -> "Item"
+                     | FsInvoke _ -> "Invoke"))
                 [ "name"; "at" ]
                 "both member sets, in the checker's order"
 
@@ -1555,7 +1556,9 @@ let shapePassTests =
                  |> List.map (function
                      | FsProperty p -> p.Name
                      | FsMethod m -> m.Name
-                     | FsIndexer _ -> "Item"))
+                     | FsIndexer _ -> "Item"
+                     | FsConstructor _ -> "Create"
+                     | FsInvoke _ -> "Invoke"))
                 [ "extra"; "name" ]
                 "and the inherited member is still declared here"
 
@@ -3241,6 +3244,7 @@ let shapePassTests =
                          | FsMethod m -> m.Parameters.Head.Type
                          | FsProperty p -> p.Type
                          | FsConstructor c -> c.Return
+                         | FsInvoke c -> c.Return
                          | FsIndexer i -> i.Value))
                     [ FsNamed "DOMTargets"; FsString ]
                     "first of the obj pair survives; the string overload is distinct"

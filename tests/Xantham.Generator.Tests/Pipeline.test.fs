@@ -881,11 +881,143 @@ let pipelineTests =
 
                         Expect.stringContains source "abstract cancel: unit -> unit" "the property survives"
 
+                        Expect.stringContains
+                            source
+                            "        [<Emit(\"$0($1...)\")>]\n        abstract Invoke: unit -> unit"
+                            "and its call signature reaches Invoke rather than being lost (§4.4)"
+
                         Expect.isEmpty
                             (rendered.Findings
                              |> List.filter (fun finding ->
                                  finding.Key = "TR050" && finding.Symbol.StartsWith "Timers"))
-                            "and the hybrid is not read as a callback" ])
+                            "and the hybrid is not read as a callback"
+
+                        Expect.equal
+                            (rendered.Findings
+                             |> List.filter (fun finding -> finding.Symbol = "Timers.Schedule" && (finding.Key = "SI001" || finding.Key = "SI008"))
+                             |> List.map (fun finding -> finding.Key, finding.Message))
+                            [
+                                "SI008",
+                                "callable-and-properties hybrid reaches its 1 call signatures through Invoke; the call is spelled x.Invoke(a)"
+                            ]
+                            "the loss finding moved from SI001 to SI008" ])
+
+        yield!
+            fixtureTests "callable-hybrid-lab" (handFixture "callable-hybrid-lab") GeneratorConfig.Default (fun package ->
+                [
+                    testCase "a hybrid at a member position reaches its call signature through Invoke (§4.4)"
+                    <| fun _ ->
+                        let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                        let source = rendered.Files |> List.head |> snd
+
+                        Expect.stringContains source "abstract enabled: bool with get, set" "the property survives"
+
+                        Expect.stringContains
+                            source
+                            "[<Emit(\"$0($1...)\")>]"
+                            "the Invoke member carries the call emit"
+
+                        Expect.stringContains
+                            source
+                            "abstract Invoke: ``event``: string -> string"
+                            "and Invoke reads the call signature's own parameter names"
+
+                        Expect.contains
+                            (rendered.Findings |> List.map (fun finding -> finding.Key, finding.Symbol))
+                            ("SI008", "Widget.Handler")
+                            "the member-position hybrid raises SI008, not SI001"
+
+                    testCase "a hybrid written as a named declaration reaches Invoke the same way"
+                    <| fun _ ->
+                        let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                        let source = rendered.Files |> List.head |> snd
+
+                        Expect.stringContains source "abstract label: string with get, set" "the property survives"
+
+                        Expect.stringContains
+                            source
+                            "abstract Invoke: value: float -> float"
+                            "and the named declaration's own call signature reaches Invoke"
+
+                        Expect.contains
+                            (rendered.Findings |> List.map (fun finding -> finding.Key, finding.Symbol))
+                            ("SI008", "Trigger")
+                            "a named declaration is no different from a member position"
+
+                    testCase "two call signatures on one hybrid become two Invoke overloads"
+                    <| fun _ ->
+                        let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                        let source = rendered.Files |> List.head |> snd
+
+                        Expect.stringContains source "abstract Invoke: x: float -> float" "the one-argument overload"
+
+                        Expect.stringContains
+                            source
+                            "abstract Invoke: x: float * y: float -> float"
+                            "and the two-argument overload, distinguished by arity"
+
+                        Expect.contains
+                            (rendered.Findings |> List.map (fun finding -> finding.Key, finding.Symbol))
+                            ("SI008", "Multi")
+                            "one SI008, naming both signatures"
+
+                    testCase "two call signatures that do not separate under F#'s overload rules drop one"
+                    <| fun _ ->
+                        let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                        let source = rendered.Files |> List.head |> snd
+
+                        Expect.stringContains source "abstract Invoke: x: float -> float" "the surviving overload"
+
+                        Expect.isFalse
+                            (source.Contains "abstract Invoke: x: float -> string")
+                            "the colliding overload is dropped, not left to fail F#'s overload rules"
+
+                        Expect.contains
+                            (rendered.Findings |> List.map (fun finding -> finding.Key, finding.Symbol))
+                            ("DO001", "Ambiguous.Invoke")
+                            "dedupe-overloads reports the drop the same way it would for any member"
+
+                    testCase "a generic call signature reaches Invoke with its own type parameter"
+                    <| fun _ ->
+                        let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                        let source = rendered.Files |> List.head |> snd
+
+                        Expect.stringContains
+                            source
+                            "abstract Invoke<'T>: value: 'T -> 'T"
+                            "the call signature's own type parameter, not the interface's"
+
+                    testCase "a generic interface's call signature reads the interface's own type parameter"
+                    <| fun _ ->
+                        let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                        let source = rendered.Files |> List.head |> snd
+
+                        Expect.stringContains source "type Boxed<'T> =" "the declaration keeps its parameter"
+                        Expect.stringContains source "abstract Invoke: unit -> 'T" "and Invoke reads it"
+
+                    testCase "a member already named Invoke keeps the call signature a loss (SI001)"
+                    <| fun _ ->
+                        let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                        let source = rendered.Files |> List.head |> snd
+
+                        Expect.stringContains
+                            source
+                            "abstract Invoke: string with get, set"
+                            "the declared member keeps its name and type"
+
+                        let collidesStart = source.IndexOf "type Collides ="
+                        let collidesEnd = source.IndexOf("type Exports =", collidesStart)
+                        let collidesBlock = source.Substring(collidesStart, collidesEnd - collidesStart)
+
+                        Expect.isFalse
+                            (collidesBlock.Contains "[<Emit(\"$0($1...)\")>]")
+                            "no second Invoke is minted to collide with it"
+
+                        Expect.contains
+                            (rendered.Findings |> List.map (fun finding -> finding.Key, finding.Symbol))
+                            ("SI001", "Collides")
+                            "the residue is reported honestly, not silently dropped"
+                ])
 
         yield!
             fixtureTests

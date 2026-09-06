@@ -13,6 +13,7 @@ let private shapedMemberName (m: FsMember) =
     | FsMethod m -> m.Name
     | FsIndexer _ -> "Item"
     | FsConstructor _ -> "Create"
+    | FsInvoke _ -> "Invoke"
 
 /// Whether F# admits a static beside an instance member of the same name. Only between two
 /// methods (`Response.json` is both): property over property is FS0441, method over property
@@ -22,7 +23,8 @@ let private staticFitsBeside (instance: FsMember) (isMethod: bool) =
     | FsMethod _ -> isMethod
     | FsProperty _
     | FsIndexer _
-    | FsConstructor _ -> false
+    | FsConstructor _
+    | FsInvoke _ -> false
 
 /// A class's static, bound through a dotted selector off whatever the class itself binds to:
 /// `[<Import("Counter.MAX", "pkg")>]` is `import { Counter }` then `Counter.MAX`, and

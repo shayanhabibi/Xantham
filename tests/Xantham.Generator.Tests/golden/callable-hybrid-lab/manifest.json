@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "package": "intersection-callable-lab",
-  "module": "IntersectionCallableLab",
+  "package": "callable-hybrid-lab",
+  "module": "CallableHybridLab",
   "counts": {
-    "exact": 4,
-    "ergonomic": 2,
-    "widened": 1,
+    "exact": 6,
+    "ergonomic": 6,
+    "widened": 3,
     "escape": 0
   },
   "passes": [
@@ -16,14 +16,19 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 5,
-      "ergonomic": 4,
+      "total": 7,
+      "ergonomic": 6,
       "widened": 1
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 4,
-      "ergonomic": 4
+      "total": 8,
+      "ergonomic": 8
+    },
+    {
+      "pass": "DO - dedupe-overloads",
+      "total": 2,
+      "widened": 2
     }
   ]
 }

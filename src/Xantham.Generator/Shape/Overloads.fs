@@ -137,6 +137,20 @@ let dedupeOverloads: Pass<ShapeModel> =
                                     false
                                 else
                                     seen <- Set.add key seen
+                                    true
+                            | FsInvoke c ->
+                                // `Invoke` overloads collide the same way `Create` overloads do: two
+                                // call signatures that widen to the same F# parameter types are one
+                                // .NET member, not two.
+                                let key = ("Invoke", signatureKey c.Parameters).ToString()
+
+                                if Set.contains key seen then
+                                    findings <-
+                                        findings @ [ Finding.make $"{owner}.Invoke" DedupeOverloads.OverloadDropped ]
+
+                                    false
+                                else
+                                    seen <- Set.add key seen
                                     true)
 
                     let decls =
