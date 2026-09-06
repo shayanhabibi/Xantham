@@ -956,6 +956,102 @@ let internal keyBoundedOverloads (model: ShapeModel) : Set<string> =
     |> Set.ofList
 
 // ---------------------------------------------------------------------------------------------
+// Indexed access over an operand whose own keys confine the index (§4.10).
+// ---------------------------------------------------------------------------------------------
+
+/// How far a bound is followed before an operand or a key set is called unenumerable. Three
+/// links reach `Sink extends Source extends Record<string, Event>`; a chain longer than that is
+/// a type-level computation the mapping declines rather than approximates.
+[<Literal>]
+let private BoundReach = 3
+
+/// What an index type confines an access to.
+type private KeySet =
+    /// `keyof T`, deferred at the operand carried here.
+    | AllKeysOf of operand: int
+    /// A literal key, or a finite union of them.
+    | Named of keys: string list
+
+/// The type an operand stands for. A type parameter stands for its bound, which is the tightest
+/// thing true of every instantiation.
+let rec private operandShape (model: ShapeModel) (depth: int) (typeId: int) : TypeFacts option =
+    if depth > BoundReach then
+        None
+    else
+        match Map.tryFind typeId model.Types with
+        | Some facts when flag TypeFlags.TypeParameter facts ->
+            facts.Constraint
+            |> Option.filter (fun bound -> bound <> typeId)
+            |> Option.bind (operandShape model (depth + 1))
+        | facts -> facts
+
+/// The keys an index type admits, where they can be enumerated. A key variable stands for its
+/// bound, the same way an operand does.
+let rec private keySetOf (model: ShapeModel) (depth: int) (typeId: int) : KeySet option =
+    if depth > BoundReach then
+        None
+    else
+        match Map.tryFind typeId model.Types with
+        | None -> None
+        | Some facts when flag TypeFlags.Index facts ->
+            facts.Response.Target |> ValueOption.toOption |> Option.map AllKeysOf
+        | Some facts when flag TypeFlags.StringLiteral facts ->
+            match literalOf facts with
+            | Some(LitString text) -> Some(Named [ text ])
+            | _ -> None
+        | Some facts when flag TypeFlags.TypeParameter facts ->
+            facts.Constraint
+            |> Option.filter (fun bound -> bound <> typeId)
+            |> Option.bind (keySetOf model (depth + 1))
+        | Some facts when flag TypeFlags.Union facts && not facts.UnionMembers.IsEmpty ->
+            let keys =
+                facts.UnionMembers
+                |> List.choose (fun id ->
+                    match Map.tryFind id model.Types |> Option.bind literalOf with
+                    | Some(LitString text) -> Some text
+                    | _ -> None)
+
+            if keys.Length = facts.UnionMembers.Length then
+                Some(Named keys)
+            else
+                None
+        | _ -> None
+
+/// The value types `T[K]` selects, where `K` is confined to keys `T` declares. `None` leaves the
+/// access widened: an operand with no enumerable keys, a key set taken over some other type, or
+/// a key the operand does not declare all reach past what the operand's own members pin down.
+let internal indexedAccessValues (model: ShapeModel) (facts: TypeFacts) : int list option =
+    match facts.Response.ObjectType |> ValueOption.toOption, facts.Response.IndexType |> ValueOption.toOption with
+    | None, _
+    | _, None -> None
+    | Some objectId, Some indexId ->
+        match operandShape model 0 objectId, keySetOf model 0 indexId with
+        | Some operand, Some(AllKeysOf keyOperand) when keyOperand = objectId ->
+            // Every value the operand carries, however it carries it: an index signature is as
+            // much a key of the operand as a declared member is.
+            match
+                [
+                    for m in operand.Members -> m.TypeId
+                    for index in operand.IndexInfos -> index.ValueTypeId
+                ]
+            with
+            | [] -> None
+            | values -> Some values
+        | Some operand, Some(Named keys) when not keys.IsEmpty ->
+            let selected =
+                keys
+                |> List.choose (fun key ->
+                    operand.Members
+                    |> List.tryFind (fun m -> m.Symbol.Name = key)
+                    |> Option.map _.TypeId)
+
+            if selected.Length = keys.Length then
+                Some selected
+            else
+                None
+        | _ -> None
+
+// ---------------------------------------------------------------------------------------------
 // Type references.
 // ---------------------------------------------------------------------------------------------
 
@@ -1100,7 +1196,7 @@ and internal typeRefOnPath
         elif has TypeFlags.Index then
             keyOfRef model owner facts
         elif has TypeFlags.IndexedAccess then
-            indexedAccessRef model owner facts
+            indexedAccessRef ctx model self owner facts
         elif has TypeFlags.Intersection then
             intersectionRef ctx model self owner facts
         elif has TypeFlags.Conditional then
@@ -1218,9 +1314,17 @@ and internal intersectionRef
                         FsObj, [ Finding.make owner reason ]
 
 /// `T[K]`. Where `K` is a key variable this signature bound as `typekeyof<'T,'R>`, the access is
-/// exactly the `'R` that idiom introduced. Everything else - `T[keyof T]`, an access over an
-/// operand not in scope - is a type-level computation with no F# form, and widens loudly.
-and internal indexedAccessRef (model: ShapeModel) (owner: string) (facts: TypeFacts) : FsTypeRef * Finding list =
+/// exactly the `'R` that idiom introduced. Where the operand's own keys confine `K`, the access
+/// is the union of the value types those keys select - a widening, and a far tighter one than
+/// `obj`. An index reaching past what the operand declares is a type-level computation with no
+/// F# form, and widens loudly.
+and internal indexedAccessRef
+    (ctx: Context)
+    (model: ShapeModel)
+    (self: string option)
+    (owner: string)
+    (facts: TypeFacts)
+    : FsTypeRef * Finding list =
     let binding =
         facts.Response.IndexType
         |> ValueOption.toOption
@@ -1233,7 +1337,10 @@ and internal indexedAccessRef (model: ShapeModel) (owner: string) (facts: TypeFa
 
     match binding, objectName with
     | Some(TypedKeyOf(operand, result)), Some name when operand = name -> FsTypeVar result, []
-    | _ -> FsObj, [ Finding.make owner TypeReference.IndexedAccessNoForm ]
+    | _ ->
+        match indexedAccessValues model facts with
+        | Some values -> erasedUnionRef ctx model self owner values
+        | None -> FsObj, [ Finding.make owner TypeReference.IndexedAccessNoForm ]
 
 /// An array-shaped type as an F# array over its element. The members an intersection's other
 /// operands contribute are reported as dropped.

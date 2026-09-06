@@ -329,13 +329,13 @@ type WorkerGlobalScope =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener)
     /// </summary>
-    abstract addEventListener<'Type>: ``type``: 'Type * handler: U2<(obj -> unit), EventListenerObject<Event>> * ?options: U2<bool, EventTargetAddEventListenerOptions> -> unit
+    abstract addEventListener<'Type>: ``type``: 'Type * handler: U2<(U4<FetchEvent, QueueEvent<obj>, PromiseRejectionEvent, ScheduledEvent> -> unit), EventListenerObject<Event>> * ?options: U2<bool, EventTargetAddEventListenerOptions> -> unit
     /// <summary>
     /// The **<c>removeEventListener()</c>** method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener)
     /// </summary>
-    abstract removeEventListener<'Type>: ``type``: 'Type * handler: U2<(obj -> unit), EventListenerObject<Event>> * ?options: U2<bool, EventTargetEventListenerOptions> -> unit
+    abstract removeEventListener<'Type>: ``type``: 'Type * handler: U2<(U4<FetchEvent, QueueEvent<obj>, PromiseRejectionEvent, ScheduledEvent> -> unit), EventListenerObject<Event>> * ?options: U2<bool, EventTargetEventListenerOptions> -> unit
     /// <summary>
     /// The **<c>dispatchEvent()</c>** method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
     ///
@@ -343,7 +343,7 @@ type WorkerGlobalScope =
     /// </summary>
     abstract dispatchEvent: ``event``: U4<FetchEvent, PromiseRejectionEvent, QueueEvent<obj>, ScheduledEvent> -> bool
     [<ParamObject; Emit("$0")>]
-    static member Create (EventTarget: EventTargetConstructor, addEventListener: Action<'Type, U2<(obj -> unit), EventListenerObject<Event>>, U2<bool, EventTargetAddEventListenerOptions> option>, removeEventListener: Action<'Type, U2<(obj -> unit), EventListenerObject<Event>>, U2<bool, EventTargetEventListenerOptions> option>, dispatchEvent: (U4<FetchEvent, PromiseRejectionEvent, QueueEvent<obj>, ScheduledEvent> -> bool)) : WorkerGlobalScope = jsNative
+    static member Create (EventTarget: EventTargetConstructor, addEventListener: Action<'Type, U2<(U4<FetchEvent, QueueEvent<obj>, PromiseRejectionEvent, ScheduledEvent> -> unit), EventListenerObject<Event>>, U2<bool, EventTargetAddEventListenerOptions> option>, removeEventListener: Action<'Type, U2<(U4<FetchEvent, QueueEvent<obj>, PromiseRejectionEvent, ScheduledEvent> -> unit), EventListenerObject<Event>>, U2<bool, EventTargetEventListenerOptions> option>, dispatchEvent: (U4<FetchEvent, PromiseRejectionEvent, QueueEvent<obj>, ScheduledEvent> -> bool)) : WorkerGlobalScope = jsNative
 
 [<Interface>]
 type Console =
@@ -1022,13 +1022,13 @@ type ServiceWorkerGlobalScope =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener)
     /// </summary>
-    abstract addEventListener<'Type>: ``type``: 'Type * handler: U2<(obj -> unit), EventListenerObject<Event>> * ?options: U2<bool, EventTargetAddEventListenerOptions> -> unit
+    abstract addEventListener<'Type>: ``type``: 'Type * handler: U2<(U4<FetchEvent, QueueEvent<obj>, PromiseRejectionEvent, ScheduledEvent> -> unit), EventListenerObject<Event>> * ?options: U2<bool, EventTargetAddEventListenerOptions> -> unit
     /// <summary>
     /// The **<c>removeEventListener()</c>** method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener)
     /// </summary>
-    abstract removeEventListener<'Type>: ``type``: 'Type * handler: U2<(obj -> unit), EventListenerObject<Event>> * ?options: U2<bool, EventTargetEventListenerOptions> -> unit
+    abstract removeEventListener<'Type>: ``type``: 'Type * handler: U2<(U4<FetchEvent, QueueEvent<obj>, PromiseRejectionEvent, ScheduledEvent> -> unit), EventListenerObject<Event>> * ?options: U2<bool, EventTargetEventListenerOptions> -> unit
     /// <summary>
     /// The **<c>dispatchEvent()</c>** method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
     ///
@@ -2106,9 +2106,9 @@ type EventTarget<'EventMap when 'EventMap :> Event.CurrentTarget.Item> =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent)
     /// </summary>
-    abstract dispatchEvent: ``event``: obj -> bool
+    abstract dispatchEvent: ``event``: Event -> bool
     [<ParamObject; Emit("$0")>]
-    static member Create (addEventListener: Action<typekeyof<'EventMap, 'R>, U2<('R -> unit), EventListenerObject<Event>>, U2<bool, EventTargetAddEventListenerOptions> option>, removeEventListener: Action<typekeyof<'EventMap, 'R>, U2<('R -> unit), EventListenerObject<Event>>, U2<bool, EventTargetEventListenerOptions> option>, dispatchEvent: (obj -> bool)) : EventTarget<'EventMap> = jsNative
+    static member Create (addEventListener: Action<typekeyof<'EventMap, 'R>, U2<('R -> unit), EventListenerObject<Event>>, U2<bool, EventTargetAddEventListenerOptions> option>, removeEventListener: Action<typekeyof<'EventMap, 'R>, U2<('R -> unit), EventListenerObject<Event>>, U2<bool, EventTargetEventListenerOptions> option>, dispatchEvent: (Event -> bool)) : EventTarget<'EventMap> = jsNative
 
 [<Interface>]
 type EventTargetEventListenerOptions =
@@ -6450,13 +6450,13 @@ type WebSocket =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener)
     /// </summary>
-    abstract addEventListener<'Type>: ``type``: 'Type * handler: U2<(obj -> unit), EventListenerObject<Event>> * ?options: U2<bool, EventTargetAddEventListenerOptions> -> unit
+    abstract addEventListener<'Type>: ``type``: 'Type * handler: U2<(U4<CloseEvent, ErrorEvent, MessageEvent, Event> -> unit), EventListenerObject<Event>> * ?options: U2<bool, EventTargetAddEventListenerOptions> -> unit
     /// <summary>
     /// The **<c>removeEventListener()</c>** method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener)
     /// </summary>
-    abstract removeEventListener<'Type>: ``type``: 'Type * handler: U2<(obj -> unit), EventListenerObject<Event>> * ?options: U2<bool, EventTargetEventListenerOptions> -> unit
+    abstract removeEventListener<'Type>: ``type``: 'Type * handler: U2<(U4<CloseEvent, ErrorEvent, MessageEvent, Event> -> unit), EventListenerObject<Event>> * ?options: U2<bool, EventTargetEventListenerOptions> -> unit
     /// <summary>
     /// The **<c>dispatchEvent()</c>** method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
     ///
@@ -6464,7 +6464,7 @@ type WebSocket =
     /// </summary>
     abstract dispatchEvent: ``event``: U4<CloseEvent, ErrorEvent, Event, MessageEvent> -> bool
     [<ParamObject; Emit("$0")>]
-    static member Create (accept: (WebSocketAcceptOptions option -> unit), send: (U3<string, JS.ArrayBuffer, JS.ArrayBufferView> -> unit), close: Action<float option, string option>, serializeAttachment: (obj -> unit), deserializeAttachment: (unit -> obj), readyState: float, binaryType: WebSocket.BinaryType, addEventListener: Action<'Type, U2<(obj -> unit), EventListenerObject<Event>>, U2<bool, EventTargetAddEventListenerOptions> option>, removeEventListener: Action<'Type, U2<(obj -> unit), EventListenerObject<Event>>, U2<bool, EventTargetEventListenerOptions> option>, dispatchEvent: (U4<CloseEvent, ErrorEvent, Event, MessageEvent> -> bool), ?url: string, ?protocol: string, ?extensions: string) : WebSocket = jsNative
+    static member Create (accept: (WebSocketAcceptOptions option -> unit), send: (U3<string, JS.ArrayBuffer, JS.ArrayBufferView> -> unit), close: Action<float option, string option>, serializeAttachment: (obj -> unit), deserializeAttachment: (unit -> obj), readyState: float, binaryType: WebSocket.BinaryType, addEventListener: Action<'Type, U2<(U4<CloseEvent, ErrorEvent, MessageEvent, Event> -> unit), EventListenerObject<Event>>, U2<bool, EventTargetAddEventListenerOptions> option>, removeEventListener: Action<'Type, U2<(U4<CloseEvent, ErrorEvent, MessageEvent, Event> -> unit), EventListenerObject<Event>>, U2<bool, EventTargetEventListenerOptions> option>, dispatchEvent: (U4<CloseEvent, ErrorEvent, Event, MessageEvent> -> bool), ?url: string, ?protocol: string, ?extensions: string) : WebSocket = jsNative
 
 type WebSocketConstructor =
     abstract READY_STATE_CONNECTING: float
@@ -29547,9 +29547,9 @@ type Exports =
     [<Global("WebAssembly")>]
     static member WebAssembly: WebAssembly = jsNative
     [<Global("addEventListener")>]
-    static member addEventListener<'Type> (``type``: 'Type, handler: U2<(obj -> unit), EventListenerObject<Event>>, ?options: U2<bool, EventTargetAddEventListenerOptions>) : unit = jsNative
+    static member addEventListener<'Type> (``type``: 'Type, handler: U2<(U4<FetchEvent, QueueEvent<obj>, PromiseRejectionEvent, ScheduledEvent> -> unit), EventListenerObject<Event>>, ?options: U2<bool, EventTargetAddEventListenerOptions>) : unit = jsNative
     [<Global("removeEventListener")>]
-    static member removeEventListener<'Type> (``type``: 'Type, handler: U2<(obj -> unit), EventListenerObject<Event>>, ?options: U2<bool, EventTargetEventListenerOptions>) : unit = jsNative
+    static member removeEventListener<'Type> (``type``: 'Type, handler: U2<(U4<FetchEvent, QueueEvent<obj>, PromiseRejectionEvent, ScheduledEvent> -> unit), EventListenerObject<Event>>, ?options: U2<bool, EventTargetEventListenerOptions>) : unit = jsNative
     /// <summary>
     /// The **<c>dispatchEvent()</c>** method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
     ///

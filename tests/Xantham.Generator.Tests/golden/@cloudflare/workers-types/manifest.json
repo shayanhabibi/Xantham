@@ -51,10 +51,10 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 7990,
+      "total": 7985,
       "exact": 98,
       "ergonomic": 7233,
-      "widened": 508,
+      "widened": 503,
       "escape": 151
     },
     {

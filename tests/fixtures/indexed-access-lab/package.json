@@ -1,0 +1,6 @@
+{
+    "name": "indexed-access-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "description": "Hand-authored fixture pinning indexed access over an operand the run can enumerate - `Concrete[K]` under `K extends keyof Concrete`, `EventMap[keyof EventMap]` over a bounded parameter, a value union past the erased-union cap, and the two boundary shapes that stay widened. Tracked in git, no npm install, so the goldens pin every shape under the live compiler."
+}
