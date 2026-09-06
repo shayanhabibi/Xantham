@@ -66,7 +66,7 @@ module DurationKeyframes =
         inherit TweenParamsOptions
         abstract duration: TweenParamValue option with get, set
         abstract delay: TweenParamValue option with get, set
-        abstract ease: obj option with get, set
+        abstract ease: U5<string, EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister> option with get, set
         abstract modifier: TweenModifier option with get, set
         abstract composition: TweenComposition option with get, set
         [<EmitIndexer>]
@@ -994,15 +994,15 @@ type LayoutSnapshot =
     [<ParamObject; Emit("$0")>]
     static member Create (layout: AutoLayout, rootNodes: JS.Set<LayoutNode>, nodes: JS.Map<string, LayoutNode>, scrollX: float, scrollY: float, revert: (unit -> LayoutSnapshot), getNode: (DOMTarget -> LayoutNode), getComputedValue: Func<DOMTarget, string, TimelinePosition>, forEach: Action<LayoutNode option, LayoutNodeIterator>, forEachRootNode: (LayoutNodeIterator -> unit), forEachNode: (LayoutNodeIterator -> unit), registerElement: Func<DOMTarget, LayoutNode option, LayoutNode option>, ensureDetachedNode: Func<DOMTarget, JS.Set<DOMTarget>, LayoutNode option>, record: (unit -> LayoutSnapshot), ?rootNode: LayoutNode) : LayoutSnapshot = jsNative
 
-type LayoutChildrenParam = obj
+type LayoutChildrenParam = U5<string, DOMTargetSelector[], Browser.Types.HTMLElement, Browser.Types.NodeList, Browser.Types.SVGElement>
 
 [<Interface>]
 type LayoutAnimationTimingsParams =
     abstract delay: U2<float, AutoLayoutParams.Ease> option with get, set
     abstract duration: U2<float, AutoLayoutParams.Ease> option with get, set
-    abstract ease: obj option with get, set
+    abstract ease: U5<string, EasingFunction, AutoLayoutParams.Ease, Spring, TweakRegister> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?delay: U2<float, AutoLayoutParams.Ease>, ?duration: U2<float, AutoLayoutParams.Ease>, ?ease: obj) : LayoutAnimationTimingsParams = jsNative
+    static member Create (?delay: U2<float, AutoLayoutParams.Ease>, ?duration: U2<float, AutoLayoutParams.Ease>, ?ease: U5<string, EasingFunction, AutoLayoutParams.Ease, Spring, TweakRegister>) : LayoutAnimationTimingsParams = jsNative
 
 type LayoutStateAnimationProperties =
     [<EmitIndexer>]
@@ -1013,7 +1013,7 @@ type LayoutStateParams =
     inherit LayoutAnimationTimingsParams
     abstract delay: U2<float, AutoLayoutParams.Ease> option with get, set
     abstract duration: U2<float, AutoLayoutParams.Ease> option with get, set
-    abstract ease: obj option with get, set
+    abstract ease: U5<string, EasingFunction, AutoLayoutParams.Ease, Spring, TweakRegister> option with get, set
     [<EmitIndexer>]
     abstract Item: string -> U3<string, float, AutoLayoutParams.Ease> with get, set
 
@@ -1022,13 +1022,13 @@ type LayoutSpecificAnimationParams =
     abstract id: TimelinePosition option with get, set
     abstract delay: U2<float, AutoLayoutParams.Ease> option with get, set
     abstract duration: U2<float, AutoLayoutParams.Ease> option with get, set
-    abstract ease: obj option with get, set
+    abstract ease: U5<string, EasingFunction, AutoLayoutParams.Ease, Spring, TweakRegister> option with get, set
     abstract playbackEase: EasingParam option with get, set
     abstract swapAt: LayoutStateParams option with get, set
     abstract enterFrom: LayoutStateParams option with get, set
     abstract leaveTo: LayoutStateParams option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?id: TimelinePosition, ?delay: U2<float, AutoLayoutParams.Ease>, ?duration: U2<float, AutoLayoutParams.Ease>, ?ease: obj, ?playbackEase: EasingParam, ?swapAt: LayoutStateParams, ?enterFrom: LayoutStateParams, ?leaveTo: LayoutStateParams) : LayoutSpecificAnimationParams = jsNative
+    static member Create (?id: TimelinePosition, ?delay: U2<float, AutoLayoutParams.Ease>, ?duration: U2<float, AutoLayoutParams.Ease>, ?ease: U5<string, EasingFunction, AutoLayoutParams.Ease, Spring, TweakRegister>, ?playbackEase: EasingParam, ?swapAt: LayoutStateParams, ?enterFrom: LayoutStateParams, ?leaveTo: LayoutStateParams) : LayoutSpecificAnimationParams = jsNative
 
 [<Interface>]
 type LayoutAnimationParams =
@@ -1037,7 +1037,7 @@ type LayoutAnimationParams =
     abstract id: TimelinePosition option with get, set
     abstract delay: obj option with get, set
     abstract duration: obj option with get, set
-    abstract ease: obj option with get, set
+    abstract ease: U5<string, EasingFunction, AutoLayoutParams.Ease, Spring, TweakRegister> option with get, set
     abstract playbackEase: EasingParam option with get, set
     abstract swapAt: LayoutStateParams option with get, set
     abstract enterFrom: LayoutStateParams option with get, set
@@ -1058,7 +1058,7 @@ type LayoutAnimationParams =
     abstract onComplete: (Timer -> obj) option with get, set
     abstract onRender: (Timeline -> obj) option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?id: TimelinePosition, ?delay: obj, ?duration: obj, ?ease: obj, ?playbackEase: EasingParam, ?swapAt: LayoutStateParams, ?enterFrom: LayoutStateParams, ?leaveTo: LayoutStateParams, ?loopDelay: float, ?reversed: bool, ?alternate: bool, ?loop: U2<float, bool>, ?autoplay: U2<bool, ScrollObserver>, ?frameRate: float, ?playbackRate: float, ?priority: float, ?onBegin: (Timer -> obj), ?onBeforeUpdate: (Timer -> obj), ?onUpdate: (Timer -> obj), ?onLoop: (Timer -> obj), ?onPause: (Timer -> obj), ?onComplete: (Timer -> obj), ?onRender: (Timeline -> obj)) : LayoutAnimationParams = jsNative
+    static member Create (?id: TimelinePosition, ?delay: obj, ?duration: obj, ?ease: U5<string, EasingFunction, AutoLayoutParams.Ease, Spring, TweakRegister>, ?playbackEase: EasingParam, ?swapAt: LayoutStateParams, ?enterFrom: LayoutStateParams, ?leaveTo: LayoutStateParams, ?loopDelay: float, ?reversed: bool, ?alternate: bool, ?loop: U2<float, bool>, ?autoplay: U2<bool, ScrollObserver>, ?frameRate: float, ?playbackRate: float, ?priority: float, ?onBegin: (Timer -> obj), ?onBeforeUpdate: (Timer -> obj), ?onUpdate: (Timer -> obj), ?onLoop: (Timer -> obj), ?onPause: (Timer -> obj), ?onComplete: (Timer -> obj), ?onRender: (Timeline -> obj)) : LayoutAnimationParams = jsNative
 
 [<Interface>]
 type LayoutOptions =
@@ -1074,7 +1074,7 @@ type AutoLayoutParams =
     abstract id: TimelinePosition option with get, set
     abstract delay: obj option with get, set
     abstract duration: obj option with get, set
-    abstract ease: obj option with get, set
+    abstract ease: U5<string, EasingFunction, AutoLayoutParams.Ease, Spring, TweakRegister> option with get, set
     abstract playbackEase: EasingParam option with get, set
     abstract swapAt: LayoutStateParams option with get, set
     abstract enterFrom: LayoutStateParams option with get, set
@@ -1804,7 +1804,7 @@ type DefaultsParams =
     abstract duration: U2<float, DurationKeyframes.Item.Duration> option with get, set
     abstract delay: U2<float, DurationKeyframes.Item.Duration> option with get, set
     abstract loopDelay: float option with get, set
-    abstract ease: obj option with get, set
+    abstract ease: U5<string, EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister> option with get, set
     abstract composition: U2<float, string> option with get, set
     abstract modifier: (obj -> obj) option with get, set
     abstract onBegin: (Tickable -> obj) option with get, set
@@ -1815,7 +1815,7 @@ type DefaultsParams =
     abstract onComplete: (Tickable -> obj) option with get, set
     abstract onRender: (Renderable -> obj) option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?id: TimelinePosition, ?keyframes: U2<DurationKeyframes.Item[], PercentageKeyframes>, ?playbackEase: EasingParam, ?playbackRate: float, ?frameRate: float, ?loop: U2<float, bool>, ?reversed: bool, ?alternate: bool, ?persist: bool, ?autoplay: U2<bool, ScrollObserver>, ?duration: U2<float, DurationKeyframes.Item.Duration>, ?delay: U2<float, DurationKeyframes.Item.Duration>, ?loopDelay: float, ?ease: obj, ?composition: U2<float, string>, ?modifier: (obj -> obj), ?onBegin: (Tickable -> obj), ?onBeforeUpdate: (Tickable -> obj), ?onUpdate: (Tickable -> obj), ?onLoop: (Tickable -> obj), ?onPause: (Tickable -> obj), ?onComplete: (Tickable -> obj), ?onRender: (Renderable -> obj)) : DefaultsParams = jsNative
+    static member Create (?id: TimelinePosition, ?keyframes: U2<DurationKeyframes.Item[], PercentageKeyframes>, ?playbackEase: EasingParam, ?playbackRate: float, ?frameRate: float, ?loop: U2<float, bool>, ?reversed: bool, ?alternate: bool, ?persist: bool, ?autoplay: U2<bool, ScrollObserver>, ?duration: U2<float, DurationKeyframes.Item.Duration>, ?delay: U2<float, DurationKeyframes.Item.Duration>, ?loopDelay: float, ?ease: U5<string, EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister>, ?composition: U2<float, string>, ?modifier: (obj -> obj), ?onBegin: (Tickable -> obj), ?onBeforeUpdate: (Tickable -> obj), ?onUpdate: (Tickable -> obj), ?onLoop: (Tickable -> obj), ?onPause: (Tickable -> obj), ?onComplete: (Tickable -> obj), ?onRender: (Renderable -> obj)) : DefaultsParams = jsNative
 
 type Renderable = U2<JSAnimation, Timeline>
 
@@ -3025,11 +3025,11 @@ type JSTarget =
 
 type Target = U3<Browser.Types.HTMLElement, JSTarget, Browser.Types.SVGElement>
 
-type TargetSelector = obj
+type TargetSelector = U5<string, Browser.Types.HTMLElement, JSTarget, Browser.Types.NodeList, Browser.Types.SVGElement>
 
 type DOMTargetSelector = U4<string, Browser.Types.HTMLElement, Browser.Types.NodeList, Browser.Types.SVGElement>
 
-type DOMTargetsParam = obj
+type DOMTargetsParam = U5<string, DOMTargetSelector[], Browser.Types.HTMLElement, Browser.Types.NodeList, Browser.Types.SVGElement>
 
 type DOMTargetsArray = DOMTarget[]
 
@@ -3037,7 +3037,7 @@ type JSTargetsParam = U2<JSTarget[], JSTarget>
 
 type JSTargetsArray = JSTarget[]
 
-type TargetsParam = obj
+type TargetsParam = U6<string, TargetSelector[], Browser.Types.HTMLElement, JSTarget, Browser.Types.NodeList, Browser.Types.SVGElement>
 
 type TargetsArray = Target[]
 
@@ -3205,7 +3205,7 @@ type TimerParams =
     [<ParamObject; Emit("$0")>]
     static member Create (?id: TimelinePosition, ?duration: TweenParamValue, ?delay: TweenParamValue, ?loopDelay: float, ?reversed: bool, ?alternate: bool, ?loop: U2<float, bool>, ?autoplay: U2<bool, ScrollObserver>, ?frameRate: float, ?playbackRate: float, ?priority: float, ?onBegin: (Timer -> obj), ?onBeforeUpdate: (Timer -> obj), ?onUpdate: (Timer -> obj), ?onLoop: (Timer -> obj), ?onPause: (Timer -> obj), ?onComplete: (Timer -> obj)) : TimerParams = jsNative
 
-type FunctionValueReturn = obj
+type FunctionValueReturn = U7<string, float, U3<string, float, TweenKeyValue>[], EasingFunction, Spring, TweakRegister, TweenKeyValue>
 
 type FunctionValue<'T> = delegate of target: Target option * index: float option * targets: Target[] option * prevTween: Tween option -> 'T
 
@@ -3299,9 +3299,9 @@ type TweenReplaceLookups = JS.WeakMap<Target, TweenLookups>
 
 type TweenAdditiveLookups = JS.Map<Target, TweenLookups>
 
-type TweenParamValue = obj
+type TweenParamValue = U6<string, float, EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister>
 
-type TweenPropValue = obj
+type TweenPropValue = U7<string, float, EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister, (TweenParamValue * TweenParamValue)>
 
 type TweenComposition = U2<float, string>
 
@@ -3309,11 +3309,11 @@ type TweenComposition = U2<float, string>
 type TweenParamsOptions =
     abstract duration: TweenParamValue option with get, set
     abstract delay: TweenParamValue option with get, set
-    abstract ease: obj option with get, set
+    abstract ease: U5<string, EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister> option with get, set
     abstract modifier: TweenModifier option with get, set
     abstract composition: TweenComposition option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?duration: TweenParamValue, ?delay: TweenParamValue, ?ease: obj, ?modifier: TweenModifier, ?composition: TweenComposition) : TweenParamsOptions = jsNative
+    static member Create (?duration: TweenParamValue, ?delay: TweenParamValue, ?ease: U5<string, EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister>, ?modifier: TweenModifier, ?composition: TweenComposition) : TweenParamsOptions = jsNative
 
 [<Interface>]
 type TweenValues =
@@ -3329,26 +3329,26 @@ type TweenKeyValue =
     inherit TweenValues
     abstract duration: TweenParamValue option with get, set
     abstract delay: TweenParamValue option with get, set
-    abstract ease: obj option with get, set
+    abstract ease: U5<string, EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister> option with get, set
     abstract modifier: TweenModifier option with get, set
     abstract composition: TweenComposition option with get, set
     abstract from: TweenParamValue option with get, set
     abstract ``to``: TweenPropValue option with get, set
     abstract fromTo: TweenPropValue option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?duration: TweenParamValue, ?delay: TweenParamValue, ?ease: obj, ?modifier: TweenModifier, ?composition: TweenComposition, ?from: TweenParamValue, ?``to``: TweenPropValue, ?fromTo: TweenPropValue) : TweenKeyValue = jsNative
+    static member Create (?duration: TweenParamValue, ?delay: TweenParamValue, ?ease: U5<string, EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister>, ?modifier: TweenModifier, ?composition: TweenComposition, ?from: TweenParamValue, ?``to``: TweenPropValue, ?fromTo: TweenPropValue) : TweenKeyValue = jsNative
 
-type ArraySyntaxValue = obj[]
+type ArraySyntaxValue = U8<string, float, EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister, (TweenParamValue * TweenParamValue), TweenKeyValue>[]
 
-type TweenOptions = obj
+type TweenOptions = U8<string, float, U8<string, float, EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister, (TweenParamValue * TweenParamValue), TweenKeyValue>[], EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister, TweenKeyValue>
 
 [<Interface>]
 type TweenObjectValue =
-    abstract ``to``: obj option with get, set
-    abstract from: obj option with get, set
-    abstract fromTo: obj option with get, set
+    abstract ``to``: U7<string, float, TweenParamValue[], EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister> option with get, set
+    abstract from: U7<string, float, TweenParamValue[], EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister> option with get, set
+    abstract fromTo: U7<string, float, TweenParamValue[], EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?``to``: obj, ?from: obj, ?fromTo: obj) : TweenObjectValue = jsNative
+    static member Create (?``to``: U7<string, float, TweenParamValue[], EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister>, ?from: U7<string, float, TweenParamValue[], EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister>, ?fromTo: U7<string, float, TweenParamValue[], EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister>) : TweenObjectValue = jsNative
 
 [<Interface>]
 type PercentageKeyframeOptions =
@@ -3390,7 +3390,7 @@ type AnimationParams =
     abstract priority: float option with get, set
     abstract keyframes: U2<DurationKeyframes.Item[], PercentageKeyframes> option with get, set
     abstract playbackEase: EasingParam option with get, set
-    abstract ease: obj option with get, set
+    abstract ease: U5<string, EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister> option with get, set
     abstract modifier: TweenModifier option with get, set
     abstract composition: TweenComposition option with get, set
     abstract onBegin: (JSAnimation -> obj) option with get, set
@@ -3468,9 +3468,9 @@ type TimelineParams =
 
 type WAAPITweenValue = U4<string, float, string[], float[]>
 
-type WAAPIFunctionValue = delegate of target: DOMTarget * index: float * targets: DOMTarget[] -> obj
+type WAAPIFunctionValue = delegate of target: DOMTarget * index: float * targets: DOMTarget[] -> U7<string, float, string[], float[], EasingFunction, Spring, TweakRegister>
 
-type WAAPIKeyframeValue = obj
+type WAAPIKeyframeValue = U6<string, float, U3<string, float, WAAPIFunctionValue>[], string[], float[], WAAPIFunctionValue>
 
 [<Interface>]
 type WAAPITweenOptions =
@@ -3499,12 +3499,12 @@ type WAAPIAnimationOptions =
     abstract playbackRate: float option with get, set
     abstract duration: U2<float, WAAPIFunctionValue> option with get, set
     abstract delay: U2<float, WAAPIFunctionValue> option with get, set
-    abstract ease: obj option with get, set
+    abstract ease: U5<string, EasingFunction, Spring, TweakRegister, WAAPIFunctionValue> option with get, set
     abstract composition: WAAPITweenOptions.Composition option with get, set
     abstract persist: bool option with get, set
     abstract onComplete: (WAAPIAnimation -> obj) option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?loop: U2<float, bool>, ?Reversed: bool, ?Alternate: bool, ?autoplay: U2<bool, ScrollObserver>, ?playbackRate: float, ?duration: U2<float, WAAPIFunctionValue>, ?delay: U2<float, WAAPIFunctionValue>, ?ease: obj, ?composition: WAAPITweenOptions.Composition, ?persist: bool, ?onComplete: (WAAPIAnimation -> obj)) : WAAPIAnimationOptions = jsNative
+    static member Create (?loop: U2<float, bool>, ?Reversed: bool, ?Alternate: bool, ?autoplay: U2<bool, ScrollObserver>, ?playbackRate: float, ?duration: U2<float, WAAPIFunctionValue>, ?delay: U2<float, WAAPIFunctionValue>, ?ease: U5<string, EasingFunction, Spring, TweakRegister, WAAPIFunctionValue>, ?composition: WAAPITweenOptions.Composition, ?persist: bool, ?onComplete: (WAAPIAnimation -> obj)) : WAAPIAnimationOptions = jsNative
 
 type WAAPIAnimationParams =
     inherit WAAPIAnimationOptions
@@ -3515,7 +3515,7 @@ type WAAPIAnimationParams =
     abstract playbackRate: float option with get, set
     abstract duration: U2<float, WAAPIFunctionValue> option with get, set
     abstract delay: U2<float, WAAPIFunctionValue> option with get, set
-    abstract ease: obj option with get, set
+    abstract ease: U5<string, EasingFunction, Spring, TweakRegister, WAAPIFunctionValue> option with get, set
     abstract composition: WAAPITweenOptions.Composition option with get, set
     abstract persist: bool option with get, set
     abstract onComplete: (WAAPIAnimation -> obj) option with get, set
@@ -3564,7 +3564,7 @@ type AnimatableParams =
     abstract onComplete: (JSAnimation -> obj) option with get, set
     abstract onRender: (JSAnimation -> obj) option with get, set
     [<EmitIndexer>]
-    abstract Item: string -> obj with get, set
+    abstract Item: string -> U9<string, float, AnimatablePropertyParamsOptions, EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister, TweenModifier, (JSAnimation -> obj)> with get, set
 
 [<Interface>]
 type ReactRef =
@@ -3580,11 +3580,11 @@ type AngularRef =
 
 [<Interface>]
 type ScopeParams =
-    abstract root: obj option with get, set
+    abstract root: U6<string, AngularRef, Browser.Types.HTMLElement, Browser.Types.NodeList, ReactRef, Browser.Types.SVGElement> option with get, set
     abstract defaults: DefaultsParams option with get, set
     abstract mediaQueries: ScopeParams.MediaQueries option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?root: obj, ?defaults: DefaultsParams, ?mediaQueries: ScopeParams.MediaQueries) : ScopeParams = jsNative
+    static member Create (?root: U6<string, AngularRef, Browser.Types.HTMLElement, Browser.Types.NodeList, ReactRef, Browser.Types.SVGElement>, ?defaults: DefaultsParams, ?mediaQueries: ScopeParams.MediaQueries) : ScopeParams = jsNative
 
 type ScopedCallback<'T> = (Scope -> 'T)
 
@@ -3610,12 +3610,12 @@ type ScrollThresholdCallback = (ScrollObserver -> U3<string, float, ScrollThresh
 [<Interface>]
 type ScrollObserverParams =
     abstract id: TimelinePosition option with get, set
-    abstract sync: obj option with get, set
+    abstract sync: U6<string, float, bool, EasingFunction, Spring, TweakRegister> option with get, set
     abstract container: TargetsParam option with get, set
     abstract target: TargetsParam option with get, set
     abstract axis: U3<string, ScrollObserverAxisCallback, (ScrollObserver -> U2<string, ScrollObserverAxisCallback>)> option with get, set
-    abstract enter: obj option with get, set
-    abstract leave: obj option with get, set
+    abstract enter: U5<string, float, ScrollThresholdCallback, ScrollThresholdParam, (ScrollObserver -> U4<string, float, ScrollThresholdCallback, ScrollThresholdParam>)> option with get, set
+    abstract leave: U5<string, float, ScrollThresholdCallback, ScrollThresholdParam, (ScrollObserver -> U4<string, float, ScrollThresholdCallback, ScrollThresholdParam>)> option with get, set
     abstract repeat: U2<bool, (ScrollObserver -> bool)> option with get, set
     abstract debug: bool option with get, set
     abstract onEnter: (ScrollObserver -> obj) option with get, set
@@ -3628,7 +3628,7 @@ type ScrollObserverParams =
     abstract onResize: (ScrollObserver -> obj) option with get, set
     abstract onSyncComplete: (ScrollObserver -> obj) option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?id: TimelinePosition, ?sync: obj, ?container: TargetsParam, ?target: TargetsParam, ?axis: U3<string, ScrollObserverAxisCallback, (ScrollObserver -> U2<string, ScrollObserverAxisCallback>)>, ?enter: obj, ?leave: obj, ?repeat: U2<bool, (ScrollObserver -> bool)>, ?debug: bool, ?onEnter: (ScrollObserver -> obj), ?onLeave: (ScrollObserver -> obj), ?onEnterForward: (ScrollObserver -> obj), ?onLeaveForward: (ScrollObserver -> obj), ?onEnterBackward: (ScrollObserver -> obj), ?onLeaveBackward: (ScrollObserver -> obj), ?onUpdate: (ScrollObserver -> obj), ?onResize: (ScrollObserver -> obj), ?onSyncComplete: (ScrollObserver -> obj)) : ScrollObserverParams = jsNative
+    static member Create (?id: TimelinePosition, ?sync: U6<string, float, bool, EasingFunction, Spring, TweakRegister>, ?container: TargetsParam, ?target: TargetsParam, ?axis: U3<string, ScrollObserverAxisCallback, (ScrollObserver -> U2<string, ScrollObserverAxisCallback>)>, ?enter: U5<string, float, ScrollThresholdCallback, ScrollThresholdParam, (ScrollObserver -> U4<string, float, ScrollThresholdCallback, ScrollThresholdParam>)>, ?leave: U5<string, float, ScrollThresholdCallback, ScrollThresholdParam, (ScrollObserver -> U4<string, float, ScrollThresholdCallback, ScrollThresholdParam>)>, ?repeat: U2<bool, (ScrollObserver -> bool)>, ?debug: bool, ?onEnter: (ScrollObserver -> obj), ?onLeave: (ScrollObserver -> obj), ?onEnterForward: (ScrollObserver -> obj), ?onLeaveForward: (ScrollObserver -> obj), ?onEnterBackward: (ScrollObserver -> obj), ?onLeaveBackward: (ScrollObserver -> obj), ?onUpdate: (ScrollObserver -> obj), ?onResize: (ScrollObserver -> obj), ?onSyncComplete: (ScrollObserver -> obj)) : ScrollObserverParams = jsNative
 
 [<Interface>]
 type DraggableAxisParam =
@@ -3655,7 +3655,7 @@ type DraggableDragThresholdParams =
 
 type DraggableParams =
     abstract trigger: DOMTargetSelector option with get, set
-    abstract container: obj option with get, set
+    abstract container: U6<string, float[], Browser.Types.HTMLElement, Browser.Types.NodeList, Browser.Types.SVGElement, (Draggable -> U5<string, float[], Browser.Types.HTMLElement, Browser.Types.NodeList, Browser.Types.SVGElement>)> option with get, set
     abstract x: U2<bool, DraggableAxisParam> option with get, set
     abstract y: U2<bool, DraggableAxisParam> option with get, set
     abstract modifier: TweenModifier option with get, set
@@ -5594,6 +5594,20 @@ type Exports =
     /// <remarks>@param targets</remarks>
     [<Import("$", "animejs")>]
     static member ``$`` (targets: JSTargetsParam) : JSTarget[] = jsNative
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@param targets</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@param targets</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@overload</remarks>
+    /// <remarks>@param targets</remarks>
+    [<Import("$", "animejs")>]
+    static member ``$`` (targets: TargetsParam) : Target[] = jsNative
     [<Import("Draggable", "animejs"); EmitConstructor>]
     static member Draggable (target: TargetsParam, ?parameters: DraggableParams) : Draggable = jsNative
     [<Import("createDraggable", "animejs")>]

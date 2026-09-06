@@ -95,7 +95,7 @@ type Subject = U2<Timer, TimerOptions>
 /// <summary>
 /// Wider than the erased-union arity, so it widens to obj.
 /// </summary>
-type Anything = obj
+type Anything = U5<string, float, bool, Timer, TimerOptions>
 
 /// <summary>
 /// One arm of a discriminated union.

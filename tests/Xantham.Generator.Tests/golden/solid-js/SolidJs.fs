@@ -9,7 +9,7 @@ open Fable.Core
 open Fable.Core.JsInterop
 open Xantham.Fable.Core
 
-type JSXElement = obj option
+type JSXElement = U5<float, bool, obj[], Browser.Types.Node, string> option
 
 [<Interface>]
 type Computation<'Init, 'Next> =
@@ -343,8 +343,7 @@ type Refreshing<'T> =
     [<ParamObject; Emit("$0")>]
     static member Create (state: string, loading: bool, latest: 'T) : Refreshing<'T> = jsNative
 
-[<Erase>]
-type Resource<'T> = private Resource__ of obj
+type Resource<'T> = U5<Errored, Pending, Ready<'T>, Refreshing<'T>, Unresolved>
 
 [<Interface>]
 type Unresolved =
@@ -431,7 +430,7 @@ module InitializedResourceOptions =
             static member Create (?value: 'T) : Info<'T> = jsNative
 
 [<Erase>]
-type ResourceReturn<'T, 'R> = private ResourceReturn__ of obj * obj
+type ResourceReturn<'T, 'R> = private ResourceReturn__ of U5<Errored, Pending, Ready<'T>, Refreshing<'T>, Unresolved> * obj
 
 module ResourceReturn =
     [<Interface>]
@@ -668,7 +667,7 @@ module Context =
 
 type ResolvedJSXElement = U4<float, bool, Browser.Types.Node, string> option
 
-type ResolvedChildren = obj option
+type ResolvedChildren = U5<float, bool, ResolvedJSXElement option[], Browser.Types.Node, string> option
 
 [<Interface>]
 type ChildrenReturn =
@@ -793,18 +792,18 @@ module Show =
         abstract ``when``: U2<bool, 'T> option with get, set
         abstract keyed: bool option with get, set
         abstract fallback: JSXElement option with get, set
-        abstract children: obj option with get, set
+        abstract children: U6<float, bool, JSXElement option[], Browser.Types.Node, 'TRenderFunction, string> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?``when``: U2<bool, 'T>, ?keyed: bool, ?fallback: JSXElement, ?children: obj) : Props<'T, 'TRenderFunction> = jsNative
+        static member Create (?``when``: U2<bool, 'T>, ?keyed: bool, ?fallback: JSXElement, ?children: U6<float, bool, JSXElement option[], Browser.Types.Node, 'TRenderFunction, string>) : Props<'T, 'TRenderFunction> = jsNative
 
     [<Interface>]
     type Props2<'T, 'TRenderFunction> =
         abstract ``when``: U2<bool, 'T> option with get, set
         abstract keyed: bool with get, set
         abstract fallback: JSXElement option with get, set
-        abstract children: obj option with get, set
+        abstract children: U6<float, bool, JSXElement option[], Browser.Types.Node, 'TRenderFunction, string> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (keyed: bool, ?``when``: U2<bool, 'T>, ?fallback: JSXElement, ?children: obj) : Props2<'T, 'TRenderFunction> = jsNative
+        static member Create (keyed: bool, ?``when``: U2<bool, 'T>, ?fallback: JSXElement, ?children: U6<float, bool, JSXElement option[], Browser.Types.Node, 'TRenderFunction, string>) : Props2<'T, 'TRenderFunction> = jsNative
 
 module Switch =
     [<Interface>]
@@ -818,34 +817,34 @@ module Switch =
 type MatchProps<'T> =
     abstract ``when``: U2<bool, 'T> option with get, set
     abstract keyed: bool option with get, set
-    abstract children: obj option with get, set
+    abstract children: U6<float, bool, JSXElement option[], Browser.Types.Node, (obj -> JSXElement option), string> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?``when``: U2<bool, 'T>, ?keyed: bool, ?children: obj) : MatchProps<'T> = jsNative
+    static member Create (?``when``: U2<bool, 'T>, ?keyed: bool, ?children: U6<float, bool, JSXElement option[], Browser.Types.Node, (obj -> JSXElement option), string>) : MatchProps<'T> = jsNative
 
 module Match =
     [<Interface>]
     type Props<'T, 'TRenderFunction> =
         abstract ``when``: U2<bool, 'T> option with get, set
         abstract keyed: bool option with get, set
-        abstract children: obj option with get, set
+        abstract children: U6<float, bool, JSXElement option[], Browser.Types.Node, 'TRenderFunction, string> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?``when``: U2<bool, 'T>, ?keyed: bool, ?children: obj) : Props<'T, 'TRenderFunction> = jsNative
+        static member Create (?``when``: U2<bool, 'T>, ?keyed: bool, ?children: U6<float, bool, JSXElement option[], Browser.Types.Node, 'TRenderFunction, string>) : Props<'T, 'TRenderFunction> = jsNative
 
     [<Interface>]
     type Props2<'T, 'TRenderFunction> =
         abstract ``when``: U2<bool, 'T> option with get, set
         abstract keyed: bool with get, set
-        abstract children: obj option with get, set
+        abstract children: U6<float, bool, JSXElement option[], Browser.Types.Node, 'TRenderFunction, string> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (keyed: bool, ?``when``: U2<bool, 'T>, ?children: obj) : Props2<'T, 'TRenderFunction> = jsNative
+        static member Create (keyed: bool, ?``when``: U2<bool, 'T>, ?children: U6<float, bool, JSXElement option[], Browser.Types.Node, 'TRenderFunction, string>) : Props2<'T, 'TRenderFunction> = jsNative
 
 module ErrorBoundary =
     [<Interface>]
     type Props =
-        abstract fallback: obj option with get, set
+        abstract fallback: U6<float, bool, JSXElement option[], Browser.Types.Node, ErrorBoundary.Props.Fallback, string> option with get, set
         abstract children: JSXElement option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?fallback: obj, ?children: JSXElement) : Props = jsNative
+        static member Create (?fallback: U6<float, bool, JSXElement option[], Browser.Types.Node, ErrorBoundary.Props.Fallback, string>, ?children: JSXElement) : Props = jsNative
 
     module Props =
         type Fallback = delegate of err: obj * reset: (unit -> unit) -> JSXElement option
@@ -1232,7 +1231,7 @@ type Exports =
     /// </remarks>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-resource</remarks>
     [<Import("createResource", "solid-js")>]
-    static member createResource<'T> (fetcher: Func<bool, obj, U2<'T, JS.Promise<'T>>>, ?options: CreateResource.Options2) : obj * obj = jsNative
+    static member createResource<'T> (fetcher: Func<bool, obj, U2<'T, JS.Promise<'T>>>, ?options: CreateResource.Options2) : U5<Errored, Pending, Ready<'T>, Refreshing<'T>, Unresolved> * obj = jsNative
     /// <summary>
     /// Creates a resource that wraps a repeated promise in a reactive pattern:
     /// <code lang="typescript">
@@ -1300,7 +1299,7 @@ type Exports =
     /// </remarks>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-resource</remarks>
     [<Import("createResource", "solid-js")>]
-    static member createResource<'T, 'S> (source: U3<bool, 'S, (unit -> U2<bool, 'S> option)> option, fetcher: Func<'S, obj, U2<'T, JS.Promise<'T>>>, ?options: obj) : obj * obj = jsNative
+    static member createResource<'T, 'S> (source: U3<bool, 'S, (unit -> U2<bool, 'S> option)> option, fetcher: Func<'S, obj, U2<'T, JS.Promise<'T>>>, ?options: obj) : U5<Errored, Pending, Ready<'T>, Refreshing<'T>, Unresolved> * obj = jsNative
     /// <summary>
     /// Creates a reactive computation that only runs and notifies the reactive context when the browser is idle
     /// <code lang="typescript">

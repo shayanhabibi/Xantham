@@ -11,10 +11,10 @@
   "passes": [
     {
       "pass": "SA - shape-aliases",
-      "total": 12,
+      "total": 9,
       "exact": 4,
       "ergonomic": 1,
-      "widened": 7
+      "widened": 4
     },
     {
       "pass": "SP - synthesize-paramobjects",

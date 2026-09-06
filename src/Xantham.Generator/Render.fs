@@ -150,7 +150,7 @@ let rec private printTypeIn (atomic: bool) =
     | FsTuple components ->
         let text = components |> List.map (printTypeIn true) |> String.concat " * "
         if atomic then $"({text})" else text
-    // Fable's erased unions (D4): the arity names the type, so `U2`-`U4` need no threshold
+    // Fable's erased unions (D4): the arity names the type, so `U2`-`U9` need no threshold
     // check here - the shape tier never builds a wider one.
     | FsErasedUnion arms ->
         let text = arms |> List.map (printTypeIn true) |> String.concat ", "

@@ -4344,7 +4344,7 @@ type JsonPrimitive = U3<string, float, bool> option
 /// </summary>
 /// <remarks>@see <c>Jsonify</c> if you need to transform a type to one that is assignable to <c>JsonValue</c>.</remarks>
 /// <remarks>@category JSON</remarks>
-type JsonValue = obj option
+type JsonValue = U5<string, float, bool, obj[], JsonObject> option
 
 /// <summary>
 /// Matches a value that can be losslessly converted to JSON.
@@ -4375,7 +4375,7 @@ type JsonValue = obj option
 /// </code>
 /// </remarks>
 /// <remarks>@category JSON</remarks>
-type Jsonifiable = obj option
+type Jsonifiable = U6<string, float, bool, obj[], Jsonifiable2, Jsonifiable2.Item> option
 
 type Jsonifiable2 =
     [<EmitIndexer>]

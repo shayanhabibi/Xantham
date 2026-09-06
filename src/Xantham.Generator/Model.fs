@@ -395,6 +395,13 @@ module Naming =
                 "AsyncIterator", ("JS.AsyncIterator", 1, None)
                 "AsyncGenerator", ("JS.AsyncGenerator", 1, None)
                 "IteratorResult", ("JS.IteratorResult", 1, None)
+                // `Fable.Core` has no name for the combined shape; `JS.AsyncIterable` carries
+                // only `Symbol.asyncIterator`, not the `next`/`return`/`throw` methods an
+                // iterator adds.
+                "AsyncIterableIterator",
+                ("JS.AsyncIterable",
+                 1,
+                 Some "AsyncIterableIterator reads as JS.AsyncIterable; its next/return/throw methods are not on it")
             ]
             |> Map.ofList
 
@@ -760,9 +767,9 @@ type FsTypeRef =
     /// mapping is exact. Optional tail elements arrive already `option`-wrapped, because the
     /// checker hands them over as `T | undefined`.
     | FsTuple of FsTypeRef list
-    /// A heterogeneous union as Fable's erased `U2`-`U4` (D4, §4.5(4)). The threshold is four;
-    /// wider unions widen to `obj`. Arms are distinct - a union whose arms collapse to one F#
-    /// type is that type instead.
+    /// A heterogeneous union as Fable's erased `U2`-`U9` (D4, §4.5(4)). Unions wider than nine
+    /// arms widen to `obj`. Arms are distinct - a union whose arms collapse to one F# type is
+    /// that type instead.
     | FsErasedUnion of FsTypeRef list
     /// A callback as a delegate (D5): parameter types and return. Renders as
     /// `System.Action`/`System.Func` so the arity is guaranteed at the Fable boundary. Emitted

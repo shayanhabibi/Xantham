@@ -301,24 +301,26 @@ let typeRefTests =
                 "the hoist is reported; the erased union is not a widening"
 
         testCase "a union wider than the erased arity still widens to obj" <| fun _ ->
-            // Five distinct arms: `U5` exists in Fable, but past four the consumer is doing
-            // runtime tests the type no longer helps them write.
+            // Ten distinct arms, one past `Fable.Core`'s widest `U9`.
             let named id name =
                 { Build.facts (Build.typeResponse id TypeFlags.Object) with SymbolName = Some name }
 
+            let names =
+                [ 20, "A"; 21, "B"; 22, "C"; 23, "D"; 24, "E"; 25, "F"; 26, "G" ]
+
             let union =
                 { Build.facts (Build.typeResponse 10 TypeFlags.Union) with
-                    UnionMembers = [ 1; 2; 3; 20; 21; 22 ] }
+                    UnionMembers = 1 :: 2 :: 3 :: (names |> List.map fst) }
 
             let model =
-                Build.shapeModel (union :: named 20 "A" :: named 21 "B" :: named 22 "C" :: Build.primitives)
+                Build.shapeModel (union :: (names |> List.map (fun (id, name) -> named id name)) @ Build.primitives)
 
             let model =
-                { model with DeclNames = [ 20, "A"; 21, "B"; 22, "C" ] |> Map.ofList }
+                { model with DeclNames = names |> Map.ofList }
 
             let reference, findings = Spec.typeRef Build.context model None "x" 10
 
-            Expect.equal reference FsObj "six members, five arms"
+            Expect.equal reference FsObj "ten members, ten arms"
             Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
 
         testCase "a fixed tuple maps to an F# tuple (D7)" <| fun _ ->

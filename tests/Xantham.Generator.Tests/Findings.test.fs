@@ -195,19 +195,19 @@ let findingsTests =
               Expect.equal passes.Length 14 "every per-pass union names its pass"
 
           testCase "a finding derives name, key, tier, payload and message from its kind" <| fun _ ->
-              let finding = Finding.make "Options.legacy" (TypeReference.UnionTooWide(5, 4))
+              let finding = Finding.make "Options.legacy" (TypeReference.UnionTooWide(10, 9))
               Expect.equal finding.Name "TR.UnionTooWide" "name"
               Expect.equal finding.Key "TR036" "key"
               Expect.equal finding.Tier Widened "tier"
 
               Expect.equal
                   (finding.Payload |> Array.map (fun (field, value) -> field, string value))
-                  [| "arms", "5"; "cap", "4" |]
+                  [| "arms", "10"; "cap", "9" |]
                   "the payload is the case's fields, under their declared names and in order"
 
               Expect.equal
                   finding.Message
-                  "union of 5 distinct types widened to obj (D4 caps the erased union at 4)"
+                  "union of 10 distinct types widened to obj (D4 caps the erased union at 9)"
                   "message interpolates the payload"
 
           testCase "a case declaring no fields carries no payload" <| fun _ ->
