@@ -1,0 +1,6 @@
+{
+    "name": "noinfer-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "description": "Hand-authored fixture for `NoInfer<T>` (docs/.ai/plans/generator-wave-fifteen.md item 4), spelled the way a package without the compiler's native version writes it - `solid-js`'s own idiom. `resolveNoInfer` toggles the reference-site mapping between the support package's abbreviation and the bare operand."
+}

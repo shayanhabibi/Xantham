@@ -31,6 +31,10 @@
     "runtime": {
       "type": "string",
       "description": "The npm package the generated `[<Import(…)>]` attributes name. Defaults to the package name with DefinitelyTyped's `@types/` convention undone, so `@types/three` imports from `three`."
+    },
+    "resolveNoInfer": {
+      "type": "boolean",
+      "description": "Resolves TypeScript's `NoInfer<T>` (§4.11) to `T` at the mapping site, dropping the name. Defaults to false, which emits `NoInfer<T>` and reaches the support package's own abbreviation."
     }
   },
   "$defs": {

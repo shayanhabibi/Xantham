@@ -412,6 +412,10 @@ let configTests =
 /// Wave five, lane R: the `map` disposition, generated under the lab's own `xantham.json`.
 let private groupMapLab = handFixture "group-map-lab"
 
+/// Wave fifteen item 4: `NoInfer<T>` under the lab's own `xantham.json`, which sets
+/// `resolveNoInfer` to exercise the toggled side; `solid-js` exercises the default.
+let private noInferLab = handFixture "noinfer-lab"
+
 [<Tests>]
 let pipelineTests =
     testList "generator e2e" [
@@ -1954,6 +1958,29 @@ let pipelineTests =
 
                       // A generic alias with no condition in it.
                       Expect.stringContains source "type Box<'T> =" "an ordinary generic alias" ])
+
+        yield!
+            fixtureTests "noinfer-lab" noInferLab (handConfig noInferLab) (fun package ->
+                [ testCase "resolveNoInfer resolves the reference to its bare operand" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate (handConfig noInferLab) package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains source "abstract value: 'T" "NoInfer<T> reads as T"
+                      Expect.stringContains source "static member widen<'T> (seed: 'T, guard: 'T) : 'T" "on a parameter too"
+
+                      Expect.isFalse
+                          (rendered.Findings |> List.exists (fun f -> f.Key = "TR020" && f.Symbol.Contains "value"))
+                          "no widening finding where the idiom resolved cleanly"
+
+                  testCase "an unrelated indexed access still widens" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate (handConfig noInferLab) package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains source "static member first<'T> (value: 'T) : obj" "the idiom is the name, not the shape alone"
+
+                      Expect.isTrue
+                          (rendered.Findings |> List.exists (fun f -> f.Key = "TR020" && f.Symbol = "FirstOf"))
+                          "recorded as an ordinary indexed access" ])
 
         // Wave three lane H's fixture. An array reaches the shaper under whatever name the
         // author put on it, and `Array` is only one of them. The three spellings below each
