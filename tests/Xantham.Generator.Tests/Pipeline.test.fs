@@ -3955,4 +3955,29 @@ let pipelineTests =
                           [ "AnchoredOptions"; "SeparableOptions" ]
                           "the disagreeing pair raises neither TR060 nor TR061" ])
 
+        yield!
+            fixtureTests "frontier-width-lab" (handFixture "frontier-width-lab") GeneratorConfig.Default (fun package ->
+                // Wave fifteen, lane DI: `Resolve.fs`'s width cutoff (`FollowWidth`), bounding a
+                // generation of the frontier the same way `FollowDepth` already bounds its
+                // recursion. `Frontier<T>.map<U>`'s return type mints a fresh `Frontier<U>`
+                // instantiation every generation, so the walk's width doubles generation over
+                // generation independent of depth; this fixture is small enough for that to
+                // outgrow the cutoff in one test run rather than only under the `lib.dom`
+                // measurement.
+                [ testCase "a generation past the width cutoff is not resolved, RT003" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                    let tooWide =
+                        rendered.Findings
+                        |> List.choose (fun finding ->
+                            match finding.Kind with
+                            | :? ResolveTypeTable as kind ->
+                                match kind with
+                                | ResolveTypeTable.FrontierTooWide(count, limit) -> Some(count, limit)
+                                | _ -> None
+                            | _ -> None)
+
+                    Expect.isNonEmpty tooWide "at least one generation of the frontier outgrows the width cutoff"
+                    Expect.allEqual (tooWide |> List.map snd) 4096 "every finding names the same width limit" ])
+
     ]

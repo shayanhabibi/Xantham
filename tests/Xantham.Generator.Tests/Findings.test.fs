@@ -131,6 +131,7 @@ let findingsTests =
                     "RE.FacetNotResolved RE001 escape"
                     "RT.FrontierNotResolved RT001 widened"
                     "RT.TypeNotResolved RT002 widened"
+                    "RT.FrontierTooWide RT003 widened"
                     "LU.NonStringLiteralCase LU001 exact"
                     "DT.ArmNotPlainData DT001 ergonomic"
                     "DT.TaggedUnion DT002 exact"

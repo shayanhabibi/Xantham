@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "package": "frontier-width-lab",
+  "module": "FrontierWidthLab",
+  "counts": {
+    "exact": 1,
+    "ergonomic": 5,
+    "widened": 1,
+    "escape": 1
+  },
+  "passes": [
+    {
+      "pass": "RT - resolve-type-table",
+      "total": 1,
+      "widened": 1
+    },
+    {
+      "pass": "SY - synthesize-anonymous",
+      "total": 10,
+      "exact": 10
+    },
+    {
+      "pass": "shape-callbacks",
+      "total": 5,
+      "ergonomic": 5
+    },
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 10,
+      "ergonomic": 6,
+      "widened": 1,
+      "escape": 3
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 1,
+      "ergonomic": 1
+    }
+  ]
+}

@@ -72,6 +72,21 @@ let private channel (trace: Trace option) (name: string) (types: TypeResponse li
 [<Literal>]
 let private FollowDepth = 20
 
+/// Distinct types one generation of the frontier may hold before the whole generation is
+/// recorded as not followed rather than derived - not a per-type admission cutoff, since a
+/// checker id is assigned in the order answers arrived and a prefix chosen by id would differ
+/// run to run. The frontier doubles as the cycle boundary, so depth alone does not bound it: a
+/// method whose return type applies its own enclosing generic to a fresh type parameter
+/// (`Array<T>.map<U>(...): Array<U>`) mints a distinct instantiation id every time the checker
+/// answers, and every one of those ids discovers the same shape again under its own fresh
+/// parameter - width grows generation over generation at any depth, not just past the cutoff.
+///
+/// The corpus's widest generation seen live sits at 2091 (`@cloudflare/workers-types`,
+/// generation 10, `XANTHAM_RESOLVE_COUNTERS` measured); this value carries roughly double
+/// that as headroom.
+[<Literal>]
+let private FollowWidth = 4096
+
 let private hasAny (mask: SymbolFlags) (flags: SymbolFlags) = uint32 (flags &&& mask) <> 0u
 
 /// The server's complaint without the Go stack it arrives with: the first line, minus the
@@ -913,9 +928,10 @@ let private deriveFacts (ctx: Context) (trace: Trace option) (ty: TypeResponse) 
                 bound @ snd conditional
     }
 
-/// Builds the closed type table: derive the current frontier (sorted by id, so the fold is
-/// deterministic whatever order answers arrive in), collect what derivation discovered, and
-/// recurse until the frontier is exhausted or the depth cutoff records the remainder.
+/// Builds the closed type table: derive the current frontier (sorted by id, purely for a
+/// readable trace - a checker id is assigned in the order answers arrived, so it names no
+/// subset of a generation, only the generation as a whole), collect what derivation discovered,
+/// and recurse until the frontier is exhausted or a cutoff records the remainder.
 let resolveTypeTable: Pass<ResolveModel> =
     {
         Name = "resolve-type-table"
@@ -924,11 +940,13 @@ let resolveTypeTable: Pass<ResolveModel> =
                 async {
                     let trace = Trace.start ()
 
-                    // Counts how many times the frontier admits a type for derivation (one per
-                    // distinct id, across every generation) - gated by `XANTHAM_RESOLVE_COUNTERS`
-                    // so it costs nothing on a normal run. The final table size is read off
-                    // `table` once the walk closes.
+                    // Counts every distinct id one generation of the frontier newly reaches,
+                    // whether or not the width cutoff goes on to defer the whole generation -
+                    // gated by `XANTHAM_RESOLVE_COUNTERS` so it costs nothing on a normal run.
+                    // The final table size is read off `table` once the walk closes; `maxWidth`
+                    // is the widest single generation the walk demanded, before the cutoff.
                     let mutable expansions = 0
+                    let mutable maxWidth = 0
 
                     let rec walk table derived notFollowed findings frontier depth =
                         async {
@@ -940,6 +958,8 @@ let resolveTypeTable: Pass<ResolveModel> =
 
                             if resolveCountersEnabled.Value then
                                 expansions <- expansions + fresh.Length
+                                maxWidth <- max maxWidth fresh.Length
+                                eprintfn "[resolve-counters] depth=%d width=%d" depth fresh.Length
 
                             match trace with
                             | None -> ()
@@ -969,6 +989,33 @@ let resolveTypeTable: Pass<ResolveModel> =
                                         Finding.make
                                             "<type-table>"
                                             (ResolveTypeTable.FrontierNotResolved(fresh.Length, FollowDepth))
+                                    ]
+
+                                return table, notFollowed, findings
+                            | fresh when fresh.Length > FollowWidth ->
+                                // A generation whose own width outruns the cutoff: admitting a
+                                // prefix by id would pick a different subset run to run, because
+                                // a checker id is assigned in the order answers arrived (the same
+                                // reason the depth cutoff above keys no finding on one). So a
+                                // generation past the width cutoff is deferred whole, the same
+                                // all-or-nothing shape as the depth cutoff, and for the same
+                                // reason: no partial admission for a later generation to
+                                // rediscover under a different id.
+                                do! dumpFrontier ctx trace fresh
+
+                                let notFollowed =
+                                    fresh
+                                    |> List.fold
+                                        (fun map ty ->
+                                            Map.add ty.Id $"beyond the frontier width cutoff ({FollowWidth})" map)
+                                        notFollowed
+
+                                let findings =
+                                    findings
+                                    @ [
+                                        Finding.make
+                                            "<type-table>"
+                                            (ResolveTypeTable.FrontierTooWide(fresh.Length, FollowWidth))
                                     ]
 
                                 return table, notFollowed, findings
@@ -1033,7 +1080,11 @@ let resolveTypeTable: Pass<ResolveModel> =
                         walk model.Types Set.empty model.NotFollowed [] seeds 0
 
                     if resolveCountersEnabled.Value then
-                        eprintfn "[resolve-counters] frontier-expansions=%d table-size=%d" expansions (Map.count table)
+                        eprintfn
+                            "[resolve-counters] frontier-expansions=%d table-size=%d max-width=%d"
+                            expansions
+                            (Map.count table)
+                            maxWidth
 
                     let model =
                         { model with
