@@ -615,8 +615,9 @@ let rec internal brandedPrimitive (model: ShapeModel) (facts: TypeFacts) =
                 Some primitive
             | _ -> None
 
-/// The widest erased union D4 allows: every arity `Fable.Core` 5.2.0 ships a `U`-type for,
-/// `U2` through `U9`.
+/// The widest arity `Fable.Core` 5.2.0 ships a `U`-type for. A union past this width still
+/// renders as `U<n>` (D4); the render tier declares the type in the emitting file's own
+/// footer rather than reaching into `Fable.Core`.
 [<Literal>]
 let internal ErasedUnionArity = 9
 
@@ -2114,13 +2115,7 @@ and internal erasedUnionRef
     | [] -> FsObj, findings @ [ Finding.make owner TypeReference.EmptyUnionToObj ]
     | [ single ] -> single, findings
     | arms when arms |> List.contains FsObj -> FsObj, findings @ [ Finding.make owner TypeReference.UnionWithObjArm ]
-    | arms when arms.Length <= ErasedUnionArity -> FsErasedUnion arms, findings
-    | arms ->
-        FsObj,
-        findings
-        @ [
-            Finding.make owner (TypeReference.UnionTooWide(arms.Length, ErasedUnionArity))
-        ]
+    | arms -> FsErasedUnion arms, findings
 
 /// An optional member or parameter reads as `option`, one level deep however the optionality
 /// arrived (a `?` marker, an `undefined` union member, or both).

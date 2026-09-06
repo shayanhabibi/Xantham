@@ -10,6 +10,7 @@ open System.Text.Json
 open System.Text.Json.Nodes
 open System.Text.Json.Serialization
 open Xantham.TypeScript.Wire.Proto
+open Xantham.Generator.Shape.Spec
 
 /// F# keywords and reserved words that force backticks when a JavaScript name collides.
 let private keywords =
@@ -150,8 +151,8 @@ let rec private printTypeIn (atomic: bool) =
     | FsTuple components ->
         let text = components |> List.map (printTypeIn true) |> String.concat " * "
         if atomic then $"({text})" else text
-    // Fable's erased unions (D4): the arity names the type, so `U2`-`U9` need no threshold
-    // check here - the shape tier never builds a wider one.
+    // Fable's erased unions (D4): the arity names the type. `U2`-`U9` are `Fable.Core`'s own;
+    // wider arities resolve against a `U<n>` this file's own footer declares.
     | FsErasedUnion arms ->
         let text = arms |> List.map (printTypeIn true) |> String.concat ", "
         $"U{arms.Length}<{text}>"
@@ -957,6 +958,111 @@ let private qualifyDecl foreign =
     // A string enum and an F# enum are closed over literals.
     | cases -> cases
 
+/// Arm counts of every `FsErasedUnion` a type reference reaches, recursively.
+let rec private erasedArities (reference: FsTypeRef) : int list =
+    match reference with
+    | FsOption inner -> erasedArities inner
+    | FsArray element -> erasedArities element
+    | FsTuple components -> components |> List.collect erasedArities
+    | FsErasedUnion arms -> arms.Length :: (arms |> List.collect erasedArities)
+    | FsDelegate(arguments, returns) -> (arguments |> List.collect erasedArities) @ erasedArities returns
+    | FsFunc(argument, returns) -> erasedArities argument @ erasedArities returns
+    | FsApp(_, arguments) -> arguments |> List.collect erasedArities
+    | FsBranded(primitive, _) -> erasedArities primitive
+    | FsBool
+    | FsString
+    | FsFloat
+    | FsBigInt
+    | FsUnit
+    | FsObj
+    | FsTypeVar _
+    | FsNamed _ -> []
+
+/// Arm counts of every `FsErasedUnion` a declaration reaches, across every type-reference
+/// position `Shape.Arity.mapDeclRefs` also rewrites: members, inherits, statics, exports,
+/// constructors and type-parameter constraints.
+let private declErasedArities (decl: FsDecl) : int list =
+    let ofParam (p: FsParam) = erasedArities p.Type
+
+    let ofTypeParam (p: FsTypeParam) =
+        p.Constraint |> Option.map erasedArities |> Option.defaultValue []
+
+    let ofMember =
+        function
+        | FsProperty p -> erasedArities p.Type
+        | FsIndexer i -> erasedArities i.Key @ erasedArities i.Value
+        | FsMethod m ->
+            (m.TypeParameters |> List.collect ofTypeParam)
+            @ (m.Parameters |> List.collect ofParam)
+            @ erasedArities m.Return
+        | FsConstructor c
+        | FsInvoke c ->
+            (c.TypeParameters |> List.collect ofTypeParam)
+            @ (c.Parameters |> List.collect ofParam)
+            @ erasedArities c.Return
+
+    let ofExportMember (m: FsExportMember) =
+        (m.TypeParameters |> List.collect ofTypeParam)
+        @ (match m.Body with
+           | ExportFunction(parameters, returns) -> (parameters |> List.collect ofParam) @ erasedArities returns
+           | ExportValue returns -> erasedArities returns
+           | ExportConstructor(parameters, returns) -> (parameters |> List.collect ofParam) @ erasedArities returns)
+
+    match decl with
+    | FsInterface d ->
+        (d.TypeParameters |> List.collect ofTypeParam)
+        @ (d.Inherits |> List.collect erasedArities)
+        @ (d.Members |> List.collect ofMember)
+        @ (d.Entrypoint
+           |> Option.map (fun e -> e.Parameters |> List.collect ofParam)
+           |> Option.defaultValue [])
+        @ (d.CreateOverloads |> List.collect (List.collect ofParam))
+        @ (d.Statics |> List.collect ofExportMember)
+    | FsAbbrev d -> (d.TypeParameters |> List.collect ofTypeParam) @ erasedArities d.Target
+    | FsPhantom d -> (d.TypeParameters |> List.collect ofTypeParam) @ erasedArities d.Carrier
+    | FsDelegateType d ->
+        (d.TypeParameters |> List.collect ofTypeParam)
+        @ (d.Parameters |> List.collect (fun p -> erasedArities p.Type))
+        @ erasedArities d.Return
+    | FsMeasure d -> erasedArities d.Primitive
+    | FsTaggedUnion d ->
+        d.Cases
+        |> List.collect (fun case -> case.Fields |> List.collect (fun f -> erasedArities f.Type))
+    | FsExports members -> members |> List.collect ofExportMember
+    | FsStringEnum _
+    | FsEnum _ -> []
+
+/// The arities above `Fable.Core`'s own `U9` a file's declarations need, ascending and
+/// deduplicated - the file's footer declares exactly these and nothing wider.
+let private footerArities (decls: FsDecl list) : int list =
+    decls
+    |> List.collect declErasedArities
+    |> List.filter (fun arity -> arity > ErasedUnionArity)
+    |> List.distinct
+    |> List.sort
+
+/// One erased union above `Fable.Core`'s shipped arity, modelled on its own `U2`-`U9`: one case
+/// per arm and one `op_ErasedCast` overload per arm, so `!^` widens into it the same way it
+/// widens into a shipped `U<n>`.
+let private renderErasedUnionArity (arity: int) =
+    let typeParameters =
+        [ 1..arity ] |> List.map (fun i -> { Name = $"t{i}"; Constraint = None })
+
+    let name = $"U{arity}"
+
+    [
+        yield "[<Erase>]"
+        yield $"type {declHead name typeParameters} ="
+
+        for i in 1..arity do
+            yield $"    | Case{i} of 't{i}"
+
+        yield ""
+
+        for i in 1..arity do
+            yield $"    static member op_ErasedCast(x: 't{i}) = Case{i} x"
+    ]
+
 /// One `.fs` file: header, opens, declarations in the order the shape tier fixed. `module rec`
 /// so declaration order never fights reference order.
 let private renderModule (group: GroupModule) (foreign: Map<string, string>) =
@@ -993,6 +1099,18 @@ let private renderModule (group: GroupModule) (foreign: Map<string, string>) =
         |> List.map (String.concat "\n")
         |> String.concat "\n\n"
 
+    // Arities past `Fable.Core`'s own `U9`, declared once at the bottom of the file that needs
+    // them (D4) rather than in the shared support package - a file needing arity twelve pays for
+    // a `U12` here, a file needing nothing past nine pays for no footer at all.
+    let footer =
+        match footerArities decls with
+        | [] -> ""
+        | arities ->
+            arities
+            |> List.map (renderErasedUnionArity >> String.concat "\n")
+            |> String.concat "\n\n"
+            |> sprintf "\n%s\n"
+
     String.concat
         "\n"
         [
@@ -1008,7 +1126,7 @@ let private renderModule (group: GroupModule) (foreign: Map<string, string>) =
             "open Fable.Core.JS"
             ""
             body
-            ""
+            footer
         ]
 
 /// The run's source files, one per shipped group (O7), and the record of what each group's

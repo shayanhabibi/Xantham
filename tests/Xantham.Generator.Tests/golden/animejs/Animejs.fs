@@ -65,7 +65,7 @@ module DurationKeyframes =
         abstract modifier: TweenModifier option with get, set
         abstract composition: TweenComposition option with get, set
         [<EmitIndexer>]
-        abstract Item: string -> obj with get, set
+        abstract Item: string -> U10<string, float, bool, U8<string, float, EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister, (TweenParamValue * TweenParamValue), TweenKeyValue>[], EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister, TweenModifier, TweenKeyValue> with get, set
 
     module Item =
         type Duration = delegate of target: Target option * index: float option * targets: Target[] option * prevTween: Tween option -> FunctionValueReturn
@@ -2939,7 +2939,7 @@ module CallbackArgument =
         abstract _prevAdd: Tween with get, set
         abstract _nextAdd: Tween with get, set
 
-type Revertible = obj
+type Revertible = U10<Animatable, AutoLayout, Draggable, JSAnimation, Scope, ScrollObserver, TextSplitter, Timeline, Timer, WAAPIAnimation>
 
 [<Interface>]
 type TweakRegister =
@@ -3362,7 +3362,7 @@ type AnimationParams =
     abstract onComplete: (JSAnimation -> obj) option with get, set
     abstract onRender: (JSAnimation -> obj) option with get, set
     [<EmitIndexer>]
-    abstract Item: string -> obj with get, set
+    abstract Item: string -> U14<string, float, bool, U8<string, float, EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister, (TweenParamValue * TweenParamValue), TweenKeyValue>[], DurationKeyframes.Item[], EasingFunction, DurationKeyframes.Item.Duration, PercentageKeyframes, ScrollObserver, Spring, TweakRegister, TweenModifier, (JSAnimation -> obj), TweenKeyValue> with get, set
 
 /// <summary>
 /// Accepts:&lt;br&gt;
@@ -3481,7 +3481,7 @@ type WAAPIAnimationParams =
     abstract persist: bool option with get, set
     abstract onComplete: (WAAPIAnimation -> obj) option with get, set
     [<EmitIndexer>]
-    abstract Item: string -> obj with get, set
+    abstract Item: string -> U14<string, float, bool, U3<string, float, WAAPIFunctionValue>[], string[], float[], EasingFunction, ScrollObserver, Spring, TweakRegister, WAAPIAnimationOptions, WAAPIFunctionValue, WAAPITweenOptions, (WAAPIAnimation -> obj)> with get, set
 
 type AnimatablePropertySetter = delegate of ``to``: U2<float, float[]> * duration: float option * ease: EasingParam option -> AnimatableObject
 
@@ -5974,3 +5974,59 @@ type Exports =
     static member WAAPIAnimation (targets: DOMTargetsParam, ``params``: WAAPIAnimationParams) : WAAPIAnimation = jsNative
     [<Import("waapi", "animejs")>]
     static member waapi: Waapi = jsNative
+
+[<Erase>]
+type U10<'t1, 't2, 't3, 't4, 't5, 't6, 't7, 't8, 't9, 't10> =
+    | Case1 of 't1
+    | Case2 of 't2
+    | Case3 of 't3
+    | Case4 of 't4
+    | Case5 of 't5
+    | Case6 of 't6
+    | Case7 of 't7
+    | Case8 of 't8
+    | Case9 of 't9
+    | Case10 of 't10
+
+    static member op_ErasedCast(x: 't1) = Case1 x
+    static member op_ErasedCast(x: 't2) = Case2 x
+    static member op_ErasedCast(x: 't3) = Case3 x
+    static member op_ErasedCast(x: 't4) = Case4 x
+    static member op_ErasedCast(x: 't5) = Case5 x
+    static member op_ErasedCast(x: 't6) = Case6 x
+    static member op_ErasedCast(x: 't7) = Case7 x
+    static member op_ErasedCast(x: 't8) = Case8 x
+    static member op_ErasedCast(x: 't9) = Case9 x
+    static member op_ErasedCast(x: 't10) = Case10 x
+
+[<Erase>]
+type U14<'t1, 't2, 't3, 't4, 't5, 't6, 't7, 't8, 't9, 't10, 't11, 't12, 't13, 't14> =
+    | Case1 of 't1
+    | Case2 of 't2
+    | Case3 of 't3
+    | Case4 of 't4
+    | Case5 of 't5
+    | Case6 of 't6
+    | Case7 of 't7
+    | Case8 of 't8
+    | Case9 of 't9
+    | Case10 of 't10
+    | Case11 of 't11
+    | Case12 of 't12
+    | Case13 of 't13
+    | Case14 of 't14
+
+    static member op_ErasedCast(x: 't1) = Case1 x
+    static member op_ErasedCast(x: 't2) = Case2 x
+    static member op_ErasedCast(x: 't3) = Case3 x
+    static member op_ErasedCast(x: 't4) = Case4 x
+    static member op_ErasedCast(x: 't5) = Case5 x
+    static member op_ErasedCast(x: 't6) = Case6 x
+    static member op_ErasedCast(x: 't7) = Case7 x
+    static member op_ErasedCast(x: 't8) = Case8 x
+    static member op_ErasedCast(x: 't9) = Case9 x
+    static member op_ErasedCast(x: 't10) = Case10 x
+    static member op_ErasedCast(x: 't11) = Case11 x
+    static member op_ErasedCast(x: 't12) = Case12 x
+    static member op_ErasedCast(x: 't13) = Case13 x
+    static member op_ErasedCast(x: 't14) = Case14 x

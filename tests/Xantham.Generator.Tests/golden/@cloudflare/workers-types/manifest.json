@@ -4,8 +4,8 @@
   "module": "Cloudflare.WorkersTypes",
   "counts": {
     "exact": 237,
-    "ergonomic": 1056,
-    "widened": 384,
+    "ergonomic": 1057,
+    "widened": 383,
     "escape": 111
   },
   "passes": [
@@ -52,10 +52,10 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 8122,
+      "total": 8121,
       "exact": 95,
       "ergonomic": 7357,
-      "widened": 520,
+      "widened": 519,
       "escape": 150
     },
     {

@@ -228,7 +228,7 @@ type Exports =
     /// The access resolves, and the union it resolves to is wider than the cap.
     /// </summary>
     [<Import("onWide", "indexed-access-lab")>]
-    static member onWide<'Type> (``type``: 'Type, handler: (obj -> unit)) : unit = jsNative
+    static member onWide<'Type> (``type``: 'Type, handler: (U12<E01, E02, E03, E04, E05, E06, E07, E08, E09, E10, E11, E12> -> unit)) : unit = jsNative
     /// <summary>
     /// A nested access, in parameter and in return position. The outer operand is <c>ModelMap[Name]</c>,
     /// which declares no keys of its own, so nothing names what <c>"inputs"</c> selects and both
@@ -241,3 +241,31 @@ type Exports =
     /// </summary>
     [<Import("Feed", "indexed-access-lab"); EmitConstructor>]
     static member Feed<'EventMap> () : Feed<'EventMap> = jsNative
+
+[<Erase>]
+type U12<'t1, 't2, 't3, 't4, 't5, 't6, 't7, 't8, 't9, 't10, 't11, 't12> =
+    | Case1 of 't1
+    | Case2 of 't2
+    | Case3 of 't3
+    | Case4 of 't4
+    | Case5 of 't5
+    | Case6 of 't6
+    | Case7 of 't7
+    | Case8 of 't8
+    | Case9 of 't9
+    | Case10 of 't10
+    | Case11 of 't11
+    | Case12 of 't12
+
+    static member op_ErasedCast(x: 't1) = Case1 x
+    static member op_ErasedCast(x: 't2) = Case2 x
+    static member op_ErasedCast(x: 't3) = Case3 x
+    static member op_ErasedCast(x: 't4) = Case4 x
+    static member op_ErasedCast(x: 't5) = Case5 x
+    static member op_ErasedCast(x: 't6) = Case6 x
+    static member op_ErasedCast(x: 't7) = Case7 x
+    static member op_ErasedCast(x: 't8) = Case8 x
+    static member op_ErasedCast(x: 't9) = Case9 x
+    static member op_ErasedCast(x: 't10) = Case10 x
+    static member op_ErasedCast(x: 't11) = Case11 x
+    static member op_ErasedCast(x: 't12) = Case12 x
