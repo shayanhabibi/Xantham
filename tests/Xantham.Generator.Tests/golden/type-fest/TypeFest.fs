@@ -6171,11 +6171,11 @@ type PackageJson =
     ///
     /// [Read more.](https://nodejs.org/api/packages.html#subpath-imports)
     /// </summary>
-    abstract imports: PackageJson.Imports option with get, set
+    abstract imports: Xantham.Fable.Core.Record<string, U3<string, U2<string, PackageJson.Exports.Item>[], PackageJson.Exports.Item> option> option with get, set
     /// <summary>
     /// The executable files that should be installed into the <c>PATH</c>.
     /// </summary>
-    abstract bin: U2<string, PackageJson.Bin> option with get, set
+    abstract bin: U2<string, Xantham.Fable.Core.Record<string, string option>> option with get, set
     /// <summary>
     /// Filenames to put in place for the <c>man</c> program to find.
     /// </summary>
@@ -6199,23 +6199,23 @@ type PackageJson =
     /// <summary>
     /// The dependencies of the package.
     /// </summary>
-    abstract dependencies: PackageJson.Dependencies option with get, set
+    abstract dependencies: Xantham.Fable.Core.Record<string, string option> option with get, set
     /// <summary>
     /// Additional tooling dependencies that are not required for the package to work. Usually test, build, or documentation tooling.
     /// </summary>
-    abstract devDependencies: PackageJson.Dependencies option with get, set
+    abstract devDependencies: Xantham.Fable.Core.Record<string, string option> option with get, set
     /// <summary>
     /// Dependencies that are skipped if they fail to install.
     /// </summary>
-    abstract optionalDependencies: PackageJson.Dependencies option with get, set
+    abstract optionalDependencies: Xantham.Fable.Core.Record<string, string option> option with get, set
     /// <summary>
     /// Dependencies that will usually be required by the package user directly or via another dependency.
     /// </summary>
-    abstract peerDependencies: PackageJson.Dependencies option with get, set
+    abstract peerDependencies: Xantham.Fable.Core.Record<string, string option> option with get, set
     /// <summary>
     /// Indicate peer dependencies that are optional.
     /// </summary>
-    abstract peerDependenciesMeta: PackageJson.PeerDependenciesMeta option with get, set
+    abstract peerDependenciesMeta: Xantham.Fable.Core.Record<string, PackageJson.PeerDependenciesMeta.Item option> option with get, set
     /// <summary>
     /// Package names that are bundled when the package is published.
     /// </summary>
@@ -6284,7 +6284,7 @@ type PackageJson =
     /// <summary>
     /// A hint to JavaScript bundlers or component tools when packaging modules for client side use.
     /// </summary>
-    abstract browser: U2<string, PackageJson.Browser> option with get, set
+    abstract browser: U2<string, Xantham.Fable.Core.Record<string, U2<string, bool> option>> option with get, set
     /// <summary>
     /// Denote which files in your project are "pure" and therefore safe for Webpack to prune if unused.
     ///
@@ -6298,7 +6298,7 @@ type PackageJson =
     /// <summary>
     /// Version selection map of TypeScript.
     /// </summary>
-    abstract typesVersions: PackageJson.TypesVersions option with get, set
+    abstract typesVersions: Xantham.Fable.Core.Record<string, Xantham.Fable.Core.Record<string, string[] option> option> option with get, set
     /// <summary>
     /// Location of the bundled TypeScript declaration file. Alias of <c>types</c>.
     /// </summary>
@@ -6312,7 +6312,7 @@ type PackageJson =
     /// <summary>
     /// Selective version resolutions. Allows the definition of custom package versions inside dependencies without manual edits in the <c>yarn.lock</c> file.
     /// </summary>
-    abstract resolutions: PackageJson.Dependencies option with get, set
+    abstract resolutions: Xantham.Fable.Core.Record<string, string option> option with get, set
     /// <summary>
     /// JSPM configuration.
     /// </summary>
@@ -6329,14 +6329,6 @@ module PackageJson =
         [<ParamObject; Emit("$0")>]
         static member Create (name: string, ?url: string, ?email: string) : Author = jsNative
 
-    type Bin =
-        [<EmitIndexer>]
-        abstract Item: string -> string option with get, set
-
-    type Browser =
-        [<EmitIndexer>]
-        abstract Item: string -> U2<string, bool> option with get, set
-
     [<Interface>]
     type Bugs =
         /// <summary>
@@ -6349,10 +6341,6 @@ module PackageJson =
         abstract email: string option with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (?url: string, ?email: string) : Bugs = jsNative
-
-    type Dependencies =
-        [<EmitIndexer>]
-        abstract Item: string -> string option with get, set
 
     [<Interface>]
     type DevEngines =
@@ -6440,10 +6428,6 @@ module PackageJson =
         [<ParamObject; Emit("$0")>]
         static member Create (url: string, ?``type``: string) : Funding = jsNative
 
-    type Imports =
-        [<EmitIndexer>]
-        abstract Item: string -> U3<string, U2<string, PackageJson.Exports.Item>[], PackageJson.Exports.Item> option with get, set
-
     module Licenses =
         [<Interface>]
         type Item =
@@ -6455,10 +6439,6 @@ module PackageJson =
     type Overrides =
         [<EmitIndexer>]
         abstract Item: string -> U2<string, PackageJson.Overrides> option with get, set
-
-    type PeerDependenciesMeta =
-        [<EmitIndexer>]
-        abstract Item: string -> PackageJson.PeerDependenciesMeta.Item option with get, set
 
     module PeerDependenciesMeta =
         [<Interface>]
@@ -6507,7 +6487,6 @@ module PackageJson =
         static member Create (``type``: string, url: string, ?directory: string) : Repository = jsNative
 
     type Scripts =
-        inherit PackageJson.Bin
         /// <summary>
         /// Run **before** the package is published (Also run on local <c>npm install</c> without any arguments).
         /// </summary>
@@ -6627,15 +6606,6 @@ module PackageJson =
     type Type =
         | [<CompiledName("commonjs")>] Commonjs
         | [<CompiledName("module")>] Module
-
-    type TypesVersions =
-        [<EmitIndexer>]
-        abstract Item: string -> PackageJson.TypesVersions.Item option with get, set
-
-    module TypesVersions =
-        type Item =
-            [<EmitIndexer>]
-            abstract Item: string -> string[] option with get, set
 
     [<Interface>]
     type Workspaces =
@@ -10131,7 +10101,7 @@ module TsConfigJson =
         /// <summary>
         /// Specify path mapping to be computed relative to baseUrl option.
         /// </summary>
-        abstract paths: TsConfigJson.CompilerOptions.Paths option with get, set
+        abstract paths: Xantham.Fable.Core.Record<string, string[]> option with get, set
         /// <summary>
         /// List of TypeScript language server plugins to load.
         /// </summary>
@@ -10674,10 +10644,6 @@ module TsConfigJson =
             | LF
             | [<CompiledName("crlf")>] Crlf
             | [<CompiledName("lf")>] Lf
-
-        type Paths =
-            [<EmitIndexer>]
-            abstract Item: string -> string[] with get, set
 
         module Plugins =
             [<Interface>]

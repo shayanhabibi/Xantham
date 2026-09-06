@@ -82,9 +82,7 @@ type Slots =
 /// <summary>
 /// <c>Record</c> over concrete operands.
 /// </summary>
-type Registry =
-    [<EmitIndexer>]
-    abstract Item: string -> float with get, set
+type Registry = Xantham.Fable.Core.Record<string, float>
 
 /// <summary>
 /// A readonly string index signature.

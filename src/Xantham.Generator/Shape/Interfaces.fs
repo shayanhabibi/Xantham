@@ -18,6 +18,11 @@ let private declaresInterface (model: ShapeModel) (facts: TypeFacts) =
          && facts.IndexInfos.IsEmpty
          && facts.ConstructSignatures.IsEmpty
      )
+     // A pure index signature the checker gave no symbol of its own - reached through a
+     // type alias, or written inline - resolves through `objectRef` as a `Record`/
+     // `ReadonlyRecord` reference instead (TR059). `interface Bag { [key: string]:
+     // number }` keeps its own name: its own symbol carries it past this exclusion.
+     && not (isAnonymousIndexSignature model facts)
      && (arrayElement model facts).IsNone
      && not (isTuple facts)
      && (instantiationOf model facts).IsNone)

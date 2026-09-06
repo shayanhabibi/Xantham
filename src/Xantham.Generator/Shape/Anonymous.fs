@@ -355,6 +355,11 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
             // An index signature is shape too: `Record<string, boolean>` has no members
             // and one index signature, and is an interface of one `Item`.
             && not (facts.Members.IsEmpty && facts.IndexInfos.IsEmpty)
+            // A pure index signature with no symbol of its own resolves through the
+            // support package's `Record`/`ReadonlyRecord` instead of a minted name
+            // (TR059); an interface's own name, reached this way rather than through a
+            // top-level export, still claims one below.
+            && not (isAnonymousIndexSignature model facts)
             // An instantiation of a generic this run declares is written as an
             // application (§4.9). Naming it would declare the expansion a second time
             // under a made-up name and lose the tie to the generic it came from.

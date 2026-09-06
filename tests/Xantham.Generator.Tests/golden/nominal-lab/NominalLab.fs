@@ -21,13 +21,9 @@ type GLAttr =
     [<ParamObject; Emit("$0")>]
     static member Create (kind: string) : GLAttr = jsNative
 
-type Narrow =
-    [<EmitIndexer>]
-    abstract Item: string -> Attr with get, set
+type Narrow = Xantham.Fable.Core.Record<string, Attr>
 
-type Wide =
-    [<EmitIndexer>]
-    abstract Item: string -> Wide.Item with get, set
+type Wide = Xantham.Fable.Core.Record<string, Wide.Item>
 
 module Wide =
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]

@@ -4,18 +4,13 @@
   "module": "GlobalsLab",
   "counts": {
     "exact": 4,
-    "ergonomic": 7,
+    "ergonomic": 6,
     "widened": 0,
     "escape": 0
   },
   "passes": [
     {
       "pass": "HG - harvest-globals",
-      "total": 1,
-      "exact": 1
-    },
-    {
-      "pass": "SY - synthesize-anonymous",
       "total": 1,
       "exact": 1
     },
@@ -31,8 +26,8 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 7,
-      "ergonomic": 7
+      "total": 6,
+      "ergonomic": 6
     },
     {
       "pass": "RA - repair-arity",

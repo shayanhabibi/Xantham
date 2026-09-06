@@ -1087,6 +1087,7 @@ let shapePassTests =
 
             let bagType =
                 { Build.facts (Build.typeResponse 20 TypeFlags.Object) with
+                    SymbolName = Some "Bag"
                     IndexInfos =
                         [ { KeyTypeId = 1
                             ValueTypeId = 2
@@ -1119,6 +1120,7 @@ let shapePassTests =
 
             let bagType =
                 { Build.facts (Build.typeResponse 20 TypeFlags.Object) with
+                    SymbolName = Some "FrozenBag"
                     IndexInfos =
                         [ { KeyTypeId = 1
                             ValueTypeId = 1

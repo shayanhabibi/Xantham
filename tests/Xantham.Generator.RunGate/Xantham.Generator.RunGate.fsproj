@@ -43,6 +43,7 @@
         <Compile Include="..\Xantham.Generator.Tests\golden\callback-function-lab\CallbackFunctionLab.fs" Link="callback-function-lab\CallbackFunctionLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\delegate-name-lab\DelegateNameLab.fs" Link="delegate-name-lab\DelegateNameLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\shared-tag-lab\SharedTagLab.fs" Link="shared-tag-lab\SharedTagLab.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\record-index-lab\RecordIndexLab.fs" Link="record-index-lab\RecordIndexLab.fs" />
         <Compile Include="Probes.fs" />
         <Compile Include="Program.fs" />
         <None Include="register.mjs" />

@@ -1,0 +1,6 @@
+{
+    "name": "record-index-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "description": "Hand-authored fixture exercising the pure index-signature zone of docs/plans/generator-type-mapping.md 4.10 - an anonymous index signature resolved to Xantham.Fable.Core's Record/ReadonlyRecord, a named interface that keeps minting its own name, a mixed shape that still mints, a generic operand, and a package that declares its own conflicting Record. Tracked in git, no npm install, so the golden pins every case under the live compiler."
+}

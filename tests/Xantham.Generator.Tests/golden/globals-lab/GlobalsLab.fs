@@ -59,14 +59,9 @@ type Loose<'P> =
 /// </summary>
 [<Interface>]
 type Bag =
-    abstract loose: Bag.Loose with get, set
+    abstract loose: Xantham.Fable.Core.Record<string, string> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (loose: Bag.Loose) : Bag = jsNative
-
-module Bag =
-    type Loose =
-        [<EmitIndexer>]
-        abstract Item: string -> string with get, set
+    static member Create (loose: Xantham.Fable.Core.Record<string, string>) : Bag = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

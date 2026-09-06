@@ -1804,6 +1804,38 @@ let private mintedTaggedCases () =
     | SharedTagLab.Narrow.Event.Email -> check "a union claimed below the cap matches on its tag too" true
     | _ -> check "a JavaScript-built email reached another case" false
 
+/// §4.10's pure index signatures, resolved to `Xantham.Fable.Core.Record`/`ReadonlyRecord`
+/// rather than a minted interface. Every property below is one of those types; reading and
+/// writing through the F# indexer (`.[key]` / `.[key] <- value`) round-trips against the
+/// underlying JavaScript object, and one write is cross-checked by a direct `emitJsExpr`
+/// property read to confirm the indexer compiles to the same property access an index
+/// signature's own type would.
+let private recordIndex () =
+    let cache = RecordIndexLab.Cache.Create(entries = emitJsExpr () "({ a: 1, b: 2 })")
+
+    equal "a string-keyed Record reads a value off the object literal it was built from" 1.0 cache.entries.["a"]
+
+    cache.entries.["c"] <- 3.0
+
+    equal "and a write through Record's indexer lands as a plain property" 3.0 (emitJsExpr (cache.entries) "$0.c")
+
+    let grid =
+        RecordIndexLab.Grid.Create(rows = emitJsExpr () "({ 1: \"x\", 2: \"y\" })")
+
+    equal "a numeric-keyed Record reads the same way" "x" grid.rows.[1.0]
+
+    let frozen = RecordIndexLab.Frozen.Create(values = emitJsExpr () "({ ok: true })")
+
+    equal "a readonly index signature reads through ReadonlyRecord's indexer" true frozen.values.["ok"]
+
+    RecordIndexLab.Exports.tag (emitJsExpr () "({ x: 1.0 })")
+
+    check
+        "an imported function taking Record<string,'T> receives the plain object literal, no wrapper"
+        (emitJsExpr
+            ()
+            "globalThis.__recordIndexLabTagCalls.length === 1 && globalThis.__recordIndexLabTagCalls[0].x === 1")
+
 [<EntryPoint>]
 let main _ =
     globals ()
@@ -1831,6 +1863,7 @@ let main _ =
     callbackUnionNestingForms ()
     callbackNamedDelegateForms ()
     generatedDelegateForms ()
+    recordIndex ()
 
     match failures with
     | [] ->

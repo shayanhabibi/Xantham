@@ -6,13 +6,13 @@
     "exact": 19,
     "ergonomic": 88,
     "widened": 67,
-    "escape": 19
+    "escape": 18
   },
   "passes": [
     {
       "pass": "SY - synthesize-anonymous",
-      "total": 95,
-      "exact": 95
+      "total": 94,
+      "exact": 94
     },
     {
       "pass": "DT - detect-tagged-unions",
@@ -51,8 +51,8 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 85,
-      "ergonomic": 85
+      "total": 84,
+      "ergonomic": 84
     },
     {
       "pass": "RA - repair-arity",

@@ -106,14 +106,9 @@ type Registry<'M> =
 /// </summary>
 [<Interface>]
 type Manifest =
-    abstract flags: Manifest.Flags with get, set
+    abstract flags: Xantham.Fable.Core.Record<string, bool> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (flags: Manifest.Flags) : Manifest = jsNative
-
-module Manifest =
-    type Flags =
-        [<EmitIndexer>]
-        abstract Item: string -> bool with get, set
+    static member Create (flags: Xantham.Fable.Core.Record<string, bool>) : Manifest = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

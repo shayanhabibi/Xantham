@@ -852,7 +852,7 @@ module ErrorBoundary =
 [<Interface>]
 type SharedConfig =
     abstract context: SharedConfig.Context option with get, set
-    abstract resources: SharedConfig.Resources option with get, set
+    abstract resources: Xantham.Fable.Core.Record<string, obj> option with get, set
     abstract load: (string -> obj) option with get, set
     abstract has: (string -> bool) option with get, set
     abstract gather: (string -> unit) option with get, set
@@ -863,7 +863,7 @@ type SharedConfig =
     abstract getContextId: unit -> string
     abstract getNextContextId: unit -> string
     [<ParamObject; Emit("$0")>]
-    static member Create (getContextId: (unit -> string), getNextContextId: (unit -> string), ?context: SharedConfig.Context, ?resources: SharedConfig.Resources, ?load: (string -> obj), ?has: (string -> bool), ?gather: (string -> unit), ?registry: JS.Map<string, Browser.Types.Element>, ?``done``: bool, ?count: float, ?effects: Computation<obj, obj>[]) : SharedConfig = jsNative
+    static member Create (getContextId: (unit -> string), getNextContextId: (unit -> string), ?context: SharedConfig.Context, ?resources: Xantham.Fable.Core.Record<string, obj>, ?load: (string -> obj), ?has: (string -> bool), ?gather: (string -> unit), ?registry: JS.Map<string, Browser.Types.Element>, ?``done``: bool, ?count: float, ?effects: Computation<obj, obj>[]) : SharedConfig = jsNative
 
 module SharedConfig =
     [<Interface>]
@@ -872,10 +872,6 @@ module SharedConfig =
         abstract count: float with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (id: string, count: float) : Context = jsNative
-
-    type Resources =
-        [<EmitIndexer>]
-        abstract Item: string -> obj with get, set
 
 module SuspenseList =
     [<Interface>]
