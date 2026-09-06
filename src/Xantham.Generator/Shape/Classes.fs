@@ -297,7 +297,15 @@ let shapeClasses: Pass<ShapeModel> =
                                     let shaped =
                                         facts.Members
                                         |> List.filter (fun m ->
-                                            if m.Symbol.Name = "prototype" then
+                                            if m.Symbol.Name.Contains '`' then
+                                                emit (
+                                                    Finding.make
+                                                        $"{declaredName}.{m.Symbol.Name}"
+                                                        Members.UnspellableMemberDropped
+                                                )
+
+                                                false
+                                            elif m.Symbol.Name = "prototype" then
                                                 false
                                             elif isSymbolKeyed m.Symbol.Name then
                                                 let stable = m.Symbol.Name.Substring(0, m.Symbol.Name.LastIndexOf '@')

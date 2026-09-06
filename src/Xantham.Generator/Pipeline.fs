@@ -57,14 +57,43 @@ let moduleName (ctx: Context) =
 
 /// The group each generated declaration belongs to (O7), read off the type the shape tier named
 /// it from. A name carried by two type ids takes the smaller id's group.
-let private declOrigins (shape: ShapeModel) : Map<string, PackageId> =
+/// The group of each declared name: the origin of the type it declares, or, for a type with no
+/// origin of its own - a union or an intersection stays `Unclassified` - the group of the export
+/// it is the declared type of (`type PropertyKey = string | number | symbol` in the compiler
+/// lib).
+let private declOrigins (ctx: Context) (shape: ShapeModel) : Map<string, PackageId> =
+    let exportOrigins =
+        shape.Harvest.Exports
+        |> List.fold
+            (fun map export ->
+                match Map.tryFind export.Symbol.Id shape.ExportTypes with
+                | Some ids ->
+                    let origin = Grouping.classify ctx.PackageDir (ValueSome export.Symbol)
+
+                    Option.toList ids.Declared @ Option.toList ids.Value
+                    |> List.fold
+                        (fun map id ->
+                            if Map.containsKey id map then
+                                map
+                            else
+                                Map.add id origin map)
+                        map
+                | None -> map)
+            Map.empty
+
     shape.DeclNames
     |> Map.toList
     |> List.sortBy fst
     |> List.fold
         (fun origins (typeId, name) ->
             match Map.tryFind name origins, Map.tryFind typeId shape.Types with
-            | None, Some facts -> Map.add name facts.Origin origins
+            | None, Some facts ->
+                let origin =
+                    match facts.Origin with
+                    | Unclassified -> Map.tryFind typeId exportOrigins |> Option.defaultValue Unclassified
+                    | origin -> origin
+
+                Map.add name origin origins
             | _ -> origins)
         Map.empty
 
@@ -81,11 +110,23 @@ let private emittingGroup (ctx: Context) (origin: PackageId) =
 /// The modules a run writes: the entry package's, plus one per shipped group a declaration
 /// reached.
 let groupModules (ctx: Context) (shape: ShapeModel) : Render.GroupModule list =
-    let origins = declOrigins shape
+    let origins = declOrigins ctx shape
+
+    // A hoisted name (`NumberFormatOptions.UnitDisplay`, §4.9) is written beside the
+    // declaration at its root: a shipped group's file compiles before the entry module and
+    // has to carry every shape its own declarations read.
+    let rec originOf (name: string) =
+        match Map.tryFind name origins with
+        | Some(EntryPackage | Unclassified)
+        | None ->
+            match name.LastIndexOf '.' with
+            | -1 -> Unclassified
+            | at -> originOf (name.Substring(0, at))
+        | Some origin -> origin
 
     let groupOf decl =
         Render.declName decl
-        |> Option.bind (fun name -> Map.tryFind name origins)
+        |> Option.map originOf
         |> Option.defaultValue Unclassified
         |> emittingGroup ctx
 

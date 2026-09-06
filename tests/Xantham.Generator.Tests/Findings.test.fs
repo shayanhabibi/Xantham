@@ -122,6 +122,7 @@ let findingsTests =
                     "MB.IndexSignatureAsIndexer MB004 ergonomic"
                     "MB.OptionalHookAsInterface MB005 ergonomic"
                     "MB.OptionalParameterFromUnion MB006 ergonomic"
+                    "MB.UnspellableMemberDropped MB007 widened"
                     "HG.AmbientModuleDropped HG001 escape"
                     "HG.UnwritableGlobalDropped HG002 escape"
                     "HG.NothingHarvested HG003 escape"

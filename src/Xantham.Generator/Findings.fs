@@ -158,6 +158,7 @@ module FindingCodes =
             "MB.IndexSignatureAsIndexer", "MB004"
             "MB.OptionalHookAsInterface", "MB005"
             "MB.OptionalParameterFromUnion", "MB006"
+            "MB.UnspellableMemberDropped", "MB007"
             "HG.AmbientModuleDropped", "HG001"
             "HG.UnwritableGlobalDropped", "HG002"
             "HG.NothingHarvested", "HG003"
@@ -654,12 +655,16 @@ type Members =
     /// Wave seven, lane AG. The parameter admits `undefined` through its declared type rather
     /// than through a `?` token.
     | [<Ergonomic>] OptionalParameterFromUnion
+    /// Wave sixteen. The member's key holds a backtick, which no F# identifier can carry even
+    /// backticked: `RegExpConstructor`'s legacy `` $` ``.
+    | [<Widened>] UnspellableMemberDropped
 
     interface IFindingKind with
         member this.Message =
             match this with
             | OptionalParameterAsOption -> "optional parameter reads as option"
             | SymbolKeyedMemberDropped -> "symbol-keyed member dropped (unrepresentable in F#)"
+            | UnspellableMemberDropped -> "member dropped: its key holds a backtick, which no F# identifier can carry"
             | OptionalMemberAsOption -> "optional member reads as option"
             | IndexSignatureAsIndexer -> "index signature reads as an EmitIndexer Item member (§4.10)"
             | OptionalHookAsInterface asInterface ->

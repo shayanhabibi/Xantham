@@ -2715,7 +2715,10 @@ let internal shapeMembers
     let members =
         facts.Members
         |> List.filter (fun m ->
-            if isSymbolKeyed m.Symbol.Name then
+            if m.Symbol.Name.Contains '`' then
+                emit (Finding.make $"{self}.{m.Symbol.Name}" Members.UnspellableMemberDropped)
+                false
+            elif isSymbolKeyed m.Symbol.Name then
                 // The name is cut at the checker id (`__@iterator@1469` -> `__@iterator`):
                 // the id is session-specific and would break run-to-run determinism.
                 let stable = m.Symbol.Name.Substring(0, m.Symbol.Name.LastIndexOf '@')
