@@ -557,6 +557,37 @@ let internal reducedOperand (model: ShapeModel) (facts: TypeFacts) =
         | _ :: _, [ remaining ] -> Some remaining
         | _ -> None
 
+/// The operand an intersection reduces to when the checker reduces the whole intersection to
+/// `never` (§4.6): two object operands share a property name, one types it a nullable marker,
+/// and that collision empties every member from the aggregate rather than leaving the property
+/// itself typed `never`. The survivor is the operand that did not mark the shared property
+/// nullable, carrying the property that a caller can actually reach.
+let internal uninhabitedOperand (model: ShapeModel) (facts: TypeFacts) =
+    if not (facts.Members.IsEmpty && facts.IndexInfos.IsEmpty) then
+        None
+    else
+        let operands = operandsOf model facts
+
+        if
+            operands.IsEmpty
+            || not (operands |> List.forall (flag TypeFlags.Object))
+            || not (operands |> List.exists (fun operand -> not operand.Members.IsEmpty))
+        then
+            None
+        else
+            let isNullable (m: ResolvedMember) =
+                match Map.tryFind m.TypeId model.Types with
+                | Some t -> flag TypeFlags.Null t || flag TypeFlags.Undefined t
+                | None -> false
+
+            operands
+            |> List.collect (fun operand -> operand.Members |> List.map (fun m -> m, operand))
+            |> List.groupBy (fun (m, _) -> m.Symbol.Name)
+            |> List.tryPick (fun (name, group) ->
+                match group |> List.partition (fun (m, _) -> isNullable m) with
+                | _ :: _, [ (_, survivor) ] -> Some(survivor, name)
+                | _ -> None)
+
 /// Whether an argument *is* the bound, or reaches it through the bases and intersection
 /// operands `shape-interfaces` emits as `inherit`. An instantiation is asked of its target,
 /// the declaration carrying the heritage. This is F# subtyping, not TypeScript's: it is the
@@ -1195,27 +1226,38 @@ and internal intersectionRef
                     reference, findings @ [ Finding.make owner TypeReference.EmptyIntersectionOperandReduced ]
                 | None ->
 
-                    // Callable operands carry their signatures over to the intersection, which is
-                    // the overload set `typeof round & Chained` spells. A member position reads it
-                    // as a delegate, the way any other callback reads (D5); an export position
-                    // reaches the same signatures and writes them as overloads.
-                    if isPureCallback facts && facts.IndexInfos.IsEmpty then
-                        let reference, findings = delegateRef ctx model self owner facts
+                    match uninhabitedOperand model facts with
+                    | Some(operand, property) ->
+                        let reference, findings = typeRef ctx model self owner operand.Response.Id
 
                         reference,
                         findings
-                        @ [
-                            Finding.make owner (TypeReference.IntersectionCallableFlattened facts.CallSignatures.Length)
-                        ]
-                    else
+                        @ [ Finding.make owner (TypeReference.UninhabitedIntersectionReduced property) ]
+                    | None ->
 
-                        let reason =
-                            if facts.Members.IsEmpty && facts.IndexInfos.IsEmpty then
-                                TypeReference.IntersectionOverNonObject
-                            else
-                                TypeReference.IntersectionNotDeclared
+                        // Callable operands carry their signatures over to the intersection, which is
+                        // the overload set `typeof round & Chained` spells. A member position reads it
+                        // as a delegate, the way any other callback reads (D5); an export position
+                        // reaches the same signatures and writes them as overloads.
+                        if isPureCallback facts && facts.IndexInfos.IsEmpty then
+                            let reference, findings = delegateRef ctx model self owner facts
 
-                        FsObj, [ Finding.make owner reason ]
+                            reference,
+                            findings
+                            @ [
+                                Finding.make
+                                    owner
+                                    (TypeReference.IntersectionCallableFlattened facts.CallSignatures.Length)
+                            ]
+                        else
+
+                            let reason =
+                                if facts.Members.IsEmpty && facts.IndexInfos.IsEmpty then
+                                    TypeReference.IntersectionOverNonObject
+                                else
+                                    TypeReference.IntersectionNotDeclared
+
+                            FsObj, [ Finding.make owner reason ]
 
 /// `T[K]`. Where `K` is a key variable this signature bound as `typekeyof<'T,'R>`, the access is
 /// exactly the `'R` that idiom introduced. Everything else - `T[keyof T]`, an access over an

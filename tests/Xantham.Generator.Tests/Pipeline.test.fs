@@ -888,6 +888,63 @@ let pipelineTests =
                             "and the hybrid is not read as a callback" ])
 
         yield!
+            fixtureTests
+                "uninhabited-intersection-lab"
+                (handFixture "uninhabited-intersection-lab")
+                GeneratorConfig.Default
+                (fun package ->
+                    [ testCase "a method colliding with its own class's nullable marker resolves to the class (§4.6)"
+                      <| fun _ ->
+                        let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                        let source = rendered.Files |> List.head |> snd
+
+                        Expect.stringContains
+                            source
+                            "abstract ``then``: ?callback: (Timer -> obj)"
+                            "self resolves to Timer, not obj"
+
+                        Expect.equal
+                            (rendered.Findings
+                             |> List.filter (fun finding -> finding.Key = "TR058")
+                             |> List.map (fun finding -> finding.Symbol, finding.Message)
+                             |> List.sort)
+                            [ "Reduced",
+                              "'then' collides across the intersection's operands and TypeScript reduces the whole type to never; the operand that does not mark 'then' nullable is the type"
+                              "Timer.then(callback)(self)",
+                              "'then' collides across the intersection's operands and TypeScript reduces the whole type to never; the operand that does not mark 'then' nullable is the type"
+                              "reduced",
+                              "'then' collides across the intersection's operands and TypeScript reduces the whole type to never; the operand that does not mark 'then' nullable is the type" ]
+                            "the alias, its use and the member position are each owned once"
+
+                      testCase "an alias over the same collision resolves to its surviving operand (§4.6)" <| fun _ ->
+                        let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                        let source = rendered.Files |> List.head |> snd
+
+                        Expect.stringContains source "type Reduced = Named" "the alias binds to the operand that kept its members"
+
+                      testCase "a non-colliding marker, a non-member name and a non-unit collision all flatten (§4.6)"
+                      <| fun _ ->
+                        let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                        let source = rendered.Files |> List.head |> snd
+
+                        Expect.stringContains source "abstract paused: bool with get, set" "the non-colliding marker's member survives"
+                        Expect.stringContains source "abstract ``then``: obj with get, set" "the non-member collision has nothing to reduce"
+
+                        Expect.stringContains
+                            source
+                            "abstract ``then``: ?callback: (Chained.Then.Callback.Self -> obj)"
+                            "a non-unit collision keeps the self as a hoisted shape"
+
+                        Expect.isEmpty
+                            (rendered.Findings
+                             |> List.filter (fun finding ->
+                                 finding.Key = "TR058"
+                                 && (finding.Symbol.StartsWith "Ticking"
+                                     || finding.Symbol.StartsWith "Player"
+                                     || finding.Symbol.StartsWith "Chained")))
+                            "none of the three negatives reduces to never" ])
+
+        yield!
             fixtureTests "inherit-lab" (handFixture "inherit-lab") GeneratorConfig.Default (fun package ->
                 [ testCase "a declared base is inherited beside the members it redeclares (§4.4)" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)

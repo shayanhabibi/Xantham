@@ -571,7 +571,7 @@ type TypeReference =
                 $"string literal {literal} kept as a literal type; it separates an overload"
             | BareNullToObj -> "a bare null type widened to obj; absence is not carried"
             | UninhabitedIntersectionReduced property ->
-                $"the intersection carrying '{property}' reduces to never; TypeScript admits no value of it"
+                $"'{property}' collides across the intersection's operands and TypeScript reduces the whole type to never; the operand that does not mark '{property}' nullable is the type"
 
 /// Type parameter binding: `Shape.typeParamsOf`, `aliasTypeParams`, key variables and erasure.
 [<Prefix "TP">]

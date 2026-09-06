@@ -186,7 +186,7 @@ type JSAnimation =
     abstract revert: unit -> JSAnimation
     /// <remarks>@param callback</remarks>
     /// <remarks>@return Promise&lt;this&gt;</remarks>
-    abstract ``then``: ?callback: (obj -> obj) -> JS.Promise<obj>
+    abstract ``then``: ?callback: (JSAnimation -> obj) -> JS.Promise<obj>
     /// <remarks>@type {Number}</remarks>
     abstract deltaTime: float with get, set
     /// <remarks>@type {Number}</remarks>
@@ -1512,7 +1512,7 @@ type Timeline =
     abstract revert: unit -> Timeline
     /// <remarks>@param callback</remarks>
     /// <remarks>@return Promise&lt;this&gt;</remarks>
-    abstract ``then``: ?callback: (obj -> obj) -> JS.Promise<obj>
+    abstract ``then``: ?callback: (Timeline -> obj) -> JS.Promise<obj>
     /// <remarks>@type {Number}</remarks>
     abstract deltaTime: float with get, set
     /// <remarks>@type {Number}</remarks>
@@ -1787,7 +1787,7 @@ type Timer =
     abstract complete: ?muteCallbacks: U2<float, bool> -> Timer
     /// <remarks>@param callback</remarks>
     /// <remarks>@return Promise&lt;this&gt;</remarks>
-    abstract ``then``: ?callback: (obj -> obj) -> JS.Promise<obj>
+    abstract ``then``: ?callback: (Timer -> obj) -> JS.Promise<obj>
 
 [<Interface>]
 type DefaultsParams =
@@ -2108,7 +2108,7 @@ module CallbackArgument =
         abstract revert: unit -> CallbackArgument.Head
         /// <remarks>@param callback</remarks>
         /// <remarks>@return Promise&lt;this&gt;</remarks>
-        abstract ``then``: ?callback: (obj -> obj) -> JS.Promise<obj>
+        abstract ``then``: ?callback: (JSAnimation -> obj) -> JS.Promise<obj>
         /// <remarks>@type {Number}</remarks>
         abstract deltaTime: float with get, set
         /// <remarks>@type {Number}</remarks>
@@ -2630,7 +2630,7 @@ module CallbackArgument =
             abstract revert: unit -> CallbackArgument.Head.Prev
             /// <remarks>@param callback</remarks>
             /// <remarks>@return Promise&lt;this&gt;</remarks>
-            abstract ``then``: ?callback: (obj -> obj) -> JS.Promise<obj>
+            abstract ``then``: ?callback: (Timeline -> obj) -> JS.Promise<obj>
             /// <remarks>@type {Number}</remarks>
             abstract deltaTime: float with get, set
             /// <remarks>@type {Number}</remarks>
@@ -2935,7 +2935,7 @@ module CallbackArgument =
         abstract complete: ?muteCallbacks: U2<float, bool> -> CallbackArgument.Head2
         /// <remarks>@param callback</remarks>
         /// <remarks>@return Promise&lt;this&gt;</remarks>
-        abstract ``then``: ?callback: (obj -> obj) -> JS.Promise<obj>
+        abstract ``then``: ?callback: (Timer -> obj) -> JS.Promise<obj>
         abstract property: string with get, set
         abstract target: Target with get, set
         abstract _value: obj with get, set
@@ -5531,7 +5531,7 @@ type WAAPIAnimation =
     abstract revert: unit -> WAAPIAnimation
     /// <remarks>@param callback</remarks>
     /// <remarks>@return Promise&lt;this&gt;</remarks>
-    abstract ``then``: ?callback: (obj -> obj) -> JS.Promise<obj>
+    abstract ``then``: ?callback: (WAAPIAnimation -> obj) -> JS.Promise<obj>
 
 type Animate = delegate of targets: DOMTargetsParam * ``params``: WAAPIAnimationParams -> WAAPIAnimation
 
