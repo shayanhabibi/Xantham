@@ -1093,6 +1093,29 @@ let pipelineTests =
                             "none of the three negatives reduces to never" ])
 
         yield!
+            fixtureTests "inherited-members-lab" (handFixture "inherited-members-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a member a base declares at the same signature is written once, down a nested chain" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    let count (text: string) = source.Split(text).Length - 1
+
+                    Expect.equal (inheritsOf source "Element") [ "Node" ] "the chain's first edge"
+                    Expect.equal (inheritsOf source "HTMLElement") [ "Element" ] "its second"
+                    Expect.equal (inheritsOf source "HTMLDivElement") [ "HTMLElement" ] "and its third"
+
+                    Expect.equal (count "abstract nodeName: string") 1 "a Node member is declared on Node alone"
+                    Expect.equal (count "abstract getAttributeNode: name: string -> Attr option") 1 "an Element member on Element alone"
+                    Expect.equal (count "abstract hidden: bool") 1 "an HTMLElement member on HTMLElement alone"
+                    Expect.equal (count "abstract align: string") 1 "and the leaf keeps its own"
+
+                    Expect.equal (count "abstract cloneNode: ") 3 "a member narrowed at each level is redeclared at each"
+
+                    Expect.stringContains source "abstract cloneNode: ?deep: bool -> HTMLDivElement" "at the leaf's own type"
+
+                    Expect.equal (count "abstract volume: float") 1 "a diamond's shared member is written on the arm that declares it" ])
+
+        yield!
             fixtureTests "inherit-lab" (handFixture "inherit-lab") GeneratorConfig.Default (fun package ->
                 [ testCase "a declared base is inherited beside the members it redeclares (§4.4)" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -1116,8 +1139,8 @@ let pipelineTests =
 
                     Expect.equal
                         (source.Split("abstract volume: float").Length - 1)
-                        3
-                        "F# admits the redeclaration down every arm"
+                        1
+                        "the shared member is written once, on the arm that declares it"
 
                   testCase "a generic base carries its argument to the inherit" <| fun _ ->
                     // `inherit Box` alone is FS0033: F# has no bare generic base.
