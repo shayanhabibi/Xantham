@@ -1,33 +1,33 @@
 {
   "schemaVersion": 1,
-  "package": "callback-function-lab",
-  "module": "CallbackFunctionLab",
+  "package": "delegate-name-lab",
+  "module": "DelegateNameLab",
   "counts": {
-    "exact": 31,
-    "ergonomic": 22,
+    "exact": 9,
+    "ergonomic": 11,
     "widened": 0,
     "escape": 0
   },
   "passes": [
     {
       "pass": "SY - synthesize-anonymous",
-      "total": 26,
-      "exact": 26
+      "total": 16,
+      "exact": 16
     },
     {
       "pass": "shape-callbacks",
-      "total": 14,
-      "ergonomic": 14
+      "total": 9,
+      "ergonomic": 9
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 4,
-      "ergonomic": 4
+      "total": 2,
+      "ergonomic": 2
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 19,
-      "ergonomic": 19
+      "total": 3,
+      "ergonomic": 3
     }
   ]
 }

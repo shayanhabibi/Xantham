@@ -22,6 +22,7 @@ let auditCoverage: Pass<ShapeModel> =
                             | FsTaggedUnion decl -> [ decl.Name ]
                             | FsEnum decl -> [ decl.Name ]
                             | FsAbbrev decl -> [ decl.Name ]
+                            | FsDelegateType decl -> [ decl.Name ]
                             | FsPhantom decl -> [ decl.Name ]
                             | FsMeasure decl -> [ decl.Name ]
                             | FsExports members -> members |> List.map _.Name)

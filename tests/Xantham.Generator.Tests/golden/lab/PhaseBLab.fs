@@ -24,7 +24,7 @@ type Mixed =
     | [<CompiledValue(1.5)>] N1_5
     | [<CompiledValue(false)>] False
 
-type TickCallback = Action<float, float option>
+type TickCallback = delegate of progress: float * count: float option -> unit
 
 /// <summary>
 /// Options for a timer.
@@ -159,18 +159,20 @@ type Keyed<'K> =
 
 type Mapper<'T> = ('T -> 'T)
 
+type Clamp = delegate of value: float * min: float * max: float -> float
+
 [<Interface>]
 type Utils =
     /// <summary>
     /// Clamps a value between bounds.
     /// </summary>
-    abstract clamp: Func<float, float, float, float> with get, set
+    abstract clamp: Clamp with get, set
     /// <summary>
     /// A namespaced constant.
     /// </summary>
     abstract epsilon: float
     [<ParamObject; Emit("$0")>]
-    static member Create (clamp: Func<float, float, float, float>, epsilon: float) : Utils = jsNative
+    static member Create (clamp: Clamp, epsilon: float) : Utils = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

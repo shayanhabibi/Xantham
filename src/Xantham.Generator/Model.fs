@@ -976,6 +976,10 @@ type FsStringEnumDecl =
         Cases: FsUnionCase list
     }
 
+/// One parameter of a named delegate declaration: the name TypeScript spelled, and the F# type
+/// written at that position.
+type FsDelegateParam = { Name: string; Type: FsTypeRef }
+
 /// One field of a tagged-union case. The name is the JS property key verbatim: Fable emits the
 /// field under its F# name, and backtick escaping is transparent there (`` ``type`` `` reaches
 /// JS as `type`), so no separate compiled name is needed.
@@ -1036,6 +1040,24 @@ type FsAbbrevDecl =
         Target: FsTypeRef
     }
 
+/// A callback declared as a named F# delegate: `type TickHandler = delegate of x: float * y:
+/// float -> string` (D5). It guarantees arity at the Fable boundary exactly as `System.Func` and
+/// `System.Action` do, and carries the parameter names TypeScript spelled on top of that, so
+/// `handler.Invoke(x = 1.0, y = 2.0)` and every tooltip reads them.
+type FsDelegateDecl =
+    {
+        Name: string
+        Docs: string
+        Tags: JSDocTagInfo list
+        Order: DeclOrder option
+        /// The delegate's own type parameters, in declaration order (§4.9), written on its left
+        /// side: `type Reader<'T> = delegate of source: 'T -> string`.
+        TypeParameters: FsTypeParam list
+        /// Empty for a nullary callback, which renders `delegate of unit -> ...`.
+        Parameters: FsDelegateParam list
+        Return: FsTypeRef
+    }
+
 /// A declaration TypeScript *computes* and F# cannot reproduce: a mapped type, a conditional or
 /// a template literal at an operand the checker could not resolve (§4.10, §4.11). There is no
 /// structure to emit - the structure is a function of an argument not yet supplied - so the
@@ -1077,6 +1099,7 @@ type FsDecl =
     | FsTaggedUnion of FsTaggedUnionDecl
     | FsEnum of FsEnumDecl
     | FsAbbrev of FsAbbrevDecl
+    | FsDelegateType of FsDelegateDecl
     /// The one `Exports` type gathering the module's value exports.
     | FsExports of FsExportMember list
 

@@ -20,6 +20,13 @@ export function callThree(callback) {
     return report(callback, 1, 2, 3);
 }
 
+// Arity 4, in both directions. `index.d.ts` declares neither: the arity-4 pair exists for the
+// hand-written bindings in `RunGate/Program.fs`, which compare a named F# delegate against
+// `System.Func` at an arity the generated golden does not reach.
+export function callFour(callback) {
+    return report(callback, 1, 2, 3, 4);
+}
+
 export function callVoid(callback) {
     callback(7);
     return callback.length;
@@ -56,6 +63,11 @@ export const factory = {
     ready: () => "ready",
     pair: (a, b) => `pair:${a}:${b}`,
 };
+
+// The read-back half of the arity-4 pair above.
+export function makeFour(seed) {
+    return (a, b, c, d) => `four:${seed}:${a}:${b}:${c}:${d}`;
+}
 
 export function callNesting(outer) {
     const inner = outer(5);
