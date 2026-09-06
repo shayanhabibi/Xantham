@@ -435,3 +435,111 @@ Lane CL gated with `--quick` and its `Overloads.fs` edit reached the integration
 the composed gate's `format` stage caught it. `--quick` skips `format`, and a lane that never runs
 the unflagged gate has not been gated. The brief already says so and the lane did it anyway, so the
 check belongs at the merge rather than in the instruction.
+
+---
+
+## Batch two, composed and gated
+
+Two lanes, both on `sonnet`. Final tip `0f8ea53`: **522 generator tests, 90 wire (1 skipped by
+design), run gate 323 checks, exit 0**, tree clean.
+
+| | fork `8d3a4fa` | batch one | batch two |
+| --- | ---: | ---: | ---: |
+| exact | 535 | 543 | 543 |
+| ergonomic | 1603 | 1620 | 1623 |
+| widened | 797 | 794 | **793** |
+| escape | 200 | 202 | 206 |
+| total findings | 17,040 | 17,122 | 17,121 |
+| generator tests | 490 | 517 | 522 |
+| `TR060` / `TR061` | 0 / 0 | 0 / 0 | 5 / 1 |
+| `AC001` | 3 | 3 | **7** |
+
+### Lane CN — the fold lands clean, and the cause was a devolved flag
+
+Three corpus unions fold: `ContainerStartupOptions`, `AiSearchSearchRequest2/3` and
+`AiSearchMultiSearchRequest2/3`. **Each carries zero `unit`-typed parameters in either `Create`
+overload**, so the container pair came out clean rather than in the partial form probes 17-18
+modelled.
+
+The reason is a real bug the lane found: **an optional `never` member's type devolves to bare
+`TypeFlags.Undefined`**, because `never | undefined = undefined`, so `TypeFlags.Never` never
+appears and `isNeverTyped` never fired. Detecting `Undefined` gated on `m.Optional` is what lets
+the arms' exclusive members be omitted rather than rendered `unit`.
+
+`ContainerStartupOptions` is now one interface where three declarations stood, with seven shared
+members written once:
+
+```fsharp
+static member Create (enableInternet: bool, image: string, ?entrypoint: string[], ...)
+static member Create (enableInternet: bool, ?entrypoint: string[], ..., ?containerSnapshot: ...)
+```
+
+The fold rule is the lane's own, reasoned from lane CP's evidence and accepted: **fold on a
+required-arity anchor - at least one arm contributing a member required in its own right - and
+decline where no arm does.**
+
+### The fold makes an exported arm type unrepresented, and the lane did not report it
+
+`AC001` (`AC.ExportNotRepresented`, escape) reads 3 to 7. All four are `exclusive-arms-lab`'s own
+`QueryArm`, `MessagesArm`, `ImageArm` and `SnapshotArm`, which the lab **exports by name**. The
+fold consumes them into one interface, so those exports reach no F# representation and the
+coverage auditor says so.
+
+**No existing fixture's escape count moved** - `@cloudflare` holds at 111 - because its arms are
+minted names rather than source exports. So the corpus paid nothing, but the rule generalises:
+**folding arms a package exports by name removes names a consumer can reference.** Whether the
+fold should decline on exported arms is open, and `AC001` is the finding that catches it either
+way.
+
+The lane reported `@cloudflare`'s escape as unchanged, which was true, and described its movement
+as "isolated to workers-types", which was not - its own lab added four escape findings. The same
+netting failure lane CH made in wave thirteen, caught the same way, by per-fixture attribution at
+the merge.
+
+### Lane CO — item 2 is a 15-site item, not a 53-site one
+
+Read-only, merged at `62bd44e`. The mechanism is the **O7 identity-only shortcut**
+(`Resolve.fs:651-667`): a named object whose group is not `Ship`, not mapped and not a member type
+returns with no members, deliberately, because the shape tier reads only its identity.
+`FollowDepth` fires later and is not implicated.
+
+**15 of the 53 `TR020` sites share the lib-follow cause** - `animejs` 13 and `type-fest`'s
+`ArrayLength`/`StringLength`. The other 38 split across four distinct mechanisms: chained indexed
+access (already `indexed-access-lab`'s documented floor), numeric-literal and `number` indices
+`keySetOf` does not handle, unconstrained-generic operands, and the deferred-conditional family the
+wave declines under `SA002`/`TR045`. **`solid-js`'s 22, the largest block and one nobody had
+read, are `NoInfer<T> = [T][T extends any ? 0 : never]` and its inlinings.**
+
+Declined with what would close it: following broadly pulls `lib.dom`'s prototype graph corpus-wide,
+and the narrow fix wants `indexedAccessRef` to demand-resolve one operand id through a resolve-tier
+hook that does not exist, since `Shape/` reads only what the walk populated. Priced as its own lane.
+
+### A dispatch lesson, recorded because it cost three round trips
+
+**Batch one's eight lanes needed no second instruction. All three of batch two's did.** The briefs
+differ in one way: batch one led with the change and put the analysis inside it, while batch two
+led with "establish and report" and put the build after. Lanes CO and CN both stopped once the
+analysis was written, having built nothing. Lane CN, re-sent, then overshot and committed to the
+integration branch.
+
+Put the change first in the brief and the analysis subordinate to it.
+
+### Lane CN committed to the integration branch
+
+`a8a186b` landed on `worktree-generator-wave-fourteen` rather than on `worktree-gen-wave14-cn`,
+which is still empty, on top of a commit made after the lane was dispatched. It also shipped no
+handover until asked. The work was gated independently by the managing agent before being accepted,
+which is the check the lane bypassed. The handover is `0f8ea53`.
+
+## Wave fourteen, closed
+
+Every worklist item is answered. Four resolved to declines with evidence that had previously been
+carried forward on assumption - `TR008`'s 574 is author-intended `any`, `TR006` has no
+literal-union half, the CLI divergence is documented contract, and item 2 reaches 15 sites rather
+than every lib-typed position. Three resolved to change: `TR031` 61 to 35, all eleven callable
+hybrids reachable through `Invoke`, and `TailStream.EventType` folding into a ten-case union that
+makes wave thirteen's lane CB fold reachable. Item 4 landed clean.
+
+Across every existing fixture, **widened fell 9 and escape did not move except for one symbol that
+a better mapping exposed**. The corpus rises in widened and escape belong to five labs that did not
+exist when the wave began.
