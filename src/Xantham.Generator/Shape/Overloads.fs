@@ -99,8 +99,7 @@ let dedupeOverloads: Pass<ShapeModel> =
                         | other -> other
 
                     let signatureKey (typeParameters: FsTypeParam list) (parameters: FsParam list) =
-                        let rename =
-                            typeParameters |> List.mapi (fun i p -> p.Name, $"T{i}") |> Map.ofList
+                        let rename = typeParameters |> List.mapi (fun i p -> p.Name, $"T{i}") |> Map.ofList
 
                         parameters
                         |> List.map (fun p -> p.Optional, p.Rest, normalize Set.empty (renameTypeVars rename p.Type))
@@ -180,7 +179,8 @@ let dedupeOverloads: Pass<ShapeModel> =
                             let key, dropped =
                                 match m.Body with
                                 | ExportFunction(parameters, _) ->
-                                    Some("fn", signatureKey [] parameters), DedupeOverloads.ExportFunctionOverloadDropped
+                                    Some("fn", signatureKey [] parameters),
+                                    DedupeOverloads.ExportFunctionOverloadDropped
                                 | ExportConstructor(parameters, _) ->
                                     Some("new", signatureKey [] parameters), DedupeOverloads.OverloadDropped
                                 | ExportValue _ -> None, DedupeOverloads.OverloadDropped
