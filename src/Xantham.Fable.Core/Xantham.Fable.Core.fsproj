@@ -24,6 +24,7 @@
 
     <ItemGroup>
         <Compile Include="Brand.fs"/>
+        <Compile Include="Record.fs"/>
         <Compile Include="Library.fs"/>
         <None Include="README.md" Pack="true" PackagePath="\" />
     </ItemGroup>

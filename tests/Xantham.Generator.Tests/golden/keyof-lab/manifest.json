@@ -11,13 +11,13 @@
   "passes": [
     {
       "pass": "SI - shape-interfaces",
-      "total": 12,
-      "ergonomic": 12
+      "total": 11,
+      "ergonomic": 11
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 9,
-      "ergonomic": 1,
+      "total": 10,
+      "ergonomic": 2,
       "widened": 8
     },
     {
@@ -28,8 +28,8 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 13,
-      "ergonomic": 13
+      "total": 12,
+      "ergonomic": 12
     }
   ]
 }

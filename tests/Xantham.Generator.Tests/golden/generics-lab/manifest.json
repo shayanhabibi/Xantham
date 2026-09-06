@@ -4,15 +4,15 @@
   "module": "GenericsLab",
   "counts": {
     "exact": 5,
-    "ergonomic": 11,
+    "ergonomic": 10,
     "widened": 1,
     "escape": 0
   },
   "passes": [
     {
       "pass": "SY - synthesize-anonymous",
-      "total": 5,
-      "exact": 5
+      "total": 4,
+      "exact": 4
     },
     {
       "pass": "shape-callbacks",
@@ -37,8 +37,8 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 11,
-      "ergonomic": 11
+      "total": 10,
+      "ergonomic": 10
     }
   ]
 }

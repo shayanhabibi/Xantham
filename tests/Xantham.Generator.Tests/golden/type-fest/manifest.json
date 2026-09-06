@@ -4,8 +4,8 @@
   "module": "TypeFest",
   "counts": {
     "exact": 25,
-    "ergonomic": 71,
-    "widened": 203,
+    "ergonomic": 64,
+    "widened": 202,
     "escape": 2
   },
   "passes": [
@@ -16,14 +16,14 @@
     },
     {
       "pass": "SY - synthesize-anonymous",
-      "total": 50,
-      "exact": 50
+      "total": 42,
+      "exact": 42
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 640,
+      "total": 648,
       "exact": 5,
-      "ergonomic": 625,
+      "ergonomic": 633,
       "widened": 10
     },
     {
@@ -35,8 +35,8 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 58,
-      "ergonomic": 58
+      "total": 50,
+      "ergonomic": 50
     },
     {
       "pass": "RA - repair-arity",

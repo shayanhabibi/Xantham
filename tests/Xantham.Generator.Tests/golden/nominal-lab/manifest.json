@@ -21,10 +21,15 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 6,
+      "total": 4,
       "exact": 1,
-      "ergonomic": 3,
+      "ergonomic": 1,
       "widened": 2
+    },
+    {
+      "pass": "SA - shape-aliases",
+      "total": 2,
+      "ergonomic": 2
     },
     {
       "pass": "SC - shape-classes",
@@ -33,8 +38,8 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 7,
-      "ergonomic": 7
+      "total": 5,
+      "ergonomic": 5
     }
   ]
 }

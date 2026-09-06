@@ -447,7 +447,7 @@ let private renderMember (m: FsMember) =
             yield! docLines "    " c.Docs c.Tags
             yield "    [<EmitConstructor>]"
             let head = declHead "Create" c.TypeParameters
-            yield $"    abstract {head}: {renderAbstractSignature c.Parameters c.Return}"
+            yield $"    abstract {head}{memberColon head} {renderAbstractSignature c.Parameters c.Return}"
         ]
 
 /// One binding attribute at `indent`, optionally carrying a second attribute inside the same

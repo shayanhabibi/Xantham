@@ -168,6 +168,16 @@ let internal isPureCallback (facts: TypeFacts) =
     && facts.ConstructSignatures.IsEmpty
     && facts.Members.IsEmpty
 
+/// An object type whose whole content is one index signature: `interface Bag { [key:
+/// string]: number }`, or the anonymous shape `Record`/`ReadonlyRecord` express directly
+/// (§4.10, TR059).
+let internal isPureIndexSignature (facts: TypeFacts) =
+    flag TypeFlags.Object facts
+    && facts.Members.IsEmpty
+    && facts.CallSignatures.IsEmpty
+    && facts.ConstructSignatures.IsEmpty
+    && facts.IndexInfos.Length = 1
+
 /// A tuple type (§4.12). Fable compiles an F# tuple to a JS array, so a fixed tuple is an
 /// exact match; the variadic forms are not.
 let internal isTuple (facts: TypeFacts) =
@@ -218,6 +228,86 @@ let internal arrayElement (model: ShapeModel) (facts: TypeFacts) =
 /// Module symbols are named by their quoted file path, which is no name either.
 let internal isSyntheticName (name: string) =
     name.StartsWith "__" || name.StartsWith "\""
+
+/// A pure index signature the checker gave no symbol of its own: reached through a type
+/// alias or written inline, rather than declared as an interface. `Bag`'s and
+/// `FrozenBag`'s own names are what their own consumers call them, and stay; this shape has
+/// none to lose.
+/// The ids a declaration binds: its own where it is a genuine generic declaration, and the
+/// alias's where it is a generic *alias*. `type Mapper<T> = (t: T) => T` leaves the function
+/// type itself parameterless - the alias is the only place `T` appears - so both are read.
+let internal declParamIds (facts: TypeFacts) =
+    (facts.Response.TypeParameters
+     |> ValueOption.map Array.toList
+     |> ValueOption.defaultValue [])
+    @ facts.AliasTypeArguments
+    |> List.distinct
+
+/// Whether `typeId` reads `paramId` anywhere in its own type arguments or union/intersection
+/// operands - `T[]`, `T | U`, `T & U` all carry a type parameter this way.
+let rec private mentionsTypeParam (model: ShapeModel) (paramId: int) (typeId: int) : bool =
+    typeId = paramId
+    || (match Map.tryFind typeId model.Types with
+        | None -> false
+        | Some facts ->
+            facts.TypeArguments |> List.exists (mentionsTypeParam model paramId)
+            || facts.UnionMembers |> List.exists (mentionsTypeParam model paramId)
+            || facts.IntersectionMembers |> List.exists (mentionsTypeParam model paramId))
+
+/// Whether the type graph starting at `root` reaches `target` through type arguments, union or
+/// intersection operands, or an alias's own target. An interface's members are not walked: a
+/// cycle closed through one is nominal, not a cycle a plain abbreviation would inherit.
+let private reachesTypeId (model: ShapeModel) (target: int) (root: int) : bool =
+    let mutable visited = Set.empty
+
+    let rec go typeId =
+        if typeId = target then
+            true
+        elif Set.contains typeId visited then
+            false
+        else
+            visited <- Set.add typeId visited
+
+            match Map.tryFind typeId model.Types with
+            | None -> false
+            | Some facts ->
+                facts.TypeArguments |> List.exists go
+                || facts.UnionMembers |> List.exists go
+                || facts.IntersectionMembers |> List.exists go
+                || (facts.Response.Target |> ValueOption.map go |> ValueOption.defaultValue false)
+
+    go root
+
+/// A pure index signature the checker gave no symbol of its own: reached through a type alias
+/// or written inline, rather than declared as an interface. `Bag`'s and `FrozenBag`'s own names
+/// are what their own consumers call them, and stay; this shape has none to lose.
+///
+/// A generic alias's own parameters must all reach the index signature's key or value: `type
+/// Loose<P> = { [key: string]: string }` declares `P` and never reads it, and collapsing it to
+/// `Record<string, string>` would leave `repair-arity` nothing to bind `P` to but an erased
+/// phantom (FS0035), which drops the index signature entirely. The alias keeps its own name
+/// instead.
+///
+/// Nor may the value or key type read back through to the index signature's own type: `type
+/// JsonObject = { [key: string]: JsonValue }` beside `type JsonValue = ... | JsonObject` would
+/// collapse `JsonObject` to `type JsonObject = Record<string, JsonValue>`, an abbreviation
+/// cycling through another abbreviation (FS0953). An interface closes the cycle nominally
+/// instead.
+let internal isAnonymousIndexSignature (model: ShapeModel) (facts: TypeFacts) =
+    isPureIndexSignature facts
+    && (facts.SymbolName |> Option.forall isSyntheticName)
+    && (declParamIds facts
+        |> List.forall (fun p ->
+            let info = List.exactlyOne facts.IndexInfos
+
+            mentionsTypeParam model p info.KeyTypeId
+            || mentionsTypeParam model p info.ValueTypeId))
+    && (let info = List.exactlyOne facts.IndexInfos
+
+        not (
+            reachesTypeId model facts.Response.Id info.ValueTypeId
+            || reachesTypeId model facts.Response.Id info.KeyTypeId
+        ))
 
 /// A member keyed by a JS well-known symbol (`__@iterator@<id>`): unrepresentable in F#, and
 /// the embedded checker id is session-specific - keeping one would also break determinism.
@@ -1439,6 +1529,8 @@ and internal objectRef
                 tupleRef ctx model self owner facts
             elif isPureCallback facts then
                 delegateRef ctx model self owner facts
+            elif isPureIndexSignature facts then
+                recordRef ctx model self owner facts
             else
 
                 match instantiationOf model facts with
@@ -1775,6 +1867,36 @@ and internal delegateRef
         let reference, callbackFindings = callbackRef owner parameters returns
         reference, findings @ returnFindings @ callbackFindings
 
+/// A pure index signature with no name of its own, resolved through the support package
+/// rather than minted a declaration (§4.10, TR059): `Record<'Key, 'Value>` for a writable
+/// index, `ReadonlyRecord<'Key, 'Value>` for a readonly one - the get-only form a readonly
+/// index signature already renders as `MB.IndexSignatureAsIndexer`. Always qualified: a
+/// generated module opens both `Xantham.Fable.Core` and `Fable.Core`, and the entry package
+/// is free to declare its own `Record`.
+and internal recordRef
+    (ctx: Context)
+    (model: ShapeModel)
+    (self: string option)
+    (owner: string)
+    (facts: TypeFacts)
+    : FsTypeRef * Finding list =
+    let info = List.exactlyOne facts.IndexInfos
+    let key, keyFindings = typeRef ctx model self owner info.KeyTypeId
+    let value, valueFindings = typeRef ctx model self owner info.ValueTypeId
+
+    let name =
+        if info.IsReadonly then
+            "Xantham.Fable.Core.ReadonlyRecord"
+        else
+            "Xantham.Fable.Core.Record"
+
+    FsApp(name, [ key; value ]),
+    keyFindings
+    @ valueFindings
+    @ [
+        Finding.make owner (TypeReference.IndexSignatureAsRecord(typeSpelling key, typeSpelling value))
+    ]
+
 /// A union hoists its `null`/`undefined` members into `option` (D1). What remains resolves as
 /// a single member, a named literal union (classified by `classify-literal-unions`), or widens
 /// - position-aware union treatment (D4) is phase C.
@@ -1926,6 +2048,14 @@ let internal typeParamsOf
                     // Only something that becomes an interface can be an F# base type. A union
                     // renders as a sealed `U_n` or StringEnum, so FS0698 rejects
                     // `'T :> Renderable`; tuples, arrays and delegates are sealed the same way.
+                    //
+                    // TypeScript reads `'T extends { [key: K]: V }` structurally: any shape
+                    // whose properties satisfy `V` proves the bound, named interface or not.
+                    // `Xantham.Fable.Core.Record<K, V>` only proves it for a type that
+                    // implements that exact interface, which a plain named interface with its
+                    // own explicit members never does - so the bound goes unexpressed here the
+                    // same way a union's does, rather than rejecting every argument TypeScript
+                    // itself accepts.
                     let expressible =
                         match Map.tryFind boundId model.Types with
                         | Some bound ->
@@ -1933,6 +2063,7 @@ let internal typeParamsOf
                             && (arrayElement model bound).IsNone
                             && not (isTuple bound)
                             && not (isPureCallback bound)
+                            && not (isPureIndexSignature bound)
                         | None -> false
 
                     if expressible then
@@ -1969,16 +2100,6 @@ let internal typeParamsOf
             | None -> { Name = name; Constraint = None })
 
     parameters, scope, findings
-
-/// The ids a declaration binds: its own where it is a genuine generic declaration, and the
-/// alias's where it is a generic *alias*. `type Mapper<T> = (t: T) => T` leaves the function
-/// type itself parameterless - the alias is the only place `T` appears - so both are read.
-let internal declParamIds (facts: TypeFacts) =
-    (facts.Response.TypeParameters
-     |> ValueOption.map Array.toList
-     |> ValueOption.defaultValue [])
-    @ facts.AliasTypeArguments
-    |> List.distinct
 
 /// The parameters a declaration binds on its left side.
 let internal declTypeParams (ctx: Context) (model: ShapeModel) (owner: string) (facts: TypeFacts) =

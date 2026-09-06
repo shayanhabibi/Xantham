@@ -1707,17 +1707,19 @@ let pipelineTests =
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                       let source = rendered.Files |> List.head |> snd
 
-                      // `Narrow` and `Wide` are two `[<EmitIndexer>]` interfaces with no
-                      // `inherit` between them, so `'Attributes :> Wide` would reject the
-                      // declaration's own default argument. The parameter stays free instead.
+                      // `Narrow` and `Wide` are both pure index signatures (§4.10), so they
+                      // read as `Xantham.Fable.Core.Record<...>` references rather than minted
+                      // interfaces - and a bound of that shape proves nothing nominal for any
+                      // named argument, `Wide`'s own default included, so it is TP002 rather
+                      // than TP008: no F# form the constraint could hold, not one that fails to
+                      // prove. The parameter stays free instead.
                       Expect.stringContains source "type Geometry<'Attributes> =" "the head carries no bound"
                       Expect.isFalse (source.Contains "'Attributes :>") "and states no nominal relation"
 
                       Expect.isTrue
                           (rendered.Findings
-                           |> List.exists (fun f ->
-                               f.Key = "TP008" && f.Message.Contains "Wide" && f.Message.Contains "Attributes"))
-                          "the drop is recorded against the parameter and its bound"
+                           |> List.exists (fun f -> f.Key = "TP002" && f.Message.Contains "Attributes"))
+                          "the drop is recorded against the parameter"
 
                   testCase "a constraint the run can prove keeps its `:>`" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -3457,5 +3459,108 @@ let pipelineTests =
                            |> List.sort)
                           [ "Feed.take(event)"; "runModel()"; "runModel(input)" ]
                           "and these three are the only accesses left widened" ])
+
+        // Wave thirteen lane CH. A pure index signature reached anonymously resolves
+        // through the support package's Record/ReadonlyRecord (TR059) rather than minting
+        // a name; a named declaration that is nothing but an index signature, or one
+        // carrying a real member beside it, keeps minting under MB004.
+        yield!
+            fixtureTests
+                "record-index-lab"
+                (handFixture "record-index-lab")
+                GeneratorConfig.Default
+                (fun package ->
+                    [ testCase "an anonymous pure index signature reads Record/ReadonlyRecord" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          let messagesFor symbol =
+                              rendered.Findings
+                              |> List.filter (fun f -> f.Symbol = symbol && f.Key = "TR059")
+                              |> List.map _.Message
+
+                          Expect.stringContains
+                              source
+                              "abstract entries: Xantham.Fable.Core.Record<string, float>"
+                              "a string-keyed inline index signature reads a Record reference"
+
+                          Expect.equal
+                              (messagesFor "Cache.entries")
+                              [
+                                  "an index signature alone reads as Record<string, float>; F# indexes it through Item"
+                              ]
+                              "the reference is reported under TR059"
+
+                          Expect.stringContains
+                              source
+                              "abstract rows: Xantham.Fable.Core.Record<float, string>"
+                              "a numeric-keyed inline index signature reads a Record reference too"
+
+                          Expect.stringContains
+                              source
+                              "abstract values: Xantham.Fable.Core.ReadonlyRecord<string, bool>"
+                              "a readonly inline index signature reads ReadonlyRecord, with no setter"
+
+                      testCase "a named index-signature declaration keeps minting its own name" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          let keysFor symbol =
+                              rendered.Findings
+                              |> List.filter (fun f -> f.Symbol = symbol)
+                              |> List.map _.Key
+                              |> List.distinct
+                              |> List.sort
+
+                          Expect.stringContains source "type Bag =" "Bag keeps its own declaration"
+
+                          Expect.stringContains
+                              source
+                              "abstract Item: string -> float with get, set"
+                              "and still mints the EmitIndexer member"
+
+                          Expect.contains (keysFor "Bag.[]") "MB004" "still reported as an interface's own indexer"
+
+                      testCase "an index signature beside a real member still mints, still MB004" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          let keysFor symbol =
+                              rendered.Findings
+                              |> List.filter (fun f -> f.Symbol = symbol)
+                              |> List.map _.Key
+                              |> List.distinct
+                              |> List.sort
+
+                          Expect.stringContains source "type Config =" "Config keeps its own declaration"
+                          Expect.stringContains source "abstract name: string" "its own member survives"
+
+                          Expect.stringContains
+                              source
+                              "abstract Item: string -> string with get, set"
+                              "and the index signature still renders as EmitIndexer"
+
+                          Expect.contains (keysFor "Config.[]") "MB004" "the mixed shape still reports MB004"
+
+                      testCase "a generic operand resolves through Record at the type parameter" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains
+                              source
+                              "static member tag<'T> (value: Xantham.Fable.Core.Record<string, 'T>) : unit"
+                              "the index signature's value type is the function's own free type parameter"
+
+                      testCase "the package's own Record does not shadow the qualified reference" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains source "type Record =" "the package's own Record still declares"
+                          Expect.stringContains source "abstract id: string" "with its own member"
+
+                          Expect.stringContains
+                              source
+                              "abstract entries: Xantham.Fable.Core.Record<string, float>"
+                              "and the support package's Record is reached fully qualified beside it" ])
 
     ]
