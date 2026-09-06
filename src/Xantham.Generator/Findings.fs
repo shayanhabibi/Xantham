@@ -138,6 +138,7 @@ module FindingCodes =
             "TR.CallbackKeptAsDelegate", "TR055"
             "TR.StringLiteralKeptForOverload", "TR056"
             "TR.BareNullToObj", "TR057"
+            "TR.UninhabitedIntersectionReduced", "TR058"
             "TP.UnnamedTypeParameter", "TP001"
             "TP.ConstraintDropped", "TP002"
             "TP.GenericFunctionHoisted", "TP003"
@@ -457,6 +458,10 @@ type TypeReference =
     /// catch-all, so the site already carries `TR014` with `flags=Null` and the widening is
     /// recorded once. Retained rather than retired, so `TR057` is never handed out twice.
     | [<Widened>] BareNullToObj
+    /// An intersection TypeScript reduced to `never`, because one operand is a unit type that
+    /// admits no value alongside the others. It reaches the shape tier flagged `Intersection`
+    /// with no members.
+    | [<Ergonomic>] UninhabitedIntersectionReduced of property: string
 
     interface IFindingKind with
         member this.Message =
@@ -565,6 +570,8 @@ type TypeReference =
             | StringLiteralKeptForOverload literal ->
                 $"string literal {literal} kept as a literal type; it separates an overload"
             | BareNullToObj -> "a bare null type widened to obj; absence is not carried"
+            | UninhabitedIntersectionReduced property ->
+                $"the intersection carrying '{property}' reduces to never; TypeScript admits no value of it"
 
 /// Type parameter binding: `Shape.typeParamsOf`, `aliasTypeParams`, key variables and erasure.
 [<Prefix "TP">]

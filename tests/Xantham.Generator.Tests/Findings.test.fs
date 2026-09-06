@@ -102,6 +102,7 @@ let findingsTests =
                     "TR.CallbackKeptAsDelegate TR055 ergonomic"
                     "TR.StringLiteralKeptForOverload TR056 exact"
                     "TR.BareNullToObj TR057 widened"
+                    "TR.UninhabitedIntersectionReduced TR058 ergonomic"
                     "TP.UnnamedTypeParameter TP001 widened"
                     "TP.ConstraintDropped TP002 ergonomic"
                     "TP.GenericFunctionHoisted TP003 ergonomic"
