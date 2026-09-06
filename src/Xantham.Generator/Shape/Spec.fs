@@ -235,10 +235,44 @@ let internal arrayMembersDropped (model: ShapeModel) (facts: TypeFacts) =
     |> List.distinct
     |> List.length
 
+/// What a union offers a `match` (D4, §4.5(2)).
+type internal TaggedShape =
+    /// The discriminant's TypeScript spelling, one case per distinct tag value with its facts
+    /// and value in first-occurrence order, and the tag values shared by folded arms.
+    | Discriminated of tag: string * cases: (TypeFacts * string) list * folded: string list
+    /// A discriminant every arm carries a string literal for, whose values fold to a single
+    /// case.
+    | TagCollides of tag: string * value: string
+    /// Every candidate property is absent or non-literal on some arm.
+    | Untagged
+
+/// One case's facts, folded from the arms sharing its tag value: the members every arm declares
+/// under the same name, type and optionality, and every signature the arms carry.
+let private foldedArm (arms: TypeFacts list) =
+    match arms with
+    | [ single ] -> single
+    | _ ->
+        let head = List.head arms
+        let rest = List.tail arms
+
+        let declaredBy (m: ResolvedMember) (arm: TypeFacts) =
+            arm.Members
+            |> List.exists (fun other ->
+                other.Symbol.Name = m.Symbol.Name
+                && other.TypeId = m.TypeId
+                && other.Optional = m.Optional)
+
+        { head with
+            Members = head.Members |> List.filter (fun m -> rest |> List.forall (declaredBy m))
+            CallSignatures = arms |> List.collect _.CallSignatures
+            ConstructSignatures = arms |> List.collect _.ConstructSignatures
+        }
+
 /// The discriminant of a tagged union (D4, §4.5(2)): the property every non-nullish object
-/// member carries with a *distinct* string-literal type. Returns its TypeScript spelling with
-/// each member's facts and tag value in member order; ties break on the first member's order.
-let internal taggedUnionShape (model: ShapeModel) (facts: TypeFacts) : (string * (TypeFacts * string) list) option =
+/// member carries with a string-literal type. A candidate whose values are all distinct wins,
+/// in the first member's order; where every candidate collides, the first one folds the arms
+/// sharing a value into one case and the fold keeps the members those arms agree on.
+let internal taggedUnionShape (model: ShapeModel) (facts: TypeFacts) : TaggedShape =
     let members =
         facts.UnionMembers
         |> List.choose (fun id -> Map.tryFind id model.Types)
@@ -248,7 +282,7 @@ let internal taggedUnionShape (model: ShapeModel) (facts: TypeFacts) : (string *
         flag TypeFlags.Object m && not m.Members.IsEmpty
 
     if members.Length < 2 || not (members |> List.forall isObjectMember) then
-        None
+        Untagged
     else
         /// The member's own string-literal value for `tag`, when it has exactly one.
         let tagValue (m: TypeFacts) (tag: string) =
@@ -260,28 +294,44 @@ let internal taggedUnionShape (model: ShapeModel) (facts: TypeFacts) : (string *
                 | Some(LitString text) -> Some text
                 | _ -> None)
 
-        members
-        |> List.head
-        |> _.Members
-        |> List.map _.Symbol.Name
-        |> List.filter (isSymbolKeyed >> not)
-        |> List.tryPick (fun tag ->
-            let tagged =
-                members
-                |> List.map (fun m -> tagValue m tag |> Option.map (fun value -> m, value))
+        let candidates =
+            members
+            |> List.head
+            |> _.Members
+            |> List.map _.Symbol.Name
+            |> List.filter (isSymbolKeyed >> not)
+            |> List.choose (fun tag ->
+                let tagged =
+                    members
+                    |> List.map (fun m -> tagValue m tag |> Option.map (fun value -> m, value))
 
-            if tagged |> List.forall Option.isSome then
-                let tagged = tagged |> List.map Option.get
-                let values = tagged |> List.map snd
-
-                // Two members sharing a tag value are not discriminated by it - matching on
-                // that case could not tell them apart.
-                if List.distinct values = values then
-                    Some(tag, tagged)
+                if tagged |> List.forall Option.isSome then
+                    Some(tag, tagged |> List.map Option.get)
                 else
-                    None
-            else
-                None)
+                    None)
+
+        let discriminates (_, tagged) =
+            let values = tagged |> List.map snd
+            List.distinct values = values
+
+        match candidates |> List.tryFind discriminates with
+        | Some(tag, tagged) -> Discriminated(tag, tagged, [])
+        | None ->
+            match candidates with
+            | [] -> Untagged
+            | (tag, tagged) :: _ ->
+                let groups =
+                    tagged
+                    |> List.groupBy snd
+                    |> List.map (fun (value, group) -> foldedArm (group |> List.map fst), value)
+
+                let folded =
+                    tagged |> List.countBy snd |> List.filter (snd >> (<) 1) |> List.map fst
+
+                if groups.Length < 2 then
+                    TagCollides(tag, List.head folded)
+                else
+                    Discriminated(tag, groups, folded)
 
 /// A property that exists only to make a type nominal: keyed by a unique symbol, spelled with a
 /// leading underscore, or typed `never`. An object of only these carries nothing at runtime,

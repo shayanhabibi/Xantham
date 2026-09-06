@@ -3229,4 +3229,66 @@ let pipelineTests =
                               "abstract format: AliasCopyDepLab.Formatter"
                               "an alias with no members is still a name the dependency ships" ])
 
+    
+
+        // Wave thirteen lane CB. `taggedUnionShape` requires every arm's tag value to be
+        // distinct, and the refusal used to be silent. Arms sharing a value now fold into one
+        // case where two cases survive the fold, and the union is refused under a named
+        // discriminant where they do not.
+        yield!
+            fixtureTests "shared-tag-lab" (handFixture "shared-tag-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "arms sharing a tag value fold into one case, or refuse under a name" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      let messagesFor symbol key =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Symbol = symbol && f.Key = key)
+                          |> List.map _.Message
+
+                      // The regression guard: distinct values on every arm, discriminated as before.
+                      Expect.stringContains source "TypeScriptTaggedUnion(\"kind\", CaseRules.None)" "Distinct is a DU"
+                      Expect.stringContains source "type Distinct =" "declared as the union itself"
+
+                      // A candidate two arms collide on leaves a later one free to win.
+                      Expect.stringContains
+                          source
+                          "TypeScriptTaggedUnion(\"verb\", CaseRules.None)"
+                          "`channel` collides, `verb` discriminates, and `verb` is the tag chosen"
+
+                      Expect.equal (messagesFor "Signal" "DT003") [] "a candidate rejected on a collision raises nothing"
+                      Expect.equal (messagesFor "Signal" "DT004") [] "and nothing folds"
+
+                      // The fold, reported once, naming the tag and the shared value. The two
+                      // `done` arms agree on the tag alone, so the case carries no field.
+                      Expect.stringContains source "| [<CompiledName(\"done\")>] Done" "the two done arms fold into one case"
+                      Expect.stringContains source "| [<CompiledName(\"pending\")>] Pending" "and the union keeps two cases"
+
+                      Expect.equal
+                          (messagesFor "Terminal" "DT004")
+                          [ "arms sharing 'state' = 'done' merged into one case, carrying the members they agree on" ]
+                          "the fold names the tag and the value it folded on"
+
+                      // The refusal. Both arms carry `type: "log"`, so the fold leaves one case
+                      // and the union stays erased - loudly.
+                      Expect.stringContains source "type Onset = U2<Onset2, Onset3>" "a fold to a single case is not a union"
+
+                      Expect.equal
+                          (messagesFor "Onset" "DT003")
+                          [ "discriminated by 'type', but two arms carry 'log'; left as an erased union" ]
+                          "the refusal names the candidate that came closest"
+
+                      // The negatives. `Log` writes the same collision as an intersection over a
+                      // union, and the checker distributes it into arms flagged `Intersection`
+                      // rather than `Object`, so the union never reaches the discriminant test.
+                      // `Loose` has no uniform string-literal property to test.
+                      for name in [ "Log"; "Loose" ] do
+                          Expect.equal
+                              (rendered.Findings
+                               |> List.filter (fun f -> f.Symbol = name && f.Pass = "detect-tagged-unions"))
+                              []
+                              $"{name} is not considered a tagged union at all"
+
+                      Expect.stringContains source "type Log = U2<Log2, Log3>" "and Log stays an erased union" ])
+
     ]

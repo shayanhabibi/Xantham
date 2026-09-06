@@ -1,0 +1,1 @@
+{"name":"shared-tag-lab","type":"module","types":"index.d.ts","description":"Wave thirteen lab: unions whose arms collide on the discriminant value. `taggedUnionShape` requires distinct tag values, and the refusal was silent - the union fell through to the erased-union mapping with no `DT` finding under any name."}
