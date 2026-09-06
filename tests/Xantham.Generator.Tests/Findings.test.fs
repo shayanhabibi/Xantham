@@ -103,6 +103,7 @@ let findingsTests =
                     "TR.StringLiteralKeptForOverload TR056 exact"
                     "TR.BareNullToObj TR057 widened"
                     "TR.UninhabitedIntersectionReduced TR058 ergonomic"
+                    "TR.IndexSignatureAsRecord TR059 ergonomic"
                     "TP.UnnamedTypeParameter TP001 widened"
                     "TP.ConstraintDropped TP002 ergonomic"
                     "TP.GenericFunctionHoisted TP003 ergonomic"

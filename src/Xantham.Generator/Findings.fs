@@ -139,6 +139,7 @@ module FindingCodes =
             "TR.StringLiteralKeptForOverload", "TR056"
             "TR.BareNullToObj", "TR057"
             "TR.UninhabitedIntersectionReduced", "TR058"
+            "TR.IndexSignatureAsRecord", "TR059"
             "TP.UnnamedTypeParameter", "TP001"
             "TP.ConstraintDropped", "TP002"
             "TP.GenericFunctionHoisted", "TP003"
@@ -462,6 +463,9 @@ type TypeReference =
     /// admits no value alongside the others. It reaches the shape tier flagged `Intersection`
     /// with no members.
     | [<Ergonomic>] UninhabitedIntersectionReduced of property: string
+    /// An object type whose whole content is one index signature, written as the support
+    /// library's `Record`/`ReadonlyRecord` rather than minted a name of its own.
+    | [<Ergonomic>] IndexSignatureAsRecord of key: string * value: string
 
     interface IFindingKind with
         member this.Message =
@@ -570,6 +574,8 @@ type TypeReference =
             | StringLiteralKeptForOverload literal ->
                 $"string literal {literal} kept as a literal type; it separates an overload"
             | BareNullToObj -> "a bare null type widened to obj; absence is not carried"
+            | IndexSignatureAsRecord(key, value) ->
+                $"an index signature alone reads as Record<{key}, {value}>; F# indexes it through Item"
             | UninhabitedIntersectionReduced property ->
                 $"'{property}' collides across the intersection's operands and TypeScript reduces the whole type to never; the operand that does not mark '{property}' nullable is the type"
 
