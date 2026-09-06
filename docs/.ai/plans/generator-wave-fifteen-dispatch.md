@@ -228,3 +228,50 @@ would break a correct case to catch a confusing one. The defect was diagnostic q
 
 No tier movement in either direction, verified per symbol at merge.
 
+### The costly shape, narrowed past lane DE
+
+Measured by the managing agent on an idle machine, after lane DG twice failed to act on DE's
+statement of it. DE's reproducer split in half by which return types its methods carry, each half
+the same length:
+
+| Input | Methods | Time |
+| --- | ---: | ---: |
+| returns `Foo<T>` and `this` only | 5 | **1.0s** |
+| returns `Foo<U>` and `Foo<S>`, fresh parameters | 5 | **7.9s** |
+| both together | 10 | **12.9s** |
+
+**Self-reference is not what costs.** An interface whose methods return itself at its own
+parameter resolves in a second. The cost is a generic method whose return type applies the
+enclosing interface to *that method's own fresh type parameter* - `map<U>(...): Foo<U>`,
+`filter<S>(...): Foo<S>`. Five such methods cost eight times what five ordinary self-returns cost,
+and the two halves together cost more than their sum.
+
+That is the shape `Array<T>` carries in `lib.es5.d.ts` - `map<U>`, `filter<S>`, `reduce<U>`,
+`flat` - and it is why the ECMAScript libs never finish.
+
+Wall-clock numbers in this wave are only comparable when taken on an idle machine. DE measured
+the full reproducer at 45.8s under three concurrent lanes; the same input is 12.9s idle. **A lane
+given a wall-clock target on this box has no stable signal**, which is what sent DG to an
+output-correctness metric it could measure instead. Later lanes get a deterministic count.
+
+### The reproducer is not added to the corpus yet
+
+At 12.9s it would cost a tenth of the whole suite's runtime to gate a bug that is still open. It
+lands as a regression fixture once it is fast, and not before.
+
+### Lane DG, failed twice, and what it established anyway
+
+Two dispatches, no change to `Resolve.fs` either time, nothing committed. The second reported
+against a duplicate-`Foo2` premise that was never in its brief and does not exist in the tree.
+
+Two negative results are worth keeping, because both were paid for:
+
+- **Keying frontier memoization on the checker's raw `Target` is unsafe.** It collides across
+  unrelated named declarations - `hoist-conditional-lab`'s `CondNode` and `DirectNode`,
+  `solid-js`'s `Computation`, `@cloudflare/workers-types`'s `File`, a `chain-lab` case - splicing
+  one declaration's facts onto another and corrupting generic parameter lists. This rules out the
+  obvious dedup.
+- A safe structural key has to carry the declaration's own identity - the `SymbolName`/`Origin`
+  pair the emitter already uses to decide whether two responses are the same named declaration -
+  **and** the type arguments applied at the reference. Collapsing to either alone is what breaks.
+
