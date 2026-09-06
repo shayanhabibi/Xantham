@@ -729,6 +729,7 @@ let private deriveFacts (ctx: Context) (trace: Trace option) (ty: TypeResponse) 
                         Default = None
                         Conditional = None
                         UnionMembers = []
+                        AliasIdentity = None
                     },
                     discovered
         elif has TypeFlags.TypeParameter && ty.IsThisType <> ValueSome true then
@@ -763,7 +764,24 @@ let private deriveFacts (ctx: Context) (trace: Trace option) (ty: TypeResponse) 
             // `T[K]` apart from `T[keyof T]`.
             let! objectType = ctx.Session.getObjectTypeOfType ty.Id
             let! indexType = ctx.Session.getIndexTypeOfType ty.Id
-            return TypeFacts.shallow ty, channel trace "indexed-access" [ objectType; indexType ]
+
+            // The alias a single-argument reference is written through (§4.11's `NoInfer`):
+            // the checker expands it to an indexed access before the shaper ever sees the
+            // flags, so only the alias identity says which reference it was.
+            let! alias = ctx.Session.getAliasSymbolOfType ty.Id
+            let! aliasTypeArguments = ctx.Session.getAliasTypeArgumentsOfType ty.Id
+            let aliasArguments = aliasTypeArguments |> ValueOption.defaultValue [||]
+
+            let identity =
+                match alias, aliasArguments with
+                | ValueSome symbol, [| argument |] -> Some(symbol.Name, argument.Id)
+                | _ -> None
+
+            return
+                { TypeFacts.shallow ty with
+                    AliasIdentity = identity
+                },
+                channel trace "indexed-access" ([ objectType; indexType ] @ Array.toList aliasArguments)
         else
             // A conditional, a template literal or an intrinsic string mapping. None of these
             // has a structure to read - each is a type-level computation over an argument the

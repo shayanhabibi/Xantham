@@ -1624,9 +1624,22 @@ and internal indexedAccessRef
     match binding, objectName with
     | Some(TypedKeyOf(operand, result)), Some name when operand = name -> FsTypeVar result, []
     | _ ->
-        match indexedAccessValues model facts with
-        | Some values -> erasedUnionRef ctx model self owner values
-        | None -> FsObj, [ Finding.make owner TypeReference.IndexedAccessNoForm ]
+        match facts.AliasIdentity with
+        | Some(name, operand) when Naming.SupportBindings.shadows name ->
+            // `NoInfer<T>` (§4.11's carve-out): every declaration shipping it writes the same
+            // identity, so the checker's flags never distinguish it from an ordinary indexed
+            // access - only the alias name does. `GeneratorConfig.ResolveNoInfer` picks which
+            // side of the support package's `type NoInfer<'T> = 'T` a reference shows.
+            let reference, findings = typeRef ctx model self owner operand
+
+            if ctx.Config.ResolveNoInfer then
+                reference, findings
+            else
+                FsApp(Naming.SupportBindings.qualify name, [ reference ]), findings
+        | _ ->
+            match indexedAccessValues model facts with
+            | Some values -> erasedUnionRef ctx model self owner values
+            | None -> FsObj, [ Finding.make owner TypeReference.IndexedAccessNoForm ]
 
 /// An array-shaped type as an F# array over its element. The members an intersection's other
 /// operands contribute are reported as dropped.

@@ -279,7 +279,7 @@ type SignalOptions<'T> =
 module SignalOptions =
     type Equals<'T> = delegate of prev: 'T * next: 'T -> bool
 
-type NoInfer = obj
+type NoInfer = JS.NoInfer<obj>
 
 [<Interface>]
 type EffectOptions =
@@ -519,14 +519,14 @@ module CreateResource =
 
     [<Interface>]
     type Options2 =
-        abstract initialValue: obj option with get, set
+        abstract initialValue: JS.NoInfer<obj> option with get, set
         abstract name: string option with get, set
         abstract deferStream: bool option with get, set
         abstract ssrLoadFrom: ResourceOptions.SsrLoadFrom option with get, set
-        abstract storage: (obj option -> ((unit -> obj option) * (obj[] -> unit))) option with get, set
+        abstract storage: (JS.NoInfer<obj> option -> ((unit -> JS.NoInfer<obj> option) * (obj[] -> unit))) option with get, set
         abstract onHydrated: CreateResource.Options2.OnHydrated option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?initialValue: obj, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptions.SsrLoadFrom, ?storage: (obj option -> ((unit -> obj option) * (obj[] -> unit))), ?onHydrated: CreateResource.Options2.OnHydrated) : Options2 = jsNative
+        static member Create (?initialValue: JS.NoInfer<obj>, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptions.SsrLoadFrom, ?storage: (JS.NoInfer<obj> option -> ((unit -> JS.NoInfer<obj> option) * (obj[] -> unit))), ?onHydrated: CreateResource.Options2.OnHydrated) : Options2 = jsNative
 
     module Options2 =
         type OnHydrated = delegate of k: bool option * info: CreateResource.Options2.OnHydrated.Info -> unit
@@ -534,9 +534,9 @@ module CreateResource =
         module OnHydrated =
             [<Interface>]
             type Info =
-                abstract value: obj option with get, set
+                abstract value: JS.NoInfer<obj> option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (?value: obj) : Info = jsNative
+                static member Create (?value: JS.NoInfer<obj>) : Info = jsNative
 
     [<Interface>]
     type Options3<'I, 'T, 'S> =
@@ -561,14 +561,14 @@ module CreateResource =
 
     [<Interface>]
     type Options4<'S> =
-        abstract initialValue: obj option with get, set
+        abstract initialValue: JS.NoInfer<obj> option with get, set
         abstract name: string option with get, set
         abstract deferStream: bool option with get, set
         abstract ssrLoadFrom: ResourceOptions.SsrLoadFrom option with get, set
-        abstract storage: (obj option -> ((unit -> obj option) * (obj[] -> unit))) option with get, set
+        abstract storage: (JS.NoInfer<obj> option -> ((unit -> JS.NoInfer<obj> option) * (obj[] -> unit))) option with get, set
         abstract onHydrated: CreateResource.Options4.OnHydrated<'S> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?initialValue: obj, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptions.SsrLoadFrom, ?storage: (obj option -> ((unit -> obj option) * (obj[] -> unit))), ?onHydrated: CreateResource.Options4.OnHydrated<'S>) : Options4<'S> = jsNative
+        static member Create (?initialValue: JS.NoInfer<obj>, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptions.SsrLoadFrom, ?storage: (JS.NoInfer<obj> option -> ((unit -> JS.NoInfer<obj> option) * (obj[] -> unit))), ?onHydrated: CreateResource.Options4.OnHydrated<'S>) : Options4<'S> = jsNative
 
     module Options4 =
         type OnHydrated<'S> = delegate of k: 'S option * info: CreateResource.Options4.OnHydrated.Info -> unit
@@ -576,9 +576,9 @@ module CreateResource =
         module OnHydrated =
             [<Interface>]
             type Info =
-                abstract value: obj option with get, set
+                abstract value: JS.NoInfer<obj> option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (?value: obj) : Info = jsNative
+                static member Create (?value: JS.NoInfer<obj>) : Info = jsNative
 
     module Result =
         type Item<'R, 'I, 'T> =
@@ -1045,7 +1045,7 @@ type Exports =
     /// <remarks>@param options allows to set a name in dev mode for debugging purposes</remarks>
     /// <remarks>@description https://docs.solidjs.com/reference/secondary-primitives/create-computed</remarks>
     [<Import("createComputed", "solid-js")>]
-    static member createComputed<'Next> (fn: (obj option -> 'Next)) : unit = jsNative
+    static member createComputed<'Next> (fn: (JS.NoInfer<'Next> option -> 'Next)) : unit = jsNative
     /// <summary>
     /// Creates a reactive computation that runs immediately before render, mainly used to write to other reactive primitives
     /// <code lang="typescript">
@@ -1077,7 +1077,7 @@ type Exports =
     /// <remarks>@param options allows to set a name in dev mode for debugging purposes</remarks>
     /// <remarks>@description https://docs.solidjs.com/reference/secondary-primitives/create-render-effect</remarks>
     [<Import("createRenderEffect", "solid-js")>]
-    static member createRenderEffect<'Next> (fn: (obj option -> 'Next)) : unit = jsNative
+    static member createRenderEffect<'Next> (fn: (JS.NoInfer<'Next> option -> 'Next)) : unit = jsNative
     /// <summary>
     /// Creates a reactive computation that runs during the render phase as DOM elements are created and updated but not necessarily connected
     /// <code lang="typescript">
@@ -1109,7 +1109,7 @@ type Exports =
     /// <remarks>@param options allows to set a name in dev mode for debugging purposes</remarks>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-effect</remarks>
     [<Import("createEffect", "solid-js")>]
-    static member createEffect<'Next> (fn: (obj option -> 'Next)) : unit = jsNative
+    static member createEffect<'Next> (fn: (JS.NoInfer<'Next> option -> 'Next)) : unit = jsNative
     /// <summary>
     /// Creates a reactive computation that runs after the render phase
     /// <code lang="typescript">
@@ -1155,7 +1155,7 @@ type Exports =
     /// <remarks>@param options allows to set a name in dev mode for debugging purposes and use a custom comparison function in equals</remarks>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-memo</remarks>
     [<Import("createMemo", "solid-js")>]
-    static member createMemo<'Next> (fn: (obj option -> 'Next)) : (unit -> 'Next) = jsNative
+    static member createMemo<'Next, 'Prev> (fn: (JS.NoInfer<'Prev> option -> 'Next)) : (unit -> 'Next) = jsNative
     /// <summary>
     /// Creates a readonly derived reactive memoized signal
     /// <code lang="typescript">
@@ -1395,7 +1395,7 @@ type Exports =
     /// </remarks>
     /// <remarks>@description https://docs.solidjs.com/reference/reactive-utilities/on-util</remarks>
     [<Import("on", "solid-js")>]
-    static member on<'S, 'Next> (deps: U2<(unit -> 'S), obj[]>, fn: Func<'S, 'S option, obj option, 'Next>, ?options: On.Options) : (obj option -> obj) = jsNative
+    static member on<'S, 'Next, 'Prev> (deps: U2<(unit -> 'S), obj[]>, fn: Func<'S, 'S option, JS.NoInfer<'Prev> option, 'Next>, ?options: On.Options) : (JS.NoInfer<'Next> option -> JS.NoInfer<'Next>) = jsNative
     /// <summary>
     /// Makes dependencies of a computation explicit
     /// <code lang="typescript">
@@ -1425,7 +1425,7 @@ type Exports =
     /// </remarks>
     /// <remarks>@description https://docs.solidjs.com/reference/reactive-utilities/on-util</remarks>
     [<Import("on", "solid-js")>]
-    static member on<'S, 'Next> (deps: U2<(unit -> 'S), obj[]>, fn: Func<'S, 'S option, obj option, 'Next>, options: U2<OnOptions, On.Options2>) : (obj option -> obj option) = jsNative
+    static member on<'S, 'Next, 'Prev> (deps: U2<(unit -> 'S), obj[]>, fn: Func<'S, 'S option, JS.NoInfer<'Prev> option, 'Next>, options: U2<OnOptions, On.Options2>) : (JS.NoInfer<'Next> option -> JS.NoInfer<'Next> option) = jsNative
     /// <summary>
     /// Runs an effect only after initial render on mount
     /// </summary>

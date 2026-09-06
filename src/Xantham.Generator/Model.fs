@@ -76,6 +76,10 @@ type GeneratorConfig =
         /// a `@types/*` package whose runtime is named something else entirely, and a
         /// types-only package published outside DefinitelyTyped.
         RuntimePackage: string option
+        /// Resolves `NoInfer<T>` (§4.11's carve-out) to `T` at the mapping site, dropping the
+        /// name. `false` emits `NoInfer<T>`, which resolves through the support package's own
+        /// abbreviation and keeps the generated file showing what TypeScript declared.
+        ResolveNoInfer: bool
     }
 
     static member Default =
@@ -85,6 +89,7 @@ type GeneratorConfig =
             Groups = Map.empty
             Lib = None
             RuntimePackage = None
+            ResolveNoInfer = false
         }
 
 module GeneratorConfig =
@@ -154,6 +159,13 @@ module GeneratorConfig =
                 | true, v when v.ValueKind = JsonValueKind.String -> Some(v.GetString())
                 | _ -> None
 
+            let boolField name defaultValue =
+                match doc.RootElement.TryGetProperty(name: string) with
+                | true, v when v.ValueKind = JsonValueKind.True -> true
+                | true, v when v.ValueKind = JsonValueKind.False -> false
+                | true, _ -> failwith $"xantham.json: {name} must be a boolean"
+                | _ -> defaultValue
+
             let groups =
                 match doc.RootElement.TryGetProperty "groups" with
                 | true, v when v.ValueKind = JsonValueKind.Object ->
@@ -182,6 +194,7 @@ module GeneratorConfig =
                 Groups = groups
                 Lib = lib
                 RuntimePackage = field "runtime"
+                ResolveNoInfer = boolField "resolveNoInfer" GeneratorConfig.Default.ResolveNoInfer
             }
 
     /// Loads `<packageDir>/xantham.json`.
@@ -729,6 +742,11 @@ type TypeFacts =
         /// `T extends U ? X : Y` (§4.11), where the type is one.
         Conditional: ConditionalFacts option
         UnionMembers: int list
+        /// The alias name and single argument an indexed-access reference was written through,
+        /// where the checker has already expanded past it before the flags reach the shaper
+        /// (§4.11's `NoInfer`). Populated only at an indexed-access reference site, never on a
+        /// declaration - unrelated to `AliasTypeArguments`, which serves the declaration form.
+        AliasIdentity: (string * int) option
     }
 
 module TypeFacts =
@@ -752,6 +770,7 @@ module TypeFacts =
             Default = None
             Conditional = None
             UnionMembers = []
+            AliasIdentity = None
         }
 
 /// The type ids an export resolves to. A symbol can be both a type and a value (a class), so

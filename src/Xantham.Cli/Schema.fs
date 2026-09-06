@@ -50,6 +50,11 @@ let private configKeys =
             ("runtime",
              "The npm package the generated `[<Import(…)>]` attributes name. Defaults to the package name \
           with DefinitelyTyped's `@types/` convention undone, so `@types/three` imports from `three`.")
+
+            "ResolveNoInfer",
+            ("resolveNoInfer",
+             "Resolves TypeScript's `NoInfer<T>` (§4.11) to `T` at the mapping site, dropping the name. \
+          Defaults to false, which emits `NoInfer<T>` and reaches the support package's own abbreviation.")
         ]
 
 /// The JSON key, description and requiredness of one `MappedName` field.
@@ -119,6 +124,7 @@ let private writeDescribed (w: Utf8JsonWriter) (description: string) (body: Utf8
 let private writeFieldType (w: Utf8JsonWriter) (name: string) (t: Type) =
     match unwrapOption t with
     | t when t = typeof<string> -> w.WriteString("type", "string")
+    | t when t = typeof<bool> -> w.WriteString("type", "boolean")
     | t when t = typeof<int> ->
         w.WriteString("type", "integer")
         w.WriteNumber("minimum", 0)

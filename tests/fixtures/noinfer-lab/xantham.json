@@ -1,0 +1,5 @@
+{
+    // §4.11's carve-out: `NoInfer<T>` resolves to its bare operand at every reference site
+    // rather than the support package's abbreviation.
+    "resolveNoInfer": true
+}
