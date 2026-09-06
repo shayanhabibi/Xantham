@@ -1,0 +1,14 @@
+  Determining projects to restore...
+  Restored /home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.PartyServer/Fidelity.CloudEdge.PartyServer.fsproj (in 117 ms).
+  4 of 5 projects are up-to-date for restore.
+  Xantham.Fable.Core -> /home/hhh/repos/Xantham/src/Xantham.Fable.Core/bin/Debug/net10.0/Xantham.Fable.Core.dll
+  Fidelity.CloudEdge.Zod -> /home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.Zod/bin/Debug/net10.0/Fidelity.CloudEdge.Zod.dll
+  Fidelity.CloudEdge.Workers -> /home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.Workers/bin/Debug/net10.0/Fidelity.CloudEdge.Workers.dll
+  Fidelity.CloudEdge.PartySocket -> /home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.PartySocket/bin/Debug/net10.0/Fidelity.CloudEdge.PartySocket.dll
+  Fidelity.CloudEdge.PartyServer -> /home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.PartyServer/bin/Debug/net10.0/Fidelity.CloudEdge.PartyServer.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:02.31

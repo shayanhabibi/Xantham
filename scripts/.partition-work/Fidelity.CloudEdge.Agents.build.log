@@ -1,0 +1,26 @@
+  Determining projects to restore...
+  Restored /home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.Agents/Fidelity.CloudEdge.Agents.fsproj (in 134 ms).
+  7 of 8 projects are up-to-date for restore.
+  Xantham.Fable.Core -> /home/hhh/repos/Xantham/src/Xantham.Fable.Core/bin/Debug/net10.0/Xantham.Fable.Core.dll
+  Fidelity.CloudEdge.Zod -> /home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.Zod/bin/Debug/net10.0/Fidelity.CloudEdge.Zod.dll
+  Fidelity.CloudEdge.Workers -> /home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.Workers/bin/Debug/net10.0/Fidelity.CloudEdge.Workers.dll
+  Fidelity.CloudEdge.PartySocket -> /home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.PartySocket/bin/Debug/net10.0/Fidelity.CloudEdge.PartySocket.dll
+  Fidelity.CloudEdge.PartyServer -> /home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.PartyServer/bin/Debug/net10.0/Fidelity.CloudEdge.PartyServer.dll
+  Fidelity.CloudEdge.Mcp -> /home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.Mcp/bin/Debug/net10.0/Fidelity.CloudEdge.Mcp.dll
+  Fidelity.CloudEdge.CodeMode -> /home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.CodeMode/bin/Debug/net10.0/Fidelity.CloudEdge.CodeMode.dll
+/home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.Agents/Fidelity.CloudEdge.Agents.fs(307,73): warning FS0046: The identifier 'params' is reserved for future use by F# [/home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.Agents/Fidelity.CloudEdge.Agents.fsproj]
+/home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.Agents/Fidelity.CloudEdge.Agents.fs(310,79): warning FS0046: The identifier 'params' is reserved for future use by F# [/home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.Agents/Fidelity.CloudEdge.Agents.fsproj]
+/home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.Agents/Fidelity.CloudEdge.Agents.fs(960,67): warning FS0046: The identifier 'params' is reserved for future use by F# [/home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.Agents/Fidelity.CloudEdge.Agents.fsproj]
+/home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.Agents/Fidelity.CloudEdge.Agents.fs(961,73): warning FS0046: The identifier 'params' is reserved for future use by F# [/home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.Agents/Fidelity.CloudEdge.Agents.fsproj]
+  Fidelity.CloudEdge.Agents -> /home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.Agents/bin/Debug/net10.0/Fidelity.CloudEdge.Agents.dll
+
+Build succeeded.
+
+/home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.Agents/Fidelity.CloudEdge.Agents.fs(307,73): warning FS0046: The identifier 'params' is reserved for future use by F# [/home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.Agents/Fidelity.CloudEdge.Agents.fsproj]
+/home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.Agents/Fidelity.CloudEdge.Agents.fs(310,79): warning FS0046: The identifier 'params' is reserved for future use by F# [/home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.Agents/Fidelity.CloudEdge.Agents.fsproj]
+/home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.Agents/Fidelity.CloudEdge.Agents.fs(960,67): warning FS0046: The identifier 'params' is reserved for future use by F# [/home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.Agents/Fidelity.CloudEdge.Agents.fsproj]
+/home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.Agents/Fidelity.CloudEdge.Agents.fs(961,73): warning FS0046: The identifier 'params' is reserved for future use by F# [/home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.Agents/Fidelity.CloudEdge.Agents.fsproj]
+    4 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.57

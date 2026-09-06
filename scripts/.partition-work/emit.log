@@ -1,0 +1,7 @@
+unit: Fidelity.CloudEdge.Zod -> /home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.Zod/Fidelity.CloudEdge.Zod.fs (6188 lines)
+unit: Fidelity.CloudEdge.Workers -> /home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.Workers/Fidelity.CloudEdge.Workers.fs (16170 lines)
+unit: Fidelity.CloudEdge.PartySocket -> /home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.PartySocket/Fidelity.CloudEdge.PartySocket.fs (175 lines)
+unit: Fidelity.CloudEdge.PartyServer -> /home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.PartyServer/Fidelity.CloudEdge.PartyServer.fs (171 lines)
+unit: Fidelity.CloudEdge.Mcp -> /home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.Mcp/Fidelity.CloudEdge.Mcp.fs (5614 lines)
+unit: Fidelity.CloudEdge.CodeMode -> /home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.CodeMode/Fidelity.CloudEdge.CodeMode.fs (581 lines)
+unit: Fidelity.CloudEdge.Agents -> /home/hhh/repos/Xantham/scripts/.partition-work/Fidelity.CloudEdge.Agents/Fidelity.CloudEdge.Agents.fs (1876 lines)
