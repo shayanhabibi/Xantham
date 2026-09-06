@@ -35,9 +35,6 @@ type Timed =
 type NamedTimed =
     inherit Named
     inherit Timed
-    abstract name: string with get, set
-    abstract at: float with get, set
-    abstract stamp: string option
     [<ParamObject; Emit("$0")>]
     static member Create (name: string, at: float, ?stamp: string) : NamedTimed = jsNative
 
@@ -47,7 +44,6 @@ type NamedTimed =
 [<Interface>]
 type Extended =
     inherit Named
-    abstract name: string with get, set
     abstract extra: bool with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (name: string, extra: bool) : Extended = jsNative
@@ -56,7 +52,6 @@ module Label =
     [<Interface>]
     type Target =
         inherit Named
-        abstract name: string with get, set
         abstract id: float with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (name: string, id: float) : Target = jsNative
@@ -67,7 +62,6 @@ module Label =
 [<Interface>]
 type WithValue<'T> =
     inherit Named
-    abstract name: string with get, set
     abstract value: 'T with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (name: string, value: 'T) : WithValue<'T> = jsNative
@@ -92,8 +86,6 @@ type Pitched =
 type LoudPitched =
     inherit Loud
     inherit Pitched
-    abstract volume: float with get, set
-    abstract pitch: float with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (volume: float, pitch: float) : LoudPitched = jsNative
 
@@ -102,7 +94,6 @@ type LoudPitched =
 /// </summary>
 type Bag =
     inherit Named
-    abstract name: string with get, set
     [<EmitIndexer>]
     abstract Item: string -> obj with get, set
 
@@ -112,7 +103,6 @@ type Bag =
 [<Interface>]
 type Loose =
     inherit Named
-    abstract name: string with get, set
     abstract at: float option with get, set
     abstract stamp: string option
     [<ParamObject; Emit("$0")>]

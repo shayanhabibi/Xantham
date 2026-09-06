@@ -36,8 +36,6 @@ type VarNode<'TNodeType, 'TNode> =
     inherit VarNodeInterface<'TNode>
     abstract isNode: bool
     abstract toVar: (string option -> VarNode<'TNodeType, VarNode<'TNodeType, 'TNode>>) with get, set
-    abstract node: 'TNode with get, set
-    abstract isVarNode: bool
     [<ParamObject; Emit("$0")>]
     static member Create (isNode: bool, toVar: (string option -> VarNode<'TNodeType, VarNode<'TNodeType, 'TNode>>), node: 'TNode, isVarNode: bool) : VarNode<'TNodeType, 'TNode> = jsNative
 

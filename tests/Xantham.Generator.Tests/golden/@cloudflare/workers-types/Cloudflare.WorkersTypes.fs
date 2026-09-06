@@ -977,25 +977,6 @@ type ServiceWorkerGlobalScope =
     abstract PerformanceResourceTiming: PerformanceResourceTimingConstructor with get, set
     abstract PerformanceObserver: PerformanceObserverConstructor with get, set
     abstract PerformanceObserverEntryList: PerformanceObserverEntryListConstructor with get, set
-    abstract EventTarget: EventTargetConstructor with get, set
-    /// <summary>
-    /// The **<c>addEventListener()</c>** method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener)
-    /// </summary>
-    abstract addEventListener<'Type>: ``type``: 'Type * handler: U2<(U4<FetchEvent, QueueEvent<obj>, PromiseRejectionEvent, ScheduledEvent> -> unit), EventListenerObject<Event>> * ?options: U2<bool, EventTargetAddEventListenerOptions> -> unit
-    /// <summary>
-    /// The **<c>removeEventListener()</c>** method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener)
-    /// </summary>
-    abstract removeEventListener<'Type>: ``type``: 'Type * handler: U2<(U4<FetchEvent, QueueEvent<obj>, PromiseRejectionEvent, ScheduledEvent> -> unit), EventListenerObject<Event>> * ?options: U2<bool, EventTargetEventListenerOptions> -> unit
-    /// <summary>
-    /// The **<c>dispatchEvent()</c>** method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent)
-    /// </summary>
-    abstract dispatchEvent: ``event``: U4<FetchEvent, PromiseRejectionEvent, QueueEvent<obj>, ScheduledEvent> -> bool
 
 module ServiceWorkerGlobalScope =
     module CompressionStream =
@@ -2136,12 +2117,6 @@ type AbortSignal =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener)
     /// </summary>
     abstract removeEventListener<'Type>: ``type``: 'Type * handler: U2<(Event -> unit), EventListenerObject<Event>> * ?options: U2<bool, EventTargetEventListenerOptions> -> unit
-    /// <summary>
-    /// The **<c>dispatchEvent()</c>** method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent)
-    /// </summary>
-    abstract dispatchEvent: ``event``: Event -> bool
     [<ParamObject; Emit("$0")>]
     static member Create (aborted: bool, reason: obj, onabort: obj, throwIfAborted: (unit -> unit), addEventListener: Action<'Type, U2<(Event -> unit), EventListenerObject<Event>>, U2<bool, EventTargetAddEventListenerOptions> option>, removeEventListener: Action<'Type, U2<(Event -> unit), EventListenerObject<Event>>, U2<bool, EventTargetEventListenerOptions> option>, dispatchEvent: (Event -> bool)) : AbortSignal = jsNative
     /// <summary>
@@ -2197,106 +2172,6 @@ type ExtendableEvent =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ExtendableEvent/waitUntil)
     /// </summary>
     abstract waitUntil: promise: JS.Promise<obj> -> unit
-    /// <summary>
-    /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/type)
-    /// </summary>
-    abstract ``type``: string
-    /// <summary>
-    /// The **<c>eventPhase</c>** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/eventPhase)
-    /// </summary>
-    abstract eventPhase: float
-    /// <summary>
-    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
-    /// </summary>
-    abstract composed: bool
-    /// <summary>
-    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
-    /// </summary>
-    abstract bubbles: bool
-    /// <summary>
-    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
-    /// </summary>
-    abstract cancelable: bool
-    /// <summary>
-    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
-    /// </summary>
-    abstract defaultPrevented: bool
-    /// <summary>
-    /// The Event property **<c>returnValue</c>** indicates whether the default action for this event has been prevented or not.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/returnValue)</remarks>
-    abstract returnValue: bool
-    /// <summary>
-    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
-    /// </summary>
-    abstract currentTarget: EventTarget<Record<string, Event>> option
-    /// <summary>
-    /// The read-only **<c>target</c>** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
-    /// </summary>
-    abstract target: EventTarget<Record<string, Event>> option
-    /// <summary>
-    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
-    abstract srcElement: EventTarget<Record<string, Event>> option
-    /// <summary>
-    /// The **<c>timeStamp</c>** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/timeStamp)
-    /// </summary>
-    abstract timeStamp: float
-    /// <summary>
-    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
-    /// </summary>
-    abstract isTrusted: bool
-    /// <summary>
-    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
-    abstract cancelBubble: bool with get, set
-    /// <summary>
-    /// The **<c>stopImmediatePropagation()</c>** method of the Event interface prevents other listeners of the same event from being called.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopImmediatePropagation)
-    /// </summary>
-    abstract stopImmediatePropagation: unit -> unit
-    /// <summary>
-    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
-    /// </summary>
-    abstract preventDefault: unit -> unit
-    /// <summary>
-    /// The **<c>stopPropagation()</c>** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation)
-    /// </summary>
-    abstract stopPropagation: unit -> unit
-    /// <summary>
-    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
-    /// </summary>
-    abstract composedPath: unit -> EventTarget<Record<string, Event>>[]
     [<ParamObject; Emit("$0")>]
     static member Create (waitUntil: (JS.Promise<obj> -> unit), ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<Record<string, Event>>[]), ?currentTarget: EventTarget<Record<string, Event>>, ?target: EventTarget<Record<string, Event>>, ?srcElement: EventTarget<Record<string, Event>>) : ExtendableEvent = jsNative
     [<Global("ExtendableEvent.NONE")>]
@@ -2322,106 +2197,6 @@ type CustomEvent<'T> =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CustomEvent/detail)
     /// </summary>
     abstract detail: 'T
-    /// <summary>
-    /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/type)
-    /// </summary>
-    abstract ``type``: string
-    /// <summary>
-    /// The **<c>eventPhase</c>** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/eventPhase)
-    /// </summary>
-    abstract eventPhase: float
-    /// <summary>
-    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
-    /// </summary>
-    abstract composed: bool
-    /// <summary>
-    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
-    /// </summary>
-    abstract bubbles: bool
-    /// <summary>
-    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
-    /// </summary>
-    abstract cancelable: bool
-    /// <summary>
-    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
-    /// </summary>
-    abstract defaultPrevented: bool
-    /// <summary>
-    /// The Event property **<c>returnValue</c>** indicates whether the default action for this event has been prevented or not.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/returnValue)</remarks>
-    abstract returnValue: bool
-    /// <summary>
-    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
-    /// </summary>
-    abstract currentTarget: EventTarget<Record<string, Event>> option
-    /// <summary>
-    /// The read-only **<c>target</c>** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
-    /// </summary>
-    abstract target: EventTarget<Record<string, Event>> option
-    /// <summary>
-    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
-    abstract srcElement: EventTarget<Record<string, Event>> option
-    /// <summary>
-    /// The **<c>timeStamp</c>** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/timeStamp)
-    /// </summary>
-    abstract timeStamp: float
-    /// <summary>
-    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
-    /// </summary>
-    abstract isTrusted: bool
-    /// <summary>
-    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
-    abstract cancelBubble: bool with get, set
-    /// <summary>
-    /// The **<c>stopImmediatePropagation()</c>** method of the Event interface prevents other listeners of the same event from being called.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopImmediatePropagation)
-    /// </summary>
-    abstract stopImmediatePropagation: unit -> unit
-    /// <summary>
-    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
-    /// </summary>
-    abstract preventDefault: unit -> unit
-    /// <summary>
-    /// The **<c>stopPropagation()</c>** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation)
-    /// </summary>
-    abstract stopPropagation: unit -> unit
-    /// <summary>
-    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
-    /// </summary>
-    abstract composedPath: unit -> EventTarget<Record<string, Event>>[]
     [<ParamObject; Emit("$0")>]
     static member Create (detail: 'T, ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<Record<string, Event>>[]), ?currentTarget: EventTarget<Record<string, Event>>, ?target: EventTarget<Record<string, Event>>, ?srcElement: EventTarget<Record<string, Event>>) : CustomEvent<'T> = jsNative
     [<Global("CustomEvent.NONE")>]
@@ -2520,48 +2295,6 @@ type File =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/File/lastModified)
     /// </summary>
     abstract lastModified: float
-    /// <summary>
-    /// The **<c>size</c>** read-only property of the Blob interface returns the size of the Blob or File in bytes.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Blob/size)
-    /// </summary>
-    abstract size: float
-    /// <summary>
-    /// The **<c>type</c>** read-only property of the Blob interface returns the MIME type of the file.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Blob/type)
-    /// </summary>
-    abstract ``type``: string
-    /// <summary>
-    /// The **<c>slice()</c>** method of the Blob interface creates and returns a new Blob object which contains data from a subset of the blob on which it's called.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Blob/slice)
-    /// </summary>
-    abstract slice: ?start: float * ?``end``: float * ?``type``: string -> Blob
-    /// <summary>
-    /// The **<c>arrayBuffer()</c>** method of the Blob interface returns a Promise that resolves with the contents of the blob as binary data contained in an ArrayBuffer.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Blob/arrayBuffer)
-    /// </summary>
-    abstract arrayBuffer: unit -> JS.Promise<JS.ArrayBuffer>
-    /// <summary>
-    /// The **<c>bytes()</c>** method of the Blob interface returns a Promise that resolves with a Uint8Array containing the contents of the blob as an array of bytes.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Blob/bytes)
-    /// </summary>
-    abstract bytes: unit -> JS.Promise<JS.Uint8Array>
-    /// <summary>
-    /// The **<c>text()</c>** method of the Blob interface returns a Promise that resolves with a string containing the contents of the blob, interpreted as UTF-8.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Blob/text)
-    /// </summary>
-    abstract text: unit -> JS.Promise<string>
-    /// <summary>
-    /// The **<c>stream()</c>** method of the Blob interface returns a ReadableStream which upon reading returns the data contained within the Blob.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Blob/stream)
-    /// </summary>
-    abstract stream: unit -> ReadableStream<obj>
     [<ParamObject; Emit("$0")>]
     static member Create (name: string, lastModified: float, size: float, ``type``: string, slice: Func<float option, float option, string option, Blob>, arrayBuffer: (unit -> JS.Promise<JS.ArrayBuffer>), bytes: (unit -> JS.Promise<JS.Uint8Array>), text: (unit -> JS.Promise<string>), stream: (unit -> ReadableStream<obj>)) : File = jsNative
 
@@ -2914,24 +2647,6 @@ type DigestStream =
     abstract digest: JS.Promise<JS.ArrayBuffer>
     abstract bytesWritten: U2<float, bigint>
     /// <summary>
-    /// The **<c>locked</c>** read-only property of the WritableStream interface returns a boolean indicating whether the WritableStream is locked to a writer.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStream/locked)
-    /// </summary>
-    abstract locked: bool
-    /// <summary>
-    /// The **<c>abort()</c>** method of the WritableStream interface aborts the stream, signaling that the producer can no longer successfully write to the stream and it is to be immediately moved to an error state, with any queued writes discarded.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStream/abort)
-    /// </summary>
-    abstract abort: ?reason: obj -> JS.Promise<unit>
-    /// <summary>
-    /// The **<c>close()</c>** method of the WritableStream interface closes the associated stream. All chunks written before this method is called are sent before the returned promise is fulfilled.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStream/close)
-    /// </summary>
-    abstract close: unit -> JS.Promise<unit>
-    /// <summary>
     /// The **<c>getWriter()</c>** method of the WritableStream interface returns a new instance of WritableStreamDefaultWriter and locks the stream to that instance. While the stream is locked, no other writer can be acquired until this one is released.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStream/getWriter)
@@ -3046,106 +2761,6 @@ type ErrorEvent =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ErrorEvent/error)
     /// </summary>
     abstract error: obj
-    /// <summary>
-    /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/type)
-    /// </summary>
-    abstract ``type``: string
-    /// <summary>
-    /// The **<c>eventPhase</c>** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/eventPhase)
-    /// </summary>
-    abstract eventPhase: float
-    /// <summary>
-    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
-    /// </summary>
-    abstract composed: bool
-    /// <summary>
-    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
-    /// </summary>
-    abstract bubbles: bool
-    /// <summary>
-    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
-    /// </summary>
-    abstract cancelable: bool
-    /// <summary>
-    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
-    /// </summary>
-    abstract defaultPrevented: bool
-    /// <summary>
-    /// The Event property **<c>returnValue</c>** indicates whether the default action for this event has been prevented or not.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/returnValue)</remarks>
-    abstract returnValue: bool
-    /// <summary>
-    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
-    /// </summary>
-    abstract currentTarget: EventTarget<Record<string, Event>> option
-    /// <summary>
-    /// The read-only **<c>target</c>** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
-    /// </summary>
-    abstract target: EventTarget<Record<string, Event>> option
-    /// <summary>
-    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
-    abstract srcElement: EventTarget<Record<string, Event>> option
-    /// <summary>
-    /// The **<c>timeStamp</c>** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/timeStamp)
-    /// </summary>
-    abstract timeStamp: float
-    /// <summary>
-    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
-    /// </summary>
-    abstract isTrusted: bool
-    /// <summary>
-    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
-    abstract cancelBubble: bool with get, set
-    /// <summary>
-    /// The **<c>stopImmediatePropagation()</c>** method of the Event interface prevents other listeners of the same event from being called.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopImmediatePropagation)
-    /// </summary>
-    abstract stopImmediatePropagation: unit -> unit
-    /// <summary>
-    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
-    /// </summary>
-    abstract preventDefault: unit -> unit
-    /// <summary>
-    /// The **<c>stopPropagation()</c>** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation)
-    /// </summary>
-    abstract stopPropagation: unit -> unit
-    /// <summary>
-    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
-    /// </summary>
-    abstract composedPath: unit -> EventTarget<Record<string, Event>>[]
     [<ParamObject; Emit("$0")>]
     static member Create (filename: string, message: string, lineno: float, colno: float, error: obj, ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<Record<string, Event>>[]), ?currentTarget: EventTarget<Record<string, Event>>, ?target: EventTarget<Record<string, Event>>, ?srcElement: EventTarget<Record<string, Event>>) : ErrorEvent = jsNative
     [<Global("ErrorEvent.NONE")>]
@@ -3208,106 +2823,6 @@ type MessageEvent =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/MessageEvent/ports)
     /// </summary>
     abstract ports: MessagePort[]
-    /// <summary>
-    /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/type)
-    /// </summary>
-    abstract ``type``: string
-    /// <summary>
-    /// The **<c>eventPhase</c>** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/eventPhase)
-    /// </summary>
-    abstract eventPhase: float
-    /// <summary>
-    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
-    /// </summary>
-    abstract composed: bool
-    /// <summary>
-    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
-    /// </summary>
-    abstract bubbles: bool
-    /// <summary>
-    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
-    /// </summary>
-    abstract cancelable: bool
-    /// <summary>
-    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
-    /// </summary>
-    abstract defaultPrevented: bool
-    /// <summary>
-    /// The Event property **<c>returnValue</c>** indicates whether the default action for this event has been prevented or not.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/returnValue)</remarks>
-    abstract returnValue: bool
-    /// <summary>
-    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
-    /// </summary>
-    abstract currentTarget: EventTarget<Record<string, Event>> option
-    /// <summary>
-    /// The read-only **<c>target</c>** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
-    /// </summary>
-    abstract target: EventTarget<Record<string, Event>> option
-    /// <summary>
-    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
-    abstract srcElement: EventTarget<Record<string, Event>> option
-    /// <summary>
-    /// The **<c>timeStamp</c>** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/timeStamp)
-    /// </summary>
-    abstract timeStamp: float
-    /// <summary>
-    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
-    /// </summary>
-    abstract isTrusted: bool
-    /// <summary>
-    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
-    abstract cancelBubble: bool with get, set
-    /// <summary>
-    /// The **<c>stopImmediatePropagation()</c>** method of the Event interface prevents other listeners of the same event from being called.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopImmediatePropagation)
-    /// </summary>
-    abstract stopImmediatePropagation: unit -> unit
-    /// <summary>
-    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
-    /// </summary>
-    abstract preventDefault: unit -> unit
-    /// <summary>
-    /// The **<c>stopPropagation()</c>** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation)
-    /// </summary>
-    abstract stopPropagation: unit -> unit
-    /// <summary>
-    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
-    /// </summary>
-    abstract composedPath: unit -> EventTarget<Record<string, Event>>[]
     [<ParamObject; Emit("$0")>]
     static member Create (data: obj, lastEventId: string, ports: MessagePort[], ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<Record<string, Event>>[]), ?origin: string, ?source: MessagePort, ?currentTarget: EventTarget<Record<string, Event>>, ?target: EventTarget<Record<string, Event>>, ?srcElement: EventTarget<Record<string, Event>>) : MessageEvent = jsNative
     [<Global("MessageEvent.NONE")>]
@@ -3352,106 +2867,6 @@ type PromiseRejectionEvent =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PromiseRejectionEvent/reason)
     /// </summary>
     abstract reason: obj
-    /// <summary>
-    /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/type)
-    /// </summary>
-    abstract ``type``: string
-    /// <summary>
-    /// The **<c>eventPhase</c>** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/eventPhase)
-    /// </summary>
-    abstract eventPhase: float
-    /// <summary>
-    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
-    /// </summary>
-    abstract composed: bool
-    /// <summary>
-    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
-    /// </summary>
-    abstract bubbles: bool
-    /// <summary>
-    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
-    /// </summary>
-    abstract cancelable: bool
-    /// <summary>
-    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
-    /// </summary>
-    abstract defaultPrevented: bool
-    /// <summary>
-    /// The Event property **<c>returnValue</c>** indicates whether the default action for this event has been prevented or not.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/returnValue)</remarks>
-    abstract returnValue: bool
-    /// <summary>
-    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
-    /// </summary>
-    abstract currentTarget: EventTarget<Record<string, Event>> option
-    /// <summary>
-    /// The read-only **<c>target</c>** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
-    /// </summary>
-    abstract target: EventTarget<Record<string, Event>> option
-    /// <summary>
-    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
-    abstract srcElement: EventTarget<Record<string, Event>> option
-    /// <summary>
-    /// The **<c>timeStamp</c>** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/timeStamp)
-    /// </summary>
-    abstract timeStamp: float
-    /// <summary>
-    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
-    /// </summary>
-    abstract isTrusted: bool
-    /// <summary>
-    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
-    abstract cancelBubble: bool with get, set
-    /// <summary>
-    /// The **<c>stopImmediatePropagation()</c>** method of the Event interface prevents other listeners of the same event from being called.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopImmediatePropagation)
-    /// </summary>
-    abstract stopImmediatePropagation: unit -> unit
-    /// <summary>
-    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
-    /// </summary>
-    abstract preventDefault: unit -> unit
-    /// <summary>
-    /// The **<c>stopPropagation()</c>** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation)
-    /// </summary>
-    abstract stopPropagation: unit -> unit
-    /// <summary>
-    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
-    /// </summary>
-    abstract composedPath: unit -> EventTarget<Record<string, Event>>[]
     [<ParamObject; Emit("$0")>]
     static member Create (promise: JS.Promise<obj>, reason: obj, ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<Record<string, Event>>[]), ?currentTarget: EventTarget<Record<string, Event>>, ?target: EventTarget<Record<string, Event>>, ?srcElement: EventTarget<Record<string, Event>>) : PromiseRejectionEvent = jsNative
     [<Global("PromiseRejectionEvent.NONE")>]
@@ -3654,112 +3069,6 @@ type FetchEvent =
     /// </summary>
     abstract respondWith: promise: U2<JS.Promise<Response>, Response> -> unit
     abstract passThroughOnException: unit -> unit
-    /// <summary>
-    /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/type)
-    /// </summary>
-    abstract ``type``: string
-    /// <summary>
-    /// The **<c>eventPhase</c>** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/eventPhase)
-    /// </summary>
-    abstract eventPhase: float
-    /// <summary>
-    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
-    /// </summary>
-    abstract composed: bool
-    /// <summary>
-    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
-    /// </summary>
-    abstract bubbles: bool
-    /// <summary>
-    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
-    /// </summary>
-    abstract cancelable: bool
-    /// <summary>
-    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
-    /// </summary>
-    abstract defaultPrevented: bool
-    /// <summary>
-    /// The Event property **<c>returnValue</c>** indicates whether the default action for this event has been prevented or not.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/returnValue)</remarks>
-    abstract returnValue: bool
-    /// <summary>
-    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
-    /// </summary>
-    abstract currentTarget: EventTarget<Record<string, Event>> option
-    /// <summary>
-    /// The read-only **<c>target</c>** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
-    /// </summary>
-    abstract target: EventTarget<Record<string, Event>> option
-    /// <summary>
-    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
-    abstract srcElement: EventTarget<Record<string, Event>> option
-    /// <summary>
-    /// The **<c>timeStamp</c>** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/timeStamp)
-    /// </summary>
-    abstract timeStamp: float
-    /// <summary>
-    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
-    /// </summary>
-    abstract isTrusted: bool
-    /// <summary>
-    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
-    abstract cancelBubble: bool with get, set
-    /// <summary>
-    /// The **<c>stopImmediatePropagation()</c>** method of the Event interface prevents other listeners of the same event from being called.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopImmediatePropagation)
-    /// </summary>
-    abstract stopImmediatePropagation: unit -> unit
-    /// <summary>
-    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
-    /// </summary>
-    abstract preventDefault: unit -> unit
-    /// <summary>
-    /// The **<c>stopPropagation()</c>** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation)
-    /// </summary>
-    abstract stopPropagation: unit -> unit
-    /// <summary>
-    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
-    /// </summary>
-    abstract composedPath: unit -> EventTarget<Record<string, Event>>[]
-    /// <summary>
-    /// The **<c>ExtendableEvent.waitUntil()</c>** method tells the event dispatcher that work is ongoing. It can also be used to detect whether that work was successful. In service workers, waitUntil() tells the browser that work is ongoing until the promise settles, and it shouldn't terminate the service worker if it wants that work to complete.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ExtendableEvent/waitUntil)
-    /// </summary>
-    abstract waitUntil: promise: JS.Promise<obj> -> unit
     [<ParamObject; Emit("$0")>]
     static member Create (request: Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, respondWith: (U2<JS.Promise<Response>, Response> -> unit), passThroughOnException: (unit -> unit), ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<Record<string, Event>>[]), waitUntil: (JS.Promise<obj> -> unit), ?currentTarget: EventTarget<Record<string, Event>>, ?target: EventTarget<Record<string, Event>>, ?srcElement: EventTarget<Record<string, Event>>) : FetchEvent = jsNative
     [<Global("FetchEvent.NONE")>]
@@ -3897,14 +3206,6 @@ type Response =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Response/type)
     /// </summary>
     abstract ``type``: Response.Type with get, set
-    abstract body: ReadableStream<obj> option
-    abstract bodyUsed: bool
-    abstract arrayBuffer: unit -> JS.Promise<JS.ArrayBuffer>
-    abstract bytes: unit -> JS.Promise<JS.Uint8Array>
-    abstract text: unit -> JS.Promise<string>
-    abstract json<'T>: unit -> JS.Promise<'T>
-    abstract formData: unit -> JS.Promise<FormData>
-    abstract blob: unit -> JS.Promise<Blob>
     [<ParamObject; Emit("$0")>]
     static member Create (clone: (unit -> Response), status: float, statusText: string, headers: Headers, ok: bool, redirected: bool, url: string, cf: obj, ``type``: Response.Type, bodyUsed: bool, arrayBuffer: (unit -> JS.Promise<JS.ArrayBuffer>), bytes: (unit -> JS.Promise<JS.Uint8Array>), text: (unit -> JS.Promise<string>), json: (unit -> JS.Promise<'T>), formData: (unit -> JS.Promise<FormData>), blob: (unit -> JS.Promise<Blob>), ?webSocket: WebSocket, ?body: ReadableStream<obj>) : Response = jsNative
 
@@ -3992,14 +3293,6 @@ type Request<'CfHostMetadata, 'Cf> =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Request/cache)
     /// </summary>
     abstract cache: RequestInit.Cache option with get, set
-    abstract body: ReadableStream<obj> option
-    abstract bodyUsed: bool
-    abstract arrayBuffer: unit -> JS.Promise<JS.ArrayBuffer>
-    abstract bytes: unit -> JS.Promise<JS.Uint8Array>
-    abstract text: unit -> JS.Promise<string>
-    abstract json<'T>: unit -> JS.Promise<'T>
-    abstract formData: unit -> JS.Promise<FormData>
-    abstract blob: unit -> JS.Promise<Blob>
     [<ParamObject; Emit("$0")>]
     static member Create (clone: (unit -> Request<'CfHostMetadata, 'Cf>), ``method``: string, url: string, headers: Headers, redirect: string, signal: AbortSignal, integrity: string, keepalive: bool, bodyUsed: bool, arrayBuffer: (unit -> JS.Promise<JS.ArrayBuffer>), bytes: (unit -> JS.Promise<JS.Uint8Array>), text: (unit -> JS.Promise<string>), json: (unit -> JS.Promise<'T>), formData: (unit -> JS.Promise<FormData>), blob: (unit -> JS.Promise<Blob>), ?fetcher: Request.Fetcher, ?cf: 'Cf, ?cache: RequestInit.Cache, ?body: ReadableStream<obj>) : Request<'CfHostMetadata, 'Cf> = jsNative
 
@@ -4286,112 +3579,6 @@ type QueueEvent<'Body> =
     abstract metadata: MessageBatchMetadata
     abstract retryAll: ?options: QueueRetryOptions -> unit
     abstract ackAll: unit -> unit
-    /// <summary>
-    /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/type)
-    /// </summary>
-    abstract ``type``: string
-    /// <summary>
-    /// The **<c>eventPhase</c>** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/eventPhase)
-    /// </summary>
-    abstract eventPhase: float
-    /// <summary>
-    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
-    /// </summary>
-    abstract composed: bool
-    /// <summary>
-    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
-    /// </summary>
-    abstract bubbles: bool
-    /// <summary>
-    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
-    /// </summary>
-    abstract cancelable: bool
-    /// <summary>
-    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
-    /// </summary>
-    abstract defaultPrevented: bool
-    /// <summary>
-    /// The Event property **<c>returnValue</c>** indicates whether the default action for this event has been prevented or not.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/returnValue)</remarks>
-    abstract returnValue: bool
-    /// <summary>
-    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
-    /// </summary>
-    abstract currentTarget: EventTarget<Record<string, Event>> option
-    /// <summary>
-    /// The read-only **<c>target</c>** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
-    /// </summary>
-    abstract target: EventTarget<Record<string, Event>> option
-    /// <summary>
-    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
-    abstract srcElement: EventTarget<Record<string, Event>> option
-    /// <summary>
-    /// The **<c>timeStamp</c>** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/timeStamp)
-    /// </summary>
-    abstract timeStamp: float
-    /// <summary>
-    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
-    /// </summary>
-    abstract isTrusted: bool
-    /// <summary>
-    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
-    abstract cancelBubble: bool with get, set
-    /// <summary>
-    /// The **<c>stopImmediatePropagation()</c>** method of the Event interface prevents other listeners of the same event from being called.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopImmediatePropagation)
-    /// </summary>
-    abstract stopImmediatePropagation: unit -> unit
-    /// <summary>
-    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
-    /// </summary>
-    abstract preventDefault: unit -> unit
-    /// <summary>
-    /// The **<c>stopPropagation()</c>** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation)
-    /// </summary>
-    abstract stopPropagation: unit -> unit
-    /// <summary>
-    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
-    /// </summary>
-    abstract composedPath: unit -> EventTarget<Record<string, Event>>[]
-    /// <summary>
-    /// The **<c>ExtendableEvent.waitUntil()</c>** method tells the event dispatcher that work is ongoing. It can also be used to detect whether that work was successful. In service workers, waitUntil() tells the browser that work is ongoing until the promise settles, and it shouldn't terminate the service worker if it wants that work to complete.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ExtendableEvent/waitUntil)
-    /// </summary>
-    abstract waitUntil: promise: JS.Promise<obj> -> unit
     [<ParamObject; Emit("$0")>]
     static member Create (messages: Message<'Body>[], queue: string, metadata: MessageBatchMetadata, retryAll: (QueueRetryOptions option -> unit), ackAll: (unit -> unit), ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<Record<string, Event>>[]), waitUntil: (JS.Promise<obj> -> unit), ?currentTarget: EventTarget<Record<string, Event>>, ?target: EventTarget<Record<string, Event>>, ?srcElement: EventTarget<Record<string, Event>>) : QueueEvent<'Body> = jsNative
 
@@ -4451,8 +3638,6 @@ module R2Bucket =
         type Options =
             inherit R2GetOptions
             abstract onlyIf: U2<Headers, R2Conditional> with get, set
-            abstract range: U4<Headers, R2Object.Range, R2Object.Range2, R2Object.Range3> option with get, set
-            abstract ssecKey: U2<string, JS.ArrayBuffer> option with get, set
             [<ParamObject; Emit("$0")>]
             static member Create (onlyIf: U2<Headers, R2Conditional>, ?range: U4<Headers, R2Object.Range, R2Object.Range2, R2Object.Range3>, ?ssecKey: U2<string, JS.ArrayBuffer>) : Options = jsNative
 
@@ -4461,52 +3646,6 @@ module R2Bucket =
             type OnlyIf =
                 inherit Headers
                 inherit R2Conditional
-                /// <summary>
-                /// The **<c>get()</c>** method of the Headers interface returns a byte string of all the values of a header within a Headers object with a given name. If the requested header doesn't exist in the Headers object, it returns null.
-                ///
-                /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/get)
-                /// </summary>
-                abstract get: name: string -> string option
-                abstract getAll: name: string -> string[]
-                /// <summary>
-                /// The **<c>getSetCookie()</c>** method of the Headers interface returns an array containing the values of all Set-Cookie headers associated with a response. This allows Headers objects to handle having multiple Set-Cookie headers, which wasn't possible prior to its implementation.
-                ///
-                /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/getSetCookie)
-                /// </summary>
-                abstract getSetCookie: unit -> string[]
-                /// <summary>
-                /// The **<c>has()</c>** method of the Headers interface returns a boolean stating whether a Headers object contains a certain header.
-                ///
-                /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/has)
-                /// </summary>
-                abstract has: name: string -> bool
-                /// <summary>
-                /// The **<c>set()</c>** method of the Headers interface sets a new value for an existing header inside a Headers object, or adds the header if it does not already exist.
-                ///
-                /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/set)
-                /// </summary>
-                abstract set: name: string * value: string -> unit
-                /// <summary>
-                /// The **<c>append()</c>** method of the Headers interface appends a new value onto an existing header inside a Headers object, or adds the header if it does not already exist.
-                ///
-                /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/append)
-                /// </summary>
-                abstract append: name: string * value: string -> unit
-                /// <summary>
-                /// The **<c>delete()</c>** method of the Headers interface deletes a header from the current Headers object.
-                ///
-                /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/delete)
-                /// </summary>
-                abstract delete: name: string -> unit
-                abstract forEach<'This>: callback: Headers.ForEach.Callback * ?thisArg: 'This -> unit
-                abstract entries: unit -> obj
-                abstract keys: unit -> obj
-                abstract values: unit -> obj
-                abstract etagMatches: string option with get, set
-                abstract etagDoesNotMatch: string option with get, set
-                abstract uploadedBefore: JS.Date option with get, set
-                abstract uploadedAfter: JS.Date option with get, set
-                abstract secondsGranularity: bool option with get, set
                 [<ParamObject; Emit("$0")>]
                 static member Create (get: (string -> string option), getAll: (string -> string[]), getSetCookie: (unit -> string[]), has: (string -> bool), set: Action<string, string>, append: Action<string, string>, delete: (string -> unit), forEach: Action<Headers.ForEach.Callback, 'This option>, entries: (unit -> obj), keys: (unit -> obj), values: (unit -> obj), ?etagMatches: string, ?etagDoesNotMatch: string, ?uploadedBefore: JS.Date, ?uploadedAfter: JS.Date, ?secondsGranularity: bool) : OnlyIf = jsNative
 
@@ -4514,52 +3653,6 @@ module R2Bucket =
             type OnlyIf2 =
                 inherit R2Conditional
                 inherit Headers
-                abstract etagMatches: string option with get, set
-                abstract etagDoesNotMatch: string option with get, set
-                abstract uploadedBefore: JS.Date option with get, set
-                abstract uploadedAfter: JS.Date option with get, set
-                abstract secondsGranularity: bool option with get, set
-                /// <summary>
-                /// The **<c>get()</c>** method of the Headers interface returns a byte string of all the values of a header within a Headers object with a given name. If the requested header doesn't exist in the Headers object, it returns null.
-                ///
-                /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/get)
-                /// </summary>
-                abstract get: name: string -> string option
-                abstract getAll: name: string -> string[]
-                /// <summary>
-                /// The **<c>getSetCookie()</c>** method of the Headers interface returns an array containing the values of all Set-Cookie headers associated with a response. This allows Headers objects to handle having multiple Set-Cookie headers, which wasn't possible prior to its implementation.
-                ///
-                /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/getSetCookie)
-                /// </summary>
-                abstract getSetCookie: unit -> string[]
-                /// <summary>
-                /// The **<c>has()</c>** method of the Headers interface returns a boolean stating whether a Headers object contains a certain header.
-                ///
-                /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/has)
-                /// </summary>
-                abstract has: name: string -> bool
-                /// <summary>
-                /// The **<c>set()</c>** method of the Headers interface sets a new value for an existing header inside a Headers object, or adds the header if it does not already exist.
-                ///
-                /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/set)
-                /// </summary>
-                abstract set: name: string * value: string -> unit
-                /// <summary>
-                /// The **<c>append()</c>** method of the Headers interface appends a new value onto an existing header inside a Headers object, or adds the header if it does not already exist.
-                ///
-                /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/append)
-                /// </summary>
-                abstract append: name: string * value: string -> unit
-                /// <summary>
-                /// The **<c>delete()</c>** method of the Headers interface deletes a header from the current Headers object.
-                ///
-                /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/delete)
-                /// </summary>
-                abstract delete: name: string -> unit
-                abstract forEach<'This>: callback: Headers.ForEach.Callback * ?thisArg: 'This -> unit
-                abstract entries: unit -> obj
-                abstract keys: unit -> obj
-                abstract values: unit -> obj
                 [<ParamObject; Emit("$0")>]
                 static member Create (get: (string -> string option), getAll: (string -> string[]), getSetCookie: (unit -> string[]), has: (string -> bool), set: Action<string, string>, append: Action<string, string>, delete: (string -> unit), forEach: Action<Headers.ForEach.Callback, 'This option>, entries: (unit -> obj), keys: (unit -> obj), values: (unit -> obj), ?etagMatches: string, ?etagDoesNotMatch: string, ?uploadedBefore: JS.Date, ?uploadedAfter: JS.Date, ?secondsGranularity: bool) : OnlyIf2 = jsNative
 
@@ -4568,15 +3661,6 @@ module R2Bucket =
         type Options =
             inherit R2PutOptions
             abstract onlyIf: U2<Headers, R2Conditional> with get, set
-            abstract httpMetadata: U2<Headers, R2HTTPMetadata> option with get, set
-            abstract customMetadata: Record<string, string> option with get, set
-            abstract md5: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
-            abstract sha1: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
-            abstract sha256: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
-            abstract sha384: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
-            abstract sha512: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
-            abstract storageClass: string option with get, set
-            abstract ssecKey: U2<string, JS.ArrayBuffer> option with get, set
             [<ParamObject; Emit("$0")>]
             static member Create (onlyIf: U2<Headers, R2Conditional>, ?httpMetadata: U2<Headers, R2HTTPMetadata>, ?customMetadata: Record<string, string>, ?md5: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha1: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha256: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha384: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha512: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?storageClass: string, ?ssecKey: U2<string, JS.ArrayBuffer>) : Options = jsNative
 
@@ -4663,19 +3747,6 @@ type R2ObjectBody =
     abstract text: unit -> JS.Promise<string>
     abstract json<'T>: unit -> JS.Promise<'T>
     abstract blob: unit -> JS.Promise<Blob>
-    abstract key: string
-    abstract version: string
-    abstract size: float
-    abstract etag: string
-    abstract httpEtag: string
-    abstract checksums: R2Checksums
-    abstract uploaded: JS.Date
-    abstract httpMetadata: R2HTTPMetadata option
-    abstract customMetadata: Record<string, string> option
-    abstract range: R2Range option
-    abstract storageClass: string
-    abstract ssecKeyMd5: string option
-    abstract writeHttpMetadata: headers: Headers -> unit
     [<ParamObject; Emit("$0")>]
     static member Create (body: ReadableStream<obj>, bodyUsed: bool, arrayBuffer: (unit -> JS.Promise<JS.ArrayBuffer>), bytes: (unit -> JS.Promise<JS.Uint8Array>), text: (unit -> JS.Promise<string>), json: (unit -> JS.Promise<'T>), blob: (unit -> JS.Promise<Blob>), key: string, version: string, size: float, etag: string, httpEtag: string, checksums: R2Checksums, uploaded: JS.Date, storageClass: string, writeHttpMetadata: (Headers -> unit), ?httpMetadata: R2HTTPMetadata, ?customMetadata: Record<string, string>, ?range: R2Range, ?ssecKeyMd5: string) : R2ObjectBody = jsNative
 
@@ -4769,112 +3840,6 @@ type ScheduledEvent =
     abstract scheduledTime: float
     abstract cron: string
     abstract noRetry: unit -> unit
-    /// <summary>
-    /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/type)
-    /// </summary>
-    abstract ``type``: string
-    /// <summary>
-    /// The **<c>eventPhase</c>** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/eventPhase)
-    /// </summary>
-    abstract eventPhase: float
-    /// <summary>
-    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
-    /// </summary>
-    abstract composed: bool
-    /// <summary>
-    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
-    /// </summary>
-    abstract bubbles: bool
-    /// <summary>
-    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
-    /// </summary>
-    abstract cancelable: bool
-    /// <summary>
-    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
-    /// </summary>
-    abstract defaultPrevented: bool
-    /// <summary>
-    /// The Event property **<c>returnValue</c>** indicates whether the default action for this event has been prevented or not.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/returnValue)</remarks>
-    abstract returnValue: bool
-    /// <summary>
-    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
-    /// </summary>
-    abstract currentTarget: EventTarget<Record<string, Event>> option
-    /// <summary>
-    /// The read-only **<c>target</c>** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
-    /// </summary>
-    abstract target: EventTarget<Record<string, Event>> option
-    /// <summary>
-    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
-    abstract srcElement: EventTarget<Record<string, Event>> option
-    /// <summary>
-    /// The **<c>timeStamp</c>** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/timeStamp)
-    /// </summary>
-    abstract timeStamp: float
-    /// <summary>
-    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
-    /// </summary>
-    abstract isTrusted: bool
-    /// <summary>
-    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
-    abstract cancelBubble: bool with get, set
-    /// <summary>
-    /// The **<c>stopImmediatePropagation()</c>** method of the Event interface prevents other listeners of the same event from being called.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopImmediatePropagation)
-    /// </summary>
-    abstract stopImmediatePropagation: unit -> unit
-    /// <summary>
-    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
-    /// </summary>
-    abstract preventDefault: unit -> unit
-    /// <summary>
-    /// The **<c>stopPropagation()</c>** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation)
-    /// </summary>
-    abstract stopPropagation: unit -> unit
-    /// <summary>
-    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
-    /// </summary>
-    abstract composedPath: unit -> EventTarget<Record<string, Event>>[]
-    /// <summary>
-    /// The **<c>ExtendableEvent.waitUntil()</c>** method tells the event dispatcher that work is ongoing. It can also be used to detect whether that work was successful. In service workers, waitUntil() tells the browser that work is ongoing until the promise settles, and it shouldn't terminate the service worker if it wants that work to complete.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ExtendableEvent/waitUntil)
-    /// </summary>
-    abstract waitUntil: promise: JS.Promise<obj> -> unit
     [<ParamObject; Emit("$0")>]
     static member Create (scheduledTime: float, cron: string, noRetry: (unit -> unit), ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<Record<string, Event>>[]), waitUntil: (JS.Promise<obj> -> unit), ?currentTarget: EventTarget<Record<string, Event>>, ?target: EventTarget<Record<string, Event>>, ?srcElement: EventTarget<Record<string, Event>>) : ScheduledEvent = jsNative
     [<Global("ScheduledEvent.NONE")>]
@@ -5382,18 +4347,6 @@ type TransformStream<'I, 'O> =
 [<Interface>]
 type FixedLengthStream =
     inherit IdentityTransformStream
-    /// <summary>
-    /// The **<c>readable</c>** read-only property of the TransformStream interface returns the ReadableStream instance controlled by this TransformStream. This stream emits the transformed output data.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TransformStream/readable)
-    /// </summary>
-    abstract readable: ReadableStream<JS.Uint8Array>
-    /// <summary>
-    /// The **<c>writable</c>** read-only property of the TransformStream interface returns the WritableStream instance controlled by this TransformStream. This stream accepts input data that will be transformed and emitted to the readable stream.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TransformStream/writable)
-    /// </summary>
-    abstract writable: WritableStream<U2<JS.ArrayBuffer, JS.ArrayBufferView>>
     [<ParamObject; Emit("$0")>]
     static member Create (readable: ReadableStream<JS.Uint8Array>, writable: WritableStream<U2<JS.ArrayBuffer, JS.ArrayBufferView>>) : FixedLengthStream = jsNative
 
@@ -5596,112 +4549,6 @@ type TailEvent =
     inherit ExtendableEvent
     abstract events: TraceItem[]
     abstract traces: TraceItem[]
-    /// <summary>
-    /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/type)
-    /// </summary>
-    abstract ``type``: string
-    /// <summary>
-    /// The **<c>eventPhase</c>** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/eventPhase)
-    /// </summary>
-    abstract eventPhase: float
-    /// <summary>
-    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
-    /// </summary>
-    abstract composed: bool
-    /// <summary>
-    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
-    /// </summary>
-    abstract bubbles: bool
-    /// <summary>
-    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
-    /// </summary>
-    abstract cancelable: bool
-    /// <summary>
-    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
-    /// </summary>
-    abstract defaultPrevented: bool
-    /// <summary>
-    /// The Event property **<c>returnValue</c>** indicates whether the default action for this event has been prevented or not.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/returnValue)</remarks>
-    abstract returnValue: bool
-    /// <summary>
-    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
-    /// </summary>
-    abstract currentTarget: EventTarget<Record<string, Event>> option
-    /// <summary>
-    /// The read-only **<c>target</c>** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
-    /// </summary>
-    abstract target: EventTarget<Record<string, Event>> option
-    /// <summary>
-    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
-    abstract srcElement: EventTarget<Record<string, Event>> option
-    /// <summary>
-    /// The **<c>timeStamp</c>** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/timeStamp)
-    /// </summary>
-    abstract timeStamp: float
-    /// <summary>
-    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
-    /// </summary>
-    abstract isTrusted: bool
-    /// <summary>
-    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
-    abstract cancelBubble: bool with get, set
-    /// <summary>
-    /// The **<c>stopImmediatePropagation()</c>** method of the Event interface prevents other listeners of the same event from being called.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopImmediatePropagation)
-    /// </summary>
-    abstract stopImmediatePropagation: unit -> unit
-    /// <summary>
-    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
-    /// </summary>
-    abstract preventDefault: unit -> unit
-    /// <summary>
-    /// The **<c>stopPropagation()</c>** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation)
-    /// </summary>
-    abstract stopPropagation: unit -> unit
-    /// <summary>
-    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
-    /// </summary>
-    abstract composedPath: unit -> EventTarget<Record<string, Event>>[]
-    /// <summary>
-    /// The **<c>ExtendableEvent.waitUntil()</c>** method tells the event dispatcher that work is ongoing. It can also be used to detect whether that work was successful. In service workers, waitUntil() tells the browser that work is ongoing until the promise settles, and it shouldn't terminate the service worker if it wants that work to complete.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ExtendableEvent/waitUntil)
-    /// </summary>
-    abstract waitUntil: promise: JS.Promise<obj> -> unit
     [<ParamObject; Emit("$0")>]
     static member Create (events: TraceItem[], traces: TraceItem[], ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<Record<string, Event>>[]), waitUntil: (JS.Promise<obj> -> unit), ?currentTarget: EventTarget<Record<string, Event>>, ?target: EventTarget<Record<string, Event>>, ?srcElement: EventTarget<Record<string, Event>>) : TailEvent = jsNative
     [<Global("TailEvent.NONE")>]
@@ -6205,106 +5052,6 @@ type CloseEvent =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CloseEvent/wasClean)
     /// </summary>
     abstract wasClean: bool
-    /// <summary>
-    /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/type)
-    /// </summary>
-    abstract ``type``: string
-    /// <summary>
-    /// The **<c>eventPhase</c>** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/eventPhase)
-    /// </summary>
-    abstract eventPhase: float
-    /// <summary>
-    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
-    /// </summary>
-    abstract composed: bool
-    /// <summary>
-    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
-    /// </summary>
-    abstract bubbles: bool
-    /// <summary>
-    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
-    /// </summary>
-    abstract cancelable: bool
-    /// <summary>
-    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
-    /// </summary>
-    abstract defaultPrevented: bool
-    /// <summary>
-    /// The Event property **<c>returnValue</c>** indicates whether the default action for this event has been prevented or not.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/returnValue)</remarks>
-    abstract returnValue: bool
-    /// <summary>
-    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
-    /// </summary>
-    abstract currentTarget: EventTarget<Record<string, Event>> option
-    /// <summary>
-    /// The read-only **<c>target</c>** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
-    /// </summary>
-    abstract target: EventTarget<Record<string, Event>> option
-    /// <summary>
-    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
-    abstract srcElement: EventTarget<Record<string, Event>> option
-    /// <summary>
-    /// The **<c>timeStamp</c>** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/timeStamp)
-    /// </summary>
-    abstract timeStamp: float
-    /// <summary>
-    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
-    /// </summary>
-    abstract isTrusted: bool
-    /// <summary>
-    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
-    abstract cancelBubble: bool with get, set
-    /// <summary>
-    /// The **<c>stopImmediatePropagation()</c>** method of the Event interface prevents other listeners of the same event from being called.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopImmediatePropagation)
-    /// </summary>
-    abstract stopImmediatePropagation: unit -> unit
-    /// <summary>
-    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
-    /// </summary>
-    abstract preventDefault: unit -> unit
-    /// <summary>
-    /// The **<c>stopPropagation()</c>** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation)
-    /// </summary>
-    abstract stopPropagation: unit -> unit
-    /// <summary>
-    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
-    /// </summary>
-    abstract composedPath: unit -> EventTarget<Record<string, Event>>[]
     [<ParamObject; Emit("$0")>]
     static member Create (code: float, reason: string, wasClean: bool, ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<Record<string, Event>>[]), ?currentTarget: EventTarget<Record<string, Event>>, ?target: EventTarget<Record<string, Event>>, ?srcElement: EventTarget<Record<string, Event>>) : CloseEvent = jsNative
     [<Global("CloseEvent.NONE")>]
@@ -6560,12 +5307,6 @@ type EventSource =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener)
     /// </summary>
     abstract removeEventListener<'Type>: ``type``: 'Type * handler: U2<(Event -> unit), EventListenerObject<Event>> * ?options: U2<bool, EventTargetEventListenerOptions> -> unit
-    /// <summary>
-    /// The **<c>dispatchEvent()</c>** method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent)
-    /// </summary>
-    abstract dispatchEvent: ``event``: Event -> bool
     [<ParamObject; Emit("$0")>]
     static member Create (close: (unit -> unit), url: string, withCredentials: bool, readyState: float, onopen: obj, onmessage: obj, onerror: obj, addEventListener: Action<'Type, U2<(Event -> unit), EventListenerObject<Event>>, U2<bool, EventTargetAddEventListenerOptions> option>, removeEventListener: Action<'Type, U2<(Event -> unit), EventListenerObject<Event>>, U2<bool, EventTargetEventListenerOptions> option>, dispatchEvent: (Event -> bool)) : EventSource = jsNative
     [<Global("EventSource.CONNECTING")>]
@@ -6744,12 +5485,6 @@ type MessagePort =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener)
     /// </summary>
     abstract removeEventListener<'Type>: ``type``: 'Type * handler: U2<(Event -> unit), EventListenerObject<Event>> * ?options: U2<bool, EventTargetEventListenerOptions> -> unit
-    /// <summary>
-    /// The **<c>dispatchEvent()</c>** method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent)
-    /// </summary>
-    abstract dispatchEvent: ``event``: Event -> bool
     [<ParamObject; Emit("$0")>]
     static member Create (postMessage: Action<obj option, U2<obj[], MessagePortPostMessageOptions> option>, close: (unit -> unit), start: (unit -> unit), onmessage: obj, addEventListener: Action<'Type, U2<(Event -> unit), EventListenerObject<Event>>, U2<bool, EventTargetAddEventListenerOptions> option>, removeEventListener: Action<'Type, U2<(Event -> unit), EventListenerObject<Event>>, U2<bool, EventTargetEventListenerOptions> option>, dispatchEvent: (Event -> bool)) : MessagePort = jsNative
 
@@ -6793,11 +5528,6 @@ type LoopbackDurableObjectClass<'T> = private LoopbackDurableObjectClass__ of ob
 [<Interface>]
 type LoopbackDurableObjectNamespace =
     inherit DurableObjectNamespace<unit>
-    abstract newUniqueId: ?options: DurableObjectNamespaceNewUniqueIdOptions -> DurableObjectId
-    abstract idFromName: name: string -> DurableObjectId
-    abstract idFromString: id: string -> DurableObjectId
-    abstract get: id: DurableObjectId * ?options: DurableObjectNamespaceGetDurableObjectOptions -> obj
-    abstract getByName: name: string * ?options: DurableObjectNamespaceGetDurableObjectOptions -> obj
     abstract jurisdiction: jurisdiction: DurableObjectJurisdiction -> DurableObjectNamespace<unit>
     [<ParamObject; Emit("$0")>]
     static member Create (newUniqueId: (DurableObjectNamespaceNewUniqueIdOptions option -> DurableObjectId), idFromName: (string -> DurableObjectId), idFromString: (string -> DurableObjectId), get: Func<DurableObjectId, DurableObjectNamespaceGetDurableObjectOptions option, obj>, getByName: Func<string, DurableObjectNamespaceGetDurableObjectOptions option, obj>, jurisdiction: (DurableObjectJurisdiction -> DurableObjectNamespace<unit>)) : LoopbackDurableObjectNamespace = jsNative
@@ -6805,7 +5535,6 @@ type LoopbackDurableObjectNamespace =
 [<Interface>]
 type LoopbackColoLocalActorNamespace =
     inherit ColoLocalActorNamespace
-    abstract get: actorId: string -> Request.Fetcher
     [<ParamObject; Emit("$0")>]
     static member Create (get: (string -> Request.Fetcher)) : LoopbackColoLocalActorNamespace = jsNative
 
@@ -6972,12 +5701,6 @@ type Performance =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener)
     /// </summary>
     abstract removeEventListener<'Type>: ``type``: 'Type * handler: U2<(Event -> unit), EventListenerObject<Event>> * ?options: U2<bool, EventTargetEventListenerOptions> -> unit
-    /// <summary>
-    /// The **<c>dispatchEvent()</c>** method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent)
-    /// </summary>
-    abstract dispatchEvent: ``event``: Event -> bool
     [<ParamObject; Emit("$0")>]
     static member Create (timeOrigin: float, now: (unit -> float), eventCounts: EventCounts, clearMarks: (string option -> unit), clearMeasures: (string option -> unit), clearResourceTimings: (unit -> unit), getEntries: (unit -> PerformanceEntry[]), getEntriesByName: Func<string, string option, PerformanceEntry[]>, getEntriesByType: (string -> PerformanceEntry[]), mark: Func<string, PerformanceMarkOptions option, PerformanceMark>, measure: Func<string, U2<string, PerformanceMeasureOptions> option, string option, PerformanceMeasure>, setResourceTimingBufferSize: (float -> unit), toJSON: (unit -> obj), nodeTiming: PerformanceNodeTiming, eventLoopUtilization: (unit -> PerformanceEventLoopUtilization), markResourceTiming: (unit -> unit), timerify: Func<(unit -> unit), (unit -> unit)>, addEventListener: Action<'Type, U2<(Event -> unit), EventListenerObject<Event>>, U2<bool, EventTargetAddEventListenerOptions> option>, removeEventListener: Action<'Type, U2<(Event -> unit), EventListenerObject<Event>>, U2<bool, EventTargetEventListenerOptions> option>, dispatchEvent: (Event -> bool)) : Performance = jsNative
 
@@ -7000,36 +5723,6 @@ type PerformanceNodeTiming =
     abstract loopExit: float
     abstract idleTime: float
     abstract uvMetricsInfo: UvMetricsInfo
-    /// <summary>
-    /// The **<c>toJSON()</c>** method is a serializer; it returns a JSON representation of the PerformanceEntry object.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/toJSON)
-    /// </summary>
-    abstract toJSON: unit -> obj
-    /// <summary>
-    /// The read-only **<c>name</c>** property of the PerformanceEntry interface is a string representing the name for a performance entry. It acts as an identifier, but it does not have to be unique. The value depends on the subclass.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/name)
-    /// </summary>
-    abstract name: string
-    /// <summary>
-    /// The read-only **<c>entryType</c>** property returns a string representing the type of performance metric that this entry represents.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/entryType)
-    /// </summary>
-    abstract entryType: string
-    /// <summary>
-    /// The read-only **<c>startTime</c>** property returns the first timestamp recorded for this PerformanceEntry. The meaning of this property depends on the value of this entry's entryType.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/startTime)
-    /// </summary>
-    abstract startTime: float
-    /// <summary>
-    /// The read-only **<c>duration</c>** property returns a timestamp that is the duration of the performance entry. The meaning of this property depends on the value of this entry's entryType.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/duration)
-    /// </summary>
-    abstract duration: float
     [<ParamObject; Emit("$0")>]
     static member Create (nodeStart: float, v8Start: float, bootstrapComplete: float, environment: float, loopStart: float, loopExit: float, idleTime: float, uvMetricsInfo: UvMetricsInfo, toJSON: (unit -> obj), name: string, entryType: string, startTime: float, duration: float) : PerformanceNodeTiming = jsNative
 
@@ -7055,36 +5748,6 @@ type PerformanceMark =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceMark/detail)
     /// </summary>
     abstract detail: obj
-    /// <summary>
-    /// The **<c>toJSON()</c>** method is a serializer; it returns a JSON representation of the PerformanceEntry object.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/toJSON)
-    /// </summary>
-    abstract toJSON: unit -> obj
-    /// <summary>
-    /// The read-only **<c>name</c>** property of the PerformanceEntry interface is a string representing the name for a performance entry. It acts as an identifier, but it does not have to be unique. The value depends on the subclass.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/name)
-    /// </summary>
-    abstract name: string
-    /// <summary>
-    /// The read-only **<c>entryType</c>** property returns a string representing the type of performance metric that this entry represents.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/entryType)
-    /// </summary>
-    abstract entryType: string
-    /// <summary>
-    /// The read-only **<c>startTime</c>** property returns the first timestamp recorded for this PerformanceEntry. The meaning of this property depends on the value of this entry's entryType.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/startTime)
-    /// </summary>
-    abstract startTime: float
-    /// <summary>
-    /// The read-only **<c>duration</c>** property returns a timestamp that is the duration of the performance entry. The meaning of this property depends on the value of this entry's entryType.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/duration)
-    /// </summary>
-    abstract duration: float
     [<ParamObject; Emit("$0")>]
     static member Create (detail: obj, toJSON: (unit -> obj), name: string, entryType: string, startTime: float, duration: float) : PerformanceMark = jsNative
 
@@ -7102,36 +5765,6 @@ type PerformanceMeasure =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceMeasure/detail)
     /// </summary>
     abstract detail: obj
-    /// <summary>
-    /// The **<c>toJSON()</c>** method is a serializer; it returns a JSON representation of the PerformanceEntry object.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/toJSON)
-    /// </summary>
-    abstract toJSON: unit -> obj
-    /// <summary>
-    /// The read-only **<c>name</c>** property of the PerformanceEntry interface is a string representing the name for a performance entry. It acts as an identifier, but it does not have to be unique. The value depends on the subclass.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/name)
-    /// </summary>
-    abstract name: string
-    /// <summary>
-    /// The read-only **<c>entryType</c>** property returns a string representing the type of performance metric that this entry represents.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/entryType)
-    /// </summary>
-    abstract entryType: string
-    /// <summary>
-    /// The read-only **<c>startTime</c>** property returns the first timestamp recorded for this PerformanceEntry. The meaning of this property depends on the value of this entry's entryType.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/startTime)
-    /// </summary>
-    abstract startTime: float
-    /// <summary>
-    /// The read-only **<c>duration</c>** property returns a timestamp that is the duration of the performance entry. The meaning of this property depends on the value of this entry's entryType.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/duration)
-    /// </summary>
-    abstract duration: float
     [<ParamObject; Emit("$0")>]
     static member Create (detail: obj, toJSON: (unit -> obj), name: string, entryType: string, startTime: float, duration: float) : PerformanceMeasure = jsNative
 
@@ -7335,36 +5968,6 @@ type PerformanceResourceTiming =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/workerStart)
     /// </summary>
     abstract workerStart: float
-    /// <summary>
-    /// The read-only **<c>name</c>** property of the PerformanceEntry interface is a string representing the name for a performance entry. It acts as an identifier, but it does not have to be unique. The value depends on the subclass.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/name)
-    /// </summary>
-    abstract name: string
-    /// <summary>
-    /// The read-only **<c>entryType</c>** property returns a string representing the type of performance metric that this entry represents.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/entryType)
-    /// </summary>
-    abstract entryType: string
-    /// <summary>
-    /// The read-only **<c>startTime</c>** property returns the first timestamp recorded for this PerformanceEntry. The meaning of this property depends on the value of this entry's entryType.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/startTime)
-    /// </summary>
-    abstract startTime: float
-    /// <summary>
-    /// The read-only **<c>duration</c>** property returns a timestamp that is the duration of the performance entry. The meaning of this property depends on the value of this entry's entryType.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/duration)
-    /// </summary>
-    abstract duration: float
-    /// <summary>
-    /// The **<c>toJSON()</c>** method is a serializer; it returns a JSON representation of the PerformanceEntry object.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/toJSON)
-    /// </summary>
-    abstract toJSON: unit -> obj
     [<ParamObject; Emit("$0")>]
     static member Create (connectEnd: float, connectStart: float, decodedBodySize: float, domainLookupEnd: float, domainLookupStart: float, encodedBodySize: float, fetchStart: float, initiatorType: string, nextHopProtocol: string, redirectEnd: float, redirectStart: float, requestStart: float, responseEnd: float, responseStart: float, responseStatus: float, transferSize: float, workerStart: float, name: string, entryType: string, startTime: float, duration: float, toJSON: (unit -> obj), ?secureConnectionStart: float) : PerformanceResourceTiming = jsNative
 
@@ -8087,16 +6690,10 @@ type AiSearchChatCompletionsRequest =
 /// </summary>
 type AiSearchMultiSearchOptions =
     inherit AiSearchOptions
-    abstract retrieval: AiSearchOptions.Retrieval option with get, set
-    abstract query_rewrite: AiSearchOptions.QueryRewrite option with get, set
-    abstract reranking: AiSearchOptions.Reranking option with get, set
-    abstract cache: AiSearchOptions.Cache option with get, set
     /// <summary>
     /// Instance IDs to search across (1-10).
     /// </summary>
     abstract instance_ids: string[] with get, set
-    [<EmitIndexer>]
-    abstract Item: string -> obj with get, set
 
 /// <summary>
 /// Request for searching across multiple instances within a namespace.
@@ -8125,15 +6722,6 @@ type AiSearchMultiSearchRequest =
 [<Interface>]
 type AiSearchMultiSearchChunk =
     inherit AiSearchSearchResponse.Chunks.Item
-    abstract id: string with get, set
-    abstract ``type``: string with get, set
-    /// <summary>
-    /// Match score (0-1)
-    /// </summary>
-    abstract score: float with get, set
-    abstract text: string with get, set
-    abstract item: AiSearchMultiSearchChunk.Item with get, set
-    abstract scoring_details: AiSearchMultiSearchChunk.ScoringDetails option with get, set
     abstract instance_id: string with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (id: string, ``type``: string, score: float, text: string, item: AiSearchMultiSearchChunk.Item, instance_id: string, ?scoring_details: AiSearchMultiSearchChunk.ScoringDetails) : AiSearchMultiSearchChunk = jsNative
@@ -8929,7 +7517,6 @@ module AiSearchItems =
         [<Interface>]
         type Options =
             inherit AiSearchUploadItemOptions
-            abstract metadata: Record<string, obj> option with get, set
             /// <summary>
             /// Polling interval in milliseconds (default 1000).
             /// </summary>
@@ -9066,12 +7653,7 @@ module AiSearchInstance =
     module ChatCompletions =
         type Params =
             inherit AiSearchChatCompletionsRequest
-            abstract messages: AiSearchMessage[] with get, set
-            abstract model: string option with get, set
             abstract stream: bool with get, set
-            abstract ai_search_options: AiSearchOptions option with get, set
-            [<EmitIndexer>]
-            abstract Item: string -> obj with get, set
 
     module Update =
         type Config =
@@ -9636,11 +8218,6 @@ module AiTextGenerationOutput =
         type Item =
             inherit AiTextGenerationToolLegacyOutput
             inherit AiTextGenerationToolOutput
-            abstract name: string with get, set
-            abstract arguments: obj with get, set
-            abstract id: string with get, set
-            abstract ``type``: string with get, set
-            abstract ``function``: AiTextGenerationToolOutput.Function with get, set
             [<ParamObject; Emit("$0")>]
             static member Create (name: string, arguments: obj, id: string, ``type``: string, ``function``: AiTextGenerationToolOutput.Function) : Item = jsNative
 
@@ -10429,37 +9006,6 @@ module ChatCompletionChoice =
 type ChatCompletionsMessagesInput =
     inherit ChatCompletionsCommonOptions
     abstract messages: ChatCompletionMessageParam[] with get, set
-    abstract model: string option with get, set
-    abstract audio: AudioParams option with get, set
-    abstract frequency_penalty: float option with get, set
-    abstract logit_bias: Record<string, obj> option with get, set
-    abstract logprobs: bool option with get, set
-    abstract top_logprobs: float option with get, set
-    abstract max_tokens: float option with get, set
-    abstract max_completion_tokens: float option with get, set
-    abstract metadata: Record<string, obj> option with get, set
-    abstract modalities: ChatCompletionsCommonOptions.Modalities.Item[] option with get, set
-    abstract n: float option with get, set
-    abstract parallel_tool_calls: bool option with get, set
-    abstract prediction: PredictionContent option with get, set
-    abstract presence_penalty: float option with get, set
-    abstract reasoning_effort: AgentMemoryThinkingLevel option with get, set
-    abstract chat_template_kwargs: ChatTemplateKwargs option with get, set
-    abstract response_format: ResponseFormat option with get, set
-    abstract seed: float option with get, set
-    abstract service_tier: ChatCompletionsCommonOptions.ServiceTier option with get, set
-    abstract stop: U2<string, string[]> option with get, set
-    abstract store: bool option with get, set
-    abstract stream: bool option with get, set
-    abstract stream_options: ChatCompletionsStreamOptions option with get, set
-    abstract temperature: float option with get, set
-    abstract tool_choice: ChatCompletionToolChoiceOption option with get, set
-    abstract tools: ChatCompletionTool[] option with get, set
-    abstract top_p: float option with get, set
-    abstract user: string option with get, set
-    abstract web_search_options: WebSearchOptions option with get, set
-    abstract function_call: U2<string, ChatCompletionsCommonOptions.FunctionCall> option with get, set
-    abstract functions: FunctionDefinition[] option with get, set
 
 [<Interface>]
 type ChatCompletionsOutput =
@@ -10781,11 +9327,6 @@ type ResponseFunctionToolCall =
 type ResponseFunctionToolCallItem =
     inherit ResponseFunctionToolCall
     abstract id: string with get, set
-    abstract arguments: string with get, set
-    abstract call_id: string with get, set
-    abstract name: string with get, set
-    abstract ``type``: string with get, set
-    abstract status: ResponseFunctionToolCall.Status option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (id: string, arguments: string, call_id: string, name: string, ``type``: string, ?status: ResponseFunctionToolCall.Status) : ResponseFunctionToolCallItem = jsNative
 
@@ -15941,26 +14482,6 @@ type Base_Ai_Cf_Openai_Gpt_Oss_120B =
 module Base_Ai_Cf_Openai_Gpt_Oss_120B =
     type Inputs =
         inherit ResponsesInput
-        abstract background: bool option with get, set
-        abstract conversation: U2<string, ResponseConversationParam> option with get, set
-        abstract ``include``: ResponseIncludable[] option with get, set
-        abstract input: U2<string, ResponseInputItem[]> option with get, set
-        abstract instructions: string option with get, set
-        abstract max_output_tokens: float option with get, set
-        abstract parallel_tool_calls: bool option with get, set
-        abstract previous_response_id: string option with get, set
-        abstract prompt_cache_key: string option with get, set
-        abstract reasoning: Reasoning option with get, set
-        abstract safety_identifier: string option with get, set
-        abstract service_tier: ChatCompletionsCommonOptions.ServiceTier option with get, set
-        abstract stream: bool option with get, set
-        abstract stream_options: StreamOptions option with get, set
-        abstract temperature: float option with get, set
-        abstract text: ResponseTextConfig option with get, set
-        abstract tool_choice: U2<string, ToolChoiceFunction> option with get, set
-        abstract tools: ResponsesFunctionTool[] option with get, set
-        abstract top_p: float option with get, set
-        abstract truncation: ResponsesInput.Truncation option with get, set
         abstract audio: unit option with get, set
         abstract chat_template_kwargs: unit option with get, set
         abstract frequency_penalty: unit option with get, set
@@ -15989,37 +14510,6 @@ module Base_Ai_Cf_Openai_Gpt_Oss_120B =
     type Inputs2 =
         inherit ChatCompletionsCommonOptions
         abstract messages: ChatCompletionMessageParam[] with get, set
-        abstract model: string option with get, set
-        abstract audio: AudioParams option with get, set
-        abstract frequency_penalty: float option with get, set
-        abstract logit_bias: Record<string, obj> option with get, set
-        abstract logprobs: bool option with get, set
-        abstract top_logprobs: float option with get, set
-        abstract max_tokens: float option with get, set
-        abstract max_completion_tokens: float option with get, set
-        abstract metadata: Record<string, obj> option with get, set
-        abstract modalities: ChatCompletionsCommonOptions.Modalities.Item[] option with get, set
-        abstract n: float option with get, set
-        abstract parallel_tool_calls: bool option with get, set
-        abstract prediction: PredictionContent option with get, set
-        abstract presence_penalty: float option with get, set
-        abstract reasoning_effort: AgentMemoryThinkingLevel option with get, set
-        abstract chat_template_kwargs: ChatTemplateKwargs option with get, set
-        abstract response_format: ResponseFormat option with get, set
-        abstract seed: float option with get, set
-        abstract service_tier: ChatCompletionsCommonOptions.ServiceTier option with get, set
-        abstract stop: U2<string, string[]> option with get, set
-        abstract store: bool option with get, set
-        abstract stream: bool option with get, set
-        abstract stream_options: ChatCompletionsStreamOptions option with get, set
-        abstract temperature: float option with get, set
-        abstract tool_choice: ChatCompletionToolChoiceOption option with get, set
-        abstract tools: ChatCompletionTool[] option with get, set
-        abstract top_p: float option with get, set
-        abstract user: string option with get, set
-        abstract web_search_options: WebSearchOptions option with get, set
-        abstract function_call: U2<string, ChatCompletionsCommonOptions.FunctionCall> option with get, set
-        abstract functions: FunctionDefinition[] option with get, set
         abstract background: unit option with get, set
         abstract conversation: unit option with get, set
         abstract ``include``: unit option with get, set
@@ -16035,14 +14525,6 @@ module Base_Ai_Cf_Openai_Gpt_Oss_120B =
 
     type PostProcessedOutputs =
         inherit ChatCompletionsOutput
-        abstract id: string with get, set
-        abstract ``object``: string with get, set
-        abstract created: float with get, set
-        abstract model: string with get, set
-        abstract choices: ChatCompletionChoice[] with get, set
-        abstract usage: CompletionUsage option with get, set
-        abstract system_fingerprint: string option with get, set
-        abstract service_tier: ChatCompletionsCommonOptions.ServiceTier option with get, set
         abstract created_at: unit option with get, set
         abstract error: unit option with get, set
         abstract incomplete_details: unit option with get, set
@@ -16065,29 +14547,6 @@ module Base_Ai_Cf_Openai_Gpt_Oss_120B =
 
     type PostProcessedOutputs2 =
         inherit ResponsesOutput
-        abstract id: string option with get, set
-        abstract created_at: float option with get, set
-        abstract output_text: string option with get, set
-        abstract error: ResponseError option with get, set
-        abstract incomplete_details: ResponseIncompleteDetails option with get, set
-        abstract instructions: U2<string, ResponseInputItem[]> option with get, set
-        abstract ``object``: string option with get, set
-        abstract output: ResponseOutputItem[] option with get, set
-        abstract parallel_tool_calls: bool option with get, set
-        abstract temperature: float option with get, set
-        abstract tool_choice: U2<string, ToolChoiceFunction> option with get, set
-        abstract tools: ResponsesFunctionTool[] option with get, set
-        abstract top_p: float option with get, set
-        abstract max_output_tokens: float option with get, set
-        abstract previous_response_id: string option with get, set
-        abstract prompt: ResponsePrompt option with get, set
-        abstract reasoning: Reasoning option with get, set
-        abstract safety_identifier: string option with get, set
-        abstract service_tier: ChatCompletionsCommonOptions.ServiceTier option with get, set
-        abstract status: ResponseStatus option with get, set
-        abstract text: ResponseTextConfig option with get, set
-        abstract truncation: ResponsesInput.Truncation option with get, set
-        abstract usage: ResponseUsage option with get, set
         abstract choices: unit option with get, set
         abstract created: unit option with get, set
         abstract model: unit option with get, set
@@ -18022,55 +16481,13 @@ module Ai =
             /// https://developers.cloudflare.com/workers-ai/features/batch-api
             /// </summary>
             abstract queueRequest: bool with get, set
-            /// <summary>
-            /// Establish websocket connections, only works for supported models
-            /// </summary>
-            abstract websocket: bool option with get, set
-            /// <summary>
-            /// Tag your requests to group and view them in Cloudflare dashboard.
-            ///
-            /// Rules:
-            /// Tags must only contain letters, numbers, and the symbols: : - . / @
-            /// Each tag can have maximum 50 characters.
-            /// Maximum 5 tags are allowed each request.
-            /// Duplicate tags will removed.
-            /// </summary>
-            abstract tags: string[] option with get, set
-            abstract gateway: GatewayOptions option with get, set
-            abstract returnRawResponse: bool option with get, set
-            abstract prefix: string option with get, set
-            abstract extraHeaders: obj option with get, set
-            abstract signal: AbortSignal option with get, set
             [<ParamObject; Emit("$0")>]
             static member Create (queueRequest: bool, ?websocket: bool, ?tags: string[], ?gateway: GatewayOptions, ?returnRawResponse: bool, ?prefix: string, ?extraHeaders: obj, ?signal: AbortSignal) : Options = jsNative
 
         [<Interface>]
         type Options2 =
             inherit AiOptions
-            /// <summary>
-            /// Send requests as an asynchronous batch job, only works for supported models
-            /// https://developers.cloudflare.com/workers-ai/features/batch-api
-            /// </summary>
-            abstract queueRequest: bool option with get, set
-            /// <summary>
-            /// Establish websocket connections, only works for supported models
-            /// </summary>
-            abstract websocket: bool option with get, set
-            /// <summary>
-            /// Tag your requests to group and view them in Cloudflare dashboard.
-            ///
-            /// Rules:
-            /// Tags must only contain letters, numbers, and the symbols: : - . / @
-            /// Each tag can have maximum 50 characters.
-            /// Maximum 5 tags are allowed each request.
-            /// Duplicate tags will removed.
-            /// </summary>
-            abstract tags: string[] option with get, set
-            abstract gateway: GatewayOptions option with get, set
             abstract returnRawResponse: bool with get, set
-            abstract prefix: string option with get, set
-            abstract extraHeaders: obj option with get, set
-            abstract signal: AbortSignal option with get, set
             [<ParamObject; Emit("$0")>]
             static member Create (returnRawResponse: bool, ?queueRequest: bool, ?websocket: bool, ?tags: string[], ?gateway: GatewayOptions, ?prefix: string, ?extraHeaders: obj, ?signal: AbortSignal) : Options2 = jsNative
 
@@ -18078,29 +16495,9 @@ module Ai =
         type Options3 =
             inherit AiOptions
             /// <summary>
-            /// Send requests as an asynchronous batch job, only works for supported models
-            /// https://developers.cloudflare.com/workers-ai/features/batch-api
-            /// </summary>
-            abstract queueRequest: bool option with get, set
-            /// <summary>
             /// Establish websocket connections, only works for supported models
             /// </summary>
             abstract websocket: bool with get, set
-            /// <summary>
-            /// Tag your requests to group and view them in Cloudflare dashboard.
-            ///
-            /// Rules:
-            /// Tags must only contain letters, numbers, and the symbols: : - . / @
-            /// Each tag can have maximum 50 characters.
-            /// Maximum 5 tags are allowed each request.
-            /// Duplicate tags will removed.
-            /// </summary>
-            abstract tags: string[] option with get, set
-            abstract gateway: GatewayOptions option with get, set
-            abstract returnRawResponse: bool option with get, set
-            abstract prefix: string option with get, set
-            abstract extraHeaders: obj option with get, set
-            abstract signal: AbortSignal option with get, set
             [<ParamObject; Emit("$0")>]
             static member Create (websocket: bool, ?queueRequest: bool, ?tags: string[], ?gateway: GatewayOptions, ?returnRawResponse: bool, ?prefix: string, ?extraHeaders: obj, ?signal: AbortSignal) : Options3 = jsNative
 
@@ -18197,7 +16594,6 @@ module ConversionOptions =
         [<Interface>]
         type Images =
             inherit ImageConversionOptions
-            abstract descriptionLanguage: ConversionOptions.Html.Images.DescriptionLanguage option with get, set
             abstract convert: bool option with get, set
             abstract maxConvertedImages: float option with get, set
             abstract convertOGImage: bool option with get, set
@@ -18267,19 +16663,6 @@ type GatewayOptions =
 [<Interface>]
 type UniversalGatewayOptions =
     inherit GatewayOptions
-    /// <summary>
-    /// *
-    /// </summary>
-    /// <remarks>@deprecated</remarks>
-    abstract id: string with get, set
-    abstract cacheKey: string option with get, set
-    abstract cacheTtl: float option with get, set
-    abstract skipCache: bool option with get, set
-    abstract metadata: Record<string, U4<string, float, bigint, bool> option> option with get, set
-    abstract collectLog: bool option with get, set
-    abstract eventId: string option with get, set
-    abstract requestTimeoutMs: float option with get, set
-    abstract retries: GatewayRetries option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (id: string, ?cacheKey: string, ?cacheTtl: float, ?skipCache: bool, ?metadata: Record<string, U4<string, float, bigint, bool> option>, ?collectLog: bool, ?eventId: string, ?requestTimeoutMs: float, ?retries: GatewayRetries) : UniversalGatewayOptions = jsNative
 
@@ -18657,46 +17040,6 @@ type ArtifactsRepo =
     /// <remarks>@throws {ArtifactsError} with code <c>ALREADY_EXISTS</c> if the target repo already exists.</remarks>
     /// <remarks>@throws {ArtifactsError} with code <c>FORK_IN_PROGRESS</c> if a fork is already running.</remarks>
     abstract fork: name: string * ?opts: ArtifactsRepo.Fork.Opts -> JS.Promise<ArtifactsCreateRepoResult>
-    /// <summary>
-    /// Unique repository ID.
-    /// </summary>
-    abstract id: string with get, set
-    /// <summary>
-    /// Repository name.
-    /// </summary>
-    abstract name: string with get, set
-    /// <summary>
-    /// Repository description, or null if not set.
-    /// </summary>
-    abstract description: string option with get, set
-    /// <summary>
-    /// Default branch name (e.g. "main").
-    /// </summary>
-    abstract defaultBranch: string with get, set
-    /// <summary>
-    /// ISO 8601 creation timestamp.
-    /// </summary>
-    abstract createdAt: string with get, set
-    /// <summary>
-    /// ISO 8601 last-updated timestamp.
-    /// </summary>
-    abstract updatedAt: string with get, set
-    /// <summary>
-    /// ISO 8601 timestamp of the last push, or null if never pushed.
-    /// </summary>
-    abstract lastPushAt: string option with get, set
-    /// <summary>
-    /// Fork source (e.g. "github:owner/repo", "artifacts:namespace/repo"), or null if not a fork.
-    /// </summary>
-    abstract source: string option with get, set
-    /// <summary>
-    /// Whether the repository is read-only.
-    /// </summary>
-    abstract readOnly: bool with get, set
-    /// <summary>
-    /// HTTPS git remote URL.
-    /// </summary>
-    abstract remote: string with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (createToken: Func<ArtifactsCreateTokenResult.Scope option, float option, JS.Promise<ArtifactsCreateTokenResult>>, listTokens: (unit -> JS.Promise<ArtifactsTokenListResult>), revokeToken: (string -> JS.Promise<bool>), fork: Func<string, ArtifactsRepo.Fork.Opts option, JS.Promise<ArtifactsCreateRepoResult>>, id: string, name: string, defaultBranch: string, createdAt: string, updatedAt: string, readOnly: bool, remote: string, ?description: string, ?lastPushAt: string, ?source: string) : ArtifactsRepo = jsNative
 
@@ -18948,12 +17291,6 @@ type AutoRagSearchRequest =
 [<Interface>]
 type AutoRagAiSearchRequest =
     inherit AutoRagSearchRequest
-    abstract query: string with get, set
-    abstract filters: U2<ComparisonFilter, CompoundFilter> option with get, set
-    abstract max_num_results: float option with get, set
-    abstract ranking_options: AutoRagSearchRequest.RankingOptions option with get, set
-    abstract reranking: AutoRagSearchRequest.Reranking option with get, set
-    abstract rewrite_query: bool option with get, set
     abstract stream: bool option with get, set
     abstract system_prompt: string option with get, set
     [<ParamObject; Emit("$0")>]
@@ -19007,11 +17344,6 @@ type AutoRagListResponse = AutoRagListResponse.Item[]
 [<Interface>]
 type AutoRagAiSearchResponse =
     inherit AutoRagSearchResponse
-    abstract ``object``: string with get, set
-    abstract search_query: string with get, set
-    abstract data: AutoRagSearchResponse.Data.Item[] with get, set
-    abstract has_more: bool with get, set
-    abstract next_page: string option with get, set
     abstract response: string with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (``object``: string, search_query: string, data: AutoRagSearchResponse.Data.Item[], has_more: bool, response: string, ?next_page: string) : AutoRagAiSearchResponse = jsNative
@@ -19317,92 +17649,6 @@ type BrowserRunCommonOptions = U2<BrowserRunCommonOptions2, BrowserRunCommonOpti
 type BrowserRunCommonOptions2 =
     inherit BrowserRunBaseOptions
     /// <summary>
-    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
-    abstract addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[] option with get, set
-    /// <summary>
-    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
-    abstract addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[] option with get, set
-    /// <summary>
-    /// Provide credentials for HTTP authentication.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
-    abstract authenticate: BrowserRunBaseOptions.Authenticate option with get, set
-    /// <summary>
-    /// Set cookies before navigating.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
-    abstract cookies: BrowserRunBaseOptions.Cookies.Item[] option with get, set
-    /// <summary>
-    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
-    /// </summary>
-    abstract emulateMediaType: string option with get, set
-    /// <summary>
-    /// Navigation options.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
-    abstract gotoOptions: BrowserRunBaseOptions.GotoOptions option with get, set
-    /// <summary>
-    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
-    /// </summary>
-    abstract rejectRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
-    /// </summary>
-    abstract allowRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
-    /// </summary>
-    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
-    /// </summary>
-    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Additional HTTP headers sent with every request.
-    /// </summary>
-    abstract setExtraHTTPHeaders: Record<string, string> option with get, set
-    /// <summary>
-    /// Whether JavaScript is enabled on the page.
-    /// </summary>
-    abstract setJavaScriptEnabled: bool option with get, set
-    /// <summary>
-    /// Override the default user agent string.
-    /// </summary>
-    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
-    abstract userAgent: string option with get, set
-    /// <summary>
-    /// Set the browser viewport size.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
-    /// <remarks>@default {width:1920,height:1080}</remarks>
-    abstract viewport: BrowserRunBaseOptions.Viewport option with get, set
-    /// <summary>
-    /// Wait for a CSS selector to appear in the page before proceeding.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
-    abstract waitForSelector: BrowserRunBaseOptions.WaitForSelector option with get, set
-    /// <summary>
-    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
-    /// </summary>
-    abstract waitForTimeout: float option with get, set
-    /// <summary>
-    /// When true, continue on best-effort when awaited events fail or timeout.
-    /// </summary>
-    abstract bestAttempt: bool option with get, set
-    /// <summary>
-    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
-    /// </summary>
-    abstract actionTimeout: float option with get, set
-    /// <summary>
-    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
-    /// </summary>
-    /// <remarks>@default 5</remarks>
-    abstract cacheTTL: float option with get, set
-    /// <summary>
     /// URL to navigate to, e.g. <c>"https://example.com"</c>.
     /// </summary>
     abstract url: string with get, set
@@ -19412,92 +17658,6 @@ type BrowserRunCommonOptions2 =
 [<Interface>]
 type BrowserRunCommonOptions3 =
     inherit BrowserRunBaseOptions
-    /// <summary>
-    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
-    abstract addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[] option with get, set
-    /// <summary>
-    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
-    abstract addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[] option with get, set
-    /// <summary>
-    /// Provide credentials for HTTP authentication.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
-    abstract authenticate: BrowserRunBaseOptions.Authenticate option with get, set
-    /// <summary>
-    /// Set cookies before navigating.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
-    abstract cookies: BrowserRunBaseOptions.Cookies.Item[] option with get, set
-    /// <summary>
-    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
-    /// </summary>
-    abstract emulateMediaType: string option with get, set
-    /// <summary>
-    /// Navigation options.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
-    abstract gotoOptions: BrowserRunBaseOptions.GotoOptions option with get, set
-    /// <summary>
-    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
-    /// </summary>
-    abstract rejectRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
-    /// </summary>
-    abstract allowRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
-    /// </summary>
-    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
-    /// </summary>
-    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Additional HTTP headers sent with every request.
-    /// </summary>
-    abstract setExtraHTTPHeaders: Record<string, string> option with get, set
-    /// <summary>
-    /// Whether JavaScript is enabled on the page.
-    /// </summary>
-    abstract setJavaScriptEnabled: bool option with get, set
-    /// <summary>
-    /// Override the default user agent string.
-    /// </summary>
-    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
-    abstract userAgent: string option with get, set
-    /// <summary>
-    /// Set the browser viewport size.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
-    /// <remarks>@default {width:1920,height:1080}</remarks>
-    abstract viewport: BrowserRunBaseOptions.Viewport option with get, set
-    /// <summary>
-    /// Wait for a CSS selector to appear in the page before proceeding.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
-    abstract waitForSelector: BrowserRunBaseOptions.WaitForSelector option with get, set
-    /// <summary>
-    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
-    /// </summary>
-    abstract waitForTimeout: float option with get, set
-    /// <summary>
-    /// When true, continue on best-effort when awaited events fail or timeout.
-    /// </summary>
-    abstract bestAttempt: bool option with get, set
-    /// <summary>
-    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
-    /// </summary>
-    abstract actionTimeout: float option with get, set
-    /// <summary>
-    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
-    /// </summary>
-    /// <remarks>@default 5</remarks>
-    abstract cacheTTL: float option with get, set
     /// <summary>
     /// Set the HTML content of the page directly.
     /// </summary>
@@ -19550,92 +17710,6 @@ type BrowserRunScreenshotOptions2 =
     inherit BrowserRunBaseOptions
     inherit BrowserRunAlternateBackendOptions
     /// <summary>
-    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
-    abstract addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[] option with get, set
-    /// <summary>
-    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
-    abstract addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[] option with get, set
-    /// <summary>
-    /// Provide credentials for HTTP authentication.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
-    abstract authenticate: BrowserRunBaseOptions.Authenticate option with get, set
-    /// <summary>
-    /// Set cookies before navigating.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
-    abstract cookies: BrowserRunBaseOptions.Cookies.Item[] option with get, set
-    /// <summary>
-    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
-    /// </summary>
-    abstract emulateMediaType: string option with get, set
-    /// <summary>
-    /// Navigation options.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
-    abstract gotoOptions: BrowserRunBaseOptions.GotoOptions option with get, set
-    /// <summary>
-    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
-    /// </summary>
-    abstract rejectRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
-    /// </summary>
-    abstract allowRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
-    /// </summary>
-    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
-    /// </summary>
-    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Additional HTTP headers sent with every request.
-    /// </summary>
-    abstract setExtraHTTPHeaders: Record<string, string> option with get, set
-    /// <summary>
-    /// Whether JavaScript is enabled on the page.
-    /// </summary>
-    abstract setJavaScriptEnabled: bool option with get, set
-    /// <summary>
-    /// Override the default user agent string.
-    /// </summary>
-    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
-    abstract userAgent: string option with get, set
-    /// <summary>
-    /// Set the browser viewport size.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
-    /// <remarks>@default {width:1920,height:1080}</remarks>
-    abstract viewport: BrowserRunBaseOptions.Viewport option with get, set
-    /// <summary>
-    /// Wait for a CSS selector to appear in the page before proceeding.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
-    abstract waitForSelector: BrowserRunBaseOptions.WaitForSelector option with get, set
-    /// <summary>
-    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
-    /// </summary>
-    abstract waitForTimeout: float option with get, set
-    /// <summary>
-    /// When true, continue on best-effort when awaited events fail or timeout.
-    /// </summary>
-    abstract bestAttempt: bool option with get, set
-    /// <summary>
-    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
-    /// </summary>
-    abstract actionTimeout: float option with get, set
-    /// <summary>
-    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
-    /// </summary>
-    /// <remarks>@default 5</remarks>
-    abstract cacheTTL: float option with get, set
-    /// <summary>
     /// URL to navigate to, e.g. <c>"https://example.com"</c>.
     /// </summary>
     abstract url: string with get, set
@@ -19649,10 +17723,6 @@ type BrowserRunScreenshotOptions2 =
     abstract scrollPage: bool option with get, set
     /// <remarks>@see https://pptr.dev/api/puppeteer.screenshotoptions</remarks>
     abstract screenshotOptions: BrowserRunPuppeteerScreenshotOptions option with get, set
-    /// <summary>
-    /// Render with an alternate browser backend instead of the default one.
-    /// </summary>
-    abstract browser: string option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (url: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?selector: string, ?scrollPage: bool, ?screenshotOptions: BrowserRunPuppeteerScreenshotOptions, ?browser: string) : BrowserRunScreenshotOptions2 = jsNative
 
@@ -19660,92 +17730,6 @@ type BrowserRunScreenshotOptions2 =
 type BrowserRunScreenshotOptions3 =
     inherit BrowserRunBaseOptions
     inherit BrowserRunAlternateBackendOptions
-    /// <summary>
-    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
-    abstract addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[] option with get, set
-    /// <summary>
-    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
-    abstract addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[] option with get, set
-    /// <summary>
-    /// Provide credentials for HTTP authentication.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
-    abstract authenticate: BrowserRunBaseOptions.Authenticate option with get, set
-    /// <summary>
-    /// Set cookies before navigating.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
-    abstract cookies: BrowserRunBaseOptions.Cookies.Item[] option with get, set
-    /// <summary>
-    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
-    /// </summary>
-    abstract emulateMediaType: string option with get, set
-    /// <summary>
-    /// Navigation options.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
-    abstract gotoOptions: BrowserRunBaseOptions.GotoOptions option with get, set
-    /// <summary>
-    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
-    /// </summary>
-    abstract rejectRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
-    /// </summary>
-    abstract allowRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
-    /// </summary>
-    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
-    /// </summary>
-    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Additional HTTP headers sent with every request.
-    /// </summary>
-    abstract setExtraHTTPHeaders: Record<string, string> option with get, set
-    /// <summary>
-    /// Whether JavaScript is enabled on the page.
-    /// </summary>
-    abstract setJavaScriptEnabled: bool option with get, set
-    /// <summary>
-    /// Override the default user agent string.
-    /// </summary>
-    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
-    abstract userAgent: string option with get, set
-    /// <summary>
-    /// Set the browser viewport size.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
-    /// <remarks>@default {width:1920,height:1080}</remarks>
-    abstract viewport: BrowserRunBaseOptions.Viewport option with get, set
-    /// <summary>
-    /// Wait for a CSS selector to appear in the page before proceeding.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
-    abstract waitForSelector: BrowserRunBaseOptions.WaitForSelector option with get, set
-    /// <summary>
-    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
-    /// </summary>
-    abstract waitForTimeout: float option with get, set
-    /// <summary>
-    /// When true, continue on best-effort when awaited events fail or timeout.
-    /// </summary>
-    abstract bestAttempt: bool option with get, set
-    /// <summary>
-    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
-    /// </summary>
-    abstract actionTimeout: float option with get, set
-    /// <summary>
-    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
-    /// </summary>
-    /// <remarks>@default 5</remarks>
-    abstract cacheTTL: float option with get, set
     /// <summary>
     /// Set the HTML content of the page directly.
     /// </summary>
@@ -19760,10 +17744,6 @@ type BrowserRunScreenshotOptions3 =
     abstract scrollPage: bool option with get, set
     /// <remarks>@see https://pptr.dev/api/puppeteer.screenshotoptions</remarks>
     abstract screenshotOptions: BrowserRunPuppeteerScreenshotOptions option with get, set
-    /// <summary>
-    /// Render with an alternate browser backend instead of the default one.
-    /// </summary>
-    abstract browser: string option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (html: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?selector: string, ?scrollPage: bool, ?screenshotOptions: BrowserRunPuppeteerScreenshotOptions, ?browser: string) : BrowserRunScreenshotOptions3 = jsNative
 
@@ -19774,101 +17754,11 @@ type BrowserRunPDFOptions2 =
     inherit BrowserRunBaseOptions
     inherit BrowserRunAlternateBackendOptions
     /// <summary>
-    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
-    abstract addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[] option with get, set
-    /// <summary>
-    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
-    abstract addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[] option with get, set
-    /// <summary>
-    /// Provide credentials for HTTP authentication.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
-    abstract authenticate: BrowserRunBaseOptions.Authenticate option with get, set
-    /// <summary>
-    /// Set cookies before navigating.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
-    abstract cookies: BrowserRunBaseOptions.Cookies.Item[] option with get, set
-    /// <summary>
-    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
-    /// </summary>
-    abstract emulateMediaType: string option with get, set
-    /// <summary>
-    /// Navigation options.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
-    abstract gotoOptions: BrowserRunBaseOptions.GotoOptions option with get, set
-    /// <summary>
-    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
-    /// </summary>
-    abstract rejectRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
-    /// </summary>
-    abstract allowRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
-    /// </summary>
-    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
-    /// </summary>
-    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Additional HTTP headers sent with every request.
-    /// </summary>
-    abstract setExtraHTTPHeaders: Record<string, string> option with get, set
-    /// <summary>
-    /// Whether JavaScript is enabled on the page.
-    /// </summary>
-    abstract setJavaScriptEnabled: bool option with get, set
-    /// <summary>
-    /// Override the default user agent string.
-    /// </summary>
-    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
-    abstract userAgent: string option with get, set
-    /// <summary>
-    /// Set the browser viewport size.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
-    /// <remarks>@default {width:1920,height:1080}</remarks>
-    abstract viewport: BrowserRunBaseOptions.Viewport option with get, set
-    /// <summary>
-    /// Wait for a CSS selector to appear in the page before proceeding.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
-    abstract waitForSelector: BrowserRunBaseOptions.WaitForSelector option with get, set
-    /// <summary>
-    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
-    /// </summary>
-    abstract waitForTimeout: float option with get, set
-    /// <summary>
-    /// When true, continue on best-effort when awaited events fail or timeout.
-    /// </summary>
-    abstract bestAttempt: bool option with get, set
-    /// <summary>
-    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
-    /// </summary>
-    abstract actionTimeout: float option with get, set
-    /// <summary>
-    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
-    /// </summary>
-    /// <remarks>@default 5</remarks>
-    abstract cacheTTL: float option with get, set
-    /// <summary>
     /// URL to navigate to, e.g. <c>"https://example.com"</c>.
     /// </summary>
     abstract url: string with get, set
     /// <remarks>@see https://pptr.dev/api/puppeteer.pdfoptions</remarks>
     abstract pdfOptions: BrowserRunPDFOptions2.PdfOptions option with get, set
-    /// <summary>
-    /// Render with an alternate browser backend instead of the default one.
-    /// </summary>
-    abstract browser: string option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (url: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?pdfOptions: BrowserRunPDFOptions2.PdfOptions, ?browser: string) : BrowserRunPDFOptions2 = jsNative
 
@@ -19933,101 +17823,11 @@ type BrowserRunPDFOptions3 =
     inherit BrowserRunBaseOptions
     inherit BrowserRunAlternateBackendOptions
     /// <summary>
-    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
-    abstract addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[] option with get, set
-    /// <summary>
-    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
-    abstract addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[] option with get, set
-    /// <summary>
-    /// Provide credentials for HTTP authentication.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
-    abstract authenticate: BrowserRunBaseOptions.Authenticate option with get, set
-    /// <summary>
-    /// Set cookies before navigating.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
-    abstract cookies: BrowserRunBaseOptions.Cookies.Item[] option with get, set
-    /// <summary>
-    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
-    /// </summary>
-    abstract emulateMediaType: string option with get, set
-    /// <summary>
-    /// Navigation options.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
-    abstract gotoOptions: BrowserRunBaseOptions.GotoOptions option with get, set
-    /// <summary>
-    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
-    /// </summary>
-    abstract rejectRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
-    /// </summary>
-    abstract allowRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
-    /// </summary>
-    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
-    /// </summary>
-    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Additional HTTP headers sent with every request.
-    /// </summary>
-    abstract setExtraHTTPHeaders: Record<string, string> option with get, set
-    /// <summary>
-    /// Whether JavaScript is enabled on the page.
-    /// </summary>
-    abstract setJavaScriptEnabled: bool option with get, set
-    /// <summary>
-    /// Override the default user agent string.
-    /// </summary>
-    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
-    abstract userAgent: string option with get, set
-    /// <summary>
-    /// Set the browser viewport size.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
-    /// <remarks>@default {width:1920,height:1080}</remarks>
-    abstract viewport: BrowserRunBaseOptions.Viewport option with get, set
-    /// <summary>
-    /// Wait for a CSS selector to appear in the page before proceeding.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
-    abstract waitForSelector: BrowserRunBaseOptions.WaitForSelector option with get, set
-    /// <summary>
-    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
-    /// </summary>
-    abstract waitForTimeout: float option with get, set
-    /// <summary>
-    /// When true, continue on best-effort when awaited events fail or timeout.
-    /// </summary>
-    abstract bestAttempt: bool option with get, set
-    /// <summary>
-    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
-    /// </summary>
-    abstract actionTimeout: float option with get, set
-    /// <summary>
-    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
-    /// </summary>
-    /// <remarks>@default 5</remarks>
-    abstract cacheTTL: float option with get, set
-    /// <summary>
     /// Set the HTML content of the page directly.
     /// </summary>
     abstract html: string with get, set
     /// <remarks>@see https://pptr.dev/api/puppeteer.pdfoptions</remarks>
     abstract pdfOptions: BrowserRunPDFOptions2.PdfOptions option with get, set
-    /// <summary>
-    /// Render with an alternate browser backend instead of the default one.
-    /// </summary>
-    abstract browser: string option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (html: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?pdfOptions: BrowserRunPDFOptions2.PdfOptions, ?browser: string) : BrowserRunPDFOptions3 = jsNative
 
@@ -20036,92 +17836,6 @@ type BrowserRunScrapeOptions = U2<BrowserRunScrapeOptions2, BrowserRunScrapeOpti
 [<Interface>]
 type BrowserRunScrapeOptions2 =
     inherit BrowserRunBaseOptions
-    /// <summary>
-    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
-    abstract addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[] option with get, set
-    /// <summary>
-    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
-    abstract addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[] option with get, set
-    /// <summary>
-    /// Provide credentials for HTTP authentication.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
-    abstract authenticate: BrowserRunBaseOptions.Authenticate option with get, set
-    /// <summary>
-    /// Set cookies before navigating.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
-    abstract cookies: BrowserRunBaseOptions.Cookies.Item[] option with get, set
-    /// <summary>
-    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
-    /// </summary>
-    abstract emulateMediaType: string option with get, set
-    /// <summary>
-    /// Navigation options.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
-    abstract gotoOptions: BrowserRunBaseOptions.GotoOptions option with get, set
-    /// <summary>
-    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
-    /// </summary>
-    abstract rejectRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
-    /// </summary>
-    abstract allowRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
-    /// </summary>
-    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
-    /// </summary>
-    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Additional HTTP headers sent with every request.
-    /// </summary>
-    abstract setExtraHTTPHeaders: Record<string, string> option with get, set
-    /// <summary>
-    /// Whether JavaScript is enabled on the page.
-    /// </summary>
-    abstract setJavaScriptEnabled: bool option with get, set
-    /// <summary>
-    /// Override the default user agent string.
-    /// </summary>
-    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
-    abstract userAgent: string option with get, set
-    /// <summary>
-    /// Set the browser viewport size.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
-    /// <remarks>@default {width:1920,height:1080}</remarks>
-    abstract viewport: BrowserRunBaseOptions.Viewport option with get, set
-    /// <summary>
-    /// Wait for a CSS selector to appear in the page before proceeding.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
-    abstract waitForSelector: BrowserRunBaseOptions.WaitForSelector option with get, set
-    /// <summary>
-    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
-    /// </summary>
-    abstract waitForTimeout: float option with get, set
-    /// <summary>
-    /// When true, continue on best-effort when awaited events fail or timeout.
-    /// </summary>
-    abstract bestAttempt: bool option with get, set
-    /// <summary>
-    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
-    /// </summary>
-    abstract actionTimeout: float option with get, set
-    /// <summary>
-    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
-    /// </summary>
-    /// <remarks>@default 5</remarks>
-    abstract cacheTTL: float option with get, set
     /// <summary>
     /// URL to navigate to, e.g. <c>"https://example.com"</c>.
     /// </summary>
@@ -20145,92 +17859,6 @@ module BrowserRunScrapeOptions2 =
 type BrowserRunScrapeOptions3 =
     inherit BrowserRunBaseOptions
     /// <summary>
-    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
-    abstract addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[] option with get, set
-    /// <summary>
-    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
-    abstract addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[] option with get, set
-    /// <summary>
-    /// Provide credentials for HTTP authentication.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
-    abstract authenticate: BrowserRunBaseOptions.Authenticate option with get, set
-    /// <summary>
-    /// Set cookies before navigating.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
-    abstract cookies: BrowserRunBaseOptions.Cookies.Item[] option with get, set
-    /// <summary>
-    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
-    /// </summary>
-    abstract emulateMediaType: string option with get, set
-    /// <summary>
-    /// Navigation options.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
-    abstract gotoOptions: BrowserRunBaseOptions.GotoOptions option with get, set
-    /// <summary>
-    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
-    /// </summary>
-    abstract rejectRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
-    /// </summary>
-    abstract allowRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
-    /// </summary>
-    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
-    /// </summary>
-    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Additional HTTP headers sent with every request.
-    /// </summary>
-    abstract setExtraHTTPHeaders: Record<string, string> option with get, set
-    /// <summary>
-    /// Whether JavaScript is enabled on the page.
-    /// </summary>
-    abstract setJavaScriptEnabled: bool option with get, set
-    /// <summary>
-    /// Override the default user agent string.
-    /// </summary>
-    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
-    abstract userAgent: string option with get, set
-    /// <summary>
-    /// Set the browser viewport size.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
-    /// <remarks>@default {width:1920,height:1080}</remarks>
-    abstract viewport: BrowserRunBaseOptions.Viewport option with get, set
-    /// <summary>
-    /// Wait for a CSS selector to appear in the page before proceeding.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
-    abstract waitForSelector: BrowserRunBaseOptions.WaitForSelector option with get, set
-    /// <summary>
-    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
-    /// </summary>
-    abstract waitForTimeout: float option with get, set
-    /// <summary>
-    /// When true, continue on best-effort when awaited events fail or timeout.
-    /// </summary>
-    abstract bestAttempt: bool option with get, set
-    /// <summary>
-    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
-    /// </summary>
-    abstract actionTimeout: float option with get, set
-    /// <summary>
-    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
-    /// </summary>
-    /// <remarks>@default 5</remarks>
-    abstract cacheTTL: float option with get, set
-    /// <summary>
     /// Set the HTML content of the page directly.
     /// </summary>
     abstract html: string with get, set
@@ -20246,92 +17874,6 @@ type BrowserRunLinksOptions = U2<BrowserRunLinksOptions2, BrowserRunLinksOptions
 [<Interface>]
 type BrowserRunLinksOptions2 =
     inherit BrowserRunBaseOptions
-    /// <summary>
-    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
-    abstract addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[] option with get, set
-    /// <summary>
-    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
-    abstract addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[] option with get, set
-    /// <summary>
-    /// Provide credentials for HTTP authentication.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
-    abstract authenticate: BrowserRunBaseOptions.Authenticate option with get, set
-    /// <summary>
-    /// Set cookies before navigating.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
-    abstract cookies: BrowserRunBaseOptions.Cookies.Item[] option with get, set
-    /// <summary>
-    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
-    /// </summary>
-    abstract emulateMediaType: string option with get, set
-    /// <summary>
-    /// Navigation options.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
-    abstract gotoOptions: BrowserRunBaseOptions.GotoOptions option with get, set
-    /// <summary>
-    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
-    /// </summary>
-    abstract rejectRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
-    /// </summary>
-    abstract allowRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
-    /// </summary>
-    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
-    /// </summary>
-    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Additional HTTP headers sent with every request.
-    /// </summary>
-    abstract setExtraHTTPHeaders: Record<string, string> option with get, set
-    /// <summary>
-    /// Whether JavaScript is enabled on the page.
-    /// </summary>
-    abstract setJavaScriptEnabled: bool option with get, set
-    /// <summary>
-    /// Override the default user agent string.
-    /// </summary>
-    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
-    abstract userAgent: string option with get, set
-    /// <summary>
-    /// Set the browser viewport size.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
-    /// <remarks>@default {width:1920,height:1080}</remarks>
-    abstract viewport: BrowserRunBaseOptions.Viewport option with get, set
-    /// <summary>
-    /// Wait for a CSS selector to appear in the page before proceeding.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
-    abstract waitForSelector: BrowserRunBaseOptions.WaitForSelector option with get, set
-    /// <summary>
-    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
-    /// </summary>
-    abstract waitForTimeout: float option with get, set
-    /// <summary>
-    /// When true, continue on best-effort when awaited events fail or timeout.
-    /// </summary>
-    abstract bestAttempt: bool option with get, set
-    /// <summary>
-    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
-    /// </summary>
-    abstract actionTimeout: float option with get, set
-    /// <summary>
-    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
-    /// </summary>
-    /// <remarks>@default 5</remarks>
-    abstract cacheTTL: float option with get, set
     /// <summary>
     /// URL to navigate to, e.g. <c>"https://example.com"</c>.
     /// </summary>
@@ -20352,92 +17894,6 @@ type BrowserRunLinksOptions2 =
 [<Interface>]
 type BrowserRunLinksOptions3 =
     inherit BrowserRunBaseOptions
-    /// <summary>
-    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
-    abstract addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[] option with get, set
-    /// <summary>
-    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
-    abstract addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[] option with get, set
-    /// <summary>
-    /// Provide credentials for HTTP authentication.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
-    abstract authenticate: BrowserRunBaseOptions.Authenticate option with get, set
-    /// <summary>
-    /// Set cookies before navigating.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
-    abstract cookies: BrowserRunBaseOptions.Cookies.Item[] option with get, set
-    /// <summary>
-    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
-    /// </summary>
-    abstract emulateMediaType: string option with get, set
-    /// <summary>
-    /// Navigation options.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
-    abstract gotoOptions: BrowserRunBaseOptions.GotoOptions option with get, set
-    /// <summary>
-    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
-    /// </summary>
-    abstract rejectRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
-    /// </summary>
-    abstract allowRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
-    /// </summary>
-    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
-    /// </summary>
-    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Additional HTTP headers sent with every request.
-    /// </summary>
-    abstract setExtraHTTPHeaders: Record<string, string> option with get, set
-    /// <summary>
-    /// Whether JavaScript is enabled on the page.
-    /// </summary>
-    abstract setJavaScriptEnabled: bool option with get, set
-    /// <summary>
-    /// Override the default user agent string.
-    /// </summary>
-    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
-    abstract userAgent: string option with get, set
-    /// <summary>
-    /// Set the browser viewport size.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
-    /// <remarks>@default {width:1920,height:1080}</remarks>
-    abstract viewport: BrowserRunBaseOptions.Viewport option with get, set
-    /// <summary>
-    /// Wait for a CSS selector to appear in the page before proceeding.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
-    abstract waitForSelector: BrowserRunBaseOptions.WaitForSelector option with get, set
-    /// <summary>
-    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
-    /// </summary>
-    abstract waitForTimeout: float option with get, set
-    /// <summary>
-    /// When true, continue on best-effort when awaited events fail or timeout.
-    /// </summary>
-    abstract bestAttempt: bool option with get, set
-    /// <summary>
-    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
-    /// </summary>
-    abstract actionTimeout: float option with get, set
-    /// <summary>
-    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
-    /// </summary>
-    /// <remarks>@default 5</remarks>
-    abstract cacheTTL: float option with get, set
     /// <summary>
     /// Set the HTML content of the page directly.
     /// </summary>
@@ -20467,92 +17923,6 @@ type BrowserRunSnapshotOptions = U2<BrowserRunSnapshotOptions2, BrowserRunSnapsh
 [<Interface>]
 type BrowserRunSnapshotOptions2 =
     inherit BrowserRunBaseOptions
-    /// <summary>
-    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
-    abstract addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[] option with get, set
-    /// <summary>
-    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
-    abstract addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[] option with get, set
-    /// <summary>
-    /// Provide credentials for HTTP authentication.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
-    abstract authenticate: BrowserRunBaseOptions.Authenticate option with get, set
-    /// <summary>
-    /// Set cookies before navigating.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
-    abstract cookies: BrowserRunBaseOptions.Cookies.Item[] option with get, set
-    /// <summary>
-    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
-    /// </summary>
-    abstract emulateMediaType: string option with get, set
-    /// <summary>
-    /// Navigation options.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
-    abstract gotoOptions: BrowserRunBaseOptions.GotoOptions option with get, set
-    /// <summary>
-    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
-    /// </summary>
-    abstract rejectRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
-    /// </summary>
-    abstract allowRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
-    /// </summary>
-    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
-    /// </summary>
-    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Additional HTTP headers sent with every request.
-    /// </summary>
-    abstract setExtraHTTPHeaders: Record<string, string> option with get, set
-    /// <summary>
-    /// Whether JavaScript is enabled on the page.
-    /// </summary>
-    abstract setJavaScriptEnabled: bool option with get, set
-    /// <summary>
-    /// Override the default user agent string.
-    /// </summary>
-    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
-    abstract userAgent: string option with get, set
-    /// <summary>
-    /// Set the browser viewport size.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
-    /// <remarks>@default {width:1920,height:1080}</remarks>
-    abstract viewport: BrowserRunBaseOptions.Viewport option with get, set
-    /// <summary>
-    /// Wait for a CSS selector to appear in the page before proceeding.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
-    abstract waitForSelector: BrowserRunBaseOptions.WaitForSelector option with get, set
-    /// <summary>
-    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
-    /// </summary>
-    abstract waitForTimeout: float option with get, set
-    /// <summary>
-    /// When true, continue on best-effort when awaited events fail or timeout.
-    /// </summary>
-    abstract bestAttempt: bool option with get, set
-    /// <summary>
-    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
-    /// </summary>
-    abstract actionTimeout: float option with get, set
-    /// <summary>
-    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
-    /// </summary>
-    /// <remarks>@default 5</remarks>
-    abstract cacheTTL: float option with get, set
     /// <summary>
     /// URL to navigate to, e.g. <c>"https://example.com"</c>.
     /// </summary>
@@ -20587,92 +17957,6 @@ module BrowserRunSnapshotOptions2 =
 type BrowserRunSnapshotOptions3 =
     inherit BrowserRunBaseOptions
     /// <summary>
-    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
-    abstract addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[] option with get, set
-    /// <summary>
-    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
-    abstract addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[] option with get, set
-    /// <summary>
-    /// Provide credentials for HTTP authentication.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
-    abstract authenticate: BrowserRunBaseOptions.Authenticate option with get, set
-    /// <summary>
-    /// Set cookies before navigating.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
-    abstract cookies: BrowserRunBaseOptions.Cookies.Item[] option with get, set
-    /// <summary>
-    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
-    /// </summary>
-    abstract emulateMediaType: string option with get, set
-    /// <summary>
-    /// Navigation options.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
-    abstract gotoOptions: BrowserRunBaseOptions.GotoOptions option with get, set
-    /// <summary>
-    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
-    /// </summary>
-    abstract rejectRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
-    /// </summary>
-    abstract allowRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
-    /// </summary>
-    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
-    /// </summary>
-    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Additional HTTP headers sent with every request.
-    /// </summary>
-    abstract setExtraHTTPHeaders: Record<string, string> option with get, set
-    /// <summary>
-    /// Whether JavaScript is enabled on the page.
-    /// </summary>
-    abstract setJavaScriptEnabled: bool option with get, set
-    /// <summary>
-    /// Override the default user agent string.
-    /// </summary>
-    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
-    abstract userAgent: string option with get, set
-    /// <summary>
-    /// Set the browser viewport size.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
-    /// <remarks>@default {width:1920,height:1080}</remarks>
-    abstract viewport: BrowserRunBaseOptions.Viewport option with get, set
-    /// <summary>
-    /// Wait for a CSS selector to appear in the page before proceeding.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
-    abstract waitForSelector: BrowserRunBaseOptions.WaitForSelector option with get, set
-    /// <summary>
-    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
-    /// </summary>
-    abstract waitForTimeout: float option with get, set
-    /// <summary>
-    /// When true, continue on best-effort when awaited events fail or timeout.
-    /// </summary>
-    abstract bestAttempt: bool option with get, set
-    /// <summary>
-    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
-    /// </summary>
-    abstract actionTimeout: float option with get, set
-    /// <summary>
-    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
-    /// </summary>
-    /// <remarks>@default 5</remarks>
-    abstract cacheTTL: float option with get, set
-    /// <summary>
     /// Set the HTML content of the page directly.
     /// </summary>
     abstract html: string with get, set
@@ -20697,92 +17981,6 @@ type BrowserRunAccessibilityTreeOptions2 =
     inherit BrowserRunBaseOptions
     inherit BrowserRunAlternateBackendOptions
     /// <summary>
-    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
-    abstract addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[] option with get, set
-    /// <summary>
-    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
-    abstract addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[] option with get, set
-    /// <summary>
-    /// Provide credentials for HTTP authentication.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
-    abstract authenticate: BrowserRunBaseOptions.Authenticate option with get, set
-    /// <summary>
-    /// Set cookies before navigating.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
-    abstract cookies: BrowserRunBaseOptions.Cookies.Item[] option with get, set
-    /// <summary>
-    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
-    /// </summary>
-    abstract emulateMediaType: string option with get, set
-    /// <summary>
-    /// Navigation options.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
-    abstract gotoOptions: BrowserRunBaseOptions.GotoOptions option with get, set
-    /// <summary>
-    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
-    /// </summary>
-    abstract rejectRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
-    /// </summary>
-    abstract allowRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
-    /// </summary>
-    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
-    /// </summary>
-    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Additional HTTP headers sent with every request.
-    /// </summary>
-    abstract setExtraHTTPHeaders: Record<string, string> option with get, set
-    /// <summary>
-    /// Whether JavaScript is enabled on the page.
-    /// </summary>
-    abstract setJavaScriptEnabled: bool option with get, set
-    /// <summary>
-    /// Override the default user agent string.
-    /// </summary>
-    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
-    abstract userAgent: string option with get, set
-    /// <summary>
-    /// Set the browser viewport size.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
-    /// <remarks>@default {width:1920,height:1080}</remarks>
-    abstract viewport: BrowserRunBaseOptions.Viewport option with get, set
-    /// <summary>
-    /// Wait for a CSS selector to appear in the page before proceeding.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
-    abstract waitForSelector: BrowserRunBaseOptions.WaitForSelector option with get, set
-    /// <summary>
-    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
-    /// </summary>
-    abstract waitForTimeout: float option with get, set
-    /// <summary>
-    /// When true, continue on best-effort when awaited events fail or timeout.
-    /// </summary>
-    abstract bestAttempt: bool option with get, set
-    /// <summary>
-    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
-    /// </summary>
-    abstract actionTimeout: float option with get, set
-    /// <summary>
-    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
-    /// </summary>
-    /// <remarks>@default 5</remarks>
-    abstract cacheTTL: float option with get, set
-    /// <summary>
     /// URL to navigate to, e.g. <c>"https://example.com"</c>.
     /// </summary>
     abstract url: string with get, set
@@ -20798,10 +17996,6 @@ type BrowserRunAccessibilityTreeOptions2 =
     /// HTTP 200; a malformed selector is an error.
     /// </summary>
     abstract root: string option with get, set
-    /// <summary>
-    /// Render with an alternate browser backend instead of the default one.
-    /// </summary>
-    abstract browser: string option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (url: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?interestingOnly: bool, ?root: string, ?browser: string) : BrowserRunAccessibilityTreeOptions2 = jsNative
 
@@ -20809,92 +18003,6 @@ type BrowserRunAccessibilityTreeOptions2 =
 type BrowserRunAccessibilityTreeOptions3 =
     inherit BrowserRunBaseOptions
     inherit BrowserRunAlternateBackendOptions
-    /// <summary>
-    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
-    abstract addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[] option with get, set
-    /// <summary>
-    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
-    abstract addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[] option with get, set
-    /// <summary>
-    /// Provide credentials for HTTP authentication.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
-    abstract authenticate: BrowserRunBaseOptions.Authenticate option with get, set
-    /// <summary>
-    /// Set cookies before navigating.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
-    abstract cookies: BrowserRunBaseOptions.Cookies.Item[] option with get, set
-    /// <summary>
-    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
-    /// </summary>
-    abstract emulateMediaType: string option with get, set
-    /// <summary>
-    /// Navigation options.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
-    abstract gotoOptions: BrowserRunBaseOptions.GotoOptions option with get, set
-    /// <summary>
-    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
-    /// </summary>
-    abstract rejectRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
-    /// </summary>
-    abstract allowRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
-    /// </summary>
-    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
-    /// </summary>
-    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Additional HTTP headers sent with every request.
-    /// </summary>
-    abstract setExtraHTTPHeaders: Record<string, string> option with get, set
-    /// <summary>
-    /// Whether JavaScript is enabled on the page.
-    /// </summary>
-    abstract setJavaScriptEnabled: bool option with get, set
-    /// <summary>
-    /// Override the default user agent string.
-    /// </summary>
-    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
-    abstract userAgent: string option with get, set
-    /// <summary>
-    /// Set the browser viewport size.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
-    /// <remarks>@default {width:1920,height:1080}</remarks>
-    abstract viewport: BrowserRunBaseOptions.Viewport option with get, set
-    /// <summary>
-    /// Wait for a CSS selector to appear in the page before proceeding.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
-    abstract waitForSelector: BrowserRunBaseOptions.WaitForSelector option with get, set
-    /// <summary>
-    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
-    /// </summary>
-    abstract waitForTimeout: float option with get, set
-    /// <summary>
-    /// When true, continue on best-effort when awaited events fail or timeout.
-    /// </summary>
-    abstract bestAttempt: bool option with get, set
-    /// <summary>
-    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
-    /// </summary>
-    abstract actionTimeout: float option with get, set
-    /// <summary>
-    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
-    /// </summary>
-    /// <remarks>@default 5</remarks>
-    abstract cacheTTL: float option with get, set
     /// <summary>
     /// Set the HTML content of the page directly.
     /// </summary>
@@ -20911,10 +18019,6 @@ type BrowserRunAccessibilityTreeOptions3 =
     /// HTTP 200; a malformed selector is an error.
     /// </summary>
     abstract root: string option with get, set
-    /// <summary>
-    /// Render with an alternate browser backend instead of the default one.
-    /// </summary>
-    abstract browser: string option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (html: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?interestingOnly: bool, ?root: string, ?browser: string) : BrowserRunAccessibilityTreeOptions3 = jsNative
 
@@ -20954,103 +18058,9 @@ type BrowserRunJsonOptions2 =
     inherit BrowserRunAlternateBackendOptions
     inherit BrowserRunJsonBaseOptions
     /// <summary>
-    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
-    abstract addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[] option with get, set
-    /// <summary>
-    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
-    abstract addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[] option with get, set
-    /// <summary>
-    /// Provide credentials for HTTP authentication.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
-    abstract authenticate: BrowserRunBaseOptions.Authenticate option with get, set
-    /// <summary>
-    /// Set cookies before navigating.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
-    abstract cookies: BrowserRunBaseOptions.Cookies.Item[] option with get, set
-    /// <summary>
-    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
-    /// </summary>
-    abstract emulateMediaType: string option with get, set
-    /// <summary>
-    /// Navigation options.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
-    abstract gotoOptions: BrowserRunBaseOptions.GotoOptions option with get, set
-    /// <summary>
-    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
-    /// </summary>
-    abstract rejectRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
-    /// </summary>
-    abstract allowRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
-    /// </summary>
-    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
-    /// </summary>
-    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Additional HTTP headers sent with every request.
-    /// </summary>
-    abstract setExtraHTTPHeaders: Record<string, string> option with get, set
-    /// <summary>
-    /// Whether JavaScript is enabled on the page.
-    /// </summary>
-    abstract setJavaScriptEnabled: bool option with get, set
-    /// <summary>
-    /// Override the default user agent string.
-    /// </summary>
-    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
-    abstract userAgent: string option with get, set
-    /// <summary>
-    /// Set the browser viewport size.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
-    /// <remarks>@default {width:1920,height:1080}</remarks>
-    abstract viewport: BrowserRunBaseOptions.Viewport option with get, set
-    /// <summary>
-    /// Wait for a CSS selector to appear in the page before proceeding.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
-    abstract waitForSelector: BrowserRunBaseOptions.WaitForSelector option with get, set
-    /// <summary>
-    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
-    /// </summary>
-    abstract waitForTimeout: float option with get, set
-    /// <summary>
-    /// When true, continue on best-effort when awaited events fail or timeout.
-    /// </summary>
-    abstract bestAttempt: bool option with get, set
-    /// <summary>
-    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
-    /// </summary>
-    abstract actionTimeout: float option with get, set
-    /// <summary>
-    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
-    /// </summary>
-    /// <remarks>@default 5</remarks>
-    abstract cacheTTL: float option with get, set
-    /// <summary>
     /// URL to navigate to, e.g. <c>"https://example.com"</c>.
     /// </summary>
     abstract url: string with get, set
-    /// <summary>
-    /// Render with an alternate browser backend instead of the default one.
-    /// </summary>
-    abstract browser: string option with get, set
-    /// <summary>
-    /// Custom AI models to try in order. Max 3. Falls back to next on error.
-    /// </summary>
-    abstract custom_ai: BrowserRunJsonBaseOptions.CustomAi.Item[] option with get, set
     /// <summary>
     /// Natural-language prompt describing what data to extract.
     /// </summary>
@@ -21069,103 +18079,9 @@ type BrowserRunJsonOptions3 =
     inherit BrowserRunAlternateBackendOptions
     inherit BrowserRunJsonBaseOptions
     /// <summary>
-    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
-    abstract addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[] option with get, set
-    /// <summary>
-    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
-    abstract addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[] option with get, set
-    /// <summary>
-    /// Provide credentials for HTTP authentication.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
-    abstract authenticate: BrowserRunBaseOptions.Authenticate option with get, set
-    /// <summary>
-    /// Set cookies before navigating.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
-    abstract cookies: BrowserRunBaseOptions.Cookies.Item[] option with get, set
-    /// <summary>
-    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
-    /// </summary>
-    abstract emulateMediaType: string option with get, set
-    /// <summary>
-    /// Navigation options.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
-    abstract gotoOptions: BrowserRunBaseOptions.GotoOptions option with get, set
-    /// <summary>
-    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
-    /// </summary>
-    abstract rejectRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
-    /// </summary>
-    abstract allowRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
-    /// </summary>
-    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
-    /// </summary>
-    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Additional HTTP headers sent with every request.
-    /// </summary>
-    abstract setExtraHTTPHeaders: Record<string, string> option with get, set
-    /// <summary>
-    /// Whether JavaScript is enabled on the page.
-    /// </summary>
-    abstract setJavaScriptEnabled: bool option with get, set
-    /// <summary>
-    /// Override the default user agent string.
-    /// </summary>
-    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
-    abstract userAgent: string option with get, set
-    /// <summary>
-    /// Set the browser viewport size.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
-    /// <remarks>@default {width:1920,height:1080}</remarks>
-    abstract viewport: BrowserRunBaseOptions.Viewport option with get, set
-    /// <summary>
-    /// Wait for a CSS selector to appear in the page before proceeding.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
-    abstract waitForSelector: BrowserRunBaseOptions.WaitForSelector option with get, set
-    /// <summary>
-    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
-    /// </summary>
-    abstract waitForTimeout: float option with get, set
-    /// <summary>
-    /// When true, continue on best-effort when awaited events fail or timeout.
-    /// </summary>
-    abstract bestAttempt: bool option with get, set
-    /// <summary>
-    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
-    /// </summary>
-    abstract actionTimeout: float option with get, set
-    /// <summary>
-    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
-    /// </summary>
-    /// <remarks>@default 5</remarks>
-    abstract cacheTTL: float option with get, set
-    /// <summary>
     /// URL to navigate to, e.g. <c>"https://example.com"</c>.
     /// </summary>
     abstract url: string with get, set
-    /// <summary>
-    /// Render with an alternate browser backend instead of the default one.
-    /// </summary>
-    abstract browser: string option with get, set
-    /// <summary>
-    /// Custom AI models to try in order. Max 3. Falls back to next on error.
-    /// </summary>
-    abstract custom_ai: BrowserRunJsonBaseOptions.CustomAi.Item[] option with get, set
     /// <summary>
     /// Natural-language prompt describing what data to extract.
     /// </summary>
@@ -21184,103 +18100,9 @@ type BrowserRunJsonOptions4 =
     inherit BrowserRunAlternateBackendOptions
     inherit BrowserRunJsonBaseOptions
     /// <summary>
-    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
-    abstract addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[] option with get, set
-    /// <summary>
-    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
-    abstract addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[] option with get, set
-    /// <summary>
-    /// Provide credentials for HTTP authentication.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
-    abstract authenticate: BrowserRunBaseOptions.Authenticate option with get, set
-    /// <summary>
-    /// Set cookies before navigating.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
-    abstract cookies: BrowserRunBaseOptions.Cookies.Item[] option with get, set
-    /// <summary>
-    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
-    /// </summary>
-    abstract emulateMediaType: string option with get, set
-    /// <summary>
-    /// Navigation options.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
-    abstract gotoOptions: BrowserRunBaseOptions.GotoOptions option with get, set
-    /// <summary>
-    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
-    /// </summary>
-    abstract rejectRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
-    /// </summary>
-    abstract allowRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
-    /// </summary>
-    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
-    /// </summary>
-    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Additional HTTP headers sent with every request.
-    /// </summary>
-    abstract setExtraHTTPHeaders: Record<string, string> option with get, set
-    /// <summary>
-    /// Whether JavaScript is enabled on the page.
-    /// </summary>
-    abstract setJavaScriptEnabled: bool option with get, set
-    /// <summary>
-    /// Override the default user agent string.
-    /// </summary>
-    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
-    abstract userAgent: string option with get, set
-    /// <summary>
-    /// Set the browser viewport size.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
-    /// <remarks>@default {width:1920,height:1080}</remarks>
-    abstract viewport: BrowserRunBaseOptions.Viewport option with get, set
-    /// <summary>
-    /// Wait for a CSS selector to appear in the page before proceeding.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
-    abstract waitForSelector: BrowserRunBaseOptions.WaitForSelector option with get, set
-    /// <summary>
-    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
-    /// </summary>
-    abstract waitForTimeout: float option with get, set
-    /// <summary>
-    /// When true, continue on best-effort when awaited events fail or timeout.
-    /// </summary>
-    abstract bestAttempt: bool option with get, set
-    /// <summary>
-    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
-    /// </summary>
-    abstract actionTimeout: float option with get, set
-    /// <summary>
-    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
-    /// </summary>
-    /// <remarks>@default 5</remarks>
-    abstract cacheTTL: float option with get, set
-    /// <summary>
     /// Set the HTML content of the page directly.
     /// </summary>
     abstract html: string with get, set
-    /// <summary>
-    /// Render with an alternate browser backend instead of the default one.
-    /// </summary>
-    abstract browser: string option with get, set
-    /// <summary>
-    /// Custom AI models to try in order. Max 3. Falls back to next on error.
-    /// </summary>
-    abstract custom_ai: BrowserRunJsonBaseOptions.CustomAi.Item[] option with get, set
     /// <summary>
     /// Natural-language prompt describing what data to extract.
     /// </summary>
@@ -21299,103 +18121,9 @@ type BrowserRunJsonOptions5 =
     inherit BrowserRunAlternateBackendOptions
     inherit BrowserRunJsonBaseOptions
     /// <summary>
-    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
-    abstract addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[] option with get, set
-    /// <summary>
-    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
-    abstract addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[] option with get, set
-    /// <summary>
-    /// Provide credentials for HTTP authentication.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
-    abstract authenticate: BrowserRunBaseOptions.Authenticate option with get, set
-    /// <summary>
-    /// Set cookies before navigating.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
-    abstract cookies: BrowserRunBaseOptions.Cookies.Item[] option with get, set
-    /// <summary>
-    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
-    /// </summary>
-    abstract emulateMediaType: string option with get, set
-    /// <summary>
-    /// Navigation options.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
-    abstract gotoOptions: BrowserRunBaseOptions.GotoOptions option with get, set
-    /// <summary>
-    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
-    /// </summary>
-    abstract rejectRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
-    /// </summary>
-    abstract allowRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
-    /// </summary>
-    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
-    /// </summary>
-    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Additional HTTP headers sent with every request.
-    /// </summary>
-    abstract setExtraHTTPHeaders: Record<string, string> option with get, set
-    /// <summary>
-    /// Whether JavaScript is enabled on the page.
-    /// </summary>
-    abstract setJavaScriptEnabled: bool option with get, set
-    /// <summary>
-    /// Override the default user agent string.
-    /// </summary>
-    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
-    abstract userAgent: string option with get, set
-    /// <summary>
-    /// Set the browser viewport size.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
-    /// <remarks>@default {width:1920,height:1080}</remarks>
-    abstract viewport: BrowserRunBaseOptions.Viewport option with get, set
-    /// <summary>
-    /// Wait for a CSS selector to appear in the page before proceeding.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
-    abstract waitForSelector: BrowserRunBaseOptions.WaitForSelector option with get, set
-    /// <summary>
-    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
-    /// </summary>
-    abstract waitForTimeout: float option with get, set
-    /// <summary>
-    /// When true, continue on best-effort when awaited events fail or timeout.
-    /// </summary>
-    abstract bestAttempt: bool option with get, set
-    /// <summary>
-    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
-    /// </summary>
-    abstract actionTimeout: float option with get, set
-    /// <summary>
-    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
-    /// </summary>
-    /// <remarks>@default 5</remarks>
-    abstract cacheTTL: float option with get, set
-    /// <summary>
     /// Set the HTML content of the page directly.
     /// </summary>
     abstract html: string with get, set
-    /// <summary>
-    /// Render with an alternate browser backend instead of the default one.
-    /// </summary>
-    abstract browser: string option with get, set
-    /// <summary>
-    /// Custom AI models to try in order. Max 3. Falls back to next on error.
-    /// </summary>
-    abstract custom_ai: BrowserRunJsonBaseOptions.CustomAi.Item[] option with get, set
     /// <summary>
     /// Natural-language prompt describing what data to extract.
     /// </summary>
@@ -21415,99 +18143,9 @@ type BrowserRunContentOptions2 =
     inherit BrowserRunBaseOptions
     inherit BrowserRunAlternateBackendOptions
     /// <summary>
-    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
-    abstract addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[] option with get, set
-    /// <summary>
-    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
-    abstract addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[] option with get, set
-    /// <summary>
-    /// Provide credentials for HTTP authentication.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
-    abstract authenticate: BrowserRunBaseOptions.Authenticate option with get, set
-    /// <summary>
-    /// Set cookies before navigating.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
-    abstract cookies: BrowserRunBaseOptions.Cookies.Item[] option with get, set
-    /// <summary>
-    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
-    /// </summary>
-    abstract emulateMediaType: string option with get, set
-    /// <summary>
-    /// Navigation options.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
-    abstract gotoOptions: BrowserRunBaseOptions.GotoOptions option with get, set
-    /// <summary>
-    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
-    /// </summary>
-    abstract rejectRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
-    /// </summary>
-    abstract allowRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
-    /// </summary>
-    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
-    /// </summary>
-    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Additional HTTP headers sent with every request.
-    /// </summary>
-    abstract setExtraHTTPHeaders: Record<string, string> option with get, set
-    /// <summary>
-    /// Whether JavaScript is enabled on the page.
-    /// </summary>
-    abstract setJavaScriptEnabled: bool option with get, set
-    /// <summary>
-    /// Override the default user agent string.
-    /// </summary>
-    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
-    abstract userAgent: string option with get, set
-    /// <summary>
-    /// Set the browser viewport size.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
-    /// <remarks>@default {width:1920,height:1080}</remarks>
-    abstract viewport: BrowserRunBaseOptions.Viewport option with get, set
-    /// <summary>
-    /// Wait for a CSS selector to appear in the page before proceeding.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
-    abstract waitForSelector: BrowserRunBaseOptions.WaitForSelector option with get, set
-    /// <summary>
-    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
-    /// </summary>
-    abstract waitForTimeout: float option with get, set
-    /// <summary>
-    /// When true, continue on best-effort when awaited events fail or timeout.
-    /// </summary>
-    abstract bestAttempt: bool option with get, set
-    /// <summary>
-    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
-    /// </summary>
-    abstract actionTimeout: float option with get, set
-    /// <summary>
-    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
-    /// </summary>
-    /// <remarks>@default 5</remarks>
-    abstract cacheTTL: float option with get, set
-    /// <summary>
     /// URL to navigate to, e.g. <c>"https://example.com"</c>.
     /// </summary>
     abstract url: string with get, set
-    /// <summary>
-    /// Render with an alternate browser backend instead of the default one.
-    /// </summary>
-    abstract browser: string option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (url: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?browser: string) : BrowserRunContentOptions2 = jsNative
 
@@ -21516,99 +18154,9 @@ type BrowserRunContentOptions3 =
     inherit BrowserRunBaseOptions
     inherit BrowserRunAlternateBackendOptions
     /// <summary>
-    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
-    abstract addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[] option with get, set
-    /// <summary>
-    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
-    abstract addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[] option with get, set
-    /// <summary>
-    /// Provide credentials for HTTP authentication.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
-    abstract authenticate: BrowserRunBaseOptions.Authenticate option with get, set
-    /// <summary>
-    /// Set cookies before navigating.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
-    abstract cookies: BrowserRunBaseOptions.Cookies.Item[] option with get, set
-    /// <summary>
-    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
-    /// </summary>
-    abstract emulateMediaType: string option with get, set
-    /// <summary>
-    /// Navigation options.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
-    abstract gotoOptions: BrowserRunBaseOptions.GotoOptions option with get, set
-    /// <summary>
-    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
-    /// </summary>
-    abstract rejectRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
-    /// </summary>
-    abstract allowRequestPattern: string[] option with get, set
-    /// <summary>
-    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
-    /// </summary>
-    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
-    /// </summary>
-    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
-    /// <summary>
-    /// Additional HTTP headers sent with every request.
-    /// </summary>
-    abstract setExtraHTTPHeaders: Record<string, string> option with get, set
-    /// <summary>
-    /// Whether JavaScript is enabled on the page.
-    /// </summary>
-    abstract setJavaScriptEnabled: bool option with get, set
-    /// <summary>
-    /// Override the default user agent string.
-    /// </summary>
-    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
-    abstract userAgent: string option with get, set
-    /// <summary>
-    /// Set the browser viewport size.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
-    /// <remarks>@default {width:1920,height:1080}</remarks>
-    abstract viewport: BrowserRunBaseOptions.Viewport option with get, set
-    /// <summary>
-    /// Wait for a CSS selector to appear in the page before proceeding.
-    /// </summary>
-    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
-    abstract waitForSelector: BrowserRunBaseOptions.WaitForSelector option with get, set
-    /// <summary>
-    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
-    /// </summary>
-    abstract waitForTimeout: float option with get, set
-    /// <summary>
-    /// When true, continue on best-effort when awaited events fail or timeout.
-    /// </summary>
-    abstract bestAttempt: bool option with get, set
-    /// <summary>
-    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
-    /// </summary>
-    abstract actionTimeout: float option with get, set
-    /// <summary>
-    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
-    /// </summary>
-    /// <remarks>@default 5</remarks>
-    abstract cacheTTL: float option with get, set
-    /// <summary>
     /// Set the HTML content of the page directly.
     /// </summary>
     abstract html: string with get, set
-    /// <summary>
-    /// Render with an alternate browser backend instead of the default one.
-    /// </summary>
-    abstract browser: string option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (html: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?browser: string) : BrowserRunContentOptions3 = jsNative
 
@@ -21966,8 +18514,6 @@ module BrowserRunErrorResponse =
 [<Interface>]
 type BrowserRunJsonErrorResponse =
     inherit BrowserRunErrorResponse
-    abstract success: bool with get, set
-    abstract errors: BrowserRunErrorResponse.Errors.Item[] with get, set
     /// <summary>
     /// Raw AI response text for debugging
     /// </summary>
@@ -23615,10 +20161,6 @@ type RequestInitCfPropertiesVaryAcceptHeader =
     /// Named <c>media_types</c> to match the serialized <c>cf.vary</c> configuration.
     /// </summary>
     abstract media_types: string[] option with get, set
-    /// <summary>
-    /// How this request header contributes to cache variance.
-    /// </summary>
-    abstract action: RequestInitCfPropertiesVaryAction with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (action: RequestInitCfPropertiesVaryAction, ?media_types: string[]) : RequestInitCfPropertiesVaryAcceptHeader = jsNative
 
@@ -23633,10 +20175,6 @@ type RequestInitCfPropertiesVaryAcceptLanguageHeader =
     /// header.
     /// </summary>
     abstract languages: string[] option with get, set
-    /// <summary>
-    /// How this request header contributes to cache variance.
-    /// </summary>
-    abstract action: RequestInitCfPropertiesVaryAction with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (action: RequestInitCfPropertiesVaryAction, ?languages: string[]) : RequestInitCfPropertiesVaryAcceptLanguageHeader = jsNative
 
@@ -23859,159 +20397,6 @@ type RequestInitCfPropertiesImageDraw =
     abstract left: float option with get, set
     abstract bottom: float option with get, set
     abstract right: float option with get, set
-    /// <summary>
-    /// Maximum width in image pixels. The value must be an integer.
-    /// </summary>
-    abstract width: float option with get, set
-    /// <summary>
-    /// Maximum height in image pixels. The value must be an integer.
-    /// </summary>
-    abstract height: float option with get, set
-    /// <summary>
-    /// When cropping with fit: "cover", this defines the side or point that should
-    /// be left uncropped. The value is either a string
-    /// "left", "right", "top", "bottom", "auto", or "center" (the default),
-    /// or an object {x, y} containing focal point coordinates in the original
-    /// image expressed as fractions ranging from 0.0 (top or left) to 1.0
-    /// (bottom or right), 0.5 being the center. {fit: "cover", gravity: "top"} will
-    /// crop bottom or left and right sides as necessary, but won’t crop anything
-    /// from the top. {fit: "cover", gravity: {x:0.5, y:0.2}} will crop each side to
-    /// preserve as much as possible around a point at 20% of the height of the
-    /// source image.
-    /// </summary>
-    abstract gravity: U2<string, BasicImageTransformationsGravityCoordinates> option with get, set
-    /// <summary>
-    /// Specifies how closely the image is cropped toward detected faces when combined
-    /// with the gravity=face option. Accepts a valid range between 0.0 (includes as much
-    /// of the background as possible) and 1.0 (crops the image as closely to the face as
-    /// possible). The default is 0.
-    /// </summary>
-    abstract zoom: float option with get, set
-    /// <summary>
-    /// Resizing mode as a string. It affects interpretation of width and height
-    /// options:
-    ///  - scale-down: Similar to contain, but the image is never enlarged. If
-    ///    the image is larger than given width or height, it will be resized.
-    ///    Otherwise its original size will be kept.
-    ///  - scale-up: Similar to contain, but the image is never shrunk. If the
-    ///    image is smaller than the given width or height, it will be resized.
-    ///    Otherwise its original size will be kept.
-    ///  - contain: Resizes to maximum size that fits within the given width and
-    ///    height. If only a single dimension is given (e.g. only width), the
-    ///    image will be shrunk or enlarged to exactly match that dimension.
-    ///    Aspect ratio is always preserved.
-    ///  - cover: Resizes (shrinks or enlarges) to fill the entire area of width
-    ///    and height. If the image has an aspect ratio different from the ratio
-    ///    of width and height, it will be cropped to fit.
-    ///  - crop: The image will be shrunk and cropped to fit within the area
-    ///    specified by width and height. The image will not be enlarged. For images
-    ///    smaller than the given dimensions it's the same as scale-down. For
-    ///    images larger than the given dimensions, it's the same as cover.
-    ///    See also trim.
-    ///  - pad: Resizes to the maximum size that fits within the given width and
-    ///    height, and then fills the remaining area with a background color
-    ///    (white by default). Use of this mode is not recommended, as the same
-    ///    effect can be more efficiently achieved with the contain mode and the
-    ///    CSS object-fit: contain property.
-    ///  - squeeze: Stretches and deforms to the width and height given, even if it
-    ///    breaks aspect ratio
-    /// </summary>
-    abstract fit: RequestInitCfPropertiesImageDraw.Fit option with get, set
-    /// <summary>
-    /// Allows you to trim your image. Takes dpr into account and is performed before
-    /// resizing or rotation.
-    ///
-    /// It can be used as:
-    /// - left, top, right, bottom - it will specify the number of pixels to cut
-    ///   off each side
-    /// - width, height - the width/height you'd like to end up with - can be used
-    ///   in combination with the properties above
-    /// - border - this will automatically trim the surroundings of an image based on
-    ///   it's color. It consists of three properties:
-    ///    - color: rgb or hex representation of the color you wish to trim (todo: verify the rgba bit)
-    ///    - tolerance: difference from color to treat as color
-    ///    - keep: the number of pixels of border to keep
-    /// </summary>
-    abstract trim: U2<string, RequestInitCfPropertiesImageDraw.Trim> option with get, set
-    /// <summary>
-    /// Background color to add underneath the image. Applies only to images with
-    /// transparency (such as PNG). Accepts any CSS color (#RRGGBB, rgba(…),
-    /// hsl(…), etc.)
-    /// </summary>
-    abstract background: string option with get, set
-    /// <summary>
-    /// Flips the images horizontally, vertically, or both. Flipping is applied before
-    /// rotation, so if you apply flip=h,rotate=90 then the image will be flipped
-    /// horizontally, then rotated by 90 degrees.
-    /// </summary>
-    abstract flip: RequestInitCfPropertiesImageDraw.Flip option with get, set
-    /// <summary>
-    /// Number of degrees (90, 180, 270) to rotate the image by. width and height
-    /// options refer to axes after rotation.
-    /// </summary>
-    abstract rotate: RequestInitCfPropertiesImageDraw.Rotate option with get, set
-    /// <summary>
-    /// Strength of sharpening filter to apply to the image. Floating-point
-    /// number between 0 (no sharpening, default) and 10 (maximum). 1.0 is a
-    /// recommended value for downscaled images.
-    /// </summary>
-    abstract sharpen: float option with get, set
-    /// <summary>
-    /// Radius of a blur filter (approximate gaussian). Maximum supported radius
-    /// is 250.
-    /// </summary>
-    abstract blur: float option with get, set
-    /// <summary>
-    /// Increase contrast by a factor. A value of 1.0 equals no change, a value of
-    /// 0.5 equals low contrast, and a value of 2.0 equals high contrast. 0 is
-    /// ignored.
-    /// </summary>
-    abstract contrast: float option with get, set
-    /// <summary>
-    /// Increase brightness by a factor. A value of 1.0 equals no change, a value
-    /// of 0.5 equals half brightness, and a value of 2.0 equals twice as bright.
-    /// 0 is ignored.
-    /// </summary>
-    abstract brightness: float option with get, set
-    /// <summary>
-    /// Increase exposure by a factor. A value of 1.0 equals no change, a value of
-    /// 0.5 darkens the image, and a value of 2.0 lightens the image. 0 is ignored.
-    /// </summary>
-    abstract gamma: float option with get, set
-    /// <summary>
-    /// Increase contrast by a factor. A value of 1.0 equals no change, a value of
-    /// 0.5 equals low contrast, and a value of 2.0 equals high contrast. 0 is
-    /// ignored.
-    /// </summary>
-    abstract saturation: float option with get, set
-    /// <summary>
-    /// Device Pixel Ratio. Default 1. Multiplier for width/height that makes it
-    /// easier to specify higher-DPI sizes in &lt;img srcset&gt;.
-    /// </summary>
-    abstract dpr: float option with get, set
-    /// <summary>
-    /// Adds a border around the image. The border is added after resizing. Border
-    /// width takes dpr into account, and can be specified either using a single
-    /// width property, or individually for each side.
-    /// </summary>
-    abstract border: U2<RequestInitCfPropertiesImageDraw.Border, RequestInitCfPropertiesImageDraw.Border2> option with get, set
-    /// <summary>
-    /// Image segmentation using artificial intelligence models. Sets pixels not
-    /// within selected segment area to transparent e.g "foreground" sets every
-    /// background pixel as transparent.
-    /// </summary>
-    abstract segment: string option with get, set
-    /// <summary>
-    /// Controls the algorithm used when an image needs to be enlarged. This
-    /// parameter works with any fit mode that upscales, such as <c>contain</c>,
-    /// <c>cover</c>, and <c>scale-up</c>. It has no effect when <c>fit=scale-down</c> or when
-    /// the target dimensions are smaller than the source.
-    /// - interpolate: Uses bicubic interpolation, which may reduce image quality.
-    ///   This is the default behavior when <c>upscale</c> is not specified.
-    /// - generate: Uses AI upscaling to produce sharper, more detailed results
-    ///   when enlarging images.
-    /// </summary>
-    abstract upscale: RequestInitCfPropertiesImageDraw.Upscale option with get, set
 
 type RequestInitCfPropertiesImage =
     inherit BasicImageTransformations
@@ -24076,159 +20461,6 @@ type RequestInitCfPropertiesImage =
     /// images.
     /// </summary>
     abstract compression: string option with get, set
-    /// <summary>
-    /// Maximum width in image pixels. The value must be an integer.
-    /// </summary>
-    abstract width: float option with get, set
-    /// <summary>
-    /// Maximum height in image pixels. The value must be an integer.
-    /// </summary>
-    abstract height: float option with get, set
-    /// <summary>
-    /// When cropping with fit: "cover", this defines the side or point that should
-    /// be left uncropped. The value is either a string
-    /// "left", "right", "top", "bottom", "auto", or "center" (the default),
-    /// or an object {x, y} containing focal point coordinates in the original
-    /// image expressed as fractions ranging from 0.0 (top or left) to 1.0
-    /// (bottom or right), 0.5 being the center. {fit: "cover", gravity: "top"} will
-    /// crop bottom or left and right sides as necessary, but won’t crop anything
-    /// from the top. {fit: "cover", gravity: {x:0.5, y:0.2}} will crop each side to
-    /// preserve as much as possible around a point at 20% of the height of the
-    /// source image.
-    /// </summary>
-    abstract gravity: U2<string, BasicImageTransformationsGravityCoordinates> option with get, set
-    /// <summary>
-    /// Specifies how closely the image is cropped toward detected faces when combined
-    /// with the gravity=face option. Accepts a valid range between 0.0 (includes as much
-    /// of the background as possible) and 1.0 (crops the image as closely to the face as
-    /// possible). The default is 0.
-    /// </summary>
-    abstract zoom: float option with get, set
-    /// <summary>
-    /// Resizing mode as a string. It affects interpretation of width and height
-    /// options:
-    ///  - scale-down: Similar to contain, but the image is never enlarged. If
-    ///    the image is larger than given width or height, it will be resized.
-    ///    Otherwise its original size will be kept.
-    ///  - scale-up: Similar to contain, but the image is never shrunk. If the
-    ///    image is smaller than the given width or height, it will be resized.
-    ///    Otherwise its original size will be kept.
-    ///  - contain: Resizes to maximum size that fits within the given width and
-    ///    height. If only a single dimension is given (e.g. only width), the
-    ///    image will be shrunk or enlarged to exactly match that dimension.
-    ///    Aspect ratio is always preserved.
-    ///  - cover: Resizes (shrinks or enlarges) to fill the entire area of width
-    ///    and height. If the image has an aspect ratio different from the ratio
-    ///    of width and height, it will be cropped to fit.
-    ///  - crop: The image will be shrunk and cropped to fit within the area
-    ///    specified by width and height. The image will not be enlarged. For images
-    ///    smaller than the given dimensions it's the same as scale-down. For
-    ///    images larger than the given dimensions, it's the same as cover.
-    ///    See also trim.
-    ///  - pad: Resizes to the maximum size that fits within the given width and
-    ///    height, and then fills the remaining area with a background color
-    ///    (white by default). Use of this mode is not recommended, as the same
-    ///    effect can be more efficiently achieved with the contain mode and the
-    ///    CSS object-fit: contain property.
-    ///  - squeeze: Stretches and deforms to the width and height given, even if it
-    ///    breaks aspect ratio
-    /// </summary>
-    abstract fit: RequestInitCfPropertiesImageDraw.Fit option with get, set
-    /// <summary>
-    /// Allows you to trim your image. Takes dpr into account and is performed before
-    /// resizing or rotation.
-    ///
-    /// It can be used as:
-    /// - left, top, right, bottom - it will specify the number of pixels to cut
-    ///   off each side
-    /// - width, height - the width/height you'd like to end up with - can be used
-    ///   in combination with the properties above
-    /// - border - this will automatically trim the surroundings of an image based on
-    ///   it's color. It consists of three properties:
-    ///    - color: rgb or hex representation of the color you wish to trim (todo: verify the rgba bit)
-    ///    - tolerance: difference from color to treat as color
-    ///    - keep: the number of pixels of border to keep
-    /// </summary>
-    abstract trim: U2<string, RequestInitCfPropertiesImageDraw.Trim> option with get, set
-    /// <summary>
-    /// Background color to add underneath the image. Applies only to images with
-    /// transparency (such as PNG). Accepts any CSS color (#RRGGBB, rgba(…),
-    /// hsl(…), etc.)
-    /// </summary>
-    abstract background: string option with get, set
-    /// <summary>
-    /// Flips the images horizontally, vertically, or both. Flipping is applied before
-    /// rotation, so if you apply flip=h,rotate=90 then the image will be flipped
-    /// horizontally, then rotated by 90 degrees.
-    /// </summary>
-    abstract flip: RequestInitCfPropertiesImageDraw.Flip option with get, set
-    /// <summary>
-    /// Number of degrees (90, 180, 270) to rotate the image by. width and height
-    /// options refer to axes after rotation.
-    /// </summary>
-    abstract rotate: RequestInitCfPropertiesImageDraw.Rotate option with get, set
-    /// <summary>
-    /// Strength of sharpening filter to apply to the image. Floating-point
-    /// number between 0 (no sharpening, default) and 10 (maximum). 1.0 is a
-    /// recommended value for downscaled images.
-    /// </summary>
-    abstract sharpen: float option with get, set
-    /// <summary>
-    /// Radius of a blur filter (approximate gaussian). Maximum supported radius
-    /// is 250.
-    /// </summary>
-    abstract blur: float option with get, set
-    /// <summary>
-    /// Increase contrast by a factor. A value of 1.0 equals no change, a value of
-    /// 0.5 equals low contrast, and a value of 2.0 equals high contrast. 0 is
-    /// ignored.
-    /// </summary>
-    abstract contrast: float option with get, set
-    /// <summary>
-    /// Increase brightness by a factor. A value of 1.0 equals no change, a value
-    /// of 0.5 equals half brightness, and a value of 2.0 equals twice as bright.
-    /// 0 is ignored.
-    /// </summary>
-    abstract brightness: float option with get, set
-    /// <summary>
-    /// Increase exposure by a factor. A value of 1.0 equals no change, a value of
-    /// 0.5 darkens the image, and a value of 2.0 lightens the image. 0 is ignored.
-    /// </summary>
-    abstract gamma: float option with get, set
-    /// <summary>
-    /// Increase contrast by a factor. A value of 1.0 equals no change, a value of
-    /// 0.5 equals low contrast, and a value of 2.0 equals high contrast. 0 is
-    /// ignored.
-    /// </summary>
-    abstract saturation: float option with get, set
-    /// <summary>
-    /// Device Pixel Ratio. Default 1. Multiplier for width/height that makes it
-    /// easier to specify higher-DPI sizes in &lt;img srcset&gt;.
-    /// </summary>
-    abstract dpr: float option with get, set
-    /// <summary>
-    /// Adds a border around the image. The border is added after resizing. Border
-    /// width takes dpr into account, and can be specified either using a single
-    /// width property, or individually for each side.
-    /// </summary>
-    abstract border: U2<RequestInitCfPropertiesImageDraw.Border, RequestInitCfPropertiesImageDraw.Border2> option with get, set
-    /// <summary>
-    /// Image segmentation using artificial intelligence models. Sets pixels not
-    /// within selected segment area to transparent e.g "foreground" sets every
-    /// background pixel as transparent.
-    /// </summary>
-    abstract segment: string option with get, set
-    /// <summary>
-    /// Controls the algorithm used when an image needs to be enlarged. This
-    /// parameter works with any fit mode that upscales, such as <c>contain</c>,
-    /// <c>cover</c>, and <c>scale-up</c>. It has no effect when <c>fit=scale-down</c> or when
-    /// the target dimensions are smaller than the source.
-    /// - interpolate: Uses bicubic interpolation, which may reduce image quality.
-    ///   This is the default behavior when <c>upscale</c> is not specified.
-    /// - generate: Uses AI upscaling to produce sharper, more detailed results
-    ///   when enlarging images.
-    /// </summary>
-    abstract upscale: RequestInitCfPropertiesImageDraw.Upscale option with get, set
 
 [<Interface>]
 type RequestInitCfPropertiesImageMinify =
@@ -24256,197 +20488,11 @@ type IncomingRequestCfProperties<'HostMetadata> =
     inherit IncomingRequestCfPropertiesCloudflareForSaaSEnterprise<'HostMetadata>
     inherit IncomingRequestCfPropertiesGeographicInformation
     inherit IncomingRequestCfPropertiesCloudflareAccessOrApiShield
-    /// <summary>
-    /// [ASN](https://www.iana.org/assignments/as-numbers/as-numbers.xhtml) of the incoming request.
-    /// </summary>
-    /// <remarks>@example 395747</remarks>
-    abstract asn: float option with get, set
-    /// <summary>
-    /// The organization which owns the ASN of the incoming request.
-    /// </summary>
-    /// <remarks>@example "Google Cloud"</remarks>
-    abstract asOrganization: string option with get, set
-    /// <summary>
-    /// The original value of the <c>Accept-Encoding</c> header if Cloudflare modified it.
-    /// </summary>
-    /// <remarks>@example "gzip, deflate, br"</remarks>
-    abstract clientAcceptEncoding: string option with get, set
-    /// <summary>
-    /// The number of milliseconds it took for the request to reach your worker.
-    /// </summary>
-    /// <remarks>@example 22</remarks>
-    abstract clientTcpRtt: float option with get, set
-    /// <summary>
-    /// The three-letter [IATA](https://en.wikipedia.org/wiki/IATA_airport_code)
-    /// airport code of the data center that the request hit.
-    /// </summary>
-    /// <remarks>@example "DFW"</remarks>
-    abstract colo: string with get, set
-    /// <summary>
-    /// Represents the upstream's response to a
-    /// [TCP <c>keepalive</c> message](https://tldp.org/HOWTO/TCP-Keepalive-HOWTO/overview.html)
-    /// from cloudflare.
-    ///
-    /// For workers with no upstream, this will always be <c>1</c>.
-    /// </summary>
-    /// <remarks>@example 3</remarks>
-    abstract edgeRequestKeepAliveStatus: IncomingRequestCfPropertiesEdgeRequestKeepAliveStatus with get, set
-    /// <summary>
-    /// The HTTP Protocol the request used.
-    /// </summary>
-    /// <remarks>@example "HTTP/2"</remarks>
-    abstract httpProtocol: string with get, set
-    /// <summary>
-    /// The browser-requested prioritization information in the request object.
-    ///
-    /// If no information was set, defaults to the empty string <c>""</c>
-    /// </summary>
-    /// <remarks>@example "weight=192;exclusive=0;group=3;group-weight=127"</remarks>
-    /// <remarks>@default ""</remarks>
-    abstract requestPriority: string with get, set
-    /// <summary>
-    /// The TLS version of the connection to Cloudflare.
-    /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
-    /// </summary>
-    /// <remarks>@example "TLSv1.3"</remarks>
-    abstract tlsVersion: string with get, set
-    /// <summary>
-    /// The cipher for the connection to Cloudflare.
-    /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
-    /// </summary>
-    /// <remarks>@example "AEAD-AES128-GCM-SHA256"</remarks>
-    abstract tlsCipher: string with get, set
-    /// <summary>
-    /// Metadata containing the [<c>HELLO</c>](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.1.2) and [<c>FINISHED</c>](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.9) messages from this request's TLS handshake.
-    ///
-    /// If the incoming request was served over plaintext (without TLS) this field is undefined.
-    /// </summary>
-    abstract tlsExportedAuthenticator: IncomingRequestCfPropertiesExportedAuthenticatorMetadata option with get, set
-    /// <summary>
-    /// Results of Cloudflare's Bot Management analysis
-    /// </summary>
-    abstract botManagement: IncomingRequestCfProperties.BotManagement with get, set
-    /// <summary>
-    /// Duplicate of <c>botManagement.score</c>.
-    /// </summary>
-    /// <remarks>@deprecated</remarks>
-    abstract clientTrustScore: float with get, set
-    /// <summary>
-    /// Custom metadata set per-host in [Cloudflare for SaaS](https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/).
-    ///
-    /// This field is only present if you have Cloudflare for SaaS enabled on your account
-    /// and you have followed the [required steps to enable it]((https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/domain-support/custom-metadata/)).
-    /// </summary>
-    abstract hostMetadata: 'HostMetadata option with get, set
-    /// <summary>
-    /// The [ISO 3166-1 Alpha 2](https://www.iso.org/iso-3166-country-codes.html) country code the request originated from.
-    ///
-    /// If your worker is [configured to accept TOR connections](https://support.cloudflare.com/hc/en-us/articles/203306930-Understanding-Cloudflare-Tor-support-and-Onion-Routing), this may also be <c>"T1"</c>, indicating a request that originated over TOR.
-    ///
-    /// If Cloudflare is unable to determine where the request originated this property is omitted.
-    ///
-    /// The country code <c>"T1"</c> is used for requests originating on TOR.
-    /// </summary>
-    /// <remarks>@example "GB"</remarks>
-    abstract country: IncomingRequestCfProperties.Country option with get, set
-    /// <summary>
-    /// If present, this property indicates that the request originated in the EU
-    /// </summary>
-    /// <remarks>@example "1"</remarks>
-    abstract isEUCountry: string option with get, set
-    /// <summary>
-    /// A two-letter code indicating the continent the request originated from.
-    /// </summary>
-    /// <remarks>@example "AN"</remarks>
-    abstract continent: ContinentCode option with get, set
-    /// <summary>
-    /// The city the request originated from
-    /// </summary>
-    /// <remarks>@example "Austin"</remarks>
-    abstract city: string option with get, set
-    /// <summary>
-    /// Postal code of the incoming request
-    /// </summary>
-    /// <remarks>@example "78701"</remarks>
-    abstract postalCode: string option with get, set
-    /// <summary>
-    /// Latitude of the incoming request
-    /// </summary>
-    /// <remarks>@example "30.27130"</remarks>
-    abstract latitude: string option with get, set
-    /// <summary>
-    /// Longitude of the incoming request
-    /// </summary>
-    /// <remarks>@example "-97.74260"</remarks>
-    abstract longitude: string option with get, set
-    /// <summary>
-    /// Timezone of the incoming request
-    /// </summary>
-    /// <remarks>@example "America/Chicago"</remarks>
-    abstract timezone: string option with get, set
-    /// <summary>
-    /// If known, the ISO 3166-2 name for the first level region associated with
-    /// the IP address of the incoming request
-    /// </summary>
-    /// <remarks>@example "Texas"</remarks>
-    abstract region: string option with get, set
-    /// <summary>
-    /// If known, the ISO 3166-2 code for the first-level region associated with
-    /// the IP address of the incoming request
-    /// </summary>
-    /// <remarks>@example "TX"</remarks>
-    abstract regionCode: string option with get, set
-    /// <summary>
-    /// Metro code (DMA) of the incoming request
-    /// </summary>
-    /// <remarks>@example "635"</remarks>
-    abstract metroCode: string option with get, set
-    /// <summary>
-    /// Information about the client certificate presented to Cloudflare.
-    ///
-    /// This is populated when the incoming request is served over TLS using
-    /// either Cloudflare Access or API Shield (mTLS)
-    /// and the presented SSL certificate has a valid
-    /// [Certificate Serial Number](https://ldapwiki.com/wiki/Certificate%20Serial%20Number)
-    /// (i.e., not <c>null</c> or <c>""</c>).
-    ///
-    /// Otherwise, a set of placeholder values are used.
-    ///
-    /// The property <c>certPresented</c> will be set to <c>"1"</c> when
-    /// the object is populated (i.e. the above conditions were met).
-    /// </summary>
-    abstract tlsClientAuth: U2<IncomingRequestCfPropertiesTLSClientAuth, IncomingRequestCfPropertiesTLSClientAuthPlaceholder> with get, set
-    [<EmitIndexer>]
-    abstract Item: string -> obj with get, set
 
 module IncomingRequestCfProperties =
     [<Interface>]
     type BotManagement =
         inherit IncomingRequestCfPropertiesBotManagementBase
-        /// <summary>
-        /// Cloudflare’s [level of certainty](https://developers.cloudflare.com/bots/concepts/bot-score/) that a request comes from a bot,
-        /// represented as an integer percentage between <c>1</c> (almost certainly a bot) and <c>99</c> (almost certainly human).
-        /// </summary>
-        /// <remarks>@example 54</remarks>
-        abstract score: float with get, set
-        /// <summary>
-        /// A boolean value that is true if the request comes from a good bot, like Google or Bing.
-        /// Most customers choose to allow this traffic. For more details, see [Traffic from known bots](https://developers.cloudflare.com/firewall/known-issues-and-faq/#how-does-firewall-rules-handle-traffic-from-known-bots).
-        /// </summary>
-        abstract verifiedBot: bool with get, set
-        /// <summary>
-        /// A boolean value that is true if the request originates from a
-        /// Cloudflare-verified proxy service.
-        /// </summary>
-        abstract corporateProxy: bool with get, set
-        /// <summary>
-        /// A boolean value that's true if the request matches [file extensions](https://developers.cloudflare.com/bots/reference/static-resources/) for many types of static resources.
-        /// </summary>
-        abstract staticResource: bool with get, set
-        /// <summary>
-        /// List of IDs that correlate to the Bot Management heuristic detections made on a request (you can have multiple heuristic detections on the same request).
-        /// </summary>
-        abstract detectionIds: float[] with get, set
         /// <summary>
         /// A [JA3 Fingerprint](https://developers.cloudflare.com/bots/concepts/ja3-fingerprint/) to help profile specific SSL/TLS clients
         /// across different destination IPs, Ports, and X509 certificates.
@@ -24843,11 +20889,6 @@ type IncomingRequestCfPropertiesBotManagementEnterprise =
     /// Results of Cloudflare's Bot Management analysis
     /// </summary>
     abstract botManagement: IncomingRequestCfProperties.BotManagement with get, set
-    /// <summary>
-    /// Duplicate of <c>botManagement.score</c>.
-    /// </summary>
-    /// <remarks>@deprecated</remarks>
-    abstract clientTrustScore: float with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (botManagement: IncomingRequestCfProperties.BotManagement, clientTrustScore: float) : IncomingRequestCfPropertiesBotManagementEnterprise = jsNative
 
@@ -25462,40 +21503,12 @@ type D1Response =
 module D1Response =
     type Meta =
         inherit D1Meta
-        abstract duration: float with get, set
-        abstract size_after: float with get, set
-        abstract rows_read: float with get, set
-        abstract rows_written: float with get, set
-        abstract last_row_id: float with get, set
-        abstract changed_db: bool with get, set
-        abstract changes: float with get, set
-        /// <summary>
-        /// The region of the database instance that executed the query.
-        /// </summary>
-        abstract served_by_region: string option with get, set
-        /// <summary>
-        /// The three letters airport code of the colo that executed the query.
-        /// </summary>
-        abstract served_by_colo: string option with get, set
-        /// <summary>
-        /// True if-and-only-if the database instance that executed the query was the primary.
-        /// </summary>
-        abstract served_by_primary: bool option with get, set
-        abstract timings: D1Meta.Timings option with get, set
-        /// <summary>
-        /// Number of total attempts to execute the query, due to automatic retries.
-        /// Note: All other fields in the response like <c>timings</c> only apply to the last attempt.
-        /// </summary>
-        abstract total_attempts: float option with get, set
         [<EmitIndexer>]
         abstract Item: string -> obj with get, set
 
 [<Interface>]
 type D1Result<'T> =
     inherit D1Response
-    abstract success: bool with get, set
-    abstract meta: D1Response.Meta with get, set
-    abstract error: unit option with get, set
     abstract results: 'T[] with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (success: bool, meta: D1Response.Meta, results: 'T[], ?error: unit) : D1Result<'T> = jsNative
@@ -25645,14 +21658,6 @@ type ForwardableEmailMessage =
     /// <remarks>@param builder The reply message contents.</remarks>
     /// <remarks>@returns A promise that resolves when the email message is replied.</remarks>
     abstract reply: builder: EmailReplyMessageBuilder -> JS.Promise<EmailSendResult>
-    /// <summary>
-    /// Envelope From attribute of the email message.
-    /// </summary>
-    abstract from: string
-    /// <summary>
-    /// Envelope To attribute of the email message.
-    /// </summary>
-    abstract ``to``: string
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("disposition", CaseRules.None)>]
 type EmailAttachment =
@@ -25725,13 +21730,6 @@ type EmailMessageBuilder = U3<EmailMessageBuilder2, EmailMessageBuilder3, EmailM
 [<Interface>]
 type EmailMessageBuilder2 =
     inherit EmailReplyMessageBuilder
-    abstract from: U2<string, EmailAddress> with get, set
-    abstract subject: string with get, set
-    abstract replyTo: U2<string, EmailAddress> option with get, set
-    abstract headers: Record<string, string> option with get, set
-    abstract text: string option with get, set
-    abstract html: string option with get, set
-    abstract attachments: EmailAttachment[] option with get, set
     abstract ``to``: U3<string, U2<string, EmailAddress>[], EmailAddress> with get, set
     abstract cc: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
     abstract bcc: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
@@ -25741,13 +21739,6 @@ type EmailMessageBuilder2 =
 [<Interface>]
 type EmailMessageBuilder3 =
     inherit EmailReplyMessageBuilder
-    abstract from: U2<string, EmailAddress> with get, set
-    abstract subject: string with get, set
-    abstract replyTo: U2<string, EmailAddress> option with get, set
-    abstract headers: Record<string, string> option with get, set
-    abstract text: string option with get, set
-    abstract html: string option with get, set
-    abstract attachments: EmailAttachment[] option with get, set
     abstract ``to``: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
     abstract cc: U3<string, U2<string, EmailAddress>[], EmailAddress> with get, set
     abstract bcc: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
@@ -25757,13 +21748,6 @@ type EmailMessageBuilder3 =
 [<Interface>]
 type EmailMessageBuilder4 =
     inherit EmailReplyMessageBuilder
-    abstract from: U2<string, EmailAddress> with get, set
-    abstract subject: string with get, set
-    abstract replyTo: U2<string, EmailAddress> option with get, set
-    abstract headers: Record<string, string> option with get, set
-    abstract text: string option with get, set
-    abstract html: string option with get, set
-    abstract attachments: EmailAttachment[] option with get, set
     abstract ``to``: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
     abstract cc: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
     abstract bcc: U3<string, U2<string, EmailAddress>[], EmailAddress> with get, set
@@ -25781,112 +21765,6 @@ type SendEmail =
 type EmailEvent =
     inherit ExtendableEvent
     abstract message: ForwardableEmailMessage
-    /// <summary>
-    /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/type)
-    /// </summary>
-    abstract ``type``: string
-    /// <summary>
-    /// The **<c>eventPhase</c>** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/eventPhase)
-    /// </summary>
-    abstract eventPhase: float
-    /// <summary>
-    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
-    /// </summary>
-    abstract composed: bool
-    /// <summary>
-    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
-    /// </summary>
-    abstract bubbles: bool
-    /// <summary>
-    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
-    /// </summary>
-    abstract cancelable: bool
-    /// <summary>
-    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
-    /// </summary>
-    abstract defaultPrevented: bool
-    /// <summary>
-    /// The Event property **<c>returnValue</c>** indicates whether the default action for this event has been prevented or not.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/returnValue)</remarks>
-    abstract returnValue: bool
-    /// <summary>
-    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
-    /// </summary>
-    abstract currentTarget: EventTarget<Record<string, Event>> option
-    /// <summary>
-    /// The read-only **<c>target</c>** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
-    /// </summary>
-    abstract target: EventTarget<Record<string, Event>> option
-    /// <summary>
-    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
-    abstract srcElement: EventTarget<Record<string, Event>> option
-    /// <summary>
-    /// The **<c>timeStamp</c>** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/timeStamp)
-    /// </summary>
-    abstract timeStamp: float
-    /// <summary>
-    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
-    /// </summary>
-    abstract isTrusted: bool
-    /// <summary>
-    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
-    abstract cancelBubble: bool with get, set
-    /// <summary>
-    /// The **<c>stopImmediatePropagation()</c>** method of the Event interface prevents other listeners of the same event from being called.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopImmediatePropagation)
-    /// </summary>
-    abstract stopImmediatePropagation: unit -> unit
-    /// <summary>
-    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
-    /// </summary>
-    abstract preventDefault: unit -> unit
-    /// <summary>
-    /// The **<c>stopPropagation()</c>** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation)
-    /// </summary>
-    abstract stopPropagation: unit -> unit
-    /// <summary>
-    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
-    /// </summary>
-    abstract composedPath: unit -> EventTarget<Record<string, Event>>[]
-    /// <summary>
-    /// The **<c>ExtendableEvent.waitUntil()</c>** method tells the event dispatcher that work is ongoing. It can also be used to detect whether that work was successful. In service workers, waitUntil() tells the browser that work is ongoing until the promise settles, and it shouldn't terminate the service worker if it wants that work to complete.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ExtendableEvent/waitUntil)
-    /// </summary>
-    abstract waitUntil: promise: JS.Promise<obj> -> unit
     [<ParamObject; Emit("$0")>]
     static member Create (message: ForwardableEmailMessage, ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<Record<string, Event>>[]), waitUntil: (JS.Promise<obj> -> unit), ?currentTarget: EventTarget<Record<string, Event>>, ?target: EventTarget<Record<string, Event>>, ?srcElement: EventTarget<Record<string, Event>>) : EmailEvent = jsNative
     [<Global("EmailEvent.NONE")>]
@@ -26908,24 +22786,6 @@ type PubSubMessage =
 type JsonWebKeyWithKid =
     inherit JsonWebKey
     abstract kid: string
-    abstract kty: string with get, set
-    abstract ``use``: string option with get, set
-    abstract key_ops: string[] option with get, set
-    abstract alg: string option with get, set
-    abstract ext: bool option with get, set
-    abstract crv: string option with get, set
-    abstract x: string option with get, set
-    abstract y: string option with get, set
-    abstract d: string option with get, set
-    abstract n: string option with get, set
-    abstract e: string option with get, set
-    abstract p: string option with get, set
-    abstract q: string option with get, set
-    abstract dp: string option with get, set
-    abstract dq: string option with get, set
-    abstract qi: string option with get, set
-    abstract oth: RsaOtherPrimesInfo[] option with get, set
-    abstract k: string option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (kid: string, kty: string, ?``use``: string, ?key_ops: string[], ?alg: string, ?ext: bool, ?crv: string, ?x: string, ?y: string, ?d: string, ?n: string, ?e: string, ?p: string, ?q: string, ?dp: string, ?dq: string, ?qi: string, ?oth: RsaOtherPrimesInfo[], ?k: string) : JsonWebKeyWithKid = jsNative
 
@@ -27402,8 +23262,6 @@ module WorkflowStep =
                     [<Interface>]
                     type Retries =
                         inherit WorkflowDynamicDelayContext.Ctx.Config.Retries
-                        abstract limit: float with get, set
-                        abstract backoff: WorkflowBackoff option with get, set
                         abstract delay: CloudflareWorkersModule.WorkflowSleepDuration with get, set
                         [<ParamObject; Emit("$0")>]
                         static member Create (limit: float, delay: CloudflareWorkersModule.WorkflowSleepDuration, ?backoff: WorkflowBackoff) : Retries = jsNative
@@ -28355,120 +24213,60 @@ type StreamError =
 [<Interface>]
 type InternalError =
     inherit StreamError
-    abstract name: string with get, set
-    abstract cause: obj option with get, set
-    abstract code: float
-    abstract statusCode: float
-    abstract message: string
-    abstract stack: string option
     [<ParamObject; Emit("$0")>]
     static member Create (name: string, code: float, statusCode: float, message: string, ?cause: obj, ?stack: string) : InternalError = jsNative
 
 [<Interface>]
 type BadRequestError =
     inherit StreamError
-    abstract name: string with get, set
-    abstract cause: obj option with get, set
-    abstract code: float
-    abstract statusCode: float
-    abstract message: string
-    abstract stack: string option
     [<ParamObject; Emit("$0")>]
     static member Create (name: string, code: float, statusCode: float, message: string, ?cause: obj, ?stack: string) : BadRequestError = jsNative
 
 [<Interface>]
 type NotFoundError =
     inherit StreamError
-    abstract name: string with get, set
-    abstract cause: obj option with get, set
-    abstract code: float
-    abstract statusCode: float
-    abstract message: string
-    abstract stack: string option
     [<ParamObject; Emit("$0")>]
     static member Create (name: string, code: float, statusCode: float, message: string, ?cause: obj, ?stack: string) : NotFoundError = jsNative
 
 [<Interface>]
 type ForbiddenError =
     inherit StreamError
-    abstract name: string with get, set
-    abstract cause: obj option with get, set
-    abstract code: float
-    abstract statusCode: float
-    abstract message: string
-    abstract stack: string option
     [<ParamObject; Emit("$0")>]
     static member Create (name: string, code: float, statusCode: float, message: string, ?cause: obj, ?stack: string) : ForbiddenError = jsNative
 
 [<Interface>]
 type RateLimitedError =
     inherit StreamError
-    abstract name: string with get, set
-    abstract cause: obj option with get, set
-    abstract code: float
-    abstract statusCode: float
-    abstract message: string
-    abstract stack: string option
     [<ParamObject; Emit("$0")>]
     static member Create (name: string, code: float, statusCode: float, message: string, ?cause: obj, ?stack: string) : RateLimitedError = jsNative
 
 [<Interface>]
 type QuotaReachedError =
     inherit StreamError
-    abstract name: string with get, set
-    abstract cause: obj option with get, set
-    abstract code: float
-    abstract statusCode: float
-    abstract message: string
-    abstract stack: string option
     [<ParamObject; Emit("$0")>]
     static member Create (name: string, code: float, statusCode: float, message: string, ?cause: obj, ?stack: string) : QuotaReachedError = jsNative
 
 [<Interface>]
 type MaxFileSizeError =
     inherit StreamError
-    abstract name: string with get, set
-    abstract cause: obj option with get, set
-    abstract code: float
-    abstract statusCode: float
-    abstract message: string
-    abstract stack: string option
     [<ParamObject; Emit("$0")>]
     static member Create (name: string, code: float, statusCode: float, message: string, ?cause: obj, ?stack: string) : MaxFileSizeError = jsNative
 
 [<Interface>]
 type InvalidURLError =
     inherit StreamError
-    abstract name: string with get, set
-    abstract cause: obj option with get, set
-    abstract code: float
-    abstract statusCode: float
-    abstract message: string
-    abstract stack: string option
     [<ParamObject; Emit("$0")>]
     static member Create (name: string, code: float, statusCode: float, message: string, ?cause: obj, ?stack: string) : InvalidURLError = jsNative
 
 [<Interface>]
 type AlreadyUploadedError =
     inherit StreamError
-    abstract name: string with get, set
-    abstract cause: obj option with get, set
-    abstract code: float
-    abstract statusCode: float
-    abstract message: string
-    abstract stack: string option
     [<ParamObject; Emit("$0")>]
     static member Create (name: string, code: float, statusCode: float, message: string, ?cause: obj, ?stack: string) : AlreadyUploadedError = jsNative
 
 [<Interface>]
 type TooManyWatermarksError =
     inherit StreamError
-    abstract name: string with get, set
-    abstract cause: obj option with get, set
-    abstract code: float
-    abstract statusCode: float
-    abstract message: string
-    abstract stack: string option
     [<ParamObject; Emit("$0")>]
     static member Create (name: string, code: float, statusCode: float, message: string, ?cause: obj, ?stack: string) : TooManyWatermarksError = jsNative
 
@@ -28495,7 +24293,6 @@ type ImageConversionOptions =
 [<Interface>]
 type EmbeddedImageConversionOptions =
     inherit ImageConversionOptions
-    abstract descriptionLanguage: ConversionOptions.Html.Images.DescriptionLanguage option with get, set
     abstract convert: bool option with get, set
     abstract maxConvertedImages: float option with get, set
     [<ParamObject; Emit("$0")>]

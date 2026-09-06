@@ -1,7 +1,8 @@
 #Requires -Version 7
 <#
-Generates the compiler-lib bindings and packs them as two NuGet packages:
-Xantham.Fable.Lib.Es (lib.es*.d.ts) and Xantham.Fable.Lib.Dom (lib.dom*.d.ts, depends on Es).
+Generates the compiler-lib bindings and packs them as one NuGet package, Xantham.Fable.Lib:
+`namespace rec TypeScript.Lib` with `module Es` (lib.es*.d.ts) and `module Dom` (lib.dom*,
+lib.webworker*, lib.scripthost*), which reference each other in both directions.
 
 Usage, from the repository root, after `dotnet build src/Xantham.Cli -c Release`:
 
@@ -66,10 +67,9 @@ $refs
     return Join-Path $dir "$name.fsproj"
 }
 
-$es = New-LibProject "Xantham.Fable.Lib.Es" "TypeScript.Lib.fs" @($core)
-$dom = New-LibProject "Xantham.Fable.Lib.Dom" "TypeScript.Lib.Dom.fs" @($core, $es)
+$lib = New-LibProject "Xantham.Fable.Lib" "TypeScript.Lib.fs" @($core)
 
 $nupkg = Join-Path $Work "nupkg"
-& dotnet pack $es -c Release -o $nupkg
-& dotnet pack $dom -c Release -o $nupkg
+& dotnet pack $lib -c Release -o $nupkg
+if ($LASTEXITCODE -ne 0) { throw "pack failed" }
 Write-Host "packages in $nupkg"

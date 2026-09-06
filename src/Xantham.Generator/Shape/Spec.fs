@@ -1820,8 +1820,13 @@ and internal referencedRef
     (facts: TypeFacts)
     (typeName: string)
     : FsTypeRef * Finding list =
-    let name =
-        $"{Naming.groupModule ctx.Config ctx.PackageName facts.Origin}.{typeName}"
+    let moduleName =
+        match facts.Origin, facts.DeclFile with
+        | CompilerLib, Some file -> Naming.compilerLibFamilyModule (Grouping.libFamily file)
+        | CompilerLib, None -> Naming.CompilerLibEsModule
+        | origin, _ -> Naming.groupModule ctx.Config ctx.PackageName origin
+
+    let name = $"{moduleName}.{typeName}"
 
     match facts.TypeArguments with
     | [] -> FsNamed name, []

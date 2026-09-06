@@ -79,8 +79,6 @@ type Hub =
 type Annex =
     inherit Hub
     abstract tag: string
-    abstract depth: float
-    abstract probe: (Signal -> string) option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (tag: string, depth: float, ?probe: (Signal -> string)) : Annex = jsNative
 

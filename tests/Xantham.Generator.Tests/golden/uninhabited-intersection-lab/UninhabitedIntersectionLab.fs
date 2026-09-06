@@ -44,7 +44,6 @@ module Ticking =
             [<Interface>]
             type Self =
                 inherit Ticking
-                abstract ``then``: ?callback: (Ticking.Then.Callback.Self -> obj) -> JS.Promise<obj>
                 abstract paused: bool with get, set
                 [<ParamObject; Emit("$0")>]
                 static member Create (``then``: ((Ticking.Then.Callback.Self -> obj) option -> JS.Promise<obj>), paused: bool) : Self = jsNative
@@ -64,7 +63,6 @@ module Player =
             [<Interface>]
             type Self =
                 inherit Player
-                abstract play: ?callback: (Player.Play.Callback.Self -> obj) -> unit
                 abstract ``then``: obj with get, set
                 [<ParamObject; Emit("$0")>]
                 static member Create (play: ((Player.Play.Callback.Self -> obj) option -> unit), ``then``: obj) : Self = jsNative

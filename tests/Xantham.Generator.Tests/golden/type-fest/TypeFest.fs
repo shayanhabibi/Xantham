@@ -789,39 +789,6 @@ type AbstractConstructor<'T, 'Arguments> =
 type CamelCaseOptions =
     inherit WordsOptions
     /// <summary>
-    /// Split on numeric sequence.
-    /// </summary>
-    /// <remarks>@default true</remarks>
-    /// <remarks>
-    /// @example
-    /// <code>
-    /// import type {Words} from 'type-fest';
-    ///
-    /// type Example1 = Words&lt;'p2pNetwork', {splitOnNumbers: true}&gt;;
-    /// //=&gt; ['p', '2', 'p', 'Network']
-    ///
-    /// type Example2 = Words&lt;'p2pNetwork', {splitOnNumbers: false}&gt;;
-    /// //=&gt; ['p2p', 'Network']
-    /// </code>
-    /// </remarks>
-    abstract splitOnNumbers: bool option with get, set
-    /// <summary>
-    /// Split on punctuation characters (e.g., <c>#</c>, <c>&amp;</c>, <c>*</c>, <c>:</c>, <c>?</c>, <c>@</c>, <c>~</c>).
-    /// </summary>
-    /// <remarks>
-    /// @example
-    /// <code>
-    /// import type {Words} from 'type-fest';
-    ///
-    /// type Example1 = Words&lt;'hello:world', {splitOnPunctuation: true}&gt;;
-    /// //=&gt; ['hello', 'world']
-    ///
-    /// type Example2 = Words&lt;'hello:world', {splitOnPunctuation: false}&gt;;
-    /// //=&gt; ['hello', ':world']
-    /// </code>
-    /// </remarks>
-    abstract splitOnPunctuation: bool option with get, set
-    /// <summary>
     /// Whether to preserved consecutive uppercase letter.
     /// </summary>
     /// <remarks>@default false</remarks>
@@ -6317,8 +6284,6 @@ type PackageJson =
     /// JSPM configuration.
     /// </summary>
     abstract jspm: PackageJson option with get, set
-    [<EmitIndexer>]
-    abstract Item: string -> JsonValue option with get, set
 
 module PackageJson =
     [<Interface>]

@@ -143,8 +143,9 @@ let groupModules (ctx: Context) (shape: ShapeModel) : Render.GroupModule list =
         |> Option.defaultValue Unclassified
         |> emittingGroup ctx
 
-    // The compiler lib ships as two modules: the ECMAScript libs, and the DOM libs that read
-    // them. A declaration's family is its own symbol's file; a hoisted name takes its root's.
+    // The compiler lib ships as two modules under one `namespace rec`: the ECMAScript libs and
+    // the DOM libs. A declaration's family is its own symbol's file; a hoisted name takes its
+    // root's.
     let families = declFamilies shape
 
     let rec familyOf (name: string) =
@@ -175,18 +176,21 @@ let groupModules (ctx: Context) (shape: ShapeModel) : Render.GroupModule list =
                 Group = ctx.PackageName
                 IsEntry = true
                 Module = moduleName ctx
+                Namespace = None
                 RuntimePackage = GeneratorConfig.runtimePackage ctx.Config ctx.PackageName
                 Decls = decls
             }
         | Some key ->
+            let moduleName, ns =
+                match origin with
+                | CompilerLib -> Naming.compilerLibFamilyModule family, Some Naming.CompilerLibModule
+                | origin -> Naming.groupModule ctx.Config ctx.PackageName origin, None
+
             {
                 Group = key
                 IsEntry = false
-                Module =
-                    if family = "Dom" then
-                        Naming.CompilerLibDomModule
-                    else
-                        Naming.groupModule ctx.Config ctx.PackageName origin
+                Module = moduleName
+                Namespace = ns
                 RuntimePackage = GeneratorConfig.derivedRuntimePackage key
                 Decls = decls
             }

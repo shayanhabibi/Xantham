@@ -19,7 +19,6 @@ type Marker =
 type Tagged =
     inherit Marker
     abstract tag: string
-    abstract id: string
     [<ParamObject; Emit("$0")>]
     static member Create (tag: string, id: string) : Tagged = jsNative
 

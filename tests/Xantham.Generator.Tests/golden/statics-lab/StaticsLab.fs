@@ -60,11 +60,6 @@ type Counter =
 type Doubling =
     inherit Counter
     abstract double: unit -> Doubling
-    /// <summary>
-    /// The count so far.
-    /// </summary>
-    abstract value: float
-    abstract bump: by: float -> Counter
     [<ParamObject; Emit("$0")>]
     static member Create (double: (unit -> Doubling), value: float, bump: (float -> Counter)) : Doubling = jsNative
     /// <summary>

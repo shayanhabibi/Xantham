@@ -24,12 +24,6 @@ type Computation<'Init, 'Next> =
     abstract ``pure``: bool with get, set
     abstract user: bool option with get, set
     abstract suspense: Computation.Suspense option with get, set
-    abstract owned: Computation<obj, obj>[] option with get, set
-    abstract cleanups: (unit -> unit)[] option with get, set
-    abstract owner: Owner option with get, set
-    abstract context: obj with get, set
-    abstract sourceMap: SourceMapValue[] option with get, set
-    abstract name: string option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (fn: ('Init -> 'Next), state: Computation.State, ``pure``: bool, context: obj, ?tState: Computation.State, ?sources: SignalState<'Next>[], ?sourceSlots: float[], ?value: 'Init, ?updatedAt: float, ?user: bool, ?suspense: Computation.Suspense, ?owned: Computation<obj, obj>[], ?cleanups: (unit -> unit)[], ?owner: Owner, ?sourceMap: SourceMapValue[], ?name: string) : Computation<'Init, 'Next> = jsNative
 
@@ -73,27 +67,9 @@ type Memo<'Prev, 'Next> =
     inherit Computation<'Next, 'Next>
     abstract value: 'Next with get, set
     abstract tOwned: Computation<U2<'Next, 'Prev>, 'Next>[] option with get, set
-    abstract name: string option with get, set
-    abstract graph: Owner option with get, set
-    abstract observers: Computation<obj, obj>[] option with get, set
-    abstract observerSlots: float[] option with get, set
     abstract tValue: 'Next option with get, set
     abstract comparator: Memo.Comparator<'Next> option with get, set
-    abstract ``internal``: bool option with get, set
-    abstract owned: Computation<obj, obj>[] option with get, set
-    abstract cleanups: (unit -> unit)[] option with get, set
-    abstract owner: Owner option with get, set
-    abstract context: obj with get, set
-    abstract sourceMap: SourceMapValue[] option with get, set
     abstract fn: ('Next -> 'Next) with get, set
-    abstract state: Computation.State with get, set
-    abstract tState: Computation.State option with get, set
-    abstract sources: SignalState<'Next>[] option with get, set
-    abstract sourceSlots: float[] option with get, set
-    abstract updatedAt: float option with get, set
-    abstract ``pure``: bool with get, set
-    abstract user: bool option with get, set
-    abstract suspense: Computation.Suspense option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (value: 'Next, context: obj, fn: ('Next -> 'Next), state: Computation.State, ``pure``: bool, ?tOwned: Computation<U2<'Next, 'Prev>, 'Next>[], ?name: string, ?graph: Owner, ?observers: Computation<obj, obj>[], ?observerSlots: float[], ?tValue: 'Next, ?comparator: Memo.Comparator<'Next>, ?``internal``: bool, ?owned: Computation<obj, obj>[], ?cleanups: (unit -> unit)[], ?owner: Owner, ?sourceMap: SourceMapValue[], ?tState: Computation.State, ?sources: SignalState<'Next>[], ?sourceSlots: float[], ?updatedAt: float, ?user: bool, ?suspense: Computation.Suspense) : Memo<'Prev, 'Next> = jsNative
 
@@ -109,8 +85,6 @@ type SignalState<'T> =
     abstract tValue: 'T option with get, set
     abstract comparator: SignalState.Comparator<'T> option with get, set
     abstract ``internal``: bool option with get, set
-    abstract name: string option with get, set
-    abstract graph: Owner option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (value: 'T, ?observers: Computation<obj, obj>[], ?observerSlots: float[], ?tValue: 'T, ?comparator: SignalState.Comparator<'T>, ?``internal``: bool, ?name: string, ?graph: Owner) : SignalState<'T> = jsNative
 
@@ -271,7 +245,6 @@ module MemoOptions =
 type SignalOptions<'T> =
     inherit MemoOptions<'T>
     abstract ``internal``: bool option with get, set
-    abstract name: string option with get, set
     abstract equals: U2<bool, SignalOptions.Equals<'T>> option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?``internal``: bool, ?name: string, ?equals: U2<bool, SignalOptions.Equals<'T>>) : SignalOptions<'T> = jsNative
@@ -284,7 +257,6 @@ type NoInfer = JS.NoInfer<obj>
 [<Interface>]
 type EffectOptions =
     inherit BaseOptions
-    abstract name: string option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?name: string) : EffectOptions = jsNative
 
@@ -294,7 +266,6 @@ module CreateEffect =
     [<Interface>]
     type Options =
         inherit EffectOptions
-        abstract name: string option with get, set
         abstract render: bool option with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (?name: string, ?render: bool) : Options = jsNative
@@ -303,7 +274,6 @@ module CreateEffect =
 type MemoOptions<'T> =
     inherit EffectOptions
     abstract equals: U2<bool, MemoOptions.Equals<'T>> option with get, set
-    abstract name: string option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?equals: U2<bool, MemoOptions.Equals<'T>>, ?name: string) : MemoOptions<'T> = jsNative
 
@@ -638,7 +608,6 @@ module On =
     [<Interface>]
     type Options =
         inherit OnOptions
-        abstract defer: bool option with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (?defer: bool) : Options = jsNative
 
