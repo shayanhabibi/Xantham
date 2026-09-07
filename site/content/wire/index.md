@@ -166,7 +166,7 @@ let session = session.WithSnapshot updated.Snapshot
 The 16 methods that take neither argument — `initialize`, `updateSnapshot`, `createProgram`, the
 `transpile*` and config-parsing family — precede any snapshot, so they hang off
 `session.Sessionless` rather than being absent. Handles are valid for exactly the pair a session
-holds; [`wire-navigation.md`](wire-navigation.md#a-session-is-the-snapshot-and-the-project-bound-once)
+holds; [`wire-navigation.md`] (wire-navigation.md#a-session-is-the-snapshot-and-the-project-bound-once)
 covers that scope and where the layer is generated from.
 
 ## Common patterns
@@ -207,7 +207,7 @@ let ty = Api.getTypeAtLocation channel { Snapshot = snapshot.Snapshot; Project =
 
 Handles are valid only within the snapshot and project that produced them. Going the other way —
 a handle from `symbol.Declarations` back to a node — is in
-[`wire-navigation.md`](wire-navigation.md#example-a-symbols-declarations).
+[`wire-navigation.md`] (wire-navigation.md#example-a-symbols-declarations).
 
 ### Enumerate a module's exports
 
@@ -297,9 +297,9 @@ output.OutputText
 
 ## Where to go next
 
-- [Navigating the AST](wire-navigation.md) — sessions in depth, `Node<'Tag>`, views, accessors,
+- [Navigating the AST] (wire-navigation.md) — sessions in depth, `Node<'Tag>`, views, accessors,
   node handles.
-- [The hand-written register](wire-hand-written.md) — the facts transcribed from upstream rather
+- [The hand-written register] (wire-hand-written.md) — the facts transcribed from upstream rather
   than derived, and how to update them.
-- [The wire protocol](plans/tsgo-protocol.md) — framing, errors, the binary AST format.
-- [Remaining work](plans/wire-remaining-work.md) — what is still outstanding.
+- [The wire protocol] (plans/tsgo-protocol.md) — framing, errors, the binary AST format.
+- [Remaining work] (plans/wire-remaining-work.md) — what is still outstanding.

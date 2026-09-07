@@ -6,46 +6,6 @@
     <File Path=".github/workflows/push_master.yml" />
     <File Path="build.fsx" />
   </Folder>
-  <Folder Name="/ai/">
-    <File Path="AGENTS.md" />
-  </Folder>
-  <Folder Name="/ai/skills/" />
-  <Folder Name="/ai/skills/spec-tests/">
-    <File Path=".claude/skills/spec-tests/SKILL.md" />
-  </Folder>
-  <Folder Name="/ai/skills/xml-documentation/">
-    <File Path=".claude/skills/xml-documentation/SKILL.md" />
-  </Folder>
-<!--          DOCUMENTATION         -->
-  <Folder Name="/docs/">
-    <File Path="docs/generator-usage.md" />
-    <File Path="docs/index.md" />
-    <File Path="docs/wire-hand-written.md" />
-    <File Path="docs/wire-navigation.md" />
-    <File Path="docs/wire-usage.md" />
-    <File Path="docs/_head.html" />
-  </Folder>
-  <Folder Name="/docs/content/">
-    <File Path="docs/content/fsdocs-theme.css" />
-  </Folder>
-  <Folder Name="/docs/content/assets/">
-    <File Path="docs/content/assets/favicon-16x16.png" />
-    <File Path="docs/content/assets/favicon-32x32.png" />
-    <File Path="docs/content/assets/favicon.ico" />
-  </Folder>
-<!--    ===================    -->
-<!--    MISCELLANEOUS    -->
-  <Folder Name="/misc/sln build/">
-    <File Path="Directory.Build.props" />
-    <File Path="Directory.Build.targets" />
-    <File Path="package.json" />
-    <File Path="xantham.schema.json" />
-  </Folder>
-  <Folder Name="/misc/">
-    <File Path="README.md" />
-    <File Path="RELEASE_NOTES.md" />
-    <File Path=".archive/README.md" />
-  </Folder>
 <!--    ===================    -->
   <Folder Name="/src/">
     <Project Path="src/Xantham.TypeScript.Wire/Xantham.TypeScript.Wire.fsproj" />
@@ -54,19 +14,13 @@
     <Project Path="src/Xantham.Fable.Core/Xantham.Fable.Core.fsproj" />
   </Folder>
   <Folder Name="/tests/">
-    <File Path="tests/Test.fsx" />
     <Project Path="tests/Xantham.TypeScript.Wire.Tests/Xantham.TypeScript.Wire.Tests.fsproj" />
     <Project Path="tests/Xantham.Generator.Tests/Xantham.Generator.Tests.fsproj" />
     <Project Path="tests/Xantham.Generator.CompileGate/Xantham.Generator.CompileGate.fsproj" />
     <Project Path="tests/Xantham.Generator.CompilerLibCompileGate/Xantham.Generator.CompilerLibCompileGate.fsproj" />
     <Project Path="tests/Xantham.Generator.RunGate/Xantham.Generator.RunGate.fsproj" />
   </Folder>
-  <Folder Name="/tools/">
-    <File Path="tools/generate-wire.fsx" />
-    <File Path="tools/probe-method-existence.mjs" />
-    <File Path="tools/workspace.fsx" />
-    <File Path="tools/xantham-fixtures.fsx" />
+  <Project Path="tools/schema-contract-example/SchemaContractExample.fsproj" />
     <Project Path="tools/tools.fsproj" />
-  </Folder>
   <Project Path="site/site.fsproj" />
 </Solution>

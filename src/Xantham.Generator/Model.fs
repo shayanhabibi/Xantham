@@ -1,9 +1,12 @@
 ﻿namespace Xantham.Generator
 
+open System
+open System.ComponentModel.DataAnnotations
 open System.IO
 open System.Text.Json
 open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
+open System.ComponentModel
 
 
 /// The package boundary a symbol or type originates from, classified from its declaration's
@@ -20,13 +23,18 @@ type PackageId =
     | Unclassified
 
 /// The F# destination of one mapped name (O7's `map`).
+[<Description("The destination of each redirected name, keyed by the TypeScript name the group declares. A name outside the table widens.")>]
 type MappedName =
     {
         /// The name written at a reference position, qualified as the destination package
         /// spells it: `Node.Buffer.Buffer`, `System.Text.RegularExpressions.Regex`.
+        [<Required>]
+        [<Description("The F# name a reference renders as, qualified as the destination package spells it.")>]
         FSharpName: string
         /// The number of type arguments the destination takes. A reference applying any other
         /// number widens with a finding (`TR053`).
+        [<Description("The number of type arguments the destination takes. A reference applying any other number widens with finding TR053.")>]
+        [<Range(0, Int32.MaxValue)>]
         Arity: int
     }
 
@@ -50,6 +58,9 @@ type GroupDisposition =
 type GeneratorConfig =
     {
         /// Overrides the F# module name otherwise derived from the package name.
+        [<Description(" \
+        The F# module the binding is written into. Defaults to the package name under the O7 naming contract, where \
+        `@scope/pkg-name` becomes `Scope.PkgName`.")>]
         ModuleName: string option
         /// The F# namespace a package family is written under. The entry package takes the
         /// namespace itself, and each group named under `groups` takes `<Namespace>.<Leaf>`:
@@ -59,25 +70,59 @@ type GeneratorConfig =
         /// Both sides of a `reference` configure the same namespace. The referencing run
         /// templates a name the referenced run has to produce, and `GE004` records each group
         /// named this way.
+        [<Description("
+        The F# namespace a package family is written under. The entry package takes it, and each group \
+        named under `groups` takes `<namespace>.<Leaf>`, so `@cloudedge/agents` under `FSharp.CloudEdge` reads \
+        `FSharp.CloudEdge.Agents`. Both sides of a reference configure the same namespace."
+                      )>]
         Namespace: string option
         /// Disposition per group, keyed as `xantham.json` spells them: npm name for a
         /// dependency, `typescript/lib` for the compiler lib.
+        [<Description(
+        "What the generator does with each package boundary its declarations reach (decision O7), keyed \
+        by npm name, with the compiler's own library as `typescript/lib`. An unlisted group widens."
+            )>]
         Groups: Map<string, GroupDisposition>
         /// The compiler's `lib` option, as `tsconfig.json` spells it (`["esnext"]`). `None` is the
         /// compiler's default, which includes the DOM. A global type library that redeclares DOM
         /// names (`@cloudflare/workers-types`) must set this to what its README prescribes: with
         /// the DOM loaded, every such name merges with the lib's declaration, is grouped as the
         /// compiler lib by its first declaration, and is not the package's to harvest.
+        [<Description(
+        "The compiler's `lib` option, as `tsconfig.json` spells it. Omitted, the \
+        compiler's default applies, which includes the DOM. A global type library that \
+        redeclares DOM names sets this to what its README prescribes."
+            )>]
         Lib: string list option
         /// Explicit ambient type packages, using the compiler's `types` option. `None` keeps
         /// automatic discovery; `Some []` disables it. Required packages must be installed.
+        [<Description(
+        "The compiler's `types` option: installed ambient type packages required by this input. \
+        Omitted, automatic discovery applies; an empty array disables automatic inclusion. \
+        Missing named packages are reported before generation."
+            )>]
         Types: string list option
         /// Emits declarations.json with the identity and final F# name of reusable declarations.
+        [<Description(
+        "Emit declarations.json with stable TypeScript declaration identities and final F# names. Defaults to false."
+            )>]
         DeclarationCatalog: bool
         /// Producer catalogs, absolute or relative to the input package directory.
+        [<Description(
+        "Producer declarations.json files, absolute or relative to the input package directory. \
+        Matching types reuse their producer's F# identity; incompatible catalogs fail generation."
+            )>]
         DeclarationReferences: string list
         /// The TypeScript input file, relative to the package directory. `None` selects the
         /// manifest's root declaration entry. Set `RuntimePackage` separately for a public subpath.
+        [<Description(
+        "The TypeScript input file, relative to the package directory passed to \
+        generate, even when the configuration lives elsewhere. Must \
+        name an existing .ts, .tsx, .mts or .cts file (including declarations) \
+        within that directory. Omitted, selects types, typings, \
+        a root-export types string, then index.d.ts. An exports map without a root requires an explicit entry. \
+        Set runtime separately for a public JavaScript subpath; each invocation generates from one entry."
+            )>]
         Entry: string option
         /// Overrides the npm package the generated `[<Import(…)>]` attributes name. `None`
         /// derives it from the package name (`GeneratorConfig.runtimePackage`), which is right
@@ -85,10 +130,20 @@ type GeneratorConfig =
         /// convention. It is the escape hatch for the packages the convention cannot describe:
         /// a `@types/*` package whose runtime is named something else entirely, and a
         /// types-only package published outside DefinitelyTyped.
+        [<Description(
+        "The public JavaScript module or subpath used by generated `[<Import(…)>]` attributes. \
+        Must be a nonempty string when provided. Independent of the entry declaration path. \
+        Defaults to the package name with DefinitelyTyped's `@types/` convention undone, so \
+        `@types/three` imports from `three`."
+            )>]
         RuntimePackage: string option
         /// Resolves `NoInfer<T>` (§4.11's carve-out) to `T` at the mapping site, dropping the
         /// name. `false` emits `NoInfer<T>`, which resolves through the support package's own
         /// abbreviation and keeps the generated file showing what TypeScript declared.
+        [<Description(
+        "Resolves TypeScript's `NoInfer<T>` (§4.11) to `T` at the mapping site, dropping the name. \
+        Defaults to false, which emits `NoInfer<T>` and reaches the support package's own abbreviation."
+            )>]
         ResolveNoInfer: bool
     }
 

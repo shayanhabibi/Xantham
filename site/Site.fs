@@ -12,6 +12,7 @@ let navbar =
         [
             NavbarSection("Guide", "guide", "/guide/introduction/")
             NavbarSection("Wire", "wire", "/wire/")
+            NavbarSection("Xantham CLI", "xantham-cli", "/xantham-cli/")
         ]
     >> Theme.navbarEnd
         [
@@ -36,7 +37,6 @@ let site =
     |> Literate.register
     |> Sitemap.register
     |> LinkValidator.register
-    |> Rumdl.register
     |> LightningCss.register
     |> Esbuild.register
     |> Nuglify.minifyHtml

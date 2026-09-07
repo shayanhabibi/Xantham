@@ -1,13 +1,13 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<!--    
+This is a dummy project to make tools easier to automatically identify in the solution.
+.slnx does not accept wild cards. This is a work around.
+    -->
+<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <IsPackable>false</IsPackable>
         <TargetFramework>netstandard2.0</TargetFramework>
     </PropertyGroup>
     <ItemGroup>
-        <None Include="tsc-ast/**/*" />
-        <None Include="browser-gen/**/*" />
-        <None Include="proto-gen/**/*" />
-        <None Include="session-gen/**/*" />
+        <None Include="**/*" Exclude="bin/**/*;obj/**/*" />
     </ItemGroup>
-
 </Project>
