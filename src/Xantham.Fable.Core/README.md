@@ -2,6 +2,29 @@
 
 A small Fable utility library providing F# representations of TypeScript type-system idioms that have no direct equivalent in standard F#. All types are erased at runtime — they exist only for the compiler and carry zero overhead in the emitted JavaScript.
 
+The erased types remain under `Fable.Core.JS.JS` and are available through
+`open Fable.Core.JS`. Executable helpers are in the global auto-open module
+`XanthamFableCore`, so ordinary calls such as `TypeKeyOf.create`, `KeyOf.item`,
+`Brand.tagString`, `keyof`, and `typekeyof` keep their spelling. This module
+works with both .NET assembly references and Fable's combined source compilation.
+
+This pre-release correction changes qualified helper names: replace
+`Fable.Core.JS.JS.TypeKeyOf` with `XanthamFableCore.TypeKeyOf`, and use the same
+new prefix for `KeyOf`, `Brand`, `PropTypeBuilder`, the free helper functions,
+and the active patterns. Existing compiled callers using those helper identities
+must be rebuilt. Erased type identities and generated binding type references
+are preserved.
+
+The `keyof` function now retains its lambda's result type for Fable's property-name
+inference. Inferred calls such as `keyof _.Name` keep their spelling. Explicit
+calls become `keyof<Config, _> _.Name` in place of `keyof<Config> _.Name`; the
+result is still `keyof<Config>`.
+
+Fable reserves the `Fable.Core.JS.` prefix for JavaScript globals and checks it
+before expanding inline functions. The helpers therefore belong outside that
+namespace. Their runtime regression is also available as a small
+[standalone repro](../../tests/repros/support-helper-globals/README.md).
+
 ---
 
 ## Contents
@@ -32,7 +55,7 @@ function get<T>(obj: T, key: keyof T): unknown { ... }
 
 ```fsharp
 // Construction — use the keyof helper function
-let key = keyof<MyObj> _.FieldName   // keyof<MyObj>, value = "FieldName"
+let key = keyof<MyObj, _> _.FieldName   // keyof<MyObj>, value = "FieldName"
 
 // Usage as a field type
 type Accessor<'T> = { Key: keyof<'T> }
@@ -56,8 +79,8 @@ type Config = {
 let describe (key: keyof<Config>) =
     printfn "Config key: %s" key.Value
 
-describe (keyof<_> _.Timeout)   // "Config key: Timeout"
-describe (keyof<_> _.Verbose)   // "Config key: Verbose"
+describe (keyof<_, _> _.Timeout)   // "Config key: Timeout"
+describe (keyof<_, _> _.Verbose)   // "Config key: Verbose"
 ```
 
 ---

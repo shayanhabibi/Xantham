@@ -406,23 +406,17 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                 | ValueSome target when target <> typeId && Map.containsKey target model.Types -> walk path order target
                 | _ -> ()
 
-                // The same rule for the declaration form of an alias whose body defers on a
-                // conditional, which reaches this point nameless: it surrenders no members, so
-                // `needsName` passes over it, and `three` exports neither `Node` nor `VarNode`
-                // from the entry that would have named it (§11.4). The first application names
-                // the family and every application after it is a reference; without the name
-                // each one hoists a strictly larger shape until the depth cutoff stops it.
+                // Private alias declarations precede their applications too. A deferred
+                // conditional has no members to walk, so its first application supplies its name.
                 match facts.Response.AliasSymbol with
                 | ValueSome alias when isFlattenable model facts ->
                     match Map.tryFind alias aliasForms with
-                    | Some declared when
-                        declared <> typeId
-                        && not (Map.containsKey declared names)
-                        && (match Map.tryFind declared model.Types with
-                            | Some declaredFacts -> hasConditionalOperand model declaredFacts
-                            | None -> false)
-                        ->
-                        claim None path declared order |> ignore
+                    | Some declared when declared <> typeId && not (Map.containsKey declared names) ->
+                        match Map.tryFind declared model.Types with
+                        | Some declaredFacts when hasConditionalOperand model declaredFacts ->
+                            claim None path declared order |> ignore
+                        | Some _ -> walk path order declared
+                        | None -> ()
                     | _ -> ()
                 | _ -> ()
 
@@ -522,6 +516,16 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
 
                     for baseId in facts.BaseTypes do
                         walk (into "Base") order baseId
+
+                    if
+                        ctx.Config.DeclarationCatalog
+                        || not (List.isEmpty ctx.Config.DeclarationReferences)
+                    then
+                        for operand in facts.IntersectionMembers do
+                            match Map.tryFind operand model.Types with
+                            | Some operandFacts when operandFacts.SymbolName |> Option.exists (isSyntheticName >> not) ->
+                                walk (into "Base") order operand
+                            | _ -> ()
 
     let fallback = defaultExportName ctx
 

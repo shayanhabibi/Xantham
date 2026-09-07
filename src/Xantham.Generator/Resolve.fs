@@ -1181,6 +1181,30 @@ let resolveTypeTable: Pass<ResolveModel> =
 
                                 return table, notFollowed, findings
                             | fresh ->
+                                let! aliasDeclarations =
+                                    if
+                                        ctx.Config.DeclarationCatalog
+                                        || not (List.isEmpty ctx.Config.DeclarationReferences)
+                                    then
+                                        async {
+                                            let! symbols =
+                                                fresh
+                                                |> List.filter (fun ty -> ty.AliasSymbol.IsSome)
+                                                |> List.map (fun ty -> ctx.Session.getAliasSymbolOfType ty.Id)
+                                                |> Async.Parallel
+
+                                            return!
+                                                symbols
+                                                |> Array.choose ValueOption.toOption
+                                                |> Array.distinctBy _.Id
+                                                |> Array.sortBy (fun symbol -> symbol.Declarations, symbol.Name)
+                                                |> Array.map (fun symbol ->
+                                                    ctx.Session.getDeclaredTypeOfSymbol symbol.Id)
+                                                |> Async.Sequential
+                                        }
+                                    else
+                                        async.Return [||]
+
                                 let! results =
                                     fresh
                                     |> List.map (fun ty ->
@@ -1225,12 +1249,13 @@ let resolveTypeTable: Pass<ResolveModel> =
                                 let derived = fresh |> List.fold (fun set ty -> Set.add ty.Id set) derived
 
                                 let discovered =
-                                    results
-                                    |> Array.toList
-                                    |> List.collect (fun (_, result) ->
-                                        match result with
-                                        | Ok(_, discovered) -> discovered
-                                        | Error _ -> [])
+                                    [
+                                        for _, result in results do
+                                            match result with
+                                            | Ok(_, discovered) -> yield! discovered
+                                            | Error _ -> ()
+                                        yield! aliasDeclarations
+                                    ]
 
                                 return! walk table derived notFollowed findings discovered (depth + 1)
                         }

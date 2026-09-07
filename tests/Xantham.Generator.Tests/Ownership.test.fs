@@ -192,3 +192,39 @@ let tests =
             hookPlacement "TypeScript.Lib.Dom" CompilerLib "/compiler/lib.dom.d.ts"
             ||> Flip.Expect.equal "the missing hook type id must not move it to the Es family"
     ]
+
+[<Tests>]
+let exportOrderTests =
+    testList "portable export source order" [
+        let expected = [ "entryFirst"; "entryTie"; "entryLast"; "dependency"; "compiler"; "missing" ]
+        let inline (==>) compilerRoot names = compilerRoot, names
+        testTheory "compiler installation position preserves logical source order" [
+            "/a-toolchain" ==> expected
+            "/z-toolchain" ==> expected
+        ] <| fun (compilerRoot, expected) ->
+            let packageDir = "/packages/entry"
+            let ordered name file index =
+                { export name (symbol index name SymbolFlags.Variable) with
+                    Order = Some { File = file; NodeIndex = index } }
+            let model =
+                { HarvestModel.Empty with
+                    Exports =
+                        [ ordered "compiler" (compilerRoot + "/node_modules/@typescript/typescript-linux-x64/lib/lib.es5.d.ts") 1
+                          ordered "entryTie" (packageDir + "/index.d.ts") 2
+                          ordered "dependency" (packageDir + "/node_modules/@scope/dependency/index.d.ts") 1
+                          ordered "entryLast" (packageDir + "/z.d.ts") 1
+                          export "missing" (symbol 100 "missing" SymbolFlags.Variable)
+                          ordered "entryFirst" (packageDir + "/index.d.ts") 2 ] }
+            let ctx = { context with PackageDir = packageDir }
+            let actual, _ = Pipeline.runTier ctx [ Harvest.orderExports ] model |> Async.RunSynchronously
+            actual.Exports |> List.map _.ExportName
+            |> Flip.Expect.equal "entry files precede dependency and compiler files; source/name ties remain stable" expected
+
+            let declarations =
+                { shapeModel [] with
+                    Decls = model.Exports |> List.map (fun export -> abbreviation export.ExportName export.Order FsString) }
+            let shaped, _ =
+                Pipeline.runTier ctx [ Shape.Ordering.orderDeclarations ] declarations |> Async.RunSynchronously
+            shaped.Decls |> List.choose Render.declName
+            |> Flip.Expect.equal "emitted declarations retain the same logical source order" expected
+    ]

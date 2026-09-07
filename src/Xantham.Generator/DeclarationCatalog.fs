@@ -243,7 +243,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
         |> Map.ofList
 
     let rec typeIdentity visited bindings id =
-        if Set.contains id visited then
+        if List.contains id visited then
             None
         else
             match Map.tryFind id shape.Types with
@@ -276,39 +276,69 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                         |> List.mapi (fun index parameter -> parameter, "parameter:" + string index)
                         |> List.fold (fun bindings (parameter, key) -> Map.add parameter key bindings) bindings
 
-                    let argumentKeyWith bindings argument =
+                    let rec argumentKeyWith visited bindings argument =
                         match Map.tryFind argument bindings with
                         | Some key -> key
                         | None ->
-                            match typeIdentity (Set.add id visited) bindings argument with
-                            | Some identity -> identity.Key
+                            // Recursive references use their distance along the current type path.
+                            match List.tryFindIndex ((=) argument) visited with
+                            | Some depth -> json ("recursive", depth)
                             | None ->
-                                match Map.tryFind argument shape.Types with
-                                | Some argument when argument.Response.Flags.HasFlag TypeFlags.TypeParameter ->
-                                    "parameter:" + Option.defaultValue "" argument.SymbolName
-                                | Some argument when
-                                    uint32 (
-                                        argument.Response.Flags
-                                        &&& (TypeFlags.StringLike
-                                             ||| TypeFlags.NumberLike
-                                             ||| TypeFlags.BooleanLike
-                                             ||| TypeFlags.BigIntLike
-                                             ||| TypeFlags.ESSymbolLike
-                                             ||| TypeFlags.Any
-                                             ||| TypeFlags.Unknown
-                                             ||| TypeFlags.Null
-                                             ||| TypeFlags.Undefined
-                                             ||| TypeFlags.Void
-                                             ||| TypeFlags.Never
-                                             ||| TypeFlags.NonPrimitive)
-                                    )
-                                    <> 0u
-                                    ->
-                                    json (uint32 argument.Response.Flags, argument.Response.Value)
-                                | Some _ -> ""
-                                | None -> ""
+                                match typeIdentity visited bindings argument with
+                                | Some identity -> identity.Key
+                                | None ->
+                                    let keys kind children =
+                                        let parts =
+                                            children |> List.map (argumentKeyWith (argument :: visited) bindings)
 
-                    let argumentKey = argumentKeyWith bindings
+                                        if List.contains "" parts then
+                                            ""
+                                        else
+                                            json (kind, if kind = "union" then List.sort parts else parts)
+
+                                    match Map.tryFind argument shape.Types with
+                                    | Some argument when argument.Response.Flags.HasFlag TypeFlags.TypeParameter ->
+                                        "parameter:" + Option.defaultValue "" argument.SymbolName
+                                    | Some argument when
+                                        uint32 (
+                                            argument.Response.Flags
+                                            &&& (TypeFlags.StringLike
+                                                 ||| TypeFlags.NumberLike
+                                                 ||| TypeFlags.BooleanLike
+                                                 ||| TypeFlags.BigIntLike
+                                                 ||| TypeFlags.ESSymbolLike
+                                                 ||| TypeFlags.Any
+                                                 ||| TypeFlags.Unknown
+                                                 ||| TypeFlags.Null
+                                                 ||| TypeFlags.Undefined
+                                                 ||| TypeFlags.Void
+                                                 ||| TypeFlags.Never
+                                                 ||| TypeFlags.NonPrimitive)
+                                        )
+                                        <> 0u
+                                        ->
+                                        json (uint32 argument.Response.Flags, argument.Response.Value)
+                                    | Some facts when not (List.isEmpty facts.UnionMembers) ->
+                                        keys "union" facts.UnionMembers
+                                    | Some facts when not (List.isEmpty facts.IntersectionMembers) ->
+                                        keys "intersection" facts.IntersectionMembers
+                                    | Some facts when facts.Response.IsTupleType = ValueSome true ->
+                                        let parts =
+                                            facts.TypeArguments
+                                            |> List.map (argumentKeyWith (argument :: visited) bindings)
+
+                                        if List.contains "" parts || parts.Length <> facts.TupleElements.Length then
+                                            ""
+                                        else
+                                            json (
+                                                "tuple",
+                                                List.zip (facts.TupleElements |> List.map uint32) parts,
+                                                facts.Response.Readonly |> ValueOption.toOption
+                                            )
+                                    | Some _ -> ""
+                                    | None -> ""
+
+                    let argumentKey = argumentKeyWith (id :: visited) bindings
 
                     let arguments =
                         match facts.Response.Target with
@@ -332,7 +362,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                             |> List.fold (fun bindings (parameter, key) -> Map.add parameter key bindings) bindings
 
                         let signatureKey id =
-                            let key = argumentKeyWith signatureBindings id
+                            let key = argumentKeyWith (facts.Response.Id :: visited) signatureBindings id
 
                             if key = "" then
                                 complete <- false
@@ -409,7 +439,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
     let mutable byType =
         shape.Types
         |> Map.toList
-        |> List.choose (fun (id, _) -> typeIdentity Set.empty Map.empty id |> Option.map (fun identity -> id, identity))
+        |> List.choose (fun (id, _) -> typeIdentity [] Map.empty id |> Option.map (fun identity -> id, identity))
         |> Map.ofList
 
     let dependencies (facts: TypeFacts) =
@@ -451,10 +481,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                 | None -> ()
                 | Some facts ->
                     if not (facts.Response.Flags.HasFlag TypeFlags.TypeParameter) then
-                        for handle in
-                            facts.Declarations
-                            @ facts.AliasDeclarations
-                            @ (Map.tryFind current exportHandles |> Option.defaultValue []) do
+                        for handle in facts.Declarations @ facts.AliasDeclarations do
                             files.Add(handle.Split([| '.' |], 3)[2]) |> ignore
 
                     for dependency in dependencies facts do
@@ -517,6 +544,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
     let byName =
         shape.DeclNames
         |> Map.toList
+        |> List.filter (fun (id, _) -> not (Map.containsKey id shape.AliasApplications))
         |> List.choose (fun (id, name) ->
             Map.tryFind id byType
             |> Option.map (fun identity ->
@@ -895,32 +923,55 @@ let apply (ctx: Context) (shape: ShapeModel) (groups: Render.GroupModule list) =
                 ]
                 |> Map.ofList
 
+            let abbreviations =
+                shape.Decls
+                |> List.choose (function
+                    | FsAbbrev alias -> Some(alias.Name, alias)
+                    | _ -> None)
+                |> Map.ofList
+
+            let rec canonicalReference visited vars reference =
+                let canonical = canonicalReference visited vars
+
+                let named name arguments applied =
+                    let arguments = List.map canonical arguments
+
+                    match Map.tryFind name abbreviations with
+                    | Some alias when
+                        not (Set.contains name visited)
+                        && alias.TypeParameters.Length = arguments.Length
+                        ->
+                        let bindings =
+                            List.zip (alias.TypeParameters |> List.map _.Name) arguments |> Map.ofList
+
+                        canonicalReference (Set.add name visited) bindings alias.Target
+                    | _ ->
+                        let name = Map.tryFind name canonicalNames |> Option.defaultValue name
+                        if applied then FsApp(name, arguments) else FsNamed name
+
+                match reference with
+                | FsNamed name -> named name [] false
+                | FsApp(name, arguments) -> named name arguments true
+                | FsTypeVar name -> Map.tryFind name vars |> Option.defaultValue (FsTypeVar name)
+                | FsOption inner -> FsOption(canonical inner)
+                | FsArray inner -> FsArray(canonical inner)
+                | FsTuple items -> FsTuple(List.map canonical items)
+                | FsErasedUnion items -> FsErasedUnion(List.map canonical items)
+                | FsFunc(argument, returns) -> FsFunc(canonical argument, canonical returns)
+                | FsDelegate(arguments, returns) -> FsDelegate(List.map canonical arguments, canonical returns)
+                | FsBranded(primitive, measure) ->
+                    FsBranded(canonical primitive, Map.tryFind measure canonicalNames |> Option.defaultValue measure)
+                | other -> other
+
             let constraints decl =
                 let parameters = parameters decl
 
                 let vars =
                     parameters
-                    |> List.mapi (fun index parameter -> parameter.Name, string index)
+                    |> List.mapi (fun index parameter -> parameter.Name, FsTypeVar(string index))
                     |> Map.ofList
 
-                let rec canonical =
-                    function
-                    | FsNamed name -> FsNamed(Map.tryFind name canonicalNames |> Option.defaultValue name)
-                    | FsApp(name, args) ->
-                        FsApp(Map.tryFind name canonicalNames |> Option.defaultValue name, List.map canonical args)
-                    | FsTypeVar name -> FsTypeVar(Map.tryFind name vars |> Option.defaultValue name)
-                    | FsOption inner -> FsOption(canonical inner)
-                    | FsArray inner -> FsArray(canonical inner)
-                    | FsTuple items -> FsTuple(List.map canonical items)
-                    | FsErasedUnion items -> FsErasedUnion(List.map canonical items)
-                    | FsFunc(argument, returns) -> FsFunc(canonical argument, canonical returns)
-                    | FsDelegate(arguments, returns) -> FsDelegate(List.map canonical arguments, canonical returns)
-                    | FsBranded(primitive, measure) ->
-                        FsBranded(
-                            canonical primitive,
-                            Map.tryFind measure canonicalNames |> Option.defaultValue measure
-                        )
-                    | other -> other
+                let canonical = canonicalReference Set.empty vars
 
                 parameters
                 |> List.map (fun parameter -> parameter.Constraint |> Option.map canonical |> sprintf "%A")
@@ -929,31 +980,10 @@ let apply (ctx: Context) (shape: ShapeModel) (groups: Render.GroupModule list) =
             let surface decl =
                 let bind prefix (parameters: FsTypeParam list) vars =
                     parameters
-                    |> List.mapi (fun index parameter -> parameter.Name, prefix + string index)
+                    |> List.mapi (fun index parameter -> parameter.Name, FsTypeVar(prefix + string index))
                     |> List.fold (fun vars (name, key) -> Map.add name key vars) vars
 
-                let rec reference vars =
-                    function
-                    | FsNamed name -> FsNamed(Map.tryFind name canonicalNames |> Option.defaultValue name)
-                    | FsApp(name, args) ->
-                        FsApp(
-                            Map.tryFind name canonicalNames |> Option.defaultValue name,
-                            List.map (reference vars) args
-                        )
-                    | FsTypeVar name -> FsTypeVar(Map.tryFind name vars |> Option.defaultValue name)
-                    | FsOption inner -> FsOption(reference vars inner)
-                    | FsArray inner -> FsArray(reference vars inner)
-                    | FsTuple items -> FsTuple(List.map (reference vars) items)
-                    | FsErasedUnion items -> FsErasedUnion(List.map (reference vars) items)
-                    | FsFunc(argument, returns) -> FsFunc(reference vars argument, reference vars returns)
-                    | FsDelegate(arguments, returns) ->
-                        FsDelegate(List.map (reference vars) arguments, reference vars returns)
-                    | FsBranded(primitive, measure) ->
-                        FsBranded(
-                            reference vars primitive,
-                            Map.tryFind measure canonicalNames |> Option.defaultValue measure
-                        )
-                    | other -> other
+                let reference = canonicalReference Set.empty
 
                 let vars = bind "type:" (parameters decl) Map.empty
 

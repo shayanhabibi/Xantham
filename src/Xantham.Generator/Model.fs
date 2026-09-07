@@ -1444,6 +1444,22 @@ module Grouping =
                 | parts when parts.Length > 0 -> Dependency parts[0]
                 | _ -> Unclassified
 
+    /// Entry sources first, then package-relative dependency and compiler sources.
+    /// Compiler installation directories must not decide declaration or export order.
+    let sourceOrderKey (packageDir: string) (filePath: string) =
+        let path = filePath.Replace('\\', '/')
+
+        let relative () =
+            System.IO.Path.GetRelativePath(packageDir, path).Replace('\\', '/')
+
+        match classifyFile packageDir path with
+        | EntryPackage -> 0, "", relative ()
+        | CompilerLib -> 1, "typescript/lib", path.Substring(path.LastIndexOf '/' + 1)
+        | Dependency package ->
+            let at = path.LastIndexOf("/node_modules/", System.StringComparison.Ordinal)
+            1, package, path.Substring(at + "/node_modules/".Length + package.Length + 1)
+        | Unclassified -> 1, "", relative ()
+
     /// A symbol's origin, using its first declaration. The synthetic global environment has
     /// no declaration; compiler-lib disposition controls whether resolve follows its members.
     let classify (packageDir: string) (symbol: SymbolResponse voption) : PackageId =

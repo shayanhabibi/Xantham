@@ -82,6 +82,56 @@ let accept (client: Identity.Adapter.Client) = Identity.Root.Exports.``use`` cli
 [<Tests>]
 let tests =
     testList "declaration catalog" [
+        testCase "transparent aliases preserve API identity across entry points" <| fun _ ->
+            let directory = Path.Combine(Path.GetTempPath(), "xantham-catalog-transparent-alias-" + Guid.NewGuid().ToString "N")
+            Directory.CreateDirectory directory |> ignore
+            try
+                writePackageFile directory "package.json" """{"name":"transparent-alias-lab","version":"1.0.0"}"""
+                writePackageFile directory "shared.d.ts" """export type Message = string | number;
+export interface Peer { send(message: Message): void; }
+"""
+                writePackageFile directory "index.d.ts" """export * from "./shared.js";"""
+                writePackageFile directory "adapter.d.ts" """export { Peer } from "./shared.js";"""
+                let root = configured directory "Root" "index.d.ts" [||]
+                Pipeline.run root directory (Path.Combine(directory, "root")) |> Async.RunSynchronously |> ignore
+                let adapter = configured directory "Adapter" "adapter.d.ts" [| Path.Combine(directory, "root", "declarations.json") |]
+                Pipeline.run adapter directory (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                let consumer = """module Identity.Consumer
+open Fable.Core
+let send (peer: Identity.Adapter.Peer) (message: Identity.Root.Message) = peer.send message
+let share (peer: Identity.Adapter.Peer) : Identity.Root.Peer = peer
+"""
+                let sources = [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ]
+                let code, output = compileConsumer directory sources consumer
+                code |> Flip.Expect.equal output 0
+                let code, output = compileConsumer directory sources (consumer + "\nlet invalid (peer: Identity.Adapter.Peer) = peer.send true\n")
+                (code <> 0 && output.Contains "FS0001") |> Flip.Expect.equal output true
+            finally Directory.Delete(directory, true)
+
+        testCase "generic alias applications retain their declaration owner" <| fun _ ->
+            let directory = Path.Combine(Path.GetTempPath(), "xantham-catalog-alias-applications-" + Guid.NewGuid().ToString "N")
+            Directory.CreateDirectory directory |> ignore
+            try
+                let input = Path.GetFullPath(Path.Combine(fixture, "..", "default-intersection-lab"))
+                let root = configured directory "Root" "index.d.ts" [||]
+                Pipeline.run root input (Path.Combine(directory, "root")) |> Async.RunSynchronously |> ignore
+                let reference = Path.Combine(directory, "root", "declarations.json")
+                use catalog = JsonDocument.Parse(File.ReadAllText reference)
+                catalog.RootElement.GetProperty("declarations").EnumerateArray()
+                |> Seq.filter (fun entry -> entry.GetProperty("fSharpName").GetString() = "Identity.Root.Connection")
+                |> Seq.length
+                |> Flip.Expect.equal "one owner for the generic declaration and its default applications" 1
+                let adapter = configured directory "Adapter" "adapter.d.ts" [| reference |]
+                Pipeline.run adapter input (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                let consumer = """module Identity.Consumer
+let connect (agent: Identity.Adapter.Agent) (connection: Identity.Root.Connection<obj>) =
+    agent.onConnect connection
+let share (agent: Identity.Adapter.Agent) : Identity.Root.Agent = agent
+"""
+                let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] consumer
+                code |> Flip.Expect.equal output 0
+            finally Directory.Delete(directory, true)
+
         testCase "renamed exports and generic subpath types share producer identity" <| fun _ ->
             let directory = Path.Combine(Path.GetTempPath(), "xantham-declaration-catalog-" + Guid.NewGuid().ToString "N")
             Directory.CreateDirectory directory |> ignore
@@ -213,4 +263,79 @@ let tests =
                 |> Flip.Expect.equal message (true, false)
             finally
                 Directory.Delete(directory, true)
+    ]
+
+[<Tests>]
+let callableTests =
+    testList "declaration catalog callable signatures" [
+        let inline (==>) argument name = argument, name
+        testTheory "anonymous arguments retain source-backed callable ownership" [
+            "string | number" ==> "union"
+            "string | typeof create" ==> "recursive"
+            "readonly [string, number?]" ==> "tuple"
+            "{ left: string } & { right: number }" ==> "intersection"
+        ] <| fun (argument, name) ->
+            let directory = Path.Combine(Path.GetTempPath(), "xantham-catalog-callable-" + name + "-" + Guid.NewGuid().ToString "N")
+            Directory.CreateDirectory directory |> ignore
+            try
+                writePackageFile directory "package.json" """{"name":"catalog-callable-lab","version":"1.0.0","types":"index.d.ts"}"""
+                writePackageFile directory "index.d.ts" $"""export namespace Factory {{
+    interface Result {{ count: number; }}
+    function create(value: {argument}, options?: object): Promise<Result>;
+}}
+"""
+                writePackageFile directory "adapter.d.ts" """export { Factory as AdapterFactory } from "./index.js";"""
+                let producer = Path.Combine(directory, "root")
+                let root = configured directory "Root" "index.d.ts" [||]
+                Pipeline.run root directory producer |> Async.RunSynchronously |> ignore
+                let reference = Path.Combine(producer, "declarations.json")
+                use catalog = JsonDocument.Parse(File.ReadAllText reference)
+                catalog.RootElement.GetProperty("declarations").EnumerateArray()
+                |> Seq.find (fun entry -> entry.GetProperty("fSharpName").GetString() = "Identity.Root.Create")
+                |> fun entry -> entry.GetProperty("handles").GetArrayLength() > 0
+                |> Flip.Expect.equal "callable identity retains its declaration anchor" true
+                let adapter = configured directory "Adapter" "adapter.d.ts" [| reference |]
+                Pipeline.run adapter directory (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                let consumer = """module Identity.Consumer
+let share () : Identity.Root.Create = Identity.Adapter.Exports.AdapterFactory.create
+"""
+                let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] consumer
+                code |> Flip.Expect.equal output 0
+            finally Directory.Delete(directory, true)
+    ]
+
+[<Tests>]
+let sourceClosureTests =
+    testList "declaration catalog source closure" [
+        let inline (==>) declaration scenario = declaration, scenario
+        testTheory "value exports preserve referenced declaration ownership" [
+            "export declare const current: Client;" ==> "instance"
+            "export declare const label: string;" ==> "primitive"
+        ] <| fun (declaration, scenario) ->
+            let directory = Path.Combine(Path.GetTempPath(), "xantham-catalog-source-" + scenario + "-" + Guid.NewGuid().ToString "N")
+            Directory.CreateDirectory directory |> ignore
+            try
+                writePackageFile directory "package.json" """{"name":"catalog-source-lab","version":"1.0.0","type":"module"}"""
+                writePackageFile directory "message.d.ts" "export interface Message { text: string; }"
+                writePackageFile directory "shared.d.ts" """import { Message } from "./message.js"; export interface Client { send(message: Message): void; }"""
+                writePackageFile directory "index.d.ts" """export { Client } from "./shared.js";"""
+                writePackageFile directory "adapter.d.ts" ("""import { Client } from "./shared.js"; export function attach(client: Client): Client; """ + declaration)
+                let producer = Path.Combine(directory, "root")
+                Pipeline.run (configured directory "Root" "index.d.ts" [||]) directory producer |> Async.RunSynchronously |> ignore
+                let reference = Path.Combine(producer, "declarations.json")
+                use catalog = JsonDocument.Parse(File.ReadAllText reference)
+                catalog.RootElement.GetProperty("declarations").EnumerateArray()
+                |> Seq.find (fun entry -> entry.GetProperty("fSharpName").GetString() = "Identity.Root.Client")
+                |> fun entry -> entry.GetProperty("sources").EnumerateArray()
+                |> Seq.map (fun source -> source.GetProperty("file").GetString())
+                |> Seq.sort |> Seq.toList
+                |> Flip.Expect.equal "member declaration sources remain in the ownership closure" [ "message.d.ts"; "shared.d.ts" ]
+                Pipeline.run (configured directory "Adapter" "adapter.d.ts" [| reference |]) directory (Path.Combine(directory, "adapter"))
+                |> Async.RunSynchronously |> ignore
+                let consumer = """module Identity.Consumer
+let share (client: Identity.Root.Client) : Identity.Root.Client = Identity.Adapter.Exports.attach client
+"""
+                let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] consumer
+                code |> Flip.Expect.equal output 0
+            finally Directory.Delete(directory, true)
     ]

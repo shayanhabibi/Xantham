@@ -376,17 +376,17 @@ let harvestDocs: Pass<HarvestModel> =
                 }
     }
 
-/// Fixes the output order: source order of the first declaration, then export name as the
-/// tiebreak. Exports with no declaration handle sort last.
+/// Entry declarations first, then package-relative dependency and compiler sources.
+/// Node index and export name break ties; exports without declarations sort last.
 let orderExports: Pass<HarvestModel> =
-    Pass.pure' "harvest-order" (fun _ model ->
+    Pass.pure' "harvest-order" (fun ctx model ->
         { model with
             Exports =
                 model.Exports
                 |> List.sortBy (fun export ->
                     (match export.Order with
-                     | Some order -> order.File, order.NodeIndex
-                     | None -> "￿", System.Int32.MaxValue),
+                     | Some order -> Grouping.sourceOrderKey ctx.PackageDir order.File, order.NodeIndex
+                     | None -> (2, "", ""), System.Int32.MaxValue),
                     export.ExportName)
         })
 

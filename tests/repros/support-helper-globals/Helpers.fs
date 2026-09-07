@@ -12,8 +12,7 @@ let erasedPropertyName () =
     key.Value
 
 let propertyName () =
-    TypeKeyOf.create (fun (settings: Settings) -> settings.Count)
-    |> TypeKeyOf.value
+    TypeKeyOf.create (fun (settings: Settings) -> settings.Count) |> TypeKeyOf.value
 
 let propertyValue () =
     let key = unbox<typekeyof<Settings, int>> "Count"

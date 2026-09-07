@@ -1217,9 +1217,12 @@ replaces repeated public declarations with aliases while retaining entry-specifi
 Catalog dependencies form an ordered owner DAG, including inherited producer entries. The
 `declaration-identity-lab` producer/adapter/next consumer and catalog-conflict tests exercise the
 contract, including class constructor values, nested package versions, and incompatible generic
-specializations. Agents 0.22.0 root generates a catalog; MCP reuse is currently refused because
-its Agent connection parameters shape more precisely than the root's. Cross-profile ownership
-is also explicitly refused. See `docs/.ai/handovers/2026-09-06-declaration-catalog.md`.
+specializations. Generic alias applications retain their declaration owner; transparent aliases
+normalize to their underlying F# type for API comparison. Callable identities include union,
+intersection, tuple and recursive references. Source closure retains declaration dependencies
+and excludes unrelated export use sites. The regression suite checks each case through producer
+and consumer compilation. Remaining SDK API and constraint mismatches, and cross-profile
+ownership, are still explicitly refused.
 
 Rendering regressions from the SDK corpus (2026-09-06) preserve `_` identifiers and qualify
 root type references shadowed by nested generated declarations. Bound parameters that collide

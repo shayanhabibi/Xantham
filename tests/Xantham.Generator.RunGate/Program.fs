@@ -1951,6 +1951,7 @@ let private callableHybrids () =
 
 [<EntryPoint>]
 let main _ =
+    SupportHelpers.run check
     globals ()
     imports ()
     ambientModules ()
