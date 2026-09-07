@@ -235,9 +235,11 @@ missing-provider diagnostics, and incompatible APIs fail before output is writte
 The current compatibility boundary requires the same `lib`, `types`, group dispositions and
 inference options. Module names, runtime imports, and selected entries may differ. Worker and
 browser profiles must keep separate catalogs when those settings differ. Even matching profiles
-can be refused when entry-dependent shaping produces different F# APIs. Agents 0.22.0 root and
-MCP currently hit that guard: root `Agent` connection parameters widen to `obj`, while MCP names
-them as interfaces. Shared identity across those entries remains unfinished.
+can be refused when entry-dependent shaping produces different F# APIs. Generic declaration
+ownership also remains incomplete when several concrete alias applications share one emitted
+name. Agents 0.22.0 root and MCP still encounter these boundaries; shared identity across those
+entries is not an accepted result. Keep the diagnostic and resolve the declaration ownership
+or shaping discrepancy before composing the generated projects.
 
 ## Compile the output
 

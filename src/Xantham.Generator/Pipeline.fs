@@ -92,6 +92,7 @@ let toShape (resolve: ResolveModel) : ShapeModel =
         DeclNames = Map.empty
         DeclOrders = Map.empty
         DeclParams = Map.empty
+        AliasApplications = Map.empty
         ExportMembers = []
         TypeVars = Map.empty
         KeyVars = Map.empty

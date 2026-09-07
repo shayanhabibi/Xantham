@@ -1622,9 +1622,9 @@ let pipelineTests =
                     [ testCase "default generic intersection arguments survive union absorption" <| fun _ ->
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                           let source = rendered.Files |> List.find (fun (path, _) -> path = "DefaultIntersectionLab.fs") |> snd
-                          (source.Contains "abstract onConnect: connection: Connection<obj> -> unit",
+                          (source.Split("abstract onConnect: connection: Connection<obj> -> unit").Length - 1,
                            rendered.Findings |> List.filter (fun finding -> finding.Key = "SY002" || finding.Key = "TR019") |> List.length)
-                          |> Flip.Expect.equal "the compiler-reported default argument remains applied" (true, 0) ])
+                          |> Flip.Expect.equal "same-file and imported default arguments remain applied" (2, 0) ])
 
         yield!
             fixtureTests
@@ -2072,30 +2072,25 @@ let pipelineTests =
                       Expect.equal (rendered.Decls |> List.length) 9 "the source's own eight types and the export container"
 
                       // A mint is named by appending the member name plus `Result`. Neither
-                      // half may produce one: the control writes applications, the reproducer
-                      // widens.
+                      // half may produce one: applications retain their declaration's name.
                       Expect.isFalse (source.Contains "Result") "no <Member>Result declaration minted"
 
-                  testCase "the conditional operand is the whole difference between the halves" <| fun _ ->
+                  testCase "compiler alias arguments preserve the conditional seed application" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
 
                       let keyed key =
                           rendered.Findings |> List.filter (fun finding -> finding.Key = key)
 
-                      // The control recognises every application of its two aliases and writes
-                      // each as one. The reproducer recognises `CondNode` too and stops there:
-                      // `TNodeType` appears in the conditional operand alone, and a deferred
-                      // conditional carries neither branch nor argument, so the application has
-                      // nothing to be written with and widens instead.
-                      Expect.equal
-                          (keyed "SY001" |> List.map _.Symbol)
-                          [ "DirectExtensions.ToVar.Result"
+                      keyed "SY001" |> List.map _.Symbol
+                      |> Flip.Expect.equal "both halves retain their alias applications"
+                          [ "CondSeed"
+                            "DirectExtensions.ToVar.Result"
                             "DirectNode.ToVar.Result"
                             "DirectVarNode.ToVar.Result"
                             "DirectSeed" ]
-                          "the control writes an application at every site"
 
-                      Expect.equal (keyed "SY002" |> List.map _.Symbol) [ "CondSeed" ] "the reproducer widens one site"
+                      keyed "SY002" |> List.map _.Symbol
+                      |> Flip.Expect.equal "the compiler supplies the erased conditional argument" []
 
                   testCase "the control's chain is written as applications" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)

@@ -88,10 +88,14 @@ let shapeInterfaces: Pass<ShapeModel> =
                     let declNames =
                         model.DeclNames |> Map.filter (fun id _ -> not (Set.contains id foldedArmIds))
 
+                    let declarationNames =
+                        declNames
+                        |> Map.filter (fun id _ -> not (Map.containsKey id model.AliasApplications))
+
                     // The names this pass declares, known ahead of the declarations: what a
                     // flattened intersection may inherit.
                     let interfaceNames =
-                        declNames
+                        declarationNames
                         |> Map.toList
                         |> List.choose (fun (typeId, name) ->
                             match Map.tryFind typeId model.Types with
@@ -104,10 +108,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                     // graph can already walk back from is enough to keep the whole graph acyclic.
                     let mutable inheritGraph: Map<string, string list> = Map.empty
 
-                    // A name is declared once. `synthesize-anonymous` hash-conses an erased alias
-                    // application onto the declaration it applies, so two ids can deliberately
-                    // carry one name: the smaller is the declared form and the larger is a
-                    // reference site. Everything else it names is unique by construction.
+                    // A name is declared once after alias applications are excluded above.
                     let mutable declaredOnce = Set.empty
 
                     // The instance side of each exported class, which is what decides whether a
@@ -115,7 +116,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                     let classSides = exportedClassSides model
 
                     let decls =
-                        declNames
+                        declarationNames
                         |> Map.toList
                         |> List.sortBy fst
                         |> List.collect (fun (typeId, name) ->

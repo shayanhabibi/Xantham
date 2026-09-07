@@ -58,6 +58,7 @@
         <Compile Include="..\Xantham.Generator.Tests\golden\**\*.fs"
                  Exclude="..\Xantham.Generator.Tests\golden\**\groups\*.fs;..\Xantham.Generator.Tests\golden\**\*.open.fs;..\Xantham.Generator.Tests\golden\compiler-lib-ownership-lab\**\*.fs"
                  Link="golden\%(RecursiveDir)%(Filename)%(Extension)" />
+        <Compile Include="DefaultIntersectionConsumer.fs" />
     </ItemGroup>
 
     <ItemGroup>

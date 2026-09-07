@@ -31,7 +31,7 @@ imported constructor/static value. Its helper interface preserves overloaded met
 methods, mutable properties, and constructor signatures. The constructor object receives its
 actual source declaration identity. Render owns emission and qualification of FsAbbrevDecl.Value.
 
-## Validation at lane freeze
+## Initial catalog validation (`452c2a4`)
 
 - Declaration catalog tests: 16 cases, including compiling the root/adapter/next consumer,
   rejecting a Left argument to Callback<Right>, private constrained generic imports, static
@@ -58,14 +58,37 @@ version 7.1.0-dev.20260902.1. Logs and repros are under
 Inference profiles must match exactly, including lib/types and group dispositions. Worker and
 DOM profiles are intentionally not combined. Cross-profile shared ownership is unfinished.
 
-Agents 0.22.0 root produces a catalog, but MCP reuse is refused with
-`F# API mismatch for Agent (CatalogAgents.Root.Agent)`. Root Agent connection parameters shape
-to obj while MCP shapes them as named interfaces; WSMessage also differs between a named alias
-and an inline erased union. The diagnostic diff is
-`/tmp/clef-cloudedge-sdk-probes-20260906/catalog-agent-api.diff`. Fix entry-dependent shaping or
-prove an appropriate equivalence before relaxing this guard. Earlier root/MCP compile evidence
-predated the full API guard and does not certify the current complete SDK identity contract.
+Full Agents 0.22.0 root/MCP catalog composition remains unfinished. The initial probe refused
+MCP reuse because Agent connection parameters and WSMessage had different F# shapes between
+entries. The closing alias-recovery change below preserves root connection parameters as
+`Connection<obj>`, but catalog ownership still needs to distinguish a generic declaration from
+its concrete applications. Named aliases versus equivalent inline forms also need a principled
+API comparison. Keep the guards while these cases are resolved. Earlier root/MCP compile
+evidence predates the full API guard and does not certify complete SDK identity.
 
 Regenerate all producer and consumer catalogs with the same final build; a Debug/Release or
 binary change correctly invalidates older catalogs. The root/MCP scratch output directory can
 contain an older MCP file after refusal, so its presence is not successful current generation.
+
+## Closing alias recovery
+
+The final slice preserves compiler-reported alias arguments before attempting structural
+recovery. When an imported alias has no argument metadata, recovery is limited to two forms
+already identified by the compiler as the same alias. It requires a consistent binding for
+every parameter. A transformed fragment can supply no binding; contradictory bindings and
+unrecovered parameters still refuse recovery. A default `unknown` argument can therefore
+remain `Connection<obj>` when it absorbs part of a callback union.
+
+`ShapeModel.AliasApplications` records an application's declaration owner explicitly. Interface
+and alias declaration passes exclude these reference sites, preserving the generic declaration
+independently of compiler ID ordering. The conditional-alias golden now exposes
+`condSeed: CondNode<float>` while retaining `CondNode<'T>`.
+
+The `default-intersection-lab` fixture covers local and imported default arguments. Its compiled
+consumer passes `Connection<obj>` callbacks to both generated Agent forms. Unit tests also
+cover contradictory and missing bindings, plus application IDs ordered before or after their
+declaration. The top-level README and documentation index link the entry, ambient provider,
+and catalog contracts for evaluation.
+
+This is the closing scope for Shayan's handoff. Further catalog ownership and cross-profile
+work belongs to a later change, with the remaining boundaries above retained for review.

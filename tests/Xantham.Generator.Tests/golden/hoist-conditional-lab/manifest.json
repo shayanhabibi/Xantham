@@ -3,9 +3,9 @@
   "package": "hoist-conditional-lab",
   "module": "HoistConditionalLab",
   "counts": {
-    "exact": 2,
+    "exact": 4,
     "ergonomic": 5,
-    "widened": 6,
+    "widened": 4,
     "escape": 0
   },
   "passes": [
@@ -17,8 +17,7 @@
     {
       "pass": "SY - synthesize-anonymous",
       "total": 5,
-      "exact": 4,
-      "widened": 1
+      "exact": 5
     },
     {
       "pass": "SI - shape-interfaces",
@@ -30,11 +29,6 @@
       "pass": "SA - shape-aliases",
       "total": 4,
       "widened": 4
-    },
-    {
-      "pass": "SE - shape-exports",
-      "total": 1,
-      "widened": 1
     },
     {
       "pass": "SP - synthesize-paramobjects",

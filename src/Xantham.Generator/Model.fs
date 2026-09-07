@@ -1297,6 +1297,8 @@ type ShapeModel =
         /// of `each<T, U>(props: { items: T[]; render: (item: T) => U })` - binds nothing of
         /// its own, so it is declared over these and every reference applies them back.
         DeclParams: Map<int, int list>
+        /// Recognized alias application id -> the declaration id whose name it references.
+        AliasApplications: Map<int, int>
         /// `Exports` members accumulated by the class/function/value passes, keyed by harvest
         /// position so `order-declarations` can assemble them in source order.
         ExportMembers: (int * FsExportMember) list

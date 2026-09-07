@@ -1,3 +1,7 @@
 export interface Socket { send(message: string): void; }
-export type Connection<T = unknown> = Socket & { state: T; setState(value: T | ((previous: T) => T)): T; };
+export type State<T> = { readonly [K in keyof T]: T[K] } | null;
+export type Connection<T = unknown> = Socket & {
+  state: State<T>;
+  setState(value: T | ((previous: State<T>) => T)): State<T>;
+};
 export interface Agent { onConnect(connection: Connection): void; }
