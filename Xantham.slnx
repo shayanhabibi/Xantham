@@ -20,7 +20,6 @@
     <Project Path="tests/Xantham.Generator.CompilerLibCompileGate/Xantham.Generator.CompilerLibCompileGate.fsproj" />
     <Project Path="tests/Xantham.Generator.RunGate/Xantham.Generator.RunGate.fsproj" />
   </Folder>
-  <Project Path="tools/schema-contract-example/SchemaContractExample.fsproj" />
     <Project Path="tools/tools.fsproj" />
   <Project Path="site/site.fsproj" />
 </Solution>
