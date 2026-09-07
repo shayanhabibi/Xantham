@@ -39,8 +39,6 @@ let site =
     |> LightningCss.register
     |> Esbuild.register
     |> Nuglify.minifyHtml
-    |> Versions.register versions
-    |> GitHubPages.register
     |> Theme.register theme
     |> Site.collection (Theme.docs theme "content")
 
