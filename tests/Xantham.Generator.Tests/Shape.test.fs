@@ -1424,6 +1424,15 @@ let shapePassTests =
             Expect.equal (Map.tryFind 60 named.DeclParams) (Some [ 2 ]) "the surviving operands carry the argument"
             Expect.equal (findings |> List.map _.Key) [ "SY001" ] "recognition, not a second hoist"
 
+        testCase "synthesize-anonymous uses exact alias arguments after an operand disappears" <| fun _ ->
+            let model = conditionalAliasModel [ 30; 31 ] [ 30; 40 ]
+            let application = model.Types[60]
+            let model =
+                { model with Types = Map.add 60 { application with Response = { application.Response with AliasTypeArguments = ValueSome [| 2 |] } } model.Types }
+            let named, findings = Build.runPass Anonymous.synthesizeAnonymous model
+            (Map.tryFind 60 named.DeclNames, Map.tryFind 60 named.DeclParams, findings |> List.map _.Key)
+            |> Flip.Expect.equal "" (Some "Node", Some [ 2 ], [ "SY001" ])
+
         testCase "synthesize-anonymous widens an alias whose argument only the conditional carried" <| fun _ ->
             // Drop the tag operand and the parameter appears under the conditional alone. The
             // checker keeps neither branch nor argument there, so the application is

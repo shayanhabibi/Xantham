@@ -1615,6 +1615,19 @@ let pipelineTests =
 
         yield!
             fixtureTests
+                "default-intersection-lab"
+                (handFixture "default-intersection-lab")
+                GeneratorConfig.Default
+                (fun package ->
+                    [ testCase "default generic intersection arguments survive union absorption" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.find (fun (path, _) -> path = "DefaultIntersectionLab.fs") |> snd
+                          (source.Contains "abstract onConnect: connection: Connection<obj> -> unit",
+                           rendered.Findings |> List.filter (fun finding -> finding.Key = "SY002" || finding.Key = "TR019") |> List.length)
+                          |> Flip.Expect.equal "the compiler-reported default argument remains applied" (true, 0) ])
+
+        yield!
+            fixtureTests
                 "declaration-identity-lab"
                 (handFixture "declaration-identity-lab")
                 GeneratorConfig.Default
