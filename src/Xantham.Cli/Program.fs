@@ -7,6 +7,7 @@ open System
 open System.IO
 open System.Text
 open Xantham.Generator
+open FSharp.SystemCommandLine
 
 /// What the process exits with.
 [<RequireQualifiedAccess>]
@@ -31,83 +32,78 @@ module Exit =
     [<Literal>]
     let Failed = 4
 
-let private usage =
-    [
-        "xantham - TypeScript declarations to F# Fable bindings"
-        ""
-        "usage:"
-        "  xantham generate <package-dir> [-o <dir>] [--config <path>] [--quiet]"
-        "  xantham schema [-o <path>]"
-        "  xantham --help | --version"
-        ""
-        "generate"
-        "  <package-dir>    a directory holding package.json and the node_modules its"
-        "                   declarations resolve through"
-        "  -o, --out <dir>  where the binding, the shipped groups, manifest.json and"
-        "                   symbols.jsonl are written (default: ./xantham-out)"
-        "  --config <path>  the xantham.json configuring the run, or the directory holding"
-        "                   one (default: the package directory)"
-        "                   entry selects a file relative to the package; runtime selects"
-        "                   its public JavaScript import (one entry per invocation)"
-        "  --quiet          write the file list alone, dropping the findings summary"
-        ""
-        "schema"
-        "  -o, --out <path> where the JSON Schema for xantham.json is written"
-        "                   (default: standard output)"
-        ""
-        "exit codes"
-        "  0 generated  1 usage  2 no package  3 configuration refused  4 generation failed"
-        ""
-    ]
-    |> String.concat "\n"
+module Options =
+    let out =
+        Input.option<string> "--out"
+        |> Input.alias "-o"
+        |> Input.description "where the binding, the shipped groups, manifest.json and symbols.jsonl are written."
+        |> Input.defaultValue "xantham-out"
+        |> Input.arity Arity.ExactlyOne
+        |> Input.acceptLegalFilePathsOnly
+        |> Input.helpName "dir"
+
+    let config =
+        Input.optionMaybe<string> "--config"
+        |> Input.description
+            "the xantham.json configuring the run, or the directory holding one (default: the package directory)."
+        |> Input.arity Arity.ExactlyOne
+        |> Input.acceptLegalFilePathsOnly
+        |> Input.helpName "path"
+
+    let quiet =
+        Input.option<bool> "--quiet"
+        |> Input.description "write the file list alone, dropping the findings summary."
+
+    let schemaOut =
+        Input.optionMaybe<string> "--out"
+        |> Input.alias "-o"
+        |> Input.helpName "path"
+        |> Input.acceptLegalFilePathsOnly
+
+    let packageDir =
+        Input.argument<string> "package-dir"
+        |> Input.description "a directory holding package.json and the node_modules its declarations resolve through."
+        |> Input.arity ExactlyOne
+
+/// The configuration for a run: `xantham.json` under the package directory, or under
+/// `--config` when that names a directory. A `--config` naming the file itself reads it under
+/// whatever name it carries.
+let private loadConfig =
+    input {
+        let! config = Options.config
+        and! packageDir = Options.packageDir
+
+        return
+            match config with
+            | None -> GeneratorConfig.load packageDir
+            | Some path when Directory.Exists path -> GeneratorConfig.load path
+            | Some path when not (File.Exists path) -> failwith $"no configuration at {path}"
+            | Some path -> GeneratorConfig.loadFile path
+    }
 
 type private GenerateOptions =
     {
         PackageDir: string
         Out: string
-        Config: string option
+        Config: GeneratorConfig
         Quiet: bool
     }
 
     static member Default =
-        {
-            PackageDir = ""
-            Out = "xantham-out"
-            Config = None
-            Quiet = false
+        input {
+            let! packageDir = Options.packageDir
+            and! out = Options.out
+            and! config = loadConfig
+            and! quiet = Options.quiet
+
+            return
+                {
+                    PackageDir = packageDir
+                    Out = out
+                    Config = config
+                    Quiet = quiet
+                }
         }
-
-let private parseGenerate (args: string list) =
-    let rec go options seen args =
-        match args with
-        | [] when seen -> Ok options
-        | [] -> Error "generate needs a package directory"
-        | ("-o" | "--out") :: value :: rest -> go { options with Out = value } seen rest
-        | "--config" :: value :: rest -> go { options with Config = Some value } seen rest
-        | "--quiet" :: rest -> go { options with Quiet = true } seen rest
-        | [ ("-o" | "--out" | "--config") as flag ] -> Error $"{flag} needs a value"
-        | value :: _ when value.StartsWith "-" -> Error $"unknown option {value}"
-        | value :: rest when not seen -> go { options with PackageDir = value } true rest
-        | value :: _ -> Error $"generate takes one package directory; {value} is a second"
-
-    go GenerateOptions.Default false args
-
-let private parseSchema (args: string list) =
-    match args with
-    | [] -> Ok None
-    | [ ("-o" | "--out") ] -> Error "-o needs a value"
-    | [ ("-o" | "--out"); value ] -> Ok(Some value)
-    | value :: _ -> Error $"unknown argument {value}"
-
-/// The configuration for a run: `xantham.json` under the package directory, or under
-/// `--config` when that names a directory. A `--config` naming the file itself reads it under
-/// whatever name it carries.
-let private loadConfig (options: GenerateOptions) =
-    match options.Config with
-    | None -> GeneratorConfig.load options.PackageDir
-    | Some path when Directory.Exists path -> GeneratorConfig.load path
-    | Some path when not (File.Exists path) -> failwith $"no configuration at {path}"
-    | Some path -> GeneratorConfig.loadFile path
 
 /// The findings a run raised, in the manifest's own vocabulary: the four tiers, then the count
 /// of each finding key, commonest first.
@@ -187,7 +183,7 @@ let private generate (out: TextWriter) (err: TextWriter) (options: GenerateOptio
     | None ->
         match
             (try
-                Ok(loadConfig options)
+                Ok options.Config
              with e ->
                  Error e.Message)
         with
@@ -230,7 +226,7 @@ let private schema (out: TextWriter) (err: TextWriter) (destination: string opti
 
 let private version =
     Reflection.Assembly.GetExecutingAssembly()
-    |> fun assembly -> assembly.GetCustomAttributes(typeof<Reflection.AssemblyInformationalVersionAttribute>, false)
+    |> _.GetCustomAttributes(typeof<Reflection.AssemblyInformationalVersionAttribute>, false)
     |> Array.tryHead
     |> Option.map (fun found -> (found :?> Reflection.AssemblyInformationalVersionAttribute).InformationalVersion)
     |> Option.defaultValue "0.0.0"
@@ -238,32 +234,30 @@ let private version =
 /// One invocation, over the writers the caller supplies. The entry point calls it against the
 /// console; the acceptance test calls it against a string writer.
 let run (out: TextWriter) (err: TextWriter) (argv: string[]) : int =
-    let refuse (message: string) =
-        err.WriteLine $"xantham: {message}"
-        err.Write usage
-        Exit.Usage
+    let cmd =
+        ManualInvocation.rootCommand {
+            description "TypeScript declarations to F# Fable bindings"
+            Input.context
 
-    match List.ofArray argv with
-    | [] ->
-        err.Write usage
-        Exit.Usage
-    | [ "--help" ]
-    | [ "-h" ]
-    | [ "help" ] ->
-        out.Write usage
-        Exit.Generated
-    | [ "--version" ] ->
-        out.WriteLine version
-        Exit.Generated
-    | "generate" :: rest ->
-        match parseGenerate rest with
-        | Error message -> refuse message
-        | Ok options -> generate out err options
-    | "schema" :: rest ->
-        match parseSchema rest with
-        | Error message -> refuse message
-        | Ok destination -> schema out err destination
-    | command :: _ -> refuse $"unknown command {command}"
+            addCommands
+                [
+                    command "generate" {
+                        description "generate a binding and its manifest"
+                        inputs GenerateOptions.Default
+                        setAction (generate out err)
+                    }
+                    command "schema" {
+                        description "write the JSON Schema for xantham.json"
+                        hidden
+                        Options.schemaOut
+                        setAction (schema out err)
+                    }
+                ]
+
+            helpAction
+        }
+
+    cmd.Parse(argv).Invoke()
 
 [<EntryPoint>]
 let main argv =

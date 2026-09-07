@@ -7,12 +7,12 @@
         <RootNamespace>Xantham.Cli</RootNamespace>
         <PackAsTool>true</PackAsTool>
         <ToolCommandName>xantham</ToolCommandName>
-        <PackageId>Xantham.Cli</PackageId>
-        <Version>0.1.0-alpha.1</Version>
+        <PackageId>xantham</PackageId>
+        <Version>0.1.0-alpha.2</Version>
         <Authors>Shayan Habibi</Authors>
         <Description>Command line driver for the Xantham TypeScript-to-F# bindings generator.</Description>
         <PackageTags>typescript;fsharp;fable;bindings;codegen;dotnet-tool</PackageTags>
-    </PropertyGroup>
+    <AssemblyVersion>0.0.0.0</AssemblyVersion></PropertyGroup>
 
     <ItemGroup>
         <!-- The schema is emitted from the config record, so it compiles before the command
@@ -23,6 +23,10 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Xantham.Generator\Xantham.Generator.fsproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="FSharp.SystemCommandLine" Version="2.2.0" />
     </ItemGroup>
 
 </Project>
