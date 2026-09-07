@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Model.fs" />
+    <Compile Include="SchemaContract.fs" />
+    <Compile Include="Checks.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Xantham.Generator/Xantham.Generator.fsproj" />
+    <ProjectReference Include="$(JsonSchemaSource)/src/FSharp.Data.JsonSchema.NJsonSchema/FSharp.Data.JsonSchema.NJsonSchema.fsproj"
+                      Condition="'$(JsonSchemaSource)' != ''" />
+  </ItemGroup>
+  <Target Name="RequireSchemaSource" BeforeTargets="Restore;PrepareForBuild">
+    <Error Condition="'$(JsonSchemaSource)' == ''"
+           Text="Pass -p:JsonSchemaSource=/absolute/path/to/FSharp.Data.JsonSchema (see this example's README.md)." />
+  </Target>
+</Project>
