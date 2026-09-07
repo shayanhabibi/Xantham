@@ -17,6 +17,7 @@
     <ItemGroup>
         <!-- The schema is emitted from the config record, so it compiles before the command
              that writes it. -->
+        <Compile Include="Spec.fs" />
         <Compile Include="Schema.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
@@ -26,6 +27,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Fake.JavaScript.Npm" Version="6.1.4" />
       <PackageReference Include="FSharp.SystemCommandLine" Version="2.2.0" />
     </ItemGroup>
 

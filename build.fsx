@@ -10,7 +10,39 @@ open Partas.TypeProvider.BuildHelper
 open Fake.IO
 open Fake.IO.Globbing.Operators
 
+
 type Repo = BuildHelperProvider<__SOURCE_DIRECTORY__, capabilityFullOverride=true>
+
+module PackageVersion =
+    open System.Text.Json
+
+    let writeCliPackageVersion =
+        stage "write-cli-package-version" {
+            echo "Writing tsc package version to src/Xantham.Cli/Spec.fs..."
+
+            run (fun _ ->
+                using (JsonDocument.Parse(Repo.FileSystem.``package.json``.OpenRead()))
+                <| fun doc ->
+                    let root = doc.RootElement
+
+                    match root.TryGetProperty "devDependencies" with
+                    | true, devDeps ->
+                        match devDeps.TryGetProperty "typescript" with
+                        | true, tsElement ->
+                            let version = tsElement.GetString()
+                            let file = Repo.FileSystem.src.``Xantham.Cli``.``Spec.fs``.FullName
+
+                            $"""
+module Xantham.Cli.Spec
+
+[<Literal>]
+let tscVersion = "{version}" """
+                            |> File.writeString false file
+
+                            Ok()
+                        | _ -> Error "no typescript dev dependency"
+                    | _ -> Error "no devDependencies")
+        }
 
 module Spec =
     let projects = Repo.Project.AllProjects()
@@ -310,16 +342,8 @@ module Stages =
                     // equals what was just written to it. Child processes inherit the variable.
                     stage "regenerate goldens" {
                         when' update
-
-                        run (fun _ ->
-                            System.Environment.SetEnvironmentVariable("XANTHAM_UPDATE_GOLDEN", "1")
-                            Ok())
-
+                        envVars [ ("XANTHAM_UPDATE_GOLDEN", "1") ]
                         run suite
-
-                        run (fun _ ->
-                            System.Environment.SetEnvironmentVariable("XANTHAM_UPDATE_GOLDEN", null)
-                            Ok())
                     }
 
                     run suite
@@ -421,9 +445,13 @@ module Stages =
             let! projects = Options.projects
             and! config = Options.config
 
+            let cliProject =
+                projects |> List.tryFind (_.Path >> (=) Repo.Project.``Xantham.Cli``.Path)
+
             return
                 stage "pack" {
                     quiet
+                    whenSome cliProject (fun _ -> PackageVersion.writeCliPackageVersion)
 
                     for project in projects do
                         stage $"pack-{project.Name}" {
