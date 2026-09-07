@@ -882,6 +882,9 @@ let private deriveFacts
                             DeclFile = Grouping.declFile symbol
                             SymbolParent = symbol |> ValueOption.bind _.Parent |> ValueOption.toOption
                             Members = structure.Members
+                            Declarations = []
+                            DeclarationArguments = []
+                            AliasDeclarations = []
                             IndexInfos = structure.IndexInfos
                             CallSignatures = structure.CallSignatures
                             ConstructSignatures = structure.ConstructSignatures
@@ -1263,4 +1266,57 @@ let resolveTypeTable: Pass<ResolveModel> =
     }
 
 /// The tier's pass list, in execution order.
-let passes: Pass<ResolveModel> list = [ resolveExportTypes; resolveTypeTable ]
+let resolveDeclarationIdentities: Pass<ResolveModel> =
+    {
+        Name = "resolve-declaration-identities"
+        Run =
+            fun ctx model ->
+                async {
+                    if
+                        not ctx.Config.DeclarationCatalog
+                        && List.isEmpty ctx.Config.DeclarationReferences
+                    then
+                        return Advanced model
+                    else
+                        let! types =
+                            model.Types
+                            |> Map.toArray
+                            |> Array.map (fun (typeId, facts) ->
+                                async {
+                                    let! actual = ctx.Session.getSymbolOfType typeId
+
+                                    let! symbol =
+                                        match actual with
+                                        | ValueSome _ -> async.Return actual
+                                        | ValueNone -> ctx.Session.getAliasSymbolOfType typeId
+
+                                    let declarations =
+                                        symbol
+                                        |> ValueOption.bind _.Declarations
+                                        |> ValueOption.defaultValue [||]
+                                        |> Array.toList
+
+                                    let! arguments = ctx.Session.getAliasTypeArgumentsOfType typeId
+                                    let! alias = ctx.Session.getAliasSymbolOfType typeId
+
+                                    return
+                                        typeId,
+                                        { facts with
+                                            Declarations = declarations
+                                            DeclarationArguments =
+                                                arguments |> ValueOption.defaultValue [||] |> Array.toList
+                                            AliasDeclarations =
+                                                alias
+                                                |> ValueOption.bind _.Declarations
+                                                |> ValueOption.defaultValue [||]
+                                                |> Array.toList
+                                        }
+                                })
+                            |> Async.Parallel
+
+                        return Advanced { model with Types = Map.ofArray types }
+                }
+    }
+
+let passes: Pass<ResolveModel> list =
+    [ resolveExportTypes; resolveTypeTable; resolveDeclarationIdentities ]

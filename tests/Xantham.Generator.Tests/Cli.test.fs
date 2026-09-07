@@ -164,6 +164,17 @@ let commandTests =
             refusesConfig message ("\"entry\": \"dist/adapter.d.ts\", \"runtime\": " + runtime)
             ||> Flip.Expect.equal "an invalid import cannot fall back to the package root"
 
+        testTheory "invalid ambient type packages are configuration errors" [
+            "null" =!> "types must be an array of nonempty strings"
+            "42" =!> "types must be an array of nonempty strings"
+            "\"provider\"" =!> "types must be an array of nonempty strings"
+            "[42]" =!> "types must be an array of nonempty strings"
+            "[\"\"]" =!> "types must be an array of nonempty strings"
+            "[\" \"]" =!> "types must be an array of nonempty strings"
+        ] <| fun (types, message) ->
+            refusesConfig message ("\"types\": " + types)
+            ||> Flip.Expect.equal "an invalid ambient selection cannot fall back to automatic discovery"
+
         testCase "a path with no directory is refused" <| fun _ ->
             invoke [ "generate"; Path.Combine(root, "no-such-package") ]
             <| fun (code, _, err, _) ->

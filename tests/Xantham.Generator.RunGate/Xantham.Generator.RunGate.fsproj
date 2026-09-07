@@ -46,6 +46,7 @@
         <Compile Include="..\Xantham.Generator.Tests\golden\record-index-lab\RecordIndexLab.fs" Link="record-index-lab\RecordIndexLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\callable-hybrid-lab\CallableHybridLab.fs" Link="callable-hybrid-lab\CallableHybridLab.fs" />
         <Compile Include="Probes.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\pattern-parameter-lab\PatternParameterLab.fs" Link="pattern-parameter-lab\PatternParameterLab.fs" />
         <Compile Include="Program.fs" />
         <None Include="register.mjs" />
     </ItemGroup>

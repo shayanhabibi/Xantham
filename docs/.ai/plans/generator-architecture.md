@@ -1207,6 +1207,29 @@ section above.
   is refused: a stub written from the templated identity agrees with the template by
   construction, and both breaks above would compile clean against one.
 
+Declaration catalogs (2026-09-06) add an opt-in stage between Shape and Render. Resolve retains
+actual-symbol declaration handles and concrete alias arguments; the catalog records stable
+package-relative handles, instantiated shape identities, source closure hashes, compiler/profile
+keys, generator binary identity, package manifest hashes, and canonical F# APIs including method
+constraints. Bound generic arguments are normalized by position, and source closure excludes
+contextual argument bounds while retaining the declaration's own source. The stage rewrites `FsTypeRef` occurrences and
+replaces repeated public declarations with aliases while retaining entry-specific value imports.
+Catalog dependencies form an ordered owner DAG, including inherited producer entries. The
+`declaration-identity-lab` producer/adapter/next consumer and catalog-conflict tests exercise the
+contract, including class constructor values, nested package versions, and incompatible generic
+specializations. Agents 0.22.0 root generates a catalog; MCP reuse is currently refused because
+its Agent connection parameters shape more precisely than the root's. Cross-profile ownership
+is also explicitly refused. See `docs/.ai/handovers/2026-09-06-declaration-catalog.md`.
+
+Rendering regressions from the SDK corpus (2026-09-06) preserve `_` identifiers and qualify
+root type references shadowed by nested generated declarations. Bound parameters that collide
+with FSharp.Core pattern constructors use distinct F# names (`GE005`), while object construction
+preserves JavaScript property names and optional-field omission. The underscore, inherited-name
+and pattern-parameter labs provide compiler checks; the four added runtime checks pass in the
+327-check Fable gate. The affected Puppeteer, Actors, Sandbox, Sandbox Preview and RealtimeKit UI
+root outputs compile; the refreshed dependency profiles and full subentry set still require
+their own generation and acceptance checks.
+
 Watch items rather than open questions: the debug assertion pass (O3) and the bespoke
 JSON model dump (O5) are named escape hatches, built only when their triggering need
 appears.

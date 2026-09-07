@@ -69,6 +69,13 @@ type GeneratorConfig =
         /// the DOM loaded, every such name merges with the lib's declaration, is grouped as the
         /// compiler lib by its first declaration, and is not the package's to harvest.
         Lib: string list option
+        /// Explicit ambient type packages, using the compiler's `types` option. `None` keeps
+        /// automatic discovery; `Some []` disables it. Required packages must be installed.
+        Types: string list option
+        /// Emits declarations.json with the identity and final F# name of reusable declarations.
+        DeclarationCatalog: bool
+        /// Producer catalogs, absolute or relative to the input package directory.
+        DeclarationReferences: string list
         /// The TypeScript input file, relative to the package directory. `None` selects the
         /// manifest's root declaration entry. Set `RuntimePackage` separately for a public subpath.
         Entry: string option
@@ -91,6 +98,9 @@ type GeneratorConfig =
             Namespace = None
             Groups = Map.empty
             Lib = None
+            Types = None
+            DeclarationCatalog = false
+            DeclarationReferences = []
             Entry = None
             RuntimePackage = None
             ResolveNoInfer = false
@@ -210,11 +220,49 @@ module GeneratorConfig =
                 | true, _ -> failwith "xantham.json: lib must be an array of strings"
                 | _ -> None
 
+            let types =
+                match doc.RootElement.TryGetProperty "types" with
+                | true, value when value.ValueKind = JsonValueKind.Array ->
+                    value.EnumerateArray()
+                    |> Seq.map (fun item ->
+                        if item.ValueKind <> JsonValueKind.String then
+                            failwith "xantham.json: types must be an array of nonempty strings"
+
+                        let name = item.GetString()
+
+                        if System.String.IsNullOrWhiteSpace name then
+                            failwith "xantham.json: types must be an array of nonempty strings"
+
+                        name)
+                    |> Seq.toList
+                    |> Some
+                | true, _ -> failwith "xantham.json: types must be an array of nonempty strings"
+                | _ -> None
+
+            let declarationReferences =
+                match doc.RootElement.TryGetProperty "declarationReferences" with
+                | true, value when value.ValueKind = JsonValueKind.Array ->
+                    value.EnumerateArray()
+                    |> Seq.map (fun item ->
+                        if
+                            item.ValueKind <> JsonValueKind.String
+                            || System.String.IsNullOrWhiteSpace(item.GetString())
+                        then
+                            failwith "xantham.json: declarationReferences must be an array of nonempty paths"
+
+                        item.GetString())
+                    |> Seq.toList
+                | true, _ -> failwith "xantham.json: declarationReferences must be an array of nonempty paths"
+                | _ -> []
+
             {
                 ModuleName = field "module"
                 Namespace = field "namespace"
                 Groups = groups
                 Lib = lib
+                Types = types
+                DeclarationCatalog = boolField "declarationCatalog" false
+                DeclarationReferences = declarationReferences
                 Entry = entry
                 RuntimePackage = runtime
                 ResolveNoInfer = boolField "resolveNoInfer" GeneratorConfig.Default.ResolveNoInfer
@@ -750,6 +798,12 @@ type TypeFacts =
         SymbolName: string option
         /// File of the type's own symbol's first declaration, as the wire reports it.
         DeclFile: string option
+        /// Complete declaration handles of the actual type symbol, retained for catalog identity.
+        Declarations: string list
+        /// Alias arguments retain concrete substitutions for declaration catalog specialization keys.
+        DeclarationArguments: TypeResponse list
+        /// Declaration handles of the alias applied at this type occurrence.
+        AliasDeclarations: string list
         /// Symbol id of the declaration the type's own symbol is written inside - a namespace,
         /// where `HarvestModel.Namespaces` has a name for it.
         SymbolParent: int option
@@ -799,6 +853,9 @@ module TypeFacts =
             Origin = Unclassified
             SymbolName = None
             DeclFile = None
+            Declarations = []
+            DeclarationArguments = []
+            AliasDeclarations = []
             SymbolParent = None
             Members = []
             IndexInfos = []
@@ -1143,6 +1200,8 @@ type FsAbbrevDecl =
         /// them on its left side exactly as TypeScript does: `type Callback<'T> = Func<'T, obj>`.
         TypeParameters: FsTypeParam list
         Target: FsTypeRef
+        /// A re-exported class can share an instance alias while binding its constructor value here.
+        Value: (ImportBinding * FsTypeRef) option
     }
 
 /// A callback declared as a named F# delegate: `type TickHandler = delegate of x: float * y:

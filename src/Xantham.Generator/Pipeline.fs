@@ -350,6 +350,9 @@ let generate (config: GeneratorConfig) (packageDir: string) : Async<RenderModel>
         let! shape, shapeFindings = runTier ctx Shape.Passes.passes (toShape resolve)
         let! compilerOnly = compilerOnlyScope ctx
 
+        let! shape, catalog =
+            DeclarationCatalog.apply ctx shape (groupModulesForScope compilerOnly ctx shape)
+
         let render = toRender ctx shape (harvestFindings @ resolveFindings @ shapeFindings)
 
         // The two halves of the render tier run separately so the manifest reports what group
@@ -369,6 +372,9 @@ let generate (config: GeneratorConfig) (packageDir: string) : Async<RenderModel>
         return
             { rendered with
                 Findings = rendered.Findings @ manifestFindings
+                Files =
+                    rendered.Files
+                    @ (catalog |> Option.map (fun text -> "declarations.json", text) |> Option.toList)
             }
     }
 

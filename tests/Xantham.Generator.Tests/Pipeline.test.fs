@@ -454,6 +454,30 @@ let pipelineTests =
                           Expect.equal counts.Escape 0 "the lab exercises only supported features - no escapes" ])
 
         yield!
+            fixtureTests "underscore-identifier-lab" (handFixture "underscore-identifier-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "underscore properties and parameters retain their source names" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    for expected in
+                        [ "abstract ``_``: 'T option with get, set"
+                          "abstract read: ``_``: string -> 'T"
+                          "abstract write: ?``_``: 'T -> unit"
+                          "?``_``: 'T"
+                          "static member ``_`` (``_``: Marker<string>) : string" ] do
+                        source.Contains expected |> Flip.Expect.equal expected true ])
+
+        yield!
+            fixtureTests "pattern-parameter-lab" (handFixture "pattern-parameter-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "union-case parameter names retain their JavaScript object keys" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+                    source.Contains "static member Create (__None: string, _None: string, ?_Error: string)"
+                    |> Flip.Expect.equal "bound names are collision-free" true
+                    rendered.Findings |> List.filter (fun finding -> finding.Key = "GE005") |> List.length
+                    |> Flip.Expect.equal "each renamed parameter is reported" 4 ])
+
+        yield!
             fixtureTests "globals-lab" (handFixture "globals-lab") GeneratorConfig.Default (fun package ->
                 [ testCase "a package with no module is harvested from global scope" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -1556,6 +1580,65 @@ let pipelineTests =
 
         yield!
             fixtureTests
+                "ambient-types-lab"
+                (handInstalledFixture "ambient-types-lab")
+                (handConfig (handInstalledFixture "ambient-types-lab"))
+                (fun package ->
+                    [ testCase "configured ambient provider resolves host imports and globals"
+                      <| fun _ ->
+                          let diagnostics =
+                              async {
+                                  let! mailbox, ctx = Bootstrap.start (GeneratorConfig.load package) package
+                                  use _ = mailbox :> IDisposable
+                                  let! program = ctx.Session.getProgramDiagnostics ()
+                                  let! semantic = ctx.Session.getSemanticDiagnostics ()
+                                  return [ yield! program |> ValueOption.defaultValue [||]
+                                           yield! semantic |> ValueOption.defaultValue [||] ]
+                              } |> Async.RunSynchronously
+                          diagnostics
+                          |> List.filter (fun diagnostic -> diagnostic.Category = 1)
+                          |> List.map _.Code
+                          |> Flip.Expect.equal "the explicitly selected provider supplies both declaration forms" []
+
+                      testCase "missing configured ambient provider stops bootstrap"
+                      <| fun _ ->
+                          let config = GeneratorConfig.loadFile (Path.Combine(package, "missing.json"))
+                          let message =
+                              try
+                                  let mailbox, _ = Async.RunSynchronously(Bootstrap.start config package)
+                                  (mailbox :> IDisposable).Dispose()
+                                  ""
+                              with e -> e.Message
+                          [ "TS2688"; "absent-ambient-provider-lab" ]
+                          |> List.map message.Contains
+                          |> Flip.Expect.equal "the missing compiler input is reported before generation" [ true; true ] ])
+
+        yield!
+            fixtureTests
+                "declaration-identity-lab"
+                (handFixture "declaration-identity-lab")
+                GeneratorConfig.Default
+                (fun _ -> [])
+        yield!
+            fixtureTests
+                "opaque-generic-lab"
+                (handFixture "opaque-generic-lab")
+                (handConfig (handFixture "opaque-generic-lab"))
+                (fun package ->
+                    [ testCase "missing generic provider preserves its finding without capturing its arguments"
+                      <| fun _ ->
+                          let config = { handConfig (Some package) with Entry = Some "missing-provider.d.ts" }
+                          let rendered = Async.RunSynchronously(Pipeline.generate config package)
+                          let source = rendered.Files |> List.find (fun (path, _) -> path = "OpaqueGenericLab.fs") |> snd
+                          [ "type Transport2<'T"; "type Connection<'T"; "type Manager<'T" ]
+                          |> List.map source.Contains
+                          |> Flip.Expect.equal "opaque generic metadata cannot introduce declaration parameters" [ false; false; false ]
+                          rendered.Findings
+                          |> List.exists (fun finding -> finding.Key = "TR008")
+                          |> Flip.Expect.equal "the unresolved type remains visible as an any-to-obj finding" true ])
+
+        yield!
+            fixtureTests
                 "compiler-lib-ownership-lab"
                 (handFixture "compiler-lib-ownership-lab")
                 (handConfig (handFixture "compiler-lib-ownership-lab"))
@@ -2318,6 +2401,28 @@ let pipelineTests =
                       let source = rendered.Files |> List.head |> snd
 
                       Expect.stringContains source "type HeldSized = Holder<Sized>" "the negative stands" ])
+        yield!
+            fixtureTests "constraint-closure-lab" (handFixture "constraint-closure-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "constraints keep every type parameter they depend on" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      [ "static member accept<'T, 'E when 'E :> Box<'T>>"
+                        "static member chain<'T, 'E, 'F when 'E :> Box<'T> and 'F :> Box<'E>>"
+                        "abstract accept<'T, 'E when 'E :> Box<'T>>"
+                        "static member unused (value: string)" ]
+                      |> List.map source.Contains
+                      |> Flip.Expect.equal "live constraints close over their variables; unused components still erase" [ true; true; true; true ] ])
+
+        yield!
+            fixtureTests "inherited-name-lab" (handFixture "inherited-name-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a hoisted intersection keeps its same-named outer base" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      source.Contains "inherit InheritedNameLab.Message"
+                      |> Flip.Expect.equal "View.Message must inherit the root Message" true ])
+
         // Wave three lane L's fixture. A compiler-lib type reached structurally hands over
         // member symbols; their types carry a member's name, so they resolve by content. A lib
         // declaration named at a reference position keeps the O7 shortcut.

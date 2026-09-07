@@ -19,7 +19,9 @@ let private freeTypeParams (model: ShapeModel) (root: int) : int list =
             match Map.tryFind typeId model.Types with
             | None -> ()
             | Some facts ->
-                if flag TypeFlags.TypeParameter facts then
+                if flag TypeFlags.Any facts || flag TypeFlags.Unknown facts then
+                    ()
+                elif flag TypeFlags.TypeParameter facts then
                     if
                         facts.Response.IsThisType <> ValueSome true
                         && not (Set.contains typeId bound)

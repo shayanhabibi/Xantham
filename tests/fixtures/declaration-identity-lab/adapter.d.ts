@@ -1,0 +1,10 @@
+import { Client, Box, Item, Config, GenericClient } from "./shared.js";
+export { Client, Box, Item } from "./shared.js";
+export declare function attach(client: Client): Client;
+export declare function bind<T extends Item>(box: Box<T>): Box<T>;
+export declare function acceptText(config: Config<string>): Config<string>;
+export declare function acceptGeneric<T>(config: Config<T>): Config<T>;
+export declare function acceptConstructor(ctor: typeof GenericClient<string>): string;
+export { Right, RightCallback } from "./shared.js";
+import { Environment } from "./environment.js";
+export declare function acceptConstrained<T extends Environment>(config: Config<T>): Config<T>;

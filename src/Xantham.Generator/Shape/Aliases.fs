@@ -134,6 +134,7 @@ let shapeAliases: Pass<ShapeModel> =
                                         Some(
                                             FsAbbrev
                                                 {
+                                                    Value = None
                                                     Name = name
                                                     Docs = export.Docs
                                                     Tags = export.Tags
@@ -254,6 +255,7 @@ let shapeAliases: Pass<ShapeModel> =
                                             Some(
                                                 FsAbbrev
                                                     {
+                                                        Value = None
                                                         Name = name
                                                         Docs = docs
                                                         Tags = tags

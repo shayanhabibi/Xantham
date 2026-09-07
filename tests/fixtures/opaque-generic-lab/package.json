@@ -1,0 +1,5 @@
+{
+  "name": "opaque-generic-lab",
+  "type": "module",
+  "types": "index.d.ts"
+}

@@ -20,9 +20,32 @@ let private baseModel =
       Files = []
       ShadowedByLib = 0 }
 
+let private boundSource names =
+    let parameters = names |> List.map (fun name -> { Name = name; Type = FsString; Optional = false; Rest = false })
+    let model =
+        { baseModel with
+            Decls =
+                [ FsExports
+                    [ { Name = "invoke"; Docs = ""; Tags = []; TypeParameters = []
+                        Binding = ImportNamed "invoke"; Settable = false
+                        Body = ExportFunction(parameters, FsUnit) } ] ] }
+    let rendered, _ = Async.RunSynchronously(Pipeline.runTier Build.context Render.passes model)
+    rendered.Files |> Map.ofList |> Map.find "TestPkg.fs"
+
 [<Tests>]
 let renderTests =
     testList "render" [
+        let inline (=!>) input expected = input, expected
+        testTheory "bound parameter names avoid pattern constructors and collisions" [
+            [ "None"; "Error" ] =!> [ "_None"; "_Error" ]
+            [ "None"; "_None"; "__None" ] =!> [ "___None"; "_None"; "__None" ]
+            [ "ValueSome"; "Choice1Of2" ] =!> [ "_ValueSome"; "_Choice1Of2" ]
+            [ "none"; "Timeout"; "_" ] =!> [ "none"; "Timeout"; "_" ]
+        ] <| fun (input, expected) ->
+            let parameters = expected |> List.map (fun name -> Render.ident name + ": string") |> String.concat ", "
+            (boundSource input).Contains("static member invoke (" + parameters + ") : unit")
+            |> Flip.Expect.equal "" true
+
         testCase "identifiers are kept verbatim until F# rejects them" <| fun _ ->
             Expect.equal (Render.ident "onlyFirst") "onlyFirst" "plain"
             Expect.equal (Render.ident "type") "``type``" "keyword"
@@ -30,6 +53,72 @@ let renderTests =
             Expect.equal (Render.ident "_tag") "_tag" "leading underscore is fine"
             Expect.equal (Render.ident "params") "``params``" "reserved for future use"
             Expect.equal (Render.ident "mod") "``mod``" "inherited from OCaml"
+
+        testCase "a single underscore names a source member" <| fun _ ->
+            Render.ident "_" |> Flip.Expect.equal "" "``_``"
+
+        testTheory "canonical class aliases keep their independently imported constructor value" [
+            ImportNamed "Client" =!> "[<Import(\"Client\", \"adapter-runtime\")>]"
+            ImportDefault =!> "[<Import(\"default\", \"adapter-runtime\")>]"
+            ImportFrom("Client", "adapter/subpath") =!> "[<Import(\"Client\", \"adapter/subpath\")>]"
+            GlobalName "Outer.Client" =!> "[<Global(\"Outer.Client\")>]"
+        ] <| fun (binding, attribute) ->
+            let alias =
+                FsAbbrev
+                    { Name = "Wrapper.Client"
+                      Docs = ""
+                      Tags = []
+                      Order = None
+                      TypeParameters = []
+                      Target = FsNamed "Root.Client"
+                      Value = Some(binding, FsNamed "Constructor") }
+            let constructor name =
+                FsAbbrev
+                    { Name = name; Docs = ""; Tags = []; Order = None; TypeParameters = []
+                      Target = FsString; Value = None }
+            let model =
+                { baseModel with RuntimePackage = "adapter-runtime"
+                                 Decls = [ constructor "Constructor"; constructor "Wrapper.Constructor"; alias ] }
+            let source = renderAll model |> Map.find "TestPkg.fs"
+            Expect.stringContains source "type Client = Root.Client" "the instance retains canonical type identity"
+            Expect.stringContains source attribute "the value keeps the entry's runtime binding"
+            Expect.stringContains source "let Client: TestPkg.Constructor = jsNative" "shadowed value references are qualified too"
+
+        testCase "nested declarations qualify shadowed root types" <| fun _ ->
+            let interface' name inherits members =
+                FsInterface
+                    { Name = name
+                      Docs = ""
+                      Tags = []
+                      Order = None
+                      TypeParameters = []
+                      Inherits = inherits
+                      Members = members
+                      Entrypoint = None
+                      CreateOverloads = []
+                      Statics = [] }
+
+            let property name reference =
+                FsProperty { Name = name; Docs = ""; Tags = []; ReadOnly = true; Type = reference }
+
+            let model =
+                { baseModel with
+                    Decls =
+                        [ interface' "Message" [] []
+                          interface' "Other" [] []
+                          interface' "View.Message" [ FsNamed "Message" ] []
+                          interface' "View.Nested.Reader" []
+                              [ property "root" (FsNamed "Message")
+                                property "nested" (FsNamed "View.Message")
+                                property "other" (FsNamed "Other") ] ] }
+
+            let source = renderAll model |> Map.find "TestPkg.fs"
+            for expected in
+                [ "inherit TestPkg.Message"
+                  "abstract root: TestPkg.Message"
+                  "abstract nested: View.Message"
+                  "abstract other: Other" ] do
+                source.Contains expected |> Flip.Expect.equal expected true
 
         testCase "tuples parenthesise only where * would reassociate" <| fun _ ->
             Expect.equal (Render.printType (FsTuple [ FsString; FsFloat ])) "string * float" "top level"
@@ -126,7 +215,7 @@ let renderTests =
                                         Rest = false } ] ]
                                 Statics = [] }
                           FsAbbrev
-                              { Name = "Mapper"
+                              { Value = None; Name = "Mapper"
                                 Docs = ""
                                 Tags = []
                                 Order = None
@@ -281,7 +370,7 @@ let renderTests =
                                       CompiledName = None
                                       CompiledValue = Some(LitNumber 1.5) } ] }
                           FsAbbrev
-                              { Name = "TimerCallback"
+                              { Value = None; Name = "TimerCallback"
                                 Docs = ""
                                 Tags = []
                                 Order = None
@@ -371,7 +460,7 @@ let renderTests =
                 { baseModel with
                     Decls =
                         [ FsAbbrev
-                            { Name = "Handle"
+                            { Value = None; Name = "Handle"
                               Docs =
                                 String.concat
                                     "\n"
@@ -427,7 +516,7 @@ let renderTests =
                 { baseModel with
                     Decls =
                         [ FsAbbrev
-                            { Name = "Handle"
+                            { Value = None; Name = "Handle"
                               Docs = String.concat "\n" [ "Truncated."; "```ts"; "open()" ]
                               Tags = []
                               Order = None
@@ -453,7 +542,7 @@ let renderTests =
                 { baseModel with
                     Decls =
                         [ FsAbbrev
-                            { Name = "Handle"
+                            { Value = None; Name = "Handle"
                               Docs =
                                 String.concat
                                     "\n"

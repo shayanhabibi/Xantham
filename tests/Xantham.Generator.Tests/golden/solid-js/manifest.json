@@ -3,9 +3,9 @@
   "package": "solid-js",
   "module": "SolidJs",
   "counts": {
-    "exact": 19,
-    "ergonomic": 93,
-    "widened": 62,
+    "exact": 21,
+    "ergonomic": 97,
+    "widened": 55,
     "escape": 18
   },
   "passes": [
@@ -44,9 +44,9 @@
     },
     {
       "pass": "SE - shape-exports",
-      "total": 143,
+      "total": 141,
       "ergonomic": 117,
-      "widened": 24,
+      "widened": 22,
       "escape": 2
     },
     {
@@ -56,9 +56,9 @@
     },
     {
       "pass": "RA - repair-arity",
-      "total": 25,
+      "total": 11,
       "ergonomic": 7,
-      "widened": 18
+      "widened": 4
     }
   ]
 }

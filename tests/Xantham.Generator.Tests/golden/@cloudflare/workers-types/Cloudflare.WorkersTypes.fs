@@ -22680,8 +22680,7 @@ type EventContext<'Env, 'P, 'Data> =
 module EventContext =
     type Next = delegate of input: U2<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>> option * init: RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option -> JS.Promise<Response>
 
-[<Erase>]
-type PagesFunction<'Env, 'Params, 'Data> = private PagesFunction__ of (obj -> U2<JS.Promise<Response>, Response>)
+type PagesFunction<'Env, 'Params, 'Data> = (PagesFunction.Context<'Env, 'Params, 'Data> -> U2<JS.Promise<Response>, Response>)
 
 module PagesFunction =
     [<Interface>]
@@ -22714,8 +22713,7 @@ type EventPluginContext<'Env, 'P, 'Data, 'PluginArgs> =
 module EventPluginContext =
     type Next = delegate of input: U2<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>> option * init: RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option -> JS.Promise<Response>
 
-[<Erase>]
-type PagesPluginFunction<'Env, 'Params, 'Data, 'PluginArgs> = private PagesPluginFunction__ of (obj -> U2<JS.Promise<Response>, Response>)
+type PagesPluginFunction<'Env, 'Params, 'Data, 'PluginArgs> = (PagesPluginFunction.Context<'Env, 'Params, 'Data, 'PluginArgs> -> U2<JS.Promise<Response>, Response>)
 
 module PagesPluginFunction =
     [<Interface>]
@@ -23129,13 +23127,13 @@ module WorkflowStepContext =
 
 [<Interface>]
 type WorkflowRollbackContext<'T, 'Delay> =
-    abstract ctx: obj with get, set
+    abstract ctx: WorkflowRollbackContext.Ctx<'Delay> with get, set
     abstract error: exn with get, set
     abstract output: 'T option with get, set
     /// <remarks>@deprecated Use <c>ctx.step.name</c> and <c>ctx.step.count</c> instead.</remarks>
     abstract stepName: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (ctx: obj, error: exn, stepName: string, ?output: 'T) : WorkflowRollbackContext<'T, 'Delay> = jsNative
+    static member Create (ctx: WorkflowRollbackContext.Ctx<'Delay>, error: exn, stepName: string, ?output: 'T) : WorkflowRollbackContext<'T, 'Delay> = jsNative
 
 module WorkflowRollbackContext =
     [<Interface>]
@@ -23155,19 +23153,18 @@ module WorkflowRollbackContext =
             [<ParamObject; Emit("$0")>]
             static member Create (?retries: obj, ?timeout: CloudflareWorkersModule.WorkflowSleepDuration, ?sensitive: string) : Config = jsNative
 
-[<Erase>]
-type WorkflowRollbackHandler<'T, 'Delay> = private WorkflowRollbackHandler__ of (obj -> JS.Promise<unit>)
+type WorkflowRollbackHandler<'T, 'Delay> = (WorkflowRollbackHandler.Ctx<'T, 'Delay> -> JS.Promise<unit>)
 
 module WorkflowRollbackHandler =
     [<Interface>]
     type Ctx<'T, 'Delay> =
-        abstract ctx: obj with get, set
+        abstract ctx: WorkflowRollbackHandler.Ctx.Ctx<'Delay> with get, set
         abstract error: exn with get, set
         abstract output: 'T option with get, set
         /// <remarks>@deprecated Use <c>ctx.step.name</c> and <c>ctx.step.count</c> instead.</remarks>
         abstract stepName: string with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (ctx: obj, error: exn, stepName: string, ?output: 'T) : Ctx<'T, 'Delay> = jsNative
+        static member Create (ctx: WorkflowRollbackHandler.Ctx.Ctx<'Delay>, error: exn, stepName: string, ?output: 'T) : Ctx<'T, 'Delay> = jsNative
 
     module Ctx =
         [<Interface>]
@@ -23189,22 +23186,22 @@ module WorkflowRollbackHandler =
 
 [<Interface>]
 type WorkflowStepRollbackOptions<'T, 'Delay> =
-    abstract rollback: (obj -> JS.Promise<unit>) with get, set
+    abstract rollback: (WorkflowStepRollbackOptions.Rollback.Ctx<'T, 'Delay> -> JS.Promise<unit>) with get, set
     abstract rollbackConfig: WorkflowStepRollbackConfig option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (rollback: (obj -> JS.Promise<unit>), ?rollbackConfig: WorkflowStepRollbackConfig) : WorkflowStepRollbackOptions<'T, 'Delay> = jsNative
+    static member Create (rollback: (WorkflowStepRollbackOptions.Rollback.Ctx<'T, 'Delay> -> JS.Promise<unit>), ?rollbackConfig: WorkflowStepRollbackConfig) : WorkflowStepRollbackOptions<'T, 'Delay> = jsNative
 
 module WorkflowStepRollbackOptions =
     module Rollback =
         [<Interface>]
         type Ctx<'T, 'Delay> =
-            abstract ctx: obj with get, set
+            abstract ctx: WorkflowStepRollbackOptions.Rollback.Ctx.Ctx<'Delay> with get, set
             abstract error: exn with get, set
             abstract output: 'T option with get, set
             /// <remarks>@deprecated Use <c>ctx.step.name</c> and <c>ctx.step.count</c> instead.</remarks>
             abstract stepName: string with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (ctx: obj, error: exn, stepName: string, ?output: 'T) : Ctx<'T, 'Delay> = jsNative
+            static member Create (ctx: WorkflowStepRollbackOptions.Rollback.Ctx.Ctx<'Delay>, error: exn, stepName: string, ?output: 'T) : Ctx<'T, 'Delay> = jsNative
 
         module Ctx =
             [<Interface>]
@@ -23226,17 +23223,17 @@ module WorkflowStepRollbackOptions =
 
 [<Import("WorkflowStep", "cloudflare:workers"); AbstractClass>]
 type WorkflowStep () =
-    abstract ``do``<'T>: name: string * callback: (WorkflowStep.Do.Callback.Ctx -> JS.Promise<'T>) * ?rollbackOptions: obj -> JS.Promise<'T>
-    abstract ``do``<'T>: name: string * config: WorkflowStepConfigWithDelayFunction * callback: (WorkflowDynamicDelayContext.Ctx -> JS.Promise<'T>) * ?rollbackOptions: obj -> JS.Promise<'T>
-    abstract ``do``<'T>: name: string * config: WorkflowStepConfigWithStaticDelay * callback: (WorkflowStep.Do.Callback.Ctx -> JS.Promise<'T>) * ?rollbackOptions: obj -> JS.Promise<'T>
-    abstract ``do``<'T>: name: string * config: WorkflowStepConfig * callback: (WorkflowStep.Do.Callback.Ctx -> JS.Promise<'T>) * ?rollbackOptions: obj -> JS.Promise<'T>
+    abstract ``do``<'T>: name: string * callback: (WorkflowStep.Do.Callback.Ctx -> JS.Promise<'T>) * ?rollbackOptions: WorkflowStep.Do.RollbackOptions<'T> -> JS.Promise<'T>
+    abstract ``do``<'T>: name: string * config: WorkflowStepConfigWithDelayFunction * callback: (WorkflowDynamicDelayContext.Ctx -> JS.Promise<'T>) * ?rollbackOptions: WorkflowStep.Do.RollbackOptions2<'T> -> JS.Promise<'T>
+    abstract ``do``<'T>: name: string * config: WorkflowStepConfigWithStaticDelay * callback: (WorkflowStep.Do.Callback.Ctx -> JS.Promise<'T>) * ?rollbackOptions: WorkflowStep.Do.RollbackOptions3<'T> -> JS.Promise<'T>
+    abstract ``do``<'T>: name: string * config: WorkflowStepConfig * callback: (WorkflowStep.Do.Callback.Ctx -> JS.Promise<'T>) * ?rollbackOptions: WorkflowStep.Do.RollbackOptions4<'T> -> JS.Promise<'T>
     member _.sleep
         with get (): WorkflowStep.Sleep = jsNative
         and set (_: WorkflowStep.Sleep): unit = jsNative
     member _.sleepUntil
         with get (): WorkflowStep.SleepUntil = jsNative
         and set (_: WorkflowStep.SleepUntil): unit = jsNative
-    abstract waitForEvent: name: string * options: WorkflowStep.WaitForEvent.Options -> JS.Promise<obj>
+    abstract waitForEvent<'T>: name: string * options: WorkflowStep.WaitForEvent.Options -> JS.Promise<WorkflowStep.WaitForEvent.Result.Item<'T>>
 
 module WorkflowStep =
     module Do =
@@ -23268,10 +23265,10 @@ module WorkflowStep =
 
         [<Interface>]
         type RollbackOptions<'T> =
-            abstract rollback: (obj -> JS.Promise<unit>) with get, set
+            abstract rollback: (WorkflowStep.Do.RollbackOptions.Rollback.Ctx<'T> -> JS.Promise<unit>) with get, set
             abstract rollbackConfig: WorkflowStepRollbackConfig option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (rollback: (obj -> JS.Promise<unit>), ?rollbackConfig: WorkflowStepRollbackConfig) : RollbackOptions<'T> = jsNative
+            static member Create (rollback: (WorkflowStep.Do.RollbackOptions.Rollback.Ctx<'T> -> JS.Promise<unit>), ?rollbackConfig: WorkflowStepRollbackConfig) : RollbackOptions<'T> = jsNative
 
         module RollbackOptions =
             module Rollback =
@@ -23287,10 +23284,10 @@ module WorkflowStep =
 
         [<Interface>]
         type RollbackOptions2<'T> =
-            abstract rollback: (obj -> JS.Promise<unit>) with get, set
+            abstract rollback: (WorkflowStep.Do.RollbackOptions2.Rollback.Ctx<'T> -> JS.Promise<unit>) with get, set
             abstract rollbackConfig: WorkflowStepRollbackConfig option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (rollback: (obj -> JS.Promise<unit>), ?rollbackConfig: WorkflowStepRollbackConfig) : RollbackOptions2<'T> = jsNative
+            static member Create (rollback: (WorkflowStep.Do.RollbackOptions2.Rollback.Ctx<'T> -> JS.Promise<unit>), ?rollbackConfig: WorkflowStepRollbackConfig) : RollbackOptions2<'T> = jsNative
 
         module RollbackOptions2 =
             module Rollback =
@@ -23306,10 +23303,10 @@ module WorkflowStep =
 
         [<Interface>]
         type RollbackOptions3<'T> =
-            abstract rollback: (obj -> JS.Promise<unit>) with get, set
+            abstract rollback: (WorkflowStep.Do.RollbackOptions3.Rollback.Ctx<'T> -> JS.Promise<unit>) with get, set
             abstract rollbackConfig: WorkflowStepRollbackConfig option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (rollback: (obj -> JS.Promise<unit>), ?rollbackConfig: WorkflowStepRollbackConfig) : RollbackOptions3<'T> = jsNative
+            static member Create (rollback: (WorkflowStep.Do.RollbackOptions3.Rollback.Ctx<'T> -> JS.Promise<unit>), ?rollbackConfig: WorkflowStepRollbackConfig) : RollbackOptions3<'T> = jsNative
 
         module RollbackOptions3 =
             module Rollback =
@@ -23325,10 +23322,10 @@ module WorkflowStep =
 
         [<Interface>]
         type RollbackOptions4<'T> =
-            abstract rollback: (obj -> JS.Promise<unit>) with get, set
+            abstract rollback: (WorkflowStep.Do.RollbackOptions4.Rollback.Ctx<'T> -> JS.Promise<unit>) with get, set
             abstract rollbackConfig: WorkflowStepRollbackConfig option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (rollback: (obj -> JS.Promise<unit>), ?rollbackConfig: WorkflowStepRollbackConfig) : RollbackOptions4<'T> = jsNative
+            static member Create (rollback: (WorkflowStep.Do.RollbackOptions4.Rollback.Ctx<'T> -> JS.Promise<unit>), ?rollbackConfig: WorkflowStepRollbackConfig) : RollbackOptions4<'T> = jsNative
 
         module RollbackOptions4 =
             module Rollback =

@@ -10,7 +10,7 @@ let private coreOrder = Some { File = "/compiler/lib.es5.d.ts"; NodeIndex = 1 }
 
 let private abbreviation name order target =
     FsAbbrev
-        { Name = name
+        { Value = None; Name = name
           Docs = ""
           Tags = []
           Order = order

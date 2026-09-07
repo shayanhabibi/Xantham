@@ -222,6 +222,7 @@ module FindingCodes =
             "GE.ShippedGroupWithoutDeclarations", "GE002"
             "GE.GroupModuleCollision", "GE003"
             "GE.GroupModuleFromNamespace", "GE004"
+            "GE.ParameterNameEscaped", "GE005"
         ]
 
     let private byName = Map.ofList table
@@ -1040,6 +1041,7 @@ type EmitGroups =
     /// Wave five, batch 3. A group named under the entry package's configured namespace rather
     /// than by the pinned derivation. The referenced run has to configure the same namespace.
     | [<Escape>] GroupModuleFromNamespace of group: string * moduleName: string
+    | [<Ergonomic>] ParameterNameEscaped of sourceName: string * parameterName: string
 
     interface IFindingKind with
         member this.Message =
@@ -1052,6 +1054,8 @@ type EmitGroups =
                 $"{group} templates the module {moduleName}, which another group in this run already writes"
             | GroupModuleFromNamespace(group, moduleName) ->
                 $"{group} is named {moduleName} from the configured namespace; a run generating {group} has to configure the same one"
+            | ParameterNameEscaped(sourceName, parameterName) ->
+                $"parameter {sourceName} is written {parameterName} to avoid an F# pattern constructor; its JavaScript name is preserved"
 
 module FindingCatalogue =
     /// Every finding union, in the order the manifest legend lists them. The snapshot test

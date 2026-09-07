@@ -1674,7 +1674,10 @@ and internal objectRef
 
         match Map.tryFind facts.Response.Id model.DeclNames with
         | Some name ->
-            match ownArguments facts @ freeParamsOf model facts.Response.Id with
+            match
+                (ownArguments facts @ declParamIds facts @ freeParamsOf model facts.Response.Id)
+                |> List.distinct
+            with
             | [] -> FsNamed name, []
             | arguments -> appliedRef ctx model self owner name arguments
         | None ->
@@ -2515,13 +2518,33 @@ let internal shapeSignature
 
     findings <- findings @ returnFindings
 
-    // A parameter no rendered position names has been erased - every use of it widened to obj
-    // on the way here - and writing `<'T>` over a signature that mentions no `'T` says the
-    // member is generic when nothing about it is. Drop it, and say so.
-    let named =
+    // Start with the variables value positions still name, then retain the variables their
+    // constraints read, transitively: `<T, E extends Box<T>>(env: E)` needs both variables.
+    // A constraint belonging to an unused parameter does not keep either one alive.
+    let directlyNamed =
         parameters
         |> List.map _.Type
         |> List.fold (fun acc t -> Set.union acc (typeVarsOf t)) (typeVarsOf returns)
+
+    let rec closeConstraints named =
+        let expanded =
+            typeParameters
+            |> List.fold
+                (fun found parameter ->
+                    if Set.contains parameter.Name named then
+                        parameter.Constraint
+                        |> Option.map (typeVarsOf >> Set.union found)
+                        |> Option.defaultValue found
+                    else
+                        found)
+                named
+
+        if expanded = named then
+            named
+        else
+            closeConstraints expanded
+
+    let named = closeConstraints directlyNamed
 
     let live, erased =
         typeParameters |> List.partition (fun p -> Set.contains p.Name named)

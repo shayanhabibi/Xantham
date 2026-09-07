@@ -1465,6 +1465,22 @@ let shapePassTests =
             Expect.equal reference (FsApp("EachProps", [ FsTypeVar "T"; FsTypeVar "U" ])) "applied back where they are in scope"
             Expect.isEmpty findings "an application over in-scope variables is exact"
 
+        testCase "bind-free-type-params treats opaque alias arguments as leaves" <| fun _ ->
+            [ TypeFlags.Any; TypeFlags.Unknown ]
+            |> List.map (fun flags ->
+                let opaque =
+                    { Build.facts (Build.typeResponse 42 flags) with
+                        AliasTypeArguments = [ 20 ] }
+                let props =
+                    { Build.facts (Build.typeResponse 40 TypeFlags.Object) with
+                        Members = [ Build.resolvedMember (Build.symbol 401 "target" SymbolFlags.Property) 42 ] }
+                let model =
+                    { Build.shapeModel (props :: opaque :: typeParam 20 "T" :: Build.primitives) with
+                        DeclNames = Map.ofList [ 40, "Props" ] }
+                let bound, _ = Build.runPass FreeTypeParams.bindFreeTypeParams model
+                Map.tryFind 40 bound.DeclParams)
+            |> Flip.Expect.equal "opaque references have no emitted type arguments" [ None; None ]
+
         testCase "bind-free-type-params leaves a signature's own parameters to the signature" <| fun _ ->
             // `interface Store { read<K>(key: K): string }` reads `K` only inside the method
             // that binds it - the declaration owes nothing to any outer scope.
@@ -3236,7 +3252,7 @@ let shapePassTests =
 
             let abbrev name =
                 FsAbbrev
-                    { Name = name
+                    { Value = None; Name = name
                       Docs = ""
                       Tags = []
                       Order = None
@@ -3877,7 +3893,7 @@ let shapePassTests =
                 { Build.shapeModel [] with
                     Decls =
                         [ FsAbbrev
-                              { Name = "Params"
+                              { Value = None; Name = "Params"
                                 Docs = ""
                                 Tags = []
                                 Order = None
@@ -3928,7 +3944,7 @@ let shapePassTests =
                 { Build.shapeModel [] with
                     Decls =
                         [ FsAbbrev
-                              { Name = "ExcludeStrict"
+                              { Value = None; Name = "ExcludeStrict"
                                 Docs = ""
                                 Tags = []
                                 Order = None
@@ -3978,7 +3994,7 @@ let shapePassTests =
                 { Build.shapeModel [] with
                     Decls =
                         [ FsAbbrev
-                              { Name = "EveryParameter"
+                              { Value = None; Name = "EveryParameter"
                                 Docs = ""
                                 Tags = []
                                 Order = None
@@ -4000,7 +4016,7 @@ let shapePassTests =
                 { Build.shapeModel [] with
                     Decls =
                         [ FsAbbrev
-                              { Name = "DivergentBound"
+                              { Value = None; Name = "DivergentBound"
                                 Docs = ""
                                 Tags = []
                                 Order = None
@@ -4039,7 +4055,7 @@ let shapePassTests =
                     Decls =
                         [ generic
                           FsAbbrev
-                              { Name = "Handler"
+                              { Value = None; Name = "Handler"
                                 Docs = ""
                                 Tags = []
                                 Order = None
@@ -4118,3 +4134,81 @@ let shapePassTests =
             Expect.equal model 1 "advanced"
             Expect.equal (findings |> List.map _.Pass) [ "always-degrades" ] "stamped"
     ]
+
+/// A signature whose constraints form T <- E <- F, with only the selected parameter used.
+let private constraintParameters expected used =
+    let applied id argument =
+        { Build.facts
+              { Build.typeResponse id TypeFlags.Object with
+                  Target = ValueSome 30
+                  ObjectFlags = ValueSome ObjectFlags.Reference } with
+            SymbolName = Some "Box"
+            TypeArguments = [ argument ] }
+
+    let model =
+        { Build.shapeModel (
+              genericDecl 30 [ 25 ] []
+              :: typeParam 25 "Value"
+              :: typeParam 20 "T"
+              :: { typeParam 21 "E" with Constraint = Some 31 }
+              :: { typeParam 22 "F" with Constraint = Some 32 }
+              :: applied 31 20
+              :: applied 32 21
+              :: Build.primitives
+          ) with
+            DeclNames = Map.ofList [ 30, "Box" ] }
+
+    let signature =
+        { Build.signature
+              [ Build.resolvedMember (Build.symbol 500 "value" SymbolFlags.FunctionScopedVariable) used ]
+              4 with
+            TypeParameters = [ 20; 21; 22 ] }
+
+    let callable =
+        { Build.facts (Build.typeResponse 40 TypeFlags.Object) with CallSignatures = [ signature ] }
+
+    let model =
+        { model with
+            Types = Map.add 40 callable model.Types
+            Harvest =
+                { HarvestModel.Empty with
+                    Exports = [ Build.export "use" (Build.symbol 400 "use" SymbolFlags.Function) ] }
+            ExportTypes = Map.ofList [ 400, { Declared = None; Value = Some 40 } ] }
+
+    let shaped, findings = Build.runPass Exports.shapeExports model
+    let parameters = shaped.ExportMembers |> List.exactlyOne |> snd |> _.TypeParameters
+
+    (parameters |> List.map _.Name,
+     findings |> List.filter (fun finding -> finding.Key = "TP006") |> List.map _.Message), expected
+
+[<Tests>]
+let signatureConstraints =
+    testList "signature constraint closure" [
+        let inline (==>) input expected = input, expected
+
+        testTheory "only constraints reachable from rendered positions retain parameters" [
+            22 ==> ([ "T"; "E"; "F" ], [])
+            21 ==> ([ "T"; "E" ], [ "type parameter 'F' is erased: every use of it widened away" ])
+            1 ==> ([], [ "type parameter 'T' is erased: every use of it widened away"
+                         "type parameter 'E' is erased: every use of it widened away"
+                         "type parameter 'F' is erased: every use of it widened away" ])
+        ] <| fun (used, expected) ->
+            let actual, expected = constraintParameters expected used
+            actual |> Flip.Expect.equal "" expected
+    ]
+
+[<Tests>]
+let privateAliasReferences =
+    testCase "private generic alias references apply their bound parameters" <| fun _ ->
+        let alias =
+            { Build.facts
+                  { Build.typeResponse 30 TypeFlags.Object with
+                      ObjectFlags = ValueSome(ObjectFlags.Anonymous ||| ObjectFlags.Instantiated) } with
+                AliasTypeArguments = [ 20 ]
+                Members = [ Build.resolvedMember (Build.symbol 300 "value" SymbolFlags.Property) 20 ] }
+        let model =
+            { Build.shapeModel [ alias; typeParam 20 "T" ] with
+                DeclNames = Map.ofList [ 30, "Accept.Config" ]
+                TypeVars = Map.ofList [ 20, "T" ] }
+        let reference, findings = Spec.typeRef Build.context model None "accept" 30
+        (reference, findings) |> Flip.Expect.equal "" (FsApp("Accept.Config", [ FsTypeVar "T" ]), [])

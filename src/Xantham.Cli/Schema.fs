@@ -46,6 +46,20 @@ let private configKeys =
           applies, which includes the DOM. A global type library that redeclares DOM names sets this to \
           what its README prescribes.")
 
+            "Types",
+            ("types",
+             "The compiler's `types` option: installed ambient type packages required by this input. \
+          Omitted, automatic discovery applies; an empty array disables automatic inclusion. \
+          Missing named packages are reported before generation.")
+
+            "DeclarationCatalog",
+            ("declarationCatalog",
+             "Emit declarations.json with stable TypeScript declaration identities and final F# names. Defaults to false.")
+
+            "DeclarationReferences",
+            ("declarationReferences",
+             "Producer declarations.json files, absolute or relative to the input package directory. Matching types reuse their producer's F# identity; incompatible catalogs fail generation.")
+
             "Entry",
             ("entry",
              "The TypeScript input file, relative to the package directory passed to generate, even when \

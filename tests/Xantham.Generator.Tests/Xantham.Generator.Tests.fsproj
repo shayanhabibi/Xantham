@@ -14,6 +14,7 @@
         <Compile Include="Findings.test.fs" />
         <Compile Include="MultiPackage.test.fs" />
         <Compile Include="Ownership.test.fs" />
+        <Compile Include="DeclarationCatalog.test.fs" />
         <Compile Include="Pipeline.test.fs" />
         <Compile Include="Bootstrap.test.fs" />
         <Compile Include="Cli.test.fs" />

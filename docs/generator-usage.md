@@ -100,6 +100,15 @@ The schema is emitted from the generator's own configuration record, so it descr
 installed tool reads. A copy generated from `master` is committed at the repository root as
 [`xantham.schema.json`](https://github.com/shayanhabibi/Xantham/blob/master/xantham.schema.json).
 
+### Select ambient type providers
+
+`types` follows TypeScript's ambient provider selection: omit it for automatic discovery, use
+`"types": []` to load no ambient providers automatically, or list installed provider names such
+as `"types": ["@cloudflare/workers-types", "node"]`. Explicit imports and reference directives
+still resolve their declared dependencies. Install those providers in the input package's
+resolution context. A missing configured provider stops generation with TypeScript's `TS2688`
+diagnostic. `lib` selects compiler libraries independently.
+
 ### Select a declaration entry
 
 Each invocation generates from one TypeScript input. By default, the generator selects the
@@ -191,6 +200,44 @@ findings:
 `manifest.json` is the file to read. Every widened and every escaped site is named there and in
 `symbols.jsonl` with the finding code accounting for it, so a binding's losses are enumerable
 before you build on it.
+
+## Share types across generated subpaths
+
+Generate a producer with `"declarationCatalog": true` to write `declarations.json` beside its
+F# output. A later entry can reference that file:
+
+```json
+{
+  "module": "Example.Adapter",
+  "entry": "adapter.d.ts",
+  "runtime": "example/adapter",
+  "declarationCatalog": true,
+  "declarationReferences": ["/bindings/root/declarations.json"]
+}
+```
+
+Relative catalog paths resolve from the input package directory. The later entry reuses the
+producer's F# type names and retains its own public aliases and runtime imports. For example,
+an adapter accepting a root `Client` accepts the producer's F# `Client` directly. Catalogs carry
+inherited references, so another subpath can reference the adapter's catalog alone.
+
+Compile producers before consumers, following the catalog's ordered `owners` dependency list.
+References act as ownership candidates; the current owner's dependencies list records producers
+whose declarations were reused. A re-exported class retains a canonical instance alias and, when
+needed, a separately imported constructor value exposing its statics, overloads and accessors.
+
+Catalogs validate complete package-relative declaration handles, source and package-manifest
+hashes, package versions, compiler and generator binary fingerprints, inference settings, and
+canonical F# APIs including arity and method constraints. Generate all related entries with the
+same Xantham build. Conflicting ownership, dependency cycles, unsuppressed missing-module or
+missing-provider diagnostics, and incompatible APIs fail before output is written.
+
+The current compatibility boundary requires the same `lib`, `types`, group dispositions and
+inference options. Module names, runtime imports, and selected entries may differ. Worker and
+browser profiles must keep separate catalogs when those settings differ. Even matching profiles
+can be refused when entry-dependent shaping produces different F# APIs. Agents 0.22.0 root and
+MCP currently hit that guard: root `Agent` connection parameters widen to `obj`, while MCP names
+them as interfaces. Shared identity across those entries remains unfinished.
 
 ## Compile the output
 

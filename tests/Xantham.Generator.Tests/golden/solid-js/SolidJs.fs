@@ -345,7 +345,7 @@ type ResourceActions<'T, 'R> =
 
 type ResourceSource<'S> = U3<bool, 'S, (unit -> U2<bool, 'S> option)> option
 
-type ResourceFetcher<'S, 'T, 'R> = delegate of k: 'S * info: obj -> U2<'T, JS.Promise<'T>>
+type ResourceFetcher<'S, 'T, 'R> = delegate of k: 'S * info: ResourceFetcher.Info<'T, 'R> -> U2<'T, JS.Promise<'T>>
 
 module ResourceFetcher =
     [<Interface>]
@@ -409,8 +409,7 @@ module InitializedResourceOptions =
             [<ParamObject; Emit("$0")>]
             static member Create (?value: 'T) : Info<'T> = jsNative
 
-[<Erase>]
-type ResourceReturn<'T, 'R> = private ResourceReturn__ of U5<Errored, Pending, Ready<'T>, Refreshing<'T>, Unresolved> * obj
+type ResourceReturn<'T, 'R> = U5<Errored, Pending, Ready<'T>, Refreshing<'T>, Unresolved> * ResourceReturn.Item<'R, 'T>
 
 module ResourceReturn =
     type Item<'R, 'T> =
@@ -420,8 +419,7 @@ module ResourceReturn =
         abstract mutate<'U>: value: U2<('T option -> 'U), 'U> -> 'U
         abstract refetch: ('R option -> U2<'T, JS.Promise<'T option>> option) with get, set
 
-[<Erase>]
-type InitializedResourceReturn<'T, 'R> = private InitializedResourceReturn__ of U3<Errored, Ready<'T>, Refreshing<'T>> * obj
+type InitializedResourceReturn<'T, 'R> = U3<Errored, Ready<'T>, Refreshing<'T>> * InitializedResourceReturn.Item<'T, 'R>
 
 module InitializedResourceReturn =
     type Item<'T, 'R> =
@@ -432,7 +430,7 @@ module InitializedResourceReturn =
         abstract refetch: ('R option -> U2<'T, JS.Promise<'T>> option) with get, set
 
 module CreateResource =
-    type Fetcher<'I, 'T, 'R> = delegate of k: bool * info: obj -> U2<'T, JS.Promise<'T>>
+    type Fetcher<'I, 'T, 'R> = delegate of k: bool * info: CreateResource.Fetcher.Info<'R, 'I, 'T> -> U2<'T, JS.Promise<'T>>
 
     module Fetcher =
         [<Interface>]
@@ -456,7 +454,7 @@ module CreateResource =
             [<ParamObject; Emit("$0")>]
             static member Create (refetching: U2<bool, 'R>, ?value: 'T) : Info3<'T, 'R> = jsNative
 
-    type Fetcher2<'S, 'I, 'T, 'R> = delegate of k: 'S * info: obj -> U2<'T, JS.Promise<'T>>
+    type Fetcher2<'S, 'I, 'T, 'R> = delegate of k: 'S * info: CreateResource.Fetcher2.Info<'R, 'I, 'T> -> U2<'T, JS.Promise<'T>>
 
     module Fetcher2 =
         [<Interface>]
@@ -1174,7 +1172,7 @@ type Exports =
     /// </remarks>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-resource</remarks>
     [<Import("createResource", "solid-js")>]
-    static member createResource<'T, 'R, 'I> (fetcher: CreateResource.Fetcher<'I, 'T, 'R>, options: CreateResource.Options<'I, 'T>) : U3<Errored, Ready<U2<'I, 'T>>, Refreshing<U2<'I, 'T>>> * obj = jsNative
+    static member createResource<'T, 'R, 'I> (fetcher: CreateResource.Fetcher<'I, 'T, 'R>, options: CreateResource.Options<'I, 'T>) : U3<Errored, Ready<U2<'I, 'T>>, Refreshing<U2<'I, 'T>>> * CreateResource.Result.Item<'R, 'I, 'T> = jsNative
     /// <summary>
     /// Creates a resource that wraps a repeated promise in a reactive pattern:
     /// <code lang="typescript">
@@ -1208,7 +1206,7 @@ type Exports =
     /// </remarks>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-resource</remarks>
     [<Import("createResource", "solid-js")>]
-    static member createResource<'T> (fetcher: Func<bool, obj, U2<'T, JS.Promise<'T>>>, ?options: CreateResource.Options2) : U5<Errored, Pending, Ready<'T>, Refreshing<'T>, Unresolved> * obj = jsNative
+    static member createResource<'T, 'R> (fetcher: Func<bool, CreateResource.Fetcher.Info2<'T, 'R>, U2<'T, JS.Promise<'T>>>, ?options: CreateResource.Options2) : U5<Errored, Pending, Ready<'T>, Refreshing<'T>, Unresolved> * CreateResource.Result.Item2<'R, 'T> = jsNative
     /// <summary>
     /// Creates a resource that wraps a repeated promise in a reactive pattern:
     /// <code lang="typescript">
@@ -1242,7 +1240,7 @@ type Exports =
     /// </remarks>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-resource</remarks>
     [<Import("createResource", "solid-js")>]
-    static member createResource<'T, 'S, 'R, 'I> (source: U3<bool, 'S, (unit -> U2<bool, 'S> option)> option, fetcher: CreateResource.Fetcher2<'S, 'I, 'T, 'R>, options: CreateResource.Options3<'I, 'T, 'S>) : U3<Errored, Ready<U2<'I, 'T>>, Refreshing<U2<'I, 'T>>> * obj = jsNative
+    static member createResource<'T, 'S, 'R, 'I> (source: U3<bool, 'S, (unit -> U2<bool, 'S> option)> option, fetcher: CreateResource.Fetcher2<'S, 'I, 'T, 'R>, options: CreateResource.Options3<'I, 'T, 'S>) : U3<Errored, Ready<U2<'I, 'T>>, Refreshing<U2<'I, 'T>>> * CreateResource.Result.Item3<'R, 'I, 'T> = jsNative
     /// <summary>
     /// Creates a resource that wraps a repeated promise in a reactive pattern:
     /// <code lang="typescript">
@@ -1276,7 +1274,7 @@ type Exports =
     /// </remarks>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-resource</remarks>
     [<Import("createResource", "solid-js")>]
-    static member createResource<'T, 'S> (source: U3<bool, 'S, (unit -> U2<bool, 'S> option)> option, fetcher: Func<'S, obj, U2<'T, JS.Promise<'T>>>, ?options: obj) : U5<Errored, Pending, Ready<'T>, Refreshing<'T>, Unresolved> * obj = jsNative
+    static member createResource<'T, 'S, 'R> (source: U3<bool, 'S, (unit -> U2<bool, 'S> option)> option, fetcher: Func<'S, CreateResource.Fetcher.Info3<'T, 'R>, U2<'T, JS.Promise<'T>>>, ?options: CreateResource.Options4<'S>) : U5<Errored, Pending, Ready<'T>, Refreshing<'T>, Unresolved> * CreateResource.Result.Item4<'R, 'T> = jsNative
     /// <summary>
     /// Creates a reactive computation that only runs and notifies the reactive context when the browser is idle
     /// <code lang="typescript">

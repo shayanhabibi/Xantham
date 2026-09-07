@@ -506,6 +506,10 @@ absence under the live compiler.
 ### 4.9 Generics
 
 - Type parameters → F# type parameters, names preserved.
+  Signature parameters remain live when a value position names them or a retained parameter's
+  constraint depends on them, transitively. `<T, E extends Box<T>>(env: E)` therefore keeps
+  both `'T` and `'E`; a wholly unused constraint chain still erases with `TP006`.
+  `tests/fixtures/constraint-closure-lab` pins exports and methods (landed 2026-09-06).
 - Constraints → F# constraints only when expressible: constraint is a generated nominal
   interface → `'T :> IThing`. Structural constraints (`T extends { id: string }`) →
   hash-cons the constraint object type into a named interface, then `:>` it; or drop the
@@ -707,6 +711,15 @@ Fable F# tuples *are* JS arrays — a happy exact match:
   origin, alias elsewhere (F# module abbreviations / type abbreviations).
 
 ### 4.14 Names and docs
+
+- A lone `_` is backticked at member and parameter positions. FSharp.Core pattern constructors
+  such as `None` and `Error` need a different bound parameter name even when backticked.
+  These parameters receive a collision-free underscore prefix, reported as `GE005`.
+  Object construction retains the original JavaScript keys and omits absent optional fields;
+  `pattern-parameter-lab` checks this through Fable and JavaScript.
+- References inside nested generated modules retain their root declaration identity when a
+  local name shadows it. `View.Message` can inherit the outer `Message`; its F# base is qualified
+  with the generated module name. `inherited-name-lab` compiles that distinction.
 
 - Identifier fidelity: F# casing conventions vs JS (`camelCase` members) — keep source names
   verbatim by default (bindings track upstream docs); `[<CompiledName>]`/backticks for

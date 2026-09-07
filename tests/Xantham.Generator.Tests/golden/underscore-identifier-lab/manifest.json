@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "package": "underscore-identifier-lab",
+  "module": "UnderscoreIdentifierLab",
+  "counts": {
+    "exact": 1,
+    "ergonomic": 1,
+    "widened": 0,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 4,
+      "ergonomic": 4
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 3,
+      "ergonomic": 3
+    }
+  ]
+}

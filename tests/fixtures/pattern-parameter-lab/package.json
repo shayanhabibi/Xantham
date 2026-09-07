@@ -1,0 +1,6 @@
+{
+  "name": "pattern-parameter-lab",
+  "type": "module",
+  "types": "index.d.ts",
+  "main": "index.js"
+}

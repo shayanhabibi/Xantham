@@ -147,12 +147,10 @@ let start (config: GeneratorConfig) (packageDir: string) : Async<TscMailbox * Co
             let! _ = AsyncApi.initialize mailbox
 
             let compilerOptions =
-                match config.Lib with
-                | None -> CompilerOptions.Default
-                | Some lib ->
-                    { CompilerOptions.Default with
-                        Lib = ValueSome(List.toArray lib)
-                    }
+                { CompilerOptions.Default with
+                    Lib = config.Lib |> Option.map List.toArray |> ValueOption.ofOption
+                    Types = config.Types |> Option.map List.toArray |> ValueOption.ofOption
+                }
 
             let! program =
                 mailbox.createProgram (
@@ -162,10 +160,46 @@ let start (config: GeneratorConfig) (packageDir: string) : Async<TscMailbox * Co
                     rootFiles = [| DocumentIdentifier.FileName entry |]
                 )
 
+            let session = mailbox.Session program
+
+            if
+                config.Types.IsSome
+                || config.DeclarationCatalog
+                || not (List.isEmpty config.DeclarationReferences)
+            then
+                let! diagnostics = session.getProgramDiagnostics ()
+
+                let! semantic =
+                    if config.DeclarationCatalog || not (List.isEmpty config.DeclarationReferences) then
+                        session.getSemanticDiagnostics ()
+                    else
+                        async.Return ValueNone
+
+                let errors =
+                    diagnostics
+                    |> ValueOption.defaultValue [||]
+                    |> Array.filter (fun diagnostic ->
+                        diagnostic.Category = 1
+                        && (config.Types.IsSome || diagnostic.Code = 2307 || diagnostic.Code = 2688))
+                    |> Array.append (
+                        semantic
+                        |> ValueOption.defaultValue [||]
+                        |> Array.filter (fun diagnostic ->
+                            diagnostic.Category = 1 && (diagnostic.Code = 2307 || diagnostic.Code = 2688))
+                    )
+
+                if not (Array.isEmpty errors) then
+                    let messages =
+                        errors
+                        |> Array.map (fun diagnostic -> $"TS{diagnostic.Code}: {diagnostic.Text}")
+                        |> String.concat "\n"
+
+                    failwith $"TypeScript program inputs could not be loaded:\n{messages}"
+
             return
                 mailbox,
                 {
-                    Session = mailbox.Session program
+                    Session = session
                     Config = config
                     PackageDir = packageDir
                     PackageName = packageName packageDir
