@@ -279,14 +279,15 @@ let private fixtureTests (fixture: string) (package: string option) (config: Gen
                   $"tests/fixtures/pins.json pins {fixture} at {pinned}, but the install is {installed}, so \
                     the committed goldens describe a different package. Reinstall the pin, or bump it and \
                     regenerate the goldens (XANTHAM_UPDATE_GOLDEN=1) in the same commit." ]
-    | Some _, Some package when OperatingSystem.IsLinux() && package.Contains("solid-js") ->
-        // TODO fix solid-js on CI
-        [ skiptest "solid-js" ]
     | Some _, Some package ->
         [ testCase $"{fixture} generates the committed goldens" <| fun _ ->
+              // TODO fix solid-js on CI
+              if fixture.Contains("solid-js") && OperatingSystem.IsLinux() then skiptest "solid-js" else
               matchesGoldens fixture config package |> ignore
 
           testCase $"{fixture} generation is deterministic run to run" <| fun _ ->
+              // TODO fix solid-js on CI
+              if fixture.Contains("solid-js") && OperatingSystem.IsLinux() then skiptest "solid-js" else
               let first = Async.RunSynchronously(Pipeline.generate config package)
               let second = Async.RunSynchronously(Pipeline.generate config package)
 
