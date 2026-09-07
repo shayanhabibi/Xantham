@@ -3,6 +3,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
     <IsPackable>false</IsPackable>
+      <JsonSchemaSource>../../../FSharp.Data.JsonSchema</JsonSchemaSource>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Model.fs" />

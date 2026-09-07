@@ -5,13 +5,13 @@ open Nacara.Core
 open Nacara.Plugins
 open Nacara.Theme
 
-let versions = [ SiteVersion.root "1.0" ]
+let versions = [ SiteVersion.root "0.0" ]
 
 let navbar =
     Theme.navbar
         [
             NavbarSection("Guide", "guide", "/guide/introduction/")
-            NavbarSection("Wire", "wire", "/wire/")
+            NavbarSection("Tsc Wire", "wire", "/wire/")
             NavbarSection("Xantham CLI", "xantham-cli", "/xantham-cli/")
         ]
     >> Theme.navbarEnd

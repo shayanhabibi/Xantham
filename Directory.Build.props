@@ -21,4 +21,5 @@
         <MaxCompilerErrors Condition="'$(MaxCompilerErrors)' == ''">25</MaxCompilerErrors>
         <OtherFlags>$(OtherFlags) --maxerrors:$(MaxCompilerErrors)</OtherFlags>
     </PropertyGroup>
+
 </Project>

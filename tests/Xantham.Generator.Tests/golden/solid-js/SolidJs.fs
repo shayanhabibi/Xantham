@@ -661,35 +661,6 @@ type ExternalSource =
     [<ParamObject; Emit("$0")>]
     static member Create (track: (obj -> obj), dispose: (unit -> unit)) : ExternalSource = jsNative
 
-module SuspenseList =
-    [<Interface>]
-    type Props =
-        abstract children: JSXElement option with get, set
-        abstract revealOrder: SuspenseList.Props.RevealOrder with get, set
-        abstract tail: SuspenseList.Props.Tail option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (revealOrder: SuspenseList.Props.RevealOrder, ?children: JSXElement, ?tail: SuspenseList.Props.Tail) : Props = jsNative
-
-    module Props =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type RevealOrder =
-            | [<CompiledName("backwards")>] Backwards
-            | [<CompiledName("forwards")>] Forwards
-            | [<CompiledName("together")>] Together
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Tail =
-            | [<CompiledName("collapsed")>] Collapsed
-            | [<CompiledName("hidden")>] Hidden
-
-module Suspense =
-    [<Interface>]
-    type Props =
-        abstract fallback: JSXElement option with get, set
-        abstract children: JSXElement option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?fallback: JSXElement, ?children: JSXElement) : Props = jsNative
-
 type Component<'P> = ('P -> JSXElement option)
 
 /// <summary>
@@ -880,6 +851,35 @@ module SharedConfig =
         abstract count: float with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (id: string, count: float) : Context = jsNative
+
+module SuspenseList =
+    [<Interface>]
+    type Props =
+        abstract children: JSXElement option with get, set
+        abstract revealOrder: SuspenseList.Props.RevealOrder with get, set
+        abstract tail: SuspenseList.Props.Tail option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (revealOrder: SuspenseList.Props.RevealOrder, ?children: JSXElement, ?tail: SuspenseList.Props.Tail) : Props = jsNative
+
+    module Props =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type RevealOrder =
+            | [<CompiledName("backwards")>] Backwards
+            | [<CompiledName("forwards")>] Forwards
+            | [<CompiledName("together")>] Together
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Tail =
+            | [<CompiledName("collapsed")>] Collapsed
+            | [<CompiledName("hidden")>] Hidden
+
+module Suspense =
+    [<Interface>]
+    type Props =
+        abstract fallback: JSXElement option with get, set
+        abstract children: JSXElement option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?fallback: JSXElement, ?children: JSXElement) : Props = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
@@ -1515,25 +1515,6 @@ type Exports =
     /// <remarks>@description https://docs.solidjs.com/reference/reactive-utilities/catch-error</remarks>
     [<Import("onError", "solid-js")>]
     static member onError (fn: (exn -> unit)) : unit = jsNative
-    /// <summary>
-    /// **[experimental]** Controls the order in which suspended content is rendered
-    /// </summary>
-    /// <remarks>@description https://docs.solidjs.com/reference/components/suspense-list</remarks>
-    [<Import("SuspenseList", "solid-js")>]
-    static member SuspenseList (props: SuspenseList.Props) : JSXElement option = jsNative
-    /// <summary>
-    /// Tracks all resources inside a component and renders a fallback until they are all resolved
-    /// <code lang="typescript">
-    /// const AsyncComponent = lazy(() =&gt; import('./component'));
-    ///
-    /// &lt;Suspense fallback={&lt;LoadingIndicator /&gt;}&gt;
-    ///   &lt;AsyncComponent /&gt;
-    /// &lt;/Suspense&gt;
-    /// </code>
-    /// </summary>
-    /// <remarks>@description https://docs.solidjs.com/reference/components/suspense</remarks>
-    [<Import("Suspense", "solid-js")>]
-    static member Suspense (props: Suspense.Props) : JSXElement option = jsNative
     [<Import("enableHydration", "solid-js")>]
     static member enableHydration () : unit = jsNative
     [<Import("createComponent", "solid-js")>]
@@ -1644,3 +1625,22 @@ type Exports =
     static member ErrorBoundary (props: ErrorBoundary.Props) : JSXElement option = jsNative
     [<Import("sharedConfig", "solid-js")>]
     static member sharedConfig: SharedConfig = jsNative
+    /// <summary>
+    /// **[experimental]** Controls the order in which suspended content is rendered
+    /// </summary>
+    /// <remarks>@description https://docs.solidjs.com/reference/components/suspense-list</remarks>
+    [<Import("SuspenseList", "solid-js")>]
+    static member SuspenseList (props: SuspenseList.Props) : JSXElement option = jsNative
+    /// <summary>
+    /// Tracks all resources inside a component and renders a fallback until they are all resolved
+    /// <code lang="typescript">
+    /// const AsyncComponent = lazy(() =&gt; import('./component'));
+    ///
+    /// &lt;Suspense fallback={&lt;LoadingIndicator /&gt;}&gt;
+    ///   &lt;AsyncComponent /&gt;
+    /// &lt;/Suspense&gt;
+    /// </code>
+    /// </summary>
+    /// <remarks>@description https://docs.solidjs.com/reference/components/suspense</remarks>
+    [<Import("Suspense", "solid-js")>]
+    static member Suspense (props: Suspense.Props) : JSXElement option = jsNative
