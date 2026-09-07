@@ -39,10 +39,7 @@ let shapeExports: Pass<ShapeModel> =
                         model.Harvest.Exports
                         |> List.indexed
                         |> List.collect (fun (index, export) ->
-                            if
-                                not (hasAny SymbolFlags.Value export.Symbol.Flags)
-                                || hasAny SymbolFlags.Class export.Symbol.Flags
-                            then
+                            if not export.HasValueExport || hasAny SymbolFlags.Class export.Symbol.Flags then
                                 []
                             else
                                 let name = fsName fallback export

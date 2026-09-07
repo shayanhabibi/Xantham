@@ -242,6 +242,45 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
         |> List.map (fun (id, entries) -> id, entries |> List.collect snd |> List.distinct)
         |> Map.ofList
 
+    let literalUnionIdentity includeNullish (facts: TypeFacts) =
+        let literalKey id =
+            match Map.tryFind id shape.Types with
+            | Some member_ ->
+                let flags = member_.Response.Flags
+
+                if
+                    not (flags.HasFlag TypeFlags.EnumLiteral)
+                    && (flags.HasFlag TypeFlags.StringLiteral
+                        || flags.HasFlag TypeFlags.NumberLiteral
+                        || flags.HasFlag TypeFlags.BigIntLiteral
+                        || flags.HasFlag TypeFlags.BooleanLiteral
+                        || flags.HasFlag TypeFlags.Null
+                        || flags.HasFlag TypeFlags.Undefined)
+                then
+                    Some(json (uint32 flags, member_.Response.Value))
+                else
+                    None
+            | None -> None
+
+        let memberIds =
+            facts.UnionMembers
+            |> List.filter (fun id ->
+                includeNullish
+                || not (Map.tryFind id shape.Types |> Option.exists Shape.Spec.isNullish))
+
+        let members = memberIds |> List.choose literalKey
+
+        if
+            List.isEmpty facts.AliasDeclarations
+            && not (List.isEmpty members)
+            && members.Length = memberIds.Length
+        then
+            // Literal unions are checker-interned across unrelated properties. Their values,
+            // not whichever parent happens to be reachable first, define anonymous identity.
+            Some(identity "literal-union" [] (List.sort members))
+        else
+            None
+
     let rec typeIdentity visited bindings id =
         if List.contains id visited then
             None
@@ -262,7 +301,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                         facts.Declarations
 
                 if List.isEmpty handles then
-                    None
+                    literalUnionIdentity true facts
                 else
                     let role =
                         if List.isEmpty facts.ConstructSignatures then
@@ -541,6 +580,13 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
         changed <- not (List.isEmpty additions)
         byType <- List.fold (fun map (id, identity) -> Map.add id identity map) byType additions
 
+    let stringEnums =
+        shape.Decls
+        |> List.choose (function
+            | FsStringEnum enum -> Some enum.Name
+            | _ -> None)
+        |> Set.ofList
+
     let byName =
         shape.DeclNames
         |> Map.toList
@@ -548,6 +594,13 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
         |> List.choose (fun (id, name) ->
             Map.tryFind id byType
             |> Option.map (fun identity ->
+                let identity =
+                    if identity.Role = "literal-union" && Set.contains name stringEnums then
+                        // Shape hoists nullish members into FsOption and shares the remaining enum.
+                        literalUnionIdentity false shape.Types[id] |> Option.defaultValue identity
+                    else
+                        identity
+
                 name,
                 { identity with
                     Sources = identity.Sources @ closure id |> List.distinct |> List.sortBy sourceKey

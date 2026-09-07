@@ -67,6 +67,7 @@ type typekeyof< ^T, ^ReturnType> =
     /// <summary>
     /// Convert a path key for a different type to the given type. UNSAFE.
     /// </summary>
+    [<Emit("$0")>]
     static member inline UnsafeCastFrom< ^T>(value: typekeyof<_, ^ReturnType>) : typekeyof< ^T, ^ReturnType > = !!value
 
     /// <summary>
@@ -78,17 +79,19 @@ type typekeyof< ^T, ^ReturnType> =
     /// <summary>
     /// Access a property of an object without type checking the object type. UNSAFE.
     /// </summary>
-    [<Extension>]
+    [<Extension; Emit("$0[$1]")>]
     static member inline UnsafeAccess(accessedObject: obj, key: typekeyof<_, ^ReturnType>) : ^ReturnType =
         accessedObject.Item(key.Value) |> unbox
 
     /// <summary>
     /// Access a property of an object using a path.
     /// </summary>
-    [<Extension>]
+    [<Extension; Emit("$0[$1]")>]
     static member inline Access(accessedObject: ^T, key: typekeyof< ^T, ^ReturnType >) : ^ReturnType =
         accessedObject.Item(key.Value) |> unbox
 
+    // Evaluate the receiver before the object expression, as an F# call does.
+    [<Emit("((key, value) => value[key])($0, $1)")>]
     member inline this.Invoke(obj: ^T) : ^ReturnType = obj.Item(this.Value) |> unbox
 
 /// <summary>
@@ -111,32 +114,27 @@ type keyof<'T> =
     private
     | Value__ of string
 
+    [<Emit("$0")>]
     static member inline UnsafeCastFrom<'T>(value: keyof<_>) : keyof<'T> = !!value
+
+    [<Emit("$0")>]
     static member inline UnsafeCastReturnType<'ReturnType>(key: keyof<'T>) : typekeyof<'T, 'ReturnType> = !!key
 
     [<Emit("$0")>]
     member inline this.Value: string = !!this
 
-    [<Extension>]
-    static member inline Access(accessedObject: 'T, key: keyof<'T>) : obj option =
-        accessedObject.Item(key.Value) |> Option.ofObj
-
-    [<Extension>]
-    static member inline UnsafeAccess(accessedObject: obj, key: keyof<_>) : obj option =
-        accessedObject.Item(key.Value) |> Option.ofObj
-
+    [<Emit("$0")>]
     static member inline op_Implicit(key: typekeyof<'T, _>) : keyof<'T> = !!key
-    member inline this.Invoke(obj: ^T) = obj.Item(this.Value) |> Option.ofObj
 
 [<Erase>]
 type proptypekey<'T, 'ReturnType> =
     private
     | Value__ of (proptypelock<'T> -> 'ReturnType)
 
-    [<Erase>]
+    [<Emit("(void $0, $1)")>]
     member inline this.unlock(value: proptypelock<'T>) : 'ReturnType = unbox value
 
-    [<Erase>]
+    [<Emit("(void $0, $1)")>]
     member inline this.lock(value: 'ReturnType) = unbox<proptypelock<'T>> value
 
 
@@ -150,8 +148,9 @@ and [<Erase>] proptypelock<'T> =
     private
     | Value__ of obj
 
-    [<Emit("$0")>]
-    member inline this.Item(value: proptypekey<'T, 'ReturnValue>) : 'ReturnValue = unbox value
+    // Evaluate the witness argument even though selection returns the stored value.
+    [<Emit("((value, _key) => value)($0, $1)")>]
+    member inline this.Item(value: proptypekey<'T, 'ReturnValue>) : 'ReturnValue = unbox this
 
 /// <summary>
 /// Branded primitives: the F# rendering of TypeScript's intersection brands

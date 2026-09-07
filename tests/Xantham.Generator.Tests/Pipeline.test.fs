@@ -4228,3 +4228,10 @@ let pipelineTests =
                             "the generic arm's members were read after it was met as a reference" ])
 
     ]
+
+[<Tests>]
+let typeOnlyExportTests =
+    testList "type-only export fixture" [
+        yield! fixtureTests "type-only-export-lab" (handFixture "type-only-export-lab")
+            (handConfig (handFixture "type-only-export-lab")) (fun _ -> [])
+    ]

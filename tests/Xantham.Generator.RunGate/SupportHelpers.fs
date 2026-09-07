@@ -11,6 +11,12 @@ type private Settings =
         Payload: obj
     }
 
+// Disambiguate type members from the same-spelled auto-open helper functions.
+type private TypedKey = Fable.Core.JS.JS.typekeyof<Settings, int>
+type private Key = Fable.Core.JS.JS.keyof<Settings>
+type private ObjectKey = Fable.Core.JS.JS.keyof<obj>
+type private ObjectTypedKey = Fable.Core.JS.JS.typekeyof<obj, obj>
+
 [<Measure>]
 type private Identifier
 
@@ -112,3 +118,193 @@ let run check =
 
         KeyOf.item (unbox<keyof<obj>> "value") value |> ignore
         emitJsExpr value "$0.reads")
+
+    expect "typekeyof.UnsafeCastFrom preserves the key" "Count" (fun () ->
+        TypedKey.UnsafeCastFrom<Settings>(unbox<typekeyof<obj, int>> "Count").Value)
+
+    expect "typekeyof.Access reads its property" 42 (fun () -> TypedKey.Access(settings, typed))
+    expect "typekeyof.UnsafeAccess reads its property" 42 (fun () -> TypedKey.UnsafeAccess(box settings, typed))
+    expect "typekeyof.Invoke reads its property" 42 (fun () -> typed.Invoke(settings))
+
+    expect "keyof.UnsafeCastFrom preserves the key" "Count" (fun () ->
+        Key.UnsafeCastFrom<Settings>(unbox<keyof<obj>> "Count").Value)
+
+    expect "keyof.UnsafeCastReturnType preserves the key" "Count" (fun () -> Key.UnsafeCastReturnType<int>(key).Value)
+
+    expect "keyof.op_Implicit preserves the key" "Count" (fun () -> (Key.op_Implicit typed).Value)
+
+    let optionalMembers: (string * (keyof<obj> -> obj -> obj option)) list =
+        [
+            "keyof.Access", fun field value -> ObjectKey.Access(value, field)
+            "keyof.UnsafeAccess", fun field value -> ObjectKey.UnsafeAccess(value, field)
+            "keyof.Invoke", fun field value -> field.Invoke(value)
+        ]
+
+    let typedMembers: (string * (typekeyof<obj, obj> -> obj -> obj)) list =
+        [
+            "typekeyof.Access", fun field value -> ObjectTypedKey.Access(value, field)
+            "typekeyof.UnsafeAccess", fun field value -> ObjectTypedKey.UnsafeAccess(value, field)
+            "typekeyof.Invoke", fun field value -> field.Invoke(value)
+        ]
+
+    let undefined: obj = emitJsExpr () "undefined"
+
+    let payloads =
+        [
+            "zero", box 0
+            "false", box false
+            "empty string", box ""
+            "Some null", box (Some(null: obj))
+            "Some undefined", box (Some undefined)
+            "nested option", box (Some(Some(null: obj)))
+        ]
+
+    let objectWith payload : obj = emitJsExpr payload "({ value: $0 })"
+
+    let sameValue left right : bool =
+        emitJsExpr (left, right) "Object.is($0, $1)"
+
+    let untypedField = unbox<keyof<obj>> "value"
+    let typedField = unbox<typekeyof<obj, obj>> "value"
+
+    for name, read in optionalMembers do
+        for label, payload in [ "null", null; "undefined", undefined ] do
+            expect $"{name} maps {label} to None" None (fun () -> read untypedField (objectWith payload))
+
+        expect $"{name} maps an absent property to None" None (fun () -> read untypedField (emitJsExpr () "({})"))
+
+        for label, payload in payloads do
+            expect $"{name} preserves {label} inside Some" true (fun () ->
+                read untypedField (objectWith payload)
+                |> Option.exists (fun actual -> sameValue actual payload))
+
+        expect $"{name} evaluates a property getter once" 1 (fun () ->
+            let value: obj =
+                emitJsExpr () "({ reads: 0, get value() { this.reads++; return 42; } })"
+
+            read untypedField value |> ignore
+            emitJsExpr value "$0.reads")
+
+    for name, read in typedMembers do
+        for label, payload in [ "null", null; "undefined", undefined ] @ payloads do
+            expect $"{name} preserves the raw {label} value" true (fun () ->
+                sameValue (read typedField (objectWith payload)) payload)
+
+        expect $"{name} leaves an absent property undefined" true (fun () ->
+            sameValue (read typedField (emitJsExpr () "({})")) undefined)
+
+        expect $"{name} evaluates a property getter once" 1 (fun () ->
+            let value: obj =
+                emitJsExpr () "({ reads: 0, get value() { this.reads++; return 42; } })"
+
+            read typedField value |> ignore
+            emitJsExpr value "$0.reads")
+
+    let witness = PropTypeBuilder.proptypekey (fun (value: Settings) -> value.Count)
+    let locked = unbox<proptypelock<Settings>> 42
+    expect "proptypekey.lock retains the value" 42 (fun () -> witness.lock (42) |> unbox<int>)
+    expect "proptypekey.unlock retains the value" 42 (fun () -> witness.unlock (locked))
+    expect "proptypelock.Item retains the value" 42 (fun () -> locked.Item(witness))
+
+    expect "property locks preserve a nested option payload" true (fun () ->
+        let objectWitness =
+            PropTypeBuilder.proptypekey (fun (value: Settings) -> value.Payload)
+
+        let payload = box (Some(Some undefined))
+        let wrapped = objectWitness.lock (payload)
+
+        sameValue (objectWitness.unlock (wrapped)) payload
+        && sameValue (wrapped.Item(objectWitness)) payload)
+
+    expect "a multiple-property marker can lock and unlock its union value" 42 (fun () ->
+        let marker =
+            PropTypeBuilder.proptypekey ((fun (value: Settings) -> value.Name), (fun value -> value.Count))
+
+        match marker.unlock (marker.lock (U2.Case2 42)) with
+        | U2.Case2 value -> value
+        | _ -> -1)
+
+    expect "typekeyof.Invoke evaluates receiver before argument" "key,object" (fun () ->
+        let calls = ResizeArray<string>()
+
+        let getKey () =
+            calls.Add "key"
+            typed
+
+        let getObject () =
+            calls.Add "object"
+            settings
+
+        (getKey ()).Invoke(getObject ()) |> ignore
+        String.concat "," calls)
+
+    expect "keyof.Invoke evaluates receiver before argument" "key,object" (fun () ->
+        let calls = ResizeArray<string>()
+
+        let getKey () =
+            calls.Add "key"
+            key
+
+        let getObject () =
+            calls.Add "object"
+            settings
+
+        (getKey ()).Invoke(getObject ()) |> ignore
+        String.concat "," calls)
+
+    for name, read in optionalMembers do
+        expect $"{name} evaluates the object and key once" 2 (fun () ->
+            let mutable calls = 0
+
+            let getKey () =
+                calls <- calls + 1
+                untypedField
+
+            let getObject () =
+                calls <- calls + 1
+                objectWith (box 42)
+
+            read (getKey ()) (getObject ()) |> ignore
+            calls)
+
+    expect "proptypekey.lock evaluates receiver before argument" "key,value" (fun () ->
+        let calls = ResizeArray<string>()
+
+        let getKey () =
+            calls.Add "key"
+            witness
+
+        let getValue () =
+            calls.Add "value"
+            42
+
+        (getKey ()).lock(getValue ()) |> ignore
+        String.concat "," calls)
+
+    expect "proptypekey.unlock evaluates receiver before argument" "key,value" (fun () ->
+        let calls = ResizeArray<string>()
+
+        let getKey () =
+            calls.Add "key"
+            witness
+
+        let getValue () =
+            calls.Add "value"
+            locked
+
+        (getKey ()).unlock(getValue ()) |> ignore
+        String.concat "," calls)
+
+    expect "proptypelock.Item evaluates its witness argument" "value,key" (fun () ->
+        let calls = ResizeArray<string>()
+
+        let getValue () =
+            calls.Add "value"
+            locked
+
+        let getKey () =
+            calls.Add "key"
+            witness
+
+        (getValue ()).Item(getKey ()) |> ignore
+        String.concat "," calls)

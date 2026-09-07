@@ -3,8 +3,8 @@
   "package": "solid-js",
   "module": "SolidJs",
   "counts": {
-    "exact": 21,
-    "ergonomic": 97,
+    "exact": 22,
+    "ergonomic": 96,
     "widened": 55,
     "escape": 18
   },
@@ -44,9 +44,9 @@
     },
     {
       "pass": "SE - shape-exports",
-      "total": 141,
-      "ergonomic": 117,
-      "widened": 22,
+      "total": 138,
+      "ergonomic": 115,
+      "widened": 21,
       "escape": 2
     },
     {

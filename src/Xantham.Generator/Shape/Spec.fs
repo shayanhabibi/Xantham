@@ -1674,10 +1674,14 @@ and internal objectRef
 
         match Map.tryFind facts.Response.Id model.DeclNames with
         | Some name ->
-            match
-                (ownArguments facts @ declParamIds facts @ freeParamsOf model facts.Response.Id)
-                |> List.distinct
-            with
+            let arguments =
+                if Map.containsKey facts.Response.Id model.AliasApplications then
+                    freeParamsOf model facts.Response.Id
+                else
+                    (ownArguments facts @ declParamIds facts @ freeParamsOf model facts.Response.Id)
+                    |> List.distinct
+
+            match arguments with
             | [] -> FsNamed name, []
             | arguments -> appliedRef ctx model self owner name arguments
         | None ->

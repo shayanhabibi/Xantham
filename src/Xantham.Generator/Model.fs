@@ -703,6 +703,9 @@ type HarvestedExport =
         ExportName: string
         /// The origin symbol (`getAliasedSymbol` applied until stable).
         Symbol: SymbolResponse
+        /// The entry exposes this symbol as a value, through no type-only import/export edge.
+        /// The origin symbol's value flags alone do not establish a runtime export.
+        HasValueExport: bool
         /// `getDocumentationComment`, already rendered to plain text by the wire.
         Docs: string
         Tags: JSDocTagInfo list
@@ -1297,7 +1300,7 @@ type ShapeModel =
         /// of `each<T, U>(props: { items: T[]; render: (item: T) => U })` - binds nothing of
         /// its own, so it is declared over these and every reference applies them back.
         DeclParams: Map<int, int list>
-        /// Recognized alias application id -> the declaration id whose name it references.
+        /// Recognized generic application id -> the declaration id whose name it references.
         AliasApplications: Map<int, int>
         /// `Exports` members accumulated by the class/function/value passes, keyed by harvest
         /// position so `order-declarations` can assemble them in source order.

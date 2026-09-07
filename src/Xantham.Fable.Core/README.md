@@ -15,6 +15,13 @@ and the active patterns. Existing compiled callers using those helper identities
 must be rebuilt. Erased type identities and generated binding type references
 are preserved.
 
+Direct erased-type members keep their call syntax. `keyof.Access`,
+`keyof.UnsafeAccess`, and `keyof.Invoke` now inline as extensions from
+`XanthamFableCore`, so their option construction preserves nested `Some` values;
+compiled callers must be rebuilt. Null or missing properties return `None`.
+Typed access returns the property's raw value. Casts, invocation, and property
+locks preserve receiver and argument evaluation without calling JavaScript globals.
+
 The `keyof` function now retains its lambda's result type for Fable's property-name
 inference. Inferred calls such as `keyof _.Name` keep their spelling. Explicit
 calls become `keyof<Config, _> _.Name` in place of `keyof<Config> _.Name`; the

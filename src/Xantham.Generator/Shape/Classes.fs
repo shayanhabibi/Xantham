@@ -262,7 +262,7 @@ let shapeClasses: Pass<ShapeModel> =
                         model.Harvest.Exports
                         |> List.indexed
                         |> List.collect (fun (index, export) ->
-                            if not (hasAny SymbolFlags.Class export.Symbol.Flags) then
+                            if not export.HasValueExport || not (hasAny SymbolFlags.Class export.Symbol.Flags) then
                                 []
                             else
                                 let name = fsName fallback export

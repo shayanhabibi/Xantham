@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "package": "type-only-export-lab",
+  "module": "TypeOnlyExportLab",
+  "counts": {
+    "exact": 3,
+    "ergonomic": 2,
+    "widened": 0,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 3,
+      "ergonomic": 3
+    }
+  ]
+}

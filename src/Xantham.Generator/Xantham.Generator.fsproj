@@ -12,6 +12,7 @@
         <Compile Include="Findings.fs" />
         <Compile Include="Model.fs" />
         <Compile Include="Bootstrap.fs" />
+        <Compile Include="ExportProvenance.fs" />
         <Compile Include="Harvest.fs" />
         <Compile Include="Resolve.fs" />
         <!-- Tier 3 - Shape. `Spec.fs` first: it is what every pass is written against.

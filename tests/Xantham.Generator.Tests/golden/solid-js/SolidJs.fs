@@ -886,8 +886,6 @@ module SharedConfig =
 type Exports =
     [<Import("DEV", "solid-js")>]
     static member DEV: DEV option = jsNative
-    [<Import("JSX", "solid-js")>]
-    static member JSX: JSX = jsNative
     /// <summary>
     /// Reactively transforms an array with a callback function - underlying helper for the <c>&lt;For&gt;</c> control flow
     ///
@@ -932,10 +930,6 @@ type Exports =
     static member ``$TRACK``: obj = jsNative
     [<Import("$DEVCOMP", "solid-js")>]
     static member ``$DEVCOMP``: obj = jsNative
-    [<Import("Owner", "solid-js")>]
-    static member Owner: Owner option = jsNative
-    [<Import("Transition", "solid-js")>]
-    static member Transition: TransitionState option = jsNative
     /// <summary>
     /// Creates a new non-tracked reactive context that doesn't auto-dispose
     /// </summary>

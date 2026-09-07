@@ -82,6 +82,37 @@ let accept (client: Identity.Adapter.Client) = Identity.Root.Exports.``use`` cli
 [<Tests>]
 let tests =
     testList "declaration catalog" [
+        testCase "contextual bounds do not redeclare generic result members" <| fun _ ->
+            let directory = Path.Combine(Path.GetTempPath(), "xantham-catalog-contextual-bound-" + Guid.NewGuid().ToString "N")
+            Directory.CreateDirectory directory |> ignore
+            try
+                writePackageFile directory "package.json" """{"name":"contextual-bound-lab","version":"1.0.0"}"""
+                writePackageFile directory "index.d.ts" """export interface Bound { bytes: number; }
+export type Result<R = any> = { done: false; value: R } | { done: true; value?: undefined };
+export type Pair<A, B> = { left: A; right: B } | { done: true };
+export interface Reader {
+    read<T extends Bound>(value: T): Result<T>;
+    duplicate<T extends Bound>(value: T): Pair<T, T>;
+    reverse<A, B>(left: A, right: B): Pair<B, A>;
+}
+"""
+                let root = configured directory "Root" "index.d.ts" [||]
+                Pipeline.run root directory (Path.Combine(directory, "root")) |> Async.RunSynchronously |> ignore
+                let consumer = """module Identity.Consumer
+let read<'T when 'T :> Identity.Root.Bound> (reader: Identity.Root.Reader) (value: 'T) : Identity.Root.Result<'T> =
+    reader.read value
+let duplicate<'T when 'T :> Identity.Root.Bound> (reader: Identity.Root.Reader) (value: 'T) : Identity.Root.Pair<'T, 'T> =
+    reader.duplicate value
+let reverse<'A, 'B> (reader: Identity.Root.Reader) (left: 'A) (right: 'B) : Identity.Root.Pair<'B, 'A> =
+    reader.reverse(left, right)
+"""
+                let sources = [ "root/Identity.Root.fs" ]
+                let code, output = compileConsumer directory sources consumer
+                code |> Flip.Expect.equal output 0
+                let code, output = compileConsumer directory sources (consumer + "\nlet invalid (reader: Identity.Root.Reader) = reader.read \"unbounded\"\n")
+                (code <> 0 && output.Contains "FS0001") |> Flip.Expect.equal output true
+            finally Directory.Delete(directory, true)
+
         testCase "transparent aliases preserve API identity across entry points" <| fun _ ->
             let directory = Path.Combine(Path.GetTempPath(), "xantham-catalog-transparent-alias-" + Guid.NewGuid().ToString "N")
             Directory.CreateDirectory directory |> ignore
@@ -337,5 +368,76 @@ let share (client: Identity.Root.Client) : Identity.Root.Client = Identity.Adapt
 """
                 let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] consumer
                 code |> Flip.Expect.equal output 0
+            finally Directory.Delete(directory, true)
+    ]
+
+[<Tests>]
+let literalUnionTests =
+    testList "declaration catalog anonymous literal unions" [
+        testTheory "unrelated parent properties preserve shared literal union ownership" [ ""; "?" ] <| fun optional ->
+            let directory = Path.Combine(Path.GetTempPath(), "xantham-catalog-literal-union-" + Guid.NewGuid().ToString "N")
+            Directory.CreateDirectory directory |> ignore
+            try
+                writePackageFile directory "package.json" """{"name":"icon-identity-lab","version":"1.0.0"}"""
+                writePackageFile directory "shared.d.ts" ("export interface Icon { src: string; theme" + optional + """: "dark" | "light"; }""")
+                writePackageFile directory "root.d.ts" """export interface Palette { color?: "dark" | "light"; }
+export { Icon } from "./shared";
+"""
+                writePackageFile directory "adapter.d.ts" """export { Icon } from "./shared";"""
+                let producer = Path.Combine(directory, "root")
+                Pipeline.run (configured directory "Root" "root.d.ts" [||]) directory producer |> Async.RunSynchronously |> ignore
+                let reference = Path.Combine(producer, "declarations.json")
+                Pipeline.run (configured directory "Adapter" "adapter.d.ts" [| reference |]) directory (Path.Combine(directory, "adapter"))
+                |> Async.RunSynchronously |> ignore
+                let consumer = """module Identity.Consumer
+let share (icon: Identity.Adapter.Icon) : Identity.Root.Icon = icon
+let copyTheme (source: Identity.Root.Icon) (target: Identity.Adapter.Icon) = target.theme <- source.theme
+"""
+                let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] consumer
+                code |> Flip.Expect.equal output 0
+                use catalog = JsonDocument.Parse(File.ReadAllText reference)
+                catalog.RootElement.GetProperty("declarations").EnumerateArray()
+                |> Seq.find (fun entry -> entry.GetProperty("fSharpName").GetString() = "Identity.Root.Icon")
+                |> fun entry -> entry.GetProperty("sources").EnumerateArray()
+                |> Seq.map (fun source -> source.GetProperty("file").GetString()) |> Seq.toList
+                |> Flip.Expect.equal "literal use sites do not replace the enclosing source dependency" [ "shared.d.ts" ]
+            finally Directory.Delete(directory, true)
+
+        testCase "named unions and mixed enum unions retain declaration identity" <| fun _ ->
+            let directory = Path.Combine(Path.GetTempPath(), "xantham-catalog-nominal-union-" + Guid.NewGuid().ToString "N")
+            Directory.CreateDirectory directory |> ignore
+            try
+                writePackageFile directory "package.json" """{"name":"nominal-union-lab","version":"1.0.0"}"""
+                writePackageFile directory "shared.d.ts" """export enum Left { Dark = "dark", Light = "light" }
+export enum Right { Dark = "dark", Light = "light" }
+export type Theme = "dark" | "light";
+export interface Mixed { left?: Left | "auto"; right?: Right | "auto"; theme?: Theme; }
+"""
+                writePackageFile directory "index.d.ts" """export * from "./shared";"""
+                writePackageFile directory "adapter.d.ts" """export * from "./shared";"""
+                let producer = Path.Combine(directory, "root")
+                Pipeline.run (configured directory "Root" "index.d.ts" [||]) directory producer |> Async.RunSynchronously |> ignore
+                let reference = Path.Combine(producer, "declarations.json")
+                use catalog = JsonDocument.Parse(File.ReadAllText reference)
+                let named =
+                    catalog.RootElement.GetProperty("declarations").EnumerateArray()
+                    |> Seq.filter (fun entry -> List.contains (entry.GetProperty("fSharpName").GetString()) [ "Identity.Root.Left"; "Identity.Root.Right"; "Identity.Root.Theme" ])
+                    |> Seq.toList
+                named |> List.length |> Flip.Expect.equal "each named declaration retains an owner" 3
+                named |> List.map (fun entry -> entry.GetProperty("identity").GetString()) |> List.distinct |> List.length
+                |> Flip.Expect.equal "equal literal values do not merge named declarations" 3
+                named |> List.forall (fun entry -> entry.GetProperty("handles").GetArrayLength() > 0)
+                |> Flip.Expect.equal "named declarations retain source anchors" true
+                Pipeline.run (configured directory "Adapter" "adapter.d.ts" [| reference |]) directory (Path.Combine(directory, "adapter"))
+                |> Async.RunSynchronously |> ignore
+                let consumer = """module Identity.Consumer
+let share (value: Identity.Adapter.Mixed) : Identity.Root.Mixed = value
+let copyLeft (source: Identity.Root.Mixed) (target: Identity.Adapter.Mixed) = target.left <- source.left
+"""
+                let sources = [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ]
+                let code, output = compileConsumer directory sources consumer
+                code |> Flip.Expect.equal output 0
+                let code, output = compileConsumer directory sources (consumer + "\nlet invalid (value: Identity.Root.Left) : Identity.Root.Right = value\n")
+                (code <> 0 && output.Contains "FS0001") |> Flip.Expect.equal output true
             finally Directory.Delete(directory, true)
     ]

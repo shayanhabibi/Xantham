@@ -79,19 +79,27 @@ let harvestExports: Pass<HarvestModel> =
                                 })
                             |> Async.Parallel
 
-                        let harvested =
+                        let valueExport = ExportProvenance.reader ctx
+
+                        let! harvested =
                             resolved
                             |> Array.sortBy fst
                             |> Array.map (fun (name, origin) ->
-                                {
-                                    ExportName = name
-                                    Symbol = origin
-                                    Docs = ""
-                                    Tags = []
-                                    Origin = FromModule
-                                    Order = Grouping.declOrder origin.Declarations
+                                async {
+                                    let! hasValueExport = valueExport moduleSymbol name
+
+                                    return
+                                        {
+                                            ExportName = name
+                                            Symbol = origin
+                                            HasValueExport = hasValueExport
+                                            Docs = ""
+                                            Tags = []
+                                            Origin = FromModule
+                                            Order = Grouping.declOrder origin.Declarations
+                                        }
                                 })
-                            |> Array.toList
+                            |> Async.Sequential
 
                         // A namespace the entry file declares without exporting is still the
                         // owner of the types an exported signature reaches through it, so the
@@ -113,7 +121,7 @@ let harvestExports: Pass<HarvestModel> =
                         return
                             Advanced
                                 { model with
-                                    Exports = harvested
+                                    Exports = harvested |> Array.toList
                                     Namespaces = namespaces
                                 }
                 }
@@ -165,19 +173,27 @@ let private harvestAmbientModule (ctx: Context) (moduleSymbol: SymbolResponse) =
                     |> ValueOption.map (fun p -> p.Id, p.Name)
                     |> ValueOption.toOption
 
-                let harvested =
+                let valueExport = ExportProvenance.reader ctx
+
+                let! harvested =
                     resolved
                     |> Array.sortBy fst
                     |> Array.map (fun (name, origin) ->
-                        {
-                            ExportName = name
-                            Symbol = origin
-                            Docs = ""
-                            Tags = []
-                            Origin = FromAmbientModule specifier
-                            Order = Grouping.declOrder origin.Declarations
+                        async {
+                            let! hasValueExport = valueExport moduleSymbol name
+
+                            return
+                                {
+                                    ExportName = name
+                                    Symbol = origin
+                                    HasValueExport = hasValueExport
+                                    Docs = ""
+                                    Tags = []
+                                    Origin = FromAmbientModule specifier
+                                    Order = Grouping.declOrder origin.Declarations
+                                }
                         })
-                    |> Array.toList
+                    |> Async.Sequential
 
                 let findings =
                     [
@@ -190,7 +206,7 @@ let private harvestAmbientModule (ctx: Context) (moduleSymbol: SymbolResponse) =
                         | None -> ()
                     ]
 
-                return harvested, findings, body |> Option.map fst
+                return harvested |> Array.toList, findings, body |> Option.map fst
     }
 
 /// The entry package's ambient global declarations, for a package that declares no module at
@@ -303,6 +319,7 @@ let harvestGlobals: Pass<HarvestModel> =
                                         {
                                             ExportName = symbol.Name
                                             Symbol = symbol
+                                            HasValueExport = hasAny SymbolFlags.Value symbol.Flags
                                             Docs = ""
                                             Tags = []
                                             Origin = FromGlobal

@@ -99,6 +99,13 @@ Wire-driven inventory, no mapping decisions at all.
   `getAliasedSymbol` to origin) appears exactly once; declaration merging is already done
   because we harvest *symbols*, not declaration nodes.
 
+- **Value exports retain their path provenance.** The flattened module export list includes
+  symbols reached only through `export type *`. Harvest records `HasValueExport` from the
+  compiler's direct export tables and typed import/export nodes, following only value-capable
+  paths to the same declaring symbol. Type-only classes retain their instance shapes and
+  `typeof` aliases retain the value-type facts, while class constructors/statics and function
+  imports require a value-export path. Barrel cycles do not cache a provisional absence.
+
 - **An ambient declaration in a `.d.ts` module is exported without the keyword**, and the
   harvest is right to take it. `declare const secret: number` beside an `export declare
   function` looks local and is not: `getExportsOfModule` returns it, and `import { secret }`
@@ -1221,7 +1228,10 @@ specializations. Generic alias applications retain their declaration owner; tran
 normalize to their underlying F# type for API comparison. Callable identities include union,
 intersection, tuple and recursive references. Source closure retains declaration dependencies
 and excludes unrelated export use sites. The regression suite checks each case through producer
-and consumer compilation. Remaining SDK API and constraint mismatches, and cross-profile
+and consumer compilation. Anonymous generic result members reuse their declaration only under
+a complete substitution, preserving caller bounds and repeated or reordered arguments.
+Anonymous literal unions use their literal values for identity; named aliases and enum members
+retain their declaration anchors. Remaining SDK API and constraint mismatches, and cross-profile
 ownership, are still explicitly refused.
 
 Rendering regressions from the SDK corpus (2026-09-06) preserve `_` identifiers and qualify

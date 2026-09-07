@@ -1952,6 +1952,7 @@ let private callableHybrids () =
 [<EntryPoint>]
 let main _ =
     SupportHelpers.run check
+    ExportProvenance.run check
     globals ()
     imports ()
     ambientModules ()

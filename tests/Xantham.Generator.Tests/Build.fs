@@ -78,6 +78,7 @@ let export (name: string) (sym: SymbolResponse) : HarvestedExport =
     {
         ExportName = name
         Symbol = sym
+        HasValueExport = uint32 (sym.Flags &&& SymbolFlags.Value) <> 0u
         Docs = ""
         Tags = []
         Origin = FromModule

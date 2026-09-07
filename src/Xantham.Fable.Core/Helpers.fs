@@ -64,6 +64,18 @@ module KeyOf =
         else
             None
 
+// Option construction must inline outside the reserved Fable.Core.JS namespace.
+// Reuse the helper so nested Some values and single getter evaluation agree.
+type Fable.Core.JS.JS.keyof<'T> with
+    [<System.Runtime.CompilerServices.Extension>]
+    static member inline Access(accessedObject: 'T, key: keyof<'T>) : obj option = KeyOf.item key accessedObject
+
+    [<System.Runtime.CompilerServices.Extension>]
+    static member inline UnsafeAccess(accessedObject: obj, key: keyof<_>) : obj option =
+        KeyOf.item (unbox<keyof<obj>> key) accessedObject
+
+    member inline this.Invoke(obj: 'T) : obj option = KeyOf.item this obj
+
 module TypeKeyOf =
     let inline value (key: typekeyof<'T, 'ReturnType>) : string = !!key
     let inline box (key: typekeyof<'T, 'ReturnType>) : keyof<'T> = !!key
