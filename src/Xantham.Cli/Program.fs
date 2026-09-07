@@ -241,17 +241,24 @@ let private cache =
         Spec.tscVersion
         |> String.filter (function
             | c when Char.IsAsciiLetterOrDigit c -> true
-            | '-' | '_' | '.' -> true
-            | _ -> false
-            )
-        )
+            | '-'
+            | '_'
+            | '.' -> true
+            | _ -> false)
+    )
 
-let private ensureInstall() =
+let private ensureInstall () =
     if not (Directory.Exists cache) then
         Directory.CreateDirectory(cache) |> ignore
+
     let packageJson = Path.Combine(cache, "package.json")
+
     if not (File.Exists(packageJson)) then
-        File.WriteAllText(packageJson, Spec.tscVersion |> sprintf (*language=json*) """{
+        File.WriteAllText(
+            packageJson,
+            Spec.tscVersion
+            |> sprintf (*language=json*)
+                """{
     "name": "xantham",
     "private": true,
     "type": "module",
@@ -259,9 +266,12 @@ let private ensureInstall() =
     "devDependencies": {
         "typescript": "%s"
     }
-}""" )
+}"""
+        )
+
     if not (Directory.Exists(Path.Combine(cache, "node_modules"))) then
         Npm.install (fun p -> { p with WorkingDirectory = cache })
+
         match Xantham.TypeScript.Wire.Tsc.locate cache with
         | Some tsc -> Ok tsc
         | None -> Error $"tsc not found at {cache}"
@@ -269,16 +279,14 @@ let private ensureInstall() =
         match Xantham.TypeScript.Wire.Tsc.locate cache with
         | Some tsc -> Ok tsc
         | None -> Error $"tsc not found at {cache}"
-    |> Result.map (fun tsc ->
-        Environment.SetEnvironmentVariable("XANTHAM_TSGO_EXE", tsc)
-        )
+    |> Result.map (fun tsc -> Environment.SetEnvironmentVariable("XANTHAM_TSGO_EXE", tsc))
 
 /// Checks the cache for a compiler executable, and sets the environment variable if found.
 /// Else no-op.
-let private checkCache() =
+let private checkCache () =
     Xantham.TypeScript.Wire.Tsc.locate cache
     |> Option.iter (fun tsc -> Environment.SetEnvironmentVariable("XANTHAM_TSGO_EXE", tsc))
-    
+
 
 /// One invocation, over the writers the caller supplies. The entry point calls it against the
 /// console; the acceptance test calls it against a string writer.
@@ -294,52 +302,58 @@ let run (out: TextWriter) (err: TextWriter) (argv: string[]) : int =
                         description "manage the typescript compiler cache"
                         inputs Input.context
                         helpAction
-                        addCommands [
-                            command "init" {
-                                description "install the xantham typescript compiler dependencies"
-                                setAction (fun _ ->
-                                    match ensureInstall() with
-                                    | Error message -> err.WriteLine message; Exit.Failed
-                                    | Ok _ -> Exit.Generated
-                                    )
-                            }
-                            command "version" {
-                                description "show the xantham typescript compiler version"
-                                setAction (fun _ ->
-                                    match Xantham.TypeScript.Wire.Tsc.locate cache with
-                                    | Some tsc ->
-                                        $"{Spec.tscVersion} cached at: {tsc}"
-                                        |> out.WriteLine
-                                    | None ->
-                                        $"{Spec.tscVersion} not found in cache. Run `xantham tsc init`."
-                                        |> err.WriteLine
-                                    Exit.Generated
-                                    )
-                            }
-                            command "clean" {
-                                description "remove all cached xantham compilers"
-                                setAction (fun _ ->
-                                    let path =
-                                        Path.Combine(
-                                            Environment.GetFolderPath Environment.SpecialFolder.UserProfile,
-                                            ".cache",
-                                            "xantham"
+
+                        addCommands
+                            [
+                                command "init" {
+                                    description "install the xantham typescript compiler dependencies"
+
+                                    setAction (fun _ ->
+                                        match ensureInstall () with
+                                        | Error message ->
+                                            err.WriteLine message
+                                            Exit.Failed
+                                        | Ok _ -> Exit.Generated)
+                                }
+                                command "version" {
+                                    description "show the xantham typescript compiler version"
+
+                                    setAction (fun _ ->
+                                        match Xantham.TypeScript.Wire.Tsc.locate cache with
+                                        | Some tsc -> $"{Spec.tscVersion} cached at: {tsc}" |> out.WriteLine
+                                        | None ->
+                                            $"{Spec.tscVersion} not found in cache. Run `xantham tsc init`."
+                                            |> err.WriteLine
+
+                                        Exit.Generated)
+                                }
+                                command "clean" {
+                                    description "remove all cached xantham compilers"
+
+                                    setAction (fun _ ->
+                                        let path =
+                                            Path.Combine(
+                                                Environment.GetFolderPath Environment.SpecialFolder.UserProfile,
+                                                ".cache",
+                                                "xantham"
                                             )
-                                    if Directory.Exists(path) then
-                                        Directory.Delete(path, true)
-                                        out.WriteLine "xantham cache removed"
-                                    else
-                                        out.WriteLine "no xantham cache to remove"
-                                    Exit.Generated
-                                    )
-                            }
-                        ]
+
+                                        if Directory.Exists(path) then
+                                            Directory.Delete(path, true)
+                                            out.WriteLine "xantham cache removed"
+                                        else
+                                            out.WriteLine "no xantham cache to remove"
+
+                                        Exit.Generated)
+                                }
+                            ]
                     }
                     command "generate" {
                         description "generate a binding and its manifest"
                         inputs GenerateOptions.Default
+
                         setAction (fun opts ->
-                            checkCache()
+                            checkCache ()
                             generate out err opts)
                     }
                     command "schema" {
