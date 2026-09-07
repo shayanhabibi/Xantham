@@ -119,6 +119,32 @@ Keep `<pkg>` outside the repository tree: the gate's format stage sweeps every `
 Compile `out/groups/TypeScript.Lib.fs` then `out/<Module>.fs` against `Fable.Core` 5.2.0 and
 `src/Xantham.Fable.Core`.
 
+## Compiler-library packaging after this handover
+
+Commit `0ed43ee` replaced the split library design with one `namespace rec TypeScript.Lib`
+file containing `Es` and `Dom` modules: the two families reference each other. The current
+[packing script](../../../tools/lib-pack/pack-libs.ps1) generates that file from a clean
+producer and compiles it for `netstandard2.1` and `net8.0` while packing `Xantham.Fable.Lib`.
+
+The tracked projects under `src/xantham-libs/` came from diagnostic commit `666ce0a`
+("push buggy gen'd files to get second opinion from houston"). They retain the superseded
+split output. The September 6, 2026 solution baseline spent 7m12s there and reported 50
+errors across both DOM target frameworks, including missing ES types. Their two solution
+entries have been removed; the snapshot files remain intact. The maintained `lib-ship-lab`
+golden still participates in the ordinary compile gate.
+
+The September 6 check regenerated the combined output with TypeScript
+`7.1.0-dev.20260902.1` and `lib: ["esnext", "dom"]`. The 73,424-line core compiled for
+`netstandard2.1` and `net8.0` with zero warnings/errors and no references to the producer module.
+The packing recipe now selects both library families explicitly; `lib` replaces the compiler's
+default set, so selecting DOM alone omits the ECMAScript declarations.
+
+Global scope is reusable in this clean producer because every program source is a compiler
+default library or an empty source/empty export. An application-enriched DOM scope remains a
+separate dependency problem; the ownership fixture retains that reproduction. The earlier
+334,599-line DOM-only measurement used a different input profile. NuGet packing and publishing
+are separate from the generation/compilation check reported here.
+
 ## Standing rules, unchanged
 
 Counts, never durations, for performance work. Read a measurement's configuration before

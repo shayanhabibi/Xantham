@@ -28,9 +28,31 @@
       },
       "description": "The compiler's `lib` option, as `tsconfig.json` spells it. Omitted, the compiler's default applies, which includes the DOM. A global type library that redeclares DOM names sets this to what its README prescribes."
     },
+    "types": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "The compiler's `types` option: installed ambient type packages required by this input. Omitted, automatic discovery applies; an empty array disables automatic inclusion. Missing named packages are reported before generation."
+    },
+    "declarationCatalog": {
+      "type": "boolean",
+      "description": "Emit declarations.json with stable TypeScript declaration identities and final F# names. Defaults to false."
+    },
+    "declarationReferences": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Producer declarations.json files, absolute or relative to the input package directory. Matching types reuse their producer's F# identity; incompatible catalogs fail generation."
+    },
+    "entry": {
+      "type": "string",
+      "description": "The TypeScript input file, relative to the package directory passed to generate, even when the configuration lives elsewhere. Must name an existing .ts, .tsx, .mts or .cts file (including declarations) within that directory. Omitted, selects types, typings, a root-export types string, then index.d.ts. An exports map without a root requires an explicit entry. Set runtime separately for a public JavaScript subpath; each invocation generates from one entry."
+    },
     "runtime": {
       "type": "string",
-      "description": "The npm package the generated `[<Import(…)>]` attributes name. Defaults to the package name with DefinitelyTyped's `@types/` convention undone, so `@types/three` imports from `three`."
+      "description": "The public JavaScript module or subpath used by generated `[<Import(…)>]` attributes. Must be a nonempty string when provided. Independent of the entry declaration path. Defaults to the package name with DefinitelyTyped's `@types/` convention undone, so `@types/three` imports from `three`."
     },
     "resolveNoInfer": {
       "type": "boolean",

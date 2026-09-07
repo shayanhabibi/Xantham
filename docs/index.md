@@ -72,6 +72,14 @@ with the pinned compiler's own `lib.*.d.ts`. Progress is measured on a ladder of
 packages pinned by version, each generated into a committed golden that is compiled as F# on
 every build.
 
+Explicit declaration entries and runtime import settings let a package expose several public
+subpaths. Ambient provider selection keeps each entry tied to its intended input environment.
+Optional declaration catalogs, applied between Shape and Render, allow later entries to reuse
+an earlier project's type definitions. Source identity, tool fingerprints, inference settings
+and emitted F# APIs must agree; catalogs record the owners actually used by each consumer.
+See [the generation guide](generator-usage.md) for configuration and the remaining
+[catalog compatibility boundaries](generator-usage.md#share-types-across-generated-subpaths).
+
 ---
 
 ## Repository layout

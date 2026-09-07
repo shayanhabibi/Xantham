@@ -24,7 +24,7 @@ let private required =
 
 /// Runs the command in a scratch output directory, handing the test the exit code, the two
 /// streams and the directory.
-let private invoke (args: string list) (test: int * string * string * string -> unit) =
+let private invoke (args: string list) (test: int * string * string * string -> 'T) : 'T =
     let outDir =
         Path.Combine(Path.GetTempPath(), "xantham-cli-" + Guid.NewGuid().ToString "N")
 
@@ -37,6 +37,20 @@ let private invoke (args: string list) (test: int * string * string * string -> 
     finally
         if Directory.Exists outDir then
             Directory.Delete(outDir, true)
+
+let private refusesConfig (message: string) (settings: string) =
+    let configDir = Path.Combine(Path.GetTempPath(), "xantham-entry-config-" + Guid.NewGuid().ToString "N")
+    Directory.CreateDirectory configDir |> ignore
+
+    try
+        let config = Path.Combine(configDir, "selection.json")
+        File.WriteAllText(config, "{ " + settings + " }")
+
+        invoke [ "generate"; Path.Combine(root, "tests", "fixtures", "entry-selection-lab"); "--config"; config ]
+        <| fun (code, _, err, outDir) ->
+            (code, err.Contains message, Directory.Exists outDir), (3, true, false)
+    finally
+        Directory.Delete(configDir, true)
 
 /// Every file the command wrote, against what the pipeline renders for the same package and
 /// configuration.
@@ -120,6 +134,47 @@ let schemaTests =
 [<Tests>]
 let commandTests =
     testList "generator cli" [
+        let inline (=!>) entry message = entry, message
+
+        testTheory "invalid declaration inputs are configuration errors" [
+            "null" =!> "entry must be a string"
+            "42" =!> "entry must be a string"
+            "true" =!> "entry must be a string"
+            "[]" =!> "entry must be a string"
+            "{}" =!> "entry must be a string"
+            "\"\"" =!> "entry must be a nonempty relative path"
+            "\" \"" =!> "entry must be a nonempty relative path"
+            (Text.Json.JsonSerializer.Serialize(Path.GetTempPath())) =!> "entry must be a relative path"
+            "\"../outside.d.ts\"" =!> "entry must stay within the package directory"
+            "\"package.json\"" =!> "entry must name a TypeScript file"
+            "\"dist/missing.d.ts\"" =!> "entry file does not exist"
+        ] <| fun (entry, message) ->
+            refusesConfig message ("\"entry\": " + entry)
+            ||> Flip.Expect.equal "selection fails before generation writes output"
+
+        testTheory "invalid runtime imports are configuration errors" [
+            "null" =!> "runtime must be a string"
+            "42" =!> "runtime must be a string"
+            "true" =!> "runtime must be a string"
+            "[]" =!> "runtime must be a string"
+            "{}" =!> "runtime must be a string"
+            "\"\"" =!> "runtime must be a nonempty string"
+            "\" \"" =!> "runtime must be a nonempty string"
+        ] <| fun (runtime, message) ->
+            refusesConfig message ("\"entry\": \"dist/adapter.d.ts\", \"runtime\": " + runtime)
+            ||> Flip.Expect.equal "an invalid import cannot fall back to the package root"
+
+        testTheory "invalid ambient type packages are configuration errors" [
+            "null" =!> "types must be an array of nonempty strings"
+            "42" =!> "types must be an array of nonempty strings"
+            "\"provider\"" =!> "types must be an array of nonempty strings"
+            "[42]" =!> "types must be an array of nonempty strings"
+            "[\"\"]" =!> "types must be an array of nonempty strings"
+            "[\" \"]" =!> "types must be an array of nonempty strings"
+        ] <| fun (types, message) ->
+            refusesConfig message ("\"types\": " + types)
+            ||> Flip.Expect.equal "an invalid ambient selection cannot fall back to automatic discovery"
+
         testCase "a path with no directory is refused" <| fun _ ->
             invoke [ "generate"; Path.Combine(root, "no-such-package") ]
             <| fun (code, _, err, _) ->
@@ -173,6 +228,55 @@ let generationTests =
         ]
     | Some _ ->
         testList "generator cli generation" [
+            let inline (==>) entry runtime = entry, runtime
+
+            testTheory "an explicit declaration opens a package with only named subpaths" [
+                "adapter.d.mts" ==> "adapter.mjs"
+                "adapter.d.cts" ==> "adapter.cjs"
+            ] <| fun (entry, runtime) ->
+                let package = Path.Combine(root, "tests", "fixtures", "entry-selection-" + Guid.NewGuid().ToString "N")
+                Directory.CreateDirectory package |> ignore
+
+                try
+                    File.WriteAllText(Path.Combine(package, "package.json"),
+                        $$"""{ "name": "subpath-only", "exports": { "./adapter": { "types": "./{{entry}}", "default": "./{{runtime}}" } } }""")
+                    File.WriteAllText(Path.Combine(package, entry), "export declare function adapt(value: string): string;")
+                    File.WriteAllText(Path.Combine(package, "xantham.json"),
+                        $$"""{ "entry": "{{entry}}", "runtime": "subpath-only/adapter", "module": "SubpathAdapter" }""")
+
+                    invoke [ "generate"; package ]
+                    <| fun (code, _, _, outDir) ->
+                        code |> Flip.Expect.equal "an explicit input bypasses root discovery" 0
+                        File.ReadAllText(Path.Combine(outDir, "SubpathAdapter.fs"))
+                        |> fun source -> source.Contains "Import(\"adapt\", \"subpath-only/adapter\")"
+                        |> Flip.Expect.equal "the emitted import addresses the selected public subpath" true
+                finally
+                    Directory.Delete(package, true)
+
+            testCase "an external config selects a declaration and its public runtime import" <| fun _ ->
+                let package = Path.Combine(root, "tests", "fixtures", "entry-selection-lab")
+                let configDir = Path.Combine(Path.GetTempPath(), "xantham-entry-config-" + Guid.NewGuid().ToString "N")
+                Directory.CreateDirectory configDir |> ignore
+
+                try
+                    let config = Path.Combine(configDir, "adapter.json")
+                    File.Copy(Path.Combine(package, "xantham.json"), config)
+
+                    invoke [ "generate"; package; "--config"; config ]
+                    <| fun (code, _, _, outDir) ->
+                        code |> Flip.Expect.equal "the configured declaration exists under the package" 0
+                        let source = Directory.GetFiles(outDir, "*.fs") |> Array.map File.ReadAllText |> String.concat "\n"
+                        source.Contains "module rec EntrySelectionLab.Adapter"
+                        |> Flip.Expect.equal "module controls the F# name" true
+                        source.Contains "adapterValue"
+                        |> Flip.Expect.equal "entry selects the adapter declaration" true
+                        source.Contains "rootValue"
+                        |> Flip.Expect.equal "the package root is a separate generation input" false
+                        source.Contains "Import(\"adapterValue\", \"entry-selection-lab/adapter\")"
+                        |> Flip.Expect.equal "runtime preserves the public JavaScript subpath" true
+                finally
+                    Directory.Delete(configDir, true)
+
             testCase "the command writes what the pipeline renders, for a package with no configuration" <| fun _ ->
                 matchesPipeline "lab"
 

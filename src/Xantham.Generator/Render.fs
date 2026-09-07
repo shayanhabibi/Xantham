@@ -16,6 +16,7 @@ open Xantham.Generator.Shape.Spec
 let private keywords =
     Set.ofList
         [
+            "_"
             "abstract"
             "and"
             "as"
@@ -329,6 +330,42 @@ let private docLines (indent: string) (docs: string) (tags: JSDocTagInfo list) =
                 yield $"{indent}/// </remarks>"
     ]
 
+let private patternCases =
+    Set.ofList
+        [
+            "None"
+            "Some"
+            "ValueNone"
+            "ValueSome"
+            "Ok"
+            "Error"
+            "Failure"
+            "MatchFailureException"
+            for arity in 2..7 do
+                for arm in 1..arity do
+                    $"Choice{arm}Of{arity}"
+        ]
+
+let private bindParameters (parameters: FsParam list) =
+    let taken = parameters |> List.map _.Name |> Set.ofList
+
+    parameters
+    |> List.mapFold
+        (fun taken parameter ->
+            if Set.contains parameter.Name patternCases then
+                let rec available candidate =
+                    if Set.contains candidate taken then
+                        available ("_" + candidate)
+                    else
+                        candidate
+
+                let name = available ("_" + parameter.Name)
+                { parameter with Name = name }, Set.add name taken
+            else
+                parameter, taken)
+        taken
+    |> fst
+
 /// A parameter of a static emission (`Exports` members, `Create` overloads): F# optional
 /// syntax, `[<ParamArray>]` on a rest tail.
 let private renderParam (parameter: FsParam) =
@@ -347,7 +384,30 @@ let private renderParam (parameter: FsParam) =
 let private renderParamList (parameters: FsParam list) =
     match parameters with
     | [] -> "()"
-    | parameters -> parameters |> List.map renderParam |> String.concat ", " |> sprintf "(%s)"
+    | parameters ->
+        parameters
+        |> bindParameters
+        |> List.map renderParam
+        |> String.concat ", "
+        |> sprintf "(%s)"
+
+let private createAttribute (parameters: FsParam list) =
+    if bindParameters parameters = parameters then
+        "[<ParamObject; Emit(\"$0\")>]"
+    else
+        let fields =
+            parameters
+            |> List.mapi (fun index parameter ->
+                let field = $"{stringLit parameter.Name}: ${index}"
+
+                if parameter.Optional then
+                    $"...(${index} === undefined ? {{}} : {{{field}}})"
+                else
+                    field)
+            |> String.concat ", "
+
+        let expression = "({" + fields + "})"
+        $"[<Emit({stringLit expression})>]"
 
 /// A parameter inside an abstract member's signature. A rest tail carries `[<ParamArray>]`
 /// here too: F# admits parameter attributes in a slot signature, and without it Fable passes
@@ -590,7 +650,7 @@ let private renderInterface (runtimePackage: string) (decl: FsInterfaceDecl) =
             // D3/§4.4 construction ergonomics: the ParamObject Create compiles a call into the
             // object literal the TS API expects; `$0` emits the (erased) argument object itself.
             for overload in creates do
-                yield "    [<ParamObject; Emit(\"$0\")>]"
+                yield "    " + createAttribute overload
 
                 yield
                     $"    static member Create {renderParamList overload} : {declRef decl.Name decl.TypeParameters} = jsNative"
@@ -655,10 +715,17 @@ let private renderEnum (decl: FsEnumDecl) =
             yield $"    | {ident name} = {value}"
     ]
 
-let private renderAbbrev (decl: FsAbbrevDecl) =
+let private renderAbbrev runtimePackage (decl: FsAbbrevDecl) =
     [
         yield! docLines "" decl.Docs decl.Tags
         yield $"type {declHead decl.Name decl.TypeParameters} = {printType decl.Target}"
+
+        match decl.Value with
+        | Some(binding, reference) ->
+            yield ""
+            yield bindingAttribute runtimePackage "" "" binding
+            yield $"let {ident decl.Name}: {printType reference} = jsNative"
+        | None -> ()
     ]
 
 /// A callback as a named delegate (D5): `type TickHandler = delegate of x: float * y: float ->
@@ -896,7 +963,7 @@ let private qualifyBound foreign (m: FsExportMember) =
                 ExportConstructor(parameters |> List.map (qualifyParam foreign), qualifyRef foreign returns)
     }
 
-let private qualifyDecl foreign =
+let internal qualifyDecl foreign =
     function
     | FsInterface decl ->
         FsInterface
@@ -934,6 +1001,9 @@ let private qualifyDecl foreign =
             { decl with
                 TypeParameters = qualifyTypeParams foreign decl.TypeParameters
                 Target = qualifyRef foreign decl.Target
+                Value =
+                    decl.Value
+                    |> Option.map (fun (binding, reference) -> binding, qualifyRef foreign reference)
             }
     | FsDelegateType decl ->
         FsDelegateType
@@ -1022,7 +1092,10 @@ let private declErasedArities (decl: FsDecl) : int list =
            |> Option.defaultValue [])
         @ (d.CreateOverloads |> List.collect (List.collect ofParam))
         @ (d.Statics |> List.collect ofExportMember)
-    | FsAbbrev d -> (d.TypeParameters |> List.collect ofTypeParam) @ erasedArities d.Target
+    | FsAbbrev d ->
+        (d.TypeParameters |> List.collect ofTypeParam)
+        @ erasedArities d.Target
+        @ (d.Value |> Option.map (snd >> erasedArities) |> Option.defaultValue [])
     | FsPhantom d -> (d.TypeParameters |> List.collect ofTypeParam) @ erasedArities d.Carrier
     | FsDelegateType d ->
         (d.TypeParameters |> List.collect ofTypeParam)
@@ -1091,6 +1164,48 @@ let private renderBody (group: GroupModule) (foreign: Map<string, string>) (inde
         else
             group.Decls |> List.map (qualifyDecl foreign)
 
+    let names = group.Decls |> List.choose declName
+
+    let namesByHead =
+        names |> List.groupBy (fun name -> name.Split('.')[0]) |> Map.ofList
+
+    let localBindings =
+        names
+        |> List.collect (fun name ->
+            let segments = name.Split '.' |> Array.toList
+
+            [
+                for depth in 1 .. segments.Length - 1 do
+                    List.take depth segments, segments[depth]
+            ])
+        |> List.groupBy fst
+        |> List.map (fun (scope, bindings) -> scope, bindings |> List.map snd |> Set.ofList)
+        |> Map.ofList
+
+    let scopedReferences =
+        names
+        |> List.map (nestingOf >> fst)
+        |> List.distinct
+        |> List.map (fun scope ->
+            let shadowed =
+                [
+                    for depth in 1 .. scope.Length do
+                        yield!
+                            Map.tryFind (List.take depth scope) localBindings
+                            |> Option.defaultValue Set.empty
+                ]
+                |> Set.ofList
+
+            let references =
+                shadowed
+                |> Set.toList
+                |> List.collect (fun head -> Map.tryFind head namesByHead |> Option.defaultValue [])
+                |> List.map (fun name -> name, $"{group.Module}.{name}")
+                |> Map.ofList
+
+            scope, references)
+        |> Map.ofList
+
     let render =
         function
         | FsInterface decl ->
@@ -1100,7 +1215,7 @@ let private renderBody (group: GroupModule) (foreign: Map<string, string>) (inde
         | FsStringEnum decl -> renderStringEnum decl
         | FsTaggedUnion decl -> renderTaggedUnion decl
         | FsEnum decl -> renderEnum decl
-        | FsAbbrev decl -> renderAbbrev decl
+        | FsAbbrev decl -> renderAbbrev group.RuntimePackage decl
         | FsDelegateType decl -> renderDelegate decl
         | FsMeasure decl -> renderMeasure decl
         | FsPhantom decl -> renderPhantom decl
@@ -1112,7 +1227,8 @@ let private renderBody (group: GroupModule) (foreign: Map<string, string>) (inde
             match declName decl with
             | Some name ->
                 let modules, leaf = nestingOf name
-                modules, underLeaf leaf decl
+                let scoped = qualifyDecl (Map.find modules scopedReferences) decl
+                modules, underLeaf leaf scoped
             | None -> [], decl)
         |> nestedBlocks render indent
         |> List.map (String.concat "\n")
@@ -1137,12 +1253,17 @@ let private renderFooter (decls: FsDecl list) =
 let private renderModule (group: GroupModule) (foreign: Map<string, string>) =
     let body, decls = renderBody group foreign ""
 
-    String.concat "\n" (fileHeader group.Group $"module rec {group.Module}" @ [ body; renderFooter decls ])
+    String.concat
+        "\n"
+        (fileHeader group.Group $"module rec {group.Module}"
+         @ [ body; renderFooter decls ])
 
 /// One `.fs` file holding every group of a namespace, each as a nested module under
 /// `namespace rec`, so the modules reference each other's types in both directions.
 let private renderNamespace (ns: string) (groups: GroupModule list) (foreignTo: GroupModule -> Map<string, string>) =
-    let rendered = groups |> List.map (fun group -> group, renderBody group (foreignTo group) "    ")
+    let rendered =
+        groups
+        |> List.map (fun group -> group, renderBody group (foreignTo group) "    ")
 
     let modules =
         rendered
@@ -1249,6 +1370,41 @@ let renderSources (modules: GroupModule list) : Pass<RenderModel> =
 
                     let findings =
                         [
+                            for group in written do
+                                for decl in group.Decls do
+                                    let bound owner (parameters: FsParam list) =
+                                        List.zip parameters (bindParameters parameters)
+                                        |> List.choose (fun (original, bound) ->
+                                            if original.Name = bound.Name then
+                                                None
+                                            else
+                                                Some(
+                                                    Finding.make
+                                                        owner
+                                                        (EmitGroups.ParameterNameEscaped(original.Name, bound.Name))
+                                                ))
+
+                                    let exports owner members =
+                                        members
+                                        |> List.collect (fun (member_: FsExportMember) ->
+                                            match member_.Body with
+                                            | ExportFunction(parameters, _)
+                                            | ExportConstructor(parameters, _) ->
+                                                bound (owner + member_.Name) parameters
+                                            | ExportValue _ -> [])
+
+                                    match decl with
+                                    | FsInterface interface_ ->
+                                        for overload in interface_.CreateOverloads do
+                                            yield! bound (interface_.Name + ".Create") overload
+
+                                        for entrypoint in Option.toList interface_.Entrypoint do
+                                            yield! bound interface_.Name entrypoint.Parameters
+
+                                        yield! exports (interface_.Name + ".") interface_.Statics
+                                    | FsExports members -> yield! exports "" members
+                                    | _ -> ()
+
                             for group in written do
                                 if not group.IsEntry then
                                     Finding.make group.Group (EmitGroups.GroupShipped(group.Group, group.Decls.Length))

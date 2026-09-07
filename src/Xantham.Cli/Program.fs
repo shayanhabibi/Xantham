@@ -47,6 +47,8 @@ let private usage =
         "                   symbols.jsonl are written (default: ./xantham-out)"
         "  --config <path>  the xantham.json configuring the run, or the directory holding"
         "                   one (default: the package directory)"
+        "                   entry selects a file relative to the package; runtime selects"
+        "                   its public JavaScript import (one entry per invocation)"
         "  --quiet          write the file list alone, dropping the findings summary"
         ""
         "schema"
@@ -149,12 +151,7 @@ let private refusePackage (packageDir: string) =
     elif not (File.Exists(Path.Combine(packageDir, "package.json"))) then
         Some $"{packageDir} holds no package.json"
     else
-        let entry = Bootstrap.entryFile packageDir
-
-        if File.Exists entry then
-            None
-        else
-            Some $"{packageDir} declares no TypeScript entry - looked for {entry}"
+        None
 
 let private emit (out: TextWriter) (err: TextWriter) (options: GenerateOptions) config packageDir =
     let outDir = Path.GetFullPath options.Out
@@ -197,7 +194,21 @@ let private generate (out: TextWriter) (err: TextWriter) (options: GenerateOptio
         | Error message ->
             err.WriteLine $"xantham: {message}"
             Exit.Configuration
-        | Ok config -> emit out err options config packageDir
+        | Ok config ->
+            match
+                (try
+                    Ok(Bootstrap.resolveEntryFile config packageDir)
+                 with e ->
+                     Error e.Message)
+            with
+            | Ok _ -> emit out err options config packageDir
+            | Error message ->
+                err.WriteLine $"xantham: {message}"
+
+                if config.Entry.IsSome then
+                    Exit.Configuration
+                else
+                    Exit.NoPackage
 
 let private schema (out: TextWriter) (err: TextWriter) (destination: string option) =
     let text = Schema.json ()

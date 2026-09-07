@@ -30,7 +30,7 @@ $probe = Join-Path $Work "probe"
 New-Item -ItemType Directory -Force $probe | Out-Null
 Set-Content (Join-Path $probe "index.d.ts") "export {};"
 Set-Content (Join-Path $probe "package.json") '{ "name": "xantham-lib-probe", "version": "0.0.0", "types": "index.d.ts" }'
-Set-Content (Join-Path $probe "xantham.json") '{ "groups": { "typescript/lib": "ship" }, "lib": ["dom"] }'
+Set-Content (Join-Path $probe "xantham.json") '{ "groups": { "typescript/lib": "ship" }, "lib": ["esnext", "dom"] }'
 
 $out = Join-Path $probe "out"
 if (Test-Path $out) { Remove-Item -Recurse -Force $out }

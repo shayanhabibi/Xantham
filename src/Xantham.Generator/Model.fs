@@ -69,6 +69,16 @@ type GeneratorConfig =
         /// the DOM loaded, every such name merges with the lib's declaration, is grouped as the
         /// compiler lib by its first declaration, and is not the package's to harvest.
         Lib: string list option
+        /// Explicit ambient type packages, using the compiler's `types` option. `None` keeps
+        /// automatic discovery; `Some []` disables it. Required packages must be installed.
+        Types: string list option
+        /// Emits declarations.json with the identity and final F# name of reusable declarations.
+        DeclarationCatalog: bool
+        /// Producer catalogs, absolute or relative to the input package directory.
+        DeclarationReferences: string list
+        /// The TypeScript input file, relative to the package directory. `None` selects the
+        /// manifest's root declaration entry. Set `RuntimePackage` separately for a public subpath.
+        Entry: string option
         /// Overrides the npm package the generated `[<Import(…)>]` attributes name. `None`
         /// derives it from the package name (`GeneratorConfig.runtimePackage`), which is right
         /// for every package that ships its own JavaScript and for the DefinitelyTyped naming
@@ -88,6 +98,10 @@ type GeneratorConfig =
             Namespace = None
             Groups = Map.empty
             Lib = None
+            Types = None
+            DeclarationCatalog = false
+            DeclarationReferences = []
+            Entry = None
             RuntimePackage = None
             ResolveNoInfer = false
         }
@@ -166,6 +180,24 @@ module GeneratorConfig =
                 | true, _ -> failwith $"xantham.json: {name} must be a boolean"
                 | _ -> defaultValue
 
+            let entry =
+                match doc.RootElement.TryGetProperty "entry" with
+                | true, value when value.ValueKind = JsonValueKind.String -> Some(value.GetString())
+                | true, _ -> failwith "xantham.json: entry must be a string"
+                | _ -> None
+
+            let runtime =
+                match doc.RootElement.TryGetProperty "runtime" with
+                | true, value when value.ValueKind = JsonValueKind.String ->
+                    let name = value.GetString()
+
+                    if System.String.IsNullOrWhiteSpace name then
+                        failwith "xantham.json: runtime must be a nonempty string"
+
+                    Some name
+                | true, _ -> failwith "xantham.json: runtime must be a string"
+                | _ -> None
+
             let groups =
                 match doc.RootElement.TryGetProperty "groups" with
                 | true, v when v.ValueKind = JsonValueKind.Object ->
@@ -188,12 +220,51 @@ module GeneratorConfig =
                 | true, _ -> failwith "xantham.json: lib must be an array of strings"
                 | _ -> None
 
+            let types =
+                match doc.RootElement.TryGetProperty "types" with
+                | true, value when value.ValueKind = JsonValueKind.Array ->
+                    value.EnumerateArray()
+                    |> Seq.map (fun item ->
+                        if item.ValueKind <> JsonValueKind.String then
+                            failwith "xantham.json: types must be an array of nonempty strings"
+
+                        let name = item.GetString()
+
+                        if System.String.IsNullOrWhiteSpace name then
+                            failwith "xantham.json: types must be an array of nonempty strings"
+
+                        name)
+                    |> Seq.toList
+                    |> Some
+                | true, _ -> failwith "xantham.json: types must be an array of nonempty strings"
+                | _ -> None
+
+            let declarationReferences =
+                match doc.RootElement.TryGetProperty "declarationReferences" with
+                | true, value when value.ValueKind = JsonValueKind.Array ->
+                    value.EnumerateArray()
+                    |> Seq.map (fun item ->
+                        if
+                            item.ValueKind <> JsonValueKind.String
+                            || System.String.IsNullOrWhiteSpace(item.GetString())
+                        then
+                            failwith "xantham.json: declarationReferences must be an array of nonempty paths"
+
+                        item.GetString())
+                    |> Seq.toList
+                | true, _ -> failwith "xantham.json: declarationReferences must be an array of nonempty paths"
+                | _ -> []
+
             {
                 ModuleName = field "module"
                 Namespace = field "namespace"
                 Groups = groups
                 Lib = lib
-                RuntimePackage = field "runtime"
+                Types = types
+                DeclarationCatalog = boolField "declarationCatalog" false
+                DeclarationReferences = declarationReferences
+                Entry = entry
+                RuntimePackage = runtime
                 ResolveNoInfer = boolField "resolveNoInfer" GeneratorConfig.Default.ResolveNoInfer
             }
 
@@ -322,7 +393,10 @@ module Naming =
 
     /// The compiler-lib module a family (`Grouping.libFamily`) is written into.
     let compilerLibFamilyModule (family: string) =
-        if family = "Dom" then CompilerLibDomModule else CompilerLibEsModule
+        if family = "Dom" then
+            CompilerLibDomModule
+        else
+            CompilerLibEsModule
 
     /// A package's module under a namespace: `FSharp.CloudEdge` over `@cloudedge/agents` is
     /// `FSharp.CloudEdge.Agents`.
@@ -629,6 +703,9 @@ type HarvestedExport =
         ExportName: string
         /// The origin symbol (`getAliasedSymbol` applied until stable).
         Symbol: SymbolResponse
+        /// The entry exposes this symbol as a value, through no type-only import/export edge.
+        /// The origin symbol's value flags alone do not establish a runtime export.
+        HasValueExport: bool
         /// `getDocumentationComment`, already rendered to plain text by the wire.
         Docs: string
         Tags: JSDocTagInfo list
@@ -724,6 +801,12 @@ type TypeFacts =
         SymbolName: string option
         /// File of the type's own symbol's first declaration, as the wire reports it.
         DeclFile: string option
+        /// Complete declaration handles of the actual type symbol, retained for catalog identity.
+        Declarations: string list
+        /// Alias arguments retain concrete substitutions for declaration catalog specialization keys.
+        DeclarationArguments: TypeResponse list
+        /// Declaration handles of the alias applied at this type occurrence.
+        AliasDeclarations: string list
         /// Symbol id of the declaration the type's own symbol is written inside - a namespace,
         /// where `HarvestModel.Namespaces` has a name for it.
         SymbolParent: int option
@@ -758,6 +841,8 @@ type TypeFacts =
         /// `T extends U ? X : Y` (§4.11), where the type is one.
         Conditional: ConditionalFacts option
         UnionMembers: int list
+        /// Compiler-returned literal-union alias after removing nullish members; populated only for catalog generation or reuse.
+        NonNullableAlias: int option
         /// The alias name and single argument an indexed-access reference was written through,
         /// where the checker has already expanded past it before the flags reach the shaper
         /// (§4.11's `NoInfer`). Populated only at an indexed-access reference site, never on a
@@ -773,6 +858,9 @@ module TypeFacts =
             Origin = Unclassified
             SymbolName = None
             DeclFile = None
+            Declarations = []
+            DeclarationArguments = []
+            AliasDeclarations = []
             SymbolParent = None
             Members = []
             IndexInfos = []
@@ -787,6 +875,7 @@ module TypeFacts =
             Default = None
             Conditional = None
             UnionMembers = []
+            NonNullableAlias = None
             AliasIdentity = None
         }
 
@@ -1117,6 +1206,8 @@ type FsAbbrevDecl =
         /// them on its left side exactly as TypeScript does: `type Callback<'T> = Func<'T, obj>`.
         TypeParameters: FsTypeParam list
         Target: FsTypeRef
+        /// A re-exported class can share an instance alias while binding its constructor value here.
+        Value: (ImportBinding * FsTypeRef) option
     }
 
 /// A callback declared as a named F# delegate: `type TickHandler = delegate of x: float * y:
@@ -1212,6 +1303,8 @@ type ShapeModel =
         /// of `each<T, U>(props: { items: T[]; render: (item: T) => U })` - binds nothing of
         /// its own, so it is declared over these and every reference applies them back.
         DeclParams: Map<int, int list>
+        /// Recognized generic application id -> the declaration id whose name it references.
+        AliasApplications: Map<int, int>
         /// `Exports` members accumulated by the class/function/value passes, keyed by harvest
         /// position so `order-declarations` can assemble them in source order.
         ExportMembers: (int * FsExportMember) list
@@ -1316,7 +1409,7 @@ module Grouping =
         else
             "Es"
 
-    /// Classifies a symbol's origin group (O7) from its first declaration's file path: under the
+    /// Classifies a declaration's origin group (O7) from its file path: under the
     /// package directory and outside any `node_modules` below it is the entry package; the
     /// compiler's default libs are the compiler-lib group; under a `node_modules` entry is that
     /// dependency, at whatever depth npm installed it; anything else - including anonymous
@@ -1329,6 +1422,52 @@ module Grouping =
     /// rather than unclassified: unclassified means Ship, and full derivation of a mistaken
     /// standard-lib file is the expensive failure, while a mis-grouped oddball is a visible
     /// finding.
+    let classifyFile (packageDir: string) (filePath: string) : PackageId =
+        let path = filePath.Replace('\\', '/')
+        let root = packageDir.Replace('\\', '/').TrimEnd '/' + "/"
+        let file = path.Substring(path.LastIndexOf '/' + 1)
+        let isLibFile = file.StartsWith "lib." && file.EndsWith ".d.ts"
+        let installedAt = path.LastIndexOf "/node_modules/"
+
+        // npm installs a package's dependencies under the package's own `node_modules`, so
+        // a dependency's path carries the entry package's directory as a prefix. The
+        // deepest `node_modules` boundary decides the group: one below the entry directory
+        // separates a dependency from its host, one at or above it is the entry package's
+        // own installation.
+        if
+            path.StartsWith(root, System.StringComparison.OrdinalIgnoreCase)
+            && installedAt < root.Length - 1
+        then
+            EntryPackage
+        else
+            match installedAt with
+            | -1 -> if isLibFile then CompilerLib else Unclassified
+            | at ->
+                match path.Substring(at + "/node_modules/".Length).Split '/' with
+                | parts when parts.Length > 0 && (parts[0] = "typescript" || parts[0] = "@typescript") -> CompilerLib
+                | _ when isLibFile -> CompilerLib
+                | parts when parts.Length > 1 && parts[0].StartsWith "@" -> Dependency $"{parts[0]}/{parts[1]}"
+                | parts when parts.Length > 0 -> Dependency parts[0]
+                | _ -> Unclassified
+
+    /// Entry sources first, then package-relative dependency and compiler sources.
+    /// Compiler installation directories must not decide declaration or export order.
+    let sourceOrderKey (packageDir: string) (filePath: string) =
+        let path = filePath.Replace('\\', '/')
+
+        let relative () =
+            System.IO.Path.GetRelativePath(packageDir, path).Replace('\\', '/')
+
+        match classifyFile packageDir path with
+        | EntryPackage -> 0, "", relative ()
+        | CompilerLib -> 1, "typescript/lib", path.Substring(path.LastIndexOf '/' + 1)
+        | Dependency package ->
+            let at = path.LastIndexOf("/node_modules/", System.StringComparison.Ordinal)
+            1, package, path.Substring(at + "/node_modules/".Length + package.Length + 1)
+        | Unclassified -> 1, "", relative ()
+
+    /// A symbol's origin, using its first declaration. The synthetic global environment has
+    /// no declaration; compiler-lib disposition controls whether resolve follows its members.
     let classify (packageDir: string) (symbol: SymbolResponse voption) : PackageId =
         match
             symbol
@@ -1341,34 +1480,7 @@ module Grouping =
         // so it groups with the compiler lib and widens with a name, identity only.
         | ValueNone when symbol |> ValueOption.exists (fun s -> s.Name = "globalThis") -> CompilerLib
         | ValueNone -> Unclassified
-        | ValueSome order ->
-            let path = order.File.Replace('\\', '/')
-            let root = packageDir.Replace('\\', '/').TrimEnd '/' + "/"
-            let file = path.Substring(path.LastIndexOf '/' + 1)
-            let isLibFile = file.StartsWith "lib." && file.EndsWith ".d.ts"
-            let installedAt = path.LastIndexOf "/node_modules/"
-
-            // npm installs a package's dependencies under the package's own `node_modules`, so
-            // a dependency's path carries the entry package's directory as a prefix. The
-            // deepest `node_modules` boundary decides the group: one below the entry directory
-            // separates a dependency from its host, one at or above it is the entry package's
-            // own installation.
-            if
-                path.StartsWith(root, System.StringComparison.OrdinalIgnoreCase)
-                && installedAt < root.Length - 1
-            then
-                EntryPackage
-            else
-                match installedAt with
-                | -1 -> if isLibFile then CompilerLib else Unclassified
-                | at ->
-                    match path.Substring(at + "/node_modules/".Length).Split '/' with
-                    | parts when parts.Length > 0 && (parts[0] = "typescript" || parts[0] = "@typescript") ->
-                        CompilerLib
-                    | _ when isLibFile -> CompilerLib
-                    | parts when parts.Length > 1 && parts[0].StartsWith "@" -> Dependency $"{parts[0]}/{parts[1]}"
-                    | parts when parts.Length > 0 -> Dependency parts[0]
-                    | _ -> Unclassified
+        | ValueSome order -> classifyFile packageDir order.File
 
     /// Whether any of `symbol`'s declarations sits under `packageDir`, by the same root test
     /// `classify` applies to only the first. Declaration merging can carry a symbol's list past

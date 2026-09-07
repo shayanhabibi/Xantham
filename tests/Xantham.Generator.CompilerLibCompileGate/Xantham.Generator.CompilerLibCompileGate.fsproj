@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <GenerateDocumentationFile>false</GenerateDocumentationFile>
+        <IsPackable>false</IsPackable>
+        <NoWarn>$(NoWarn);FS1104</NoWarn>
+    </PropertyGroup>
+
+    <!-- This ES5 profile owns TypeScript.Lib.Es independently of the scripthost profile
+         in the main compile gate. Each generated core compiles with its own consumer. -->
+    <ItemGroup>
+        <Compile Include="..\Xantham.Generator.Tests\golden\compiler-lib-ownership-lab\groups\TypeScript.Lib.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\compiler-lib-ownership-lab\CompilerLibOwnershipLab.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Fable.Core" Version="5.2.0" />
+        <ProjectReference Include="..\..\src\Xantham.Fable.Core\Xantham.Fable.Core.fsproj" />
+    </ItemGroup>
+</Project>

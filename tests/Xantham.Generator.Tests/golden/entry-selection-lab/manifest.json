@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "package": "entry-selection-lab",
+  "module": "EntrySelectionLab.Adapter",
+  "counts": {
+    "exact": 1,
+    "ergonomic": 1,
+    "widened": 0,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 1,
+      "ergonomic": 1
+    }
+  ]
+}

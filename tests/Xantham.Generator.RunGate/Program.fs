@@ -26,6 +26,29 @@ let private equal (claim: string) (expected: 'T) (actual: 'T) =
 /// The JSON of a value as JavaScript sees it: the shape an erased type really has.
 let private json (value: obj) : string = emitJsExpr value "JSON.stringify($0)"
 
+let private patternParameters () =
+    let omitted = PatternParameterLab.Keys.Create(__None = "none", _None = "underscore")
+
+    equal
+        "renamed parameters keep exact JavaScript keys and omit absent optionals"
+        """{"None":"none","_None":"underscore"}"""
+        (PatternParameterLab.Exports.inspect omitted)
+
+    let present =
+        PatternParameterLab.Keys.Create(__None = "none", _None = "underscore", _Error = "")
+
+    equal
+        "a supplied empty string remains a present property"
+        """{"None":"none","_None":"underscore","Error":""}"""
+        (PatternParameterLab.Exports.inspect present)
+
+    equal "the generated property reads the original key" "none" present.None
+
+    equal
+        "renamed positional parameters preserve their argument order"
+        "left/right"
+        (PatternParameterLab.Exports.join ("left", "right"))
+
 /// `[<Global>]` reaches the global it names, and `[<Global>]` + `[<EmitConstructor>]` news the
 /// global class rather than emitting the name as a call.
 let private globals () =
@@ -1928,6 +1951,8 @@ let private callableHybrids () =
 
 [<EntryPoint>]
 let main _ =
+    SupportHelpers.run check
+    ExportProvenance.run check
     globals ()
     imports ()
     ambientModules ()
@@ -1956,6 +1981,7 @@ let main _ =
     generatedDelegateForms ()
     recordIndex ()
     callableHybrids ()
+    patternParameters ()
 
     match failures with
     | [] ->

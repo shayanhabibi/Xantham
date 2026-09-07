@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "package": "ambient-types-lab",
+  "module": "AmbientTypesLab",
+  "counts": {
+    "exact": 1,
+    "ergonomic": 3,
+    "widened": 0,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 4,
+      "ergonomic": 4
+    },
+    {
+      "pass": "render-source",
+      "total": 1,
+      "exact": 1
+    }
+  ]
+}

@@ -61,9 +61,8 @@ let private aliasDeclarationForms (model: ShapeModel) : Map<int, int> =
             | _ -> forms)
         Map.empty
 
-/// The substitution carrying `declared` onto `instance`, or `None` where the two do not line
-/// up. Only the declaration's own parameters are open - everything else has to match - so a
-/// pair that is not the same alias applied twice fails rather than binding nonsense.
+/// The consistent parameter bindings recoverable from two compiler-identified forms of one
+/// alias. Transformed fragments contribute no bindings; conflicting bindings reject the result.
 let private unifyAlias (model: ShapeModel) (parameters: Set<int>) (declared: int) (instance: int) =
     let mutable subst = Map.empty
     let mutable ok = true
@@ -105,53 +104,63 @@ let private unifyAlias (model: ShapeModel) (parameters: Set<int>) (declared: int
                 // parameter under it stands for itself and the application has to write it:
                 // `VarNode<T, VarNode<T, U>>` shares its whole first operand with the
                 // declaration, and `T` is only bound by walking it. `seen` ends the descent.
-                let identical = left = right
-
                 match Map.tryFind left model.Types, Map.tryFind right model.Types with
                 | Some declaredFacts, Some instanceFacts ->
-                    match declaredFacts.Response.Target, instanceFacts.Response.Target with
-                    // A deferred operand and its resolution, which stand in the same place and
-                    // share no structure: `(unknown extends TNodeType ? {} : NodeExtensions<
-                    // TNodeType>)` arrives at `Node<number>` as `NodeExtensions<number>`, and
-                    // the checker keeps neither branch nor argument on the deferred form. The
-                    // pair binds nothing and the walk continues on the remaining operands.
-                    | _ when isDeferredOperand declaredFacts -> ()
-                    // Two references to the same generic: the arguments are what differ.
-                    | ValueSome declaredTarget, ValueSome instanceTarget when
-                        declaredTarget = instanceTarget
-                        && declaredFacts.TypeArguments.Length = instanceFacts.TypeArguments.Length
+                    match
+                        declaredFacts.Response.AliasSymbol,
+                        instanceFacts.Response.AliasSymbol,
+                        declaredFacts.Response.AliasTypeArguments,
+                        instanceFacts.Response.AliasTypeArguments
+                    with
+                    | ValueSome declaredAlias, ValueSome instanceAlias, ValueSome declaredArgs, ValueSome instanceArgs when
+                        declaredAlias = instanceAlias
+                        && declaredArgs.Length = instanceArgs.Length
+                        && declaredArgs.Length > 0
                         ->
-                        List.iter2 go declaredFacts.TypeArguments instanceFacts.TypeArguments
-                    // A nested alias: the checker keeps operand order under instantiation.
-                    | _ when
-                        flag TypeFlags.Intersection declaredFacts
-                        && flag TypeFlags.Intersection instanceFacts
-                        ->
-                        match alignOperands declaredFacts instanceFacts with
-                        | Some pairs ->
-                            pairs
-                            |> List.iter (fun (declaredOperand, instanceOperand) -> go declaredOperand instanceOperand)
-                        | None -> ok <- false
-                    // An anonymous operand written inline in the alias body. `D1Response & {
-                    // results: T[] }` instantiates its second operand in place, and the checker
-                    // gives an instantiated anonymous object no `Target` to compare it by, so
-                    // the members are the only tie. Pairing them by name in order is what keeps
-                    // two unrelated shapes apart: a differing name, count or member type fails
-                    // the walk the same way a differing operand does.
-                    | _ when
-                        flag TypeFlags.Object declaredFacts
-                        && flag TypeFlags.Object instanceFacts
-                        && not declaredFacts.Members.IsEmpty
-                        && (declaredFacts.Members |> List.map _.Symbol.Name) =
-                            (instanceFacts.Members |> List.map _.Symbol.Name)
-                        ->
-                        List.iter2
-                            (fun (declaredMember: ResolvedMember) (instanceMember: ResolvedMember) ->
-                                go declaredMember.TypeId instanceMember.TypeId)
-                            declaredFacts.Members
-                            instanceFacts.Members
-                    | _ -> ok <- ok && identical
-                | _ -> ok <- ok && identical
+                        Array.iter2 go declaredArgs instanceArgs
+                    | _ ->
+                        match declaredFacts.Response.Target, instanceFacts.Response.Target with
+                        // A deferred operand and its resolution, which stand in the same place and
+                        // share no structure: `(unknown extends TNodeType ? {} : NodeExtensions<
+                        // TNodeType>)` arrives at `Node<number>` as `NodeExtensions<number>`, and
+                        // the checker keeps neither branch nor argument on the deferred form. The
+                        // pair binds nothing and the walk continues on the remaining operands.
+                        | _ when isDeferredOperand declaredFacts -> ()
+                        // Two references to the same generic: the arguments are what differ.
+                        | ValueSome declaredTarget, ValueSome instanceTarget when
+                            declaredTarget = instanceTarget
+                            && declaredFacts.TypeArguments.Length = instanceFacts.TypeArguments.Length
+                            ->
+                            List.iter2 go declaredFacts.TypeArguments instanceFacts.TypeArguments
+                        // A nested alias: the checker keeps operand order under instantiation.
+                        | _ when
+                            flag TypeFlags.Intersection declaredFacts
+                            && flag TypeFlags.Intersection instanceFacts
+                            ->
+                            match alignOperands declaredFacts instanceFacts with
+                            | Some pairs ->
+                                pairs
+                                |> List.iter (fun (declaredOperand, instanceOperand) ->
+                                    go declaredOperand instanceOperand)
+                            | None -> ()
+                        // An anonymous operand written inline in the alias body. `D1Response & {
+                        // results: T[] }` instantiates its second operand in place, and the checker
+                        // gives an instantiated anonymous object no `Target` to compare it by, so
+                        // corresponding members provide parameter bindings at matching source paths.
+                        | _ when
+                            flag TypeFlags.Object declaredFacts
+                            && flag TypeFlags.Object instanceFacts
+                            && not declaredFacts.Members.IsEmpty
+                            && (declaredFacts.Members |> List.map _.Symbol.Name) =
+                                (instanceFacts.Members |> List.map _.Symbol.Name)
+                            ->
+                            List.iter2
+                                (fun (declaredMember: ResolvedMember) (instanceMember: ResolvedMember) ->
+                                    go declaredMember.TypeId instanceMember.TypeId)
+                                declaredFacts.Members
+                                instanceFacts.Members
+                        | _ -> ()
+                | _ -> ()
 
     go declared instance
     if ok then Some subst else None
@@ -165,8 +174,8 @@ let private unifyAlias (model: ShapeModel) (parameters: Set<int>) (declared: int
 /// target - cannot see it, and the shape is hoisted under a made-up name. Where the alias
 /// contains `this`, every application is a strictly larger type, so that mints one declaration
 /// per application until the depth cutoff stops the walk. The alias *symbol* survives on the
-/// response and is the tie back: unifying the declaration form's operands against this one
-/// recovers the arguments, and the reference is written as the application it was.
+/// response and is the tie back. Compiler arguments are retained directly; otherwise matching
+/// operand paths recover a complete, consistent substitution for the declaration parameters.
 let internal aliasInstantiationOf
     (model: ShapeModel)
     (forms: Map<int, int>)
@@ -181,14 +190,21 @@ let internal aliasInstantiationOf
                 let parameters = declParamIds declaredFacts
 
                 let arguments =
-                    unifyAlias model (Set.ofList parameters) declared facts.Response.Id
-                    |> Option.bind (fun subst ->
-                        // A parameter the body never mentions cannot be recovered, and an
-                        // application short of an argument is not writable F#.
-                        if parameters |> List.forall (fun p -> Map.containsKey p subst) then
-                            Some(parameters |> List.map (fun p -> Map.find p subst))
-                        else
-                            None)
+                    facts.Response.AliasTypeArguments
+                    |> ValueOption.toOption
+                    |> Option.map Array.toList
+                    |> Option.filter (fun arguments ->
+                        arguments.Length = parameters.Length
+                        && arguments |> List.forall (fun argument -> Map.containsKey argument model.Types))
+                    |> Option.orElseWith (fun () ->
+                        unifyAlias model (Set.ofList parameters) declared facts.Response.Id
+                        |> Option.bind (fun subst ->
+                            // A parameter the body never mentions cannot be recovered, and an
+                            // application short of an argument is not writable F#.
+                            if parameters |> List.forall (fun p -> Map.containsKey p subst) then
+                                Some(parameters |> List.map (fun p -> Map.find p subst))
+                            else
+                                None))
 
                 Some(name, arguments)
             | _ -> None
@@ -209,9 +225,16 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
     let mutable names = model.DeclNames
     let mutable orders = model.DeclOrders
     let mutable declParams = model.DeclParams
+    let mutable aliasApplications = model.AliasApplications
     let mutable findings = []
     let mutable taken = model.DeclNames |> Map.toList |> List.map snd |> Set.ofList
     let mutable visited = Set.empty
+
+    let recoveredAliases =
+        model.Types
+        |> Map.toList
+        |> List.choose (snd >> _.NonNullableAlias)
+        |> Set.ofList
 
     let aliasForms = aliasDeclarationForms model
 
@@ -273,7 +296,8 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                | Some m -> (literalOf m).IsSome
                | None -> false)
         && not (isBooleanPair model remaining)
-        && (namedUnionByMembers { model with DeclNames = names } remaining).IsNone
+        && (Set.contains facts.Response.Id recoveredAliases
+            || (namedUnionByMembers { model with DeclNames = names } remaining).IsNone)
 
     /// A union `detect-tagged-unions` will declare (D4, §4.5(2)): every arm an object type
     /// carrying the same string-literal discriminant, and data a DU case can bind. That pass
@@ -382,6 +406,8 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
             match Map.tryFind typeId model.Types with
             | None -> ()
             | Some facts ->
+                facts.NonNullableAlias |> Option.iter (walk path order)
+
                 // The generic declaration behind an instantiation is named ahead of it, so
                 // `Ready<T>` reached only through `Resource<T> = Ready<T> | ...` declares
                 // `Ready<'T>` once and instantiations are applications of it (§4.9).
@@ -389,23 +415,17 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                 | ValueSome target when target <> typeId && Map.containsKey target model.Types -> walk path order target
                 | _ -> ()
 
-                // The same rule for the declaration form of an alias whose body defers on a
-                // conditional, which reaches this point nameless: it surrenders no members, so
-                // `needsName` passes over it, and `three` exports neither `Node` nor `VarNode`
-                // from the entry that would have named it (§11.4). The first application names
-                // the family and every application after it is a reference; without the name
-                // each one hoists a strictly larger shape until the depth cutoff stops it.
+                // Private alias declarations precede their applications too. A deferred
+                // conditional has no members to walk, so its first application supplies its name.
                 match facts.Response.AliasSymbol with
                 | ValueSome alias when isFlattenable model facts ->
                     match Map.tryFind alias aliasForms with
-                    | Some declared when
-                        declared <> typeId
-                        && not (Map.containsKey declared names)
-                        && (match Map.tryFind declared model.Types with
-                            | Some declaredFacts -> hasConditionalOperand model declaredFacts
-                            | None -> false)
-                        ->
-                        claim None path declared order |> ignore
+                    | Some declared when declared <> typeId && not (Map.containsKey declared names) ->
+                        match Map.tryFind declared model.Types with
+                        | Some declaredFacts when hasConditionalOperand model declaredFacts ->
+                            claim None path declared order |> ignore
+                        | Some _ -> walk path order declared
+                        | None -> ()
                     | _ -> ()
                 | _ -> ()
 
@@ -429,8 +449,8 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
 
                 // An erased alias application: hash-consed onto the declaration it applies,
                 // with the recovered arguments standing in for the parameters a hoisted
-                // shape would have read free. `shape-interfaces` declares a name once, so
-                // the second id is a reference site and nothing more.
+                // shape would have read free. The application map separates reference sites
+                // from the declaration candidates in later shaping passes.
                 let aliasApplication =
                     aliasInstantiationOf { model with DeclNames = names } aliasForms facts
 
@@ -438,6 +458,8 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                 | Some(name, Some arguments) ->
                     names <- Map.add typeId name names
                     declParams <- Map.add typeId arguments declParams
+                    let declared = aliasForms[facts.Response.AliasSymbol.Value]
+                    aliasApplications <- Map.add typeId declared aliasApplications
 
                     findings <-
                         findings
@@ -504,6 +526,16 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                     for baseId in facts.BaseTypes do
                         walk (into "Base") order baseId
 
+                    if
+                        ctx.Config.DeclarationCatalog
+                        || not (List.isEmpty ctx.Config.DeclarationReferences)
+                    then
+                        for operand in facts.IntersectionMembers do
+                            match Map.tryFind operand model.Types with
+                            | Some operandFacts when operandFacts.SymbolName |> Option.exists (isSyntheticName >> not) ->
+                                walk (into "Base") order operand
+                            | _ -> ()
+
     let fallback = defaultExportName ctx
 
     for export in model.Harvest.Exports do
@@ -519,6 +551,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
         DeclNames = names
         DeclOrders = orders
         DeclParams = declParams
+        AliasApplications = aliasApplications
     },
     findings
 

@@ -62,6 +62,6 @@ type DirectVarNode<'TNodeType, 'TNode> =
 [<Erase>]
 type Exports =
     [<Import("condSeed", "hoist-conditional-lab")>]
-    static member condSeed: obj = jsNative
+    static member condSeed: CondNode<float> = jsNative
     [<Import("directSeed", "hoist-conditional-lab")>]
     static member directSeed: DirectNode<float> = jsNative

@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "package": "declaration-identity-lab",
+  "module": "DeclarationIdentityLab",
+  "counts": {
+    "exact": 0,
+    "ergonomic": 13,
+    "widened": 0,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SY - synthesize-anonymous",
+      "total": 2,
+      "exact": 2
+    },
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 1,
+      "ergonomic": 1
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 14,
+      "ergonomic": 14
+    }
+  ]
+}

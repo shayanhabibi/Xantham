@@ -78,6 +78,7 @@ let export (name: string) (sym: SymbolResponse) : HarvestedExport =
     {
         ExportName = name
         Symbol = sym
+        HasValueExport = uint32 (sym.Flags &&& SymbolFlags.Value) <> 0u
         Docs = ""
         Tags = []
         Origin = FromModule
@@ -94,6 +95,7 @@ let shapeModel (table: TypeFacts list) : ShapeModel =
         DeclNames = Map.empty
         DeclOrders = Map.empty
         DeclParams = Map.empty
+        AliasApplications = Map.empty
         ExportMembers = []
         TypeVars = Map.empty
         KeyVars = Map.empty

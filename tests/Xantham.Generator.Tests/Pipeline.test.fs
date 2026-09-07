@@ -454,6 +454,30 @@ let pipelineTests =
                           Expect.equal counts.Escape 0 "the lab exercises only supported features - no escapes" ])
 
         yield!
+            fixtureTests "underscore-identifier-lab" (handFixture "underscore-identifier-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "underscore properties and parameters retain their source names" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    for expected in
+                        [ "abstract ``_``: 'T option with get, set"
+                          "abstract read: ``_``: string -> 'T"
+                          "abstract write: ?``_``: 'T -> unit"
+                          "?``_``: 'T"
+                          "static member ``_`` (``_``: Marker<string>) : string" ] do
+                        source.Contains expected |> Flip.Expect.equal expected true ])
+
+        yield!
+            fixtureTests "pattern-parameter-lab" (handFixture "pattern-parameter-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "union-case parameter names retain their JavaScript object keys" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+                    source.Contains "static member Create (__None: string, _None: string, ?_Error: string)"
+                    |> Flip.Expect.equal "bound names are collision-free" true
+                    rendered.Findings |> List.filter (fun finding -> finding.Key = "GE005") |> List.length
+                    |> Flip.Expect.equal "each renamed parameter is reported" 4 ])
+
+        yield!
             fixtureTests "globals-lab" (handFixture "globals-lab") GeneratorConfig.Default (fun package ->
                 [ testCase "a package with no module is harvested from global scope" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -784,7 +808,8 @@ let pipelineTests =
                     let source = rendered.Files |> List.head |> snd
 
                     Expect.stringContains source "type LoudPitched =" "operands sharing a member declare once"
-                    Expect.equal (source.Split("abstract volume: float").Length - 1) 3 "volume once per declaration that has it"
+                    Expect.equal (inheritsOf source "LoudPitched") [ "Loud"; "Pitched" ] "the intersection preserves both bases"
+                    Expect.equal (source.Split("abstract volume: float").Length - 1) 2 "volume is declared on each operand and inherited by the intersection"
                     Expect.stringContains source "type Bag =" "an index-signature operand"
                     Expect.stringContains source "abstract Item: string -> obj with get, set" "carries its indexer"
                     Expect.stringContains source "type Loose =" "a mapped operand expands under D6"
@@ -1109,7 +1134,10 @@ let pipelineTests =
                     Expect.equal (count "abstract hidden: bool") 1 "an HTMLElement member on HTMLElement alone"
                     Expect.equal (count "abstract align: string") 1 "and the leaf keeps its own"
 
-                    Expect.equal (count "abstract cloneNode: ") 3 "a member narrowed at each level is redeclared at each"
+                    Expect.equal (count "abstract cloneNode: ") 4 "the root signature and three successive narrowings are preserved"
+
+                    for owner in [ "Node"; "Element"; "HTMLElement"; "HTMLDivElement" ] do
+                        Expect.stringContains source $"abstract cloneNode: ?deep: bool -> {owner}" "each level keeps its own return type"
 
                     Expect.stringContains source "abstract cloneNode: ?deep: bool -> HTMLDivElement" "at the leaf's own type"
 
@@ -1552,6 +1580,133 @@ let pipelineTests =
 
         yield!
             fixtureTests
+                "ambient-types-lab"
+                (handInstalledFixture "ambient-types-lab")
+                (handConfig (handInstalledFixture "ambient-types-lab"))
+                (fun package ->
+                    [ testCase "configured ambient provider resolves host imports and globals"
+                      <| fun _ ->
+                          let diagnostics =
+                              async {
+                                  let! mailbox, ctx = Bootstrap.start (GeneratorConfig.load package) package
+                                  use _ = mailbox :> IDisposable
+                                  let! program = ctx.Session.getProgramDiagnostics ()
+                                  let! semantic = ctx.Session.getSemanticDiagnostics ()
+                                  return [ yield! program |> ValueOption.defaultValue [||]
+                                           yield! semantic |> ValueOption.defaultValue [||] ]
+                              } |> Async.RunSynchronously
+                          diagnostics
+                          |> List.filter (fun diagnostic -> diagnostic.Category = 1)
+                          |> List.map _.Code
+                          |> Flip.Expect.equal "the explicitly selected provider supplies both declaration forms" []
+
+                      testCase "missing configured ambient provider stops bootstrap"
+                      <| fun _ ->
+                          let config = GeneratorConfig.loadFile (Path.Combine(package, "missing.json"))
+                          let message =
+                              try
+                                  let mailbox, _ = Async.RunSynchronously(Bootstrap.start config package)
+                                  (mailbox :> IDisposable).Dispose()
+                                  ""
+                              with e -> e.Message
+                          [ "TS2688"; "absent-ambient-provider-lab" ]
+                          |> List.map message.Contains
+                          |> Flip.Expect.equal "the missing compiler input is reported before generation" [ true; true ] ])
+
+        yield!
+            fixtureTests
+                "default-intersection-lab"
+                (handFixture "default-intersection-lab")
+                GeneratorConfig.Default
+                (fun package ->
+                    [ testCase "default generic intersection arguments survive union absorption" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.find (fun (path, _) -> path = "DefaultIntersectionLab.fs") |> snd
+                          (source.Split("abstract onConnect: connection: Connection<obj> -> unit").Length - 1,
+                           rendered.Findings |> List.filter (fun finding -> finding.Key = "SY002" || finding.Key = "TR019") |> List.length)
+                          |> Flip.Expect.equal "same-file and imported default arguments remain applied" (2, 0) ])
+
+        yield!
+            fixtureTests
+                "declaration-identity-lab"
+                (handFixture "declaration-identity-lab")
+                GeneratorConfig.Default
+                (fun _ -> [])
+        yield!
+            fixtureTests
+                "opaque-generic-lab"
+                (handFixture "opaque-generic-lab")
+                (handConfig (handFixture "opaque-generic-lab"))
+                (fun package ->
+                    [ testCase "missing generic provider preserves its finding without capturing its arguments"
+                      <| fun _ ->
+                          let config = { handConfig (Some package) with Entry = Some "missing-provider.d.ts" }
+                          let rendered = Async.RunSynchronously(Pipeline.generate config package)
+                          let source = rendered.Files |> List.find (fun (path, _) -> path = "OpaqueGenericLab.fs") |> snd
+                          [ "type Transport2<'T"; "type Connection<'T"; "type Manager<'T" ]
+                          |> List.map source.Contains
+                          |> Flip.Expect.equal "opaque generic metadata cannot introduce declaration parameters" [ false; false; false ]
+                          rendered.Findings
+                          |> List.exists (fun finding -> finding.Key = "TR008")
+                          |> Flip.Expect.equal "the unresolved type remains visible as an any-to-obj finding" true ])
+
+        yield!
+            fixtureTests
+                "compiler-lib-ownership-lab"
+                (handFixture "compiler-lib-ownership-lab")
+                (handConfig (handFixture "compiler-lib-ownership-lab"))
+                (fun package ->
+                    [ testCase "compiler-lib ownership keeps the shared core independent of its consumer"
+                      <| fun _ ->
+                          let rendered =
+                              Async.RunSynchronously(
+                                  Pipeline.generate (handConfig (handFixture "compiler-lib-ownership-lab")) package)
+
+                          let core = rendered.Files |> List.find (fun (path, _) -> path = "groups/TypeScript.Lib.fs") |> snd
+                          let entry = rendered.Files |> List.find (fun (path, _) -> path = "CompilerLibOwnershipLab.fs") |> snd
+
+                          [ "type Items"; "type Brief"; "type LocalDate"; "type GlobalThis" ]
+                          |> List.map (fun name -> name, entry.Contains name, core.Contains name)
+                          |> Flip.Expect.equal "entry-owned declarations stay in the entry module"
+                              [ "type Items", true, false
+                                "type Brief", true, false
+                                "type LocalDate", true, false
+                                "type GlobalThis", true, false ]
+
+                          core.Contains "CompilerLibOwnershipLab."
+                          |> Flip.Expect.equal "the core file compiles before the entry file" false
+
+                          core.Contains "type Date ="
+                          |> Flip.Expect.equal "an entry alias leaves the actual core declaration in place" true
+
+                          entry.Contains "inherit GlobalThis"
+                          |> Flip.Expect.equal "WindowLike.self retains its program-global intersection operand" true
+
+                      testCase "compiler-lib ownership certifies the global scope of a clean producer" <| fun _ ->
+                          let config =
+                              { handConfig (handFixture "compiler-lib-ownership-lab") with Entry = Some "clean.d.ts" }
+                          let rendered = Async.RunSynchronously(Pipeline.generate config package)
+                          let core = rendered.Files |> List.find (fun (path, _) -> path = "groups/TypeScript.Lib.fs") |> snd
+                          let entry = rendered.Files |> List.find (fun (path, _) -> path = "CompilerLibOwnershipLab.fs") |> snd
+
+                          (core.Contains "type GlobalThis", entry.Contains "type GlobalThis")
+                          |> Flip.Expect.equal "only compiler-library declarations contribute to this scope" (true, false)
+
+                          core.Contains "CompilerLibOwnershipLab."
+                          |> Flip.Expect.equal "the certified global object is reusable with its core" false
+
+                      testCase "compiler-lib ownership checks referenced augmentation files too" <| fun _ ->
+                          let config =
+                              { handConfig (handFixture "compiler-lib-ownership-lab") with Entry = Some "referenced-augmentation.d.ts" }
+                          let rendered = Async.RunSynchronously(Pipeline.generate config package)
+                          let core = rendered.Files |> List.find (fun (path, _) -> path = "groups/TypeScript.Lib.fs") |> snd
+                          let entry = rendered.Files |> List.find (fun (path, _) -> path = "CompilerLibOwnershipLab.fs") |> snd
+
+                          (core.Contains "type GlobalThis", entry.Contains "type GlobalThis")
+                          |> Flip.Expect.equal "an empty export root does not certify an augmented compiler interface" (false, true) ])
+
+        yield!
+            fixtureTests
                 "lib-ship-lab"
                 (handFixture "lib-ship-lab")
                 (handConfig (handFixture "lib-ship-lab"))
@@ -1575,12 +1730,15 @@ let pipelineTests =
 
                           let source = group |> Option.get |> snd
 
-                          // The two families are sibling modules under one `namespace rec`, so
-                          // the ECMAScript module's `GlobalThis` reads DOM types and the DOM
-                          // module reads ECMAScript ones from one file.
+                          // This empty producer contributes no globals, so its global object
+                          // belongs to the shared compiler-only scope beside the DOM family.
                           Expect.stringContains source "namespace rec TypeScript.Lib" "the shared namespace"
-                          Expect.stringContains source "module Es =" "the ECMAScript module"
+                          Expect.stringContains source "module Es =" "the certified global environment's module"
                           Expect.stringContains source "module Dom =" "the DOM module"
+
+                          let entry = rendered.Files |> List.find (fun (path, _) -> path = "LibShipLab.fs") |> snd
+                          (source.Contains "type GlobalThis", entry.Contains "type GlobalThis")
+                          |> Flip.Expect.equal "the clean producer's scope belongs to its shared core" (true, false)
 
                           Expect.stringContains source "type ActiveXObject" "a scripthost interface is shaped, not widened away"
                           Expect.stringContains source "type TextStreamReader" "and more than one of them"
@@ -1588,6 +1746,22 @@ let pipelineTests =
                           Expect.isFalse
                               (rendered.Findings |> List.exists (fun f -> f.Key = "HG003"))
                               "harvest-globals finds something to harvest, so it never reaches NothingHarvested" ])
+
+        yield!
+            fixtureTests
+                "entry-selection-lab"
+                (handFixture "entry-selection-lab")
+                (handConfig (handFixture "entry-selection-lab"))
+                (fun package ->
+                    [ testCase "configured entry selects a secondary declaration surface" <| fun _ ->
+                          let rendered =
+                              Async.RunSynchronously(
+                                  Pipeline.generate (handConfig (handFixture "entry-selection-lab")) package)
+
+                          let source = rendered.Files |> List.find (fun (path, _) -> path = "EntrySelectionLab.Adapter.fs") |> snd
+                          [ "type AdapterOptions"; "adapterValue"; "rootValue" ]
+                          |> List.map source.Contains
+                          |> Flip.Expect.equal "only the configured adapter's API is generated" [ true; true; false ] ])
 
         yield!
             fixtureTests "group-map-lab" groupMapLab (handConfig groupMapLab) (fun package ->
@@ -1898,30 +2072,25 @@ let pipelineTests =
                       Expect.equal (rendered.Decls |> List.length) 9 "the source's own eight types and the export container"
 
                       // A mint is named by appending the member name plus `Result`. Neither
-                      // half may produce one: the control writes applications, the reproducer
-                      // widens.
+                      // half may produce one: applications retain their declaration's name.
                       Expect.isFalse (source.Contains "Result") "no <Member>Result declaration minted"
 
-                  testCase "the conditional operand is the whole difference between the halves" <| fun _ ->
+                  testCase "compiler alias arguments preserve the conditional seed application" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
 
                       let keyed key =
                           rendered.Findings |> List.filter (fun finding -> finding.Key = key)
 
-                      // The control recognises every application of its two aliases and writes
-                      // each as one. The reproducer recognises `CondNode` too and stops there:
-                      // `TNodeType` appears in the conditional operand alone, and a deferred
-                      // conditional carries neither branch nor argument, so the application has
-                      // nothing to be written with and widens instead.
-                      Expect.equal
-                          (keyed "SY001" |> List.map _.Symbol)
-                          [ "DirectExtensions.ToVar.Result"
+                      keyed "SY001" |> List.map _.Symbol
+                      |> Flip.Expect.equal "both halves retain their alias applications"
+                          [ "CondSeed"
+                            "DirectExtensions.ToVar.Result"
                             "DirectNode.ToVar.Result"
                             "DirectVarNode.ToVar.Result"
                             "DirectSeed" ]
-                          "the control writes an application at every site"
 
-                      Expect.equal (keyed "SY002" |> List.map _.Symbol) [ "CondSeed" ] "the reproducer widens one site"
+                      keyed "SY002" |> List.map _.Symbol
+                      |> Flip.Expect.equal "the compiler supplies the erased conditional argument" []
 
                   testCase "the control's chain is written as applications" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -2240,6 +2409,28 @@ let pipelineTests =
                       let source = rendered.Files |> List.head |> snd
 
                       Expect.stringContains source "type HeldSized = Holder<Sized>" "the negative stands" ])
+        yield!
+            fixtureTests "constraint-closure-lab" (handFixture "constraint-closure-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "constraints keep every type parameter they depend on" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      [ "static member accept<'T, 'E when 'E :> Box<'T>>"
+                        "static member chain<'T, 'E, 'F when 'E :> Box<'T> and 'F :> Box<'E>>"
+                        "abstract accept<'T, 'E when 'E :> Box<'T>>"
+                        "static member unused (value: string)" ]
+                      |> List.map source.Contains
+                      |> Flip.Expect.equal "live constraints close over their variables; unused components still erase" [ true; true; true; true ] ])
+
+        yield!
+            fixtureTests "inherited-name-lab" (handFixture "inherited-name-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a hoisted intersection keeps its same-named outer base" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      source.Contains "inherit InheritedNameLab.Message"
+                      |> Flip.Expect.equal "View.Message must inherit the root Message" true ])
+
         // Wave three lane L's fixture. A compiler-lib type reached structurally hands over
         // member symbols; their types carry a member's name, so they resolve by content. A lib
         // declaration named at a reference position keeps the O7 shortcut.
@@ -4036,4 +4227,11 @@ let pipelineTests =
                             "| [<CompiledName(\"ok\")>] Ok of value: string"
                             "the generic arm's members were read after it was met as a reference" ])
 
+    ]
+
+[<Tests>]
+let typeOnlyExportTests =
+    testList "type-only export fixture" [
+        yield! fixtureTests "type-only-export-lab" (handFixture "type-only-export-lab")
+            (handConfig (handFixture "type-only-export-lab")) (fun _ -> [])
     ]

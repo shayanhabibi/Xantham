@@ -93,6 +93,7 @@ let shapeCallbacks: Pass<ShapeModel> =
                                     Some(
                                         FsAbbrev
                                             {
+                                                Value = None
                                                 Name = name
                                                 Docs = ""
                                                 Tags = []

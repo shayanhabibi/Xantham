@@ -186,6 +186,7 @@ let findingsTests =
                     "GE.ShippedGroupWithoutDeclarations GE002 widened"
                     "GE.GroupModuleCollision GE003 escape"
                     "GE.GroupModuleFromNamespace GE004 escape"
+                    "GE.ParameterNameEscaped GE005 ergonomic"
                   ]
 
               Expect.equal

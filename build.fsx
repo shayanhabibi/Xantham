@@ -147,7 +147,14 @@ module Stages =
             return
                 stage "clean" {
                     when' (not quick)
-                    run (fun _ -> !!"**/**/bin" -- "bin" |> Shell.cleanDirs)
+
+                    run (fun _ ->
+                        Spec.projects
+                        |> List.map (fun project ->
+                            System.IO.Path.Combine(__SOURCE_DIRECTORY__, project.RelativePath)
+                            |> System.IO.Path.GetDirectoryName
+                            |> fun directory -> System.IO.Path.Combine(directory, "bin"))
+                        |> Shell.cleanDirs)
                 }
         }
 

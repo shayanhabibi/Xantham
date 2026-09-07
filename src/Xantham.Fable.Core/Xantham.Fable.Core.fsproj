@@ -24,6 +24,7 @@
 
     <ItemGroup>
         <Compile Include="Library.fs"/>
+        <Compile Include="Helpers.fs"/>
         <None Include="README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 

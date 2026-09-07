@@ -345,7 +345,7 @@ type ResourceActions<'T, 'R> =
 
 type ResourceSource<'S> = U3<bool, 'S, (unit -> U2<bool, 'S> option)> option
 
-type ResourceFetcher<'S, 'T, 'R> = delegate of k: 'S * info: obj -> U2<'T, JS.Promise<'T>>
+type ResourceFetcher<'S, 'T, 'R> = delegate of k: 'S * info: ResourceFetcher.Info<'T, 'R> -> U2<'T, JS.Promise<'T>>
 
 module ResourceFetcher =
     [<Interface>]
@@ -409,8 +409,7 @@ module InitializedResourceOptions =
             [<ParamObject; Emit("$0")>]
             static member Create (?value: 'T) : Info<'T> = jsNative
 
-[<Erase>]
-type ResourceReturn<'T, 'R> = private ResourceReturn__ of U5<Errored, Pending, Ready<'T>, Refreshing<'T>, Unresolved> * obj
+type ResourceReturn<'T, 'R> = U5<Errored, Pending, Ready<'T>, Refreshing<'T>, Unresolved> * ResourceReturn.Item<'R, 'T>
 
 module ResourceReturn =
     type Item<'R, 'T> =
@@ -420,8 +419,7 @@ module ResourceReturn =
         abstract mutate<'U>: value: U2<('T option -> 'U), 'U> -> 'U
         abstract refetch: ('R option -> U2<'T, JS.Promise<'T option>> option) with get, set
 
-[<Erase>]
-type InitializedResourceReturn<'T, 'R> = private InitializedResourceReturn__ of U3<Errored, Ready<'T>, Refreshing<'T>> * obj
+type InitializedResourceReturn<'T, 'R> = U3<Errored, Ready<'T>, Refreshing<'T>> * InitializedResourceReturn.Item<'T, 'R>
 
 module InitializedResourceReturn =
     type Item<'T, 'R> =
@@ -432,7 +430,7 @@ module InitializedResourceReturn =
         abstract refetch: ('R option -> U2<'T, JS.Promise<'T>> option) with get, set
 
 module CreateResource =
-    type Fetcher<'I, 'T, 'R> = delegate of k: bool * info: obj -> U2<'T, JS.Promise<'T>>
+    type Fetcher<'I, 'T, 'R> = delegate of k: bool * info: CreateResource.Fetcher.Info<'R, 'I, 'T> -> U2<'T, JS.Promise<'T>>
 
     module Fetcher =
         [<Interface>]
@@ -456,7 +454,7 @@ module CreateResource =
             [<ParamObject; Emit("$0")>]
             static member Create (refetching: U2<bool, 'R>, ?value: 'T) : Info3<'T, 'R> = jsNative
 
-    type Fetcher2<'S, 'I, 'T, 'R> = delegate of k: 'S * info: obj -> U2<'T, JS.Promise<'T>>
+    type Fetcher2<'S, 'I, 'T, 'R> = delegate of k: 'S * info: CreateResource.Fetcher2.Info<'R, 'I, 'T> -> U2<'T, JS.Promise<'T>>
 
     module Fetcher2 =
         [<Interface>]
@@ -663,6 +661,35 @@ type ExternalSource =
     [<ParamObject; Emit("$0")>]
     static member Create (track: (obj -> obj), dispose: (unit -> unit)) : ExternalSource = jsNative
 
+module SuspenseList =
+    [<Interface>]
+    type Props =
+        abstract children: JSXElement option with get, set
+        abstract revealOrder: SuspenseList.Props.RevealOrder with get, set
+        abstract tail: SuspenseList.Props.Tail option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (revealOrder: SuspenseList.Props.RevealOrder, ?children: JSXElement, ?tail: SuspenseList.Props.Tail) : Props = jsNative
+
+    module Props =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type RevealOrder =
+            | [<CompiledName("backwards")>] Backwards
+            | [<CompiledName("forwards")>] Forwards
+            | [<CompiledName("together")>] Together
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Tail =
+            | [<CompiledName("collapsed")>] Collapsed
+            | [<CompiledName("hidden")>] Hidden
+
+module Suspense =
+    [<Interface>]
+    type Props =
+        abstract fallback: JSXElement option with get, set
+        abstract children: JSXElement option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?fallback: JSXElement, ?children: JSXElement) : Props = jsNative
+
 type Component<'P> = ('P -> JSXElement option)
 
 /// <summary>
@@ -854,42 +881,11 @@ module SharedConfig =
         [<ParamObject; Emit("$0")>]
         static member Create (id: string, count: float) : Context = jsNative
 
-module SuspenseList =
-    [<Interface>]
-    type Props =
-        abstract children: JSXElement option with get, set
-        abstract revealOrder: SuspenseList.Props.RevealOrder with get, set
-        abstract tail: SuspenseList.Props.Tail option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (revealOrder: SuspenseList.Props.RevealOrder, ?children: JSXElement, ?tail: SuspenseList.Props.Tail) : Props = jsNative
-
-    module Props =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type RevealOrder =
-            | [<CompiledName("backwards")>] Backwards
-            | [<CompiledName("forwards")>] Forwards
-            | [<CompiledName("together")>] Together
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Tail =
-            | [<CompiledName("collapsed")>] Collapsed
-            | [<CompiledName("hidden")>] Hidden
-
-module Suspense =
-    [<Interface>]
-    type Props =
-        abstract fallback: JSXElement option with get, set
-        abstract children: JSXElement option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?fallback: JSXElement, ?children: JSXElement) : Props = jsNative
-
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
     [<Import("DEV", "solid-js")>]
     static member DEV: DEV option = jsNative
-    [<Import("JSX", "solid-js")>]
-    static member JSX: JSX = jsNative
     /// <summary>
     /// Reactively transforms an array with a callback function - underlying helper for the <c>&lt;For&gt;</c> control flow
     ///
@@ -934,10 +930,6 @@ type Exports =
     static member ``$TRACK``: obj = jsNative
     [<Import("$DEVCOMP", "solid-js")>]
     static member ``$DEVCOMP``: obj = jsNative
-    [<Import("Owner", "solid-js")>]
-    static member Owner: Owner option = jsNative
-    [<Import("Transition", "solid-js")>]
-    static member Transition: TransitionState option = jsNative
     /// <summary>
     /// Creates a new non-tracked reactive context that doesn't auto-dispose
     /// </summary>
@@ -1174,7 +1166,7 @@ type Exports =
     /// </remarks>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-resource</remarks>
     [<Import("createResource", "solid-js")>]
-    static member createResource<'T, 'R, 'I> (fetcher: CreateResource.Fetcher<'I, 'T, 'R>, options: CreateResource.Options<'I, 'T>) : U3<Errored, Ready<U2<'I, 'T>>, Refreshing<U2<'I, 'T>>> * obj = jsNative
+    static member createResource<'T, 'R, 'I> (fetcher: CreateResource.Fetcher<'I, 'T, 'R>, options: CreateResource.Options<'I, 'T>) : U3<Errored, Ready<U2<'I, 'T>>, Refreshing<U2<'I, 'T>>> * CreateResource.Result.Item<'R, 'I, 'T> = jsNative
     /// <summary>
     /// Creates a resource that wraps a repeated promise in a reactive pattern:
     /// <code lang="typescript">
@@ -1208,7 +1200,7 @@ type Exports =
     /// </remarks>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-resource</remarks>
     [<Import("createResource", "solid-js")>]
-    static member createResource<'T> (fetcher: Func<bool, obj, U2<'T, JS.Promise<'T>>>, ?options: CreateResource.Options2) : U5<Errored, Pending, Ready<'T>, Refreshing<'T>, Unresolved> * obj = jsNative
+    static member createResource<'T, 'R> (fetcher: Func<bool, CreateResource.Fetcher.Info2<'T, 'R>, U2<'T, JS.Promise<'T>>>, ?options: CreateResource.Options2) : U5<Errored, Pending, Ready<'T>, Refreshing<'T>, Unresolved> * CreateResource.Result.Item2<'R, 'T> = jsNative
     /// <summary>
     /// Creates a resource that wraps a repeated promise in a reactive pattern:
     /// <code lang="typescript">
@@ -1242,7 +1234,7 @@ type Exports =
     /// </remarks>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-resource</remarks>
     [<Import("createResource", "solid-js")>]
-    static member createResource<'T, 'S, 'R, 'I> (source: U3<bool, 'S, (unit -> U2<bool, 'S> option)> option, fetcher: CreateResource.Fetcher2<'S, 'I, 'T, 'R>, options: CreateResource.Options3<'I, 'T, 'S>) : U3<Errored, Ready<U2<'I, 'T>>, Refreshing<U2<'I, 'T>>> * obj = jsNative
+    static member createResource<'T, 'S, 'R, 'I> (source: U3<bool, 'S, (unit -> U2<bool, 'S> option)> option, fetcher: CreateResource.Fetcher2<'S, 'I, 'T, 'R>, options: CreateResource.Options3<'I, 'T, 'S>) : U3<Errored, Ready<U2<'I, 'T>>, Refreshing<U2<'I, 'T>>> * CreateResource.Result.Item3<'R, 'I, 'T> = jsNative
     /// <summary>
     /// Creates a resource that wraps a repeated promise in a reactive pattern:
     /// <code lang="typescript">
@@ -1276,7 +1268,7 @@ type Exports =
     /// </remarks>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-resource</remarks>
     [<Import("createResource", "solid-js")>]
-    static member createResource<'T, 'S> (source: U3<bool, 'S, (unit -> U2<bool, 'S> option)> option, fetcher: Func<'S, obj, U2<'T, JS.Promise<'T>>>, ?options: obj) : U5<Errored, Pending, Ready<'T>, Refreshing<'T>, Unresolved> * obj = jsNative
+    static member createResource<'T, 'S, 'R> (source: U3<bool, 'S, (unit -> U2<bool, 'S> option)> option, fetcher: Func<'S, CreateResource.Fetcher.Info3<'T, 'R>, U2<'T, JS.Promise<'T>>>, ?options: CreateResource.Options4<'S>) : U5<Errored, Pending, Ready<'T>, Refreshing<'T>, Unresolved> * CreateResource.Result.Item4<'R, 'T> = jsNative
     /// <summary>
     /// Creates a reactive computation that only runs and notifies the reactive context when the browser is idle
     /// <code lang="typescript">
@@ -1523,6 +1515,25 @@ type Exports =
     /// <remarks>@description https://docs.solidjs.com/reference/reactive-utilities/catch-error</remarks>
     [<Import("onError", "solid-js")>]
     static member onError (fn: (exn -> unit)) : unit = jsNative
+    /// <summary>
+    /// **[experimental]** Controls the order in which suspended content is rendered
+    /// </summary>
+    /// <remarks>@description https://docs.solidjs.com/reference/components/suspense-list</remarks>
+    [<Import("SuspenseList", "solid-js")>]
+    static member SuspenseList (props: SuspenseList.Props) : JSXElement option = jsNative
+    /// <summary>
+    /// Tracks all resources inside a component and renders a fallback until they are all resolved
+    /// <code lang="typescript">
+    /// const AsyncComponent = lazy(() =&gt; import('./component'));
+    ///
+    /// &lt;Suspense fallback={&lt;LoadingIndicator /&gt;}&gt;
+    ///   &lt;AsyncComponent /&gt;
+    /// &lt;/Suspense&gt;
+    /// </code>
+    /// </summary>
+    /// <remarks>@description https://docs.solidjs.com/reference/components/suspense</remarks>
+    [<Import("Suspense", "solid-js")>]
+    static member Suspense (props: Suspense.Props) : JSXElement option = jsNative
     [<Import("enableHydration", "solid-js")>]
     static member enableHydration () : unit = jsNative
     [<Import("createComponent", "solid-js")>]
@@ -1633,22 +1644,3 @@ type Exports =
     static member ErrorBoundary (props: ErrorBoundary.Props) : JSXElement option = jsNative
     [<Import("sharedConfig", "solid-js")>]
     static member sharedConfig: SharedConfig = jsNative
-    /// <summary>
-    /// **[experimental]** Controls the order in which suspended content is rendered
-    /// </summary>
-    /// <remarks>@description https://docs.solidjs.com/reference/components/suspense-list</remarks>
-    [<Import("SuspenseList", "solid-js")>]
-    static member SuspenseList (props: SuspenseList.Props) : JSXElement option = jsNative
-    /// <summary>
-    /// Tracks all resources inside a component and renders a fallback until they are all resolved
-    /// <code lang="typescript">
-    /// const AsyncComponent = lazy(() =&gt; import('./component'));
-    ///
-    /// &lt;Suspense fallback={&lt;LoadingIndicator /&gt;}&gt;
-    ///   &lt;AsyncComponent /&gt;
-    /// &lt;/Suspense&gt;
-    /// </code>
-    /// </summary>
-    /// <remarks>@description https://docs.solidjs.com/reference/components/suspense</remarks>
-    [<Import("Suspense", "solid-js")>]
-    static member Suspense (props: Suspense.Props) : JSXElement option = jsNative

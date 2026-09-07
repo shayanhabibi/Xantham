@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Helpers.fs" />
+    <ProjectReference Include="../../../src/Xantham.Fable.Core/Xantham.Fable.Core.fsproj" />
+    <PackageReference Include="Fable.Core" Version="5.2.0" />
+  </ItemGroup>
+</Project>

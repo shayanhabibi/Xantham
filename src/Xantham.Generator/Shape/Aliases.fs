@@ -134,6 +134,7 @@ let shapeAliases: Pass<ShapeModel> =
                                         Some(
                                             FsAbbrev
                                                 {
+                                                    Value = None
                                                     Name = name
                                                     Docs = export.Docs
                                                     Tags = export.Tags
@@ -150,7 +151,10 @@ let shapeAliases: Pass<ShapeModel> =
                         |> Map.toList
                         |> List.sortBy fst
                         |> List.choose (fun (typeId, name) ->
-                            if Set.contains name declaredNames then
+                            if
+                                Set.contains name declaredNames
+                                || Map.containsKey typeId model.AliasApplications
+                            then
                                 None
                             else
                                 match Map.tryFind typeId model.Types with
@@ -254,6 +258,7 @@ let shapeAliases: Pass<ShapeModel> =
                                             Some(
                                                 FsAbbrev
                                                     {
+                                                        Value = None
                                                         Name = name
                                                         Docs = docs
                                                         Tags = tags

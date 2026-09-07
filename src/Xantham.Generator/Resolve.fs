@@ -589,13 +589,63 @@ let private deriveFacts
                 |> Array.filter (fun argument -> argument.Flags.HasFlag TypeFlags.TypeParameter)
                 |> Array.toList
 
+            let isNullish (member_: TypeResponse) =
+                member_.Flags.HasFlag TypeFlags.Null
+                || member_.Flags.HasFlag TypeFlags.Undefined
+
+            let literals = members |> List.filter (isNullish >> not)
+
+            let plainLiteralUnion =
+                not (List.isEmpty literals)
+                && literals
+                   |> List.forall (fun member_ ->
+                       let flags = member_.Flags
+
+                       not (flags.HasFlag TypeFlags.Enum || flags.HasFlag TypeFlags.EnumLiteral)
+                       && (flags.HasFlag TypeFlags.StringLiteral
+                           || flags.HasFlag TypeFlags.NumberLiteral
+                           || flags.HasFlag TypeFlags.BigIntLiteral
+                           || flags.HasFlag TypeFlags.BooleanLiteral))
+
+            // Other union mappings may require generic arguments that a named reference omits.
+            let recoverAlias =
+                plainLiteralUnion
+                && (ctx.Config.DeclarationCatalog
+                    || not (List.isEmpty ctx.Config.DeclarationReferences))
+
+            let! nonNullable =
+                async {
+                    if recoverAlias && members |> List.exists isNullish then
+                        let! result = ctx.Session.getNonNullableType ty.Id
+
+                        return
+                            if result.Id <> ty.Id && result.AliasSymbol.IsSome then
+                                Some result
+                            else
+                                None
+                    else
+                        return None
+                }
+
+            let! alias =
+                if recoverAlias && ty.AliasSymbol.IsSome then
+                    ctx.Session.getAliasSymbolOfType ty.Id
+                else
+                    async.Return ValueNone
+
             return
                 { TypeFacts.shallow ty with
                     UnionMembers = members |> List.map _.Id
+                    NonNullableAlias = nonNullable |> Option.map _.Id
                     AliasTypeArguments = aliasTypeArguments |> List.map _.Id
+                    SymbolName = alias |> ValueOption.map _.Name |> ValueOption.toOption
+                    SymbolParent = alias |> ValueOption.bind _.Parent |> ValueOption.toOption
+                    Origin = Grouping.classify ctx.PackageDir alias
+                    DeclFile = Grouping.declFile alias
                 },
                 channel trace "union-members" members
                 @ channel trace "alias-type-arguments" aliasTypeArguments
+                @ channel trace "nonnullable-alias" (Option.toList nonNullable)
         elif has TypeFlags.Intersection then
             // The constituents, followed into the table. A branding intersection (§4.6) is
             // decided by what its object operands *contain* - a marker property or a real
@@ -882,6 +932,9 @@ let private deriveFacts
                             DeclFile = Grouping.declFile symbol
                             SymbolParent = symbol |> ValueOption.bind _.Parent |> ValueOption.toOption
                             Members = structure.Members
+                            Declarations = []
+                            DeclarationArguments = []
+                            AliasDeclarations = []
                             IndexInfos = structure.IndexInfos
                             CallSignatures = structure.CallSignatures
                             ConstructSignatures = structure.ConstructSignatures
@@ -894,6 +947,7 @@ let private deriveFacts
                             Default = None
                             Conditional = None
                             UnionMembers = []
+                            NonNullableAlias = None
                             AliasIdentity = None
                         },
                         discovered
@@ -1178,6 +1232,30 @@ let resolveTypeTable: Pass<ResolveModel> =
 
                                 return table, notFollowed, findings
                             | fresh ->
+                                let! aliasDeclarations =
+                                    if
+                                        ctx.Config.DeclarationCatalog
+                                        || not (List.isEmpty ctx.Config.DeclarationReferences)
+                                    then
+                                        async {
+                                            let! symbols =
+                                                fresh
+                                                |> List.filter (fun ty -> ty.AliasSymbol.IsSome)
+                                                |> List.map (fun ty -> ctx.Session.getAliasSymbolOfType ty.Id)
+                                                |> Async.Parallel
+
+                                            return!
+                                                symbols
+                                                |> Array.choose ValueOption.toOption
+                                                |> Array.distinctBy _.Id
+                                                |> Array.sortBy (fun symbol -> symbol.Declarations, symbol.Name)
+                                                |> Array.map (fun symbol ->
+                                                    ctx.Session.getDeclaredTypeOfSymbol symbol.Id)
+                                                |> Async.Sequential
+                                        }
+                                    else
+                                        async.Return [||]
+
                                 let! results =
                                     fresh
                                     |> List.map (fun ty ->
@@ -1222,12 +1300,13 @@ let resolveTypeTable: Pass<ResolveModel> =
                                 let derived = fresh |> List.fold (fun set ty -> Set.add ty.Id set) derived
 
                                 let discovered =
-                                    results
-                                    |> Array.toList
-                                    |> List.collect (fun (_, result) ->
-                                        match result with
-                                        | Ok(_, discovered) -> discovered
-                                        | Error _ -> [])
+                                    [
+                                        for _, result in results do
+                                            match result with
+                                            | Ok(_, discovered) -> yield! discovered
+                                            | Error _ -> ()
+                                        yield! aliasDeclarations
+                                    ]
 
                                 return! walk table derived notFollowed findings discovered (depth + 1)
                         }
@@ -1263,4 +1342,57 @@ let resolveTypeTable: Pass<ResolveModel> =
     }
 
 /// The tier's pass list, in execution order.
-let passes: Pass<ResolveModel> list = [ resolveExportTypes; resolveTypeTable ]
+let resolveDeclarationIdentities: Pass<ResolveModel> =
+    {
+        Name = "resolve-declaration-identities"
+        Run =
+            fun ctx model ->
+                async {
+                    if
+                        not ctx.Config.DeclarationCatalog
+                        && List.isEmpty ctx.Config.DeclarationReferences
+                    then
+                        return Advanced model
+                    else
+                        let! types =
+                            model.Types
+                            |> Map.toArray
+                            |> Array.map (fun (typeId, facts) ->
+                                async {
+                                    let! actual = ctx.Session.getSymbolOfType typeId
+
+                                    let! symbol =
+                                        match actual with
+                                        | ValueSome _ -> async.Return actual
+                                        | ValueNone -> ctx.Session.getAliasSymbolOfType typeId
+
+                                    let declarations =
+                                        symbol
+                                        |> ValueOption.bind _.Declarations
+                                        |> ValueOption.defaultValue [||]
+                                        |> Array.toList
+
+                                    let! arguments = ctx.Session.getAliasTypeArgumentsOfType typeId
+                                    let! alias = ctx.Session.getAliasSymbolOfType typeId
+
+                                    return
+                                        typeId,
+                                        { facts with
+                                            Declarations = declarations
+                                            DeclarationArguments =
+                                                arguments |> ValueOption.defaultValue [||] |> Array.toList
+                                            AliasDeclarations =
+                                                alias
+                                                |> ValueOption.bind _.Declarations
+                                                |> ValueOption.defaultValue [||]
+                                                |> Array.toList
+                                        }
+                                })
+                            |> Async.Parallel
+
+                        return Advanced { model with Types = Map.ofArray types }
+                }
+    }
+
+let passes: Pass<ResolveModel> list =
+    [ resolveExportTypes; resolveTypeTable; resolveDeclarationIdentities ]

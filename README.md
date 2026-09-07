@@ -50,6 +50,33 @@ Targets `net10.0`, `net8.0` and `netstandard2.1`. See the
 
 ---
 
+## Generating bindings
+
+The generator can start from an explicit declaration entry and preserve the package's runtime
+import separately. Configuration also selects ambient type providers, so a package can be
+generated against its intended browser, Workers, or Node declaration environment. See
+[Generating F# bindings](docs/generator-usage.md) for the configuration and CLI examples.
+
+Optional declaration catalogs let later entries reuse types owned by an earlier generated
+project. Catalogs check source identity, tool fingerprints, inference settings and the emitted
+F# API before reusing a declaration. They also record the owners actually needed by the
+consumer. This supports project dependency graphs while retaining public re-exports and class
+constructors. Incompatible profiles or unresolved ownership produce a diagnostic; see the
+[catalog compatibility boundary](docs/generator-usage.md#share-types-across-generated-subpaths).
+
+For a source checkout, run the build and the full test pipeline:
+
+```sh
+dotnet build Xantham.slnx
+XANTHAM_REQUIRE_TSC=1 dotnet fsi build.fsx -- test
+```
+
+The pipeline exercises live compiler queries, generator regressions, compiled F# consumers,
+and Fable runtime behavior. A successful compile alone does not establish that every
+TypeScript construct has a faithful F# mapping; the generated findings remain part of review.
+
+---
+
 ## Repository layout
 
 | Path | Role |

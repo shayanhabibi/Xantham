@@ -99,6 +99,13 @@ Wire-driven inventory, no mapping decisions at all.
   `getAliasedSymbol` to origin) appears exactly once; declaration merging is already done
   because we harvest *symbols*, not declaration nodes.
 
+- **Value exports retain their path provenance.** The flattened module export list includes
+  symbols reached only through `export type *`. Harvest records `HasValueExport` from the
+  compiler's direct export tables and typed import/export nodes, following only value-capable
+  paths to the same declaring symbol. Type-only classes retain their instance shapes and
+  `typeof` aliases retain the value-type facts, while class constructors/statics and function
+  imports require a value-export path. Barrel cycles do not cache a provisional absence.
+
 - **An ambient declaration in a `.d.ts` module is exported without the keyword**, and the
   harvest is right to take it. `declare const secret: number` beside an `export declare
   function` looks local and is not: `getExportsOfModule` returns it, and `import { secret }`
@@ -267,6 +274,13 @@ New projects (names step around the archive, which is invisible to the solution 
   F# declarations, the key spellings and descriptions from a table in `src/Xantham.Cli/Schema.fs`
   that emission refuses to skip. `dotnet fsi build.fsx -- generate --only schema` regenerates
   it, and `Cli.test.fs` fails when the committed text and the record disagree.
+
+  *Extended (2026-09-06):* `entry` selects one existing TypeScript file relative to the
+  package directory, independently of the `runtime` import and F# `module` name. The default
+  lookup checks root declarations; a package exposing only named subpaths requires an explicit
+  input. Conditional environment selection remains the caller's responsibility. Bootstrap,
+  CLI, schema and `entry-selection-lab` tests cover selection and refusal paths, including
+  `.d.mts` and `.d.cts`. See [entry selection](../../generator-usage.md#select-a-declaration-entry).
 
   Two things `load` still leaves to a caller. It is addressed by *directory*, so `--config`
   pointing at a file under another name reads it through a staged copy; a `loadFile` taking
@@ -1173,6 +1187,25 @@ section above.
   has to resolve the 61 names the corpus references rather than the 20,000 a group walk
   reaches, and has to scope `Unclassified` shapes as well as named group members.
 
+  *Updated (2026-09-06):* the later combined compiler-library producer supersedes the
+  shipping restriction above. Its `Es` and `Dom` modules share `namespace rec TypeScript.Lib`.
+  The clean `esnext`/`dom` profile compiles for `netstandard2.1` and `net8.0`; the retained split
+  snapshots are outside the solution. The [packaging record](../handovers/wave-sixteen-management.md#compiler-library-packaging-after-this-handover)
+  gives the input pins and measurements.
+
+  Declaration placement now follows the defining export, with synthesized nested declarations
+  following their parent. A secondary alias keeps its own export's owner. These distinctions
+  prevent an application alias from renaming or relocating a shared compiler type. A complete
+  program-source check permits reusable `GlobalThis` only when compiler libraries are accompanied
+  by empty sources or empty exports. Application declarations and referenced augmentations keep
+  that global object in the application. Ownership tests cover these cases; the independent ES5
+  golden profile compiles with its consumer in a separate gate project.
+
+  This establishes the clean producer and the tested ownership cases. An application-enriched
+  DOM scope can still introduce a dependency from core to application; its reproduction remains
+  in `compiler-lib-ownership-lab`. General augmentation handling and closure across arbitrary
+  separately generated groups remain further work.
+
   *Settled (wave five lane T):* the compile gate takes closed configurations only, with the
   **corpus** as the unit of closure rather than the run. `cross-package-lab` and
   `cross-package-dep` are gated together, which makes the F# compiler rather than a string
@@ -1180,6 +1213,39 @@ section above.
   templated module nothing ships carries the `.open.fs` suffix and stays out. Stub synthesis
   is refused: a stub written from the templated identity agrees with the template by
   construction, and both breaks above would compile clean against one.
+
+Declaration catalogs (2026-09-06) add an opt-in stage between Shape and Render. Resolve retains
+actual-symbol declaration handles and concrete alias arguments; the catalog records stable
+package-relative handles, instantiated shape identities, source closure hashes, compiler/profile
+keys, generator binary identity, package manifest hashes, and canonical F# APIs including method
+constraints. Bound generic arguments are normalized by position, and source closure excludes
+contextual argument bounds while retaining the declaration's own source. The stage rewrites `FsTypeRef` occurrences and
+replaces repeated public declarations with aliases while retaining entry-specific value imports.
+Catalog dependencies form an ordered owner DAG, including inherited producer entries. The
+`declaration-identity-lab` producer/adapter/next consumer and catalog-conflict tests exercise the
+contract, including class constructor values, nested package versions, and incompatible generic
+specializations. Generic alias applications retain their declaration owner; transparent aliases
+normalize to their underlying F# type for API comparison. Callable identities include union,
+intersection, tuple and recursive references. Source closure retains declaration dependencies
+and excludes unrelated export use sites. The regression suite checks each case through producer
+and consumer compilation. Anonymous generic result members reuse their declaration only under
+a complete substitution, preserving caller bounds and repeated or reordered arguments.
+Opaque dependency aliases retain their argument owners and applications in identity, including
+the source dependencies of concrete defaults, even when member facts are intentionally widened.
+Anonymous literal unions use their literal values for identity; named aliases and enum members
+retain their declaration anchors. Nullable literal unions retain the compiler's nonnullable alias
+relation, including its source dependencies, so optional properties reuse the correct named
+type across entries. Remaining SDK API and constraint mismatches, and cross-profile
+ownership, are still explicitly refused.
+
+Rendering regressions from the SDK corpus (2026-09-06) preserve `_` identifiers and qualify
+root type references shadowed by nested generated declarations. Bound parameters that collide
+with FSharp.Core pattern constructors use distinct F# names (`GE005`), while object construction
+preserves JavaScript property names and optional-field omission. The underscore, inherited-name
+and pattern-parameter labs provide compiler checks; the four added runtime checks pass in the
+327-check Fable gate. The affected Puppeteer, Actors, Sandbox, Sandbox Preview and RealtimeKit UI
+root outputs compile; the refreshed dependency profiles and full subentry set still require
+their own generation and acceptance checks.
 
 Watch items rather than open questions: the debug assertion pass (O3) and the bespoke
 JSON model dump (O5) are named escape hatches, built only when their triggering need

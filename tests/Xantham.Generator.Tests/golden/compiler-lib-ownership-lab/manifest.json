@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "package": "compiler-lib-ownership-lab",
+  "module": "CompilerLibOwnershipLab",
+  "counts": {
+    "exact": 39,
+    "ergonomic": 70,
+    "widened": 152,
+    "escape": 58
+  },
+  "passes": [
+    {
+      "pass": "SY - synthesize-anonymous",
+      "total": 300,
+      "exact": 300
+    },
+    {
+      "pass": "DT - detect-tagged-unions",
+      "total": 2,
+      "ergonomic": 2
+    },
+    {
+      "pass": "shape-callbacks",
+      "total": 304,
+      "ergonomic": 148,
+      "widened": 141,
+      "escape": 15
+    },
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 1076,
+      "exact": 14,
+      "ergonomic": 896,
+      "widened": 37,
+      "escape": 129
+    },
+    {
+      "pass": "SA - shape-aliases",
+      "total": 46,
+      "ergonomic": 10,
+      "widened": 31,
+      "escape": 5
+    },
+    {
+      "pass": "SE - shape-exports",
+      "total": 43,
+      "ergonomic": 36,
+      "escape": 7
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 172,
+      "ergonomic": 172
+    },
+    {
+      "pass": "DO - dedupe-overloads",
+      "total": 8,
+      "widened": 8
+    },
+    {
+      "pass": "RA - repair-arity",
+      "total": 3,
+      "ergonomic": 1,
+      "widened": 2
+    },
+    {
+      "pass": "render-source",
+      "total": 1,
+      "exact": 1
+    }
+  ]
+}

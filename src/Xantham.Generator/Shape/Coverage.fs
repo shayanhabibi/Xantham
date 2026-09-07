@@ -41,6 +41,9 @@ let auditCoverage: Pass<ShapeModel> =
 
                     let missing =
                         model.Harvest.Exports
+                        |> List.filter (fun export ->
+                            export.HasValueExport
+                            || hasAny (SymbolFlags.Type ||| SymbolFlags.Module) export.Symbol.Flags)
                         |> List.filter (represented >> not)
                         |> List.map (fun export -> Finding.make (name export) AuditCoverage.ExportNotRepresented)
 

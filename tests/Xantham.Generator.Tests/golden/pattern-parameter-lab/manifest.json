@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "package": "pattern-parameter-lab",
+  "module": "PatternParameterLab",
+  "counts": {
+    "exact": 1,
+    "ergonomic": 2,
+    "widened": 0,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 2,
+      "ergonomic": 2
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 1,
+      "ergonomic": 1
+    },
+    {
+      "pass": "render-source",
+      "total": 4,
+      "ergonomic": 4
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "package": "default-intersection-lab",
+  "module": "DefaultIntersectionLab",
+  "counts": {
+    "exact": 0,
+    "ergonomic": 1,
+    "widened": 4,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SY - synthesize-anonymous",
+      "total": 2,
+      "exact": 2
+    },
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 9,
+      "ergonomic": 4,
+      "widened": 5
+    },
+    {
+      "pass": "SA - shape-aliases",
+      "total": 2,
+      "ergonomic": 1,
+      "widened": 1
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 9,
+      "ergonomic": 9
+    }
+  ]
+}

@@ -8,11 +8,11 @@ open Xantham.Generator.Shape.Spec
 /// Fixes the output order the renderer will follow verbatim: declarations in source order with
 /// name as the tiebreak, then the `Exports` type - its members in harvest order - last.
 let orderDeclarations: Pass<ShapeModel> =
-    Pass.pure' "order-declarations" (fun _ model ->
+    Pass.pure' "order-declarations" (fun ctx model ->
         let orderKey (order: DeclOrder option) (name: string) =
             (match order with
-             | Some order -> order.File, order.NodeIndex
-             | None -> "￿", System.Int32.MaxValue),
+             | Some order -> Grouping.sourceOrderKey ctx.PackageDir order.File, order.NodeIndex
+             | None -> (2, "", ""), System.Int32.MaxValue),
             name
 
         let decls =
@@ -26,7 +26,7 @@ let orderDeclarations: Pass<ShapeModel> =
                 | FsDelegateType decl -> orderKey decl.Order decl.Name
                 | FsPhantom decl -> orderKey decl.Order decl.Name
                 | FsMeasure decl -> orderKey decl.Order decl.Name
-                | FsExports _ -> ("￿", System.Int32.MaxValue), "￿")
+                | FsExports _ -> ((2, "", ""), System.Int32.MaxValue), "￿")
 
         let exports =
             model.ExportMembers

@@ -8,12 +8,16 @@
 
     <ItemGroup>
         <Compile Include="Build.fs" />
+        <Compile Include="ExportProvenance.test.fs" />
         <Compile Include="Resolve.test.fs" />
         <Compile Include="Shape.test.fs" />
         <Compile Include="Render.test.fs" />
         <Compile Include="Findings.test.fs" />
         <Compile Include="MultiPackage.test.fs" />
+        <Compile Include="Ownership.test.fs" />
+        <Compile Include="DeclarationCatalog.test.fs" />
         <Compile Include="Pipeline.test.fs" />
+        <Compile Include="Bootstrap.test.fs" />
         <Compile Include="Cli.test.fs" />
         <Compile Include="Main.fs" />
     </ItemGroup>

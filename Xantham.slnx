@@ -50,8 +50,6 @@
   <Folder Name="/src/">
     <Project Path="src/Xantham.TypeScript.Wire/Xantham.TypeScript.Wire.fsproj" />
     <Project Path="src/Xantham.Generator/Xantham.Generator.fsproj" />
-    <Project Path="src/xantham-libs/Xantham.Fable.Lib.Dom/Xantham.Fable.Lib.Dom.fsproj" />
-    <Project Path="src/xantham-libs/Xantham.Fable.Lib.Es/Xantham.Fable.Lib.Es.fsproj" />
     <Project Path="src/Xantham.Cli/Xantham.Cli.fsproj" />
     <Project Path="src/Xantham.Fable.Core/Xantham.Fable.Core.fsproj" />
   </Folder>
@@ -60,6 +58,7 @@
     <Project Path="tests/Xantham.TypeScript.Wire.Tests/Xantham.TypeScript.Wire.Tests.fsproj" />
     <Project Path="tests/Xantham.Generator.Tests/Xantham.Generator.Tests.fsproj" />
     <Project Path="tests/Xantham.Generator.CompileGate/Xantham.Generator.CompileGate.fsproj" />
+    <Project Path="tests/Xantham.Generator.CompilerLibCompileGate/Xantham.Generator.CompilerLibCompileGate.fsproj" />
     <Project Path="tests/Xantham.Generator.RunGate/Xantham.Generator.RunGate.fsproj" />
   </Folder>
   <Folder Name="/tools/">
