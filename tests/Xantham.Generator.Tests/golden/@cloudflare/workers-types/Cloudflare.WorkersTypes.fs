@@ -5528,9 +5528,11 @@ type LoopbackDurableObjectClass<'T> = private LoopbackDurableObjectClass__ of ob
 [<Interface>]
 type LoopbackDurableObjectNamespace =
     inherit DurableObjectNamespace<unit>
+    abstract get: id: DurableObjectId * ?options: DurableObjectNamespaceGetDurableObjectOptions -> DurableObjectStub<unit>
+    abstract getByName: name: string * ?options: DurableObjectNamespaceGetDurableObjectOptions -> DurableObjectStub<unit>
     abstract jurisdiction: jurisdiction: DurableObjectJurisdiction -> DurableObjectNamespace<unit>
     [<ParamObject; Emit("$0")>]
-    static member Create (newUniqueId: (DurableObjectNamespaceNewUniqueIdOptions option -> DurableObjectId), idFromName: (string -> DurableObjectId), idFromString: (string -> DurableObjectId), get: Func<DurableObjectId, DurableObjectNamespaceGetDurableObjectOptions option, obj>, getByName: Func<string, DurableObjectNamespaceGetDurableObjectOptions option, obj>, jurisdiction: (DurableObjectJurisdiction -> DurableObjectNamespace<unit>)) : LoopbackDurableObjectNamespace = jsNative
+    static member Create (newUniqueId: (DurableObjectNamespaceNewUniqueIdOptions option -> DurableObjectId), idFromName: (string -> DurableObjectId), idFromString: (string -> DurableObjectId), get: Func<DurableObjectId, DurableObjectNamespaceGetDurableObjectOptions option, DurableObjectStub<unit>>, getByName: Func<string, DurableObjectNamespaceGetDurableObjectOptions option, DurableObjectStub<unit>>, jurisdiction: (DurableObjectJurisdiction -> DurableObjectNamespace<unit>)) : LoopbackDurableObjectNamespace = jsNative
 
 [<Interface>]
 type LoopbackColoLocalActorNamespace =
