@@ -35,7 +35,7 @@ jobs:
         run: dotnet build -c Release Xantham.slnx
       # Generate the documentation files
       - name: Generate the documentation'
-        run: dotnet fsdocs build --eval --properties Configuration=Release
+        run: dotnet run --project ./site/site.fsproj -- build
       # Upload the static files
       - name: Upload documentation
         uses: actions/upload-pages-artifact@v5

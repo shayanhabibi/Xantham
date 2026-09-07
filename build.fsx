@@ -215,9 +215,9 @@ module Stages =
             return
                 stage "docs" {
                     if watch then
-                        stage "watch" { run "dotnet fsdocs watch --eval" }
+                        stage "watch" { run "dotnet run --project site/site.fsproj -- watch" }
                     else
-                        stage "build" { run "dotnet fsdocs build --eval --clean" }
+                        stage "build" { run "dotnet run --project site/site.fsproj -- build" }
 
                 }
         }

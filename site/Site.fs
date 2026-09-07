@@ -10,9 +10,8 @@ let versions = [ SiteVersion.root "0.0" ]
 let navbar =
     Theme.navbar
         [
-            NavbarSection("Guide", "guide", "/guide/introduction/")
-            NavbarSection("Tsc Wire", "wire", "/wire/")
             NavbarSection("Xantham CLI", "xantham-cli", "/xantham-cli/")
+            NavbarSection("Tsc Wire", "wire", "/wire/")
         ]
     >> Theme.navbarEnd
         [
@@ -28,9 +27,9 @@ let theme =
 
 let site =
     Site.create "Xantham"
-    |> Site.baseUrl "/"
+    |> Site.baseUrl "/xantham/"
     |> Site.origin "https://shayanhabibi.github.io"
-    |> Site.output "output"
+    |> Site.output "../output"
     |> Site.staticFiles "static"
     |> Markdown.register
     |> TreeSitter.register

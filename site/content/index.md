@@ -1,7 +1,11 @@
 ---
 title: Xantham
 description: Documentation for Xantham
-layout: bare
+layout: splash
 ---
 
-Welcome. Start with [the introduction](guide/introduction.md).
+# xantham
+
+These docs are under construction.
+
+## [Start here](xantham-cli/index.md)
