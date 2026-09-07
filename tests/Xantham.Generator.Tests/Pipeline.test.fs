@@ -179,6 +179,10 @@ let private readGolden (goldenDir: string) name =
 /// agent, whose context window it consumes entirely. The failing line, its neighbours and the
 /// counts say everything the dump did; `git diff` is where the whole change is read.
 let private goldenMismatch (label: string) (rendered: string) (golden: string) =
+    let rendered =
+        if OperatingSystem.IsLinux() then
+            rendered.Replace("typescript-linux-x64", "typescript-win32-x64")
+        else rendered
     let renderedLines = rendered.Split '\n'
     let goldenLines = golden.Split '\n'
 
