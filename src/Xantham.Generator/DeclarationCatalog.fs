@@ -445,14 +445,42 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                             ]
                         else
                             arguments
-                            @ (facts.DeclarationArguments
-                               |> List.map (fun argument ->
-                                   if Map.containsKey argument.Id shape.Types then
-                                       partKey argument.Id
-                                   elif argument.Flags.HasFlag TypeFlags.Object then
-                                       ""
-                                   else
-                                       json (uint32 argument.Flags, argument.Value)))
+
+                    let arguments =
+                        if structural && not (List.isEmpty arguments) then
+                            // Populated structural keys already describe the applied members,
+                            // including transparent aliases that carry different alias arguments.
+                            arguments
+                        else
+                            let declarationArguments =
+                                facts.DeclarationArguments
+                                |> List.map (fun argument ->
+                                    if Map.containsKey argument.Id shape.Types then
+                                        partKey argument.Id
+                                    elif argument.Flags.HasFlag TypeFlags.Object then
+                                        ""
+                                    else
+                                        json (uint32 argument.Flags, argument.Value))
+
+                            if not structural then
+                                arguments @ declarationArguments
+                            elif List.isEmpty declarationArguments then
+                                arguments
+                            else
+                                // Opaque dependencies retain no members. Their alias arguments
+                                // still distinguish defaults and repeated slots, but belong to
+                                // the alias declaration, which can reorder the underlying type's
+                                // parameters. Retain that normalized argument owner as well.
+                                let owner =
+                                    facts.AliasDeclarations
+                                    |> List.map (normalizeHandle sourceFiles)
+                                    |> List.distinct
+                                    |> List.sort
+
+                                if List.contains "" declarationArguments then
+                                    complete <- false
+
+                                arguments @ [ json ("declaration-arguments", owner, declarationArguments) ]
 
                     if not complete || List.contains "" arguments then
                         let aliasArguments =
@@ -494,7 +522,9 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
             yield! facts.BaseTypes
             yield! facts.TypeArguments
             yield! facts.AliasTypeArguments
+            yield! facts.DeclarationArguments |> List.map _.Id
             yield! facts.UnionMembers
+            yield! Option.toList facts.NonNullableAlias
             yield! facts.IntersectionMembers
             yield! Option.toList facts.Constraint
             yield! Option.toList facts.Default

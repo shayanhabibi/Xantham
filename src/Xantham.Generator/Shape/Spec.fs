@@ -2092,27 +2092,33 @@ and internal unionRef
                 (TypeReference.NullableHoistedToOption(absence.FromNull, absence.FromUndefined, absence.FromVoid))
             :: findings
 
-    match remaining with
-    | [] ->
-        let absence = absenceAcross model hoisted
+    match facts.NonNullableAlias with
+    | Some alias ->
+        let reference, findings = typeRef ctx model self owner alias
+        wrap reference findings
+    | None ->
+        match remaining with
+        | [] ->
+            let absence = absenceAcross model hoisted
 
-        FsUnit,
-        [
-            Finding.make
-                owner
-                (TypeReference.OnlyNullUndefinedToUnit(absence.FromNull, absence.FromUndefined, absence.FromVoid))
-        ]
-    | [ single ] ->
-        let inner, findings = typeRef ctx model self owner single
-        wrap inner findings
-    | _ when isBooleanPair model remaining -> wrap FsBool []
-    | _ ->
-        match Map.tryFind facts.Response.Id model.DeclNames with
-        | Some name -> wrap (FsNamed name) []
-        | None ->
-            match namedUnionByMembers model remaining with
+            FsUnit,
+            [
+                Finding.make
+                    owner
+                    (TypeReference.OnlyNullUndefinedToUnit(absence.FromNull, absence.FromUndefined, absence.FromVoid))
+            ]
+        | [ single ] ->
+            let inner, findings = typeRef ctx model self owner single
+            wrap inner findings
+        | _ when isBooleanPair model remaining -> wrap FsBool []
+        | _ ->
+            match Map.tryFind facts.Response.Id model.DeclNames with
             | Some name -> wrap (FsNamed name) []
-            | None -> let reference, findings = erasedUnionRef ctx model self owner remaining in wrap reference findings
+            | None ->
+                match namedUnionByMembers model remaining with
+                | Some name -> wrap (FsNamed name) []
+                | None ->
+                    let reference, findings = erasedUnionRef ctx model self owner remaining in wrap reference findings
 
 /// An unnamed heterogeneous union as Fable's `U2`-`U4` (D4, §4.5(4)). Arms are the members' own
 /// F# types, deduplicated after mapping, so an unnamed literal union collapses to `string`.

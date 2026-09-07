@@ -841,6 +841,8 @@ type TypeFacts =
         /// `T extends U ? X : Y` (§4.11), where the type is one.
         Conditional: ConditionalFacts option
         UnionMembers: int list
+        /// Compiler-returned literal-union alias after removing nullish members; populated only for catalog generation or reuse.
+        NonNullableAlias: int option
         /// The alias name and single argument an indexed-access reference was written through,
         /// where the checker has already expanded past it before the flags reach the shaper
         /// (§4.11's `NoInfer`). Populated only at an indexed-access reference site, never on a
@@ -873,6 +875,7 @@ module TypeFacts =
             Default = None
             Conditional = None
             UnionMembers = []
+            NonNullableAlias = None
             AliasIdentity = None
         }
 

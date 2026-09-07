@@ -82,6 +82,59 @@ let accept (client: Identity.Adapter.Client) = Identity.Root.Exports.``use`` cli
 [<Tests>]
 let tests =
     testList "declaration catalog" [
+        testCase "opaque specializations retain declaration arguments" <| fun _ ->
+            let directory = Path.Combine(Path.GetTempPath(), "xantham-catalog-opaque-arguments-" + Guid.NewGuid().ToString "N")
+            Directory.CreateDirectory directory |> ignore
+            try
+                writePackageFile directory "package.json" """{"name":"opaque-arguments-lab","version":"1.0.0"}"""
+                writePackageFile directory "node_modules/identity-dep/package.json" """{"name":"identity-dep","version":"1.0.0","types":"index.d.ts"}"""
+                writePackageFile directory "node_modules/identity-dep/context.d.ts" """export interface Context { source: string; }"""
+                writePackageFile directory "node_modules/identity-dep/index.d.ts" """import type { Context } from "./context.js";
+export type Result<T, R = Context> = { item: T; context: R };
+export type Callback<T, R = Context> = (event: Result<T, R>) => void;
+export type Forward<A, B> = Result<A, B>;
+export type Reverse<A, B> = Result<B, A>;
+export type Repeated<T> = Result<T, T>;
+"""
+                writePackageFile directory "index.d.ts" """import type { Callback } from "identity-dep";
+export { Result, Forward, Reverse, Repeated } from "identity-dep";
+export type Current<T> = Parameters<Callback<T>>[0];
+export type Alpha<U> = Parameters<Callback<U>>[0];
+export type Numeric<T> = Parameters<Callback<T, number>>[0];
+"""
+                writePackageFile directory "adapter.d.ts" """export { Result, Current, Alpha, Numeric, Forward, Reverse, Repeated } from "./index.js";"""
+                let root = configured directory "Root" "index.d.ts" [||]
+                Pipeline.run root directory (Path.Combine(directory, "root")) |> Async.RunSynchronously |> ignore
+                let reference = Path.Combine(directory, "root", "declarations.json")
+                use catalog = JsonDocument.Parse(File.ReadAllText reference)
+                let alpha =
+                    catalog.RootElement.GetProperty("declarations").EnumerateArray()
+                    |> Seq.find (fun entry -> entry.GetProperty("fSharpName").GetString() = "Identity.Root.Alpha")
+                alpha.GetProperty("sources").EnumerateArray()
+                |> Seq.exists (fun source -> source.GetProperty("file").GetString() = "context.d.ts")
+                |> Flip.Expect.equal "the concrete default's source remains in the specialization closure" true
+                let adapter = configured directory "Adapter" "adapter.d.ts" [| reference |]
+                Pipeline.run adapter directory (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                let consumer = """module Identity.Consumer
+let alpha<'T> (value: Identity.Root.Current<'T>) : Identity.Root.Alpha<'T> = value
+let share<'T> (value: Identity.Root.Current<'T>) : Identity.Adapter.Current<'T> = value
+let numeric<'T> (value: Identity.Root.Numeric<'T>) : Identity.Adapter.Numeric<'T> = value
+let forward<'A, 'B> (value: Identity.Root.Forward<'A, 'B>) : Identity.Adapter.Forward<'A, 'B> = value
+let reverse<'A, 'B> (value: Identity.Root.Reverse<'A, 'B>) : Identity.Adapter.Reverse<'A, 'B> = value
+let repeated<'T> (value: Identity.Root.Repeated<'T>) : Identity.Adapter.Repeated<'T> = value
+"""
+                let sources = [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ]
+                let code, output = compileConsumer directory sources consumer
+                code |> Flip.Expect.equal output 0
+                for invalid in [
+                    "let invalid (value: Identity.Root.Numeric<string>) : Identity.Root.Current<string> = value"
+                    "let invalid (value: Identity.Root.Reverse<string, float>) : Identity.Root.Forward<string, float> = value"
+                    "let invalid (value: Identity.Root.Repeated<string>) : Identity.Root.Current<string> = value"
+                ] do
+                    let code, output = compileConsumer directory sources (consumer + "\n" + invalid + "\n")
+                    (code <> 0 && output.Contains "FS0001") |> Flip.Expect.equal (invalid + "\n" + output) true
+            finally Directory.Delete(directory, true)
+
         testCase "contextual bounds do not redeclare generic result members" <| fun _ ->
             let directory = Path.Combine(Path.GetTempPath(), "xantham-catalog-contextual-bound-" + Guid.NewGuid().ToString "N")
             Directory.CreateDirectory directory |> ignore
@@ -439,5 +492,94 @@ let copyLeft (source: Identity.Root.Mixed) (target: Identity.Adapter.Mixed) = ta
                 code |> Flip.Expect.equal output 0
                 let code, output = compileConsumer directory sources (consumer + "\nlet invalid (value: Identity.Root.Left) : Identity.Root.Right = value\n")
                 (code <> 0 && output.Contains "FS0001") |> Flip.Expect.equal output true
+            finally Directory.Delete(directory, true)
+    ]
+
+[<Tests>]
+let privateNullableAliasTests =
+    testList "declaration catalog private nullable aliases" [
+        let cases = [ "?", ""; "", " | null"; "", " | undefined"; "", " | null | undefined" ]
+        testTheory "compiler relation preserves private aliases and export order" [
+            for optional, nullish in cases do
+                for reverse in [ false; true ] do yield optional, nullish, reverse
+        ] <| fun (optional, nullish, reverse) ->
+            let directory = Path.Combine(Path.GetTempPath(), "xantham-private-nullable-" + Guid.NewGuid().ToString "N")
+            Directory.CreateDirectory directory |> ignore
+            try
+                writePackageFile directory "package.json" """{"name":"private-nullable-lab","version":"1.0.0"}"""
+                writePackageFile directory "aliases.d.ts" """export type First = "a" | "b";
+export type Second = "a" | "b";
+"""
+                writePackageFile directory "shared.d.ts" ("import { First, Second } from './aliases';\nexport { First, Second } from './aliases';\nexport interface Options { first" + optional + ": First" + nullish + "; second" + optional + ": Second" + nullish + "; }\n")
+                writePackageFile directory "index.d.ts" (if reverse then "export { Options, Second, First } from './shared';" else "export { First, Second, Options } from './shared';")
+                writePackageFile directory "adapter.d.ts" "export interface Earlier { unrelated?: 'a' | 'b'; }\nexport { Options } from './shared';"
+                let producer = Path.Combine(directory, "root")
+                Pipeline.run (configured directory "Root" "index.d.ts" [||]) directory producer |> Async.RunSynchronously |> ignore
+                let reference = Path.Combine(producer, "declarations.json")
+                Pipeline.run (configured directory "Adapter" "adapter.d.ts" [| reference |]) directory (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                let consumer = """module Identity.Consumer
+let share (value: Identity.Adapter.Options) : Identity.Root.Options = value
+let first (value: Identity.Adapter.Options) : Identity.Root.First option = value.first
+let second (value: Identity.Adapter.Options) : Identity.Root.Second option = value.second
+let copy (source: Identity.Root.Options) (target: Identity.Adapter.Options) =
+    target.first <- source.first
+    target.second <- source.second
+"""
+                let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] consumer
+                code |> Flip.Expect.equal output 0
+                if optional = "?" && not reverse then
+                    let invalid = consumer + "\nlet invalid (source: Identity.Root.Options) (target: Identity.Adapter.Options) = target.first <- source.second\n"
+                    let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] invalid
+                    (code <> 0 && output.Contains "FS0193") |> Flip.Expect.equal output true
+                use catalog = JsonDocument.Parse(File.ReadAllText reference)
+                catalog.RootElement.GetProperty("declarations").EnumerateArray()
+                |> Seq.find (fun entry -> entry.GetProperty("fSharpName").GetString() = "Identity.Root.Options")
+                |> fun entry -> entry.GetProperty("sources").EnumerateArray()
+                |> Seq.map (fun source -> source.GetProperty("file").GetString()) |> Seq.sort |> Seq.toList
+                |> Flip.Expect.equal "nullable references retain alias source dependencies" [ "aliases.d.ts"; "shared.d.ts" ]
+                let aliases = catalog.RootElement.GetProperty("declarations").EnumerateArray() |> Seq.filter (fun entry -> [ "Identity.Root.First"; "Identity.Root.Second" ] |> List.contains (entry.GetProperty("fSharpName").GetString())) |> Seq.toList
+                aliases |> List.length |> Flip.Expect.equal "two source declaration owners" 2
+                aliases |> List.map (fun entry -> entry.GetProperty("identity").GetString()) |> List.distinct |> List.length |> Flip.Expect.equal "equal values retain distinct alias declarations" 2
+            finally Directory.Delete(directory, true)
+    ]
+
+[<Tests>]
+let genericNullableAliasTests =
+    testList "declaration catalog generic nullable aliases" [
+        testCase "nullable tagged unions retain payload type arguments" <| fun _ ->
+            let directory = Path.Combine(Path.GetTempPath(), "xantham-generic-nullable-" + Guid.NewGuid().ToString "N")
+            Directory.CreateDirectory directory |> ignore
+            try
+                writePackageFile directory "package.json" """{"name":"generic-nullable-lab","version":"1.0.0"}"""
+                writePackageFile directory "aliases.d.ts" """export type Result<T> = { kind: 'ok'; value: T } | { kind: 'error'; message: string };
+export type Maybe<T> = Result<T> | null;
+"""
+                writePackageFile directory "shared.d.ts" """import { Result, Maybe } from './aliases';
+export interface Options<T> { direct?: Result<T>; wrapped?: Maybe<T>; }
+"""
+                writePackageFile directory "index.d.ts" "export * from './aliases'; export { Options } from './shared';"
+                writePackageFile directory "adapter.d.ts" "export { Options } from './shared';"
+                let producer = Path.Combine(directory, "root")
+                Pipeline.run (configured directory "Root" "index.d.ts" [||]) directory producer |> Async.RunSynchronously |> ignore
+                let reference = Path.Combine(producer, "declarations.json")
+                Pipeline.run (configured directory "Adapter" "adapter.d.ts" [| reference |]) directory (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                let sources = [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ]
+                let consumer = """module Identity.Consumer
+let share<'T> (value: Identity.Adapter.Options<'T>) : Identity.Root.Options<'T> = value
+let copy<'T> (source: Identity.Root.Options<'T>) (target: Identity.Adapter.Options<'T>) =
+    target.direct <- source.direct
+    target.wrapped <- source.wrapped
+"""
+                let invalid = consumer + "\nlet invalid (source: Identity.Root.Options<string>) (target: Identity.Adapter.Options<float>) = target.direct <- source.direct\n"
+                let code, output = compileConsumer directory sources invalid
+                (code <> 0 && output.Contains "FS0193") |> Flip.Expect.equal "distinct payload types must reject cross-assignment" true
+                let payloads = """
+let stringPayload (value: Identity.Root.Options<string>) : string option =
+    value.direct |> Option.bind (function Fable.Core.U2.Case1 ok -> Some ok.value | _ -> None)
+let numberPayload (value: Identity.Adapter.Options<float>) : float option =
+    value.wrapped |> Option.bind (function Fable.Core.U2.Case1 ok -> Some ok.value | _ -> None)
+"""
+                let code, output = compileConsumer directory sources (consumer + payloads)
+                code |> Flip.Expect.equal output 0
             finally Directory.Delete(directory, true)
     ]

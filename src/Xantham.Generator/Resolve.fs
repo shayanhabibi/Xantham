@@ -589,13 +589,63 @@ let private deriveFacts
                 |> Array.filter (fun argument -> argument.Flags.HasFlag TypeFlags.TypeParameter)
                 |> Array.toList
 
+            let isNullish (member_: TypeResponse) =
+                member_.Flags.HasFlag TypeFlags.Null
+                || member_.Flags.HasFlag TypeFlags.Undefined
+
+            let literals = members |> List.filter (isNullish >> not)
+
+            let plainLiteralUnion =
+                not (List.isEmpty literals)
+                && literals
+                   |> List.forall (fun member_ ->
+                       let flags = member_.Flags
+
+                       not (flags.HasFlag TypeFlags.Enum || flags.HasFlag TypeFlags.EnumLiteral)
+                       && (flags.HasFlag TypeFlags.StringLiteral
+                           || flags.HasFlag TypeFlags.NumberLiteral
+                           || flags.HasFlag TypeFlags.BigIntLiteral
+                           || flags.HasFlag TypeFlags.BooleanLiteral))
+
+            // Other union mappings may require generic arguments that a named reference omits.
+            let recoverAlias =
+                plainLiteralUnion
+                && (ctx.Config.DeclarationCatalog
+                    || not (List.isEmpty ctx.Config.DeclarationReferences))
+
+            let! nonNullable =
+                async {
+                    if recoverAlias && members |> List.exists isNullish then
+                        let! result = ctx.Session.getNonNullableType ty.Id
+
+                        return
+                            if result.Id <> ty.Id && result.AliasSymbol.IsSome then
+                                Some result
+                            else
+                                None
+                    else
+                        return None
+                }
+
+            let! alias =
+                if recoverAlias && ty.AliasSymbol.IsSome then
+                    ctx.Session.getAliasSymbolOfType ty.Id
+                else
+                    async.Return ValueNone
+
             return
                 { TypeFacts.shallow ty with
                     UnionMembers = members |> List.map _.Id
+                    NonNullableAlias = nonNullable |> Option.map _.Id
                     AliasTypeArguments = aliasTypeArguments |> List.map _.Id
+                    SymbolName = alias |> ValueOption.map _.Name |> ValueOption.toOption
+                    SymbolParent = alias |> ValueOption.bind _.Parent |> ValueOption.toOption
+                    Origin = Grouping.classify ctx.PackageDir alias
+                    DeclFile = Grouping.declFile alias
                 },
                 channel trace "union-members" members
                 @ channel trace "alias-type-arguments" aliasTypeArguments
+                @ channel trace "nonnullable-alias" (Option.toList nonNullable)
         elif has TypeFlags.Intersection then
             // The constituents, followed into the table. A branding intersection (§4.6) is
             // decided by what its object operands *contain* - a marker property or a real
@@ -897,6 +947,7 @@ let private deriveFacts
                             Default = None
                             Conditional = None
                             UnionMembers = []
+                            NonNullableAlias = None
                             AliasIdentity = None
                         },
                         discovered

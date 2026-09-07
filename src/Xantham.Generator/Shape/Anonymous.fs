@@ -230,6 +230,12 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
     let mutable taken = model.DeclNames |> Map.toList |> List.map snd |> Set.ofList
     let mutable visited = Set.empty
 
+    let recoveredAliases =
+        model.Types
+        |> Map.toList
+        |> List.choose (snd >> _.NonNullableAlias)
+        |> Set.ofList
+
     let aliasForms = aliasDeclarationForms model
 
     /// The module name a type nests under, where its own symbol is written inside a namespace
@@ -290,7 +296,8 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                | Some m -> (literalOf m).IsSome
                | None -> false)
         && not (isBooleanPair model remaining)
-        && (namedUnionByMembers { model with DeclNames = names } remaining).IsNone
+        && (Set.contains facts.Response.Id recoveredAliases
+            || (namedUnionByMembers { model with DeclNames = names } remaining).IsNone)
 
     /// A union `detect-tagged-unions` will declare (D4, §4.5(2)): every arm an object type
     /// carrying the same string-literal discriminant, and data a DU case can bind. That pass
@@ -399,6 +406,8 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
             match Map.tryFind typeId model.Types with
             | None -> ()
             | Some facts ->
+                facts.NonNullableAlias |> Option.iter (walk path order)
+
                 // The generic declaration behind an instantiation is named ahead of it, so
                 // `Ready<T>` reached only through `Resource<T> = Ready<T> | ...` declares
                 // `Ready<'T>` once and instantiations are applications of it (§4.9).
