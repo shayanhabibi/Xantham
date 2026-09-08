@@ -6,6 +6,7 @@ on:
     paths:
       - '**.fs'
       - 'src/**/**.fsproj'
+      - 'package.json'
       - '!**/*.fsx'
       - '!build.fsx'
   workflow_dispatch: 
