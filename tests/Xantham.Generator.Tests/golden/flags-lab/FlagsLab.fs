@@ -60,7 +60,7 @@ type Ledger =
     static member Create (balance: bigint, credit: (bigint -> bigint)) : Ledger = jsNative
 
 /// <summary>
-/// A bigint *literal* type is the widening its string and number counterparts already are.
+/// A bigint <i>literal</i> type is the widening its string and number counterparts already are.
 /// </summary>
 type Two = bigint
 

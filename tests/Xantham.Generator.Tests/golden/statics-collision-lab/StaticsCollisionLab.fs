@@ -11,7 +11,7 @@ open Fable.Core.JS
 
 /// <summary>
 /// A global interface holding the name the exported class below also carries. The class's
-/// instance side is declared under a renamed name, and its statics have to reach *that*
+/// instance side is declared under a renamed name, and its statics have to reach <i>that</i>
 /// declaration rather than this one.
 /// </summary>
 [<Interface>]

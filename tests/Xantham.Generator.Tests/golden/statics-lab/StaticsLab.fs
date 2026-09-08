@@ -92,7 +92,7 @@ type Doubling =
         and set (_: float): unit = jsNative
 
 /// <summary>
-/// A static on a generic declaration. F# warns at a *use* that cannot infer the instantiation
+/// A static on a generic declaration. F# warns at a <i>use</i> that cannot infer the instantiation
 /// (<c>Box&lt;_&gt;.EMPTY</c>), but the declaration itself is legal and the value is reachable.
 /// </summary>
 [<Interface>]
@@ -148,7 +148,7 @@ type Exports =
     [<Import("Doubling", "statics-lab"); EmitConstructor>]
     static member Doubling (start: float) : Doubling = jsNative
     /// <summary>
-    /// A static on a generic declaration. F# warns at a *use* that cannot infer the instantiation
+    /// A static on a generic declaration. F# warns at a <i>use</i> that cannot infer the instantiation
     /// (<c>Box&lt;_&gt;.EMPTY</c>), but the declaration itself is legal and the value is reachable.
     /// </summary>
     [<Import("Box", "statics-lab"); EmitConstructor>]

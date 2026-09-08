@@ -46,21 +46,21 @@ type Deferred =
 type Recorder =
     abstract channel: string
     /// <summary>
-    /// The **<c>addEventListener()</c>** method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
+    /// The <b>`addEventListener()`</b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
     /// </summary>
     abstract addEventListener: ``type``: string * ?callback: obj * ?options: U2<bool, Browser.Types.AddEventListenerOptions> -> unit
     /// <summary>
-    /// The **<c>dispatchEvent()</c>** method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
+    /// The <b>`dispatchEvent()`</b> method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent">MDN Reference</a>
     /// </summary>
     abstract dispatchEvent: ``event``: Browser.Types.Event -> bool
     /// <summary>
-    /// The **<c>removeEventListener()</c>** method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
+    /// The <b>`removeEventListener()`</b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
     /// </summary>
     abstract removeEventListener: ``type``: string * ?callback: obj * ?options: obj -> unit
     [<ParamObject; Emit("$0")>]

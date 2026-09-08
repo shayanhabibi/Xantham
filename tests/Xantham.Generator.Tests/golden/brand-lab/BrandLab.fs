@@ -94,7 +94,7 @@ type Merged =
     static member Create (a: string, b: float) : Merged = jsNative
 
 /// <summary>
-/// A primitive intersected with an object that has a *real* member - not a brand.
+/// A primitive intersected with an object that has a <i>real</i> member - not a brand.
 /// </summary>
 type Counted = obj
 

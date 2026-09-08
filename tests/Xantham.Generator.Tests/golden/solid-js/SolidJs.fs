@@ -1626,7 +1626,7 @@ type Exports =
     [<Import("sharedConfig", "solid-js")>]
     static member sharedConfig: SharedConfig = jsNative
     /// <summary>
-    /// **[experimental]** Controls the order in which suspended content is rendered
+    /// <b>[experimental]</b> Controls the order in which suspended content is rendered
     /// </summary>
     /// <remarks>@description https://docs.solidjs.com/reference/components/suspense-list</remarks>
     [<Import("SuspenseList", "solid-js")>]

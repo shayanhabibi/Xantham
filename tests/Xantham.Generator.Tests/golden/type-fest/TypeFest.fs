@@ -282,7 +282,7 @@ type AllUnionFields<'Union> = private AllUnionFields__ of obj
 /// //=&gt; boolean
 /// </code>
 ///
-/// Note: <c>AndAll&lt;[]&gt;</c> evaluates to <c>true</c> due to the concept of [vacuous truth](https://en.wikipedia.org/wiki/Logical_conjunction#:~:text=In%20keeping%20with%20the%20concept%20of%20vacuous%20truth%2C%20when%20conjunction%20is%20defined%20as%20an%20operator%20or%20function%20of%20arbitrary%20arity%2C%20the%20empty%20conjunction%20(AND%2Ding%20over%20an%20empty%20set%20of%20operands)%20is%20often%20defined%20as%20having%20the%20result%20true.), i.e., there are no <c>false</c> elements in an empty tuple.
+/// Note: <c>AndAll&lt;[]&gt;</c> evaluates to <c>true</c> due to the concept of <a href="https://en.wikipedia.org/wiki/Logical_conjunction#:~:text=In%20keeping%20with%20the%20concept%20of%20vacuous%20truth%2C%20when%20conjunction%20is%20defined%20as%20an%20operator%20or%20function%20of%20arbitrary%20arity%2C%20the%20empty%20conjunction%20(AND%2Ding%20over%20an%20empty%20set%20of%20operands">vacuous truth</a>%20is%20often%20defined%20as%20having%20the%20result%20true.), i.e., there are no <c>false</c> elements in an empty tuple.
 /// </remarks>
 /// <remarks>@see {@link And}</remarks>
 /// <remarks>@see {@link OrAll}</remarks>
@@ -574,7 +574,7 @@ type ArraySlice<'Array_, 'Start, 'End> = private ArraySlice__ of obj
 ///
 /// Use-case: Replace or insert items in an array type.
 ///
-/// Like [<c>Array#splice()</c>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/splice) but for types.
+/// Like <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/splice">`Array#splice()`</a> but for types.
 /// </summary>
 /// <remarks>
 /// @example
@@ -702,7 +702,7 @@ type Arrayable<'T> = U2<'T, 'T[]>
 /// <summary>
 /// Unwrap the return type of a function that returns a <c>Promise</c>.
 ///
-/// There has been [discussion](https://github.com/microsoft/TypeScript/pull/35998) about implementing this type in TypeScript.
+/// There has been <a href="https://github.com/microsoft/TypeScript/pull/35998">discussion</a> about implementing this type in TypeScript.
 /// </summary>
 /// <remarks>
 /// @example
@@ -749,7 +749,7 @@ type AsyncReturnType<'Target> = private AsyncReturnType__ of obj
 type Asyncify<'Function_> = private Asyncify__ of obj
 
 /// <summary>
-/// Matches a [<c>class</c>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes).
+/// Matches a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes">`class`</a>.
 /// </summary>
 /// <remarks>@category Class</remarks>
 type Class<'T, 'Arguments> =
@@ -757,7 +757,7 @@ type Class<'T, 'Arguments> =
     abstract Create: [<ParamArray>] arguments_: 'Arguments -> 'T
 
 /// <summary>
-/// Matches a [<c>class</c> constructor](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes).
+/// Matches a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes">`class` constructor</a>.
 /// </summary>
 /// <remarks>@category Class</remarks>
 type Constructor<'T, 'Arguments> =
@@ -765,7 +765,7 @@ type Constructor<'T, 'Arguments> =
     abstract Create: [<ParamArray>] arguments_: 'Arguments -> 'T
 
 /// <summary>
-/// Matches an [<c>abstract class</c>](https://www.typescriptlang.org/docs/handbook/2/classes.html#abstract-classes-and-members).
+/// Matches an <a href="https://www.typescriptlang.org/docs/handbook/2/classes.html#abstract-classes-and-members">`abstract class`</a>.
 /// </summary>
 /// <remarks>@category Class</remarks>
 /// <remarks>@privateRemarks We cannot use a <c>type</c> here because TypeScript throws: 'abstract' modifier cannot appear on a type member. (1070)</remarks>
@@ -774,7 +774,7 @@ type AbstractClass<'T, 'Arguments> =
     abstract Create: [<ParamArray>] arguments_: 'Arguments -> 'T
 
 /// <summary>
-/// Matches an [<c>abstract class</c>](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-2.html#abstract-construct-signatures) constructor.
+/// Matches an <a href="https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-2.html#abstract-construct-signatures">`abstract class`</a> constructor.
 /// </summary>
 /// <remarks>@category Class</remarks>
 type AbstractConstructor<'T, 'Arguments> =
@@ -796,7 +796,7 @@ type CamelCaseOptions =
     /// <summary>
     /// Whether to preserve leading underscores.
     ///
-    /// This matches the behavior of the [<c>camelcase</c>](https://github.com/sindresorhus/camelcase) package v9+.
+    /// This matches the behavior of the <a href="https://github.com/sindresorhus/camelcase">`camelcase`</a> package v9+.
     /// </summary>
     /// <remarks>@default false</remarks>
     abstract preserveLeadingUnderscores: bool option with get, set
@@ -810,7 +810,7 @@ type CamelCaseOptions =
 ///
 /// By default, consecutive uppercase letter are preserved. See preserveConsecutiveUppercase option to change this behaviour.
 ///
-/// Use the <c>preserveLeadingUnderscores</c> option to retain leading underscores, matching the runtime behavior of [<c>camelcase</c>](https://github.com/sindresorhus/camelcase) v9+.
+/// Use the <c>preserveLeadingUnderscores</c> option to retain leading underscores, matching the runtime behavior of <a href="https://github.com/sindresorhus/camelcase">`camelcase`</a> v9+.
 /// </summary>
 /// <remarks>
 /// @example
@@ -1598,7 +1598,7 @@ type DelimiterCasedProperties<'Value, 'Delimiter, 'Options> = private DelimiterC
 /// }
 /// </code>
 ///
-/// While <c>Except</c> solves this problem, it restricts the keys you can omit to the ones that are present in **ALL** union members, where <c>DistributedOmit</c> allows you to omit keys that are present in **ANY** union member.
+/// While <c>Except</c> solves this problem, it restricts the keys you can omit to the ones that are present in <b>ALL</b> union members, where <c>DistributedOmit</c> allows you to omit keys that are present in <b>ANY</b> union member.
 /// </summary>
 /// <remarks>
 /// @example
@@ -1741,7 +1741,7 @@ type DistributedPick<'ObjectType, 'KeyType> = private DistributedPick__ of obj
 /// <summary>
 /// Represents a strictly empty plain object, the <c>{}</c> value.
 ///
-/// When you annotate something as the type <c>{}</c>, it can be anything except <c>null</c> and <c>undefined</c>. This means that you cannot use <c>{}</c> to represent an empty plain object ([read more](https://stackoverflow.com/questions/47339869/typescript-empty-object-and-any-difference/52193484#52193484)).
+/// When you annotate something as the type <c>{}</c>, it can be anything except <c>null</c> and <c>undefined</c>. This means that you cannot use <c>{}</c> to represent an empty plain object (<a href="https://stackoverflow.com/questions/47339869/typescript-empty-object-and-any-difference/52193484#52193484">read more</a>).
 /// </summary>
 /// <remarks>
 /// @example
@@ -1897,7 +1897,7 @@ type Entry<'BaseType> = private Entry__ of obj
 ///
 /// This is useful for function type-guarding to reject arguments with excess properties. Due to the nature of TypeScript, it does not complain if excess properties are provided unless the provided value is an object literal.
 ///
-/// Please upvote [this issue](https://github.com/microsoft/TypeScript/issues/12936) if you want to have this type as a built-in in TypeScript.*
+/// Please upvote <a href="https://github.com/microsoft/TypeScript/issues/12936">this issue</a> if you want to have this type as a built-in in TypeScript.*
 /// </summary>
 /// <remarks>
 /// @example
@@ -1932,7 +1932,7 @@ type Entry<'BaseType> = private Entry__ of obj
 /// onlyAcceptNameImproved(invalidInput); // Compilation error
 /// </code>
 ///
-/// [Read more](https://stackoverflow.com/questions/49580725/is-it-possible-to-restrict-typescript-object-to-contain-only-properties-defined)
+/// <a href="https://stackoverflow.com/questions/49580725/is-it-possible-to-restrict-typescript-object-to-contain-only-properties-defined">Read more</a>
 /// </remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
@@ -1955,9 +1955,9 @@ type ExceptOptions =
 ///
 /// We recommend setting the <c>requireExactProps</c> option to <c>true</c>.
 ///
-/// This type is a stricter version of [<c>Omit</c>](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-5.html#the-omit-helper-type). The <c>Omit</c> type does not restrict the omitted keys to be keys present on the given type, while <c>Except</c> does. The benefits of a stricter type are avoiding typos and allowing the compiler to pick up on rename refactors automatically.
+/// This type is a stricter version of <a href="https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-5.html#the-omit-helper-type">`Omit`</a>. The <c>Omit</c> type does not restrict the omitted keys to be keys present on the given type, while <c>Except</c> does. The benefits of a stricter type are avoiding typos and allowing the compiler to pick up on rename refactors automatically.
 ///
-/// This type was proposed to the TypeScript team, which declined it, saying they prefer that libraries implement stricter versions of the built-in types ([microsoft/TypeScript#30825](https://github.com/microsoft/TypeScript/issues/30825#issuecomment-523668235)).
+/// This type was proposed to the TypeScript team, which declined it, saying they prefer that libraries implement stricter versions of the built-in types (<a href="https://github.com/microsoft/TypeScript/issues/30825#issuecomment-523668235">microsoft/TypeScript#30825</a>).
 /// </summary>
 /// <remarks>
 /// @example
@@ -2040,7 +2040,7 @@ type Except<'ObjectType, 'KeysType, 'Options> = private Except__ of obj
 type ExcludeExactly<'Union, 'Delete> = private ExcludeExactly__ of obj
 
 /// <summary>
-/// Create a tuple with the [<c>rest</c>](https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types) element removed.
+/// Create a tuple with the <a href="https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types">`rest`</a> element removed.
 /// </summary>
 /// <remarks>
 /// @example
@@ -2389,7 +2389,7 @@ type ExtendsStrict<'Left, 'Right, 'Options> = private ExtendsStrict__ of obj
 type ExtractExactly<'Union, 'Match> = private ExtractExactly__ of obj
 
 /// <summary>
-/// Extract the [<c>rest</c>](https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types) element type from an array.
+/// Extract the <a href="https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types">`rest`</a> element type from an array.
 /// </summary>
 /// <remarks>
 /// @example
@@ -2487,7 +2487,7 @@ type FindGlobalType<'Name> = private FindGlobalType__ of obj
 ///
 /// Use-case: Conditionally referencing DOM types only when the DOM library present.
 ///
-/// Limitations:* Due to peculiarities with the behavior of <c>globalThis</c>, "globally defined" has a narrow definition in this case. Declaring a class in a <c>declare global</c> block won't work, instead you must declare its type using an interface and declare its constructor as a <c>var</c> (*not* <c>let</c>/<c>const</c>) inside the <c>declare global</c> block.
+/// Limitations:<i> Due to peculiarities with the behavior of `globalThis`, "globally defined" has a narrow definition in this case. Declaring a class in a `declare global` block won't work, instead you must declare its type using an interface and declare its constructor as a `var` (</i>not* <c>let</c>/<c>const</c>) inside the <c>declare global</c> block.
 /// </summary>
 /// <remarks>
 /// @example
@@ -2626,7 +2626,7 @@ type GetOptions =
     static member Create (?strict: bool) : GetOptions = jsNative
 
 /// <summary>
-/// Get a deeply-nested property from an object using a key path, like [Lodash's <c>.get()</c>](https://lodash.com/docs#get) function.
+/// Get a deeply-nested property from an object using a key path, like <a href="https://lodash.com/docs#get">Lodash's `.get()`</a> function.
 ///
 /// Use-case: Retrieve a property from deep inside an API response or some other complex object.
 /// </summary>
@@ -3248,11 +3248,11 @@ type IntClosedRange<'Start, 'End, 'Skip> = private IntClosedRange__ of obj
 type IntRange<'Start, 'End, 'Step> = private IntRange__ of obj
 
 /// <summary>
-/// Create an [invariant type](https://basarat.gitbook.io/typescript/type-system/type-compatibility#footnote-invariance), which is a type that does not accept supertypes and subtypes.
+/// Create an <a href="https://basarat.gitbook.io/typescript/type-system/type-compatibility#footnote-invariance">invariant type</a>, which is a type that does not accept supertypes and subtypes.
 ///
 /// Use-case:
 /// - Prevent runtime errors that may occur due to assigning subtypes to supertypes.
-/// - Improve type signature of object methods like [<c>Object.keys()</c> or <c>Object.entries()</c>](https://github.com/microsoft/TypeScript/pull/12253#issuecomment-263132208) by sealing the object type.
+/// - Improve type signature of object methods like <a href="https://github.com/microsoft/TypeScript/pull/12253#issuecomment-263132208">`Object.keys()` or `Object.entries()`</a> by sealing the object type.
 /// </summary>
 /// <remarks>
 /// @example
@@ -3365,7 +3365,7 @@ type InvariantOf<'Type> = private InvariantOf__ of obj
 type IsAny<'T> = private IsAny__ of obj
 
 /// <summary>
-/// Returns a boolean for whether the given type is a <c>true</c> or <c>false</c> [literal type](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types).
+/// Returns a boolean for whether the given type is a <c>true</c> or <c>false</c> <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types">literal type</a>.
 /// </summary>
 /// <remarks>
 /// @example
@@ -3504,7 +3504,7 @@ type IsFloat<'T> = private IsFloat__ of obj
 type IsInteger<'T> = private IsInteger__ of obj
 
 /// <summary>
-/// Returns a boolean for whether the given type is a [literal type](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types).
+/// Returns a boolean for whether the given type is a <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types">literal type</a>.
 /// </summary>
 /// <remarks>
 /// @example
@@ -3694,7 +3694,7 @@ type IsNull<'T> = private IsNull__ of obj
 type IsNullable<'T> = private IsNullable__ of obj
 
 /// <summary>
-/// Returns a boolean for whether the given type is a <c>number</c> or <c>bigint</c> [literal type](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types).
+/// Returns a boolean for whether the given type is a <c>number</c> or <c>bigint</c> <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types">literal type</a>.
 /// </summary>
 /// <remarks>
 /// @example
@@ -3884,9 +3884,9 @@ type IsReadonlyKeyOf<'Type, 'Key> = private IsReadonlyKeyOf__ of obj
 type IsRequiredKeyOf<'Type, 'Key> = private IsRequiredKeyOf__ of obj
 
 /// <summary>
-/// Returns a boolean for whether the given type is a <c>string</c> [literal type](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types).
+/// Returns a boolean for whether the given type is a <c>string</c> <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types">literal type</a>.
 ///
-/// The implementation of this type is inspired by the trick mentioned in this [StackOverflow answer](https://stackoverflow.com/a/68261113/420747).
+/// The implementation of this type is inspired by the trick mentioned in this <a href="https://stackoverflow.com/a/68261113/420747">StackOverflow answer</a>.
 /// </summary>
 /// <remarks>
 /// @example
@@ -3941,7 +3941,7 @@ type IsRequiredKeyOf<'Type, 'Key> = private IsRequiredKeyOf__ of obj
 type IsStringLiteral<'S> = private IsStringLiteral__ of obj
 
 /// <summary>
-/// Returns a boolean for whether the given type is a <c>symbol</c> [literal type](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types).
+/// Returns a boolean for whether the given type is a <c>symbol</c> <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types">literal type</a>.
 /// </summary>
 /// <remarks>
 /// @example
@@ -4360,7 +4360,7 @@ module Jsonifiable2 =
 ///
 /// This includes:
 /// 1. Transforming JSON <c>interface</c> to a <c>type</c> that is assignable to <c>JsonValue</c>.
-/// 2. Transforming non-JSON value that is *jsonable* to a type that is assignable to <c>JsonValue</c>, where *jsonable* means the non-JSON value implements the <c>.toJSON()</c> method that returns a value that is assignable to <c>JsonValue</c>.
+/// 2. Transforming non-JSON value that is <i>jsonable</i> to a type that is assignable to <c>JsonValue</c>, where <i>jsonable</i> means the non-JSON value implements the <c>.toJSON()</c> method that returns a value that is assignable to <c>JsonValue</c>.
 /// </summary>
 /// <remarks>@remarks An interface cannot be structurally compared to <c>JsonValue</c> because an interface can be re-opened to add properties that may not satisfy <c>JsonValue</c>.</remarks>
 /// <remarks>
@@ -4580,7 +4580,7 @@ type KeyAsString = string
 /// <summary>
 /// Create a union of all keys from a given type, even those exclusive to specific union members.
 ///
-/// Unlike the native <c>keyof</c> keyword, which returns keys present in **all** union members, this type returns keys from **any** member.
+/// Unlike the native <c>keyof</c> keyword, which returns keys present in <b>all</b> union members, this type returns keys from <b>any</b> member.
 /// </summary>
 /// <remarks>@link https://stackoverflow.com/a/49402091</remarks>
 /// <remarks>
@@ -4618,7 +4618,7 @@ type KeysOfUnion = obj
 /// <summary>
 /// Extract the type of the last element of an array.
 ///
-/// Use-case: Defining the return type of functions that extract the last element of an array, for example [<c>lodash.last</c>](https://lodash.com/docs/4.17.15#last).
+/// Use-case: Defining the return type of functions that extract the last element of an array, for example <a href="https://lodash.com/docs/4.17.15#last">`lodash.last`</a>.
 /// </summary>
 /// <remarks>
 /// @example
@@ -4848,7 +4848,7 @@ type LessThan<'A, 'B> = private LessThan__ of obj
 type LiteralToPrimitiveDeep<'T> = private LiteralToPrimitiveDeep__ of obj
 
 /// <summary>
-/// Given a [literal type](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types) return the [primitive type](https://developer.mozilla.org/en-US/docs/Glossary/Primitive) it belongs to, or <c>never</c> if it's not a primitive.
+/// Given a <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types">literal type</a> return the <a href="https://developer.mozilla.org/en-US/docs/Glossary/Primitive">primitive type</a> it belongs to, or <c>never</c> if it's not a primitive.
 ///
 /// Use-case: Working with generic types that may be literal types.
 /// </summary>
@@ -4876,7 +4876,7 @@ type LiteralToPrimitive<'T> = private LiteralToPrimitive__ of obj
 ///
 /// Currently, when a union type of a primitive type is combined with literal types, TypeScript loses all information about the combined literals. Thus, when such type is used in an IDE with autocompletion, no suggestions are made for the declared literals.
 ///
-/// This type is a workaround for [Microsoft/TypeScript#29729](https://github.com/Microsoft/TypeScript/issues/29729). It will be removed as soon as it's not needed anymore.
+/// This type is a workaround for <a href="https://github.com/Microsoft/TypeScript/issues/29729">Microsoft/TypeScript#29729</a>. It will be removed as soon as it's not needed anymore.
 /// </summary>
 /// <remarks>
 /// @example
@@ -5054,7 +5054,7 @@ type MergeDeep<'Destination, 'Source, 'Options> = private MergeDeep__ of obj
 /// <summary>
 /// Create a type that has mutually exclusive keys.
 ///
-/// This type was inspired by [this comment](https://github.com/Microsoft/TypeScript/issues/14094#issuecomment-373782604).
+/// This type was inspired by <a href="https://github.com/Microsoft/TypeScript/issues/14094#issuecomment-373782604">this comment</a>.
 ///
 /// This type works with a helper type, called <c>Without</c>. <c>Without&lt;FirstType, SecondType&gt;</c> produces a type that has only keys from <c>FirstType</c> which are not present on <c>SecondType</c> and sets the value type for these keys to <c>never</c>. This helper type is then used in <c>MergeExclusive</c> to remove keys from either <c>FirstType</c> or <c>SecondType</c>.
 /// </summary>
@@ -5380,7 +5380,7 @@ type NonNullableDeep<'T> = private NonNullableDeep__ of obj
 ///
 /// Use-case: Validating and documenting parameters.
 ///
-/// Note: This can't detect <c>NaN</c>, please upvote [this issue](https://github.com/microsoft/TypeScript/issues/28682) if you want to have this type as a built-in in TypeScript.
+/// Note: This can't detect <c>NaN</c>, please upvote <a href="https://github.com/microsoft/TypeScript/issues/28682">this issue</a> if you want to have this type as a built-in in TypeScript.
 /// </summary>
 /// <remarks>
 /// @example
@@ -5646,7 +5646,7 @@ type ObjectMerge<'First, 'Second> = private ObjectMerge__ of obj
 ///
 /// Use-case: Remove unneeded parts of complex objects.
 ///
-/// Use [<c>Omit&lt;T&gt;</c>](https://www.typescriptlang.org/docs/handbook/utility-types.html#omittype-keys) if you only need one level deep.
+/// Use <a href="https://www.typescriptlang.org/docs/handbook/utility-types.html#omittype-keys">`Omit&lt;T&gt;`</a> if you only need one level deep.
 /// </summary>
 /// <remarks>
 /// @example
@@ -5714,7 +5714,7 @@ type OmitDeep<'T, 'PathUnion> = private OmitDeep__ of obj
 /// Use-cases:
 /// - Remove overly permissive signatures from third-party types.
 ///
-/// This type was taken from this [StackOverflow answer](https://stackoverflow.com/a/68261113/420747).
+/// This type was taken from this <a href="https://stackoverflow.com/a/68261113/420747">StackOverflow answer</a>.
 ///
 /// It relies on the fact that an empty object (<c>{}</c>) is assignable to an object with just an index signature, like <c>Record&lt;string, unknown&gt;</c>, but not to an object with explicitly defined keys, like <c>Record&lt;'foo' | 'bar', unknown&gt;</c>.
 ///
@@ -5728,7 +5728,7 @@ type OmitDeep<'T, 'PathUnion> = private OmitDeep__ of obj
 /// // TS2739: Type '{}' is missing the following properties from type 'Record&lt;"foo" | "bar", unknown&gt;': foo, bar
 /// </code>
 ///
-/// Instead of causing a type error like the above, you can also use a [conditional type](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html) to test whether a type is assignable to another:
+/// Instead of causing a type error like the above, you can also use a <a href="https://www.typescriptlang.org/docs/handbook/2/conditional-types.html">conditional type</a> to test whether a type is assignable to another:
 ///
 /// <code>
 /// type Indexed = {} extends Record&lt;string, unknown&gt;
@@ -5746,7 +5746,7 @@ type OmitDeep<'T, 'PathUnion> = private OmitDeep__ of obj
 /// //=&gt; '❌ `{}` is NOT assignable to `Record&lt;\'foo\' | \'bar\', unknown&gt;`'
 /// </code>
 ///
-/// Using a [mapped type](https://www.typescriptlang.org/docs/handbook/2/mapped-types.html#further-exploration), you can then check for each <c>KeyType</c> of <c>ObjectType</c>...
+/// Using a <a href="https://www.typescriptlang.org/docs/handbook/2/mapped-types.html#further-exploration">mapped type</a>, you can then check for each <c>KeyType</c> of <c>ObjectType</c>...
 ///
 /// <code>
 /// type OmitIndexSignature&lt;ObjectType&gt; = {
@@ -5933,7 +5933,7 @@ type Optional<'Value> = 'Value option
 /// //=&gt; true
 /// </code>
 ///
-/// Note: <c>OrAll&lt;[]&gt;</c> evaluates to <c>false</c> because there are no <c>true</c> elements in an empty tuple. See [Wikipedia: Clause (logic) &gt; Empty clauses](https://en.wikipedia.org/wiki/Clause_(logic)#Empty_clauses:~:text=The%20truth%20evaluation%20of%20an%20empty%20disjunctive%20clause%20is%20always%20false.).
+/// Note: <c>OrAll&lt;[]&gt;</c> evaluates to <c>false</c> because there are no <c>true</c> elements in an empty tuple. See <a href="https://en.wikipedia.org/wiki/Clause_(logic">Wikipedia: Clause (logic) &gt; Empty clauses</a>#Empty_clauses:~:text=The%20truth%20evaluation%20of%20an%20empty%20disjunctive%20clause%20is%20always%20false.).
 /// </remarks>
 /// <remarks>@see {@link Or}</remarks>
 /// <remarks>@see {@link AndAll}</remarks>
@@ -6053,15 +6053,15 @@ type Or = obj
 type OverrideProperties<'TOriginal, 'TOverride> = private OverrideProperties__ of obj
 
 /// <summary>
-/// Type for [npm's <c>package.json</c> file](https://docs.npmjs.com/creating-a-package-json-file). Also includes types for fields used by other popular projects, like TypeScript and Yarn.
+/// Type for <a href="https://docs.npmjs.com/creating-a-package-json-file">npm's `package.json` file</a>. Also includes types for fields used by other popular projects, like TypeScript and Yarn.
 /// </summary>
 /// <remarks>@category File</remarks>
 type PackageJson =
     inherit JsonObject
     /// <summary>
-    /// Defines which package manager is expected to be used when working on the current project. It can set to any of the [supported package managers](https://nodejs.org/api/corepack.html#supported-package-managers), and will ensure that your teams use the exact same package manager versions without having to install anything else than Node.js.
+    /// Defines which package manager is expected to be used when working on the current project. It can set to any of the <a href="https://nodejs.org/api/corepack.html#supported-package-managers">supported package managers</a>, and will ensure that your teams use the exact same package manager versions without having to install anything else than Node.js.
     ///
-    /// __This field is currently experimental and needs to be opted-in; check the [Corepack](https://nodejs.org/api/corepack.html) page for details about the procedure.__
+    /// __This field is currently experimental and needs to be opted-in; check the <a href="https://nodejs.org/api/corepack.html">Corepack</a> page for details about the procedure.__
     /// </summary>
     /// <remarks>
     /// @example
@@ -6077,7 +6077,7 @@ type PackageJson =
     /// </summary>
     abstract name: string option with get, set
     /// <summary>
-    /// Package version, parseable by [<c>node-semver</c>](https://github.com/npm/node-semver).
+    /// Package version, parseable by <a href="https://github.com/npm/node-semver">`node-semver`</a>.
     /// </summary>
     abstract version: string option with get, set
     /// <summary>
@@ -6120,7 +6120,7 @@ type PackageJson =
     /// <summary>
     /// Resolution algorithm for importing ".js" files from the package's scope.
     ///
-    /// [Read more.](https://nodejs.org/api/esm.html#esm_package_json_type_field)
+    /// <a href="https://nodejs.org/api/esm.html#esm_package_json_type_field">Read more.</a>
     /// </summary>
     abstract ``type``: PackageJson.Type option with get, set
     /// <summary>
@@ -6130,13 +6130,13 @@ type PackageJson =
     /// <summary>
     /// Subpath exports to define entry points of the package.
     ///
-    /// [Read more.](https://nodejs.org/api/packages.html#subpath-exports)
+    /// <a href="https://nodejs.org/api/packages.html#subpath-exports">Read more.</a>
     /// </summary>
     abstract exports: U3<string, U2<string, PackageJson.Exports.Item>[], PackageJson.Exports.Item> option with get, set
     /// <summary>
     /// Subpath imports to define internal package import maps that only apply to import specifiers from within the package itself.
     ///
-    /// [Read more.](https://nodejs.org/api/packages.html#subpath-imports)
+    /// <a href="https://nodejs.org/api/packages.html#subpath-imports">Read more.</a>
     /// </summary>
     abstract imports: Record<string, U3<string, U2<string, PackageJson.Exports.Item>[], PackageJson.Exports.Item> option> option with get, set
     /// <summary>
@@ -6229,15 +6229,15 @@ type PackageJson =
     /// <summary>
     /// Describes and notifies consumers of a package's monetary support information.
     ///
-    /// [Read more.](https://github.com/npm/rfcs/blob/main/implemented/0017-add-funding-support.md)
+    /// <a href="https://github.com/npm/rfcs/blob/main/implemented/0017-add-funding-support.md">Read more.</a>
     /// </summary>
     abstract funding: U2<string, PackageJson.Funding> option with get, set
     /// <summary>
-    /// Used to configure [npm workspaces](https://docs.npmjs.com/cli/using-npm/workspaces) / [Yarn workspaces](https://classic.yarnpkg.com/docs/workspaces/).
+    /// Used to configure <a href="https://docs.npmjs.com/cli/using-npm/workspaces">npm workspaces</a> / <a href="https://classic.yarnpkg.com/docs/workspaces/">Yarn workspaces</a>.
     ///
     /// Workspaces allow you to manage multiple packages within the same repository in such a way that you only need to run your install command once in order to install all of them in a single pass.
     ///
-    /// Please note that the top-level <c>private</c> property of <c>package.json</c> **must** be set to <c>true</c> in order to use workspaces.
+    /// Please note that the top-level <c>private</c> property of <c>package.json</c> <b>must</b> be set to <c>true</c> in order to use workspaces.
     /// </summary>
     abstract workspaces: U2<string[], PackageJson.Workspaces> option with get, set
     /// <summary>
@@ -6255,7 +6255,7 @@ type PackageJson =
     /// <summary>
     /// Denote which files in your project are "pure" and therefore safe for Webpack to prune if unused.
     ///
-    /// [Read more.](https://webpack.js.org/guides/tree-shaking/)
+    /// <a href="https://webpack.js.org/guides/tree-shaking/">Read more.</a>
     /// </summary>
     abstract sideEffects: U2<bool, string[]> option with get, set
     /// <summary>
@@ -6445,7 +6445,7 @@ module PackageJson =
         /// <summary>
         /// Relative path to package.json if it is placed in non-root directory (for example if it is part of a monorepo).
         ///
-        /// [Read more.](https://github.com/npm/rfcs/blob/latest/implemented/0010-monorepo-subdirectory-declaration.md)
+        /// <a href="https://github.com/npm/rfcs/blob/latest/implemented/0010-monorepo-subdirectory-declaration.md">Read more.</a>
         /// </summary>
         abstract directory: string option with get, set
         [<ParamObject; Emit("$0")>]
@@ -6453,67 +6453,67 @@ module PackageJson =
 
     type Scripts =
         /// <summary>
-        /// Run **before** the package is published (Also run on local <c>npm install</c> without any arguments).
+        /// Run <b>before</b> the package is published (Also run on local <c>npm install</c> without any arguments).
         /// </summary>
         abstract prepublish: string option with get, set
         /// <summary>
-        /// Run both **before** the package is packed and published, and on local <c>npm install</c> without any arguments. This is run **after** <c>prepublish</c>, but **before** <c>prepublishOnly</c>.
+        /// Run both <b>before</b> the package is packed and published, and on local <c>npm install</c> without any arguments. This is run <b>after</b> <c>prepublish</c>, but <b>before</b> <c>prepublishOnly</c>.
         /// </summary>
         abstract prepare: string option with get, set
         /// <summary>
-        /// Run **before** the package is prepared and packed, **only** on <c>npm publish</c>.
+        /// Run <b>before</b> the package is prepared and packed, <b>only</b> on <c>npm publish</c>.
         /// </summary>
         abstract prepublishOnly: string option with get, set
         /// <summary>
-        /// Run **before** a tarball is packed (on <c>npm pack</c>, <c>npm publish</c>, and when installing git dependencies).
+        /// Run <b>before</b> a tarball is packed (on <c>npm pack</c>, <c>npm publish</c>, and when installing git dependencies).
         /// </summary>
         abstract prepack: string option with get, set
         /// <summary>
-        /// Run **after** the tarball has been generated and moved to its final destination.
+        /// Run <b>after</b> the tarball has been generated and moved to its final destination.
         /// </summary>
         abstract postpack: string option with get, set
         /// <summary>
-        /// Run **after** the package is published.
+        /// Run <b>after</b> the package is published.
         /// </summary>
         abstract publish: string option with get, set
         /// <summary>
-        /// Run **after** the package is published.
+        /// Run <b>after</b> the package is published.
         /// </summary>
         abstract postpublish: string option with get, set
         /// <summary>
-        /// Run **before** the package is installed.
+        /// Run <b>before</b> the package is installed.
         /// </summary>
         abstract preinstall: string option with get, set
         /// <summary>
-        /// Run **after** the package is installed.
+        /// Run <b>after</b> the package is installed.
         /// </summary>
         abstract install: string option with get, set
         /// <summary>
-        /// Run **after** the package is installed and after <c>install</c>.
+        /// Run <b>after</b> the package is installed and after <c>install</c>.
         /// </summary>
         abstract postinstall: string option with get, set
         /// <summary>
-        /// Run **before** the package is uninstalled and before <c>uninstall</c>.
+        /// Run <b>before</b> the package is uninstalled and before <c>uninstall</c>.
         /// </summary>
         abstract preuninstall: string option with get, set
         /// <summary>
-        /// Run **before** the package is uninstalled.
+        /// Run <b>before</b> the package is uninstalled.
         /// </summary>
         abstract uninstall: string option with get, set
         /// <summary>
-        /// Run **after** the package is uninstalled.
+        /// Run <b>after</b> the package is uninstalled.
         /// </summary>
         abstract postuninstall: string option with get, set
         /// <summary>
-        /// Run **before** bump the package version and before <c>version</c>.
+        /// Run <b>before</b> bump the package version and before <c>version</c>.
         /// </summary>
         abstract preversion: string option with get, set
         /// <summary>
-        /// Run **before** bump the package version.
+        /// Run <b>before</b> bump the package version.
         /// </summary>
         abstract version: string option with get, set
         /// <summary>
-        /// Run **after** bump the package version.
+        /// Run <b>after</b> bump the package version.
         /// </summary>
         abstract postversion: string option with get, set
         /// <summary>
@@ -6581,8 +6581,8 @@ module PackageJson =
         /// <summary>
         /// Designed to solve the problem of packages which break when their <c>node_modules</c> are moved to the root workspace directory - a process known as hoisting. For these packages, both within your workspace, and also some that have been installed via <c>node_modules</c>, it is important to have a mechanism for preventing the default Yarn workspace behavior. By adding workspace pattern strings here, Yarn will resume non-workspace behavior for any package which matches the defined patterns.
         ///
-        /// [Supported](https://classic.yarnpkg.com/blog/2018/02/15/nohoist/) by Yarn.
-        /// [Not supported](https://github.com/npm/rfcs/issues/287) by npm.
+        /// <a href="https://classic.yarnpkg.com/blog/2018/02/15/nohoist/">Supported</a> by Yarn.
+        /// <a href="https://github.com/npm/rfcs/issues/287">Not supported</a> by npm.
         /// </summary>
         abstract nohoist: string[] option with get, set
         [<ParamObject; Emit("$0")>]
@@ -6630,7 +6630,7 @@ type PartialDeepOptions =
 /// - Merging a default settings/config object with another object, the second object would be a deep partial of the default object.
 /// - Mocking and testing complex entities, where populating an entire object with its keys would be redundant in terms of the mock or test.
 ///
-/// Use [<c>Partial&lt;T&gt;</c>](https://www.typescriptlang.org/docs/handbook/utility-types.html#partialtype) if you only need one level deep.
+/// Use <a href="https://www.typescriptlang.org/docs/handbook/utility-types.html#partialtype">`Partial&lt;T&gt;`</a> if you only need one level deep.
 /// </summary>
 /// <remarks>
 /// @example
@@ -7052,7 +7052,7 @@ type Paths<'T, 'Options> = private Paths__ of obj
 ///
 /// Use-case: Distill complex objects down to the components you need to target.
 ///
-/// Use [<c>Pick&lt;T&gt;</c>](https://www.typescriptlang.org/docs/handbook/utility-types.html#picktype-keys) if you only need one level deep.
+/// Use <a href="https://www.typescriptlang.org/docs/handbook/utility-types.html#picktype-keys">`Pick&lt;T&gt;`</a> if you only need one level deep.
 /// </summary>
 /// <remarks>
 /// @example
@@ -7154,7 +7154,7 @@ type PickDeep<'T, 'PathUnion> = private PickDeep__ of obj
 type PickIndexSignature<'ObjectType> = private PickIndexSignature__ of obj
 
 /// <summary>
-/// Matches any [primitive value](https://developer.mozilla.org/en-US/docs/Glossary/Primitive).
+/// Matches any <a href="https://developer.mozilla.org/en-US/docs/Glossary/Primitive">primitive value</a>.
 /// </summary>
 /// <remarks>@category Type</remarks>
 type Primitive = obj option
@@ -7166,7 +7166,7 @@ type Primitive = obj option
 /// - A function accepts a callback that may either return a value synchronously or may return a promised value.
 /// - This type could be the return type of <c>Promise#then()</c>, <c>Promise#catch()</c>, and <c>Promise#finally()</c> callbacks.
 ///
-/// Please upvote [this issue](https://github.com/microsoft/TypeScript/issues/31394) if you want to have this type as a built-in in TypeScript.
+/// Please upvote <a href="https://github.com/microsoft/TypeScript/issues/31394">this issue</a> if you want to have this type as a built-in in TypeScript.
 /// </summary>
 /// <remarks>
 /// @example
@@ -7190,9 +7190,9 @@ type Promisable<'T> = U2<'T, JS.Promise<'T>>
 ///
 /// This is useful when a deeply nested structure needs to be exposed as completely immutable, for example, an imported JSON module or when receiving an API response that is passed around.
 ///
-/// Please upvote [this issue](https://github.com/microsoft/TypeScript/issues/13923) if you want to have this type as a built-in in TypeScript.
+/// Please upvote <a href="https://github.com/microsoft/TypeScript/issues/13923">this issue</a> if you want to have this type as a built-in in TypeScript.
 ///
-/// Use [<c>Readonly&lt;T&gt;</c>](https://www.typescriptlang.org/docs/handbook/utility-types.html#readonlytype) if you only need one level deep.
+/// Use <a href="https://www.typescriptlang.org/docs/handbook/utility-types.html#readonlytype">`Readonly&lt;T&gt;`</a> if you only need one level deep.
 /// </summary>
 /// <remarks>
 /// @example
@@ -7250,7 +7250,7 @@ type Promisable<'T> = U2<'T, JS.Promise<'T>>
 /// }
 /// </code>
 ///
-/// Note that types containing overloaded functions are not made deeply readonly due to a [TypeScript limitation](https://github.com/microsoft/TypeScript/issues/29732).
+/// Note that types containing overloaded functions are not made deeply readonly due to a <a href="https://github.com/microsoft/TypeScript/issues/29732">TypeScript limitation</a>.
 /// </remarks>
 /// <remarks>@category Object</remarks>
 /// <remarks>@category Array</remarks>
@@ -7791,7 +7791,7 @@ type RequireOneOrNone<'ObjectType, 'KeysType> = private RequireOneOrNone__ of ob
 /// - Creating optional configuration interfaces where the underlying implementation still requires all options to be fully specified.
 /// - Modeling the resulting type after a deep merge with a set of defaults.
 ///
-/// Use [<c>Required&lt;T&gt;</c>](https://www.typescriptlang.org/docs/handbook/utility-types.html#requiredtype) if you only need one level deep.
+/// Use <a href="https://www.typescriptlang.org/docs/handbook/utility-types.html#requiredtype">`Required&lt;T&gt;`</a> if you only need one level deep.
 /// </summary>
 /// <remarks>
 /// @example
@@ -7820,7 +7820,7 @@ type RequireOneOrNone<'ObjectType, 'KeysType> = private RequireOneOrNone__ of ob
 /// // }
 /// </code>
 ///
-/// Note that types containing overloaded functions are not made deeply required due to a [TypeScript limitation](https://github.com/microsoft/TypeScript/issues/29732).
+/// Note that types containing overloaded functions are not made deeply required due to a <a href="https://github.com/microsoft/TypeScript/issues/29732">TypeScript limitation</a>.
 /// </remarks>
 /// <remarks>@category Utilities</remarks>
 /// <remarks>@category Object</remarks>
@@ -8852,7 +8852,7 @@ type SomeExtendOptions =
 type SomeExtend<'TArray, 'Type, 'Options> = private SomeExtend__ of obj
 
 /// <summary>
-/// Splits an array into three parts, where the first contains all elements before the rest element, the second is the [<c>rest</c>](https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types) element itself, and the third contains all elements after the rest element.
+/// Splits an array into three parts, where the first contains all elements before the rest element, the second is the <a href="https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types">`rest`</a> element itself, and the third contains all elements after the rest element.
 ///
 /// Note: If any of the parts are missing, then they will be represented as empty arrays. For example, <c>SplitOnRestElement&lt;[string, number]&gt;</c> returns <c>[[string, number], [], []]</c>, where parts corresponding to the rest element and elements after it are empty.
 ///
@@ -9188,7 +9188,7 @@ type StringToArray<'S, 'Options> = private StringToArray__ of obj
 /// //=&gt; -Infinity
 /// </code>
 ///
-/// Note: Some strings, such as <c>'1.50'</c>, <c>'0b10'</c>, or <c>'12_345'</c>, may look like they can be converted to numbers, but they don't actually have corresponding numeric literals. So, in such cases, this type produces <c>never</c>. See [type-fest#1446](https://github.com/sindresorhus/type-fest/pull/1446) for more details.
+/// Note: Some strings, such as <c>'1.50'</c>, <c>'0b10'</c>, or <c>'12_345'</c>, may look like they can be converted to numbers, but they don't actually have corresponding numeric literals. So, in such cases, this type produces <c>never</c>. See <a href="https://github.com/sindresorhus/type-fest/pull/1446">type-fest#1446</a> for more details.
 /// </remarks>
 /// <remarks>
 /// @example
@@ -9387,7 +9387,7 @@ type Sum<'A, 'B> = private Sum__ of obj
 type TaggedUnion = obj
 
 /// <summary>
-/// Create a [tagged type](https://medium.com/@KevinBGreene/surviving-the-typescript-ecosystem-branding-and-type-tagging-6cf6e516523d) that can support [multiple tags](https://github.com/sindresorhus/type-fest/issues/665) and [per-tag metadata](https://medium.com/@ethanresnick/advanced-typescript-tagged-types-improved-with-type-level-metadata-5072fc125fcf).
+/// Create a <a href="https://medium.com/@KevinBGreene/surviving-the-typescript-ecosystem-branding-and-type-tagging-6cf6e516523d">tagged type</a> that can support <a href="https://github.com/sindresorhus/type-fest/issues/665">multiple tags</a> and <a href="https://medium.com/@ethanresnick/advanced-typescript-tagged-types-improved-with-type-level-metadata-5072fc125fcf">per-tag metadata</a>.
 ///
 /// A type returned by <c>Tagged</c> can be passed to <c>Tagged</c> again, to create a type with multiple tags.
 ///
@@ -9399,9 +9399,9 @@ type TaggedUnion = obj
 /// 	- and the metadata type for each of <c>A</c>'s tags is assignable to the metadata type of <c>B</c>'s corresponding tag.
 ///
 /// There have been several discussions about adding similar features to TypeScript. Unfortunately, nothing has (yet) moved forward:
-/// 	- [Microsoft/TypeScript#202](https://github.com/microsoft/TypeScript/issues/202)
-/// 	- [Microsoft/TypeScript#4895](https://github.com/microsoft/TypeScript/issues/4895)
-/// 	- [Microsoft/TypeScript#33290](https://github.com/microsoft/TypeScript/pull/33290)
+/// 	- <a href="https://github.com/microsoft/TypeScript/issues/202">Microsoft/TypeScript#202</a>
+/// 	- <a href="https://github.com/microsoft/TypeScript/issues/4895">Microsoft/TypeScript#4895</a>
+/// 	- <a href="https://github.com/microsoft/TypeScript/pull/33290">Microsoft/TypeScript#33290</a>
 /// </summary>
 /// <remarks>
 /// @example
@@ -9454,7 +9454,7 @@ type Tagged<'Type, 'TagName, 'TagMetadata> = private Tagged__ of obj
 ///
 /// In the example below, one could use <c>Tagged&lt;string, 'JSON'&gt;</c> to represent "a string that is valid JSON". That type might be useful -- for instance, it communicates that the value can be safely passed to <c>JSON.parse</c> without it throwing an exception. However, it doesn't indicate what type of value will be produced on parse (which is sometimes known). <c>JsonOf&lt;T&gt;</c> solves this; it represents "a string that is valid JSON and that, if parsed, would produce a value of type T". The type T is held in the metadata associated with the <c>'JSON'</c> tag.
 ///
-/// This article explains more about [how tag metadata works and when it can be useful](https://medium.com/@ethanresnick/advanced-typescript-tagged-types-improved-with-type-level-metadata-5072fc125fcf).
+/// This article explains more about <a href="https://medium.com/@ethanresnick/advanced-typescript-tagged-types-improved-with-type-level-metadata-5072fc125fcf">how tag metadata works and when it can be useful</a>.
 /// </summary>
 /// <remarks>
 /// @example
@@ -9517,16 +9517,16 @@ type UnwrapTagged<'TaggedType> = private UnwrapTagged__ of obj
 ///
 /// The generic type parameters can be anything.
 ///
-/// Note that <c>Opaque</c> is somewhat of a misnomer here, in that, unlike [some alternative implementations](https://github.com/microsoft/TypeScript/issues/4895#issuecomment-425132582), the original, untagged type is not actually hidden. (E.g., functions that accept the untagged type can still be called with the "opaque" version -- but not vice-versa.)
+/// Note that <c>Opaque</c> is somewhat of a misnomer here, in that, unlike <a href="https://github.com/microsoft/TypeScript/issues/4895#issuecomment-425132582">some alternative implementations</a>, the original, untagged type is not actually hidden. (E.g., functions that accept the untagged type can still be called with the "opaque" version -- but not vice-versa.)
 ///
 /// Also note that this implementation is limited to a single tag. If you want to allow multiple tags, use <c>Tagged</c> instead.
 ///
-/// [Read more about tagged types.](https://medium.com/@KevinBGreene/surviving-the-typescript-ecosystem-branding-and-type-tagging-6cf6e516523d)
+/// <a href="https://medium.com/@KevinBGreene/surviving-the-typescript-ecosystem-branding-and-type-tagging-6cf6e516523d">Read more about tagged types.</a>
 ///
 /// There have been several discussions about adding similar features to TypeScript. Unfortunately, nothing has (yet) moved forward:
-/// 	- [Microsoft/TypeScript#202](https://github.com/microsoft/TypeScript/issues/202)
-/// 	- [Microsoft/TypeScript#15408](https://github.com/Microsoft/TypeScript/issues/15408)
-/// 	- [Microsoft/TypeScript#15807](https://github.com/Microsoft/TypeScript/issues/15807)
+/// 	- <a href="https://github.com/microsoft/TypeScript/issues/202">Microsoft/TypeScript#202</a>
+/// 	- <a href="https://github.com/Microsoft/TypeScript/issues/15408">Microsoft/TypeScript#15408</a>
+/// 	- <a href="https://github.com/Microsoft/TypeScript/issues/15807">Microsoft/TypeScript#15807</a>
 /// </summary>
 /// <remarks>
 /// @example
@@ -9644,7 +9644,7 @@ type UnwrapOpaque<'OpaqueType> = private UnwrapOpaque__ of obj
 type Trim<'V> = private Trim__ of obj
 
 /// <summary>
-/// Type for [TypeScript's <c>tsconfig.json</c> file](https://www.typescriptlang.org/docs/handbook/tsconfig-json.html).
+/// Type for <a href="https://www.typescriptlang.org/docs/handbook/tsconfig-json.html">TypeScript's `tsconfig.json` file</a>.
 /// </summary>
 /// <remarks>@category File</remarks>
 [<Interface>]
@@ -10869,7 +10869,7 @@ type TupleOf<'Length, 'Fill> = private TupleOf__ of obj
 /// <summary>
 /// Transforms a tuple into an object, mapping each tuple index to its corresponding type as a key-value pair.
 ///
-/// Note: Tuple labels are [lost in the transformation process](https://stackoverflow.com/a/70398429/11719314). For example, <c>TupleToObject&lt;[x: number, y: number]&gt;</c> produces <c>{0: number; 1: number}</c>, and not <c>{x: number; y: number}</c>.
+/// Note: Tuple labels are <a href="https://stackoverflow.com/a/70398429/11719314">lost in the transformation process</a>. For example, <c>TupleToObject&lt;[x: number, y: number]&gt;</c> produces <c>{0: number; 1: number}</c>, and not <c>{x: number; y: number}</c>.
 /// </summary>
 /// <remarks>
 /// @example
@@ -10960,7 +10960,7 @@ type TupleToObject<'TArray> = private TupleToObject__ of obj
 type TupleToUnion<'ArrayType> = private TupleToUnion__ of obj
 
 /// <summary>
-/// Matches any [typed array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray), like <c>Uint8Array</c> or <c>Float64Array</c>.
+/// Matches any <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray">typed array</a>, like <c>Uint8Array</c> or <c>Float64Array</c>.
 /// </summary>
 /// <remarks>@category Array</remarks>
 type TypedArray = obj
@@ -10968,7 +10968,7 @@ type TypedArray = obj
 /// <summary>
 /// Create a deep version of another type where all optional keys are set to also accept <c>undefined</c>.
 ///
-/// Note: This is only needed when the [<c>exactOptionalPropertyTypes</c>](https://www.typescriptlang.org/tsconfig#exactOptionalPropertyTypes) TSConfig setting is enabled.
+/// Note: This is only needed when the <a href="https://www.typescriptlang.org/tsconfig#exactOptionalPropertyTypes">`exactOptionalPropertyTypes`</a> TSConfig setting is enabled.
 ///
 /// Use-cases:
 /// - When <c>exactOptionalPropertyTypes</c> is enabled, an object like <c>{a: undefined}</c> is not assignable to the type <c>{a?: number}</c>. You can use <c>UndefinedOnPartialDeep&lt;{a?: number}&gt;</c> to make it assignable.
@@ -11096,7 +11096,7 @@ type UnionMember<'T> = private UnionMember__ of obj
 /// <summary>
 /// Convert a union type to an intersection type.
 ///
-/// Inspired by [this Stack Overflow answer](https://stackoverflow.com/a/50375286/2172153).
+/// Inspired by <a href="https://stackoverflow.com/a/50375286/2172153">this Stack Overflow answer</a>.
 /// </summary>
 /// <remarks>
 /// @example
@@ -11322,7 +11322,7 @@ type UnwrapRequired<'RequiredObjectType> = private UnwrapRequired__ of obj
 /// <summary>
 /// Create a union of the given object's values, and optionally specify which keys to get the values from.
 ///
-/// Please upvote [this issue](https://github.com/microsoft/TypeScript/issues/31438) if you want to have this type as a built-in in TypeScript.
+/// Please upvote <a href="https://github.com/microsoft/TypeScript/issues/31438">this issue</a> if you want to have this type as a built-in in TypeScript.
 /// </summary>
 /// <remarks>
 /// @example
@@ -11433,7 +11433,7 @@ type Words<'Sentence, 'Options> = private Words__ of obj
 /// <summary>
 /// Create a deeply mutable version of an <c>object</c>/<c>ReadonlyMap</c>/<c>ReadonlySet</c>/<c>ReadonlyArray</c> type. The inverse of <c>ReadonlyDeep&lt;T&gt;</c>. Use <c>Writable&lt;T&gt;</c> if you only need one level deep.
 ///
-/// This can be used to [store and mutate options within a class](https://github.com/sindresorhus/pageres/blob/4a5d05fca19a5fbd2f53842cbf3eb7b1b63bddd2/source/index.ts#L72), [edit <c>readonly</c> objects within tests](https://stackoverflow.com/questions/50703834), [construct a <c>readonly</c> object within a function](https://github.com/Microsoft/TypeScript/issues/24509), or to define a single model where the only thing that changes is whether or not some of the keys are writable.
+/// This can be used to <a href="https://github.com/sindresorhus/pageres/blob/4a5d05fca19a5fbd2f53842cbf3eb7b1b63bddd2/source/index.ts#L72">store and mutate options within a class</a>, <a href="https://stackoverflow.com/questions/50703834">edit `readonly` objects within tests</a>, <a href="https://github.com/Microsoft/TypeScript/issues/24509">construct a `readonly` object within a function</a>, or to define a single model where the only thing that changes is whether or not some of the keys are writable.
 /// </summary>
 /// <remarks>
 /// @example
@@ -11452,7 +11452,7 @@ type Words<'Sentence, 'Options> = private Words__ of obj
 /// writableDeepFoo.b = ['something'];
 /// </code>
 ///
-/// Note that types containing overloaded functions are not made deeply writable due to a [TypeScript limitation](https://github.com/microsoft/TypeScript/issues/29732).
+/// Note that types containing overloaded functions are not made deeply writable due to a <a href="https://github.com/microsoft/TypeScript/issues/29732">TypeScript limitation</a>.
 /// </remarks>
 /// <remarks>@see {@link Writable}</remarks>
 /// <remarks>@category Object</remarks>
@@ -11497,7 +11497,7 @@ type WritableKeysOf<'Type> = keyof<'Type>
 ///
 /// Note: This type can make readonly <c>Set</c> and <c>Map</c> writable. This behavior is different from <c>Readonly&lt;T&gt;</c> (as of TypeScript 5.2.2). See: https://github.com/microsoft/TypeScript/issues/29655
 ///
-/// This can be used to [store and mutate options within a class](https://github.com/sindresorhus/pageres/blob/4a5d05fca19a5fbd2f53842cbf3eb7b1b63bddd2/source/index.ts#L72), [edit <c>readonly</c> objects within tests](https://stackoverflow.com/questions/50703834), [construct a <c>readonly</c> object within a function](https://github.com/Microsoft/TypeScript/issues/24509), or to define a single model where the only thing that changes is whether or not some of the keys are writable.
+/// This can be used to <a href="https://github.com/sindresorhus/pageres/blob/4a5d05fca19a5fbd2f53842cbf3eb7b1b63bddd2/source/index.ts#L72">store and mutate options within a class</a>, <a href="https://stackoverflow.com/questions/50703834">edit `readonly` objects within tests</a>, <a href="https://github.com/Microsoft/TypeScript/issues/24509">construct a `readonly` object within a function</a>, or to define a single model where the only thing that changes is whether or not some of the keys are writable.
 /// </summary>
 /// <remarks>
 /// @example

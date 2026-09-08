@@ -2838,273 +2838,273 @@ type ScrambleTextParams =
 
 type DrawableSVGGeometry =
     /// <summary>
-    /// The **<c>SVGGeometryElement.pathLength</c>** property reflects the pathLength attribute and returns the total length of the path, in user units.
+    /// The <b>`SVGGeometryElement.pathLength`</b> property reflects the pathLength attribute and returns the total length of the path, in user units.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SVGGeometryElement/pathLength)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/SVGGeometryElement/pathLength">MDN Reference</a>
     /// </summary>
     abstract pathLength: Browser.Types.SVGAnimatedNumber
     /// <summary>
-    /// The **<c>SVGGeometryElement.getPointAtLength()</c>** method returns the point at a given distance along the path.
+    /// The <b>`SVGGeometryElement.getPointAtLength()`</b> method returns the point at a given distance along the path.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SVGGeometryElement/getPointAtLength)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/SVGGeometryElement/getPointAtLength">MDN Reference</a>
     /// </summary>
     abstract getPointAtLength: distance: float -> obj
     /// <summary>
-    /// The **<c>SVGGeometryElement.getTotalLength()</c>** method returns the user agent's computed value for the total length of the path in user units.
+    /// The <b>`SVGGeometryElement.getTotalLength()`</b> method returns the user agent's computed value for the total length of the path in user units.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SVGGeometryElement/getTotalLength)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/SVGGeometryElement/getTotalLength">MDN Reference</a>
     /// </summary>
     abstract getTotalLength: unit -> float
     /// <summary>
-    /// The **<c>isPointInFill()</c>** method of the SVGGeometryElement interface determines whether a given point is within the fill shape of an element. The point argument is interpreted as a point in the local coordinate system of the element.
+    /// The <b>`isPointInFill()`</b> method of the SVGGeometryElement interface determines whether a given point is within the fill shape of an element. The point argument is interpreted as a point in the local coordinate system of the element.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SVGGeometryElement/isPointInFill)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/SVGGeometryElement/isPointInFill">MDN Reference</a>
     /// </summary>
     abstract isPointInFill: ?point: obj -> bool
     /// <summary>
-    /// The **<c>isPointInStroke()</c>** method of the SVGGeometryElement interface determines whether a given point is within the stroke shape of an element. The point argument is interpreted as a point in the local coordinate system of the element.
+    /// The <b>`isPointInStroke()`</b> method of the SVGGeometryElement interface determines whether a given point is within the stroke shape of an element. The point argument is interpreted as a point in the local coordinate system of the element.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SVGGeometryElement/isPointInStroke)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/SVGGeometryElement/isPointInStroke">MDN Reference</a>
     /// </summary>
     abstract isPointInStroke: ?point: obj -> bool
     /// <summary>
-    /// The **<c>addEventListener()</c>** method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
+    /// The <b>`addEventListener()`</b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
     /// </summary>
     abstract addEventListener<'K>: ``type``: 'K * listener: (obj -> obj) * ?options: U2<bool, Browser.Types.AddEventListenerOptions> -> unit
     /// <summary>
-    /// The **<c>addEventListener()</c>** method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
+    /// The <b>`addEventListener()`</b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
     /// </summary>
     abstract addEventListener: ``type``: string * listener: obj * ?options: U2<bool, Browser.Types.AddEventListenerOptions> -> unit
     /// <summary>
-    /// The **<c>removeEventListener()</c>** method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
+    /// The <b>`removeEventListener()`</b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
     /// </summary>
     abstract removeEventListener<'K>: ``type``: 'K * listener: (obj -> obj) * ?options: obj -> unit
     /// <summary>
-    /// The **<c>removeEventListener()</c>** method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
+    /// The <b>`removeEventListener()`</b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
     /// </summary>
     abstract removeEventListener: ``type``: string * listener: obj * ?options: obj -> unit
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaActiveDescendantElement)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaActiveDescendantElement">MDN Reference</a>
     /// </summary>
     abstract ariaActiveDescendantElement: Browser.Types.Element option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaAtomic)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaAtomic">MDN Reference</a>
     /// </summary>
     abstract ariaAtomic: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaAutoComplete)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaAutoComplete">MDN Reference</a>
     /// </summary>
     abstract ariaAutoComplete: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaBrailleLabel)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaBrailleLabel">MDN Reference</a>
     /// </summary>
     abstract ariaBrailleLabel: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaBrailleRoleDescription)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaBrailleRoleDescription">MDN Reference</a>
     /// </summary>
     abstract ariaBrailleRoleDescription: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaBusy)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaBusy">MDN Reference</a>
     /// </summary>
     abstract ariaBusy: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaChecked)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaChecked">MDN Reference</a>
     /// </summary>
     abstract ariaChecked: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaColCount)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaColCount">MDN Reference</a>
     /// </summary>
     abstract ariaColCount: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaColIndex)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaColIndex">MDN Reference</a>
     /// </summary>
     abstract ariaColIndex: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaColIndexText)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaColIndexText">MDN Reference</a>
     /// </summary>
     abstract ariaColIndexText: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaColSpan)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaColSpan">MDN Reference</a>
     /// </summary>
     abstract ariaColSpan: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaControlsElements)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaControlsElements">MDN Reference</a>
     /// </summary>
     abstract ariaControlsElements: Browser.Types.Element[] option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaCurrent)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaCurrent">MDN Reference</a>
     /// </summary>
     abstract ariaCurrent: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaDescribedByElements)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaDescribedByElements">MDN Reference</a>
     /// </summary>
     abstract ariaDescribedByElements: Browser.Types.Element[] option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaDescription)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaDescription">MDN Reference</a>
     /// </summary>
     abstract ariaDescription: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaDetailsElements)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaDetailsElements">MDN Reference</a>
     /// </summary>
     abstract ariaDetailsElements: Browser.Types.Element[] option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaDisabled)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaDisabled">MDN Reference</a>
     /// </summary>
     abstract ariaDisabled: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaErrorMessageElements)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaErrorMessageElements">MDN Reference</a>
     /// </summary>
     abstract ariaErrorMessageElements: Browser.Types.Element[] option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaExpanded)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaExpanded">MDN Reference</a>
     /// </summary>
     abstract ariaExpanded: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaFlowToElements)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaFlowToElements">MDN Reference</a>
     /// </summary>
     abstract ariaFlowToElements: Browser.Types.Element[] option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaHasPopup)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaHasPopup">MDN Reference</a>
     /// </summary>
     abstract ariaHasPopup: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaHidden)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaHidden">MDN Reference</a>
     /// </summary>
     abstract ariaHidden: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaInvalid)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaInvalid">MDN Reference</a>
     /// </summary>
     abstract ariaInvalid: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaKeyShortcuts)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaKeyShortcuts">MDN Reference</a>
     /// </summary>
     abstract ariaKeyShortcuts: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaLabel)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaLabel">MDN Reference</a>
     /// </summary>
     abstract ariaLabel: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaLabelledByElements)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaLabelledByElements">MDN Reference</a>
     /// </summary>
     abstract ariaLabelledByElements: Browser.Types.Element[] option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaLevel)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaLevel">MDN Reference</a>
     /// </summary>
     abstract ariaLevel: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaLive)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaLive">MDN Reference</a>
     /// </summary>
     abstract ariaLive: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaModal)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaModal">MDN Reference</a>
     /// </summary>
     abstract ariaModal: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaMultiLine)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaMultiLine">MDN Reference</a>
     /// </summary>
     abstract ariaMultiLine: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaMultiSelectable)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaMultiSelectable">MDN Reference</a>
     /// </summary>
     abstract ariaMultiSelectable: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaOrientation)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaOrientation">MDN Reference</a>
     /// </summary>
     abstract ariaOrientation: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaOwnsElements)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaOwnsElements">MDN Reference</a>
     /// </summary>
     abstract ariaOwnsElements: Browser.Types.Element[] option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaPlaceholder)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaPlaceholder">MDN Reference</a>
     /// </summary>
     abstract ariaPlaceholder: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaPosInSet)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaPosInSet">MDN Reference</a>
     /// </summary>
     abstract ariaPosInSet: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaPressed)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaPressed">MDN Reference</a>
     /// </summary>
     abstract ariaPressed: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaReadOnly)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaReadOnly">MDN Reference</a>
     /// </summary>
     abstract ariaReadOnly: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaRelevant)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaRelevant">MDN Reference</a>
     /// </summary>
     abstract ariaRelevant: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaRequired)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaRequired">MDN Reference</a>
     /// </summary>
     abstract ariaRequired: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaRoleDescription)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaRoleDescription">MDN Reference</a>
     /// </summary>
     abstract ariaRoleDescription: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaRowCount)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaRowCount">MDN Reference</a>
     /// </summary>
     abstract ariaRowCount: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaRowIndex)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaRowIndex">MDN Reference</a>
     /// </summary>
     abstract ariaRowIndex: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaRowIndexText)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaRowIndexText">MDN Reference</a>
     /// </summary>
     abstract ariaRowIndexText: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaRowSpan)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaRowSpan">MDN Reference</a>
     /// </summary>
     abstract ariaRowSpan: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaSelected)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaSelected">MDN Reference</a>
     /// </summary>
     abstract ariaSelected: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaSetSize)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaSetSize">MDN Reference</a>
     /// </summary>
     abstract ariaSetSize: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaSort)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaSort">MDN Reference</a>
     /// </summary>
     abstract ariaSort: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaValueMax)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaValueMax">MDN Reference</a>
     /// </summary>
     abstract ariaValueMax: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaValueMin)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaValueMin">MDN Reference</a>
     /// </summary>
     abstract ariaValueMin: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaValueNow)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaValueNow">MDN Reference</a>
     /// </summary>
     abstract ariaValueNow: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaValueText)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaValueText">MDN Reference</a>
     /// </summary>
     abstract ariaValueText: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/role)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/role">MDN Reference</a>
     /// </summary>
     abstract role: string option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/animate)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/animate">MDN Reference</a>
     /// </summary>
     abstract animate: ?keyframes: obj * ?options: obj -> obj
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/getAnimations)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getAnimations">MDN Reference</a>
     /// </summary>
     abstract getAnimations: ?options: obj -> obj[]
     /// <summary>
@@ -3112,7 +3112,7 @@ type DrawableSVGGeometry =
     ///
     /// Throws a "HierarchyRequestError" DOMException if the constraints of the node tree are violated.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CharacterData/after)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/CharacterData/after">MDN Reference</a>
     /// </summary>
     abstract after: [<ParamArray>] nodes: U2<string, Browser.Types.Node>[] -> unit
     /// <summary>
@@ -3120,13 +3120,13 @@ type DrawableSVGGeometry =
     ///
     /// Throws a "HierarchyRequestError" DOMException if the constraints of the node tree are violated.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CharacterData/before)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/CharacterData/before">MDN Reference</a>
     /// </summary>
     abstract before: [<ParamArray>] nodes: U2<string, Browser.Types.Node>[] -> unit
     /// <summary>
     /// Removes node.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CharacterData/remove)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/CharacterData/remove">MDN Reference</a>
     /// </summary>
     abstract remove: unit -> unit
     /// <summary>
@@ -3134,1074 +3134,1074 @@ type DrawableSVGGeometry =
     ///
     /// Throws a "HierarchyRequestError" DOMException if the constraints of the node tree are violated.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CharacterData/replaceWith)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/CharacterData/replaceWith">MDN Reference</a>
     /// </summary>
     abstract replaceWith: [<ParamArray>] nodes: U2<string, Browser.Types.Node>[] -> unit
     /// <summary>
-    /// The **<c>Element.attributes</c>** property returns a live collection of all attribute nodes registered to the specified node. It is a NamedNodeMap, not an Array, so it has no Array methods and the Attr nodes' indexes may differ among browsers. To be more specific, attributes is a key/value pair of strings that represents any information regarding that attribute.
+    /// The <b>`Element.attributes`</b> property returns a live collection of all attribute nodes registered to the specified node. It is a NamedNodeMap, not an Array, so it has no Array methods and the Attr nodes' indexes may differ among browsers. To be more specific, attributes is a key/value pair of strings that represents any information regarding that attribute.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/attributes)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/attributes">MDN Reference</a>
     /// </summary>
     abstract attributes: Browser.Types.NamedNodeMap
     /// <summary>
-    /// The read-only **<c>classList</c>** property of the Element interface contains a live DOMTokenList collection representing the class attribute of the element. This can then be used to manipulate the class list.
+    /// The read-only <b>`classList`</b> property of the Element interface contains a live DOMTokenList collection representing the class attribute of the element. This can then be used to manipulate the class list.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/classList)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/classList">MDN Reference</a>
     /// </summary>
     abstract classList: Browser.Types.DOMTokenList with get, set
     /// <summary>
-    /// The **<c>clientHeight</c>** read-only property of the Element interface is zero for elements with no CSS or inline layout boxes; otherwise, it's the inner height of an element in pixels. It includes padding but excludes borders, margins, and horizontal scrollbars (if present).
+    /// The <b>`clientHeight`</b> read-only property of the Element interface is zero for elements with no CSS or inline layout boxes; otherwise, it's the inner height of an element in pixels. It includes padding but excludes borders, margins, and horizontal scrollbars (if present).
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/clientHeight)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/clientHeight">MDN Reference</a>
     /// </summary>
     abstract clientHeight: float
     /// <summary>
-    /// The **<c>clientLeft</c>** read-only property of the Element interface returns the width of the left border of an element in pixels. It includes the width of the vertical scrollbar if the text direction of the element is right-to-left and if there is an overflow causing a left vertical scrollbar to be rendered. clientLeft does not include the left margin or the left padding.
+    /// The <b>`clientLeft`</b> read-only property of the Element interface returns the width of the left border of an element in pixels. It includes the width of the vertical scrollbar if the text direction of the element is right-to-left and if there is an overflow causing a left vertical scrollbar to be rendered. clientLeft does not include the left margin or the left padding.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/clientLeft)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/clientLeft">MDN Reference</a>
     /// </summary>
     abstract clientLeft: float
     /// <summary>
-    /// The **<c>clientTop</c>** read-only property of the Element interface returns the width of the top border of an element in pixels.
+    /// The <b>`clientTop`</b> read-only property of the Element interface returns the width of the top border of an element in pixels.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/clientTop)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/clientTop">MDN Reference</a>
     /// </summary>
     abstract clientTop: float
     /// <summary>
-    /// The **<c>clientWidth</c>** read-only property of the Element interface is zero for inline elements and elements with no CSS; otherwise, it's the inner width of an element in pixels. It includes padding but excludes borders, margins, and vertical scrollbars (if present).
+    /// The <b>`clientWidth`</b> read-only property of the Element interface is zero for inline elements and elements with no CSS; otherwise, it's the inner width of an element in pixels. It includes padding but excludes borders, margins, and vertical scrollbars (if present).
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/clientWidth)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/clientWidth">MDN Reference</a>
     /// </summary>
     abstract clientWidth: float
     /// <summary>
-    /// The **<c>currentCSSZoom</c>** read-only property of the Element interface provides the "effective" CSS zoom of an element, taking into account the zoom applied to the element and all its parent elements.
+    /// The <b>`currentCSSZoom`</b> read-only property of the Element interface provides the "effective" CSS zoom of an element, taking into account the zoom applied to the element and all its parent elements.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/currentCSSZoom)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/currentCSSZoom">MDN Reference</a>
     /// </summary>
     abstract currentCSSZoom: float
     abstract customElementRegistry: obj option
     /// <summary>
-    /// The **<c>id</c>** property of the Element interface represents the element's identifier, reflecting the id global attribute.
+    /// The <b>`id`</b> property of the Element interface represents the element's identifier, reflecting the id global attribute.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/id)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/id">MDN Reference</a>
     /// </summary>
     abstract id: string with get, set
     /// <summary>
-    /// The **<c>innerHTML</c>** property of the Element interface gets or sets the HTML or XML markup contained within the element, omitting any shadow roots in both cases.
+    /// The <b>`innerHTML`</b> property of the Element interface gets or sets the HTML or XML markup contained within the element, omitting any shadow roots in both cases.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/innerHTML)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/innerHTML">MDN Reference</a>
     /// </summary>
     abstract innerHTML: string with get, set
     /// <summary>
-    /// The **<c>Element.localName</c>** read-only property returns the local part of the qualified name of an element.
+    /// The <b>`Element.localName`</b> read-only property returns the local part of the qualified name of an element.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/localName)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/localName">MDN Reference</a>
     /// </summary>
     abstract localName: string
     /// <summary>
-    /// The **<c>Element.namespaceURI</c>** read-only property returns the namespace URI of the element, or null if the element is not in a namespace.
+    /// The <b>`Element.namespaceURI`</b> read-only property returns the namespace URI of the element, or null if the element is not in a namespace.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/namespaceURI)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/namespaceURI">MDN Reference</a>
     /// </summary>
     abstract namespaceURI: string option
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/fullscreenchange_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/fullscreenchange_event">MDN Reference</a>
     /// </summary>
     abstract onfullscreenchange: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/fullscreenerror_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/fullscreenerror_event">MDN Reference</a>
     /// </summary>
     abstract onfullscreenerror: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// The **<c>outerHTML</c>** attribute of the Element interface gets or sets the HTML or XML markup of the element and its descendants, omitting any shadow roots in both cases.
+    /// The <b>`outerHTML`</b> attribute of the Element interface gets or sets the HTML or XML markup of the element and its descendants, omitting any shadow roots in both cases.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/outerHTML)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/outerHTML">MDN Reference</a>
     /// </summary>
     abstract outerHTML: string with get, set
     /// <summary>
-    /// The read-only **<c>ownerDocument</c>** property of the Node interface returns the top-level document object of the node.
+    /// The read-only <b>`ownerDocument`</b> property of the Node interface returns the top-level document object of the node.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/ownerDocument)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/ownerDocument">MDN Reference</a>
     /// </summary>
     abstract ownerDocument: Browser.Types.Document
     /// <summary>
-    /// The read-only **<c>part</c>** property of the Element interface contains a DOMTokenList object representing the part identifier(s) of the element. It reflects the element's part content attribute. These can be used to style parts of a shadow DOM, via the ::part pseudo-element.
+    /// The read-only <b>`part`</b> property of the Element interface contains a DOMTokenList object representing the part identifier(s) of the element. It reflects the element's part content attribute. These can be used to style parts of a shadow DOM, via the ::part pseudo-element.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/part)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/part">MDN Reference</a>
     /// </summary>
     abstract part: Browser.Types.DOMTokenList with get, set
     /// <summary>
-    /// The **<c>Element.prefix</c>** read-only property returns the namespace prefix of the specified element, or null if no prefix is specified.
+    /// The <b>`Element.prefix`</b> read-only property returns the namespace prefix of the specified element, or null if no prefix is specified.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/prefix)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/prefix">MDN Reference</a>
     /// </summary>
     abstract prefix: string option
     /// <summary>
-    /// The **<c>scrollHeight</c>** read-only property of the Element interface is a measurement of the height of an element's content, including content not visible on the screen due to overflow.
+    /// The <b>`scrollHeight`</b> read-only property of the Element interface is a measurement of the height of an element's content, including content not visible on the screen due to overflow.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/scrollHeight)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/scrollHeight">MDN Reference</a>
     /// </summary>
     abstract scrollHeight: float
     /// <summary>
-    /// The **<c>scrollLeft</c>** property of the Element interface gets or sets the number of pixels by which an element's content is scrolled from its left edge. This value is subpixel precise in modern browsers, meaning that it isn't necessarily a whole number.
+    /// The <b>`scrollLeft`</b> property of the Element interface gets or sets the number of pixels by which an element's content is scrolled from its left edge. This value is subpixel precise in modern browsers, meaning that it isn't necessarily a whole number.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/scrollLeft)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/scrollLeft">MDN Reference</a>
     /// </summary>
     abstract scrollLeft: float with get, set
     /// <summary>
-    /// The **<c>scrollTop</c>** property of the Element interface gets or sets the number of pixels by which an element's content is scrolled from its top edge. This value is subpixel precise in modern browsers, meaning that it isn't necessarily a whole number.
+    /// The <b>`scrollTop`</b> property of the Element interface gets or sets the number of pixels by which an element's content is scrolled from its top edge. This value is subpixel precise in modern browsers, meaning that it isn't necessarily a whole number.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/scrollTop)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/scrollTop">MDN Reference</a>
     /// </summary>
     abstract scrollTop: float with get, set
     /// <summary>
-    /// The **<c>scrollWidth</c>** read-only property of the Element interface is a measurement of the width of an element's content, including content not visible on the screen due to overflow.
+    /// The <b>`scrollWidth`</b> read-only property of the Element interface is a measurement of the width of an element's content, including content not visible on the screen due to overflow.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/scrollWidth)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/scrollWidth">MDN Reference</a>
     /// </summary>
     abstract scrollWidth: float
     /// <summary>
-    /// The **<c>Element.shadowRoot</c>** read-only property represents the shadow root hosted by the element.
+    /// The <b>`Element.shadowRoot`</b> read-only property represents the shadow root hosted by the element.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/shadowRoot)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/shadowRoot">MDN Reference</a>
     /// </summary>
     abstract shadowRoot: Browser.Types.ShadowRoot option
     /// <summary>
-    /// The **<c>slot</c>** property of the Element interface returns the name of the shadow DOM slot the element is inserted in.
+    /// The <b>`slot`</b> property of the Element interface returns the name of the shadow DOM slot the element is inserted in.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/slot)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/slot">MDN Reference</a>
     /// </summary>
     abstract slot: string with get, set
     /// <summary>
-    /// The **<c>tagName</c>** read-only property of the Element interface returns the tag name of the element on which it's called.
+    /// The <b>`tagName`</b> read-only property of the Element interface returns the tag name of the element on which it's called.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/tagName)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/tagName">MDN Reference</a>
     /// </summary>
     abstract tagName: string
     /// <summary>
-    /// The **<c>Element.attachShadow()</c>** method attaches a shadow DOM tree to the specified element and returns a reference to its ShadowRoot.
+    /// The <b>`Element.attachShadow()`</b> method attaches a shadow DOM tree to the specified element and returns a reference to its ShadowRoot.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/attachShadow)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/attachShadow">MDN Reference</a>
     /// </summary>
     abstract attachShadow: init: Browser.Types.ShadowRootInit -> Browser.Types.ShadowRoot
     /// <summary>
-    /// The **<c>checkVisibility()</c>** method of the Element interface checks whether the element is visible.
+    /// The <b>`checkVisibility()`</b> method of the Element interface checks whether the element is visible.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/checkVisibility)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/checkVisibility">MDN Reference</a>
     /// </summary>
     abstract checkVisibility: ?options: obj -> bool
     /// <summary>
-    /// The **<c>closest()</c>** method of the Element interface traverses the element and its parents (heading toward the document root) until it finds a node that matches the specified CSS selector.
+    /// The <b>`closest()`</b> method of the Element interface traverses the element and its parents (heading toward the document root) until it finds a node that matches the specified CSS selector.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/closest)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/closest">MDN Reference</a>
     /// </summary>
     abstract closest<'K>: selector: 'K -> obj option
     /// <summary>
-    /// The **<c>closest()</c>** method of the Element interface traverses the element and its parents (heading toward the document root) until it finds a node that matches the specified CSS selector.
+    /// The <b>`closest()`</b> method of the Element interface traverses the element and its parents (heading toward the document root) until it finds a node that matches the specified CSS selector.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/closest)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/closest">MDN Reference</a>
     /// </summary>
     abstract closest<'E when 'E :> Browser.Types.Element>: selectors: string -> 'E option
     /// <summary>
-    /// The **<c>computedStyleMap()</c>** method of the Element interface returns a StylePropertyMapReadOnly interface which provides a read-only representation of a CSS declaration block that is an alternative to CSSStyleDeclaration.
+    /// The <b>`computedStyleMap()`</b> method of the Element interface returns a StylePropertyMapReadOnly interface which provides a read-only representation of a CSS declaration block that is an alternative to CSSStyleDeclaration.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/computedStyleMap)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/computedStyleMap">MDN Reference</a>
     /// </summary>
     abstract computedStyleMap: unit -> obj
     /// <summary>
-    /// The **<c>getAttribute()</c>** method of the Element interface returns the value of a specified attribute on the element.
+    /// The <b>`getAttribute()`</b> method of the Element interface returns the value of a specified attribute on the element.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/getAttribute)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getAttribute">MDN Reference</a>
     /// </summary>
     abstract getAttribute: qualifiedName: string -> string option
     /// <summary>
-    /// The **<c>getAttributeNS()</c>** method of the Element interface returns the string value of the attribute with the specified namespace and name. If the named attribute does not exist, the value returned will either be null or "" (the empty string); see Notes for details.
+    /// The <b>`getAttributeNS()`</b> method of the Element interface returns the string value of the attribute with the specified namespace and name. If the named attribute does not exist, the value returned will either be null or "" (the empty string); see Notes for details.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/getAttributeNS)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getAttributeNS">MDN Reference</a>
     /// </summary>
     abstract getAttributeNS: ``namespace``: string option * localName: string -> string option
     /// <summary>
-    /// The **<c>getAttributeNames()</c>** method of the Element interface returns the attribute names of the element as an Array of strings. If the element has no attributes it returns an empty array.
+    /// The <b>`getAttributeNames()`</b> method of the Element interface returns the attribute names of the element as an Array of strings. If the element has no attributes it returns an empty array.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/getAttributeNames)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getAttributeNames">MDN Reference</a>
     /// </summary>
     abstract getAttributeNames: unit -> string[]
     /// <summary>
     /// Returns the specified attribute of the specified element, as an Attr node.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/getAttributeNode)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getAttributeNode">MDN Reference</a>
     /// </summary>
     abstract getAttributeNode: qualifiedName: string -> Browser.Types.Attr option
     /// <summary>
-    /// The **<c>getAttributeNodeNS()</c>** method of the Element interface returns the namespaced Attr node of an element.
+    /// The <b>`getAttributeNodeNS()`</b> method of the Element interface returns the namespaced Attr node of an element.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/getAttributeNodeNS)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getAttributeNodeNS">MDN Reference</a>
     /// </summary>
     abstract getAttributeNodeNS: ``namespace``: string option * localName: string -> Browser.Types.Attr option
     /// <summary>
-    /// The **<c>Element.getBoundingClientRect()</c>** method returns a DOMRect object providing information about the size of an element and its position relative to the viewport.
+    /// The <b>`Element.getBoundingClientRect()`</b> method returns a DOMRect object providing information about the size of an element and its position relative to the viewport.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/getBoundingClientRect)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getBoundingClientRect">MDN Reference</a>
     /// </summary>
     abstract getBoundingClientRect: unit -> obj
     /// <summary>
-    /// The **<c>getClientRects()</c>** method of the Element interface returns a collection of DOMRect objects that indicate the bounding rectangles for each CSS border box in a client.
+    /// The <b>`getClientRects()`</b> method of the Element interface returns a collection of DOMRect objects that indicate the bounding rectangles for each CSS border box in a client.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/getClientRects)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getClientRects">MDN Reference</a>
     /// </summary>
     abstract getClientRects: unit -> obj
     /// <summary>
-    /// The Element method **<c>getElementsByClassName()</c>** returns a live HTMLCollection which contains every descendant element which has the specified class name or names.
+    /// The Element method <b>`getElementsByClassName()`</b> returns a live HTMLCollection which contains every descendant element which has the specified class name or names.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/getElementsByClassName)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByClassName">MDN Reference</a>
     /// </summary>
     abstract getElementsByClassName: classNames: string -> obj
     /// <summary>
-    /// The **<c>Element.getElementsByTagName()</c>** method returns a live HTMLCollection of elements with the given tag name.
+    /// The <b>`Element.getElementsByTagName()`</b> method returns a live HTMLCollection of elements with the given tag name.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagName)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagName">MDN Reference</a>
     /// </summary>
     /// <remarks>@deprecated</remarks>
     abstract getElementsByTagName<'K>: qualifiedName: 'K -> obj
     /// <summary>
-    /// The **<c>Element.getElementsByTagName()</c>** method returns a live HTMLCollection of elements with the given tag name.
+    /// The <b>`Element.getElementsByTagName()`</b> method returns a live HTMLCollection of elements with the given tag name.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagName)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagName">MDN Reference</a>
     /// </summary>
     /// <remarks>@deprecated</remarks>
     abstract getElementsByTagName: qualifiedName: string -> obj
     /// <summary>
-    /// The **<c>Element.getElementsByTagNameNS()</c>** method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+    /// The <b>`Element.getElementsByTagNameNS()`</b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
     /// </summary>
     abstract getElementsByTagNameNS: namespaceURI: DrawableSVGGeometry.HttpWwwW3Org1999Xhtml * localName: string -> obj
     /// <summary>
-    /// The **<c>Element.getElementsByTagNameNS()</c>** method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+    /// The <b>`Element.getElementsByTagNameNS()`</b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
     /// </summary>
     abstract getElementsByTagNameNS: namespaceURI: DrawableSVGGeometry.HttpWwwW3Org2000Svg * localName: string -> obj
     /// <summary>
-    /// The **<c>Element.getElementsByTagNameNS()</c>** method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+    /// The <b>`Element.getElementsByTagNameNS()`</b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
     /// </summary>
     abstract getElementsByTagNameNS: namespaceURI: DrawableSVGGeometry.HttpWwwW3Org1998MathMathML * localName: string -> obj
     /// <summary>
-    /// The **<c>Element.getElementsByTagNameNS()</c>** method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+    /// The <b>`Element.getElementsByTagNameNS()`</b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
     /// </summary>
     abstract getElementsByTagNameNS: ``namespace``: string option * localName: string -> obj
     /// <summary>
-    /// The **<c>getHTML()</c>** method of the Element interface is used to serialize an element's DOM to an HTML string.
+    /// The <b>`getHTML()`</b> method of the Element interface is used to serialize an element's DOM to an HTML string.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/getHTML)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getHTML">MDN Reference</a>
     /// </summary>
     abstract getHTML: ?options: obj -> string
     /// <summary>
-    /// The **<c>Element.hasAttribute()</c>** method returns a Boolean value indicating whether the specified element has the specified attribute or not.
+    /// The <b>`Element.hasAttribute()`</b> method returns a Boolean value indicating whether the specified element has the specified attribute or not.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/hasAttribute)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/hasAttribute">MDN Reference</a>
     /// </summary>
     abstract hasAttribute: qualifiedName: string -> bool
     /// <summary>
-    /// The **<c>hasAttributeNS()</c>** method of the Element interface returns a boolean value indicating whether the current element has the specified attribute with the specified namespace.
+    /// The <b>`hasAttributeNS()`</b> method of the Element interface returns a boolean value indicating whether the current element has the specified attribute with the specified namespace.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/hasAttributeNS)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/hasAttributeNS">MDN Reference</a>
     /// </summary>
     abstract hasAttributeNS: ``namespace``: string option * localName: string -> bool
     /// <summary>
-    /// The **<c>hasAttributes()</c>** method of the Element interface returns a boolean value indicating whether the current element has any attributes or not.
+    /// The <b>`hasAttributes()`</b> method of the Element interface returns a boolean value indicating whether the current element has any attributes or not.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/hasAttributes)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/hasAttributes">MDN Reference</a>
     /// </summary>
     abstract hasAttributes: unit -> bool
     /// <summary>
-    /// The **<c>hasPointerCapture()</c>** method of the Element interface checks whether the element on which it is invoked has pointer capture for the pointer identified by the given pointer ID.
+    /// The <b>`hasPointerCapture()`</b> method of the Element interface checks whether the element on which it is invoked has pointer capture for the pointer identified by the given pointer ID.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/hasPointerCapture)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/hasPointerCapture">MDN Reference</a>
     /// </summary>
     abstract hasPointerCapture: pointerId: float -> bool
     /// <summary>
-    /// The **<c>insertAdjacentElement()</c>** method of the Element interface inserts a given element node at a given position relative to the element it is invoked upon.
+    /// The <b>`insertAdjacentElement()`</b> method of the Element interface inserts a given element node at a given position relative to the element it is invoked upon.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/insertAdjacentElement)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/insertAdjacentElement">MDN Reference</a>
     /// </summary>
     abstract insertAdjacentElement: where: DrawableSVGGeometry.InsertAdjacentElement.Where * element: Browser.Types.Element -> Browser.Types.Element option
     /// <summary>
-    /// The **<c>insertAdjacentHTML()</c>** method of the Element interface parses the specified input as HTML or XML and inserts the resulting nodes into the DOM tree at a specified position.
+    /// The <b>`insertAdjacentHTML()`</b> method of the Element interface parses the specified input as HTML or XML and inserts the resulting nodes into the DOM tree at a specified position.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/insertAdjacentHTML)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/insertAdjacentHTML">MDN Reference</a>
     /// </summary>
     abstract insertAdjacentHTML: position: DrawableSVGGeometry.InsertAdjacentElement.Where * string: string -> unit
     /// <summary>
-    /// The **<c>insertAdjacentText()</c>** method of the Element interface, given a relative position and a string, inserts a new text node at the given position relative to the element it is called from.
+    /// The <b>`insertAdjacentText()`</b> method of the Element interface, given a relative position and a string, inserts a new text node at the given position relative to the element it is called from.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/insertAdjacentText)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/insertAdjacentText">MDN Reference</a>
     /// </summary>
     abstract insertAdjacentText: where: DrawableSVGGeometry.InsertAdjacentElement.Where * data: string -> unit
     /// <summary>
-    /// The **<c>matches()</c>** method of the Element interface tests whether the element would be selected by the specified CSS selector.
+    /// The <b>`matches()`</b> method of the Element interface tests whether the element would be selected by the specified CSS selector.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/matches)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/matches">MDN Reference</a>
     /// </summary>
     abstract matches<'K>: selectors: 'K -> bool
     /// <summary>
-    /// The **<c>matches()</c>** method of the Element interface tests whether the element would be selected by the specified CSS selector.
+    /// The <b>`matches()`</b> method of the Element interface tests whether the element would be selected by the specified CSS selector.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/matches)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/matches">MDN Reference</a>
     /// </summary>
     abstract matches: selectors: string -> bool
     /// <summary>
-    /// The **<c>releasePointerCapture()</c>** method of the Element interface releases (stops) pointer capture that was previously set for a specific (PointerEvent) pointer.
+    /// The <b>`releasePointerCapture()`</b> method of the Element interface releases (stops) pointer capture that was previously set for a specific (PointerEvent) pointer.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/releasePointerCapture)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/releasePointerCapture">MDN Reference</a>
     /// </summary>
     abstract releasePointerCapture: pointerId: float -> unit
     /// <summary>
-    /// The Element method **<c>removeAttribute()</c>** removes the attribute with the specified name from the element.
+    /// The Element method <b>`removeAttribute()`</b> removes the attribute with the specified name from the element.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/removeAttribute)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/removeAttribute">MDN Reference</a>
     /// </summary>
     abstract removeAttribute: qualifiedName: string -> unit
     /// <summary>
-    /// The **<c>removeAttributeNS()</c>** method of the Element interface removes the specified attribute with the specified namespace from an element.
+    /// The <b>`removeAttributeNS()`</b> method of the Element interface removes the specified attribute with the specified namespace from an element.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/removeAttributeNS)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/removeAttributeNS">MDN Reference</a>
     /// </summary>
     abstract removeAttributeNS: ``namespace``: string option * localName: string -> unit
     /// <summary>
-    /// The **<c>removeAttributeNode()</c>** method of the Element interface removes the specified Attr node from the element.
+    /// The <b>`removeAttributeNode()`</b> method of the Element interface removes the specified Attr node from the element.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/removeAttributeNode)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/removeAttributeNode">MDN Reference</a>
     /// </summary>
     abstract removeAttributeNode: attr: Browser.Types.Attr -> Browser.Types.Attr
     /// <summary>
-    /// The **<c>Element.requestFullscreen()</c>** method issues an asynchronous request to make the element be displayed in fullscreen mode.
+    /// The <b>`Element.requestFullscreen()`</b> method issues an asynchronous request to make the element be displayed in fullscreen mode.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/requestFullscreen)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/requestFullscreen">MDN Reference</a>
     /// </summary>
     abstract requestFullscreen: ?options: obj -> JS.Promise<unit>
     /// <summary>
-    /// The **<c>requestPointerLock()</c>** method of the Element interface lets you asynchronously ask for the pointer to be locked on the given element.
+    /// The <b>`requestPointerLock()`</b> method of the Element interface lets you asynchronously ask for the pointer to be locked on the given element.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/requestPointerLock)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/requestPointerLock">MDN Reference</a>
     /// </summary>
     abstract requestPointerLock: ?options: obj -> JS.Promise<unit>
     /// <summary>
-    /// The **<c>scroll()</c>** method of the Element interface scrolls the element to a particular set of coordinates inside a given element.
+    /// The <b>`scroll()`</b> method of the Element interface scrolls the element to a particular set of coordinates inside a given element.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/scroll)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/scroll">MDN Reference</a>
     /// </summary>
     abstract scroll: ?options: obj -> unit
     /// <summary>
-    /// The **<c>scroll()</c>** method of the Element interface scrolls the element to a particular set of coordinates inside a given element.
+    /// The <b>`scroll()`</b> method of the Element interface scrolls the element to a particular set of coordinates inside a given element.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/scroll)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/scroll">MDN Reference</a>
     /// </summary>
     abstract scroll: x: float * y: float -> unit
     /// <summary>
-    /// The **<c>scrollBy()</c>** method of the Element interface scrolls an element by the given amount.
+    /// The <b>`scrollBy()`</b> method of the Element interface scrolls an element by the given amount.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/scrollBy)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/scrollBy">MDN Reference</a>
     /// </summary>
     abstract scrollBy: ?options: obj -> unit
     /// <summary>
-    /// The **<c>scrollBy()</c>** method of the Element interface scrolls an element by the given amount.
+    /// The <b>`scrollBy()`</b> method of the Element interface scrolls an element by the given amount.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/scrollBy)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/scrollBy">MDN Reference</a>
     /// </summary>
     abstract scrollBy: x: float * y: float -> unit
     /// <summary>
-    /// The Element interface's **<c>scrollIntoView()</c>** method scrolls the element's ancestor containers such that the element on which scrollIntoView() is called is visible to the user.
+    /// The Element interface's <b>`scrollIntoView()`</b> method scrolls the element's ancestor containers such that the element on which scrollIntoView() is called is visible to the user.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/scrollIntoView)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/scrollIntoView">MDN Reference</a>
     /// </summary>
     abstract scrollIntoView: ?arg: U2<bool, Browser.Types.ScrollIntoViewOptions> -> unit
     /// <summary>
-    /// The **<c>scrollTo()</c>** method of the Element interface scrolls to a particular set of coordinates inside a given element.
+    /// The <b>`scrollTo()`</b> method of the Element interface scrolls to a particular set of coordinates inside a given element.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/scrollTo)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/scrollTo">MDN Reference</a>
     /// </summary>
     abstract scrollTo: ?options: obj -> unit
     /// <summary>
-    /// The **<c>scrollTo()</c>** method of the Element interface scrolls to a particular set of coordinates inside a given element.
+    /// The <b>`scrollTo()`</b> method of the Element interface scrolls to a particular set of coordinates inside a given element.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/scrollTo)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/scrollTo">MDN Reference</a>
     /// </summary>
     abstract scrollTo: x: float * y: float -> unit
     /// <summary>
-    /// The **<c>setAttribute()</c>** method of the Element interface sets the value of an attribute on the specified element. If the attribute already exists, the value is updated; otherwise a new attribute is added with the specified name and value.
+    /// The <b>`setAttribute()`</b> method of the Element interface sets the value of an attribute on the specified element. If the attribute already exists, the value is updated; otherwise a new attribute is added with the specified name and value.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/setAttribute)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/setAttribute">MDN Reference</a>
     /// </summary>
     abstract setAttribute: qualifiedName: string * value: string -> unit
     /// <summary>
-    /// The **<c>setAttributeNS()</c>** method of the Element interface adds a new attribute or changes the value of an attribute with the given namespace and name.
+    /// The <b>`setAttributeNS()`</b> method of the Element interface adds a new attribute or changes the value of an attribute with the given namespace and name.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/setAttributeNS)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/setAttributeNS">MDN Reference</a>
     /// </summary>
     abstract setAttributeNS: ``namespace``: string option * qualifiedName: string * value: string -> unit
     /// <summary>
-    /// The **<c>setAttributeNode()</c>** method of the Element interface adds a new Attr node to the specified element.
+    /// The <b>`setAttributeNode()`</b> method of the Element interface adds a new Attr node to the specified element.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/setAttributeNode)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/setAttributeNode">MDN Reference</a>
     /// </summary>
     abstract setAttributeNode: attr: Browser.Types.Attr -> Browser.Types.Attr option
     /// <summary>
-    /// The **<c>setAttributeNodeNS()</c>** method of the Element interface adds a new namespaced Attr node to an element.
+    /// The <b>`setAttributeNodeNS()`</b> method of the Element interface adds a new namespaced Attr node to an element.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/setAttributeNodeNS)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/setAttributeNodeNS">MDN Reference</a>
     /// </summary>
     abstract setAttributeNodeNS: attr: Browser.Types.Attr -> Browser.Types.Attr option
     /// <summary>
-    /// The **<c>setHTMLUnsafe()</c>** method of the Element interface is used to parse HTML input into a DocumentFragment, optionally filtering out unwanted elements and attributes, and those that don't belong in the context, and then using it to replace the element's subtree in the DOM.
+    /// The <b>`setHTMLUnsafe()`</b> method of the Element interface is used to parse HTML input into a DocumentFragment, optionally filtering out unwanted elements and attributes, and those that don't belong in the context, and then using it to replace the element's subtree in the DOM.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/setHTMLUnsafe)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/setHTMLUnsafe">MDN Reference</a>
     /// </summary>
     abstract setHTMLUnsafe: html: string -> unit
     /// <summary>
-    /// The **<c>setPointerCapture()</c>** method of the Element interface is used to designate a specific element as the capture target of future pointer events. Subsequent events for the pointer will be targeted at the capture element until capture is released (via Element.releasePointerCapture() or the pointerup event is fired).
+    /// The <b>`setPointerCapture()`</b> method of the Element interface is used to designate a specific element as the capture target of future pointer events. Subsequent events for the pointer will be targeted at the capture element until capture is released (via Element.releasePointerCapture() or the pointerup event is fired).
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/setPointerCapture)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/setPointerCapture">MDN Reference</a>
     /// </summary>
     abstract setPointerCapture: pointerId: float -> unit
     /// <summary>
-    /// The **<c>toggleAttribute()</c>** method of the Element interface toggles a Boolean attribute (removing it if it is present and adding it if it is not present) on the given element.
+    /// The <b>`toggleAttribute()`</b> method of the Element interface toggles a Boolean attribute (removing it if it is present and adding it if it is not present) on the given element.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/toggleAttribute)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/toggleAttribute">MDN Reference</a>
     /// </summary>
     abstract toggleAttribute: qualifiedName: string * ?force: bool -> bool
     /// <remarks>
     /// @deprecated
     /// This is a legacy alias of <c>matches</c>.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/matches)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/matches">MDN Reference</a>
     /// </remarks>
     abstract webkitMatchesSelector: selectors: string -> bool
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/textContent)
-    /// The **<c>textContent</c>** property of the Node interface represents the text content of the node and its descendants.
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/textContent">MDN Reference</a>
+    /// The <b>`textContent`</b> property of the Node interface represents the text content of the node and its descendants.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/textContent)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/textContent">MDN Reference</a>
     /// </summary>
     abstract textContent: string with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/attributeStyleMap)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/attributeStyleMap">MDN Reference</a>
     /// </summary>
     abstract attributeStyleMap: obj
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/style)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/style">MDN Reference</a>
     /// </summary>
     abstract style: Browser.Types.CSSStyleDeclaration with get, set
     /// <summary>
-    /// The **<c>dispatchEvent()</c>** method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
+    /// The <b>`dispatchEvent()`</b> method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent">MDN Reference</a>
     /// </summary>
     abstract dispatchEvent: ``event``: Browser.Types.Event -> bool
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/abort_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/abort_event">MDN Reference</a>
     /// </summary>
     abstract onabort: (Browser.Types.UIEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/animationcancel_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/animationcancel_event">MDN Reference</a>
     /// </summary>
     abstract onanimationcancel: (Browser.Types.AnimationEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/animationend_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/animationend_event">MDN Reference</a>
     /// </summary>
     abstract onanimationend: (Browser.Types.AnimationEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/animationiteration_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/animationiteration_event">MDN Reference</a>
     /// </summary>
     abstract onanimationiteration: (Browser.Types.AnimationEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/animationstart_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/animationstart_event">MDN Reference</a>
     /// </summary>
     abstract onanimationstart: (Browser.Types.AnimationEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/auxclick_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/auxclick_event">MDN Reference</a>
     /// </summary>
     abstract onauxclick: (Browser.Types.PointerEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/beforeinput_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/beforeinput_event">MDN Reference</a>
     /// </summary>
     abstract onbeforeinput: (Browser.Types.InputEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/beforematch_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/beforematch_event">MDN Reference</a>
     /// </summary>
     abstract onbeforematch: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/beforetoggle_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/beforetoggle_event">MDN Reference</a>
     /// </summary>
     abstract onbeforetoggle: (Browser.Types.ToggleEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/blur_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/blur_event">MDN Reference</a>
     /// </summary>
     abstract onblur: (Browser.Types.FocusEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLDialogElement/cancel_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLDialogElement/cancel_event">MDN Reference</a>
     /// </summary>
     abstract oncancel: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/canplay_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/canplay_event">MDN Reference</a>
     /// </summary>
     abstract oncanplay: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/canplaythrough_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/canplaythrough_event">MDN Reference</a>
     /// </summary>
     abstract oncanplaythrough: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/change_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/change_event">MDN Reference</a>
     /// </summary>
     abstract onchange: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/click_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/click_event">MDN Reference</a>
     /// </summary>
     abstract onclick: (Browser.Types.PointerEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLDialogElement/close_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLDialogElement/close_event">MDN Reference</a>
     /// </summary>
     abstract onclose: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/command_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/command_event">MDN Reference</a>
     /// </summary>
     abstract oncommand: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLCanvasElement/contextlost_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLCanvasElement/contextlost_event">MDN Reference</a>
     /// </summary>
     abstract oncontextlost: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/contextmenu_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/contextmenu_event">MDN Reference</a>
     /// </summary>
     abstract oncontextmenu: (Browser.Types.PointerEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLCanvasElement/contextrestored_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLCanvasElement/contextrestored_event">MDN Reference</a>
     /// </summary>
     abstract oncontextrestored: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/copy_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/copy_event">MDN Reference</a>
     /// </summary>
     abstract oncopy: (Browser.Types.ClipboardEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLTrackElement/cuechange_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLTrackElement/cuechange_event">MDN Reference</a>
     /// </summary>
     abstract oncuechange: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/cut_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/cut_event">MDN Reference</a>
     /// </summary>
     abstract oncut: (Browser.Types.ClipboardEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/dblclick_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/dblclick_event">MDN Reference</a>
     /// </summary>
     abstract ondblclick: (Browser.Types.MouseEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/drag_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/drag_event">MDN Reference</a>
     /// </summary>
     abstract ondrag: (Browser.Types.DragEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/dragend_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/dragend_event">MDN Reference</a>
     /// </summary>
     abstract ondragend: (Browser.Types.DragEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/dragenter_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/dragenter_event">MDN Reference</a>
     /// </summary>
     abstract ondragenter: (Browser.Types.DragEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/dragleave_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/dragleave_event">MDN Reference</a>
     /// </summary>
     abstract ondragleave: (Browser.Types.DragEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/dragover_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/dragover_event">MDN Reference</a>
     /// </summary>
     abstract ondragover: (Browser.Types.DragEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/dragstart_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/dragstart_event">MDN Reference</a>
     /// </summary>
     abstract ondragstart: (Browser.Types.DragEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/drop_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/drop_event">MDN Reference</a>
     /// </summary>
     abstract ondrop: (Browser.Types.DragEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/durationchange_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/durationchange_event">MDN Reference</a>
     /// </summary>
     abstract ondurationchange: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/emptied_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/emptied_event">MDN Reference</a>
     /// </summary>
     abstract onemptied: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/ended_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/ended_event">MDN Reference</a>
     /// </summary>
     abstract onended: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/error_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/error_event">MDN Reference</a>
     /// </summary>
     abstract onerror: obj option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/focus_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/focus_event">MDN Reference</a>
     /// </summary>
     abstract onfocus: (Browser.Types.FocusEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLFormElement/formdata_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLFormElement/formdata_event">MDN Reference</a>
     /// </summary>
     abstract onformdata: (obj -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/gotpointercapture_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/gotpointercapture_event">MDN Reference</a>
     /// </summary>
     abstract ongotpointercapture: (Browser.Types.PointerEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/input_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/input_event">MDN Reference</a>
     /// </summary>
     abstract oninput: (Browser.Types.InputEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLInputElement/invalid_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLInputElement/invalid_event">MDN Reference</a>
     /// </summary>
     abstract oninvalid: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/keydown_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/keydown_event">MDN Reference</a>
     /// </summary>
     abstract onkeydown: (Browser.Types.KeyboardEvent -> obj) option with get, set
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/keypress_event)</remarks>
+    /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Element/keypress_event">MDN Reference</a></remarks>
     abstract onkeypress: (Browser.Types.KeyboardEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/keyup_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/keyup_event">MDN Reference</a>
     /// </summary>
     abstract onkeyup: (Browser.Types.KeyboardEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/load_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/load_event">MDN Reference</a>
     /// </summary>
     abstract onload: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/loadeddata_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/loadeddata_event">MDN Reference</a>
     /// </summary>
     abstract onloadeddata: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/loadedmetadata_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/loadedmetadata_event">MDN Reference</a>
     /// </summary>
     abstract onloadedmetadata: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/loadstart_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/loadstart_event">MDN Reference</a>
     /// </summary>
     abstract onloadstart: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/lostpointercapture_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/lostpointercapture_event">MDN Reference</a>
     /// </summary>
     abstract onlostpointercapture: (Browser.Types.PointerEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/mousedown_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/mousedown_event">MDN Reference</a>
     /// </summary>
     abstract onmousedown: (Browser.Types.MouseEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/mouseenter_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/mouseenter_event">MDN Reference</a>
     /// </summary>
     abstract onmouseenter: (Browser.Types.MouseEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/mouseleave_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/mouseleave_event">MDN Reference</a>
     /// </summary>
     abstract onmouseleave: (Browser.Types.MouseEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/mousemove_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/mousemove_event">MDN Reference</a>
     /// </summary>
     abstract onmousemove: (Browser.Types.MouseEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/mouseout_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/mouseout_event">MDN Reference</a>
     /// </summary>
     abstract onmouseout: (Browser.Types.MouseEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/mouseover_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/mouseover_event">MDN Reference</a>
     /// </summary>
     abstract onmouseover: (Browser.Types.MouseEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/mouseup_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/mouseup_event">MDN Reference</a>
     /// </summary>
     abstract onmouseup: (Browser.Types.MouseEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/paste_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/paste_event">MDN Reference</a>
     /// </summary>
     abstract onpaste: (Browser.Types.ClipboardEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/pause_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/pause_event">MDN Reference</a>
     /// </summary>
     abstract onpause: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/play_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/play_event">MDN Reference</a>
     /// </summary>
     abstract onplay: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/playing_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/playing_event">MDN Reference</a>
     /// </summary>
     abstract onplaying: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/pointercancel_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointercancel_event">MDN Reference</a>
     /// </summary>
     abstract onpointercancel: (Browser.Types.PointerEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/pointerdown_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointerdown_event">MDN Reference</a>
     /// </summary>
     abstract onpointerdown: (Browser.Types.PointerEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/pointerenter_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointerenter_event">MDN Reference</a>
     /// </summary>
     abstract onpointerenter: (Browser.Types.PointerEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/pointerleave_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointerleave_event">MDN Reference</a>
     /// </summary>
     abstract onpointerleave: (Browser.Types.PointerEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/pointermove_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointermove_event">MDN Reference</a>
     /// </summary>
     abstract onpointermove: (Browser.Types.PointerEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/pointerout_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointerout_event">MDN Reference</a>
     /// </summary>
     abstract onpointerout: (Browser.Types.PointerEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/pointerover_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointerover_event">MDN Reference</a>
     /// </summary>
     abstract onpointerover: (Browser.Types.PointerEvent -> obj) option with get, set
     /// <summary>
     /// Available only in secure contexts.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/pointerrawupdate_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointerrawupdate_event">MDN Reference</a>
     /// </summary>
     abstract onpointerrawupdate: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/pointerup_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointerup_event">MDN Reference</a>
     /// </summary>
     abstract onpointerup: (Browser.Types.PointerEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/progress_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/progress_event">MDN Reference</a>
     /// </summary>
     abstract onprogress: (Browser.Types.ProgressEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/ratechange_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/ratechange_event">MDN Reference</a>
     /// </summary>
     abstract onratechange: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLFormElement/reset_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLFormElement/reset_event">MDN Reference</a>
     /// </summary>
     abstract onreset: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLVideoElement/resize_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLVideoElement/resize_event">MDN Reference</a>
     /// </summary>
     abstract onresize: (Browser.Types.UIEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/scroll_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Document/scroll_event">MDN Reference</a>
     /// </summary>
     abstract onscroll: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/scrollend_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Document/scrollend_event">MDN Reference</a>
     /// </summary>
     abstract onscrollend: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/securitypolicyviolation_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Document/securitypolicyviolation_event">MDN Reference</a>
     /// </summary>
     abstract onsecuritypolicyviolation: (obj -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/seeked_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/seeked_event">MDN Reference</a>
     /// </summary>
     abstract onseeked: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/seeking_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/seeking_event">MDN Reference</a>
     /// </summary>
     abstract onseeking: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLInputElement/select_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLInputElement/select_event">MDN Reference</a>
     /// </summary>
     abstract onselect: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/selectionchange_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Document/selectionchange_event">MDN Reference</a>
     /// </summary>
     abstract onselectionchange: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/selectstart_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/selectstart_event">MDN Reference</a>
     /// </summary>
     abstract onselectstart: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLSlotElement/slotchange_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLSlotElement/slotchange_event">MDN Reference</a>
     /// </summary>
     abstract onslotchange: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/stalled_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/stalled_event">MDN Reference</a>
     /// </summary>
     abstract onstalled: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLFormElement/submit_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLFormElement/submit_event">MDN Reference</a>
     /// </summary>
     abstract onsubmit: (Browser.Types.SubmitEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/suspend_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/suspend_event">MDN Reference</a>
     /// </summary>
     abstract onsuspend: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/timeupdate_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/timeupdate_event">MDN Reference</a>
     /// </summary>
     abstract ontimeupdate: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/toggle_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/toggle_event">MDN Reference</a>
     /// </summary>
     abstract ontoggle: (Browser.Types.ToggleEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/touchcancel_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/touchcancel_event">MDN Reference</a>
     /// </summary>
     abstract ontouchcancel: (Browser.Types.TouchEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/touchend_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/touchend_event">MDN Reference</a>
     /// </summary>
     abstract ontouchend: (Browser.Types.TouchEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/touchmove_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/touchmove_event">MDN Reference</a>
     /// </summary>
     abstract ontouchmove: (Browser.Types.TouchEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/touchstart_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/touchstart_event">MDN Reference</a>
     /// </summary>
     abstract ontouchstart: (Browser.Types.TouchEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/transitioncancel_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/transitioncancel_event">MDN Reference</a>
     /// </summary>
     abstract ontransitioncancel: (Browser.Types.TransitionEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/transitionend_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/transitionend_event">MDN Reference</a>
     /// </summary>
     abstract ontransitionend: (Browser.Types.TransitionEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/transitionrun_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/transitionrun_event">MDN Reference</a>
     /// </summary>
     abstract ontransitionrun: (Browser.Types.TransitionEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/transitionstart_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/transitionstart_event">MDN Reference</a>
     /// </summary>
     abstract ontransitionstart: (Browser.Types.TransitionEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/volumechange_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/volumechange_event">MDN Reference</a>
     /// </summary>
     abstract onvolumechange: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/waiting_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/waiting_event">MDN Reference</a>
     /// </summary>
     abstract onwaiting: (Browser.Types.Event -> obj) option with get, set
     /// <remarks>
     /// @deprecated
     /// This is a legacy alias of <c>onanimationend</c>.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/animationend_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/animationend_event">MDN Reference</a>
     /// </remarks>
     abstract onwebkitanimationend: (Browser.Types.Event -> obj) option with get, set
     /// <remarks>
     /// @deprecated
     /// This is a legacy alias of <c>onanimationiteration</c>.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/animationiteration_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/animationiteration_event">MDN Reference</a>
     /// </remarks>
     abstract onwebkitanimationiteration: (Browser.Types.Event -> obj) option with get, set
     /// <remarks>
     /// @deprecated
     /// This is a legacy alias of <c>onanimationstart</c>.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/animationstart_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/animationstart_event">MDN Reference</a>
     /// </remarks>
     abstract onwebkitanimationstart: (Browser.Types.Event -> obj) option with get, set
     /// <remarks>
     /// @deprecated
     /// This is a legacy alias of <c>ontransitionend</c>.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/transitionend_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/transitionend_event">MDN Reference</a>
     /// </remarks>
     abstract onwebkittransitionend: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/wheel_event)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/wheel_event">MDN Reference</a>
     /// </summary>
     abstract onwheel: (Browser.Types.WheelEvent -> obj) option with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/autofocus)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/autofocus">MDN Reference</a>
     /// </summary>
     abstract autofocus: bool with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/dataset)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/dataset">MDN Reference</a>
     /// </summary>
     abstract dataset: Browser.Types.DOMStringMap
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/nonce)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/nonce">MDN Reference</a>
     /// </summary>
     abstract nonce: string with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/tabIndex)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/tabIndex">MDN Reference</a>
     /// </summary>
     abstract tabIndex: float with get, set
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/blur)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/blur">MDN Reference</a>
     /// </summary>
     abstract blur: unit -> unit
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/focus)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/focus">MDN Reference</a>
     /// </summary>
     abstract focus: ?options: obj -> unit
     /// <summary>
-    /// The read-only **<c>baseURI</c>** property of the Node interface returns the absolute base URL of the document containing the node.
+    /// The read-only <b>`baseURI`</b> property of the Node interface returns the absolute base URL of the document containing the node.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/baseURI)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/baseURI">MDN Reference</a>
     /// </summary>
     abstract baseURI: string
     /// <summary>
-    /// The read-only **<c>childNodes</c>** property of the Node interface returns a live NodeList of child nodes of the given element where the first child node is assigned index 0. Child nodes include elements, text and comments.
+    /// The read-only <b>`childNodes`</b> property of the Node interface returns a live NodeList of child nodes of the given element where the first child node is assigned index 0. Child nodes include elements, text and comments.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/childNodes)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/childNodes">MDN Reference</a>
     /// </summary>
     abstract childNodes: Browser.Types.NodeListOf<Browser.Types.ChildNode>
     /// <summary>
-    /// The read-only **<c>firstChild</c>** property of the Node interface returns the node's first child in the tree, or null if the node has no children.
+    /// The read-only <b>`firstChild`</b> property of the Node interface returns the node's first child in the tree, or null if the node has no children.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/firstChild)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/firstChild">MDN Reference</a>
     /// </summary>
     abstract firstChild: Browser.Types.ChildNode option
     /// <summary>
-    /// The read-only **<c>isConnected</c>** property of the Node interface returns a boolean indicating whether the node is connected (directly or indirectly) to a Document object.
+    /// The read-only <b>`isConnected`</b> property of the Node interface returns a boolean indicating whether the node is connected (directly or indirectly) to a Document object.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/isConnected)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/isConnected">MDN Reference</a>
     /// </summary>
     abstract isConnected: bool
     /// <summary>
-    /// The read-only **<c>lastChild</c>** property of the Node interface returns the last child of the node, or null if there are no child nodes.
+    /// The read-only <b>`lastChild`</b> property of the Node interface returns the last child of the node, or null if there are no child nodes.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/lastChild)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/lastChild">MDN Reference</a>
     /// </summary>
     abstract lastChild: Browser.Types.ChildNode option
     /// <summary>
-    /// The read-only **<c>nextSibling</c>** property of the Node interface returns the node immediately following the specified one in their parent's childNodes, or returns null if the specified node is the last child in the parent element.
+    /// The read-only <b>`nextSibling`</b> property of the Node interface returns the node immediately following the specified one in their parent's childNodes, or returns null if the specified node is the last child in the parent element.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/nextSibling)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/nextSibling">MDN Reference</a>
     /// </summary>
     abstract nextSibling: Browser.Types.ChildNode option
     /// <summary>
-    /// The read-only **<c>nodeName</c>** property of Node returns the name of the current node as a string.
+    /// The read-only <b>`nodeName`</b> property of Node returns the name of the current node as a string.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/nodeName)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/nodeName">MDN Reference</a>
     /// </summary>
     abstract nodeName: string
     /// <summary>
-    /// The read-only **<c>nodeType</c>** property of a Node interface is an integer that identifies what the node is. It distinguishes different kinds of nodes from each other, such as elements, text, and comments.
+    /// The read-only <b>`nodeType`</b> property of a Node interface is an integer that identifies what the node is. It distinguishes different kinds of nodes from each other, such as elements, text, and comments.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/nodeType)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/nodeType">MDN Reference</a>
     /// </summary>
     abstract nodeType: float
     /// <summary>
-    /// The **<c>nodeValue</c>** property of the Node interface returns or sets the value of the current node.
+    /// The <b>`nodeValue`</b> property of the Node interface returns or sets the value of the current node.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/nodeValue)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/nodeValue">MDN Reference</a>
     /// </summary>
     abstract nodeValue: string option with get, set
     /// <summary>
-    /// The read-only **<c>parentElement</c>** property of Node interface returns the DOM node's parent Element, or null if the node either has no parent, or its parent isn't a DOM Element. Node.parentNode on the other hand returns any kind of parent, regardless of its type.
+    /// The read-only <b>`parentElement`</b> property of Node interface returns the DOM node's parent Element, or null if the node either has no parent, or its parent isn't a DOM Element. Node.parentNode on the other hand returns any kind of parent, regardless of its type.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/parentElement)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/parentElement">MDN Reference</a>
     /// </summary>
     abstract parentElement: Browser.Types.HTMLElement option
     /// <summary>
-    /// The read-only **<c>parentNode</c>** property of the Node interface returns the parent of the specified node in the DOM tree.
+    /// The read-only <b>`parentNode`</b> property of the Node interface returns the parent of the specified node in the DOM tree.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/parentNode)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/parentNode">MDN Reference</a>
     /// </summary>
     abstract parentNode: obj option
     /// <summary>
-    /// The read-only **<c>previousSibling</c>** property of the Node interface returns the node immediately preceding the specified one in its parent's childNodes list, or null if the specified node is the first in that list.
+    /// The read-only <b>`previousSibling`</b> property of the Node interface returns the node immediately preceding the specified one in its parent's childNodes list, or null if the specified node is the first in that list.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/previousSibling)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/previousSibling">MDN Reference</a>
     /// </summary>
     abstract previousSibling: Browser.Types.ChildNode option
     /// <summary>
-    /// The **<c>appendChild()</c>** method of the Node interface adds a node to the end of the list of children of a specified parent node.
+    /// The <b>`appendChild()`</b> method of the Node interface adds a node to the end of the list of children of a specified parent node.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/appendChild)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/appendChild">MDN Reference</a>
     /// </summary>
     abstract appendChild<'T when 'T :> Browser.Types.Node>: node: 'T -> 'T
     /// <summary>
-    /// The **<c>cloneNode()</c>** method of the Node interface returns a duplicate of the node on which this method was called. Its parameter controls if the subtree contained in the node is also cloned or not.
+    /// The <b>`cloneNode()`</b> method of the Node interface returns a duplicate of the node on which this method was called. Its parameter controls if the subtree contained in the node is also cloned or not.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/cloneNode)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/cloneNode">MDN Reference</a>
     /// </summary>
     abstract cloneNode: ?subtree: bool -> Browser.Types.Node
     /// <summary>
-    /// The **<c>compareDocumentPosition()</c>** method of the Node interface reports the position of its argument node relative to the node on which it is called.
+    /// The <b>`compareDocumentPosition()`</b> method of the Node interface reports the position of its argument node relative to the node on which it is called.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/compareDocumentPosition)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/compareDocumentPosition">MDN Reference</a>
     /// </summary>
     abstract compareDocumentPosition: other: Browser.Types.Node -> float
     /// <summary>
-    /// The **<c>contains()</c>** method of the Node interface returns a boolean value indicating whether a node is a descendant of a given node, that is the node itself, one of its direct children (childNodes), one of the children's direct children, and so on.
+    /// The <b>`contains()`</b> method of the Node interface returns a boolean value indicating whether a node is a descendant of a given node, that is the node itself, one of its direct children (childNodes), one of the children's direct children, and so on.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/contains)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/contains">MDN Reference</a>
     /// </summary>
     abstract contains: ?other: Browser.Types.Node -> bool
     /// <summary>
-    /// The **<c>getRootNode()</c>** method of the Node interface returns the context object's root, which optionally includes the shadow root if it is available.
+    /// The <b>`getRootNode()`</b> method of the Node interface returns the context object's root, which optionally includes the shadow root if it is available.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/getRootNode)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/getRootNode">MDN Reference</a>
     /// </summary>
     abstract getRootNode: ?options: obj -> Browser.Types.Node
     /// <summary>
-    /// The **<c>hasChildNodes()</c>** method of the Node interface returns a boolean value indicating whether the given Node has child nodes or not.
+    /// The <b>`hasChildNodes()`</b> method of the Node interface returns a boolean value indicating whether the given Node has child nodes or not.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/hasChildNodes)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/hasChildNodes">MDN Reference</a>
     /// </summary>
     abstract hasChildNodes: unit -> bool
     /// <summary>
-    /// The **<c>insertBefore()</c>** method of the Node interface inserts a node before a reference node as a child of a specified parent node.
+    /// The <b>`insertBefore()`</b> method of the Node interface inserts a node before a reference node as a child of a specified parent node.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/insertBefore)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/insertBefore">MDN Reference</a>
     /// </summary>
     abstract insertBefore<'T when 'T :> Browser.Types.Node>: node: 'T * ?child: Browser.Types.Node -> 'T
     /// <summary>
-    /// The **<c>isDefaultNamespace()</c>** method of the Node interface accepts a namespace URI as an argument. It returns a boolean value that is true if the namespace is the default namespace on the given node and false if not. The default namespace can be retrieved with Node.lookupNamespaceURI() by passing null as the argument.
+    /// The <b>`isDefaultNamespace()`</b> method of the Node interface accepts a namespace URI as an argument. It returns a boolean value that is true if the namespace is the default namespace on the given node and false if not. The default namespace can be retrieved with Node.lookupNamespaceURI() by passing null as the argument.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/isDefaultNamespace)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/isDefaultNamespace">MDN Reference</a>
     /// </summary>
     abstract isDefaultNamespace: ?``namespace``: string -> bool
     /// <summary>
-    /// The **<c>isEqualNode()</c>** method of the Node interface tests whether two nodes are equal. Two nodes are equal when they have the same type, defining characteristics (for elements, this would be their ID, number of children, and so forth), its attributes match, and so on. The specific set of data points that must match varies depending on the types of the nodes.
+    /// The <b>`isEqualNode()`</b> method of the Node interface tests whether two nodes are equal. Two nodes are equal when they have the same type, defining characteristics (for elements, this would be their ID, number of children, and so forth), its attributes match, and so on. The specific set of data points that must match varies depending on the types of the nodes.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/isEqualNode)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/isEqualNode">MDN Reference</a>
     /// </summary>
     abstract isEqualNode: ?otherNode: Browser.Types.Node -> bool
     /// <summary>
-    /// The **<c>isSameNode()</c>** method of the Node interface is a legacy alias the for the === strict equality operator. That is, it tests whether two nodes are the same (in other words, whether they reference the same object).
+    /// The <b>`isSameNode()`</b> method of the Node interface is a legacy alias the for the === strict equality operator. That is, it tests whether two nodes are the same (in other words, whether they reference the same object).
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/isSameNode)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/isSameNode">MDN Reference</a>
     /// </summary>
     abstract isSameNode: ?otherNode: Browser.Types.Node -> bool
     /// <summary>
-    /// The **<c>lookupNamespaceURI()</c>** method of the Node interface takes a prefix as parameter and returns the namespace URI associated with it on the given node if found (and null if not). This method's existence allows Node objects to be passed as a namespace resolver to XPathEvaluator.createExpression() and XPathEvaluator.evaluate().
+    /// The <b>`lookupNamespaceURI()`</b> method of the Node interface takes a prefix as parameter and returns the namespace URI associated with it on the given node if found (and null if not). This method's existence allows Node objects to be passed as a namespace resolver to XPathEvaluator.createExpression() and XPathEvaluator.evaluate().
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/lookupNamespaceURI)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/lookupNamespaceURI">MDN Reference</a>
     /// </summary>
     abstract lookupNamespaceURI: ?prefix: string -> string option
     /// <summary>
-    /// The **<c>lookupPrefix()</c>** method of the Node interface returns a string containing the prefix for a given namespace URI, if present, and null if not. When multiple prefixes are possible, the first prefix is returned.
+    /// The <b>`lookupPrefix()`</b> method of the Node interface returns a string containing the prefix for a given namespace URI, if present, and null if not. When multiple prefixes are possible, the first prefix is returned.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/lookupPrefix)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/lookupPrefix">MDN Reference</a>
     /// </summary>
     abstract lookupPrefix: ?``namespace``: string -> string option
     /// <summary>
-    /// The **<c>normalize()</c>** method of the Node interface puts the specified node and all of its sub-tree into a normalized form. In a normalized sub-tree, no text nodes in the sub-tree are empty and there are no adjacent text nodes.
+    /// The <b>`normalize()`</b> method of the Node interface puts the specified node and all of its sub-tree into a normalized form. In a normalized sub-tree, no text nodes in the sub-tree are empty and there are no adjacent text nodes.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/normalize)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/normalize">MDN Reference</a>
     /// </summary>
     abstract normalize: unit -> unit
     /// <summary>
-    /// The **<c>removeChild()</c>** method of the Node interface removes a child node from the DOM and returns the removed node.
+    /// The <b>`removeChild()`</b> method of the Node interface removes a child node from the DOM and returns the removed node.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/removeChild)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/removeChild">MDN Reference</a>
     /// </summary>
     abstract removeChild<'T when 'T :> Browser.Types.Node>: child: 'T -> 'T
     /// <summary>
-    /// The **<c>replaceChild()</c>** method of the Node interface replaces a child node within the given (parent) node.
+    /// The <b>`replaceChild()`</b> method of the Node interface replaces a child node within the given (parent) node.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/replaceChild)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/replaceChild">MDN Reference</a>
     /// </summary>
     abstract replaceChild<'T when 'T :> Browser.Types.Node>: node: Browser.Types.Node * child: 'T -> 'T
     /// <summary>
@@ -4264,35 +4264,35 @@ type DrawableSVGGeometry =
     /// <summary>
     /// Returns the first following sibling that is an element, and null otherwise.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CharacterData/nextElementSibling)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/CharacterData/nextElementSibling">MDN Reference</a>
     /// </summary>
     abstract nextElementSibling: Browser.Types.Element option
     /// <summary>
     /// Returns the first preceding sibling that is an element, and null otherwise.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CharacterData/previousElementSibling)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/CharacterData/previousElementSibling">MDN Reference</a>
     /// </summary>
     abstract previousElementSibling: Browser.Types.Element option
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/childElementCount)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Document/childElementCount">MDN Reference</a>
     /// </summary>
     abstract childElementCount: float
     /// <summary>
     /// Returns the child elements.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/children)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Document/children">MDN Reference</a>
     /// </summary>
     abstract children: Browser.Types.HTMLCollection
     /// <summary>
     /// Returns the first child that is an element, and null otherwise.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/firstElementChild)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Document/firstElementChild">MDN Reference</a>
     /// </summary>
     abstract firstElementChild: Browser.Types.Element option
     /// <summary>
     /// Returns the last child that is an element, and null otherwise.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/lastElementChild)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Document/lastElementChild">MDN Reference</a>
     /// </summary>
     abstract lastElementChild: Browser.Types.Element option
     /// <summary>
@@ -4300,11 +4300,11 @@ type DrawableSVGGeometry =
     ///
     /// Throws a "HierarchyRequestError" DOMException if the constraints of the node tree are violated.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/append)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Document/append">MDN Reference</a>
     /// </summary>
     abstract append: [<ParamArray>] nodes: U2<string, Browser.Types.Node>[] -> unit
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/moveBefore)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Document/moveBefore">MDN Reference</a>
     /// </summary>
     abstract moveBefore: node: Browser.Types.Node * ?child: Browser.Types.Node -> unit
     /// <summary>
@@ -4312,34 +4312,34 @@ type DrawableSVGGeometry =
     ///
     /// Throws a "HierarchyRequestError" DOMException if the constraints of the node tree are violated.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/prepend)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Document/prepend">MDN Reference</a>
     /// </summary>
     abstract prepend: [<ParamArray>] nodes: U2<string, Browser.Types.Node>[] -> unit
     /// <summary>
     /// Returns the first element that is a descendant of node that matches selectors.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/querySelector)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelector">MDN Reference</a>
     /// </summary>
     /// <remarks>@deprecated</remarks>
     abstract querySelector<'K>: selectors: 'K -> obj option
     /// <summary>
     /// Returns the first element that is a descendant of node that matches selectors.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/querySelector)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelector">MDN Reference</a>
     /// </summary>
     /// <remarks>@deprecated</remarks>
     abstract querySelector<'E when 'E :> Browser.Types.Element>: selectors: string -> 'E option
     /// <summary>
     /// Returns all element descendants of node that match selectors.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/querySelectorAll)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelectorAll">MDN Reference</a>
     /// </summary>
     /// <remarks>@deprecated</remarks>
     abstract querySelectorAll<'K>: selectors: 'K -> Browser.Types.NodeListOf<obj>
     /// <summary>
     /// Returns all element descendants of node that match selectors.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/querySelectorAll)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelectorAll">MDN Reference</a>
     /// </summary>
     /// <remarks>@deprecated</remarks>
     abstract querySelectorAll<'E when 'E :> Browser.Types.Element>: selectors: string -> Browser.Types.NodeListOf<'E>
@@ -4348,57 +4348,57 @@ type DrawableSVGGeometry =
     ///
     /// Throws a "HierarchyRequestError" DOMException if the constraints of the node tree are violated.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/replaceChildren)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Document/replaceChildren">MDN Reference</a>
     /// </summary>
     abstract replaceChildren: [<ParamArray>] nodes: U2<string, Browser.Types.Node>[] -> unit
     /// <remarks>@deprecated</remarks>
     abstract className: obj
     /// <summary>
-    /// The **<c>ownerSVGElement</c>** property of the SVGElement interface reflects the nearest ancestor &lt;svg&gt; element. null if the given element is the outermost &lt;svg&gt; element.
+    /// The <b>`ownerSVGElement`</b> property of the SVGElement interface reflects the nearest ancestor &lt;svg&gt; element. null if the given element is the outermost &lt;svg&gt; element.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SVGElement/ownerSVGElement)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/SVGElement/ownerSVGElement">MDN Reference</a>
     /// </summary>
     abstract ownerSVGElement: Browser.Types.SVGSVGElement option
     /// <summary>
-    /// The **<c>viewportElement</c>** property of the SVGElement interface represents the SVGElement which established the current viewport. Often the nearest ancestor &lt;svg&gt; element. null if the given element is the outermost &lt;svg&gt; element.
+    /// The <b>`viewportElement`</b> property of the SVGElement interface represents the SVGElement which established the current viewport. Often the nearest ancestor &lt;svg&gt; element. null if the given element is the outermost &lt;svg&gt; element.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SVGElement/viewportElement)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/SVGElement/viewportElement">MDN Reference</a>
     /// </summary>
     abstract viewportElement: Browser.Types.SVGElement option
     /// <summary>
-    /// The **<c>transform</c>** read-only property of the SVGGraphicsElement interface reflects the computed value of the transform property and its corresponding transform attribute of the given element.
+    /// The <b>`transform`</b> read-only property of the SVGGraphicsElement interface reflects the computed value of the transform property and its corresponding transform attribute of the given element.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SVGGraphicsElement/transform)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/SVGGraphicsElement/transform">MDN Reference</a>
     /// </summary>
     abstract transform: Browser.Types.SVGAnimatedTransformList
     /// <summary>
-    /// The **<c>SVGGraphicsElement.getBBox()</c>** method allows us to determine the coordinates of the smallest rectangle in which the object fits. The coordinates returned are with respect to the current SVG space (after the application of all geometry attributes on all the elements contained in the target element).
+    /// The <b>`SVGGraphicsElement.getBBox()`</b> method allows us to determine the coordinates of the smallest rectangle in which the object fits. The coordinates returned are with respect to the current SVG space (after the application of all geometry attributes on all the elements contained in the target element).
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SVGGraphicsElement/getBBox)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/SVGGraphicsElement/getBBox">MDN Reference</a>
     /// </summary>
     abstract getBBox: ?options: obj -> obj
     /// <summary>
-    /// The **<c>getCTM()</c>** method of the SVGGraphicsElement interface represents the matrix that transforms the current element's coordinate system to its SVG viewport's coordinate system.
+    /// The <b>`getCTM()`</b> method of the SVGGraphicsElement interface represents the matrix that transforms the current element's coordinate system to its SVG viewport's coordinate system.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SVGGraphicsElement/getCTM)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/SVGGraphicsElement/getCTM">MDN Reference</a>
     /// </summary>
     abstract getCTM: unit -> obj option
     /// <summary>
-    /// The **<c>getScreenCTM()</c>** method of the SVGGraphicsElement interface represents the matrix that transforms the current element's coordinate system to the coordinate system of the SVG viewport for the SVG document fragment.
+    /// The <b>`getScreenCTM()`</b> method of the SVGGraphicsElement interface represents the matrix that transforms the current element's coordinate system to the coordinate system of the SVG viewport for the SVG document fragment.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SVGGraphicsElement/getScreenCTM)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/SVGGraphicsElement/getScreenCTM">MDN Reference</a>
     /// </summary>
     abstract getScreenCTM: unit -> obj option
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SVGAnimationElement/requiredExtensions)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/SVGAnimationElement/requiredExtensions">MDN Reference</a>
     /// </summary>
     abstract requiredExtensions: Browser.Types.SVGStringList
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SVGAnimationElement/systemLanguage)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/SVGAnimationElement/systemLanguage">MDN Reference</a>
     /// </summary>
     abstract systemLanguage: Browser.Types.SVGStringList
     /// <summary>
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/assignedSlot)
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/assignedSlot">MDN Reference</a>
     /// </summary>
     abstract assignedSlot: obj option
     abstract draw: string with get, set

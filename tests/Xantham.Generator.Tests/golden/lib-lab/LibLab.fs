@@ -85,7 +85,7 @@ type Exports =
     [<Import("view", "lib-lab")>]
     static member view (buffer: JS.ArrayBuffer, over: JS.DataView) : JS.ArrayBufferView = jsNative
     /// <summary>
-    /// An async iterable, which Fable.Core binds (the *synchronous* one it does not - see below).
+    /// An async iterable, which Fable.Core binds (the <i>synchronous</i> one it does not - see below).
     /// </summary>
     [<Import("stream", "lib-lab")>]
     static member stream (source: JS.AsyncIterable<string>) : JS.AsyncIterator<float> = jsNative
