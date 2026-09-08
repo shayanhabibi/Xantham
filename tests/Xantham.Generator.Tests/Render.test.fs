@@ -657,6 +657,7 @@ let renderTests =
                                 String.concat
                                     "\n"
                                     [ "Use **strong & safe**, *gentle <text>*, and [guide & notes](https://example.test/?a=1&b=2)."
+                                      "Nest **`isPointInFill()`** inside strong."
                                       "Keep `**bold** *italic* [guide](url)` literal."
                                       "Leave **open, *open, and [label]( open." ]
                               Tags = []
@@ -672,6 +673,7 @@ let renderTests =
                     "\n"
                     [ "/// <summary>"
                       "/// Use <b>strong &amp; safe</b>, <i>gentle &lt;text&gt;</i>, and <a href=\"https://example.test/?a=1&amp;b=2\">guide &amp; notes</a>."
+                      "/// Nest <b><c>isPointInFill()</c></b> inside strong."
                       "/// Keep <c>**bold** *italic* [guide](url)</c> literal."
                       "/// Leave **open, *open, and [label]( open."
                       "/// </summary>" ])

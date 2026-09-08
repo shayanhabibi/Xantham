@@ -214,9 +214,9 @@ let private xmlAttributeEscape (text: string) =
 let private splitLines (text: string) = text.Replace("\r\n", "\n").Split '\n'
 
 /// A line of doc prose, XML-escaped, with simple markdown inline elements rewritten as XML docs.
-/// Code spans are opaque to the other elements. Markup does not span lines or nest, and a marker
-/// that never closes remains prose rather than producing unbalanced XML.
-let private inlineCode (line: string) =
+/// Code spans are opaque to the other elements; other element contents may nest. Markup does not
+/// span lines, and a marker that never closes remains prose rather than producing unbalanced XML.
+let rec private inlineCode (line: string) =
     let ticksAt index =
         let mutable last = index
 
@@ -262,7 +262,10 @@ let private inlineCode (line: string) =
     let appendElement opening contentStart contentEnd closing tag =
         rendered.Append(xmlEscape line[prose .. opening - 1]) |> ignore
 
-        rendered.Append($"<{tag}>{xmlEscape line[contentStart..contentEnd]}</{tag}>")
+        let content = line[contentStart..contentEnd]
+        let content = if tag = "c" then xmlEscape content else inlineCode content
+
+        rendered.Append($"<{tag}>{content}</{tag}>")
         |> ignore
 
         index <- closing
@@ -304,7 +307,7 @@ let private inlineCode (line: string) =
                 rendered.Append($"<a href=\"{xmlAttributeEscape line[separator + 2 .. closing - 1]}\">")
                 |> ignore
 
-                rendered.Append(xmlEscape line[index + 1 .. separator - 1]).Append("</a>")
+                rendered.Append(inlineCode line[index + 1 .. separator - 1]).Append("</a>")
                 |> ignore
 
                 index <- closing + 1
