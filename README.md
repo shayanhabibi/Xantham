@@ -1,20 +1,16 @@
 # Xantham
 
-[![NuGet](https://img.shields.io/nuget/v/Xantham.TypeScript.Wire?label=nuget%20Xantham.TypeScript.Wire)](https://www.nuget.org/packages/Xantham.TypeScript.Wire)
-
 > A TypeScript → F# bindings generator, built on the TypeScript 7 compiler's own API server.
 
-Xantham is a hard fork of [Glutinum](https://github.com/glutinum-org/cli). It is mid-rebuild.
+
+> [!NOTE]
+> For consuming the cli tool [get started here.](https://shayanhabibi.github.io/Xantham/xantham-cli/)
 
 The whole project now sits on **`Xantham.TypeScript.Wire`** — a .NET client that runs the Go `tsc`
 binary as `tsc --api`, speaks its msgpack protocol over stdio, and reads the binary AST it returns
 in place, without JSON in the middle. The compiler's own schema generates the API surface, the
 kinds, the child slots and the typed node layer, so the client tracks upstream rather than
 paraphrasing it.
-
-The earlier design — a Fable extractor crawling the TypeScript 5 JavaScript compiler API, a common
-JSON schema as the hand-off point, and a .NET decoder plus generator — has been retired. See
-[`.archive/`](.archive/README.md) below.
 
 ---
 
@@ -33,84 +29,35 @@ A standalone NuGet package, usable on its own with no dependency on the rest of 
 Targets `net10.0`, `net8.0` and `netstandard2.1`. See the
 [package README](src/Xantham.TypeScript.Wire/README.md) to get started.
 
-### Documentation
-
-- [Navigating the AST](docs/wire-navigation.md) — tags, `Node<'Tag>`, views and the escape hatches.
-- [The hand-written register](docs/wire-hand-written.md) — every fact transcribed from upstream
-  rather than derived from its schema, and how to update each one.
-- [The wire protocol](docs/.ai/plans/tsgo-protocol.md) — framing, error model and the binary AST
-  format, verified against live byte traces.
-- [Remaining work](docs/.ai/plans/wire-remaining-work.md) — what is still outstanding, in phases.
-- [Generating F# bindings](docs/generator-usage.md) — install the tool, pin a compiler, write
-  `xantham.json`, and compile the output.
-- [Generator architecture](docs/.ai/plans/generator-architecture.md) — the nano-pass pipeline, its
-  decisions, and what each phase landed.
-- [Type mapping](docs/.ai/plans/generator-type-mapping.md) — how each TypeScript construct becomes
-  F#, and what it costs when it cannot.
-
----
-
-## Generating bindings
-
-The generator can start from an explicit declaration entry and preserve the package's runtime
-import separately. Configuration also selects ambient type providers, so a package can be
-generated against its intended browser, Workers, or Node declaration environment. See
-[Generating F# bindings](docs/generator-usage.md) for the configuration and CLI examples.
-
-Optional declaration catalogs let later entries reuse types owned by an earlier generated
-project. Catalogs check source identity, tool fingerprints, inference settings and the emitted
-F# API before reusing a declaration. They also record the owners actually needed by the
-consumer. This supports project dependency graphs while retaining public re-exports and class
-constructors. Incompatible profiles or unresolved ownership produce a diagnostic; see the
-[catalog compatibility boundary](docs/generator-usage.md#share-types-across-generated-subpaths).
-
-For a source checkout, run the build and the full test pipeline:
-
-```sh
-dotnet build Xantham.slnx
-XANTHAM_REQUIRE_TSC=1 dotnet fsi build.fsx -- test
-```
-
-The pipeline exercises live compiler queries, generator regressions, compiled F# consumers,
-and Fable runtime behavior. A successful compile alone does not establish that every
-TypeScript construct has a faithful F# mapping; the generated findings remain part of review.
-
 ---
 
 ## Repository layout
 
-| Path | Role |
-|------|------|
-| `src/Xantham.TypeScript.Wire` | The client. Published to NuGet, usable on its own. |
-| `src/Xantham.Generator` | The bindings generator: Harvest → Resolve → Shape → Render over Wire. |
-| `src/Xantham.Fable.Core` | The support library generated bindings open (erased `keyof`, brands). |
-| `tests/Xantham.TypeScript.Wire.Tests` | Expecto suite against the root pinned `typescript` 7.x package. |
-| `tests/Xantham.Generator.Tests` | Expecto suite plus the golden corpus the generator is pinned against. |
-| `tests/Xantham.Generator.CompileGate` | Compiles the committed goldens as F# on every build. |
-| `tools/tsc-ast` | Vendors upstream compiler sources and emits the AST and enum F# layers. |
-| `tools/proto-gen` | Emits the protocol F# layers from the shipped `typescript` schema. |
-| `tools/session-gen` | Emits the session layer over the protocol surface. |
-| `tools/browser-gen` | Emits the generator's DOM binding table from the `Fable.Browser.*` family. |
-| `build.fsx` | The build pipeline. |
-| `.archive/` | **Obsolete pre-Wire work. Nothing in here is live.** |
-
-## `.archive/`
-
-Everything under [`.archive/`](.archive/README.md) is retired: `Xantham.Common`, `Xantham.Fable`,
-`Xantham.Decoder`, `Xantham.Generator` and their tests and docs, the superseded plans, and the old
-build system. It is kept as a record of obstacles already met, not as a source of truth — it does
-not build, is not referenced by the solution, and should not be read as a description of how
-Xantham works today.
+| Path                                  | Role                                                                       |
+|---------------------------------------|----------------------------------------------------------------------------|
+| `src/Xantham.TypeScript.Wire`         | The client. Published to NuGet, usable on its own.                         |
+| `src/Xantham.Generator`               | The bindings generator: Harvest → Resolve → Shape → Render over Wire.      |
+| `src/Xantham.Fable.Core`              | The support library generated bindings open (erased `keyof`, brands).      |
+| `src/Xantham.Cli`                | The cli tool that ships the generator for consumption.                     |
+| `tests/Xantham.TypeScript.Wire.Tests` | Expecto suite against the root pinned `typescript` 7.x package.            |
+| `tests/Xantham.Generator.Tests`       | Expecto suite plus the golden corpus the generator is pinned against.      |
+| `tests/Xantham.Generator.CompileGate` | Compiles the committed goldens as F# on every build.                       |
+| `tools/tsc-ast`                       | Vendors upstream compiler sources and emits the AST and enum F# layers.    |
+| `tools/proto-gen`                     | Emits the protocol F# layers from the shipped `typescript` schema.         |
+| `tools/session-gen`                   | Emits the session layer over the protocol surface.                         |
+| `tools/browser-gen`                   | Emits the generator's DOM binding table from the `Fable.Browser.*` family. |
+| `build.fsx`                           | The build pipeline.                                                        |
 
 ---
 
 ## Current Status
 
-| Component | Status | Notes |
-|-----------|:------:|-------|
-| **Wire** (`Xantham.TypeScript.Wire`) | 🟢 Shipped | Generated from the compiler's own schema; packaged for NuGet. |
-| **Generator** (`Xantham.Generator`) | 🟡 Alpha | Phases A–C landed; phase D (erased idioms) is most of the way through. Ships as the `Xantham.Cli` dotnet tool at `0.1.0-alpha.1` — see [Generating F# bindings](docs/generator-usage.md). |
+| Component | Status | Notes                                                                                                                        |
+|-----------|:------:|------------------------------------------------------------------------------------------------------------------------------|
+| **Wire** (`Xantham.TypeScript.Wire`) | 🟢 Shipped | Generated from the compiler's own schema; packaged for NuGet.                                                                |
+| **Generator** (`Xantham.Generator`) | 🟡 Alpha | Ships as the `Xantham.Cli` dotnet tool at `0.1.0-alpha.1`.                                                                   |
 | **Support** (`Xantham.Fable.Core`) | 🟡 Alpha | Erased `keyof`/`typekeyof` and brand helpers, revived from the archive. Packaged as `Xantham.Fable.Core` at `0.1.0-alpha.1`. |
+| **cli** (`Xantham.Cli`) | 🟡 Alpha | The `Xantham.Cli` dotnet tool at `0.1.0-alpha.1`.                                                                            |
 
 Generated bindings target **Fable 5.x only**, and depend on `Fable.Core` plus the
 `Fable.Browser.*` family. Every committed golden is compiled against those packages on each
@@ -119,9 +66,7 @@ build, so a binding that does not compile fails the build rather than a review.
 The generator's progress is tracked as a ladder of real npm packages (`ansi-regex`, `animejs`,
 `@cloudflare/workers-types`, ...), each pinned by version, generated into a committed golden,
 and accompanied by a `manifest.json` grading every symbol `Exact`, `Ergonomic`, `Widened` or
-`Escape`. See [the architecture plan](docs/.ai/plans/generator-architecture.md) for where each
-phase stands.
-
+`Escape`. 
 ---
 
 ## See the Docs

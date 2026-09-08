@@ -9,3 +9,7 @@ paths:
 - DO NOT cite, build, grep, or otherwise apply patterns from these projects without permission.
 - The obstacles documents are the only reason any of it survives; consult them deliberately, never incidentally.
 - `.archive/README.md` is the inventory and is safe to read — start there to decide whether you need anything else.
+
+## Removed
+
+Has been removed from the repository.

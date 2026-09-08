@@ -56,7 +56,6 @@ compile gate is only evidence if it compiles against what a consumer will:
 - `build.fsx` — the current build pipeline (Partas.Build).
 - `package.json` — root manifest, tooling only. The single pin of the `typescript` 7.x compiler,
   used both as generation input and as the live `tsc --api` server. Nothing else pins it.
-- `.archive/` — dead weight. Never cite, build, or grep it as current. Ask before entering.
 
 ## Key Commands
 
@@ -159,7 +158,7 @@ not edit the deny list to unblock itself.
 
 The repo ships an `fslangmcp` MCP server (`.mcp.json`, FsLangMCP 0.16.0 over FSAC +
 FSharp.Compiler.Service). It loads `Xantham.slnx`, so it sees exactly the projects the
-solution references — `.archive/` is invisible to it, which is the behaviour this repo wants.
+solution references.
 Requires the `fslangmcp`, `fsautocomplete` and `fantomas` global tools; `fslangmcp
 --bootstrap-tools` installs the pinned set.
 
@@ -190,9 +189,6 @@ Pass `projectPath` explicitly on `fcs_*` calls when several agents run at once; 
 per resolved `.fsproj`. `fcs_dead_code` on the Wire project is dominated by generated-file
 internals — treat its output as candidates to filter, not a work list.
 
-Serena's symbol tools (`find_symbol`, `find_referencing_symbols`) do **not** work on this repo —
-its language server fails on `.archive/` and on `Library.fs`. Use `fslangmcp` instead.
-
 ## Architecture Notes
 
 - Nothing is hand-transcribed that can be generated. Facts that must be transcribed are
@@ -221,9 +217,7 @@ its language server fails on `.archive/` and on `Library.fs`. Use `fslangmcp` in
 
 **`microsoft/typescript-go` is dead. Never clone it, never cite it, never `gh api` it.**
 The Go compiler was merged into `microsoft/TypeScript@main`, and that repository is the only
-valid source of truth. The old checkout of it survives only as dead weight under
-`.archive/scratch/tmp/tsgo-native`; it is not ground truth, must not be cited, and must not be
-recreated anywhere live.
+valid source of truth.
 
 Read every historical mention of "tsgo", "native", or "native-preview" as **TypeScript 7+**:
 
