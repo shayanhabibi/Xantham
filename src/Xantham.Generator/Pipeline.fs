@@ -194,6 +194,7 @@ let private secondaryAliasOrder =
 let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel) : Render.GroupModule list =
     let origins = declOrigins compilerOnly ctx shape
     let declared = exportedDeclarations ctx shape
+    let compilerLibLayout = CompilerLibLayout.create ctx.Config.CompilerLib
 
     // A hoisted name (`NumberFormatOptions.UnitDisplay`, §4.9) is written beside the
     // declaration at its root: a shipped group's file compiles before the entry module and
@@ -278,7 +279,11 @@ let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel)
         | Some key ->
             let moduleName, ns =
                 match origin with
-                | CompilerLib -> Naming.compilerLibFamilyModule family, Some Naming.CompilerLibModule
+                | CompilerLib ->
+                    (if family = "Dom" then
+                         compilerLibLayout.DomQualifiedModule
+                     else
+                         compilerLibLayout.EsQualifiedModule), None
                 | origin -> Naming.groupModule ctx.Config ctx.PackageName origin, None
 
             {

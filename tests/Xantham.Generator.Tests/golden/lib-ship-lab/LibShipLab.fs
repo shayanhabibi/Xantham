@@ -14,38 +14,38 @@ open Fable.Core.JS
 [<Global("globalThis")>]
 type Exports =
     static member ActiveXObject
-        with get (): TypeScript.Lib.Dom.ActiveXObject = jsNative
-        and set (_: TypeScript.Lib.Dom.ActiveXObject): unit = jsNative
+        with get (): Fable.Core.TS.Browser.ActiveXObject = jsNative
+        and set (_: Fable.Core.TS.Browser.ActiveXObject): unit = jsNative
     static member WScript
-        with get (): TypeScript.Lib.Dom.WScript = jsNative
-        and set (_: TypeScript.Lib.Dom.WScript): unit = jsNative
+        with get (): Fable.Core.TS.Browser.WScript = jsNative
+        and set (_: Fable.Core.TS.Browser.WScript): unit = jsNative
     /// <summary>
     /// WSH is an alias for WScript under Windows Script Host
     /// </summary>
     static member WSH
-        with get (): TypeScript.Lib.Dom.WScript = jsNative
-        and set (_: TypeScript.Lib.Dom.WScript): unit = jsNative
+        with get (): Fable.Core.TS.Browser.WScript = jsNative
+        and set (_: Fable.Core.TS.Browser.WScript): unit = jsNative
     /// <summary>
     /// Represents an Automation SAFEARRAY
     /// </summary>
     [<Global("SafeArray"); EmitConstructor>]
-    static member SafeArray<'T> () : TypeScript.Lib.Dom.SafeArray<'T> = jsNative
+    static member SafeArray<'T> () : Fable.Core.TS.Browser.SafeArray<'T> = jsNative
     /// <summary>
     /// Allows enumerating over a COM collection, which may not have indexed item access.
     /// </summary>
     static member Enumerator
-        with get (): TypeScript.Lib.Dom.EnumeratorConstructor = jsNative
-        and set (_: TypeScript.Lib.Dom.EnumeratorConstructor): unit = jsNative
+        with get (): Fable.Core.TS.Browser.EnumeratorConstructor = jsNative
+        and set (_: Fable.Core.TS.Browser.EnumeratorConstructor): unit = jsNative
     /// <summary>
     /// Enables reading from a COM safe array, which might have an alternate lower bound, or multiple dimensions.
     /// </summary>
     static member VBArray
-        with get (): TypeScript.Lib.Dom.VBArrayConstructor = jsNative
-        and set (_: TypeScript.Lib.Dom.VBArrayConstructor): unit = jsNative
+        with get (): Fable.Core.TS.Browser.VBArrayConstructor = jsNative
+        and set (_: Fable.Core.TS.Browser.VBArrayConstructor): unit = jsNative
     /// <summary>
     /// Automation date (VT_DATE)
     /// </summary>
     [<Global("VarDate"); EmitConstructor>]
-    static member VarDate () : TypeScript.Lib.Dom.VarDate = jsNative
+    static member VarDate () : Fable.Core.TS.Browser.VarDate = jsNative
     [<Global("globalThis")>]
-    static member globalThis: TypeScript.Lib.Es.GlobalThis = jsNative
+    static member globalThis: Fable.Core.TS.Ecma.GlobalThis = jsNative

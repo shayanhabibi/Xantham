@@ -6,5 +6,15 @@
 
     // The compiler-lib group ships rather than widens: its declarations are harvested and shaped
     // in full (item 1f), the same as this package's own would be.
-    "groups": { "typescript/lib": "ship" }
+    "groups": { "typescript/lib": "ship" },
+
+    // Exercise a non-default combined binding layout. Scripthost is a DOM-family library, so
+    // the asymmetric flags also prove that the family marker follows declaration ownership.
+    "compilerLib": {
+        "module": "Fable.Core.TS",
+        "esModule": "Ecma",
+        "domModule": "Browser",
+        "autoOpenEs": false,
+        "autoOpenDom": true
+    }
 }

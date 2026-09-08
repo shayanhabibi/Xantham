@@ -89,13 +89,14 @@ let private sharedName expected definingFile =
 
     expected, (Map.find 10 named.DeclNames, Map.find 10 named.DeclOrders)
 
-let private hookPlacement expected origin file =
+let private hookPlacement expected origin file compilerLib =
     let ctx =
         { context with
             PackageDir = "/packages/ownership"
             Config =
                 { GeneratorConfig.Default with
-                    Groups = Map.ofList [ "typescript/lib", Ship; "shared-sdk", Ship ] } }
+                    Groups = Map.ofList [ "typescript/lib", Ship; "shared-sdk", Ship ]
+                    CompilerLib = compilerLib } }
     let iface name =
         FsInterface
             { Name = name; Docs = ""; Tags = []; Order = None; TypeParameters = []
@@ -185,12 +186,25 @@ let tests =
             ||> Flip.Expect.equal "the defining export owns cross-package identity"
 
         testCase "a synthesized hook without a type-table name follows its shipped owner" <| fun _ ->
-            hookPlacement "SharedSdk" (Dependency "shared-sdk") "/packages/ownership/node_modules/shared-sdk/index.d.ts"
+            hookPlacement "SharedSdk" (Dependency "shared-sdk") "/packages/ownership/node_modules/shared-sdk/index.d.ts" CompilerLibConfig.Default
             ||> Flip.Expect.equal "a nested secondary alias still belongs to its own entry declaration"
 
         testCase "a synthesized hook follows its owner's compiler-library family" <| fun _ ->
-            hookPlacement "TypeScript.Lib.Dom" CompilerLib "/compiler/lib.dom.d.ts"
+            hookPlacement "TypeScript.Lib.Dom" CompilerLib "/compiler/lib.dom.d.ts" CompilerLibConfig.Default
             ||> Flip.Expect.equal "the missing hook type id must not move it to the Es family"
+
+        testTheory "configured compiler-library families own their declarations" [
+            "/compiler/lib.es5.d.ts", "Fable.Core.TS.Ecma"
+            "/compiler/lib.dom.d.ts", "Fable.Core.TS.Browser"
+        ] <| fun (file, expected) ->
+            let compilerLib =
+                { CompilerLibConfig.Default with
+                    ModuleName = Some "Fable.Core.TS"
+                    EsModuleName = Some "Ecma"
+                    DomModuleName = Some "Browser" }
+
+            hookPlacement expected CompilerLib file compilerLib
+            ||> Flip.Expect.equal "ownership uses the configured family's fully qualified module"
     ]
 
 [<Tests>]

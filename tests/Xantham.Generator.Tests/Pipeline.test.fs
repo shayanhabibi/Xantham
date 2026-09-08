@@ -1806,7 +1806,20 @@ let pipelineTests =
 
                           Expect.isFalse
                               (rendered.Findings |> List.exists (fun f -> f.Key = "HG003"))
-                              "harvest-globals finds something to harvest, so it never reaches NothingHarvested" ])
+                              "harvest-globals finds something to harvest, so it never reaches NothingHarvested"
+
+                      testCase "the configured compiler-library layout owns the emitted family" <| fun _ ->
+                          let rendered =
+                              Async.RunSynchronously(Pipeline.generate (handConfig (handFixture "lib-ship-lab")) package)
+
+                          let source =
+                              rendered.Files
+                              |> List.find (fun (path, _) -> path = "groups/Fable.Core.TS.fs")
+                              |> snd
+
+                          Expect.stringContains source "module rec Fable.Core.TS" "the configured root owns the combined file"
+                          Expect.stringContains source "[<AutoOpen>]\nmodule Browser =" "the configured DOM child keeps its own opening policy"
+                          Expect.stringContains source "Fable.Core.TS.Browser." "compiler-library references use the configured fully qualified family" ])
 
         yield!
             fixtureTests
