@@ -793,6 +793,12 @@ let private renderExports (runtimePackage: string) (members: FsExportMember list
 // boundary is written qualified - the same spelling the `reference` disposition templates.
 // ---------------------------------------------------------------------------------------------
 
+/// The compiler library's two declaration families. This is renderer metadata rather than a
+/// general module-path tree: only the compiler library is co-located in one source file.
+type CompilerLibFamily =
+    | Es
+    | Dom
+
 /// One module a run writes: a group's declarations under the module name that group templates
 /// to (O7).
 type GroupModule =
@@ -810,6 +816,8 @@ type GroupModule =
         Namespace: string option
         /// The npm package this module's `[<Import(…)>]` attributes name.
         RuntimePackage: string
+        /// Present only for one of the compiler library's two child modules.
+        CompilerLib: CompilerLibFamily option
         Decls: FsDecl list
     }
 
@@ -1258,6 +1266,41 @@ let private renderModule (group: GroupModule) (foreign: Map<string, string>) =
         (fileHeader group.Group $"module rec {group.Module}"
          @ [ body; renderFooter decls ])
 
+let private compilerLibModule (layout: CompilerLibLayout) =
+    function
+    | Es -> layout.EsQualifiedModule
+    | Dom -> layout.DomQualifiedModule
+
+let private compilerLibChild (layout: CompilerLibLayout) =
+    function
+    | Es -> layout.EsModule, layout.AutoOpenEs
+    | Dom -> layout.DomModule, layout.AutoOpenDom
+
+/// The compiler library's two families live under one recursive root module. References still
+/// use each child's canonical module name, regardless of whether that child is auto-opened.
+let private renderCompilerLib (layout: CompilerLibLayout) (groups: GroupModule list) (foreignTo: GroupModule -> Map<string, string>) =
+    let rendered =
+        groups
+        |> List.choose (fun group ->
+            group.CompilerLib
+            |> Option.map (fun family ->
+                let moduleName = compilerLibModule layout family
+                let body, decls = renderBody { group with Module = moduleName } (foreignTo group) "    "
+                family, body, decls))
+        |> List.sortBy (fun (family, _, _) -> family)
+
+    let modules =
+        rendered
+        |> List.map (fun (family, body, _) ->
+            let child, autoOpen = compilerLibChild layout family
+            let declaration = if autoOpen then [ "[<AutoOpen>]"; $"module {ident child} =" ] else [ $"module {ident child} =" ]
+            String.concat "\n" (declaration @ [ body ]))
+        |> String.concat "\n\n"
+
+    let footer = rendered |> List.collect (fun (_, _, decls) -> decls) |> renderFooter
+    let sources = groups |> List.map _.Group |> List.distinct |> String.concat ", "
+    String.concat "\n" (fileHeader sources $"module rec {layout.RootModule}" @ [ modules; footer ])
+
 /// One `.fs` file holding every group of a namespace, each as a nested module under
 /// `namespace rec`, so the modules reference each other's types in both directions.
 let private renderNamespace (ns: string) (groups: GroupModule list) (foreignTo: GroupModule -> Map<string, string>) =
@@ -1300,6 +1343,7 @@ let renderSources (modules: GroupModule list) : Pass<RenderModel> =
                                     Module = model.ModuleName
                                     Namespace = None
                                     RuntimePackage = model.RuntimePackage
+                                    CompilerLib = None
                                     Decls = model.Decls
                                 }
                             ]
@@ -1332,10 +1376,17 @@ let renderSources (modules: GroupModule list) : Pass<RenderModel> =
                                 group)
                         |> List.filter (fun group -> group.IsEntry || not group.Decls.IsEmpty)
 
+                    let compilerLibLayout = CompilerLibLayout.create ctx.Config.CompilerLib
+
+                    let effectiveModule group =
+                        group.CompilerLib
+                        |> Option.map (compilerLibModule compilerLibLayout)
+                        |> Option.defaultValue group.Module
+
                     let owners =
                         written
                         |> List.collect (fun group ->
-                            group.Decls |> List.choose declName |> List.map (fun name -> name, group.Module))
+                            group.Decls |> List.choose declName |> List.map (fun name -> name, effectiveModule group))
                         |> Map.ofList
 
                     let foreignTo (group: GroupModule) =
@@ -1347,7 +1398,7 @@ let renderSources (modules: GroupModule list) : Pass<RenderModel> =
 
                     let files =
                         ordered
-                        |> List.filter (fun group -> group.Namespace.IsNone)
+                        |> List.filter (fun group -> group.CompilerLib.IsNone && group.Namespace.IsNone)
                         |> List.map (fun group ->
                             let file =
                                 if group.IsEntry then
@@ -1355,16 +1406,24 @@ let renderSources (modules: GroupModule list) : Pass<RenderModel> =
                                 else
                                     $"groups/{group.Module}.fs"
 
-                            file, renderModule group (foreignTo group))
+                            file, renderModule { group with Module = effectiveModule group } (foreignTo group))
 
                     let namespaced =
                         ordered
+                        |> List.filter (fun group -> group.CompilerLib.IsNone)
                         |> List.choose (fun group -> group.Namespace |> Option.map (fun ns -> ns, group))
                         |> List.groupBy fst
                         |> List.map (fun (ns, groups) ->
                             $"groups/{ns}.fs", renderNamespace ns (List.map snd groups) foreignTo)
 
-                    let files = files @ namespaced
+                    let compilerLib = ordered |> List.filter (fun group -> group.CompilerLib.IsSome)
+
+                    let compilerLibFile =
+                        match compilerLib with
+                        | [] -> []
+                        | groups -> [ $"groups/{compilerLibLayout.RootModule}.fs", renderCompilerLib compilerLibLayout groups foreignTo ]
+
+                    let files = files @ namespaced @ compilerLibFile
 
                     let reached = written @ collided |> List.map _.Group |> Set.ofList
 

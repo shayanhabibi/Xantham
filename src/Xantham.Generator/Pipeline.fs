@@ -272,6 +272,7 @@ let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel)
                 Module = moduleName ctx
                 Namespace = None
                 RuntimePackage = GeneratorConfig.runtimePackage ctx.Config ctx.PackageName
+                CompilerLib = None
                 Decls = decls
             }
         | Some key ->
@@ -286,6 +287,10 @@ let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel)
                 Module = moduleName
                 Namespace = ns
                 RuntimePackage = GeneratorConfig.derivedRuntimePackage key
+                CompilerLib =
+                    match origin with
+                    | CompilerLib -> Some(if family = "Dom" then Render.Dom else Render.Es)
+                    | _ -> None
                 Decls = decls
             }
 

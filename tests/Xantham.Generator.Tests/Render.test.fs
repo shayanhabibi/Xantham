@@ -32,6 +32,10 @@ let private boundSource names =
     let rendered, _ = Async.RunSynchronously(Pipeline.runTier Build.context Render.passes model)
     rendered.Files |> Map.ofList |> Map.find "TestPkg.fs"
 
+let private renderGroups ctx groups model =
+    let rendered, _ = Async.RunSynchronously(Pipeline.runTier ctx [ Render.renderSources groups ] model)
+    rendered.Files |> Map.ofList
+
 [<Tests>]
 let renderTests =
     testList "render" [
@@ -45,6 +49,62 @@ let renderTests =
             let parameters = expected |> List.map (fun name -> Render.ident name + ": string") |> String.concat ", "
             (boundSource input).Contains("static member invoke (" + parameters + ") : unit")
             |> Flip.Expect.equal "" true
+
+        testCase "compiler library families share one recursive root module" <| fun _ ->
+            let config =
+                { GeneratorConfig.Default with
+                    CompilerLib =
+                        { CompilerLibConfig.Default with
+                            ModuleName = Some "Fable.Core.TS"
+                            AutoOpenEs = true } }
+
+            let ctx = { Build.context with Config = config }
+
+            let interface' name members =
+                FsInterface
+                    { Name = name
+                      Docs = ""
+                      Tags = []
+                      Order = None
+                      TypeParameters = []
+                      Inherits = []
+                      Members = members
+                      Entrypoint = None
+                      CreateOverloads = []
+                      Statics = [] }
+
+            let es: Render.GroupModule =
+                { Group = "typescript/lib"
+                  IsEntry = false
+                  Module = "Fable.Core.TS.Es"
+                  Namespace = Some "Fable.Core.TS"
+                  RuntimePackage = "typescript/lib"
+                  CompilerLib = Some Render.Es
+                  Decls =
+                    [ interface' "EsName"
+                        [ FsProperty { Name = "dom"; Docs = ""; Tags = []; ReadOnly = true; Type = FsNamed "DomName" } ] ] }
+
+            let dom: Render.GroupModule =
+                { Group = "typescript/lib"
+                  IsEntry = false
+                  Module = "Fable.Core.TS.Dom"
+                  Namespace = Some "Fable.Core.TS"
+                  RuntimePackage = "typescript/lib"
+                  CompilerLib = Some Render.Dom
+                  Decls =
+                    [ interface' "DomName"
+                        [ FsProperty { Name = "es"; Docs = ""; Tags = []; ReadOnly = true; Type = FsNamed "EsName" } ] ] }
+
+            let files = renderGroups ctx [ es; dom ] baseModel
+            Expect.equal (files |> Map.keys |> Seq.toList) [ "groups/Fable.Core.TS.fs" ] "one combined source file"
+
+            let source = files |> Map.find "groups/Fable.Core.TS.fs"
+            Expect.stringContains source "module rec Fable.Core.TS" "the configured dotted root module"
+            Expect.stringContains source "[<AutoOpen>]\nmodule Es =" "only the requested ES child opens"
+            Expect.stringContains source "module Dom =" "the DOM child remains explicit"
+            Expect.isFalse (source.Contains "[<AutoOpen>]\nmodule Dom =") "DOM does not inherit ES opening"
+            Expect.stringContains source "abstract dom: Fable.Core.TS.Dom.DomName" "ES references DOM canonically"
+            Expect.stringContains source "abstract es: Fable.Core.TS.Es.EsName" "DOM references ES canonically"
 
         testCase "identifiers are kept verbatim until F# rejects them" <| fun _ ->
             Expect.equal (Render.ident "onlyFirst") "onlyFirst" "plain"
