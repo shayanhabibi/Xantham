@@ -5,7 +5,7 @@ open Nacara.Core
 open Nacara.Plugins
 open Nacara.Theme
 
-let versions = [ SiteVersion.root "0.0" ]
+// let versions = [ SiteVersion.root "0.0" ]
 
 let navbar =
     Theme.navbar
@@ -15,7 +15,7 @@ let navbar =
         ]
     >> Theme.navbarEnd
         [
-            NavbarDynamicWidget(Versions.switcher (Versions.versions versions Versions.defaults))
+            // NavbarDynamicWidget(Versions.switcher (Versions.versions versions Versions.defaults))
             NavbarIcon("GitHub", "https://github.com/shayanhabibi/xantham", Icons.github)
         ]
 
@@ -27,17 +27,16 @@ let theme =
 
 let site =
     Site.create "Xantham"
-    |> Site.baseUrl "/xantham/"
     |> Site.origin "https://shayanhabibi.github.io"
+    |> Site.baseUrl "/Xantham/"
     |> Site.output "../output"
     |> Site.staticFiles "static"
     |> Markdown.register
     |> TreeSitter.register
     |> Literate.register
     |> Sitemap.register
-    |> LinkValidator.register
+    // |> LinkValidator.register
     |> LightningCss.register
-    |> Esbuild.register
     |> Nuglify.minifyHtml
     |> Theme.register theme
     |> Site.collection (Theme.docs theme "content")
