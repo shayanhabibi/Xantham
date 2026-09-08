@@ -208,12 +208,14 @@ let printLiteral =
 let private xmlEscape (text: string) =
     text.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;")
 
+let private xmlAttributeEscape (text: string) =
+    (xmlEscape text).Replace("\"", "&quot;").Replace("'", "&apos;")
+
 let private splitLines (text: string) = text.Replace("\r\n", "\n").Split '\n'
 
-/// A line of doc prose, XML-escaped, with its markdown code spans as `<c>`. A span opens on a
-/// run of backticks and closes on a run of the same length - so a span can carry backticks of
-/// its own - and a run that never closes is prose, which is what a lone backtick in a sentence
-/// nearly always is. Multi-line spans are not recognised; the caller works a line at a time.
+/// A line of doc prose, XML-escaped, with simple markdown inline elements rewritten as XML docs.
+/// Code spans are opaque to the other elements. Markup does not span lines or nest, and a marker
+/// that never closes remains prose rather than producing unbalanced XML.
 let private inlineCode (line: string) =
     let ticksAt index =
         let mutable last = index
@@ -237,24 +239,80 @@ let private inlineCode (line: string) =
 
         found
 
+    let closingAsterisk index =
+        let mutable index = index
+        let mutable found = -1
+
+        while found < 0 && index < line.Length do
+            if
+                line[index] = '*'
+                && (index = 0 || line[index - 1] <> '*')
+                && (index + 1 = line.Length || line[index + 1] <> '*')
+            then
+                found <- index
+            else
+                index <- index + 1
+
+        found
+
     let rendered = System.Text.StringBuilder()
     let mutable index = 0
     let mutable prose = 0
 
+    let appendElement opening contentStart contentEnd closing tag =
+        rendered.Append(xmlEscape line[prose .. opening - 1]) |> ignore
+
+        rendered.Append($"<{tag}>{xmlEscape line[contentStart..contentEnd]}</{tag}>")
+        |> ignore
+
+        index <- closing
+        prose <- index
+
     while index < line.Length do
-        match ticksAt index with
-        | 0 -> index <- index + 1
-        | opening ->
+        if line[index] = '`' then
+            let opening = ticksAt index
+
             match closingRun opening (index + opening) with
             | -1 -> index <- index + opening
-            | closing ->
+            | closing -> appendElement index (index + opening) (closing - 1) (closing + opening) "c"
+        elif index + 1 < line.Length && line[index] = '*' && line[index + 1] = '*' then
+            let closing = line.IndexOf("**", index + 2, System.StringComparison.Ordinal)
+
+            if closing > index + 2 then
+                appendElement index (index + 2) (closing - 1) (closing + 2) "b"
+            else
+                index <- index + 2
+        elif line[index] = '*' then
+            let closing = closingAsterisk (index + 1)
+
+            if closing > index + 1 then
+                appendElement index (index + 1) (closing - 1) (closing + 1) "i"
+            else
+                index <- index + 1
+        elif line[index] = '[' then
+            let separator = line.IndexOf("](", index + 1, System.StringComparison.Ordinal)
+
+            let closing =
+                if separator < 0 then
+                    -1
+                else
+                    line.IndexOf(')', separator + 2)
+
+            if separator > index + 1 && closing > separator + 2 then
                 rendered.Append(xmlEscape line[prose .. index - 1]) |> ignore
 
-                rendered.Append($"<c>{xmlEscape line[index + opening .. closing - 1]}</c>")
+                rendered.Append($"<a href=\"{xmlAttributeEscape line[separator + 2 .. closing - 1]}\">")
                 |> ignore
 
-                index <- closing + opening
+                rendered.Append(xmlEscape line[index + 1 .. separator - 1]).Append("</a>")
+                |> ignore
+
+                index <- closing + 1
                 prose <- index
+            else
+                index <- index + 1
+        else
+            index <- index + 1
 
     rendered.Append(xmlEscape line[prose..]).ToString()
 

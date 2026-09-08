@@ -644,6 +644,39 @@ let renderTests =
                 (String.concat "\n" [ "/// @example"; "/// Call <c>open()</c>."; "/// Twice." ])
                 "a multi-line tag"
 
+        testCase "markdown emphasis and links become XML inline elements" <| fun _ ->
+            // Inline code is opaque to the prose renderer, and incomplete markdown remains
+            // literal rather than producing unbalanced XML.
+            let model =
+                { baseModel with
+                    Decls =
+                        [ FsAbbrev
+                            { Value = None
+                              Name = "Handle"
+                              Docs =
+                                String.concat
+                                    "\n"
+                                    [ "Use **strong & safe**, *gentle <text>*, and [guide & notes](https://example.test/?a=1&b=2)."
+                                      "Keep `**bold** *italic* [guide](url)` literal."
+                                      "Leave **open, *open, and [label]( open." ]
+                              Tags = []
+                              Order = None
+                              TypeParameters = []
+                              Target = FsString } ] }
+
+            let source = renderAll model |> Map.find "TestPkg.fs"
+
+            Expect.stringContains
+                source
+                (String.concat
+                    "\n"
+                    [ "/// <summary>"
+                      "/// Use <b>strong &amp; safe</b>, <i>gentle &lt;text&gt;</i>, and <a href=\"https://example.test/?a=1&amp;b=2\">guide &amp; notes</a>."
+                      "/// Keep <c>**bold** *italic* [guide](url)</c> literal."
+                      "/// Leave **open, *open, and [label]( open."
+                      "/// </summary>" ])
+                "prose markup is XML-safe while code and incomplete markup stay literal"
+
         testCase "the manifest reports per-symbol tiers with pass provenance" <| fun _ ->
             let model =
                 { baseModel with
