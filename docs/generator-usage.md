@@ -117,6 +117,35 @@ must differ. The defaults are `TypeScript.Lib`, `Es`, and `Dom`; `autoOpenEs` an
 both default to `false`. Set either flag only when consumers should reach that child module through
 the root without an explicit `open`.
 
+### Regenerate Xantham's compiler-library artifact
+
+The repository also ships the combined compiler-library artifact,
+`Xantham.Fable.Core.TS`. It is generated from the deliberately small
+`tools/fable-core-ts-input` package, which asks the generator to traverse the TypeScript
+compiler's `lib.*.d.ts` declarations from one recursive source. Regenerate it explicitly:
+
+```bash
+dotnet fsi build.fsx -- generate --only compiler-lib
+```
+
+This is intentionally **not** part of the default `generate` stages. Normal wire-layer
+regeneration must not rewrite the checked-in, multi-megabyte consumer artifact. The stage writes
+`src/Xantham.Fable.Core.TS/Fable.Core.TS.fs` and its `manifest.json`; review the manifest and the
+generated-file header rather than editing the source by hand.
+
+Consumers use the public `Fable.Core.TS` root. The ECMAScript half is auto-opened, so familiar ES
+types and values such as `Promise` are available after opening the root. DOM is deliberately not
+auto-opened: spell it as `Fable.Core.TS.Dom` so DOM names cannot silently shadow application or
+other browser bindings.
+
+```fsharp
+open Fable.Core.TS
+
+let completed : Promise<int> = Promise.resolve 42
+
+let retainTarget (target: Fable.Core.TS.Dom.EventTarget) = target
+```
+
 ### Select ambient type providers
 
 `types` follows TypeScript's ambient provider selection: omit it for automatic discovery, use

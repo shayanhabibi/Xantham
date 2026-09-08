@@ -1251,6 +1251,23 @@ Watch items rather than open questions: the debug assertion pass (O3) and the be
 JSON model dump (O5) are named escape hatches, built only when their triggering need
 appears.
 
+## Compiler-library artifact (2026-09-09)
+
+The compiler library is now a single combined generated artifact rather than a family of
+separately generated library inputs. One recursive source, `tools/fable-core-ts-input/entry.d.ts`,
+is the intentionally narrow traversal root: it covers the compiler's selected `lib.*.d.ts`
+surface without reintroducing the non-terminating per-library shipping walk that O7 rejected.
+The source uses the constrained `compilerLib` layout configuration to place the result under the
+public `Fable.Core.TS` root, with its `Es` and `Dom` child modules. Only ES is auto-opened;
+`Fable.Core.TS.Dom` remains explicit to avoid making browser globals ambient in every consumer.
+
+Regeneration is an explicit `build.fsx -- generate --only compiler-lib` stage, not a default
+generated-layer stage, because this checked-in consumer artifact is large and should change only
+when deliberately refreshed. The initial output is package version `0.1.0-alpha.1`, manifest
+schema version 1, with tier counts exact 544, ergonomic 1824, widened 624, and escape 658. The
+manifest is the fidelity record for the generated binding; those counts are not a claim that a
+future TypeScript compiler pin will reproduce the same shape.
+
 # Easy Nits 
 
 To include in scope when a phases implementation/attempt ends up being small/quick.
