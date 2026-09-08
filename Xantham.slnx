@@ -12,6 +12,7 @@
     <Project Path="src/Xantham.Generator/Xantham.Generator.fsproj" />
     <Project Path="src/Xantham.Cli/Xantham.Cli.fsproj" />
     <Project Path="src/Xantham.Fable.Core/Xantham.Fable.Core.fsproj" />
+    <Project Path="src/Xantham.Fable.Core.TS/Xantham.Fable.Core.TS.fsproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Xantham.TypeScript.Wire.Tests/Xantham.TypeScript.Wire.Tests.fsproj" />

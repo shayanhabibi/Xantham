@@ -359,6 +359,19 @@ let configTests =
                 Expect.isFalse domLayout.AutoOpenEs "the ES flag remains its default"
                 Expect.isTrue domLayout.AutoOpenDom "the DOM flag is carried through"
 
+        testCase "the Fable Core TS artifact config keeps its compiler-library layout explicit" <| fun _ ->
+            let config =
+                Path.Combine(root, "tools", "fable-core-ts-input")
+                |> GeneratorConfig.load
+
+            let layout = CompilerLibLayout.create config.CompilerLib
+
+            Expect.equal layout.RootModule "Fable.Core.TS" "the artifact owns its root module"
+            Expect.equal layout.EsModule "Es" "the artifact keeps ECMAScript in its own child"
+            Expect.equal layout.DomModule "Dom" "the artifact keeps DOM in its own child"
+            Expect.isTrue layout.AutoOpenEs "the artifact opens only its ECMAScript child"
+            Expect.isFalse layout.AutoOpenDom "the artifact leaves its DOM child opt-in"
+
         testCase "compilerLib refuses malformed layouts with a configuration error" <| fun _ ->
             let refused json =
                 try

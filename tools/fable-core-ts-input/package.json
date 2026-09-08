@@ -1,0 +1,5 @@
+{
+  "name": "fable-core-ts-input",
+  "private": true,
+  "types": "entry.d.ts"
+}

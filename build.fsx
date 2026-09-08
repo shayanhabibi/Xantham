@@ -57,7 +57,7 @@ module Spec =
     /// The three projects `pack` emits and `publish` pushes. `Xantham.Cli` packs as a tool and
     /// carries `Xantham.Generator`'s assembly inside its own package.
     let publishable =
-        let names = set [ "Xantham.TypeScript.Wire"; "Xantham.Fable.Core"; "Xantham.Cli" ]
+        let names = set [ "Xantham.TypeScript.Wire"; "Xantham.Fable.Core"; "Xantham.Fable.Core.TS"; "Xantham.Cli" ]
 
         srcProjects |> List.filter (fun project -> names.Contains project.Name)
 
@@ -104,7 +104,7 @@ module Options =
     let generateOnly =
         Input.option<string> "--only"
         |> Input.description
-            "Limit generation to one layer: ast | proto | session | browser | schema. All five by default."
+            "Limit generation to one layer: ast | proto | session | browser | schema | compiler-lib. The first five by default."
         |> Input.def ""
 
     /// The generator's inner loop, in three flags. An agent iterating on a pass runs
@@ -306,6 +306,19 @@ module Stages =
                     stage "generate schema" {
                         when' (wanted "schema")
                         run "dotnet run --project src/Xantham.Cli -- schema -o xantham.schema.json"
+                    }
+                    // The compiler library is a shipped artifact, not a normal generator input:
+                    // opt in explicitly so ordinary generated-layer runs do not rewrite it.
+                    stage "generate compiler-lib" {
+                        when' (only = "compiler-lib")
+                        run
+                            "dotnet run --project src/Xantham.Cli -- generate tools/fable-core-ts-input -o src/Xantham.Fable.Core.TS"
+                        run
+                            "powershell -NoProfile -Command \"Move-Item -Force src/Xantham.Fable.Core.TS/groups/Fable.Core.TS.fs src/Xantham.Fable.Core.TS/Fable.Core.TS.fs\""
+                        run
+                            "powershell -NoProfile -Command \"Remove-Item -Force src/Xantham.Fable.Core.TS/FableCoreTsInput.fs\""
+                        run
+                            "powershell -NoProfile -Command \"Remove-Item -Force src/Xantham.Fable.Core.TS/symbols.jsonl\""
                     }
                 }
         }
