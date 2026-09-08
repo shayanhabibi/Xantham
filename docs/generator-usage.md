@@ -86,6 +86,15 @@ JSONC: comments and trailing commas are accepted. Every key is optional, and a p
         "WeakRef": { "name": "System.WeakReference", "arity": 1 }
       }
     }
+  },
+  // The compiler-library binding's root and its two child modules. All these values are
+  // optional: the defaults are TypeScript.Lib, Es and Dom, with both auto-open flags false.
+  "compilerLib": {
+    "module": "MyBindings.TypeScript",
+    "esModule": "Es",
+    "domModule": "Dom",
+    "autoOpenEs": false,
+    "autoOpenDom": false
   }
 }
 ```
@@ -99,6 +108,14 @@ xantham schema -o xantham.schema.json
 The schema is emitted from the generator's own configuration record, so it describes the keys the
 installed tool reads. A copy generated from `master` is committed at the repository root as
 [`xantham.schema.json`](https://github.com/shayanhabibi/Xantham/blob/master/xantham.schema.json).
+
+### Lay out the compiler library
+
+`compilerLib` controls the combined binding generated for TypeScript's standard libraries. Its
+`module` may be a dotted F# module path. `esModule` and `domModule` are each one F# identifier and
+must differ. The defaults are `TypeScript.Lib`, `Es`, and `Dom`; `autoOpenEs` and `autoOpenDom`
+both default to `false`. Set either flag only when consumers should reach that child module through
+the root without an explicit `open`.
 
 ### Select ambient type providers
 

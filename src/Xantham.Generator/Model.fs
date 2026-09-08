@@ -53,6 +53,100 @@ type GroupDisposition =
     /// non-entry groups until the shipped compiler-lib package exists.
     | Widen
 
+/// The optional spelling controls for the combined compiler-library binding. Names remain
+/// optional here so the JSONC reader can distinguish an omitted field from an override; the
+/// layout below owns the effective values consumers use.
+type CompilerLibConfig =
+    {
+        [<Description("The root F# module for the generated compiler-library binding. It may be dotted.")>]
+        ModuleName: string option
+        [<Description("The single F# identifier used for the ECMAScript child module.")>]
+        EsModuleName: string option
+        [<Description("The single F# identifier used for the DOM child module.")>]
+        DomModuleName: string option
+        [<Description("Open the ECMAScript child module from the compiler-library root. Defaults to false.")>]
+        AutoOpenEs: bool
+        [<Description("Open the DOM child module from the compiler-library root. Defaults to false.")>]
+        AutoOpenDom: bool
+    }
+
+    static member Default =
+        {
+            ModuleName = None
+            EsModuleName = None
+            DomModuleName = None
+            AutoOpenEs = false
+            AutoOpenDom = false
+        }
+
+/// The one identifier validator shared by names that become F# declaration or module segments.
+module Identifier =
+    let private shaped =
+        System.Text.RegularExpressions.Regex @"^[A-Za-z_][A-Za-z0-9_']*$"
+
+    let isPlain (name: string) = shaped.IsMatch name
+
+/// Effective module layout for the compiler's standard-library binding.
+type CompilerLibLayout =
+    {
+        RootModule: string
+        EsModule: string
+        DomModule: string
+        AutoOpenEs: bool
+        AutoOpenDom: bool
+        EsQualifiedModule: string
+        DomQualifiedModule: string
+    }
+
+module CompilerLibLayout =
+    [<Literal>]
+    let private defaultRootModule = "TypeScript.Lib"
+
+    [<Literal>]
+    let private defaultEsModule = "Es"
+
+    [<Literal>]
+    let private defaultDomModule = "Dom"
+
+    let private invalid field expectation =
+        failwith $"xantham.json: compilerLib.{field} {expectation}"
+
+    let private validateRoot (name: string) =
+        if System.String.IsNullOrWhiteSpace name then
+            invalid "module" "must be a nonempty dotted F# module name"
+
+        name.Split('.')
+        |> Array.iter (fun segment ->
+            if not (Identifier.isPlain segment) then
+                invalid "module" "must be a nonempty dotted F# module name")
+
+    let private validateChild field (name: string) =
+        if System.String.IsNullOrWhiteSpace name || not (Identifier.isPlain name) then
+            invalid field "must be one nonempty F# identifier"
+
+    /// Applies defaults and verifies the names can become the compiler-library's nested modules.
+    let create (config: CompilerLibConfig) =
+        let root = config.ModuleName |> Option.defaultValue defaultRootModule
+        let es = config.EsModuleName |> Option.defaultValue defaultEsModule
+        let dom = config.DomModuleName |> Option.defaultValue defaultDomModule
+
+        validateRoot root
+        validateChild "esModule" es
+        validateChild "domModule" dom
+
+        if es = dom then
+            invalid "esModule" "must differ from compilerLib.domModule"
+
+        {
+            RootModule = root
+            EsModule = es
+            DomModule = dom
+            AutoOpenEs = config.AutoOpenEs
+            AutoOpenDom = config.AutoOpenDom
+            EsQualifiedModule = $"{root}.{es}"
+            DomQualifiedModule = $"{root}.{dom}"
+        }
+
 /// Per-package generator configuration, read from `xantham.json` next to the package manifest
 /// when present (decision O4 in `docs/plans/generator-architecture.md`).
 type GeneratorConfig =
@@ -128,6 +222,8 @@ type GeneratorConfig =
         [<Description("Resolves TypeScript's `NoInfer<T>` (§4.11) to `T` at the mapping site, dropping the name. \
         Defaults to false, which emits `NoInfer<T>` and reaches the support package's own abbreviation.")>]
         ResolveNoInfer: bool
+        /// Names and opening policy for the compiler's combined library binding.
+        CompilerLib: CompilerLibConfig
     }
 
     static member Default =
@@ -142,6 +238,7 @@ type GeneratorConfig =
             Entry = None
             RuntimePackage = None
             ResolveNoInfer = false
+            CompilerLib = CompilerLibConfig.Default
         }
 
 module GeneratorConfig =
@@ -293,6 +390,35 @@ module GeneratorConfig =
                 | true, _ -> failwith "xantham.json: declarationReferences must be an array of nonempty paths"
                 | _ -> []
 
+            let compilerLib =
+                match doc.RootElement.TryGetProperty "compilerLib" with
+                | false, _ -> CompilerLibConfig.Default
+                | true, value when value.ValueKind = JsonValueKind.Object ->
+                    let name (field: string) =
+                        match value.TryGetProperty field with
+                        | false, _ -> None
+                        | true, name when name.ValueKind = JsonValueKind.String -> Some(name.GetString())
+                        | true, _ -> failwith $"xantham.json: compilerLib.{field} must be a string"
+
+                    let flag (field: string) =
+                        match value.TryGetProperty field with
+                        | false, _ -> false
+                        | true, flag when flag.ValueKind = JsonValueKind.True -> true
+                        | true, flag when flag.ValueKind = JsonValueKind.False -> false
+                        | true, _ -> failwith $"xantham.json: compilerLib.{field} must be a boolean"
+
+                    {
+                        ModuleName = name "module"
+                        EsModuleName = name "esModule"
+                        DomModuleName = name "domModule"
+                        AutoOpenEs = flag "autoOpenEs"
+                        AutoOpenDom = flag "autoOpenDom"
+                    }
+                    |> fun config ->
+                        CompilerLibLayout.create config |> ignore
+                        config
+                | true, _ -> failwith "xantham.json: compilerLib must be an object"
+
             {
                 ModuleName = field "module"
                 Namespace = field "namespace"
@@ -304,6 +430,7 @@ module GeneratorConfig =
                 Entry = entry
                 RuntimePackage = runtime
                 ResolveNoInfer = boolField "resolveNoInfer" GeneratorConfig.Default.ResolveNoInfer
+                CompilerLib = compilerLib
             }
 
     /// Loads `<packageDir>/xantham.json`.
@@ -377,12 +504,9 @@ module Naming =
     let pascalSegment (text: string) =
         segments text |> Array.map capitalize |> String.concat ""
 
-    let private identifierShaped =
-        System.Text.RegularExpressions.Regex @"^[A-Za-z_][A-Za-z0-9_']*$"
-
     /// True for the plain identifier shape, which is the form a generated name opens a module
     /// under. A JavaScript key outside it - `beta channel`, `@cf/meta` - names a type only.
-    let nestable (name: string) = identifierShaped.IsMatch name
+    let nestable (name: string) = Identifier.isPlain name
 
     /// `name` in the shape an F# declaration admits: characters outside the plain identifier
     /// separate segments, and every segment after the first is capitalised, so

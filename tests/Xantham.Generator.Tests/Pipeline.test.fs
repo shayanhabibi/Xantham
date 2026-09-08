@@ -325,6 +325,59 @@ let configTests =
             let dir = Path.Combine(Path.GetTempPath(), "xantham-config-" + Guid.NewGuid().ToString "N")
             Expect.equal (GeneratorConfig.load dir) GeneratorConfig.Default "nothing configured"
 
+        testCase "compilerLib defaults to the TypeScript library layout" <| fun _ ->
+            let layout = GeneratorConfig.Default.CompilerLib |> CompilerLibLayout.create
+
+            Expect.equal layout.RootModule "TypeScript.Lib" "the root keeps the established namespace"
+            Expect.equal layout.EsModule "Es" "ECMAScript has its conventional child"
+            Expect.equal layout.DomModule "Dom" "DOM has its conventional child"
+            Expect.isFalse layout.AutoOpenEs "ECMAScript is not opened implicitly"
+            Expect.isFalse layout.AutoOpenDom "DOM is not opened implicitly"
+            Expect.equal layout.EsQualifiedModule "TypeScript.Lib.Es" "the ES path is rooted"
+            Expect.equal layout.DomQualifiedModule "TypeScript.Lib.Dom" "the DOM path is rooted"
+
+        testCase "compilerLib applies supplied names over its defaults" <| fun _ ->
+            withConfig
+                """{ "compilerLib": { "module": "Company.TypeScript", "esModule": "Ecma", "domModule": "Browser" } }"""
+            <| fun config ->
+                let layout = CompilerLibLayout.create config.CompilerLib
+
+                Expect.equal layout.RootModule "Company.TypeScript" "a dotted root is preserved"
+                Expect.equal layout.EsModule "Ecma" "the ES child is independently configurable"
+                Expect.equal layout.DomModule "Browser" "the DOM child is independently configurable"
+                Expect.equal layout.EsQualifiedModule "Company.TypeScript.Ecma" "the ES path joins root and child"
+                Expect.equal layout.DomQualifiedModule "Company.TypeScript.Browser" "the DOM path joins root and child"
+
+        testCase "compilerLib auto-open flags are independent" <| fun _ ->
+            withConfig """{ "compilerLib": { "autoOpenEs": true } }""" <| fun esConfig ->
+                let esLayout = CompilerLibLayout.create esConfig.CompilerLib
+                Expect.isTrue esLayout.AutoOpenEs "the ES flag is carried through"
+                Expect.isFalse esLayout.AutoOpenDom "the DOM flag remains its default"
+
+            withConfig """{ "compilerLib": { "autoOpenDom": true } }""" <| fun domConfig ->
+                let domLayout = CompilerLibLayout.create domConfig.CompilerLib
+                Expect.isFalse domLayout.AutoOpenEs "the ES flag remains its default"
+                Expect.isTrue domLayout.AutoOpenDom "the DOM flag is carried through"
+
+        testCase "compilerLib refuses malformed layouts with a configuration error" <| fun _ ->
+            let refused json =
+                try
+                    withConfig json ignore
+                    failtest "the invalid compiler-library layout was accepted"
+                with error ->
+                    Expect.stringContains error.Message "xantham.json: compilerLib" "the error names its configuration path"
+
+            refused """{ "compilerLib": "TypeScript.Lib" }"""
+            refused """{ "compilerLib": { "module": false } }"""
+            refused """{ "compilerLib": { "esModule": 1 } }"""
+            refused """{ "compilerLib": { "domModule": [] } }"""
+            refused """{ "compilerLib": { "autoOpenEs": "yes" } }"""
+            refused """{ "compilerLib": { "autoOpenDom": 0 } }"""
+            refused """{ "compilerLib": { "module": " " } }"""
+            refused """{ "compilerLib": { "esModule": "not-valid" } }"""
+            refused """{ "compilerLib": { "domModule": "" } }"""
+            refused """{ "compilerLib": { "esModule": "Same", "domModule": "Same" } }"""
+
         testCase "lib is the compiler's lib option, as tsconfig spells it" <| fun _ ->
             // A global type library that replaces the DOM (`@cloudflare/workers-types`) has to
             // be generated without it, or every name it shares with `lib.dom.d.ts` merges into

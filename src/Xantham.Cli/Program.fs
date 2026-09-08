@@ -359,7 +359,7 @@ let run (out: TextWriter) (err: TextWriter) (argv: string[]) : int =
                     command "schema" {
                         description "write the JSON Schema for xantham.json"
                         hidden
-                        Options.schemaOut
+                        inputs Options.schemaOut
                         setAction (schema out err)
                     }
                 ]

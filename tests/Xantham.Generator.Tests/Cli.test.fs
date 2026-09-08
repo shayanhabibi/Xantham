@@ -99,6 +99,21 @@ let schemaTests =
                     "xantham.schema.json is not what Schema.json() emits. Regenerate it with \
                      `dotnet fsi build.fsx -- generate --only schema`."
 
+        testCase "the schema command binds and writes its optional output path" <| fun _ ->
+            let destination = Path.Combine(Path.GetTempPath(), "xantham-schema-" + Guid.NewGuid().ToString "N")
+            let out = new StringWriter()
+            let err = new StringWriter()
+
+            try
+                let code = Xantham.Cli.Program.run out err [| "schema"; "-o"; destination |]
+
+                Expect.equal code 0 "the command accepts its optional path"
+                Expect.isEmpty (err.ToString()) "a successful write has no diagnostics"
+                Expect.equal (File.ReadAllText destination) (Xantham.Cli.Schema.json ()) "the requested file is the emitted schema"
+            finally
+                if File.Exists destination then
+                    File.Delete destination
+
         testCase "every disposition the schema offers is one the loader accepts" <| fun _ ->
             use doc = Text.Json.JsonDocument.Parse(File.ReadAllText committed)
 

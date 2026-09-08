@@ -57,6 +57,33 @@
     "resolveNoInfer": {
       "type": "boolean",
       "description": "Resolves TypeScript's `NoInfer<T>` (§4.11) to `T` at the mapping site, dropping the name. Defaults to false, which emits `NoInfer<T>` and reaches the support package's own abbreviation."
+    },
+    "compilerLib": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "module": {
+          "type": "string",
+          "description": "The dotted root F# module for the compiler-library binding."
+        },
+        "esModule": {
+          "type": "string",
+          "description": "The single F# identifier for the ECMAScript child module."
+        },
+        "domModule": {
+          "type": "string",
+          "description": "The single F# identifier for the DOM child module."
+        },
+        "autoOpenEs": {
+          "type": "boolean",
+          "description": "Open the ECMAScript child module from the root. Defaults to false."
+        },
+        "autoOpenDom": {
+          "type": "boolean",
+          "description": "Open the DOM child module from the root. Defaults to false."
+        }
+      },
+      "description": "The module layout and opening policy for the combined TypeScript compiler-library binding."
     }
   },
   "$defs": {

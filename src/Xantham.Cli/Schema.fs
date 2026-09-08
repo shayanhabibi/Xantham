@@ -80,6 +80,21 @@ let private configKeys =
             ("resolveNoInfer",
              "Resolves TypeScript's `NoInfer<T>` (§4.11) to `T` at the mapping site, dropping the name. \
           Defaults to false, which emits `NoInfer<T>` and reaches the support package's own abbreviation.")
+
+            "CompilerLib",
+            ("compilerLib",
+             "The module layout and opening policy for the combined TypeScript compiler-library binding.")
+        ]
+
+/// The JSON key and description of one `CompilerLibConfig` field.
+let private compilerLibKeys =
+    Map.ofList
+        [
+            "ModuleName", ("module", "The dotted root F# module for the compiler-library binding.")
+            "EsModuleName", ("esModule", "The single F# identifier for the ECMAScript child module.")
+            "DomModuleName", ("domModule", "The single F# identifier for the DOM child module.")
+            "AutoOpenEs", ("autoOpenEs", "Open the ECMAScript child module from the root. Defaults to false.")
+            "AutoOpenDom", ("autoOpenDom", "Open the DOM child module from the root. Defaults to false.")
         ]
 
 /// The JSON key, description and requiredness of one `MappedName` field.
@@ -144,6 +159,29 @@ let private writeDescribed (w: Utf8JsonWriter) (description: string) (body: Utf8
     w.WriteString("description", description)
     w.WriteEndObject()
 
+let private writeCompilerLib (w: Utf8JsonWriter) =
+    w.WriteString("type", "object")
+    w.WriteBoolean("additionalProperties", false)
+    w.WriteStartObject "properties"
+
+    for field in FSharpType.GetRecordFields typeof<CompilerLibConfig> do
+        match Map.tryFind field.Name compilerLibKeys with
+        | None -> failwith $"CompilerLibConfig.{field.Name} is absent from Schema.fs's key table"
+        | Some(key, description) ->
+            w.WritePropertyName key
+
+            writeDescribed w description (fun w ->
+                let fieldType = unwrapOption field.PropertyType
+
+                if fieldType = typeof<string> then
+                    w.WriteString("type", "string")
+                elif fieldType = typeof<bool> then
+                    w.WriteString("type", "boolean")
+                else
+                    failwith $"CompilerLibConfig.{field.Name} has type {fieldType.FullName}, which Schema.fs writes no JSON form for")
+
+    w.WriteEndObject()
+
 /// The schema fragment for one F# type. `option` is unwrapped: every key of `xantham.json` is
 /// optional.
 let private writeFieldType (w: Utf8JsonWriter) (name: string) (t: Type) =
@@ -163,6 +201,7 @@ let private writeFieldType (w: Utf8JsonWriter) (name: string) (t: Type) =
         w.WriteStartObject "additionalProperties"
         w.WriteString("$ref", "#/$defs/disposition")
         w.WriteEndObject()
+    | t when t = typeof<CompilerLibConfig> -> writeCompilerLib w
     | t -> failwith $"xantham.json: {name} has type {t.FullName}, which Schema.fs writes no JSON form for"
 
 let private writeConfigProperties (w: Utf8JsonWriter) =
