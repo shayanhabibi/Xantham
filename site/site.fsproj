@@ -23,5 +23,6 @@
         <PackageReference Include="Nacara.Plugin.Assets.Nuglify" Version="1.0.0-*"/>
         <PackageReference Include="Nacara.Plugin.Deploy.GitHubPages" Version="1.0.0-*"/>
         <PackageReference Include="Nacara.Theme.Default" Version="1.0.0-*"/>
+        <PackageReference Include="Partas.Nacara.Plugins.Tailwind" Version="0.1.0" />
     </ItemGroup>
 </Project>

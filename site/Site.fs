@@ -10,7 +10,7 @@ open Nacara.Theme
 let navbar =
     Theme.navbar
         [
-            NavbarSection("Xantham CLI", "xantham-cli", "/xantham-cli/")
+            NavbarSection("Xantham", "xantham-cli", "/xantham-cli/")
             NavbarSection("Tsc Wire", "wire", "/wire/")
         ]
     >> Theme.navbarEnd
@@ -18,12 +18,38 @@ let navbar =
             // NavbarDynamicWidget(Versions.switcher (Versions.versions versions Versions.defaults))
             NavbarIcon("GitHub", "https://github.com/shayanhabibi/xantham", Icons.github)
         ]
+    >> Theme.menu
+        "xantham-cli"
+        [
+            Menu.section
+                "xantham"
+                [
+
+                    Menu.page "xantham-cli/index"
+                    Menu.section
+                        "Guide"
+                        [
+                            Menu.page "xantham-cli/guide/installation"
+                            Menu.page "xantham-cli/guide/usage"
+                        ]
+                    Menu.link "Source" "https://github.com/shayanhabibi/xantham"
+                ]
+        ]
 
 let theme =
     Theme.defaults
     |> navbar
-    |> Theme.editUrl "https://github.com/shayanhabibi/xantham/edit/main/docs"
-    |> Theme.footer (Html.p [ Html.text "Built with Nacara" ])
+    |> Theme.editUrl "https://github.com/shayanhabibi/xantham/edit/main/site"
+    |> Theme.footer (
+        Html.div
+            [
+                Html.p
+                    [
+                        Html.text "Copyright (c) 2026 - Shayan Habibi, Houston Haynes and contributors"
+                    ]
+                Html.p [ Html.text "Built with Nacara" ]
+            ]
+    )
 
 let site =
     Site.create "Xantham"
@@ -36,7 +62,7 @@ let site =
     |> Literate.register
     |> Sitemap.register
     // |> LinkValidator.register
-    |> LightningCss.register
+    |> TailwindCss.register
     |> Nuglify.minifyHtml
     |> Theme.register theme
     |> Site.collection (Theme.docs theme "content")

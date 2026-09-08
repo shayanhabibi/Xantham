@@ -1,7 +1,13 @@
 ﻿---
-title: Usage
+title: Overview
+category: Wire
 order: 0
 ---
+
+`Xantham.TypeScript.Wire` is the communication client for TypeScript's api that is
+releasing with `+7.1.0`. 
+
+Compatible `tsc` versions are currently in prerelease.
 
 ## Install
 
@@ -297,9 +303,7 @@ output.OutputText
 
 ## Where to go next
 
-- [Navigating the AST] (wire-navigation.md) — sessions in depth, `Node<'Tag>`, views, accessors,
+- [Navigating the AST](navigation.md) — sessions in depth, `Node<'Tag>`, views, accessors,
   node handles.
-- [The hand-written register] (wire-hand-written.md) — the facts transcribed from upstream rather
+- [The hand-written register](hand-written.md) — the facts transcribed from upstream rather
   than derived, and how to update them.
-- [The wire protocol] (plans/tsgo-protocol.md) — framing, errors, the binary AST format.
-- [Remaining work] (plans/wire-remaining-work.md) — what is still outstanding.
