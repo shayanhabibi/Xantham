@@ -51,6 +51,14 @@ optional, and a package with no `xantham.json` generates under the defaults.
         "WeakRef": { "name": "System.WeakReference", "arity": 1 }
       }
     }
+  },
+  // Layout for a shipped TypeScript compiler-library binding.
+  "compilerLib": {
+    "module": "MyBindings.TypeScript",
+    "esModule": "Es",
+    "domModule": "Dom",
+    "autoOpenEs": false,
+    "autoOpenDom": false
   }
 }
 ```
@@ -77,6 +85,57 @@ xantham schema -o xantham.schema.json
 
 :::
 ::::
+
+### Lay out the compiler library
+
+`compilerLib` controls the combined binding generated for TypeScript's standard
+libraries. Its `module` may be a dotted F# module path. `esModule` and `domModule`
+must each be one valid F# identifier and must differ.
+
+The defaults are `TypeScript.Lib`, `Es`, and `Dom`; both auto-open flags default
+to `false`. Set an auto-open flag only when consumers should reach that child
+module by opening the root.
+
+The ES and DOM families are emitted together as one recursive
+`groups/<module>.fs` file. References between the families remain fully qualified,
+independent of either auto-open setting.
+
+### Use Xantham's standard-library bindings
+
+`Xantham.Fable.Core.TS` is the checked-in combined binding for the pinned
+TypeScript `esnext` and DOM declarations. Add it alongside `Fable.Core` and
+`Xantham.Fable.Core`:
+
+```xml title="Project file"
+<PackageReference Include="Fable.Core" Version="5.2.0" />
+<PackageReference Include="Xantham.Fable.Core" Version="0.1.0-alpha.1" />
+<PackageReference Include="Xantham.Fable.Core.TS" Version="0.1.0-alpha.1" />
+```
+
+The public root is `Fable.Core.TS`. Its ECMAScript `Es` module is auto-opened,
+so types and values such as `Promise` are available after opening the root. DOM
+is deliberately not auto-opened; qualify it through `Fable.Core.TS.Dom` so browser
+globals do not silently become ambient in every consumer.
+
+```fsharp
+open Fable.Core.TS
+
+let completed : Promise<int> = Promise.resolve 42
+
+let retainTarget (target: Fable.Core.TS.Dom.EventTarget) = target
+```
+
+Repository contributors regenerate the artifact explicitly:
+
+```bash frame=terminal
+dotnet fsi build.fsx -- generate --only compiler-lib
+```
+
+This stage is intentionally excluded from the default `generate` pipeline because
+the checked-in consumer artifact is several megabytes and should move only during
+a deliberate compiler-library refresh. It writes
+`src/Xantham.Fable.Core.TS/Fable.Core.TS.fs` and its `manifest.json`; regenerate
+rather than editing the generated source.
 
 ### Select ambient type providers
 
@@ -200,7 +259,7 @@ standard error, so `xantham generate … > files.txt` keeps the two apart.
 | File | |
 |---|---|
 | `<Module>.fs` | The entry package's binding. |
-| `groups/<Module>.fs` | One file per further shipped group. |
+| `groups/<Module>.fs` | One file per further shipped group. A shipped compiler library combines its ES and DOM families in one recursive root file. |
 | `manifest.json` | The aggregate: the package, the tier counts, the per-pass tallies. A page long for any package. |
 | `symbols.jsonl` | One line per symbol, carrying that symbol's findings. Thousands of lines for a large package; grep it. |
 
@@ -300,6 +359,9 @@ before the module naming its types.
   index-signature objects and nominal brands — and each one erases at runtime. Its
   [README](https://github.com/shayanhabibi/Xantham/blob/master/src/Xantham.Fable.Core/README.md)
   documents them.
+- **`Xantham.Fable.Core.TS`.** The optional combined `esnext` and DOM binding. Opening
+  `Fable.Core.TS` exposes its auto-opened ES surface; DOM remains under
+  `Fable.Core.TS.Dom`.
 - **`net8.0` or later.** The generated `ParamObject` `Create` members are static interface members
   with bodies, which need default-interface-member runtime support to type-check. Fable erases
   them; the target framework only has to let the F# compiler accept them.
