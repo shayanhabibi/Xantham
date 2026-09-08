@@ -1798,7 +1798,7 @@ let pipelineTests =
                           // `HG003` escape finding and nothing else.
                           let group =
                               rendered.Files
-                              |> List.tryFind (fun (path, _) -> path = "groups/TypeScript.Lib.fs")
+                              |> List.tryFind (fun (path, _) -> path = "groups/Fable.Core.TS.fs")
 
                           Expect.isSome group "the compiler-lib group renders its own file, not just the entry module"
 
@@ -1806,9 +1806,9 @@ let pipelineTests =
 
                           // This empty producer contributes no globals, so its global object
                           // belongs to the shared compiler-only scope beside the DOM family.
-                          Expect.stringContains source "namespace rec TypeScript.Lib" "the shared namespace"
-                          Expect.stringContains source "module Es =" "the certified global environment's module"
-                          Expect.stringContains source "module Dom =" "the DOM module"
+                          Expect.stringContains source "module rec Fable.Core.TS" "the shared recursive root"
+                          Expect.stringContains source "module Ecma =" "the certified global environment's module"
+                          Expect.stringContains source "module Browser =" "the DOM module"
 
                           let entry = rendered.Files |> List.find (fun (path, _) -> path = "LibShipLab.fs") |> snd
                           (source.Contains "type GlobalThis", entry.Contains "type GlobalThis")
