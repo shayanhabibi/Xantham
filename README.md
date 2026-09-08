@@ -67,6 +67,7 @@ The generator's progress is tracked as a ladder of real npm packages (`ansi-rege
 `@cloudflare/workers-types`, ...), each pinned by version, generated into a committed golden,
 and accompanied by a `manifest.json` grading every symbol `Exact`, `Ergonomic`, `Widened` or
 `Escape`. 
+
 ---
 
 ## See the Docs
