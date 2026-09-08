@@ -18,22 +18,22 @@ type Deferred =
     /// <summary>
     /// Attaches callbacks for the resolution and/or rejection of the Promise.
     /// </summary>
-    /// <remarks>@param onfulfilled The callback to execute when the Promise is resolved.</remarks>
-    /// <remarks>@param onrejected The callback to execute when the Promise is rejected.</remarks>
-    /// <remarks>@returns A Promise for the completion of which ever callback is executed.</remarks>
+    /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
+    /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+    /// <returns>A Promise for the completion of which ever callback is executed.</returns>
     abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (string -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
     /// <summary>
     /// Attaches a callback for only the rejection of the Promise.
     /// </summary>
-    /// <remarks>@param onrejected The callback to execute when the Promise is rejected.</remarks>
-    /// <remarks>@returns A Promise for the completion of the callback.</remarks>
+    /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+    /// <returns>A Promise for the completion of the callback.</returns>
     abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<string, 'TResult>>
     /// <summary>
     /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
     /// resolved value cannot be modified from the callback.
     /// </summary>
-    /// <remarks>@param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).</remarks>
-    /// <remarks>@returns A Promise for the completion of the callback.</remarks>
+    /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
+    /// <returns>A Promise for the completion of the callback.</returns>
     abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<string>
     abstract tag: string
     [<ParamObject; Emit("$0")>]
@@ -46,19 +46,19 @@ type Deferred =
 type Recorder =
     abstract channel: string
     /// <summary>
-    /// The <b>`addEventListener()`</b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
+    /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
     /// </summary>
     abstract addEventListener: ``type``: string * ?callback: obj * ?options: U2<bool, Browser.Types.AddEventListenerOptions> -> unit
     /// <summary>
-    /// The <b>`dispatchEvent()`</b> method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
+    /// The <b><c>dispatchEvent()</c></b> method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent">MDN Reference</a>
     /// </summary>
     abstract dispatchEvent: ``event``: Browser.Types.Event -> bool
     /// <summary>
-    /// The <b>`removeEventListener()`</b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
+    /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
     /// </summary>

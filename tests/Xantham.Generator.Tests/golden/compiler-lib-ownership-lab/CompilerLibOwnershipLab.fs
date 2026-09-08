@@ -47,65 +47,64 @@ type GlobalThis =
     /// <summary>
     /// Evaluates JavaScript code and executes it.
     /// </summary>
-    /// <remarks>@param x A String value that contains valid JavaScript code.</remarks>
+    /// <param name="x">A String value that contains valid JavaScript code.</param>
     abstract eval: (string -> obj) with get, set
     /// <summary>
     /// Converts a string to an integer.
     /// </summary>
-    /// <remarks>@param string A string to convert into a number.</remarks>
-    /// <remarks>
-    /// @param
-    /// radix A value between 2 and 36 that specifies the base of the number in <c>string</c>.
+    /// <param name="string">A string to convert into a number.</param>
+    /// <param name="radix">
+    /// A value between 2 and 36 that specifies the base of the number in <c>string</c>.
     /// If this argument is not supplied, strings with a prefix of '0x' are considered hexadecimal.
     /// All other strings are considered decimal.
-    /// </remarks>
+    /// </param>
     abstract parseInt: Func<string, float option, float> with get, set
     /// <summary>
     /// Converts a string to a floating-point number.
     /// </summary>
-    /// <remarks>@param string A string that contains a floating-point number.</remarks>
+    /// <param name="string">A string that contains a floating-point number.</param>
     abstract parseFloat: (string -> float) with get, set
     /// <summary>
     /// Returns a Boolean value that indicates whether a value is the reserved value NaN (not a number).
     /// </summary>
-    /// <remarks>@param number A numeric value.</remarks>
+    /// <param name="number">A numeric value.</param>
     abstract isNaN: (float -> bool) with get, set
     /// <summary>
     /// Determines whether a supplied number is finite.
     /// </summary>
-    /// <remarks>@param number Any numeric value.</remarks>
+    /// <param name="number">Any numeric value.</param>
     abstract isFinite: (float -> bool) with get, set
     /// <summary>
     /// Gets the unencoded version of an encoded Uniform Resource Identifier (URI).
     /// </summary>
-    /// <remarks>@param encodedURI A value representing an encoded URI.</remarks>
+    /// <param name="encodedURI">A value representing an encoded URI.</param>
     abstract decodeURI: (string -> string) with get, set
     /// <summary>
     /// Gets the unencoded version of an encoded component of a Uniform Resource Identifier (URI).
     /// </summary>
-    /// <remarks>@param encodedURIComponent A value representing an encoded URI component.</remarks>
+    /// <param name="encodedURIComponent">A value representing an encoded URI component.</param>
     abstract decodeURIComponent: (string -> string) with get, set
     /// <summary>
     /// Encodes a text string as a valid Uniform Resource Identifier (URI)
     /// </summary>
-    /// <remarks>@param uri A value representing an unencoded URI.</remarks>
+    /// <param name="uri">A value representing an unencoded URI.</param>
     abstract encodeURI: (string -> string) with get, set
     /// <summary>
     /// Encodes a text string as a valid component of a Uniform Resource Identifier (URI).
     /// </summary>
-    /// <remarks>@param uriComponent A value representing an unencoded URI component.</remarks>
+    /// <param name="uriComponent">A value representing an unencoded URI component.</param>
     abstract encodeURIComponent: (U3<string, float, bool> -> string) with get, set
     /// <summary>
     /// Computes a new string in which certain characters have been replaced by a hexadecimal escape sequence.
     /// </summary>
     /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
-    /// <remarks>@param string A string value</remarks>
+    /// <param name="string">A string value</param>
     abstract escape: (string -> string) with get, set
     /// <summary>
     /// Computes a new string in which hexadecimal escape sequences are replaced with the character that it represents.
     /// </summary>
     /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
-    /// <remarks>@param string A string value</remarks>
+    /// <param name="string">A string value</param>
     abstract unescape: (string -> string) with get, set
     /// <summary>
     /// Provides functionality common to all JavaScript objects.
@@ -237,75 +236,74 @@ type Exports =
     /// <summary>
     /// Evaluates JavaScript code and executes it.
     /// </summary>
-    /// <remarks>@param x A String value that contains valid JavaScript code.</remarks>
+    /// <param name="x">A String value that contains valid JavaScript code.</param>
     [<Global("eval")>]
     static member eval (x: string) : obj = jsNative
     /// <summary>
     /// Converts a string to an integer.
     /// </summary>
-    /// <remarks>@param string A string to convert into a number.</remarks>
-    /// <remarks>
-    /// @param
-    /// radix A value between 2 and 36 that specifies the base of the number in <c>string</c>.
+    /// <param name="string">A string to convert into a number.</param>
+    /// <param name="radix">
+    /// A value between 2 and 36 that specifies the base of the number in <c>string</c>.
     /// If this argument is not supplied, strings with a prefix of '0x' are considered hexadecimal.
     /// All other strings are considered decimal.
-    /// </remarks>
+    /// </param>
     [<Global("parseInt")>]
     static member parseInt (string: string, ?radix: float) : float = jsNative
     /// <summary>
     /// Converts a string to a floating-point number.
     /// </summary>
-    /// <remarks>@param string A string that contains a floating-point number.</remarks>
+    /// <param name="string">A string that contains a floating-point number.</param>
     [<Global("parseFloat")>]
     static member parseFloat (string: string) : float = jsNative
     /// <summary>
     /// Returns a Boolean value that indicates whether a value is the reserved value NaN (not a number).
     /// </summary>
-    /// <remarks>@param number A numeric value.</remarks>
+    /// <param name="number">A numeric value.</param>
     [<Global("isNaN")>]
     static member isNaN (number: float) : bool = jsNative
     /// <summary>
     /// Determines whether a supplied number is finite.
     /// </summary>
-    /// <remarks>@param number Any numeric value.</remarks>
+    /// <param name="number">Any numeric value.</param>
     [<Global("isFinite")>]
     static member isFinite (number: float) : bool = jsNative
     /// <summary>
     /// Gets the unencoded version of an encoded Uniform Resource Identifier (URI).
     /// </summary>
-    /// <remarks>@param encodedURI A value representing an encoded URI.</remarks>
+    /// <param name="encodedURI">A value representing an encoded URI.</param>
     [<Global("decodeURI")>]
     static member decodeURI (encodedURI: string) : string = jsNative
     /// <summary>
     /// Gets the unencoded version of an encoded component of a Uniform Resource Identifier (URI).
     /// </summary>
-    /// <remarks>@param encodedURIComponent A value representing an encoded URI component.</remarks>
+    /// <param name="encodedURIComponent">A value representing an encoded URI component.</param>
     [<Global("decodeURIComponent")>]
     static member decodeURIComponent (encodedURIComponent: string) : string = jsNative
     /// <summary>
     /// Encodes a text string as a valid Uniform Resource Identifier (URI)
     /// </summary>
-    /// <remarks>@param uri A value representing an unencoded URI.</remarks>
+    /// <param name="uri">A value representing an unencoded URI.</param>
     [<Global("encodeURI")>]
     static member encodeURI (uri: string) : string = jsNative
     /// <summary>
     /// Encodes a text string as a valid component of a Uniform Resource Identifier (URI).
     /// </summary>
-    /// <remarks>@param uriComponent A value representing an unencoded URI component.</remarks>
+    /// <param name="uriComponent">A value representing an unencoded URI component.</param>
     [<Global("encodeURIComponent")>]
     static member encodeURIComponent (uriComponent: U3<string, float, bool>) : string = jsNative
     /// <summary>
     /// Computes a new string in which certain characters have been replaced by a hexadecimal escape sequence.
     /// </summary>
     /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
-    /// <remarks>@param string A string value</remarks>
+    /// <param name="string">A string value</param>
     [<Global("escape")>]
     static member escape (string: string) : string = jsNative
     /// <summary>
     /// Computes a new string in which hexadecimal escape sequences are replaced with the character that it represents.
     /// </summary>
     /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
-    /// <remarks>@param string A string value</remarks>
+    /// <param name="string">A string value</param>
     [<Global("unescape")>]
     static member unescape (string: string) : string = jsNative
     /// <summary>

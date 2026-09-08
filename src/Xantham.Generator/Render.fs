@@ -373,6 +373,29 @@ let private docLines (indent: string) (docs: string) (tags: JSDocTagInfo list) =
             yield $"{indent}/// </summary>"
 
         for tag in tags do
+            match tag.Name with
+            | "param" when tag.Text.IsSome ->
+                match tag.Text.Value.Trim().Split(' ', 2, StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries) with
+                | [| name; text |] ->
+                    match splitLines text with
+                    | [| single |] ->
+                        yield $"{indent}/// <param name=\"{name}\">{inlineCode single}</param>"
+                    | lines ->
+                        yield $"{indent}/// <param name=\"{name}\">"
+                        yield! docBody indent lines
+                        yield $"{indent}/// </param>"
+                | _ -> ()
+            | "returns" | "return" when tag.Text.IsSome ->
+                match splitLines tag.Text.Value  with
+                | [||] as arr | arr when arr |> Array.forall String.IsNullOrEmpty -> ()
+                | [| single |] ->
+                    yield $"{indent}/// <returns>{inlineCode single}</returns>"
+                | lines ->
+                    yield $"{indent}/// <returns>"
+                    yield! docBody indent lines
+                    yield $"{indent}/// </returns>"
+            | "param" | "returns" | "return" -> ()
+            | _ ->
             let text = tag.Text |> ValueOption.defaultValue ""
 
             match splitLines text with

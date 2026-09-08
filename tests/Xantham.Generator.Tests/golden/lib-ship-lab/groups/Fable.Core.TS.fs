@@ -106,7 +106,7 @@ module Browser =
         /// Skips a specified number of characters when reading from an input text stream.
         /// Can only be used on a stream in reading mode; causes an error in writing or appending mode.
         /// </summary>
-        /// <remarks>@param characters Positive number of characters to skip forward. (Backward skipping is not supported.)</remarks>
+        /// <param name="characters">Positive number of characters to skip forward. (Backward skipping is not supported.)</param>
         abstract Skip: characters: float -> unit
         /// <summary>
         /// Skips the next line when reading from an input text stream.
@@ -190,8 +190,7 @@ module Browser =
         /// <summary>
         /// Creates a COM object.
         /// </summary>
-        /// <remarks>@param strProgiID</remarks>
-        /// <remarks>@param strPrefix Function names in the form prefix_event will be bound to this object's COM events.</remarks>
+        /// <param name="strPrefix">Function names in the form prefix_event will be bound to this object's COM events.</param>
         abstract CreateObject: strProgID: string * ?strPrefix: string -> obj
         /// <summary>
         /// Disconnects a COM object from its event sources.
@@ -200,18 +199,16 @@ module Browser =
         /// <summary>
         /// Retrieves an existing object with the specified ProgID from memory, or creates a new one from a file.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// strPathname Fully qualified path to the file containing the object persisted to disk.
+        /// <param name="strPathname">
+        /// Fully qualified path to the file containing the object persisted to disk.
         ///    For objects in memory, pass a zero-length string.
-        /// </remarks>
-        /// <remarks>@param strProgID</remarks>
-        /// <remarks>@param strPrefix Function names in the form prefix_event will be bound to this object's COM events.</remarks>
+        /// </param>
+        /// <param name="strPrefix">Function names in the form prefix_event will be bound to this object's COM events.</param>
         abstract GetObject: strPathname: string * ?strProgID: string * ?strPrefix: string -> obj
         /// <summary>
         /// Suspends script execution for a specified length of time, then continues execution.
         /// </summary>
-        /// <remarks>@param intTime Interval (in milliseconds) to suspend script execution.</remarks>
+        /// <param name="intTime">Interval (in milliseconds) to suspend script execution.</param>
         abstract Sleep: intTime: float -> unit
         [<ParamObject; Emit("$0")>]
         static member Create (Echo: (obj -> unit), StdErr: TextStreamWriter, StdOut: TextStreamWriter, Arguments: WScript.Arguments, ScriptFullName: string, Quit: (float option -> float), BuildVersion: float, FullName: string, Interactive: bool, Name: string, Path: string, ScriptName: string, StdIn: TextStreamReader, Version: string, ConnectObject: Action<obj, string>, CreateObject: Func<string, string option, obj>, DisconnectObject: (obj -> unit), GetObject: Func<string, string option, string option, obj>, Sleep: (float -> unit)) : WScript = jsNative
@@ -291,12 +288,12 @@ module Browser =
         /// <summary>
         /// Returns the smallest available index for a given dimension.
         /// </summary>
-        /// <remarks>@param dimension 1-based dimension (defaults to 1)</remarks>
+        /// <param name="dimension">1-based dimension (defaults to 1)</param>
         abstract lbound: ?dimension: float -> float
         /// <summary>
         /// Returns the largest available index for a given dimension.
         /// </summary>
-        /// <remarks>@param dimension 1-based dimension (defaults to 1)</remarks>
+        /// <param name="dimension">1-based dimension (defaults to 1)</param>
         abstract ubound: ?dimension: float -> float
         /// <summary>
         /// Returns a Javascript array with all the elements in the VBArray. If there are multiple dimensions,

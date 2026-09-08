@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <Version>0.1.0-alpha.1</Version>
+        <Version>0.1.0-alpha.2</Version>
         <AssemblyVersion>0.0.0.0</AssemblyVersion>
         <PackageId>Xantham.Fable.Core.TS</PackageId>
         <Authors>Shayan Habibi</Authors>

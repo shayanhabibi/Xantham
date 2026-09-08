@@ -47,11 +47,7 @@ type Clock =
     abstract _tail: U4<JSAnimation, Timeline, Timer, Tween> with get, set
     abstract fps: float with get, set
     abstract speed: float with get, set
-    /// <remarks>@param time</remarks>
-    /// <remarks>@return</remarks>
     abstract requestTick: time: float -> float
-    /// <remarks>@param time</remarks>
-    /// <remarks>@return</remarks>
     abstract computeDeltaTime: time: float -> float
     [<ParamObject; Emit("$0")>]
     static member Create (deltaTime: float, _currentTime: float, _lastTickTime: float, _startTime: float, _lastTime: float, _frameDuration: float, _fps: float, _speed: float, _hasChildren: bool, _head: U4<JSAnimation, Timeline, Timer, Tween>, _tail: U4<JSAnimation, Timeline, Timer, Tween>, fps: float, speed: float, requestTick: (float -> float), computeDeltaTime: (float -> float)) : Clock = jsNative
@@ -129,7 +125,6 @@ type ScrollContainer =
     abstract refreshScrollObservers: unit -> unit
     abstract refresh: unit -> unit
     abstract handleScroll: unit -> unit
-    /// <remarks>@param e</remarks>
     abstract handleEvent: e: Browser.Types.Event -> unit
     abstract revert: unit -> unit
 
@@ -158,18 +153,13 @@ type JSAnimation =
     abstract onRender: (JSAnimation -> obj) with get, set
     /// <remarks>@type {EasingFunction}</remarks>
     abstract _ease: EasingFunction with get, set
-    /// <remarks>@param newDuration</remarks>
-    /// <remarks>@return</remarks>
     abstract stretch: newDuration: float -> JSAnimation
-    /// <remarks>@return</remarks>
     abstract refresh: unit -> JSAnimation
     /// <summary>
     /// Cancel the animation and revert all the values affected by this animation to their original state
     /// </summary>
-    /// <remarks>@return</remarks>
     abstract revert: unit -> JSAnimation
-    /// <remarks>@param callback</remarks>
-    /// <remarks>@return Promise&lt;this&gt;</remarks>
+    /// <returns>Promise&lt;this&gt;</returns>
     abstract ``then``: ?callback: (JSAnimation -> obj) -> JS.Promise<obj>
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
     abstract onBegin: (JSAnimation -> obj) with get, set
@@ -183,38 +173,20 @@ type JSAnimation =
     abstract onPause: (JSAnimation -> obj) with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
     abstract onComplete: (JSAnimation -> obj) with get, set
-    /// <remarks>@param softReset</remarks>
-    /// <remarks>@return</remarks>
     abstract reset: ?softReset: bool -> JSAnimation
-    /// <remarks>@param internalRender</remarks>
-    /// <remarks>@return</remarks>
     abstract init: ?internalRender: bool -> JSAnimation
-    /// <remarks>@return</remarks>
     abstract resetTime: unit -> JSAnimation
-    /// <remarks>@return</remarks>
     abstract pause: unit -> JSAnimation
-    /// <remarks>@return</remarks>
     abstract resume: unit -> JSAnimation
-    /// <remarks>@return</remarks>
     abstract restart: unit -> JSAnimation
-    /// <remarks>@param time</remarks>
-    /// <remarks>@param muteCallbacks</remarks>
-    /// <remarks>@param internalRender</remarks>
-    /// <remarks>@return</remarks>
     abstract seek: time: float * ?muteCallbacks: U2<float, bool> * ?internalRender: U2<float, bool> -> JSAnimation
-    /// <remarks>@return</remarks>
     abstract alternate: unit -> JSAnimation
-    /// <remarks>@return</remarks>
     abstract play: unit -> JSAnimation
-    /// <remarks>@return</remarks>
     abstract reverse: unit -> JSAnimation
-    /// <remarks>@return</remarks>
     abstract cancel: unit -> JSAnimation
     /// <summary>
     /// Imediatly completes the timer, cancels it and triggers the onComplete callback
     /// </summary>
-    /// <remarks>@param muteCallbacks</remarks>
-    /// <remarks>@return</remarks>
     abstract complete: ?muteCallbacks: U2<float, bool> -> JSAnimation
 
 [<Interface>]
@@ -402,17 +374,8 @@ type Draggable =
     abstract resizeTicker: Timer with get, set
     abstract parameters: DraggableParams with get, set
     abstract resizeObserver: obj with get, set
-    /// <remarks>@param dx</remarks>
-    /// <remarks>@param dy</remarks>
-    /// <remarks>@return</remarks>
     abstract computeVelocity: dx: float * dy: float -> float
-    /// <remarks>@param x</remarks>
-    /// <remarks>@param muteUpdateCallback</remarks>
-    /// <remarks>@return</remarks>
     abstract setX: x: float * ?muteUpdateCallback: bool -> Draggable
-    /// <remarks>@param y</remarks>
-    /// <remarks>@param muteUpdateCallback</remarks>
-    /// <remarks>@return</remarks>
     abstract setY: y: float * ?muteUpdateCallback: bool -> Draggable
     abstract x: float with get, set
     abstract y: float with get, set
@@ -420,35 +383,20 @@ type Draggable =
     abstract progressY: float with get, set
     abstract updateScrollCoords: unit -> unit
     abstract updateBoundingValues: unit -> unit
-    /// <remarks>@param bounds</remarks>
-    /// <remarks>@param x</remarks>
-    /// <remarks>@param y</remarks>
-    /// <remarks>@return</remarks>
     abstract isOutOfBounds: bounds: obj[] * x: float * y: float -> float
     abstract refresh: unit -> unit
     abstract update: unit -> unit
     abstract stop: unit -> Draggable
-    /// <remarks>@param duration</remarks>
-    /// <remarks>@param gap</remarks>
-    /// <remarks>@param ease</remarks>
-    /// <remarks>@return</remarks>
     abstract scrollInView: ?duration: float * ?gap: float * ?ease: EasingParam -> Draggable
     abstract handleHover: unit -> unit
-    /// <remarks>@param duration</remarks>
-    /// <remarks>@param gap</remarks>
-    /// <remarks>@param ease</remarks>
-    /// <remarks>@return</remarks>
     abstract animateInView: ?duration: float * ?gap: float * ?ease: EasingParam -> Draggable
-    /// <remarks>@param e</remarks>
     abstract handleDown: e: U2<Browser.Types.MouseEvent, Browser.Types.TouchEvent> -> unit
-    /// <remarks>@param e</remarks>
     abstract handleMove: e: U2<Browser.Types.MouseEvent, Browser.Types.TouchEvent> -> unit
     abstract handleUp: unit -> unit
     abstract reset: unit -> Draggable
     abstract enable: unit -> Draggable
     abstract disable: unit -> Draggable
     abstract revert: unit -> Draggable
-    /// <remarks>@param e</remarks>
     abstract handleEvent: e: Browser.Types.Event -> unit
 
 module Draggable =
@@ -472,11 +420,7 @@ type Transforms =
     abstract inlineTransforms: obj[] with get, set
     abstract point: obj with get, set
     abstract inversedMatrix: obj with get, set
-    /// <remarks>@param x</remarks>
-    /// <remarks>@param y</remarks>
-    /// <remarks>@return</remarks>
     abstract normalizePoint: x: float * y: float -> obj
-    /// <remarks>@param cb</remarks>
     abstract traverseUp: cb: Transforms.TraverseUp.Cb -> unit
     abstract getMatrix: unit -> obj
     abstract remove: unit -> unit
@@ -707,7 +651,6 @@ type ScrollObserver =
     abstract _next: ScrollObserver with get, set
     /// <remarks>@type {ScrollObserver}</remarks>
     abstract _prev: ScrollObserver with get, set
-    /// <remarks>@param linked</remarks>
     abstract link: linked: U4<JSAnimation, Timeline, Timer, WAAPIAnimation> -> ScrollObserver
     abstract velocity: float
     abstract backward: bool
@@ -762,16 +705,9 @@ type AutoLayout =
     abstract leaving: DOMTarget[] with get, set
     /// <remarks>@type {Array&lt;DOMTarget&gt;}</remarks>
     abstract entering: DOMTarget[] with get, set
-    /// <remarks>@return</remarks>
     abstract revert: unit -> AutoLayout
-    /// <remarks>@return</remarks>
     abstract record: unit -> AutoLayout
-    /// <remarks>@param params</remarks>
-    /// <remarks>@return</remarks>
     abstract animate: ?``params``: LayoutAnimationParams -> Timeline
-    /// <remarks>@param callback</remarks>
-    /// <remarks>@param params</remarks>
-    /// <remarks>@return</remarks>
     abstract update: callback: (AutoLayout -> unit) * ?``params``: LayoutAnimationParams -> Timeline
     [<ParamObject; Emit("$0")>]
     static member Create (``params``: AutoLayoutParams, root: DOMTarget, id: TimelinePosition, children: LayoutChildrenParam, absoluteCoords: bool, swapAtParams: LayoutStateParams, enterFromParams: LayoutStateParams, leaveToParams: LayoutStateParams, properties: JS.Set<string>, recordedProperties: JS.Set<string>, pendingRemoval: JS.WeakSet<DOMTarget>, transitionMuteStore: JS.Map<DOMTarget, string option>, oldState: LayoutSnapshot, newState: LayoutSnapshot, timeline: Timeline, transformAnimation: WAAPIAnimation, animating: DOMTarget[], swapping: DOMTarget[], leaving: DOMTarget[], entering: DOMTarget[], revert: (unit -> AutoLayout), record: (unit -> AutoLayout), animate: (LayoutAnimationParams option -> Timeline), update: Func<(AutoLayout -> unit), LayoutAnimationParams option, Timeline>) : AutoLayout = jsNative
@@ -806,31 +742,14 @@ type LayoutSnapshot =
     abstract scrollX: float with get, set
     /// <remarks>@type {Number}</remarks>
     abstract scrollY: float with get, set
-    /// <remarks>@return</remarks>
     abstract revert: unit -> LayoutSnapshot
-    /// <remarks>@param $el</remarks>
-    /// <remarks>@return</remarks>
     abstract getNode: ``$el``: DOMTarget -> LayoutNode
-    /// <remarks>@param $el</remarks>
-    /// <remarks>@param prop</remarks>
-    /// <remarks>@return</remarks>
     abstract getComputedValue: ``$el``: DOMTarget * prop: string -> TimelinePosition
-    /// <remarks>@param rootNode</remarks>
-    /// <remarks>@param cb</remarks>
     abstract forEach: rootNode: LayoutNode option * cb: LayoutNodeIterator -> unit
-    /// <remarks>@param cb</remarks>
     abstract forEachRootNode: cb: LayoutNodeIterator -> unit
-    /// <remarks>@param cb</remarks>
     abstract forEachNode: cb: LayoutNodeIterator -> unit
-    /// <remarks>@param $el</remarks>
-    /// <remarks>@param parentNode</remarks>
-    /// <remarks>@return</remarks>
     abstract registerElement: ``$el``: DOMTarget * ?parentNode: LayoutNode -> LayoutNode option
-    /// <remarks>@param $el</remarks>
-    /// <remarks>@param candidates</remarks>
-    /// <remarks>@return</remarks>
     abstract ensureDetachedNode: ``$el``: DOMTarget * candidates: JS.Set<DOMTarget> -> LayoutNode option
-    /// <remarks>@return</remarks>
     abstract record: unit -> LayoutSnapshot
     [<ParamObject; Emit("$0")>]
     static member Create (layout: AutoLayout, rootNodes: JS.Set<LayoutNode>, nodes: JS.Map<string, LayoutNode>, scrollX: float, scrollY: float, revert: (unit -> LayoutSnapshot), getNode: (DOMTarget -> LayoutNode), getComputedValue: Func<DOMTarget, string, TimelinePosition>, forEach: Action<LayoutNode option, LayoutNodeIterator>, forEachRootNode: (LayoutNodeIterator -> unit), forEachNode: (LayoutNodeIterator -> unit), registerElement: Func<DOMTarget, LayoutNode option, LayoutNode option>, ensureDetachedNode: Func<DOMTarget, JS.Set<DOMTarget>, LayoutNode option>, record: (unit -> LayoutSnapshot), ?rootNode: LayoutNode) : LayoutSnapshot = jsNative
@@ -990,39 +909,22 @@ type Scope =
     abstract mediaQueryLists: Record<string, Browser.Types.MediaQueryList> with get, set
     /// <remarks>@type {Record&lt;String, any&gt;}</remarks>
     abstract data: Record<string, obj> with get, set
-    /// <remarks>@param revertible</remarks>
     abstract register: revertible: Revertible -> unit
     /// <remarks>@template T</remarks>
-    /// <remarks>@param cb</remarks>
-    /// <remarks>@return</remarks>
     abstract execute<'T>: cb: (Scope -> 'T) -> 'T
-    /// <remarks>@return</remarks>
     abstract refresh: unit -> Scope
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param a1</remarks>
-    /// <remarks>@param a2</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param a1</remarks>
-    /// <remarks>@param a2</remarks>
     abstract add: a1: string * a2: ScopeMethod -> Scope
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param a1</remarks>
-    /// <remarks>@param a2</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param a1</remarks>
-    /// <remarks>@param a2</remarks>
     abstract add: a1: ScopeConstructorCallback -> Scope
-    /// <remarks>@param scopeConstructorCallback</remarks>
-    /// <remarks>@return</remarks>
     abstract addOnce: scopeConstructorCallback: ScopeConstructorCallback -> Scope
-    /// <remarks>@param cb</remarks>
-    /// <remarks>@return</remarks>
     abstract keepTime: cb: (Scope -> Tickable) -> Tickable
-    /// <remarks>@param e</remarks>
     abstract handleEvent: e: Browser.Types.Event -> unit
     abstract revert: unit -> unit
 
@@ -1159,17 +1061,13 @@ type TextSplitter =
     abstract width: float with get, set
     abstract resizeTimeout: obj with get, set
     abstract resizeObserver: obj with get, set
-    /// <remarks>@param effect</remarks>
-    /// <remarks>@return this</remarks>
+    /// <returns>this</returns>
     abstract addEffect: effect: (obj[] -> U4<JSAnimation, Timeline, Timer, (unit -> unit)> option) -> TextSplitter
     abstract revert: unit -> TextSplitter
     /// <summary>
     /// Recursively processes a node and its children
     /// </summary>
-    /// <remarks>@param node</remarks>
     abstract splitNode: node: Browser.Types.Node -> unit
-    /// <remarks>@param clearCache</remarks>
-    /// <remarks>@return</remarks>
     abstract split: ?clearCache: bool -> TextSplitter
     abstract refresh: unit -> unit
     [<ParamObject; Emit("$0")>]
@@ -1201,100 +1099,52 @@ type Timeline =
     abstract _ease: EasingFunction with get, set
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param a1</remarks>
-    /// <remarks>@param a2</remarks>
-    /// <remarks>@param a3</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param a1</remarks>
-    /// <remarks>@param a2</remarks>
-    /// <remarks>@param a3</remarks>
     abstract add: a1: TargetsParam * a2: AnimationParams * ?a3: TimelineAnimationPosition -> Timeline
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param a1</remarks>
-    /// <remarks>@param a2</remarks>
-    /// <remarks>@param a3</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param a1</remarks>
-    /// <remarks>@param a2</remarks>
-    /// <remarks>@param a3</remarks>
     abstract add: a1: TimerParams * ?a2: TimelinePosition -> Timeline
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param synced</remarks>
-    /// <remarks>@param position</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param synced</remarks>
-    /// <remarks>@param position</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param synced</remarks>
-    /// <remarks>@param position</remarks>
     abstract sync: ?synced: Tickable * ?position: TimelinePosition -> Timeline
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param synced</remarks>
-    /// <remarks>@param position</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param synced</remarks>
-    /// <remarks>@param position</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param synced</remarks>
-    /// <remarks>@param position</remarks>
     abstract sync: ?synced: obj * ?position: TimelinePosition -> Timeline
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param synced</remarks>
-    /// <remarks>@param position</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param synced</remarks>
-    /// <remarks>@param position</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param synced</remarks>
-    /// <remarks>@param position</remarks>
     abstract sync: ?synced: WAAPIAnimation * ?position: TimelinePosition -> Timeline
-    /// <remarks>@param targets</remarks>
-    /// <remarks>@param parameters</remarks>
-    /// <remarks>@param position</remarks>
-    /// <remarks>@return</remarks>
     abstract set: targets: TargetsParam * parameters: AnimationParams * ?position: TimelineAnimationPosition -> Timeline
-    /// <remarks>@param callback</remarks>
-    /// <remarks>@param position</remarks>
-    /// <remarks>@return</remarks>
     abstract call: callback: (Timer -> obj) * ?position: TimelinePosition -> Timeline
-    /// <remarks>@param labelName</remarks>
-    /// <remarks>@param position</remarks>
-    /// <remarks>@return</remarks>
     abstract label: labelName: string * ?position: TimelinePosition -> Timeline
-    /// <remarks>@param targets</remarks>
-    /// <remarks>@param propertyName</remarks>
-    /// <remarks>@return</remarks>
     abstract remove: targets: TargetsParam * ?propertyName: string -> Timeline
-    /// <remarks>@param newDuration</remarks>
-    /// <remarks>@return</remarks>
     abstract stretch: newDuration: float -> Timeline
-    /// <remarks>@return</remarks>
     abstract refresh: unit -> Timeline
-    /// <remarks>@return</remarks>
     abstract revert: unit -> Timeline
-    /// <remarks>@param callback</remarks>
-    /// <remarks>@return Promise&lt;this&gt;</remarks>
+    /// <returns>Promise&lt;this&gt;</returns>
     abstract ``then``: ?callback: (Timeline -> obj) -> JS.Promise<obj>
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
     abstract onBegin: (Timeline -> obj) with get, set
@@ -1308,38 +1158,20 @@ type Timeline =
     abstract onPause: (Timeline -> obj) with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
     abstract onComplete: (Timeline -> obj) with get, set
-    /// <remarks>@param softReset</remarks>
-    /// <remarks>@return</remarks>
     abstract reset: ?softReset: bool -> Timeline
-    /// <remarks>@param internalRender</remarks>
-    /// <remarks>@return</remarks>
     abstract init: ?internalRender: bool -> Timeline
-    /// <remarks>@return</remarks>
     abstract resetTime: unit -> Timeline
-    /// <remarks>@return</remarks>
     abstract pause: unit -> Timeline
-    /// <remarks>@return</remarks>
     abstract resume: unit -> Timeline
-    /// <remarks>@return</remarks>
     abstract restart: unit -> Timeline
-    /// <remarks>@param time</remarks>
-    /// <remarks>@param muteCallbacks</remarks>
-    /// <remarks>@param internalRender</remarks>
-    /// <remarks>@return</remarks>
     abstract seek: time: float * ?muteCallbacks: U2<float, bool> * ?internalRender: U2<float, bool> -> Timeline
-    /// <remarks>@return</remarks>
     abstract alternate: unit -> Timeline
-    /// <remarks>@return</remarks>
     abstract play: unit -> Timeline
-    /// <remarks>@return</remarks>
     abstract reverse: unit -> Timeline
-    /// <remarks>@return</remarks>
     abstract cancel: unit -> Timeline
     /// <summary>
     /// Imediatly completes the timer, cancels it and triggers the onComplete callback
     /// </summary>
-    /// <remarks>@param muteCallbacks</remarks>
-    /// <remarks>@return</remarks>
     abstract complete: ?muteCallbacks: U2<float, bool> -> Timeline
 
 /// <summary>
@@ -1413,49 +1245,27 @@ type Timer =
     abstract iterationProgress: float with get, set
     abstract currentIteration: float with get, set
     abstract reversed: bool with get, set
-    /// <remarks>@param softReset</remarks>
-    /// <remarks>@return</remarks>
     abstract reset: ?softReset: bool -> Timer
-    /// <remarks>@param internalRender</remarks>
-    /// <remarks>@return</remarks>
     abstract init: ?internalRender: bool -> Timer
-    /// <remarks>@return</remarks>
     abstract resetTime: unit -> Timer
-    /// <remarks>@return</remarks>
     abstract pause: unit -> Timer
-    /// <remarks>@return</remarks>
     abstract resume: unit -> Timer
-    /// <remarks>@return</remarks>
     abstract restart: unit -> Timer
-    /// <remarks>@param time</remarks>
-    /// <remarks>@param muteCallbacks</remarks>
-    /// <remarks>@param internalRender</remarks>
-    /// <remarks>@return</remarks>
     abstract seek: time: float * ?muteCallbacks: U2<float, bool> * ?internalRender: U2<float, bool> -> Timer
-    /// <remarks>@return</remarks>
     abstract alternate: unit -> Timer
-    /// <remarks>@return</remarks>
     abstract play: unit -> Timer
-    /// <remarks>@return</remarks>
     abstract reverse: unit -> Timer
-    /// <remarks>@return</remarks>
     abstract cancel: unit -> Timer
-    /// <remarks>@param newDuration</remarks>
-    /// <remarks>@return</remarks>
     abstract stretch: newDuration: float -> Timer
     /// <summary>
     /// Cancels the timer by seeking it back to 0 and reverting the attached scroller if necessary
     /// </summary>
-    /// <remarks>@return</remarks>
     abstract revert: unit -> Timer
     /// <summary>
     /// Imediatly completes the timer, cancels it and triggers the onComplete callback
     /// </summary>
-    /// <remarks>@param muteCallbacks</remarks>
-    /// <remarks>@return</remarks>
     abstract complete: ?muteCallbacks: U2<float, bool> -> Timer
-    /// <remarks>@param callback</remarks>
-    /// <remarks>@return Promise&lt;this&gt;</remarks>
+    /// <returns>Promise&lt;this&gt;</returns>
     abstract ``then``: ?callback: (Timer -> obj) -> JS.Promise<obj>
 
 [<Interface>]
@@ -1512,153 +1322,78 @@ type CallbackArgument =
     abstract onPause: (CallbackArgument -> obj) with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
     abstract onComplete: (CallbackArgument -> obj) with get, set
-    /// <remarks>@param softReset</remarks>
-    /// <remarks>@return</remarks>
     abstract reset: ?softReset: bool -> CallbackArgument
-    /// <remarks>@param internalRender</remarks>
-    /// <remarks>@return</remarks>
     abstract init: ?internalRender: bool -> CallbackArgument
-    /// <remarks>@return</remarks>
     abstract resetTime: unit -> CallbackArgument
-    /// <remarks>@return</remarks>
     abstract pause: unit -> CallbackArgument
-    /// <remarks>@return</remarks>
     abstract resume: unit -> CallbackArgument
-    /// <remarks>@return</remarks>
     abstract restart: unit -> CallbackArgument
-    /// <remarks>@param time</remarks>
-    /// <remarks>@param muteCallbacks</remarks>
-    /// <remarks>@param internalRender</remarks>
-    /// <remarks>@return</remarks>
     abstract seek: time: float * ?muteCallbacks: U2<float, bool> * ?internalRender: U2<float, bool> -> CallbackArgument
-    /// <remarks>@return</remarks>
     abstract alternate: unit -> CallbackArgument
-    /// <remarks>@return</remarks>
     abstract play: unit -> CallbackArgument
-    /// <remarks>@return</remarks>
     abstract reverse: unit -> CallbackArgument
-    /// <remarks>@return</remarks>
     abstract cancel: unit -> CallbackArgument
-    /// <remarks>@param newDuration</remarks>
-    /// <remarks>@return</remarks>
-    /// <remarks>@param newDuration</remarks>
-    /// <remarks>@return</remarks>
-    /// <remarks>@param newDuration</remarks>
-    /// <remarks>@return</remarks>
     abstract stretch: (float -> CallbackArgument) with get, set
     /// <summary>
     /// Cancels the timer by seeking it back to 0 and reverting the attached scroller if necessary
     /// Cancel the animation and revert all the values affected by this animation to their original state
     /// </summary>
-    /// <remarks>@return</remarks>
-    /// <remarks>@return</remarks>
-    /// <remarks>@return</remarks>
     abstract revert: (unit -> CallbackArgument) with get, set
     /// <summary>
     /// Imediatly completes the timer, cancels it and triggers the onComplete callback
     /// </summary>
-    /// <remarks>@param muteCallbacks</remarks>
-    /// <remarks>@return</remarks>
     abstract complete: ?muteCallbacks: U2<float, bool> -> CallbackArgument
-    /// <remarks>@param callback</remarks>
-    /// <remarks>@return Promise&lt;this&gt;</remarks>
-    /// <remarks>@param callback</remarks>
-    /// <remarks>@return Promise&lt;this&gt;</remarks>
-    /// <remarks>@param callback</remarks>
-    /// <remarks>@return Promise&lt;this&gt;</remarks>
+    /// <returns>Promise&lt;this&gt;</returns>
+    /// <returns>Promise&lt;this&gt;</returns>
+    /// <returns>Promise&lt;this&gt;</returns>
     abstract ``then``: ((obj -> obj) option -> JS.Promise<obj>) with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
     abstract onRender: (CallbackArgument -> obj) with get, set
-    /// <remarks>@return</remarks>
-    /// <remarks>@return</remarks>
     abstract refresh: (unit -> CallbackArgument) with get, set
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param a1</remarks>
-    /// <remarks>@param a2</remarks>
-    /// <remarks>@param a3</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param a1</remarks>
-    /// <remarks>@param a2</remarks>
-    /// <remarks>@param a3</remarks>
     abstract add: a1: TargetsParam * a2: AnimationParams * ?a3: TimelineAnimationPosition -> CallbackArgument
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param a1</remarks>
-    /// <remarks>@param a2</remarks>
-    /// <remarks>@param a3</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param a1</remarks>
-    /// <remarks>@param a2</remarks>
-    /// <remarks>@param a3</remarks>
     abstract add: a1: TimerParams * ?a2: TimelinePosition -> CallbackArgument
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param synced</remarks>
-    /// <remarks>@param position</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param synced</remarks>
-    /// <remarks>@param position</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param synced</remarks>
-    /// <remarks>@param position</remarks>
     abstract sync: ?synced: Tickable * ?position: TimelinePosition -> CallbackArgument
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param synced</remarks>
-    /// <remarks>@param position</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param synced</remarks>
-    /// <remarks>@param position</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param synced</remarks>
-    /// <remarks>@param position</remarks>
     abstract sync: ?synced: obj * ?position: TimelinePosition -> CallbackArgument
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param synced</remarks>
-    /// <remarks>@param position</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param synced</remarks>
-    /// <remarks>@param position</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param synced</remarks>
-    /// <remarks>@param position</remarks>
     abstract sync: ?synced: WAAPIAnimation * ?position: TimelinePosition -> CallbackArgument
-    /// <remarks>@param targets</remarks>
-    /// <remarks>@param parameters</remarks>
-    /// <remarks>@param position</remarks>
-    /// <remarks>@return</remarks>
     abstract set: targets: TargetsParam * parameters: AnimationParams * ?position: TimelineAnimationPosition -> CallbackArgument
-    /// <remarks>@param callback</remarks>
-    /// <remarks>@param position</remarks>
-    /// <remarks>@return</remarks>
     abstract call: callback: (Timer -> obj) * ?position: TimelinePosition -> CallbackArgument
-    /// <remarks>@param labelName</remarks>
-    /// <remarks>@param position</remarks>
-    /// <remarks>@return</remarks>
     abstract label: labelName: string * ?position: TimelinePosition -> CallbackArgument
-    /// <remarks>@param targets</remarks>
-    /// <remarks>@param propertyName</remarks>
-    /// <remarks>@return</remarks>
     abstract remove: targets: TargetsParam * ?propertyName: string -> CallbackArgument
 
 module CallbackArgument =
@@ -1667,15 +1402,11 @@ module CallbackArgument =
         inherit Tween
         /// <remarks>@type {Callback&lt;this&gt;}</remarks>
         abstract onRender: (CallbackArgument.Head -> obj) with get, set
-        /// <remarks>@param newDuration</remarks>
-        /// <remarks>@return</remarks>
         abstract stretch: newDuration: float -> CallbackArgument.Head
-        /// <remarks>@return</remarks>
         abstract refresh: unit -> CallbackArgument.Head
         /// <summary>
         /// Cancel the animation and revert all the values affected by this animation to their original state
         /// </summary>
-        /// <remarks>@return</remarks>
         abstract revert: unit -> CallbackArgument.Head
         /// <remarks>@type {Timeline}</remarks>
         abstract parent: CallbackArgument.Head.Parent with get, set
@@ -1695,38 +1426,20 @@ module CallbackArgument =
         abstract _prev: U2<CallbackArgument.Head, CallbackArgument.Head.Prev> with get, set
         /// <remarks>@type {Renderable}</remarks>
         abstract _next: U2<CallbackArgument.Head, CallbackArgument.Head.Prev> with get, set
-        /// <remarks>@param softReset</remarks>
-        /// <remarks>@return</remarks>
         abstract reset: ?softReset: bool -> CallbackArgument.Head
-        /// <remarks>@param internalRender</remarks>
-        /// <remarks>@return</remarks>
         abstract init: ?internalRender: bool -> CallbackArgument.Head
-        /// <remarks>@return</remarks>
         abstract resetTime: unit -> CallbackArgument.Head
-        /// <remarks>@return</remarks>
         abstract pause: unit -> CallbackArgument.Head
-        /// <remarks>@return</remarks>
         abstract resume: unit -> CallbackArgument.Head
-        /// <remarks>@return</remarks>
         abstract restart: unit -> CallbackArgument.Head
-        /// <remarks>@param time</remarks>
-        /// <remarks>@param muteCallbacks</remarks>
-        /// <remarks>@param internalRender</remarks>
-        /// <remarks>@return</remarks>
         abstract seek: time: float * ?muteCallbacks: U2<float, bool> * ?internalRender: U2<float, bool> -> CallbackArgument.Head
-        /// <remarks>@return</remarks>
         abstract alternate: unit -> CallbackArgument.Head
-        /// <remarks>@return</remarks>
         abstract play: unit -> CallbackArgument.Head
-        /// <remarks>@return</remarks>
         abstract reverse: unit -> CallbackArgument.Head
-        /// <remarks>@return</remarks>
         abstract cancel: unit -> CallbackArgument.Head
         /// <summary>
         /// Imediatly completes the timer, cancels it and triggers the onComplete callback
         /// </summary>
-        /// <remarks>@param muteCallbacks</remarks>
-        /// <remarks>@return</remarks>
         abstract complete: ?muteCallbacks: U2<float, bool> -> CallbackArgument.Head
 
     module Head =
@@ -1738,109 +1451,56 @@ module CallbackArgument =
             abstract onRender: (CallbackArgument.Head.Parent -> obj) with get, set
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
-            /// <remarks>@param a1</remarks>
-            /// <remarks>@param a2</remarks>
-            /// <remarks>@param a3</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
-            /// <remarks>@param a1</remarks>
-            /// <remarks>@param a2</remarks>
-            /// <remarks>@param a3</remarks>
             abstract add: a1: TargetsParam * a2: AnimationParams * ?a3: TimelineAnimationPosition -> CallbackArgument.Head.Parent
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
-            /// <remarks>@param a1</remarks>
-            /// <remarks>@param a2</remarks>
-            /// <remarks>@param a3</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
-            /// <remarks>@param a1</remarks>
-            /// <remarks>@param a2</remarks>
-            /// <remarks>@param a3</remarks>
             abstract add: a1: TimerParams * ?a2: TimelinePosition -> CallbackArgument.Head.Parent
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
-            /// <remarks>@param synced</remarks>
-            /// <remarks>@param position</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
-            /// <remarks>@param synced</remarks>
-            /// <remarks>@param position</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
-            /// <remarks>@param synced</remarks>
-            /// <remarks>@param position</remarks>
             abstract sync: ?synced: Tickable * ?position: TimelinePosition -> CallbackArgument.Head.Parent
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
-            /// <remarks>@param synced</remarks>
-            /// <remarks>@param position</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
-            /// <remarks>@param synced</remarks>
-            /// <remarks>@param position</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
-            /// <remarks>@param synced</remarks>
-            /// <remarks>@param position</remarks>
             abstract sync: ?synced: obj * ?position: TimelinePosition -> CallbackArgument.Head.Parent
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
-            /// <remarks>@param synced</remarks>
-            /// <remarks>@param position</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
-            /// <remarks>@param synced</remarks>
-            /// <remarks>@param position</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
-            /// <remarks>@param synced</remarks>
-            /// <remarks>@param position</remarks>
             abstract sync: ?synced: WAAPIAnimation * ?position: TimelinePosition -> CallbackArgument.Head.Parent
-            /// <remarks>@param targets</remarks>
-            /// <remarks>@param parameters</remarks>
-            /// <remarks>@param position</remarks>
-            /// <remarks>@return</remarks>
             abstract set: targets: TargetsParam * parameters: AnimationParams * ?position: TimelineAnimationPosition -> CallbackArgument.Head.Parent
-            /// <remarks>@param callback</remarks>
-            /// <remarks>@param position</remarks>
-            /// <remarks>@return</remarks>
             abstract call: callback: (Timer -> obj) * ?position: TimelinePosition -> CallbackArgument.Head.Parent
-            /// <remarks>@param labelName</remarks>
-            /// <remarks>@param position</remarks>
-            /// <remarks>@return</remarks>
             abstract label: labelName: string * ?position: TimelinePosition -> CallbackArgument.Head.Parent
-            /// <remarks>@param targets</remarks>
-            /// <remarks>@param propertyName</remarks>
-            /// <remarks>@return</remarks>
             abstract remove: targets: TargetsParam * ?propertyName: string -> CallbackArgument.Head.Parent
-            /// <remarks>@param newDuration</remarks>
-            /// <remarks>@return</remarks>
-            /// <remarks>@param newDuration</remarks>
-            /// <remarks>@return</remarks>
             abstract stretch: (float -> CallbackArgument.Head.Parent) with get, set
-            /// <remarks>@return</remarks>
-            /// <remarks>@return</remarks>
             abstract refresh: (unit -> CallbackArgument.Head.Parent) with get, set
             /// <summary>
             /// Cancel the animation and revert all the values affected by this animation to their original state
             /// </summary>
-            /// <remarks>@return</remarks>
-            /// <remarks>@return</remarks>
             abstract revert: (unit -> CallbackArgument.Head.Parent) with get, set
-            /// <remarks>@param callback</remarks>
-            /// <remarks>@return Promise&lt;this&gt;</remarks>
-            /// <remarks>@param callback</remarks>
-            /// <remarks>@return Promise&lt;this&gt;</remarks>
+            /// <returns>Promise&lt;this&gt;</returns>
+            /// <returns>Promise&lt;this&gt;</returns>
             abstract ``then``: ((obj -> obj) option -> JS.Promise<obj>) with get, set
             /// <remarks>@type {Tickable|Tween}</remarks>
             /// <remarks>@type {Tween}</remarks>
@@ -1860,38 +1520,20 @@ module CallbackArgument =
             abstract onPause: (CallbackArgument.Head.Parent -> obj) with get, set
             /// <remarks>@type {Callback&lt;this&gt;}</remarks>
             abstract onComplete: (CallbackArgument.Head.Parent -> obj) with get, set
-            /// <remarks>@param softReset</remarks>
-            /// <remarks>@return</remarks>
             abstract reset: ?softReset: bool -> CallbackArgument.Head.Parent
-            /// <remarks>@param internalRender</remarks>
-            /// <remarks>@return</remarks>
             abstract init: ?internalRender: bool -> CallbackArgument.Head.Parent
-            /// <remarks>@return</remarks>
             abstract resetTime: unit -> CallbackArgument.Head.Parent
-            /// <remarks>@return</remarks>
             abstract pause: unit -> CallbackArgument.Head.Parent
-            /// <remarks>@return</remarks>
             abstract resume: unit -> CallbackArgument.Head.Parent
-            /// <remarks>@return</remarks>
             abstract restart: unit -> CallbackArgument.Head.Parent
-            /// <remarks>@param time</remarks>
-            /// <remarks>@param muteCallbacks</remarks>
-            /// <remarks>@param internalRender</remarks>
-            /// <remarks>@return</remarks>
             abstract seek: time: float * ?muteCallbacks: U2<float, bool> * ?internalRender: U2<float, bool> -> CallbackArgument.Head.Parent
-            /// <remarks>@return</remarks>
             abstract alternate: unit -> CallbackArgument.Head.Parent
-            /// <remarks>@return</remarks>
             abstract play: unit -> CallbackArgument.Head.Parent
-            /// <remarks>@return</remarks>
             abstract reverse: unit -> CallbackArgument.Head.Parent
-            /// <remarks>@return</remarks>
             abstract cancel: unit -> CallbackArgument.Head.Parent
             /// <summary>
             /// Imediatly completes the timer, cancels it and triggers the onComplete callback
             /// </summary>
-            /// <remarks>@param muteCallbacks</remarks>
-            /// <remarks>@return</remarks>
             abstract complete: ?muteCallbacks: U2<float, bool> -> CallbackArgument.Head.Parent
 
         type Prev =
@@ -1901,97 +1543,50 @@ module CallbackArgument =
             abstract onRender: (CallbackArgument.Head.Prev -> obj) with get, set
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
-            /// <remarks>@param a1</remarks>
-            /// <remarks>@param a2</remarks>
-            /// <remarks>@param a3</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
-            /// <remarks>@param a1</remarks>
-            /// <remarks>@param a2</remarks>
-            /// <remarks>@param a3</remarks>
             abstract add: a1: TargetsParam * a2: AnimationParams * ?a3: TimelineAnimationPosition -> CallbackArgument.Head.Prev
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
-            /// <remarks>@param a1</remarks>
-            /// <remarks>@param a2</remarks>
-            /// <remarks>@param a3</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
-            /// <remarks>@param a1</remarks>
-            /// <remarks>@param a2</remarks>
-            /// <remarks>@param a3</remarks>
             abstract add: a1: TimerParams * ?a2: TimelinePosition -> CallbackArgument.Head.Prev
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
-            /// <remarks>@param synced</remarks>
-            /// <remarks>@param position</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
-            /// <remarks>@param synced</remarks>
-            /// <remarks>@param position</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
-            /// <remarks>@param synced</remarks>
-            /// <remarks>@param position</remarks>
             abstract sync: ?synced: Tickable * ?position: TimelinePosition -> CallbackArgument.Head.Prev
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
-            /// <remarks>@param synced</remarks>
-            /// <remarks>@param position</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
-            /// <remarks>@param synced</remarks>
-            /// <remarks>@param position</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
-            /// <remarks>@param synced</remarks>
-            /// <remarks>@param position</remarks>
             abstract sync: ?synced: obj * ?position: TimelinePosition -> CallbackArgument.Head.Prev
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
-            /// <remarks>@param synced</remarks>
-            /// <remarks>@param position</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
-            /// <remarks>@param synced</remarks>
-            /// <remarks>@param position</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
-            /// <remarks>@param synced</remarks>
-            /// <remarks>@param position</remarks>
             abstract sync: ?synced: WAAPIAnimation * ?position: TimelinePosition -> CallbackArgument.Head.Prev
-            /// <remarks>@param targets</remarks>
-            /// <remarks>@param parameters</remarks>
-            /// <remarks>@param position</remarks>
-            /// <remarks>@return</remarks>
             abstract set: targets: TargetsParam * parameters: AnimationParams * ?position: TimelineAnimationPosition -> CallbackArgument.Head.Prev
-            /// <remarks>@param callback</remarks>
-            /// <remarks>@param position</remarks>
-            /// <remarks>@return</remarks>
             abstract call: callback: (Timer -> obj) * ?position: TimelinePosition -> CallbackArgument.Head.Prev
-            /// <remarks>@param labelName</remarks>
-            /// <remarks>@param position</remarks>
-            /// <remarks>@return</remarks>
             abstract label: labelName: string * ?position: TimelinePosition -> CallbackArgument.Head.Prev
-            /// <remarks>@param targets</remarks>
-            /// <remarks>@param propertyName</remarks>
-            /// <remarks>@return</remarks>
             abstract remove: targets: TargetsParam * ?propertyName: string -> CallbackArgument.Head.Prev
-            /// <remarks>@param newDuration</remarks>
-            /// <remarks>@return</remarks>
             abstract stretch: newDuration: float -> CallbackArgument.Head.Prev
-            /// <remarks>@return</remarks>
             abstract refresh: unit -> CallbackArgument.Head.Prev
-            /// <remarks>@return</remarks>
             abstract revert: unit -> CallbackArgument.Head.Prev
             /// <remarks>@type {Timeline}</remarks>
             abstract parent: CallbackArgument.Head.Parent with get, set
@@ -2011,38 +1606,20 @@ module CallbackArgument =
             abstract _prev: U2<CallbackArgument.Head, CallbackArgument.Head.Prev> with get, set
             /// <remarks>@type {Renderable}</remarks>
             abstract _next: U2<CallbackArgument.Head, CallbackArgument.Head.Prev> with get, set
-            /// <remarks>@param softReset</remarks>
-            /// <remarks>@return</remarks>
             abstract reset: ?softReset: bool -> CallbackArgument.Head.Prev
-            /// <remarks>@param internalRender</remarks>
-            /// <remarks>@return</remarks>
             abstract init: ?internalRender: bool -> CallbackArgument.Head.Prev
-            /// <remarks>@return</remarks>
             abstract resetTime: unit -> CallbackArgument.Head.Prev
-            /// <remarks>@return</remarks>
             abstract pause: unit -> CallbackArgument.Head.Prev
-            /// <remarks>@return</remarks>
             abstract resume: unit -> CallbackArgument.Head.Prev
-            /// <remarks>@return</remarks>
             abstract restart: unit -> CallbackArgument.Head.Prev
-            /// <remarks>@param time</remarks>
-            /// <remarks>@param muteCallbacks</remarks>
-            /// <remarks>@param internalRender</remarks>
-            /// <remarks>@return</remarks>
             abstract seek: time: float * ?muteCallbacks: U2<float, bool> * ?internalRender: U2<float, bool> -> CallbackArgument.Head.Prev
-            /// <remarks>@return</remarks>
             abstract alternate: unit -> CallbackArgument.Head.Prev
-            /// <remarks>@return</remarks>
             abstract play: unit -> CallbackArgument.Head.Prev
-            /// <remarks>@return</remarks>
             abstract reverse: unit -> CallbackArgument.Head.Prev
-            /// <remarks>@return</remarks>
             abstract cancel: unit -> CallbackArgument.Head.Prev
             /// <summary>
             /// Imediatly completes the timer, cancels it and triggers the onComplete callback
             /// </summary>
-            /// <remarks>@param muteCallbacks</remarks>
-            /// <remarks>@return</remarks>
             abstract complete: ?muteCallbacks: U2<float, bool> -> CallbackArgument.Head.Prev
 
     type Head2 =
@@ -2066,46 +1643,25 @@ module CallbackArgument =
         abstract _prev: U2<CallbackArgument.Head, CallbackArgument.Head.Prev> with get, set
         /// <remarks>@type {Renderable}</remarks>
         abstract _next: U2<CallbackArgument.Head, CallbackArgument.Head.Prev> with get, set
-        /// <remarks>@param softReset</remarks>
-        /// <remarks>@return</remarks>
         abstract reset: ?softReset: bool -> CallbackArgument.Head2
-        /// <remarks>@param internalRender</remarks>
-        /// <remarks>@return</remarks>
         abstract init: ?internalRender: bool -> CallbackArgument.Head2
-        /// <remarks>@return</remarks>
         abstract resetTime: unit -> CallbackArgument.Head2
-        /// <remarks>@return</remarks>
         abstract pause: unit -> CallbackArgument.Head2
-        /// <remarks>@return</remarks>
         abstract resume: unit -> CallbackArgument.Head2
-        /// <remarks>@return</remarks>
         abstract restart: unit -> CallbackArgument.Head2
-        /// <remarks>@param time</remarks>
-        /// <remarks>@param muteCallbacks</remarks>
-        /// <remarks>@param internalRender</remarks>
-        /// <remarks>@return</remarks>
         abstract seek: time: float * ?muteCallbacks: U2<float, bool> * ?internalRender: U2<float, bool> -> CallbackArgument.Head2
-        /// <remarks>@return</remarks>
         abstract alternate: unit -> CallbackArgument.Head2
-        /// <remarks>@return</remarks>
         abstract play: unit -> CallbackArgument.Head2
-        /// <remarks>@return</remarks>
         abstract reverse: unit -> CallbackArgument.Head2
-        /// <remarks>@return</remarks>
         abstract cancel: unit -> CallbackArgument.Head2
-        /// <remarks>@param newDuration</remarks>
-        /// <remarks>@return</remarks>
         abstract stretch: newDuration: float -> CallbackArgument.Head2
         /// <summary>
         /// Cancels the timer by seeking it back to 0 and reverting the attached scroller if necessary
         /// </summary>
-        /// <remarks>@return</remarks>
         abstract revert: unit -> CallbackArgument.Head2
         /// <summary>
         /// Imediatly completes the timer, cancels it and triggers the onComplete callback
         /// </summary>
-        /// <remarks>@param muteCallbacks</remarks>
-        /// <remarks>@return</remarks>
         abstract complete: ?muteCallbacks: U2<float, bool> -> CallbackArgument.Head2
 
 type Revertible = U10<Animatable, AutoLayout, Draggable, JSAnimation, Scope, ScrollObserver, TextSplitter, Timeline, Timer, WAAPIAnimation>
@@ -2838,55 +2394,55 @@ type ScrambleTextParams =
 
 type DrawableSVGGeometry =
     /// <summary>
-    /// The <b>`SVGGeometryElement.pathLength`</b> property reflects the pathLength attribute and returns the total length of the path, in user units.
+    /// The <b><c>SVGGeometryElement.pathLength</c></b> property reflects the pathLength attribute and returns the total length of the path, in user units.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/SVGGeometryElement/pathLength">MDN Reference</a>
     /// </summary>
     abstract pathLength: Browser.Types.SVGAnimatedNumber
     /// <summary>
-    /// The <b>`SVGGeometryElement.getPointAtLength()`</b> method returns the point at a given distance along the path.
+    /// The <b><c>SVGGeometryElement.getPointAtLength()</c></b> method returns the point at a given distance along the path.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/SVGGeometryElement/getPointAtLength">MDN Reference</a>
     /// </summary>
     abstract getPointAtLength: distance: float -> obj
     /// <summary>
-    /// The <b>`SVGGeometryElement.getTotalLength()`</b> method returns the user agent's computed value for the total length of the path in user units.
+    /// The <b><c>SVGGeometryElement.getTotalLength()</c></b> method returns the user agent's computed value for the total length of the path in user units.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/SVGGeometryElement/getTotalLength">MDN Reference</a>
     /// </summary>
     abstract getTotalLength: unit -> float
     /// <summary>
-    /// The <b>`isPointInFill()`</b> method of the SVGGeometryElement interface determines whether a given point is within the fill shape of an element. The point argument is interpreted as a point in the local coordinate system of the element.
+    /// The <b><c>isPointInFill()</c></b> method of the SVGGeometryElement interface determines whether a given point is within the fill shape of an element. The point argument is interpreted as a point in the local coordinate system of the element.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/SVGGeometryElement/isPointInFill">MDN Reference</a>
     /// </summary>
     abstract isPointInFill: ?point: obj -> bool
     /// <summary>
-    /// The <b>`isPointInStroke()`</b> method of the SVGGeometryElement interface determines whether a given point is within the stroke shape of an element. The point argument is interpreted as a point in the local coordinate system of the element.
+    /// The <b><c>isPointInStroke()</c></b> method of the SVGGeometryElement interface determines whether a given point is within the stroke shape of an element. The point argument is interpreted as a point in the local coordinate system of the element.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/SVGGeometryElement/isPointInStroke">MDN Reference</a>
     /// </summary>
     abstract isPointInStroke: ?point: obj -> bool
     /// <summary>
-    /// The <b>`addEventListener()`</b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
+    /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
     /// </summary>
     abstract addEventListener<'K>: ``type``: 'K * listener: (obj -> obj) * ?options: U2<bool, Browser.Types.AddEventListenerOptions> -> unit
     /// <summary>
-    /// The <b>`addEventListener()`</b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
+    /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
     /// </summary>
     abstract addEventListener: ``type``: string * listener: obj * ?options: U2<bool, Browser.Types.AddEventListenerOptions> -> unit
     /// <summary>
-    /// The <b>`removeEventListener()`</b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
+    /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
     /// </summary>
     abstract removeEventListener<'K>: ``type``: 'K * listener: (obj -> obj) * ?options: obj -> unit
     /// <summary>
-    /// The <b>`removeEventListener()`</b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
+    /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
     /// </summary>
@@ -3138,68 +2694,68 @@ type DrawableSVGGeometry =
     /// </summary>
     abstract replaceWith: [<ParamArray>] nodes: U2<string, Browser.Types.Node>[] -> unit
     /// <summary>
-    /// The <b>`Element.attributes`</b> property returns a live collection of all attribute nodes registered to the specified node. It is a NamedNodeMap, not an Array, so it has no Array methods and the Attr nodes' indexes may differ among browsers. To be more specific, attributes is a key/value pair of strings that represents any information regarding that attribute.
+    /// The <b><c>Element.attributes</c></b> property returns a live collection of all attribute nodes registered to the specified node. It is a NamedNodeMap, not an Array, so it has no Array methods and the Attr nodes' indexes may differ among browsers. To be more specific, attributes is a key/value pair of strings that represents any information regarding that attribute.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/attributes">MDN Reference</a>
     /// </summary>
     abstract attributes: Browser.Types.NamedNodeMap
     /// <summary>
-    /// The read-only <b>`classList`</b> property of the Element interface contains a live DOMTokenList collection representing the class attribute of the element. This can then be used to manipulate the class list.
+    /// The read-only <b><c>classList</c></b> property of the Element interface contains a live DOMTokenList collection representing the class attribute of the element. This can then be used to manipulate the class list.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/classList">MDN Reference</a>
     /// </summary>
     abstract classList: Browser.Types.DOMTokenList with get, set
     /// <summary>
-    /// The <b>`clientHeight`</b> read-only property of the Element interface is zero for elements with no CSS or inline layout boxes; otherwise, it's the inner height of an element in pixels. It includes padding but excludes borders, margins, and horizontal scrollbars (if present).
+    /// The <b><c>clientHeight</c></b> read-only property of the Element interface is zero for elements with no CSS or inline layout boxes; otherwise, it's the inner height of an element in pixels. It includes padding but excludes borders, margins, and horizontal scrollbars (if present).
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/clientHeight">MDN Reference</a>
     /// </summary>
     abstract clientHeight: float
     /// <summary>
-    /// The <b>`clientLeft`</b> read-only property of the Element interface returns the width of the left border of an element in pixels. It includes the width of the vertical scrollbar if the text direction of the element is right-to-left and if there is an overflow causing a left vertical scrollbar to be rendered. clientLeft does not include the left margin or the left padding.
+    /// The <b><c>clientLeft</c></b> read-only property of the Element interface returns the width of the left border of an element in pixels. It includes the width of the vertical scrollbar if the text direction of the element is right-to-left and if there is an overflow causing a left vertical scrollbar to be rendered. clientLeft does not include the left margin or the left padding.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/clientLeft">MDN Reference</a>
     /// </summary>
     abstract clientLeft: float
     /// <summary>
-    /// The <b>`clientTop`</b> read-only property of the Element interface returns the width of the top border of an element in pixels.
+    /// The <b><c>clientTop</c></b> read-only property of the Element interface returns the width of the top border of an element in pixels.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/clientTop">MDN Reference</a>
     /// </summary>
     abstract clientTop: float
     /// <summary>
-    /// The <b>`clientWidth`</b> read-only property of the Element interface is zero for inline elements and elements with no CSS; otherwise, it's the inner width of an element in pixels. It includes padding but excludes borders, margins, and vertical scrollbars (if present).
+    /// The <b><c>clientWidth</c></b> read-only property of the Element interface is zero for inline elements and elements with no CSS; otherwise, it's the inner width of an element in pixels. It includes padding but excludes borders, margins, and vertical scrollbars (if present).
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/clientWidth">MDN Reference</a>
     /// </summary>
     abstract clientWidth: float
     /// <summary>
-    /// The <b>`currentCSSZoom`</b> read-only property of the Element interface provides the "effective" CSS zoom of an element, taking into account the zoom applied to the element and all its parent elements.
+    /// The <b><c>currentCSSZoom</c></b> read-only property of the Element interface provides the "effective" CSS zoom of an element, taking into account the zoom applied to the element and all its parent elements.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/currentCSSZoom">MDN Reference</a>
     /// </summary>
     abstract currentCSSZoom: float
     abstract customElementRegistry: obj option
     /// <summary>
-    /// The <b>`id`</b> property of the Element interface represents the element's identifier, reflecting the id global attribute.
+    /// The <b><c>id</c></b> property of the Element interface represents the element's identifier, reflecting the id global attribute.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/id">MDN Reference</a>
     /// </summary>
     abstract id: string with get, set
     /// <summary>
-    /// The <b>`innerHTML`</b> property of the Element interface gets or sets the HTML or XML markup contained within the element, omitting any shadow roots in both cases.
+    /// The <b><c>innerHTML</c></b> property of the Element interface gets or sets the HTML or XML markup contained within the element, omitting any shadow roots in both cases.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/innerHTML">MDN Reference</a>
     /// </summary>
     abstract innerHTML: string with get, set
     /// <summary>
-    /// The <b>`Element.localName`</b> read-only property returns the local part of the qualified name of an element.
+    /// The <b><c>Element.localName</c></b> read-only property returns the local part of the qualified name of an element.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/localName">MDN Reference</a>
     /// </summary>
     abstract localName: string
     /// <summary>
-    /// The <b>`Element.namespaceURI`</b> read-only property returns the namespace URI of the element, or null if the element is not in a namespace.
+    /// The <b><c>Element.namespaceURI</c></b> read-only property returns the namespace URI of the element, or null if the element is not in a namespace.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/namespaceURI">MDN Reference</a>
     /// </summary>
@@ -3213,115 +2769,115 @@ type DrawableSVGGeometry =
     /// </summary>
     abstract onfullscreenerror: (Browser.Types.Event -> obj) option with get, set
     /// <summary>
-    /// The <b>`outerHTML`</b> attribute of the Element interface gets or sets the HTML or XML markup of the element and its descendants, omitting any shadow roots in both cases.
+    /// The <b><c>outerHTML</c></b> attribute of the Element interface gets or sets the HTML or XML markup of the element and its descendants, omitting any shadow roots in both cases.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/outerHTML">MDN Reference</a>
     /// </summary>
     abstract outerHTML: string with get, set
     /// <summary>
-    /// The read-only <b>`ownerDocument`</b> property of the Node interface returns the top-level document object of the node.
+    /// The read-only <b><c>ownerDocument</c></b> property of the Node interface returns the top-level document object of the node.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/ownerDocument">MDN Reference</a>
     /// </summary>
     abstract ownerDocument: Browser.Types.Document
     /// <summary>
-    /// The read-only <b>`part`</b> property of the Element interface contains a DOMTokenList object representing the part identifier(s) of the element. It reflects the element's part content attribute. These can be used to style parts of a shadow DOM, via the ::part pseudo-element.
+    /// The read-only <b><c>part</c></b> property of the Element interface contains a DOMTokenList object representing the part identifier(s) of the element. It reflects the element's part content attribute. These can be used to style parts of a shadow DOM, via the ::part pseudo-element.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/part">MDN Reference</a>
     /// </summary>
     abstract part: Browser.Types.DOMTokenList with get, set
     /// <summary>
-    /// The <b>`Element.prefix`</b> read-only property returns the namespace prefix of the specified element, or null if no prefix is specified.
+    /// The <b><c>Element.prefix</c></b> read-only property returns the namespace prefix of the specified element, or null if no prefix is specified.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/prefix">MDN Reference</a>
     /// </summary>
     abstract prefix: string option
     /// <summary>
-    /// The <b>`scrollHeight`</b> read-only property of the Element interface is a measurement of the height of an element's content, including content not visible on the screen due to overflow.
+    /// The <b><c>scrollHeight</c></b> read-only property of the Element interface is a measurement of the height of an element's content, including content not visible on the screen due to overflow.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/scrollHeight">MDN Reference</a>
     /// </summary>
     abstract scrollHeight: float
     /// <summary>
-    /// The <b>`scrollLeft`</b> property of the Element interface gets or sets the number of pixels by which an element's content is scrolled from its left edge. This value is subpixel precise in modern browsers, meaning that it isn't necessarily a whole number.
+    /// The <b><c>scrollLeft</c></b> property of the Element interface gets or sets the number of pixels by which an element's content is scrolled from its left edge. This value is subpixel precise in modern browsers, meaning that it isn't necessarily a whole number.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/scrollLeft">MDN Reference</a>
     /// </summary>
     abstract scrollLeft: float with get, set
     /// <summary>
-    /// The <b>`scrollTop`</b> property of the Element interface gets or sets the number of pixels by which an element's content is scrolled from its top edge. This value is subpixel precise in modern browsers, meaning that it isn't necessarily a whole number.
+    /// The <b><c>scrollTop</c></b> property of the Element interface gets or sets the number of pixels by which an element's content is scrolled from its top edge. This value is subpixel precise in modern browsers, meaning that it isn't necessarily a whole number.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/scrollTop">MDN Reference</a>
     /// </summary>
     abstract scrollTop: float with get, set
     /// <summary>
-    /// The <b>`scrollWidth`</b> read-only property of the Element interface is a measurement of the width of an element's content, including content not visible on the screen due to overflow.
+    /// The <b><c>scrollWidth</c></b> read-only property of the Element interface is a measurement of the width of an element's content, including content not visible on the screen due to overflow.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/scrollWidth">MDN Reference</a>
     /// </summary>
     abstract scrollWidth: float
     /// <summary>
-    /// The <b>`Element.shadowRoot`</b> read-only property represents the shadow root hosted by the element.
+    /// The <b><c>Element.shadowRoot</c></b> read-only property represents the shadow root hosted by the element.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/shadowRoot">MDN Reference</a>
     /// </summary>
     abstract shadowRoot: Browser.Types.ShadowRoot option
     /// <summary>
-    /// The <b>`slot`</b> property of the Element interface returns the name of the shadow DOM slot the element is inserted in.
+    /// The <b><c>slot</c></b> property of the Element interface returns the name of the shadow DOM slot the element is inserted in.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/slot">MDN Reference</a>
     /// </summary>
     abstract slot: string with get, set
     /// <summary>
-    /// The <b>`tagName`</b> read-only property of the Element interface returns the tag name of the element on which it's called.
+    /// The <b><c>tagName</c></b> read-only property of the Element interface returns the tag name of the element on which it's called.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/tagName">MDN Reference</a>
     /// </summary>
     abstract tagName: string
     /// <summary>
-    /// The <b>`Element.attachShadow()`</b> method attaches a shadow DOM tree to the specified element and returns a reference to its ShadowRoot.
+    /// The <b><c>Element.attachShadow()</c></b> method attaches a shadow DOM tree to the specified element and returns a reference to its ShadowRoot.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/attachShadow">MDN Reference</a>
     /// </summary>
     abstract attachShadow: init: Browser.Types.ShadowRootInit -> Browser.Types.ShadowRoot
     /// <summary>
-    /// The <b>`checkVisibility()`</b> method of the Element interface checks whether the element is visible.
+    /// The <b><c>checkVisibility()</c></b> method of the Element interface checks whether the element is visible.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/checkVisibility">MDN Reference</a>
     /// </summary>
     abstract checkVisibility: ?options: obj -> bool
     /// <summary>
-    /// The <b>`closest()`</b> method of the Element interface traverses the element and its parents (heading toward the document root) until it finds a node that matches the specified CSS selector.
+    /// The <b><c>closest()</c></b> method of the Element interface traverses the element and its parents (heading toward the document root) until it finds a node that matches the specified CSS selector.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/closest">MDN Reference</a>
     /// </summary>
     abstract closest<'K>: selector: 'K -> obj option
     /// <summary>
-    /// The <b>`closest()`</b> method of the Element interface traverses the element and its parents (heading toward the document root) until it finds a node that matches the specified CSS selector.
+    /// The <b><c>closest()</c></b> method of the Element interface traverses the element and its parents (heading toward the document root) until it finds a node that matches the specified CSS selector.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/closest">MDN Reference</a>
     /// </summary>
     abstract closest<'E when 'E :> Browser.Types.Element>: selectors: string -> 'E option
     /// <summary>
-    /// The <b>`computedStyleMap()`</b> method of the Element interface returns a StylePropertyMapReadOnly interface which provides a read-only representation of a CSS declaration block that is an alternative to CSSStyleDeclaration.
+    /// The <b><c>computedStyleMap()</c></b> method of the Element interface returns a StylePropertyMapReadOnly interface which provides a read-only representation of a CSS declaration block that is an alternative to CSSStyleDeclaration.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/computedStyleMap">MDN Reference</a>
     /// </summary>
     abstract computedStyleMap: unit -> obj
     /// <summary>
-    /// The <b>`getAttribute()`</b> method of the Element interface returns the value of a specified attribute on the element.
+    /// The <b><c>getAttribute()</c></b> method of the Element interface returns the value of a specified attribute on the element.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getAttribute">MDN Reference</a>
     /// </summary>
     abstract getAttribute: qualifiedName: string -> string option
     /// <summary>
-    /// The <b>`getAttributeNS()`</b> method of the Element interface returns the string value of the attribute with the specified namespace and name. If the named attribute does not exist, the value returned will either be null or "" (the empty string); see Notes for details.
+    /// The <b><c>getAttributeNS()</c></b> method of the Element interface returns the string value of the attribute with the specified namespace and name. If the named attribute does not exist, the value returned will either be null or "" (the empty string); see Notes for details.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getAttributeNS">MDN Reference</a>
     /// </summary>
     abstract getAttributeNS: ``namespace``: string option * localName: string -> string option
     /// <summary>
-    /// The <b>`getAttributeNames()`</b> method of the Element interface returns the attribute names of the element as an Array of strings. If the element has no attributes it returns an empty array.
+    /// The <b><c>getAttributeNames()</c></b> method of the Element interface returns the attribute names of the element as an Array of strings. If the element has no attributes it returns an empty array.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getAttributeNames">MDN Reference</a>
     /// </summary>
@@ -3333,243 +2889,243 @@ type DrawableSVGGeometry =
     /// </summary>
     abstract getAttributeNode: qualifiedName: string -> Browser.Types.Attr option
     /// <summary>
-    /// The <b>`getAttributeNodeNS()`</b> method of the Element interface returns the namespaced Attr node of an element.
+    /// The <b><c>getAttributeNodeNS()</c></b> method of the Element interface returns the namespaced Attr node of an element.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getAttributeNodeNS">MDN Reference</a>
     /// </summary>
     abstract getAttributeNodeNS: ``namespace``: string option * localName: string -> Browser.Types.Attr option
     /// <summary>
-    /// The <b>`Element.getBoundingClientRect()`</b> method returns a DOMRect object providing information about the size of an element and its position relative to the viewport.
+    /// The <b><c>Element.getBoundingClientRect()</c></b> method returns a DOMRect object providing information about the size of an element and its position relative to the viewport.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getBoundingClientRect">MDN Reference</a>
     /// </summary>
     abstract getBoundingClientRect: unit -> obj
     /// <summary>
-    /// The <b>`getClientRects()`</b> method of the Element interface returns a collection of DOMRect objects that indicate the bounding rectangles for each CSS border box in a client.
+    /// The <b><c>getClientRects()</c></b> method of the Element interface returns a collection of DOMRect objects that indicate the bounding rectangles for each CSS border box in a client.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getClientRects">MDN Reference</a>
     /// </summary>
     abstract getClientRects: unit -> obj
     /// <summary>
-    /// The Element method <b>`getElementsByClassName()`</b> returns a live HTMLCollection which contains every descendant element which has the specified class name or names.
+    /// The Element method <b><c>getElementsByClassName()</c></b> returns a live HTMLCollection which contains every descendant element which has the specified class name or names.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByClassName">MDN Reference</a>
     /// </summary>
     abstract getElementsByClassName: classNames: string -> obj
     /// <summary>
-    /// The <b>`Element.getElementsByTagName()`</b> method returns a live HTMLCollection of elements with the given tag name.
+    /// The <b><c>Element.getElementsByTagName()</c></b> method returns a live HTMLCollection of elements with the given tag name.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagName">MDN Reference</a>
     /// </summary>
     /// <remarks>@deprecated</remarks>
     abstract getElementsByTagName<'K>: qualifiedName: 'K -> obj
     /// <summary>
-    /// The <b>`Element.getElementsByTagName()`</b> method returns a live HTMLCollection of elements with the given tag name.
+    /// The <b><c>Element.getElementsByTagName()</c></b> method returns a live HTMLCollection of elements with the given tag name.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagName">MDN Reference</a>
     /// </summary>
     /// <remarks>@deprecated</remarks>
     abstract getElementsByTagName: qualifiedName: string -> obj
     /// <summary>
-    /// The <b>`Element.getElementsByTagNameNS()`</b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+    /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
     /// </summary>
     abstract getElementsByTagNameNS: namespaceURI: DrawableSVGGeometry.HttpWwwW3Org1999Xhtml * localName: string -> obj
     /// <summary>
-    /// The <b>`Element.getElementsByTagNameNS()`</b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+    /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
     /// </summary>
     abstract getElementsByTagNameNS: namespaceURI: DrawableSVGGeometry.HttpWwwW3Org2000Svg * localName: string -> obj
     /// <summary>
-    /// The <b>`Element.getElementsByTagNameNS()`</b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+    /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
     /// </summary>
     abstract getElementsByTagNameNS: namespaceURI: DrawableSVGGeometry.HttpWwwW3Org1998MathMathML * localName: string -> obj
     /// <summary>
-    /// The <b>`Element.getElementsByTagNameNS()`</b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+    /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
     /// </summary>
     abstract getElementsByTagNameNS: ``namespace``: string option * localName: string -> obj
     /// <summary>
-    /// The <b>`getHTML()`</b> method of the Element interface is used to serialize an element's DOM to an HTML string.
+    /// The <b><c>getHTML()</c></b> method of the Element interface is used to serialize an element's DOM to an HTML string.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getHTML">MDN Reference</a>
     /// </summary>
     abstract getHTML: ?options: obj -> string
     /// <summary>
-    /// The <b>`Element.hasAttribute()`</b> method returns a Boolean value indicating whether the specified element has the specified attribute or not.
+    /// The <b><c>Element.hasAttribute()</c></b> method returns a Boolean value indicating whether the specified element has the specified attribute or not.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/hasAttribute">MDN Reference</a>
     /// </summary>
     abstract hasAttribute: qualifiedName: string -> bool
     /// <summary>
-    /// The <b>`hasAttributeNS()`</b> method of the Element interface returns a boolean value indicating whether the current element has the specified attribute with the specified namespace.
+    /// The <b><c>hasAttributeNS()</c></b> method of the Element interface returns a boolean value indicating whether the current element has the specified attribute with the specified namespace.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/hasAttributeNS">MDN Reference</a>
     /// </summary>
     abstract hasAttributeNS: ``namespace``: string option * localName: string -> bool
     /// <summary>
-    /// The <b>`hasAttributes()`</b> method of the Element interface returns a boolean value indicating whether the current element has any attributes or not.
+    /// The <b><c>hasAttributes()</c></b> method of the Element interface returns a boolean value indicating whether the current element has any attributes or not.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/hasAttributes">MDN Reference</a>
     /// </summary>
     abstract hasAttributes: unit -> bool
     /// <summary>
-    /// The <b>`hasPointerCapture()`</b> method of the Element interface checks whether the element on which it is invoked has pointer capture for the pointer identified by the given pointer ID.
+    /// The <b><c>hasPointerCapture()</c></b> method of the Element interface checks whether the element on which it is invoked has pointer capture for the pointer identified by the given pointer ID.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/hasPointerCapture">MDN Reference</a>
     /// </summary>
     abstract hasPointerCapture: pointerId: float -> bool
     /// <summary>
-    /// The <b>`insertAdjacentElement()`</b> method of the Element interface inserts a given element node at a given position relative to the element it is invoked upon.
+    /// The <b><c>insertAdjacentElement()</c></b> method of the Element interface inserts a given element node at a given position relative to the element it is invoked upon.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/insertAdjacentElement">MDN Reference</a>
     /// </summary>
     abstract insertAdjacentElement: where: DrawableSVGGeometry.InsertAdjacentElement.Where * element: Browser.Types.Element -> Browser.Types.Element option
     /// <summary>
-    /// The <b>`insertAdjacentHTML()`</b> method of the Element interface parses the specified input as HTML or XML and inserts the resulting nodes into the DOM tree at a specified position.
+    /// The <b><c>insertAdjacentHTML()</c></b> method of the Element interface parses the specified input as HTML or XML and inserts the resulting nodes into the DOM tree at a specified position.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/insertAdjacentHTML">MDN Reference</a>
     /// </summary>
     abstract insertAdjacentHTML: position: DrawableSVGGeometry.InsertAdjacentElement.Where * string: string -> unit
     /// <summary>
-    /// The <b>`insertAdjacentText()`</b> method of the Element interface, given a relative position and a string, inserts a new text node at the given position relative to the element it is called from.
+    /// The <b><c>insertAdjacentText()</c></b> method of the Element interface, given a relative position and a string, inserts a new text node at the given position relative to the element it is called from.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/insertAdjacentText">MDN Reference</a>
     /// </summary>
     abstract insertAdjacentText: where: DrawableSVGGeometry.InsertAdjacentElement.Where * data: string -> unit
     /// <summary>
-    /// The <b>`matches()`</b> method of the Element interface tests whether the element would be selected by the specified CSS selector.
+    /// The <b><c>matches()</c></b> method of the Element interface tests whether the element would be selected by the specified CSS selector.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/matches">MDN Reference</a>
     /// </summary>
     abstract matches<'K>: selectors: 'K -> bool
     /// <summary>
-    /// The <b>`matches()`</b> method of the Element interface tests whether the element would be selected by the specified CSS selector.
+    /// The <b><c>matches()</c></b> method of the Element interface tests whether the element would be selected by the specified CSS selector.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/matches">MDN Reference</a>
     /// </summary>
     abstract matches: selectors: string -> bool
     /// <summary>
-    /// The <b>`releasePointerCapture()`</b> method of the Element interface releases (stops) pointer capture that was previously set for a specific (PointerEvent) pointer.
+    /// The <b><c>releasePointerCapture()</c></b> method of the Element interface releases (stops) pointer capture that was previously set for a specific (PointerEvent) pointer.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/releasePointerCapture">MDN Reference</a>
     /// </summary>
     abstract releasePointerCapture: pointerId: float -> unit
     /// <summary>
-    /// The Element method <b>`removeAttribute()`</b> removes the attribute with the specified name from the element.
+    /// The Element method <b><c>removeAttribute()</c></b> removes the attribute with the specified name from the element.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/removeAttribute">MDN Reference</a>
     /// </summary>
     abstract removeAttribute: qualifiedName: string -> unit
     /// <summary>
-    /// The <b>`removeAttributeNS()`</b> method of the Element interface removes the specified attribute with the specified namespace from an element.
+    /// The <b><c>removeAttributeNS()</c></b> method of the Element interface removes the specified attribute with the specified namespace from an element.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/removeAttributeNS">MDN Reference</a>
     /// </summary>
     abstract removeAttributeNS: ``namespace``: string option * localName: string -> unit
     /// <summary>
-    /// The <b>`removeAttributeNode()`</b> method of the Element interface removes the specified Attr node from the element.
+    /// The <b><c>removeAttributeNode()</c></b> method of the Element interface removes the specified Attr node from the element.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/removeAttributeNode">MDN Reference</a>
     /// </summary>
     abstract removeAttributeNode: attr: Browser.Types.Attr -> Browser.Types.Attr
     /// <summary>
-    /// The <b>`Element.requestFullscreen()`</b> method issues an asynchronous request to make the element be displayed in fullscreen mode.
+    /// The <b><c>Element.requestFullscreen()</c></b> method issues an asynchronous request to make the element be displayed in fullscreen mode.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/requestFullscreen">MDN Reference</a>
     /// </summary>
     abstract requestFullscreen: ?options: obj -> JS.Promise<unit>
     /// <summary>
-    /// The <b>`requestPointerLock()`</b> method of the Element interface lets you asynchronously ask for the pointer to be locked on the given element.
+    /// The <b><c>requestPointerLock()</c></b> method of the Element interface lets you asynchronously ask for the pointer to be locked on the given element.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/requestPointerLock">MDN Reference</a>
     /// </summary>
     abstract requestPointerLock: ?options: obj -> JS.Promise<unit>
     /// <summary>
-    /// The <b>`scroll()`</b> method of the Element interface scrolls the element to a particular set of coordinates inside a given element.
+    /// The <b><c>scroll()</c></b> method of the Element interface scrolls the element to a particular set of coordinates inside a given element.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/scroll">MDN Reference</a>
     /// </summary>
     abstract scroll: ?options: obj -> unit
     /// <summary>
-    /// The <b>`scroll()`</b> method of the Element interface scrolls the element to a particular set of coordinates inside a given element.
+    /// The <b><c>scroll()</c></b> method of the Element interface scrolls the element to a particular set of coordinates inside a given element.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/scroll">MDN Reference</a>
     /// </summary>
     abstract scroll: x: float * y: float -> unit
     /// <summary>
-    /// The <b>`scrollBy()`</b> method of the Element interface scrolls an element by the given amount.
+    /// The <b><c>scrollBy()</c></b> method of the Element interface scrolls an element by the given amount.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/scrollBy">MDN Reference</a>
     /// </summary>
     abstract scrollBy: ?options: obj -> unit
     /// <summary>
-    /// The <b>`scrollBy()`</b> method of the Element interface scrolls an element by the given amount.
+    /// The <b><c>scrollBy()</c></b> method of the Element interface scrolls an element by the given amount.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/scrollBy">MDN Reference</a>
     /// </summary>
     abstract scrollBy: x: float * y: float -> unit
     /// <summary>
-    /// The Element interface's <b>`scrollIntoView()`</b> method scrolls the element's ancestor containers such that the element on which scrollIntoView() is called is visible to the user.
+    /// The Element interface's <b><c>scrollIntoView()</c></b> method scrolls the element's ancestor containers such that the element on which scrollIntoView() is called is visible to the user.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/scrollIntoView">MDN Reference</a>
     /// </summary>
     abstract scrollIntoView: ?arg: U2<bool, Browser.Types.ScrollIntoViewOptions> -> unit
     /// <summary>
-    /// The <b>`scrollTo()`</b> method of the Element interface scrolls to a particular set of coordinates inside a given element.
+    /// The <b><c>scrollTo()</c></b> method of the Element interface scrolls to a particular set of coordinates inside a given element.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/scrollTo">MDN Reference</a>
     /// </summary>
     abstract scrollTo: ?options: obj -> unit
     /// <summary>
-    /// The <b>`scrollTo()`</b> method of the Element interface scrolls to a particular set of coordinates inside a given element.
+    /// The <b><c>scrollTo()</c></b> method of the Element interface scrolls to a particular set of coordinates inside a given element.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/scrollTo">MDN Reference</a>
     /// </summary>
     abstract scrollTo: x: float * y: float -> unit
     /// <summary>
-    /// The <b>`setAttribute()`</b> method of the Element interface sets the value of an attribute on the specified element. If the attribute already exists, the value is updated; otherwise a new attribute is added with the specified name and value.
+    /// The <b><c>setAttribute()</c></b> method of the Element interface sets the value of an attribute on the specified element. If the attribute already exists, the value is updated; otherwise a new attribute is added with the specified name and value.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/setAttribute">MDN Reference</a>
     /// </summary>
     abstract setAttribute: qualifiedName: string * value: string -> unit
     /// <summary>
-    /// The <b>`setAttributeNS()`</b> method of the Element interface adds a new attribute or changes the value of an attribute with the given namespace and name.
+    /// The <b><c>setAttributeNS()</c></b> method of the Element interface adds a new attribute or changes the value of an attribute with the given namespace and name.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/setAttributeNS">MDN Reference</a>
     /// </summary>
     abstract setAttributeNS: ``namespace``: string option * qualifiedName: string * value: string -> unit
     /// <summary>
-    /// The <b>`setAttributeNode()`</b> method of the Element interface adds a new Attr node to the specified element.
+    /// The <b><c>setAttributeNode()</c></b> method of the Element interface adds a new Attr node to the specified element.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/setAttributeNode">MDN Reference</a>
     /// </summary>
     abstract setAttributeNode: attr: Browser.Types.Attr -> Browser.Types.Attr option
     /// <summary>
-    /// The <b>`setAttributeNodeNS()`</b> method of the Element interface adds a new namespaced Attr node to an element.
+    /// The <b><c>setAttributeNodeNS()</c></b> method of the Element interface adds a new namespaced Attr node to an element.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/setAttributeNodeNS">MDN Reference</a>
     /// </summary>
     abstract setAttributeNodeNS: attr: Browser.Types.Attr -> Browser.Types.Attr option
     /// <summary>
-    /// The <b>`setHTMLUnsafe()`</b> method of the Element interface is used to parse HTML input into a DocumentFragment, optionally filtering out unwanted elements and attributes, and those that don't belong in the context, and then using it to replace the element's subtree in the DOM.
+    /// The <b><c>setHTMLUnsafe()</c></b> method of the Element interface is used to parse HTML input into a DocumentFragment, optionally filtering out unwanted elements and attributes, and those that don't belong in the context, and then using it to replace the element's subtree in the DOM.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/setHTMLUnsafe">MDN Reference</a>
     /// </summary>
     abstract setHTMLUnsafe: html: string -> unit
     /// <summary>
-    /// The <b>`setPointerCapture()`</b> method of the Element interface is used to designate a specific element as the capture target of future pointer events. Subsequent events for the pointer will be targeted at the capture element until capture is released (via Element.releasePointerCapture() or the pointerup event is fired).
+    /// The <b><c>setPointerCapture()</c></b> method of the Element interface is used to designate a specific element as the capture target of future pointer events. Subsequent events for the pointer will be targeted at the capture element until capture is released (via Element.releasePointerCapture() or the pointerup event is fired).
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/setPointerCapture">MDN Reference</a>
     /// </summary>
     abstract setPointerCapture: pointerId: float -> unit
     /// <summary>
-    /// The <b>`toggleAttribute()`</b> method of the Element interface toggles a Boolean attribute (removing it if it is present and adding it if it is not present) on the given element.
+    /// The <b><c>toggleAttribute()</c></b> method of the Element interface toggles a Boolean attribute (removing it if it is present and adding it if it is not present) on the given element.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/toggleAttribute">MDN Reference</a>
     /// </summary>
@@ -3583,7 +3139,7 @@ type DrawableSVGGeometry =
     abstract webkitMatchesSelector: selectors: string -> bool
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/textContent">MDN Reference</a>
-    /// The <b>`textContent`</b> property of the Node interface represents the text content of the node and its descendants.
+    /// The <b><c>textContent</c></b> property of the Node interface represents the text content of the node and its descendants.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/textContent">MDN Reference</a>
     /// </summary>
@@ -3597,7 +3153,7 @@ type DrawableSVGGeometry =
     /// </summary>
     abstract style: Browser.Types.CSSStyleDeclaration with get, set
     /// <summary>
-    /// The <b>`dispatchEvent()`</b> method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
+    /// The <b><c>dispatchEvent()</c></b> method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent">MDN Reference</a>
     /// </summary>
@@ -4043,163 +3599,163 @@ type DrawableSVGGeometry =
     /// </summary>
     abstract focus: ?options: obj -> unit
     /// <summary>
-    /// The read-only <b>`baseURI`</b> property of the Node interface returns the absolute base URL of the document containing the node.
+    /// The read-only <b><c>baseURI</c></b> property of the Node interface returns the absolute base URL of the document containing the node.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/baseURI">MDN Reference</a>
     /// </summary>
     abstract baseURI: string
     /// <summary>
-    /// The read-only <b>`childNodes`</b> property of the Node interface returns a live NodeList of child nodes of the given element where the first child node is assigned index 0. Child nodes include elements, text and comments.
+    /// The read-only <b><c>childNodes</c></b> property of the Node interface returns a live NodeList of child nodes of the given element where the first child node is assigned index 0. Child nodes include elements, text and comments.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/childNodes">MDN Reference</a>
     /// </summary>
     abstract childNodes: Browser.Types.NodeListOf<Browser.Types.ChildNode>
     /// <summary>
-    /// The read-only <b>`firstChild`</b> property of the Node interface returns the node's first child in the tree, or null if the node has no children.
+    /// The read-only <b><c>firstChild</c></b> property of the Node interface returns the node's first child in the tree, or null if the node has no children.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/firstChild">MDN Reference</a>
     /// </summary>
     abstract firstChild: Browser.Types.ChildNode option
     /// <summary>
-    /// The read-only <b>`isConnected`</b> property of the Node interface returns a boolean indicating whether the node is connected (directly or indirectly) to a Document object.
+    /// The read-only <b><c>isConnected</c></b> property of the Node interface returns a boolean indicating whether the node is connected (directly or indirectly) to a Document object.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/isConnected">MDN Reference</a>
     /// </summary>
     abstract isConnected: bool
     /// <summary>
-    /// The read-only <b>`lastChild`</b> property of the Node interface returns the last child of the node, or null if there are no child nodes.
+    /// The read-only <b><c>lastChild</c></b> property of the Node interface returns the last child of the node, or null if there are no child nodes.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/lastChild">MDN Reference</a>
     /// </summary>
     abstract lastChild: Browser.Types.ChildNode option
     /// <summary>
-    /// The read-only <b>`nextSibling`</b> property of the Node interface returns the node immediately following the specified one in their parent's childNodes, or returns null if the specified node is the last child in the parent element.
+    /// The read-only <b><c>nextSibling</c></b> property of the Node interface returns the node immediately following the specified one in their parent's childNodes, or returns null if the specified node is the last child in the parent element.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/nextSibling">MDN Reference</a>
     /// </summary>
     abstract nextSibling: Browser.Types.ChildNode option
     /// <summary>
-    /// The read-only <b>`nodeName`</b> property of Node returns the name of the current node as a string.
+    /// The read-only <b><c>nodeName</c></b> property of Node returns the name of the current node as a string.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/nodeName">MDN Reference</a>
     /// </summary>
     abstract nodeName: string
     /// <summary>
-    /// The read-only <b>`nodeType`</b> property of a Node interface is an integer that identifies what the node is. It distinguishes different kinds of nodes from each other, such as elements, text, and comments.
+    /// The read-only <b><c>nodeType</c></b> property of a Node interface is an integer that identifies what the node is. It distinguishes different kinds of nodes from each other, such as elements, text, and comments.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/nodeType">MDN Reference</a>
     /// </summary>
     abstract nodeType: float
     /// <summary>
-    /// The <b>`nodeValue`</b> property of the Node interface returns or sets the value of the current node.
+    /// The <b><c>nodeValue</c></b> property of the Node interface returns or sets the value of the current node.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/nodeValue">MDN Reference</a>
     /// </summary>
     abstract nodeValue: string option with get, set
     /// <summary>
-    /// The read-only <b>`parentElement`</b> property of Node interface returns the DOM node's parent Element, or null if the node either has no parent, or its parent isn't a DOM Element. Node.parentNode on the other hand returns any kind of parent, regardless of its type.
+    /// The read-only <b><c>parentElement</c></b> property of Node interface returns the DOM node's parent Element, or null if the node either has no parent, or its parent isn't a DOM Element. Node.parentNode on the other hand returns any kind of parent, regardless of its type.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/parentElement">MDN Reference</a>
     /// </summary>
     abstract parentElement: Browser.Types.HTMLElement option
     /// <summary>
-    /// The read-only <b>`parentNode`</b> property of the Node interface returns the parent of the specified node in the DOM tree.
+    /// The read-only <b><c>parentNode</c></b> property of the Node interface returns the parent of the specified node in the DOM tree.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/parentNode">MDN Reference</a>
     /// </summary>
     abstract parentNode: obj option
     /// <summary>
-    /// The read-only <b>`previousSibling`</b> property of the Node interface returns the node immediately preceding the specified one in its parent's childNodes list, or null if the specified node is the first in that list.
+    /// The read-only <b><c>previousSibling</c></b> property of the Node interface returns the node immediately preceding the specified one in its parent's childNodes list, or null if the specified node is the first in that list.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/previousSibling">MDN Reference</a>
     /// </summary>
     abstract previousSibling: Browser.Types.ChildNode option
     /// <summary>
-    /// The <b>`appendChild()`</b> method of the Node interface adds a node to the end of the list of children of a specified parent node.
+    /// The <b><c>appendChild()</c></b> method of the Node interface adds a node to the end of the list of children of a specified parent node.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/appendChild">MDN Reference</a>
     /// </summary>
     abstract appendChild<'T when 'T :> Browser.Types.Node>: node: 'T -> 'T
     /// <summary>
-    /// The <b>`cloneNode()`</b> method of the Node interface returns a duplicate of the node on which this method was called. Its parameter controls if the subtree contained in the node is also cloned or not.
+    /// The <b><c>cloneNode()</c></b> method of the Node interface returns a duplicate of the node on which this method was called. Its parameter controls if the subtree contained in the node is also cloned or not.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/cloneNode">MDN Reference</a>
     /// </summary>
     abstract cloneNode: ?subtree: bool -> Browser.Types.Node
     /// <summary>
-    /// The <b>`compareDocumentPosition()`</b> method of the Node interface reports the position of its argument node relative to the node on which it is called.
+    /// The <b><c>compareDocumentPosition()</c></b> method of the Node interface reports the position of its argument node relative to the node on which it is called.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/compareDocumentPosition">MDN Reference</a>
     /// </summary>
     abstract compareDocumentPosition: other: Browser.Types.Node -> float
     /// <summary>
-    /// The <b>`contains()`</b> method of the Node interface returns a boolean value indicating whether a node is a descendant of a given node, that is the node itself, one of its direct children (childNodes), one of the children's direct children, and so on.
+    /// The <b><c>contains()</c></b> method of the Node interface returns a boolean value indicating whether a node is a descendant of a given node, that is the node itself, one of its direct children (childNodes), one of the children's direct children, and so on.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/contains">MDN Reference</a>
     /// </summary>
     abstract contains: ?other: Browser.Types.Node -> bool
     /// <summary>
-    /// The <b>`getRootNode()`</b> method of the Node interface returns the context object's root, which optionally includes the shadow root if it is available.
+    /// The <b><c>getRootNode()</c></b> method of the Node interface returns the context object's root, which optionally includes the shadow root if it is available.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/getRootNode">MDN Reference</a>
     /// </summary>
     abstract getRootNode: ?options: obj -> Browser.Types.Node
     /// <summary>
-    /// The <b>`hasChildNodes()`</b> method of the Node interface returns a boolean value indicating whether the given Node has child nodes or not.
+    /// The <b><c>hasChildNodes()</c></b> method of the Node interface returns a boolean value indicating whether the given Node has child nodes or not.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/hasChildNodes">MDN Reference</a>
     /// </summary>
     abstract hasChildNodes: unit -> bool
     /// <summary>
-    /// The <b>`insertBefore()`</b> method of the Node interface inserts a node before a reference node as a child of a specified parent node.
+    /// The <b><c>insertBefore()</c></b> method of the Node interface inserts a node before a reference node as a child of a specified parent node.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/insertBefore">MDN Reference</a>
     /// </summary>
     abstract insertBefore<'T when 'T :> Browser.Types.Node>: node: 'T * ?child: Browser.Types.Node -> 'T
     /// <summary>
-    /// The <b>`isDefaultNamespace()`</b> method of the Node interface accepts a namespace URI as an argument. It returns a boolean value that is true if the namespace is the default namespace on the given node and false if not. The default namespace can be retrieved with Node.lookupNamespaceURI() by passing null as the argument.
+    /// The <b><c>isDefaultNamespace()</c></b> method of the Node interface accepts a namespace URI as an argument. It returns a boolean value that is true if the namespace is the default namespace on the given node and false if not. The default namespace can be retrieved with Node.lookupNamespaceURI() by passing null as the argument.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/isDefaultNamespace">MDN Reference</a>
     /// </summary>
     abstract isDefaultNamespace: ?``namespace``: string -> bool
     /// <summary>
-    /// The <b>`isEqualNode()`</b> method of the Node interface tests whether two nodes are equal. Two nodes are equal when they have the same type, defining characteristics (for elements, this would be their ID, number of children, and so forth), its attributes match, and so on. The specific set of data points that must match varies depending on the types of the nodes.
+    /// The <b><c>isEqualNode()</c></b> method of the Node interface tests whether two nodes are equal. Two nodes are equal when they have the same type, defining characteristics (for elements, this would be their ID, number of children, and so forth), its attributes match, and so on. The specific set of data points that must match varies depending on the types of the nodes.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/isEqualNode">MDN Reference</a>
     /// </summary>
     abstract isEqualNode: ?otherNode: Browser.Types.Node -> bool
     /// <summary>
-    /// The <b>`isSameNode()`</b> method of the Node interface is a legacy alias the for the === strict equality operator. That is, it tests whether two nodes are the same (in other words, whether they reference the same object).
+    /// The <b><c>isSameNode()</c></b> method of the Node interface is a legacy alias the for the === strict equality operator. That is, it tests whether two nodes are the same (in other words, whether they reference the same object).
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/isSameNode">MDN Reference</a>
     /// </summary>
     abstract isSameNode: ?otherNode: Browser.Types.Node -> bool
     /// <summary>
-    /// The <b>`lookupNamespaceURI()`</b> method of the Node interface takes a prefix as parameter and returns the namespace URI associated with it on the given node if found (and null if not). This method's existence allows Node objects to be passed as a namespace resolver to XPathEvaluator.createExpression() and XPathEvaluator.evaluate().
+    /// The <b><c>lookupNamespaceURI()</c></b> method of the Node interface takes a prefix as parameter and returns the namespace URI associated with it on the given node if found (and null if not). This method's existence allows Node objects to be passed as a namespace resolver to XPathEvaluator.createExpression() and XPathEvaluator.evaluate().
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/lookupNamespaceURI">MDN Reference</a>
     /// </summary>
     abstract lookupNamespaceURI: ?prefix: string -> string option
     /// <summary>
-    /// The <b>`lookupPrefix()`</b> method of the Node interface returns a string containing the prefix for a given namespace URI, if present, and null if not. When multiple prefixes are possible, the first prefix is returned.
+    /// The <b><c>lookupPrefix()</c></b> method of the Node interface returns a string containing the prefix for a given namespace URI, if present, and null if not. When multiple prefixes are possible, the first prefix is returned.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/lookupPrefix">MDN Reference</a>
     /// </summary>
     abstract lookupPrefix: ?``namespace``: string -> string option
     /// <summary>
-    /// The <b>`normalize()`</b> method of the Node interface puts the specified node and all of its sub-tree into a normalized form. In a normalized sub-tree, no text nodes in the sub-tree are empty and there are no adjacent text nodes.
+    /// The <b><c>normalize()</c></b> method of the Node interface puts the specified node and all of its sub-tree into a normalized form. In a normalized sub-tree, no text nodes in the sub-tree are empty and there are no adjacent text nodes.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/normalize">MDN Reference</a>
     /// </summary>
     abstract normalize: unit -> unit
     /// <summary>
-    /// The <b>`removeChild()`</b> method of the Node interface removes a child node from the DOM and returns the removed node.
+    /// The <b><c>removeChild()</c></b> method of the Node interface removes a child node from the DOM and returns the removed node.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/removeChild">MDN Reference</a>
     /// </summary>
     abstract removeChild<'T when 'T :> Browser.Types.Node>: child: 'T -> 'T
     /// <summary>
-    /// The <b>`replaceChild()`</b> method of the Node interface replaces a child node within the given (parent) node.
+    /// The <b><c>replaceChild()</c></b> method of the Node interface replaces a child node within the given (parent) node.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/replaceChild">MDN Reference</a>
     /// </summary>
@@ -4354,37 +3910,37 @@ type DrawableSVGGeometry =
     /// <remarks>@deprecated</remarks>
     abstract className: obj
     /// <summary>
-    /// The <b>`ownerSVGElement`</b> property of the SVGElement interface reflects the nearest ancestor &lt;svg&gt; element. null if the given element is the outermost &lt;svg&gt; element.
+    /// The <b><c>ownerSVGElement</c></b> property of the SVGElement interface reflects the nearest ancestor &lt;svg&gt; element. null if the given element is the outermost &lt;svg&gt; element.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/SVGElement/ownerSVGElement">MDN Reference</a>
     /// </summary>
     abstract ownerSVGElement: Browser.Types.SVGSVGElement option
     /// <summary>
-    /// The <b>`viewportElement`</b> property of the SVGElement interface represents the SVGElement which established the current viewport. Often the nearest ancestor &lt;svg&gt; element. null if the given element is the outermost &lt;svg&gt; element.
+    /// The <b><c>viewportElement</c></b> property of the SVGElement interface represents the SVGElement which established the current viewport. Often the nearest ancestor &lt;svg&gt; element. null if the given element is the outermost &lt;svg&gt; element.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/SVGElement/viewportElement">MDN Reference</a>
     /// </summary>
     abstract viewportElement: Browser.Types.SVGElement option
     /// <summary>
-    /// The <b>`transform`</b> read-only property of the SVGGraphicsElement interface reflects the computed value of the transform property and its corresponding transform attribute of the given element.
+    /// The <b><c>transform</c></b> read-only property of the SVGGraphicsElement interface reflects the computed value of the transform property and its corresponding transform attribute of the given element.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/SVGGraphicsElement/transform">MDN Reference</a>
     /// </summary>
     abstract transform: Browser.Types.SVGAnimatedTransformList
     /// <summary>
-    /// The <b>`SVGGraphicsElement.getBBox()`</b> method allows us to determine the coordinates of the smallest rectangle in which the object fits. The coordinates returned are with respect to the current SVG space (after the application of all geometry attributes on all the elements contained in the target element).
+    /// The <b><c>SVGGraphicsElement.getBBox()</c></b> method allows us to determine the coordinates of the smallest rectangle in which the object fits. The coordinates returned are with respect to the current SVG space (after the application of all geometry attributes on all the elements contained in the target element).
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/SVGGraphicsElement/getBBox">MDN Reference</a>
     /// </summary>
     abstract getBBox: ?options: obj -> obj
     /// <summary>
-    /// The <b>`getCTM()`</b> method of the SVGGraphicsElement interface represents the matrix that transforms the current element's coordinate system to its SVG viewport's coordinate system.
+    /// The <b><c>getCTM()</c></b> method of the SVGGraphicsElement interface represents the matrix that transforms the current element's coordinate system to its SVG viewport's coordinate system.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/SVGGraphicsElement/getCTM">MDN Reference</a>
     /// </summary>
     abstract getCTM: unit -> obj option
     /// <summary>
-    /// The <b>`getScreenCTM()`</b> method of the SVGGraphicsElement interface represents the matrix that transforms the current element's coordinate system to the coordinate system of the SVG viewport for the SVG document fragment.
+    /// The <b><c>getScreenCTM()</c></b> method of the SVGGraphicsElement interface represents the matrix that transforms the current element's coordinate system to the coordinate system of the SVG viewport for the SVG document fragment.
     ///
     /// <a href="https://developer.mozilla.org/docs/Web/API/SVGGraphicsElement/getScreenCTM">MDN Reference</a>
     /// </summary>
@@ -4494,117 +4050,69 @@ type Utils =
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targetSelector</remarks>
-    /// <remarks>@param propName</remarks>
-    /// <remarks>@param unit</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targetSelector</remarks>
-    /// <remarks>@param propName</remarks>
-    /// <remarks>@param unit</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targetSelector</remarks>
-    /// <remarks>@param propName</remarks>
-    /// <remarks>@param unit</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targetSelector</remarks>
-    /// <remarks>@param propName</remarks>
-    /// <remarks>@param unit</remarks>
     abstract get: targetSelector: DOMTargetSelector * propName: string -> string
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targetSelector</remarks>
-    /// <remarks>@param propName</remarks>
-    /// <remarks>@param unit</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targetSelector</remarks>
-    /// <remarks>@param propName</remarks>
-    /// <remarks>@param unit</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targetSelector</remarks>
-    /// <remarks>@param propName</remarks>
-    /// <remarks>@param unit</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targetSelector</remarks>
-    /// <remarks>@param propName</remarks>
-    /// <remarks>@param unit</remarks>
     abstract get: targetSelector: JSTargetsParam * propName: string -> TimelinePosition
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targetSelector</remarks>
-    /// <remarks>@param propName</remarks>
-    /// <remarks>@param unit</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targetSelector</remarks>
-    /// <remarks>@param propName</remarks>
-    /// <remarks>@param unit</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targetSelector</remarks>
-    /// <remarks>@param propName</remarks>
-    /// <remarks>@param unit</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targetSelector</remarks>
-    /// <remarks>@param propName</remarks>
-    /// <remarks>@param unit</remarks>
     abstract get: targetSelector: DOMTargetsParam * propName: string * unit: string -> string
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targetSelector</remarks>
-    /// <remarks>@param propName</remarks>
-    /// <remarks>@param unit</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targetSelector</remarks>
-    /// <remarks>@param propName</remarks>
-    /// <remarks>@param unit</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targetSelector</remarks>
-    /// <remarks>@param propName</remarks>
-    /// <remarks>@param unit</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targetSelector</remarks>
-    /// <remarks>@param propName</remarks>
-    /// <remarks>@param unit</remarks>
     abstract get: targetSelector: TargetsParam * propName: string * unit: bool -> float
     abstract ``$``: targets: DOMTargetsParam -> DOMTarget[]
     abstract ``$``: targets: JSTargetsParam -> JSTarget[]
@@ -4675,8 +4183,6 @@ type WAAPIAnimation =
     abstract _completed: float with get, set
     /// <remarks>@type {Array.&lt;Object&gt;}</remarks>
     abstract _inlineStyles: obj[] with get, set
-    /// <remarks>@param callback</remarks>
-    /// <remarks>@return</remarks>
     abstract forEach: callback: U2<string, (obj -> obj)> -> WAAPIAnimation
     abstract speed: float with get, set
     abstract currentTime: float with get, set
@@ -4686,16 +4192,13 @@ type WAAPIAnimation =
     abstract alternate: unit -> WAAPIAnimation
     abstract play: unit -> WAAPIAnimation
     abstract reverse: unit -> WAAPIAnimation
-    /// <remarks>@param time</remarks>
-    /// <remarks>@param muteCallbacks</remarks>
     abstract seek: time: float * ?muteCallbacks: bool -> WAAPIAnimation
     abstract restart: unit -> WAAPIAnimation
     abstract commitStyles: unit -> WAAPIAnimation
     abstract complete: unit -> WAAPIAnimation
     abstract cancel: unit -> WAAPIAnimation
     abstract revert: unit -> WAAPIAnimation
-    /// <remarks>@param callback</remarks>
-    /// <remarks>@return Promise&lt;this&gt;</remarks>
+    /// <returns>Promise&lt;this&gt;</returns>
     abstract ``then``: ?callback: (WAAPIAnimation -> obj) -> JS.Promise<obj>
 
 type Animate = delegate of targets: DOMTargetsParam * ``params``: WAAPIAnimationParams -> WAAPIAnimation
@@ -4734,43 +4237,34 @@ type Exports =
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targets</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targets</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targets</remarks>
     [<Import("$", "animejs")>]
     static member ``$`` (targets: DOMTargetsParam) : DOMTarget[] = jsNative
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targets</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targets</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targets</remarks>
     [<Import("$", "animejs")>]
     static member ``$`` (targets: JSTargetsParam) : JSTarget[] = jsNative
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targets</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targets</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targets</remarks>
     [<Import("$", "animejs")>]
     static member ``$`` (targets: TargetsParam) : Target[] = jsNative
     [<Import("Draggable", "animejs"); EmitConstructor>]
@@ -4933,120 +4427,72 @@ type Exports =
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targetSelector</remarks>
-    /// <remarks>@param propName</remarks>
-    /// <remarks>@param unit</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targetSelector</remarks>
-    /// <remarks>@param propName</remarks>
-    /// <remarks>@param unit</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targetSelector</remarks>
-    /// <remarks>@param propName</remarks>
-    /// <remarks>@param unit</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targetSelector</remarks>
-    /// <remarks>@param propName</remarks>
-    /// <remarks>@param unit</remarks>
     [<Import("get", "animejs")>]
     static member get (targetSelector: DOMTargetSelector, propName: string) : string = jsNative
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targetSelector</remarks>
-    /// <remarks>@param propName</remarks>
-    /// <remarks>@param unit</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targetSelector</remarks>
-    /// <remarks>@param propName</remarks>
-    /// <remarks>@param unit</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targetSelector</remarks>
-    /// <remarks>@param propName</remarks>
-    /// <remarks>@param unit</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targetSelector</remarks>
-    /// <remarks>@param propName</remarks>
-    /// <remarks>@param unit</remarks>
     [<Import("get", "animejs")>]
     static member get (targetSelector: JSTargetsParam, propName: string) : TimelinePosition = jsNative
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targetSelector</remarks>
-    /// <remarks>@param propName</remarks>
-    /// <remarks>@param unit</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targetSelector</remarks>
-    /// <remarks>@param propName</remarks>
-    /// <remarks>@param unit</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targetSelector</remarks>
-    /// <remarks>@param propName</remarks>
-    /// <remarks>@param unit</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targetSelector</remarks>
-    /// <remarks>@param propName</remarks>
-    /// <remarks>@param unit</remarks>
     [<Import("get", "animejs")>]
     static member get (targetSelector: DOMTargetsParam, propName: string, unit: string) : string = jsNative
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targetSelector</remarks>
-    /// <remarks>@param propName</remarks>
-    /// <remarks>@param unit</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targetSelector</remarks>
-    /// <remarks>@param propName</remarks>
-    /// <remarks>@param unit</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targetSelector</remarks>
-    /// <remarks>@param propName</remarks>
-    /// <remarks>@param unit</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    /// <remarks>@param targetSelector</remarks>
-    /// <remarks>@param propName</remarks>
-    /// <remarks>@param unit</remarks>
     [<Import("get", "animejs")>]
     static member get (targetSelector: TargetsParam, propName: string, unit: bool) : float = jsNative
     [<Import("set", "animejs")>]

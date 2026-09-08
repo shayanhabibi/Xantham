@@ -1019,8 +1019,8 @@ module Es =
         /// <summary>
         /// An optional initializer mutator that is invoked when the underlying field initializer is evaluated.
         /// </summary>
-        /// <remarks>@param value The incoming initializer value.</remarks>
-        /// <remarks>@returns The replacement initializer value.</remarks>
+        /// <param name="value">The incoming initializer value.</param>
+        /// <returns>The replacement initializer value.</returns>
         abstract init: ('Value -> 'Value) option with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (?get: (unit -> 'Value), ?set: ('Value -> unit), ?init: ('Value -> 'Value)) : ClassAccessorDecoratorResult<'This, 'Value> = jsNative
@@ -1131,17 +1131,17 @@ module Es =
         /// <summary>
         /// Determines whether an object has a property with the specified name.
         /// </summary>
-        /// <remarks>@param v A property name.</remarks>
+        /// <param name="v">A property name.</param>
         abstract hasOwnProperty: v: PropertyKey -> bool
         /// <summary>
         /// Determines whether an object exists in another object's prototype chain.
         /// </summary>
-        /// <remarks>@param v Another object whose prototype chain is to be checked.</remarks>
+        /// <param name="v">Another object whose prototype chain is to be checked.</param>
         abstract isPrototypeOf: v: Object -> bool
         /// <summary>
         /// Determines whether a specified property is enumerable.
         /// </summary>
-        /// <remarks>@param v A property name.</remarks>
+        /// <param name="v">A property name.</param>
         abstract propertyIsEnumerable: v: PropertyKey -> bool
         [<ParamObject; Emit("$0")>]
         static member Create (``constructor``: Function, toString: (unit -> string), toLocaleString: (unit -> string), valueOf: (unit -> Object), hasOwnProperty: (PropertyKey -> bool), isPrototypeOf: (Object -> bool), propertyIsEnumerable: (PropertyKey -> bool)) : Object = jsNative
@@ -1150,86 +1150,86 @@ module Es =
         /// <summary>
         /// Returns the prototype of an object.
         /// </summary>
-        /// <remarks>@param o The object that references the prototype.</remarks>
+        /// <param name="o">The object that references the prototype.</param>
         abstract getPrototypeOf: o: obj -> obj
         /// <summary>
         /// Gets the own property descriptor of the specified object.
         /// An own property descriptor is one that is defined directly on the object and is not inherited from the object's prototype.
         /// </summary>
-        /// <remarks>@param o Object that contains the property.</remarks>
-        /// <remarks>@param p Name of the property.</remarks>
+        /// <param name="o">Object that contains the property.</param>
+        /// <param name="p">Name of the property.</param>
         abstract getOwnPropertyDescriptor: o: obj * p: PropertyKey -> PropertyDescriptor option
         /// <summary>
         /// Returns the names of the own properties of an object. The own properties of an object are those that are defined directly
         /// on that object, and are not inherited from the object's prototype. The properties of an object include both fields (objects) and functions.
         /// </summary>
-        /// <remarks>@param o Object that contains the own properties.</remarks>
+        /// <param name="o">Object that contains the own properties.</param>
         abstract getOwnPropertyNames: o: obj -> string[]
         /// <summary>
         /// Creates an object that has the specified prototype or that has null prototype.
         /// Creates an object that has the specified prototype, and that optionally contains specified properties.
         /// </summary>
-        /// <remarks>@param o Object to use as a prototype. May be null.</remarks>
-        /// <remarks>@param o Object to use as a prototype. May be null</remarks>
-        /// <remarks>@param properties JavaScript object that contains one or more property descriptors.</remarks>
+        /// <param name="o">Object to use as a prototype. May be null.</param>
+        /// <param name="o">Object to use as a prototype. May be null</param>
+        /// <param name="properties">JavaScript object that contains one or more property descriptors.</param>
         abstract create: ?o: obj -> obj
         /// <summary>
         /// Creates an object that has the specified prototype or that has null prototype.
         /// Creates an object that has the specified prototype, and that optionally contains specified properties.
         /// </summary>
-        /// <remarks>@param o Object to use as a prototype. May be null.</remarks>
-        /// <remarks>@param o Object to use as a prototype. May be null</remarks>
-        /// <remarks>@param properties JavaScript object that contains one or more property descriptors.</remarks>
+        /// <param name="o">Object to use as a prototype. May be null.</param>
+        /// <param name="o">Object to use as a prototype. May be null</param>
+        /// <param name="properties">JavaScript object that contains one or more property descriptors.</param>
         abstract create: o: obj option * properties: ObjectConstructor.Create.Properties -> obj
         /// <summary>
         /// Adds a property to an object, or modifies attributes of an existing property.
         /// </summary>
-        /// <remarks>@param o Object on which to add or modify the property. This can be a native JavaScript object (that is, a user-defined object or a built in object) or a DOM object.</remarks>
-        /// <remarks>@param p The property name.</remarks>
-        /// <remarks>@param attributes Descriptor for the property. It can be for a data property or an accessor property.</remarks>
+        /// <param name="o">Object on which to add or modify the property. This can be a native JavaScript object (that is, a user-defined object or a built in object) or a DOM object.</param>
+        /// <param name="p">The property name.</param>
+        /// <param name="attributes">Descriptor for the property. It can be for a data property or an accessor property.</param>
         abstract defineProperty<'T>: o: 'T * p: PropertyKey * attributes: ObjectConstructor.DefineProperty.Attributes -> 'T
         /// <summary>
         /// Adds one or more properties to an object, and/or modifies attributes of existing properties.
         /// </summary>
-        /// <remarks>@param o Object on which to add or modify the properties. This can be a native JavaScript object or a DOM object.</remarks>
-        /// <remarks>@param properties JavaScript object that contains one or more descriptor objects. Each descriptor object describes a data property or an accessor property.</remarks>
+        /// <param name="o">Object on which to add or modify the properties. This can be a native JavaScript object or a DOM object.</param>
+        /// <param name="properties">JavaScript object that contains one or more descriptor objects. Each descriptor object describes a data property or an accessor property.</param>
         abstract defineProperties<'T>: o: 'T * properties: ObjectConstructor.Create.Properties -> 'T
         /// <summary>
         /// Prevents the modification of attributes of existing properties, and prevents the addition of new properties.
         /// </summary>
-        /// <remarks>@param o Object on which to lock the attributes.</remarks>
+        /// <param name="o">Object on which to lock the attributes.</param>
         abstract seal<'T>: o: 'T -> 'T
         /// <summary>
         /// Prevents the modification of existing property attributes and values, and prevents the addition of new properties.
         /// </summary>
-        /// <remarks>@param f Object on which to lock the attributes.</remarks>
-        /// <remarks>@param o Object on which to lock the attributes.</remarks>
-        /// <remarks>@param o Object on which to lock the attributes.</remarks>
+        /// <param name="f">Object on which to lock the attributes.</param>
+        /// <param name="o">Object on which to lock the attributes.</param>
+        /// <param name="o">Object on which to lock the attributes.</param>
         abstract freeze<'T when 'T :> Function>: f: 'T -> 'T
         /// <summary>
         /// Prevents the addition of new properties to an object.
         /// </summary>
-        /// <remarks>@param o Object to make non-extensible.</remarks>
+        /// <param name="o">Object to make non-extensible.</param>
         abstract preventExtensions<'T>: o: 'T -> 'T
         /// <summary>
         /// Returns true if existing property attributes cannot be modified in an object and new properties cannot be added to the object.
         /// </summary>
-        /// <remarks>@param o Object to test.</remarks>
+        /// <param name="o">Object to test.</param>
         abstract isSealed: o: obj -> bool
         /// <summary>
         /// Returns true if existing property attributes and values cannot be modified in an object, and new properties cannot be added to the object.
         /// </summary>
-        /// <remarks>@param o Object to test.</remarks>
+        /// <param name="o">Object to test.</param>
         abstract isFrozen: o: obj -> bool
         /// <summary>
         /// Returns a value that indicates whether new properties can be added to an object.
         /// </summary>
-        /// <remarks>@param o Object to test.</remarks>
+        /// <param name="o">Object to test.</param>
         abstract isExtensible: o: obj -> bool
         /// <summary>
         /// Returns the names of the enumerable string properties and methods of an object.
         /// </summary>
-        /// <remarks>@param o Object that contains the properties and methods. This can be an object that you created or an existing Document Object Model (DOM) object.</remarks>
+        /// <param name="o">Object that contains the properties and methods. This can be an object that you created or an existing Document Object Model (DOM) object.</param>
         abstract keys: o: obj -> string[]
         [<EmitConstructor>]
         abstract Create: ?value: obj -> Object
@@ -1246,21 +1246,21 @@ module Es =
         /// <summary>
         /// Calls the function, substituting the specified object for the this value of the function, and the specified array for the arguments of the function.
         /// </summary>
-        /// <remarks>@param thisArg The object to be used as the this object.</remarks>
-        /// <remarks>@param argArray A set of arguments to be passed to the function.</remarks>
+        /// <param name="thisArg">The object to be used as the this object.</param>
+        /// <param name="argArray">A set of arguments to be passed to the function.</param>
         abstract apply: thisArg: obj * ?argArray: obj -> obj
         /// <summary>
         /// Calls a method of an object, substituting another object for the current object.
         /// </summary>
-        /// <remarks>@param thisArg The object to be used as the current object.</remarks>
-        /// <remarks>@param argArray A list of arguments to be passed to the method.</remarks>
+        /// <param name="thisArg">The object to be used as the current object.</param>
+        /// <param name="argArray">A list of arguments to be passed to the method.</param>
         abstract call: thisArg: obj * [<ParamArray>] argArray: obj[] -> obj
         /// <summary>
         /// For a given function, creates a bound function that has the same body as the original function.
         /// The this object of the bound function is associated with the specified object, and has the specified initial parameters.
         /// </summary>
-        /// <remarks>@param thisArg An object to which the this keyword can refer inside the new function.</remarks>
-        /// <remarks>@param argArray A list of arguments to be passed to the new function.</remarks>
+        /// <param name="thisArg">An object to which the this keyword can refer inside the new function.</param>
+        /// <param name="argArray">A list of arguments to be passed to the new function.</param>
         abstract bind: thisArg: obj * [<ParamArray>] argArray: obj[] -> obj
         /// <summary>
         /// Returns a string representation of a function.
@@ -1296,38 +1296,38 @@ module Es =
         /// <summary>
         /// Calls the function with the specified object as the this value and the elements of specified array as the arguments.
         /// </summary>
-        /// <remarks>@param thisArg The object to be used as the this object.</remarks>
-        /// <remarks>@param thisArg The object to be used as the this object.</remarks>
-        /// <remarks>@param args An array of argument values to be passed to the function.</remarks>
+        /// <param name="thisArg">The object to be used as the this object.</param>
+        /// <param name="thisArg">The object to be used as the this object.</param>
+        /// <param name="args">An array of argument values to be passed to the function.</param>
         abstract apply<'T, 'R>: thisArg: 'T -> 'R
         /// <summary>
         /// Calls the function with the specified object as the this value and the elements of specified array as the arguments.
         /// </summary>
-        /// <remarks>@param thisArg The object to be used as the this object.</remarks>
-        /// <remarks>@param thisArg The object to be used as the this object.</remarks>
-        /// <remarks>@param args An array of argument values to be passed to the function.</remarks>
+        /// <param name="thisArg">The object to be used as the this object.</param>
+        /// <param name="thisArg">The object to be used as the this object.</param>
+        /// <param name="args">An array of argument values to be passed to the function.</param>
         abstract apply<'T, 'A, 'R>: thisArg: 'T * args: 'A -> 'R
         /// <summary>
         /// Calls the function with the specified object as the this value and the specified rest arguments as the arguments.
         /// </summary>
-        /// <remarks>@param thisArg The object to be used as the this object.</remarks>
-        /// <remarks>@param args Argument values to be passed to the function.</remarks>
+        /// <param name="thisArg">The object to be used as the this object.</param>
+        /// <param name="args">Argument values to be passed to the function.</param>
         abstract call<'T, 'A, 'R>: thisArg: 'T * [<ParamArray>] args: 'A -> 'R
         /// <summary>
         /// For a given function, creates a bound function that has the same body as the original function.
         /// The this object of the bound function is associated with the specified object, and has the specified initial parameters.
         /// </summary>
-        /// <remarks>@param thisArg The object to be used as the this object.</remarks>
-        /// <remarks>@param thisArg The object to be used as the this object.</remarks>
-        /// <remarks>@param args Arguments to bind to the parameters of the function.</remarks>
+        /// <param name="thisArg">The object to be used as the this object.</param>
+        /// <param name="thisArg">The object to be used as the this object.</param>
+        /// <param name="args">Arguments to bind to the parameters of the function.</param>
         abstract bind: thisArg: obj -> obj
         /// <summary>
         /// For a given function, creates a bound function that has the same body as the original function.
         /// The this object of the bound function is associated with the specified object, and has the specified initial parameters.
         /// </summary>
-        /// <remarks>@param thisArg The object to be used as the this object.</remarks>
-        /// <remarks>@param thisArg The object to be used as the this object.</remarks>
-        /// <remarks>@param args Arguments to bind to the parameters of the function.</remarks>
+        /// <param name="thisArg">The object to be used as the this object.</param>
+        /// <param name="thisArg">The object to be used as the this object.</param>
+        /// <param name="args">Arguments to bind to the parameters of the function.</param>
         abstract bind<'T, 'A, 'B, 'R>: thisArg: 'T * [<ParamArray>] args: 'A -> ('B -> 'R)
 
     type NewableFunction =
@@ -1335,38 +1335,38 @@ module Es =
         /// <summary>
         /// Calls the function with the specified object as the this value and the elements of specified array as the arguments.
         /// </summary>
-        /// <remarks>@param thisArg The object to be used as the this object.</remarks>
-        /// <remarks>@param thisArg The object to be used as the this object.</remarks>
-        /// <remarks>@param args An array of argument values to be passed to the function.</remarks>
+        /// <param name="thisArg">The object to be used as the this object.</param>
+        /// <param name="thisArg">The object to be used as the this object.</param>
+        /// <param name="args">An array of argument values to be passed to the function.</param>
         abstract apply<'T>: thisArg: 'T -> unit
         /// <summary>
         /// Calls the function with the specified object as the this value and the elements of specified array as the arguments.
         /// </summary>
-        /// <remarks>@param thisArg The object to be used as the this object.</remarks>
-        /// <remarks>@param thisArg The object to be used as the this object.</remarks>
-        /// <remarks>@param args An array of argument values to be passed to the function.</remarks>
+        /// <param name="thisArg">The object to be used as the this object.</param>
+        /// <param name="thisArg">The object to be used as the this object.</param>
+        /// <param name="args">An array of argument values to be passed to the function.</param>
         abstract apply<'T, 'A>: thisArg: 'T * args: 'A -> unit
         /// <summary>
         /// Calls the function with the specified object as the this value and the specified rest arguments as the arguments.
         /// </summary>
-        /// <remarks>@param thisArg The object to be used as the this object.</remarks>
-        /// <remarks>@param args Argument values to be passed to the function.</remarks>
+        /// <param name="thisArg">The object to be used as the this object.</param>
+        /// <param name="args">Argument values to be passed to the function.</param>
         abstract call<'T, 'A>: thisArg: 'T * [<ParamArray>] args: 'A -> unit
         /// <summary>
         /// For a given function, creates a bound function that has the same body as the original function.
         /// The this object of the bound function is associated with the specified object, and has the specified initial parameters.
         /// </summary>
-        /// <remarks>@param thisArg The object to be used as the this object.</remarks>
-        /// <remarks>@param thisArg The object to be used as the this object.</remarks>
-        /// <remarks>@param args Arguments to bind to the parameters of the function.</remarks>
+        /// <param name="thisArg">The object to be used as the this object.</param>
+        /// <param name="thisArg">The object to be used as the this object.</param>
+        /// <param name="args">Arguments to bind to the parameters of the function.</param>
         abstract bind<'T>: thisArg: obj -> 'T
         /// <summary>
         /// For a given function, creates a bound function that has the same body as the original function.
         /// The this object of the bound function is associated with the specified object, and has the specified initial parameters.
         /// </summary>
-        /// <remarks>@param thisArg The object to be used as the this object.</remarks>
-        /// <remarks>@param thisArg The object to be used as the this object.</remarks>
-        /// <remarks>@param args Arguments to bind to the parameters of the function.</remarks>
+        /// <param name="thisArg">The object to be used as the this object.</param>
+        /// <param name="thisArg">The object to be used as the this object.</param>
+        /// <param name="args">Arguments to bind to the parameters of the function.</param>
         abstract bind<'A, 'B, 'R>: thisArg: obj * [<ParamArray>] args: 'A -> NewableFunction.Bind.ResultConstructor<'B, 'R>
 
     module NewableFunction =
@@ -1392,99 +1392,97 @@ module Es =
         /// <summary>
         /// Returns the character at the specified index.
         /// </summary>
-        /// <remarks>@param pos The zero-based index of the desired character.</remarks>
+        /// <param name="pos">The zero-based index of the desired character.</param>
         abstract charAt: pos: float -> string
         /// <summary>
         /// Returns the Unicode value of the character at the specified location, or NaN if the index is out of bounds.
         /// </summary>
-        /// <remarks>@param index The zero-based index of the desired character.</remarks>
+        /// <param name="index">The zero-based index of the desired character.</param>
         abstract charCodeAt: index: float -> float
         /// <summary>
         /// Returns a string that contains the concatenation of two or more strings.
         /// </summary>
-        /// <remarks>@param strings The strings to append to the end of the string.</remarks>
+        /// <param name="strings">The strings to append to the end of the string.</param>
         abstract concat: [<ParamArray>] strings: string[] -> string
         /// <summary>
         /// Returns the position of the first occurrence of a substring, or -1 if it is not present.
         /// </summary>
-        /// <remarks>@param searchString The substring to search for in the string</remarks>
-        /// <remarks>@param position The index at which to begin searching the String object. If omitted, search starts at the beginning of the string.</remarks>
+        /// <param name="searchString">The substring to search for in the string</param>
+        /// <param name="position">The index at which to begin searching the String object. If omitted, search starts at the beginning of the string.</param>
         abstract indexOf: searchString: string * ?position: float -> float
         /// <summary>
         /// Returns the last occurrence of a substring in the string, or -1 if it is not present.
         /// </summary>
-        /// <remarks>@param searchString The substring to search for.</remarks>
-        /// <remarks>@param position The index at which to begin searching. If omitted, the search begins at the end of the string.</remarks>
+        /// <param name="searchString">The substring to search for.</param>
+        /// <param name="position">The index at which to begin searching. If omitted, the search begins at the end of the string.</param>
         abstract lastIndexOf: searchString: string * ?position: float -> float
         /// <summary>
         /// Determines whether two strings are equivalent in the current locale.
         /// Determines whether two strings are equivalent in the current or specified locale.
         /// </summary>
-        /// <remarks>@param that String to compare to target string</remarks>
-        /// <remarks>@param that String to compare to target string</remarks>
-        /// <remarks>@param locales A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used. This parameter must conform to BCP 47 standards; see the Intl.Collator object for details.</remarks>
-        /// <remarks>@param options An object that contains one or more properties that specify comparison options. see the Intl.Collator object for details.</remarks>
+        /// <param name="that">String to compare to target string</param>
+        /// <param name="that">String to compare to target string</param>
+        /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used. This parameter must conform to BCP 47 standards; see the Intl.Collator object for details.</param>
+        /// <param name="options">An object that contains one or more properties that specify comparison options. see the Intl.Collator object for details.</param>
         abstract localeCompare: that: string -> float
         /// <summary>
         /// Determines whether two strings are equivalent in the current locale.
         /// Determines whether two strings are equivalent in the current or specified locale.
         /// </summary>
-        /// <remarks>@param that String to compare to target string</remarks>
-        /// <remarks>@param that String to compare to target string</remarks>
-        /// <remarks>@param locales A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used. This parameter must conform to BCP 47 standards; see the Intl.Collator object for details.</remarks>
-        /// <remarks>@param options An object that contains one or more properties that specify comparison options. see the Intl.Collator object for details.</remarks>
+        /// <param name="that">String to compare to target string</param>
+        /// <param name="that">String to compare to target string</param>
+        /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used. This parameter must conform to BCP 47 standards; see the Intl.Collator object for details.</param>
+        /// <param name="options">An object that contains one or more properties that specify comparison options. see the Intl.Collator object for details.</param>
         abstract localeCompare: that: string * ?locales: U2<string, string[]> * ?options: CollatorOptions -> float
         /// <summary>
         /// Matches a string with a regular expression, and returns an array containing the results of that search.
         /// </summary>
-        /// <remarks>@param regexp A variable name or string literal containing the regular expression pattern and flags.</remarks>
+        /// <param name="regexp">A variable name or string literal containing the regular expression pattern and flags.</param>
         abstract ``match``: regexp: U2<string, RegExp> -> string[] option
         /// <summary>
         /// Replaces text in a string, using a regular expression or search string.
         /// </summary>
-        /// <remarks>@param searchValue A string or regular expression to search for.</remarks>
-        /// <remarks>@param replaceValue A string containing the text to replace. When the {@linkcode searchValue} is a <c>RegExp</c>, all matches are replaced if the <c>g</c> flag is set (or only those matches at the beginning, if the <c>y</c> flag is also present). Otherwise, only the first match of {@linkcode searchValue} is replaced.</remarks>
-        /// <remarks>@param searchValue A string to search for.</remarks>
-        /// <remarks>@param replacer A function that returns the replacement text.</remarks>
+        /// <param name="searchValue">A string or regular expression to search for.</param>
+        /// <param name="replaceValue">A string containing the text to replace. When the {@linkcode searchValue} is a <c>RegExp</c>, all matches are replaced if the <c>g</c> flag is set (or only those matches at the beginning, if the <c>y</c> flag is also present). Otherwise, only the first match of {@linkcode searchValue} is replaced.</param>
+        /// <param name="searchValue">A string to search for.</param>
+        /// <param name="replacer">A function that returns the replacement text.</param>
         abstract replace: searchValue: U2<string, RegExp> * replaceValue: string -> string
         /// <summary>
         /// Replaces text in a string, using a regular expression or search string.
         /// </summary>
-        /// <remarks>@param searchValue A string or regular expression to search for.</remarks>
-        /// <remarks>@param replaceValue A string containing the text to replace. When the {@linkcode searchValue} is a <c>RegExp</c>, all matches are replaced if the <c>g</c> flag is set (or only those matches at the beginning, if the <c>y</c> flag is also present). Otherwise, only the first match of {@linkcode searchValue} is replaced.</remarks>
-        /// <remarks>@param searchValue A string to search for.</remarks>
-        /// <remarks>@param replacer A function that returns the replacement text.</remarks>
+        /// <param name="searchValue">A string or regular expression to search for.</param>
+        /// <param name="replaceValue">A string containing the text to replace. When the {@linkcode searchValue} is a <c>RegExp</c>, all matches are replaced if the <c>g</c> flag is set (or only those matches at the beginning, if the <c>y</c> flag is also present). Otherwise, only the first match of {@linkcode searchValue} is replaced.</param>
+        /// <param name="searchValue">A string to search for.</param>
+        /// <param name="replacer">A function that returns the replacement text.</param>
         abstract replace: searchValue: U2<string, RegExp> * replacer: String.Replace.Replacer -> string
         /// <summary>
         /// Finds the first substring match in a regular expression search.
         /// </summary>
-        /// <remarks>@param regexp The regular expression pattern and applicable flags.</remarks>
+        /// <param name="regexp">The regular expression pattern and applicable flags.</param>
         abstract search: regexp: U2<string, RegExp> -> float
         /// <summary>
         /// Returns a section of a string.
         /// </summary>
-        /// <remarks>@param start The index to the beginning of the specified portion of stringObj.</remarks>
-        /// <remarks>
-        /// @param
-        /// end The index to the end of the specified portion of stringObj. The substring includes the characters up to, but not including, the character indicated by end.
+        /// <param name="start">The index to the beginning of the specified portion of stringObj.</param>
+        /// <param name="end">
+        /// The index to the end of the specified portion of stringObj. The substring includes the characters up to, but not including, the character indicated by end.
         /// If this value is not specified, the substring continues to the end of stringObj.
-        /// </remarks>
+        /// </param>
         abstract slice: ?start: float * ?``end``: float -> string
         /// <summary>
         /// Split a string into substrings using the specified separator and return them as an array.
         /// </summary>
-        /// <remarks>@param separator A string that identifies character or characters to use in separating the string. If omitted, a single-element array containing the entire string is returned.</remarks>
-        /// <remarks>@param limit A value used to limit the number of elements returned in the array.</remarks>
+        /// <param name="separator">A string that identifies character or characters to use in separating the string. If omitted, a single-element array containing the entire string is returned.</param>
+        /// <param name="limit">A value used to limit the number of elements returned in the array.</param>
         abstract split: separator: U2<string, RegExp> * ?limit: float -> string[]
         /// <summary>
         /// Returns the substring at the specified location within a String object.
         /// </summary>
-        /// <remarks>@param start The zero-based index number indicating the beginning of the substring.</remarks>
-        /// <remarks>
-        /// @param
-        /// end Zero-based index number indicating the end of the substring. The substring includes the characters up to, but not including, the character indicated by end.
+        /// <param name="start">The zero-based index number indicating the beginning of the substring.</param>
+        /// <param name="end">
+        /// Zero-based index number indicating the end of the substring. The substring includes the characters up to, but not including, the character indicated by end.
         /// If end is omitted, the characters from start through the end of the original string are returned.
-        /// </remarks>
+        /// </param>
         abstract substring: start: float * ?``end``: float -> string
         /// <summary>
         /// Converts all the alphabetic characters in a string to lowercase.
@@ -1514,8 +1512,8 @@ module Es =
         /// Gets a substring beginning at the specified location and having the specified length.
         /// </summary>
         /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
-        /// <remarks>@param from The starting position of the desired substring. The index of the first character in the string is zero.</remarks>
-        /// <remarks>@param length The number of characters to include in the returned substring.</remarks>
+        /// <param name="from">The starting position of the desired substring. The index of the first character in the string is zero.</param>
+        /// <param name="length">The number of characters to include in the returned substring.</param>
         abstract substr: from: float * ?length: float -> string
         /// <summary>
         /// Returns the primitive value of the specified object.
@@ -1554,22 +1552,22 @@ module Es =
         /// <summary>
         /// Returns a string representation of an object.
         /// </summary>
-        /// <remarks>@param radix Specifies a radix for converting numeric values to strings. This value is only used for numbers.</remarks>
+        /// <param name="radix">Specifies a radix for converting numeric values to strings. This value is only used for numbers.</param>
         abstract toString: ?radix: float -> string
         /// <summary>
         /// Returns a string representing a number in fixed-point notation.
         /// </summary>
-        /// <remarks>@param fractionDigits Number of digits after the decimal point. Must be in the range 0 - 100, inclusive.</remarks>
+        /// <param name="fractionDigits">Number of digits after the decimal point. Must be in the range 0 - 100, inclusive.</param>
         abstract toFixed: ?fractionDigits: float -> string
         /// <summary>
         /// Returns a string containing a number represented in exponential notation.
         /// </summary>
-        /// <remarks>@param fractionDigits Number of digits after the decimal point. Must be in the range 0 - 100, inclusive.</remarks>
+        /// <param name="fractionDigits">Number of digits after the decimal point. Must be in the range 0 - 100, inclusive.</param>
         abstract toExponential: ?fractionDigits: float -> string
         /// <summary>
         /// Returns a string containing a number represented either in exponential or fixed-point notation with a specified number of digits.
         /// </summary>
-        /// <remarks>@param precision Number of significant digits. Must be in the range 1 - 100, inclusive.</remarks>
+        /// <param name="precision">Number of significant digits. Must be in the range 1 - 100, inclusive.</param>
         abstract toPrecision: ?precision: float -> string
         /// <summary>
         /// Returns the primitive value of the specified object.
@@ -1578,8 +1576,8 @@ module Es =
         /// <summary>
         /// Converts a number to a string by using the current or specified locale.
         /// </summary>
-        /// <remarks>@param locales A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</remarks>
-        /// <remarks>@param options An object that contains one or more properties that specify comparison options.</remarks>
+        /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</param>
+        /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
         abstract toLocaleString: ?locales: U2<string, string[]> * ?options: NumberFormatOptions -> string
         [<ParamObject; Emit("$0")>]
         static member Create (toString: (float option -> string), toFixed: (float option -> string), toExponential: (float option -> string), toPrecision: (float option -> string), valueOf: (unit -> float), toLocaleString: Func<U2<string, string[]> option, NumberFormatOptions option, string>) : Number = jsNative
@@ -1692,69 +1690,69 @@ module Es =
         /// Returns the absolute value of a number (the value without regard to whether it is positive or negative).
         /// For example, the absolute value of -5 is the same as the absolute value of 5.
         /// </summary>
-        /// <remarks>@param x A numeric expression for which the absolute value is needed.</remarks>
+        /// <param name="x">A numeric expression for which the absolute value is needed.</param>
         abstract abs: x: float -> float
         /// <summary>
         /// Returns the arc cosine (or inverse cosine) of a number.
         /// </summary>
-        /// <remarks>@param x A numeric expression.</remarks>
+        /// <param name="x">A numeric expression.</param>
         abstract acos: x: float -> float
         /// <summary>
         /// Returns the arcsine of a number.
         /// </summary>
-        /// <remarks>@param x A numeric expression.</remarks>
+        /// <param name="x">A numeric expression.</param>
         abstract asin: x: float -> float
         /// <summary>
         /// Returns the arctangent of a number.
         /// </summary>
-        /// <remarks>@param x A numeric expression for which the arctangent is needed.</remarks>
+        /// <param name="x">A numeric expression for which the arctangent is needed.</param>
         abstract atan: x: float -> float
         /// <summary>
         /// Returns the angle (in radians) between the X axis and the line going through both the origin and the given point.
         /// </summary>
-        /// <remarks>@param y A numeric expression representing the cartesian y-coordinate.</remarks>
-        /// <remarks>@param x A numeric expression representing the cartesian x-coordinate.</remarks>
+        /// <param name="y">A numeric expression representing the cartesian y-coordinate.</param>
+        /// <param name="x">A numeric expression representing the cartesian x-coordinate.</param>
         abstract atan2: y: float * x: float -> float
         /// <summary>
         /// Returns the smallest integer greater than or equal to its numeric argument.
         /// </summary>
-        /// <remarks>@param x A numeric expression.</remarks>
+        /// <param name="x">A numeric expression.</param>
         abstract ceil: x: float -> float
         /// <summary>
         /// Returns the cosine of a number.
         /// </summary>
-        /// <remarks>@param x A numeric expression that contains an angle measured in radians.</remarks>
+        /// <param name="x">A numeric expression that contains an angle measured in radians.</param>
         abstract cos: x: float -> float
         /// <summary>
         /// Returns e (the base of natural logarithms) raised to a power.
         /// </summary>
-        /// <remarks>@param x A numeric expression representing the power of e.</remarks>
+        /// <param name="x">A numeric expression representing the power of e.</param>
         abstract exp: x: float -> float
         /// <summary>
         /// Returns the greatest integer less than or equal to its numeric argument.
         /// </summary>
-        /// <remarks>@param x A numeric expression.</remarks>
+        /// <param name="x">A numeric expression.</param>
         abstract floor: x: float -> float
         /// <summary>
         /// Returns the natural logarithm (base e) of a number.
         /// </summary>
-        /// <remarks>@param x A numeric expression.</remarks>
+        /// <param name="x">A numeric expression.</param>
         abstract log: x: float -> float
         /// <summary>
         /// Returns the larger of a set of supplied numeric expressions.
         /// </summary>
-        /// <remarks>@param values Numeric expressions to be evaluated.</remarks>
+        /// <param name="values">Numeric expressions to be evaluated.</param>
         abstract max: [<ParamArray>] values: float[] -> float
         /// <summary>
         /// Returns the smaller of a set of supplied numeric expressions.
         /// </summary>
-        /// <remarks>@param values Numeric expressions to be evaluated.</remarks>
+        /// <param name="values">Numeric expressions to be evaluated.</param>
         abstract min: [<ParamArray>] values: float[] -> float
         /// <summary>
         /// Returns the value of a base expression taken to a specified power.
         /// </summary>
-        /// <remarks>@param x The base value of the expression.</remarks>
-        /// <remarks>@param y The exponent value of the expression.</remarks>
+        /// <param name="x">The base value of the expression.</param>
+        /// <param name="y">The exponent value of the expression.</param>
         abstract pow: x: float * y: float -> float
         /// <summary>
         /// Returns a pseudorandom number between 0 and 1.
@@ -1763,22 +1761,22 @@ module Es =
         /// <summary>
         /// Returns a supplied numeric expression rounded to the nearest integer.
         /// </summary>
-        /// <remarks>@param x The value to be rounded to the nearest integer.</remarks>
+        /// <param name="x">The value to be rounded to the nearest integer.</param>
         abstract round: x: float -> float
         /// <summary>
         /// Returns the sine of a number.
         /// </summary>
-        /// <remarks>@param x A numeric expression that contains an angle measured in radians.</remarks>
+        /// <param name="x">A numeric expression that contains an angle measured in radians.</param>
         abstract sin: x: float -> float
         /// <summary>
         /// Returns the square root of a number.
         /// </summary>
-        /// <remarks>@param x A numeric expression.</remarks>
+        /// <param name="x">A numeric expression.</param>
         abstract sqrt: x: float -> float
         /// <summary>
         /// Returns the tangent of a number.
         /// </summary>
-        /// <remarks>@param x A numeric expression that contains an angle measured in radians.</remarks>
+        /// <param name="x">A numeric expression that contains an angle measured in radians.</param>
         abstract tan: x: float -> float
 
     /// <summary>
@@ -1801,43 +1799,43 @@ module Es =
         /// Returns a value as a string value appropriate to the host environment's current locale.
         /// Converts a date and time to a string by using the current or specified locale.
         /// </summary>
-        /// <remarks>@param locales A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</remarks>
-        /// <remarks>@param options An object that contains one or more properties that specify comparison options.</remarks>
+        /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</param>
+        /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
         abstract toLocaleString: unit -> string
         /// <summary>
         /// Returns a value as a string value appropriate to the host environment's current locale.
         /// Converts a date and time to a string by using the current or specified locale.
         /// </summary>
-        /// <remarks>@param locales A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</remarks>
-        /// <remarks>@param options An object that contains one or more properties that specify comparison options.</remarks>
+        /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</param>
+        /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
         abstract toLocaleString: ?locales: U2<string, string[]> * ?options: DateTimeFormatOptions -> string
         /// <summary>
         /// Returns a date as a string value appropriate to the host environment's current locale.
         /// Converts a date to a string by using the current or specified locale.
         /// </summary>
-        /// <remarks>@param locales A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</remarks>
-        /// <remarks>@param options An object that contains one or more properties that specify comparison options.</remarks>
+        /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</param>
+        /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
         abstract toLocaleDateString: unit -> string
         /// <summary>
         /// Returns a date as a string value appropriate to the host environment's current locale.
         /// Converts a date to a string by using the current or specified locale.
         /// </summary>
-        /// <remarks>@param locales A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</remarks>
-        /// <remarks>@param options An object that contains one or more properties that specify comparison options.</remarks>
+        /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</param>
+        /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
         abstract toLocaleDateString: ?locales: U2<string, string[]> * ?options: DateTimeFormatOptions -> string
         /// <summary>
         /// Returns a time as a string value appropriate to the host environment's current locale.
         /// Converts a time to a string by using the current or specified locale.
         /// </summary>
-        /// <remarks>@param locales A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</remarks>
-        /// <remarks>@param options An object that contains one or more properties that specify comparison options.</remarks>
+        /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</param>
+        /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
         abstract toLocaleTimeString: unit -> string
         /// <summary>
         /// Returns a time as a string value appropriate to the host environment's current locale.
         /// Converts a time to a string by using the current or specified locale.
         /// </summary>
-        /// <remarks>@param locales A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</remarks>
-        /// <remarks>@param options An object that contains one or more properties that specify comparison options.</remarks>
+        /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</param>
+        /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
         abstract toLocaleTimeString: ?locales: U2<string, string[]> * ?options: DateTimeFormatOptions -> string
         /// <summary>
         /// Returns the stored time value in milliseconds since midnight, January 1, 1970 UTC.
@@ -1918,95 +1916,95 @@ module Es =
         /// <summary>
         /// Sets the date and time value in the Date object.
         /// </summary>
-        /// <remarks>@param time A numeric value representing the number of elapsed milliseconds since midnight, January 1, 1970 GMT.</remarks>
+        /// <param name="time">A numeric value representing the number of elapsed milliseconds since midnight, January 1, 1970 GMT.</param>
         abstract setTime: time: float -> float
         /// <summary>
         /// Sets the milliseconds value in the Date object using local time.
         /// </summary>
-        /// <remarks>@param ms A numeric value equal to the millisecond value.</remarks>
+        /// <param name="ms">A numeric value equal to the millisecond value.</param>
         abstract setMilliseconds: ms: float -> float
         /// <summary>
         /// Sets the milliseconds value in the Date object using Universal Coordinated Time (UTC).
         /// </summary>
-        /// <remarks>@param ms A numeric value equal to the millisecond value.</remarks>
+        /// <param name="ms">A numeric value equal to the millisecond value.</param>
         abstract setUTCMilliseconds: ms: float -> float
         /// <summary>
         /// Sets the seconds value in the Date object using local time.
         /// </summary>
-        /// <remarks>@param sec A numeric value equal to the seconds value.</remarks>
-        /// <remarks>@param ms A numeric value equal to the milliseconds value.</remarks>
+        /// <param name="sec">A numeric value equal to the seconds value.</param>
+        /// <param name="ms">A numeric value equal to the milliseconds value.</param>
         abstract setSeconds: sec: float * ?ms: float -> float
         /// <summary>
         /// Sets the seconds value in the Date object using Universal Coordinated Time (UTC).
         /// </summary>
-        /// <remarks>@param sec A numeric value equal to the seconds value.</remarks>
-        /// <remarks>@param ms A numeric value equal to the milliseconds value.</remarks>
+        /// <param name="sec">A numeric value equal to the seconds value.</param>
+        /// <param name="ms">A numeric value equal to the milliseconds value.</param>
         abstract setUTCSeconds: sec: float * ?ms: float -> float
         /// <summary>
         /// Sets the minutes value in the Date object using local time.
         /// </summary>
-        /// <remarks>@param min A numeric value equal to the minutes value.</remarks>
-        /// <remarks>@param sec A numeric value equal to the seconds value.</remarks>
-        /// <remarks>@param ms A numeric value equal to the milliseconds value.</remarks>
+        /// <param name="min">A numeric value equal to the minutes value.</param>
+        /// <param name="sec">A numeric value equal to the seconds value.</param>
+        /// <param name="ms">A numeric value equal to the milliseconds value.</param>
         abstract setMinutes: min: float * ?sec: float * ?ms: float -> float
         /// <summary>
         /// Sets the minutes value in the Date object using Universal Coordinated Time (UTC).
         /// </summary>
-        /// <remarks>@param min A numeric value equal to the minutes value.</remarks>
-        /// <remarks>@param sec A numeric value equal to the seconds value.</remarks>
-        /// <remarks>@param ms A numeric value equal to the milliseconds value.</remarks>
+        /// <param name="min">A numeric value equal to the minutes value.</param>
+        /// <param name="sec">A numeric value equal to the seconds value.</param>
+        /// <param name="ms">A numeric value equal to the milliseconds value.</param>
         abstract setUTCMinutes: min: float * ?sec: float * ?ms: float -> float
         /// <summary>
         /// Sets the hour value in the Date object using local time.
         /// </summary>
-        /// <remarks>@param hours A numeric value equal to the hours value.</remarks>
-        /// <remarks>@param min A numeric value equal to the minutes value.</remarks>
-        /// <remarks>@param sec A numeric value equal to the seconds value.</remarks>
-        /// <remarks>@param ms A numeric value equal to the milliseconds value.</remarks>
+        /// <param name="hours">A numeric value equal to the hours value.</param>
+        /// <param name="min">A numeric value equal to the minutes value.</param>
+        /// <param name="sec">A numeric value equal to the seconds value.</param>
+        /// <param name="ms">A numeric value equal to the milliseconds value.</param>
         abstract setHours: hours: float * ?min: float * ?sec: float * ?ms: float -> float
         /// <summary>
         /// Sets the hours value in the Date object using Universal Coordinated Time (UTC).
         /// </summary>
-        /// <remarks>@param hours A numeric value equal to the hours value.</remarks>
-        /// <remarks>@param min A numeric value equal to the minutes value.</remarks>
-        /// <remarks>@param sec A numeric value equal to the seconds value.</remarks>
-        /// <remarks>@param ms A numeric value equal to the milliseconds value.</remarks>
+        /// <param name="hours">A numeric value equal to the hours value.</param>
+        /// <param name="min">A numeric value equal to the minutes value.</param>
+        /// <param name="sec">A numeric value equal to the seconds value.</param>
+        /// <param name="ms">A numeric value equal to the milliseconds value.</param>
         abstract setUTCHours: hours: float * ?min: float * ?sec: float * ?ms: float -> float
         /// <summary>
         /// Sets the numeric day-of-the-month value of the Date object using local time.
         /// </summary>
-        /// <remarks>@param date A numeric value equal to the day of the month.</remarks>
+        /// <param name="date">A numeric value equal to the day of the month.</param>
         abstract setDate: date: float -> float
         /// <summary>
         /// Sets the numeric day of the month in the Date object using Universal Coordinated Time (UTC).
         /// </summary>
-        /// <remarks>@param date A numeric value equal to the day of the month.</remarks>
+        /// <param name="date">A numeric value equal to the day of the month.</param>
         abstract setUTCDate: date: float -> float
         /// <summary>
         /// Sets the month value in the Date object using local time.
         /// </summary>
-        /// <remarks>@param month A numeric value equal to the month. The value for January is 0, and other month values follow consecutively.</remarks>
-        /// <remarks>@param date A numeric value representing the day of the month. If this value is not supplied, the value from a call to the getDate method is used.</remarks>
+        /// <param name="month">A numeric value equal to the month. The value for January is 0, and other month values follow consecutively.</param>
+        /// <param name="date">A numeric value representing the day of the month. If this value is not supplied, the value from a call to the getDate method is used.</param>
         abstract setMonth: month: float * ?date: float -> float
         /// <summary>
         /// Sets the month value in the Date object using Universal Coordinated Time (UTC).
         /// </summary>
-        /// <remarks>@param month A numeric value equal to the month. The value for January is 0, and other month values follow consecutively.</remarks>
-        /// <remarks>@param date A numeric value representing the day of the month. If it is not supplied, the value from a call to the getUTCDate method is used.</remarks>
+        /// <param name="month">A numeric value equal to the month. The value for January is 0, and other month values follow consecutively.</param>
+        /// <param name="date">A numeric value representing the day of the month. If it is not supplied, the value from a call to the getUTCDate method is used.</param>
         abstract setUTCMonth: month: float * ?date: float -> float
         /// <summary>
         /// Sets the year of the Date object using local time.
         /// </summary>
-        /// <remarks>@param year A numeric value for the year.</remarks>
-        /// <remarks>@param month A zero-based numeric value for the month (0 for January, 11 for December). Must be specified if numDate is specified.</remarks>
-        /// <remarks>@param date A numeric value equal for the day of the month.</remarks>
+        /// <param name="year">A numeric value for the year.</param>
+        /// <param name="month">A zero-based numeric value for the month (0 for January, 11 for December). Must be specified if numDate is specified.</param>
+        /// <param name="date">A numeric value equal for the day of the month.</param>
         abstract setFullYear: year: float * ?month: float * ?date: float -> float
         /// <summary>
         /// Sets the year value in the Date object using Universal Coordinated Time (UTC).
         /// </summary>
-        /// <remarks>@param year A numeric value equal to the year.</remarks>
-        /// <remarks>@param month A numeric value equal to the month. The value for January is 0, and other month values follow consecutively. Must be supplied if numDate is supplied.</remarks>
-        /// <remarks>@param date A numeric value equal to the day of the month.</remarks>
+        /// <param name="year">A numeric value equal to the year.</param>
+        /// <param name="month">A numeric value equal to the month. The value for January is 0, and other month values follow consecutively. Must be supplied if numDate is supplied.</param>
+        /// <param name="date">A numeric value equal to the day of the month.</param>
         abstract setUTCFullYear: year: float * ?month: float * ?date: float -> float
         /// <summary>
         /// Returns a date converted to a string using Universal Coordinated Time (UTC).
@@ -2025,18 +2023,18 @@ module Es =
         /// <summary>
         /// Parses a string containing a date, and returns the number of milliseconds between that date and midnight, January 1, 1970.
         /// </summary>
-        /// <remarks>@param s A date string</remarks>
+        /// <param name="s">A date string</param>
         abstract parse: s: string -> float
         /// <summary>
         /// Returns the number of milliseconds between midnight, January 1, 1970 Universal Coordinated Time (UTC) (or GMT) and the specified date.
         /// </summary>
-        /// <remarks>@param year The full year designation is required for cross-century date accuracy. If year is between 0 and 99 is used, then year is assumed to be 1900 + year.</remarks>
-        /// <remarks>@param monthIndex The month as a number between 0 and 11 (January to December).</remarks>
-        /// <remarks>@param date The date as a number between 1 and 31.</remarks>
-        /// <remarks>@param hours Must be supplied if minutes is supplied. A number from 0 to 23 (midnight to 11pm) that specifies the hour.</remarks>
-        /// <remarks>@param minutes Must be supplied if seconds is supplied. A number from 0 to 59 that specifies the minutes.</remarks>
-        /// <remarks>@param seconds Must be supplied if milliseconds is supplied. A number from 0 to 59 that specifies the seconds.</remarks>
-        /// <remarks>@param ms A number from 0 to 999 that specifies the milliseconds.</remarks>
+        /// <param name="year">The full year designation is required for cross-century date accuracy. If year is between 0 and 99 is used, then year is assumed to be 1900 + year.</param>
+        /// <param name="monthIndex">The month as a number between 0 and 11 (January to December).</param>
+        /// <param name="date">The date as a number between 1 and 31.</param>
+        /// <param name="hours">Must be supplied if minutes is supplied. A number from 0 to 23 (midnight to 11pm) that specifies the hour.</param>
+        /// <param name="minutes">Must be supplied if seconds is supplied. A number from 0 to 59 that specifies the minutes.</param>
+        /// <param name="seconds">Must be supplied if milliseconds is supplied. A number from 0 to 59 that specifies the seconds.</param>
+        /// <param name="ms">A number from 0 to 999 that specifies the milliseconds.</param>
         abstract UTC: year: float * monthIndex: float * ?date: float * ?hours: float * ?minutes: float * ?seconds: float * ?ms: float -> float
         /// <summary>
         /// Returns the number of milliseconds elapsed since midnight, January 1, 1970 Universal Coordinated Time (UTC).
@@ -2060,12 +2058,12 @@ module Es =
         /// <summary>
         /// Executes a search on a string using a regular expression pattern, and returns an array containing the results of that search.
         /// </summary>
-        /// <remarks>@param string The String object or string literal on which to perform the search.</remarks>
+        /// <param name="string">The String object or string literal on which to perform the search.</param>
         abstract exec: string: string -> string[] option
         /// <summary>
         /// Returns a Boolean value that indicates whether or not a pattern exists in a searched string.
         /// </summary>
-        /// <remarks>@param string String on which to perform the search.</remarks>
+        /// <param name="string">String on which to perform the search.</param>
         abstract test: string: string -> bool
         /// <summary>
         /// Returns a copy of the text of the regular expression pattern. Read-only. The regExp argument is a Regular expression object. It can be a variable name or a literal.
@@ -2234,36 +2232,35 @@ module Es =
         /// <summary>
         /// Converts a JavaScript Object Notation (JSON) string into an object.
         /// </summary>
-        /// <remarks>@param text A valid JSON string.</remarks>
-        /// <remarks>
-        /// @param
-        /// reviver A function that transforms the results. This function is called for each member of the object.
+        /// <param name="text">A valid JSON string.</param>
+        /// <param name="reviver">
+        /// A function that transforms the results. This function is called for each member of the object.
         /// If a member contains nested objects, the nested objects are transformed before the parent object is.
-        /// </remarks>
+        /// </param>
         /// <remarks>@throws {SyntaxError} If <c>text</c> is not valid JSON.</remarks>
         abstract parse: text: string * ?reviver: JSON.Parse.Reviver -> obj
         /// <summary>
         /// Converts a JavaScript value to a JavaScript Object Notation (JSON) string.
         /// </summary>
-        /// <remarks>@param value A JavaScript value, usually an object or array, to be converted.</remarks>
-        /// <remarks>@param replacer A function that transforms the results.</remarks>
-        /// <remarks>@param space Adds indentation, white space, and line break characters to the return-value JSON text to make it easier to read.</remarks>
+        /// <param name="value">A JavaScript value, usually an object or array, to be converted.</param>
+        /// <param name="replacer">A function that transforms the results.</param>
+        /// <param name="space">Adds indentation, white space, and line break characters to the return-value JSON text to make it easier to read.</param>
         /// <remarks>@throws {TypeError} If a circular reference or a BigInt value is found.</remarks>
-        /// <remarks>@param value A JavaScript value, usually an object or array, to be converted.</remarks>
-        /// <remarks>@param replacer An array of strings and numbers that acts as an approved list for selecting the object properties that will be stringified.</remarks>
-        /// <remarks>@param space Adds indentation, white space, and line break characters to the return-value JSON text to make it easier to read.</remarks>
+        /// <param name="value">A JavaScript value, usually an object or array, to be converted.</param>
+        /// <param name="replacer">An array of strings and numbers that acts as an approved list for selecting the object properties that will be stringified.</param>
+        /// <param name="space">Adds indentation, white space, and line break characters to the return-value JSON text to make it easier to read.</param>
         /// <remarks>@throws {TypeError} If a circular reference or a BigInt value is found.</remarks>
         abstract stringify: value: obj * ?replacer: JSON.Stringify.Replacer * ?space: U2<string, float> -> string
         /// <summary>
         /// Converts a JavaScript value to a JavaScript Object Notation (JSON) string.
         /// </summary>
-        /// <remarks>@param value A JavaScript value, usually an object or array, to be converted.</remarks>
-        /// <remarks>@param replacer A function that transforms the results.</remarks>
-        /// <remarks>@param space Adds indentation, white space, and line break characters to the return-value JSON text to make it easier to read.</remarks>
+        /// <param name="value">A JavaScript value, usually an object or array, to be converted.</param>
+        /// <param name="replacer">A function that transforms the results.</param>
+        /// <param name="space">Adds indentation, white space, and line break characters to the return-value JSON text to make it easier to read.</param>
         /// <remarks>@throws {TypeError} If a circular reference or a BigInt value is found.</remarks>
-        /// <remarks>@param value A JavaScript value, usually an object or array, to be converted.</remarks>
-        /// <remarks>@param replacer An array of strings and numbers that acts as an approved list for selecting the object properties that will be stringified.</remarks>
-        /// <remarks>@param space Adds indentation, white space, and line break characters to the return-value JSON text to make it easier to read.</remarks>
+        /// <param name="value">A JavaScript value, usually an object or array, to be converted.</param>
+        /// <param name="replacer">An array of strings and numbers that acts as an approved list for selecting the object properties that will be stringified.</param>
+        /// <param name="space">Adds indentation, white space, and line break characters to the return-value JSON text to make it easier to read.</param>
         /// <remarks>@throws {TypeError} If a circular reference or a BigInt value is found.</remarks>
         abstract stringify: value: obj * ?replacer: U2<string, float>[] * ?space: U2<string, float> -> string
 
@@ -2316,9 +2313,9 @@ module Es =
         /// <summary>
         /// Attaches callbacks for the resolution and/or rejection of the Promise.
         /// </summary>
-        /// <remarks>@param onfulfilled The callback to execute when the Promise is resolved.</remarks>
-        /// <remarks>@param onrejected The callback to execute when the Promise is rejected.</remarks>
-        /// <remarks>@returns A Promise for the completion of which ever callback is executed.</remarks>
+        /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
+        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+        /// <returns>A Promise for the completion of which ever callback is executed.</returns>
         abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: ('T -> U2<'TResult1, PromiseLike<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, PromiseLike<'TResult2>>) -> PromiseLike<U2<'TResult1, 'TResult2>>
         [<ParamObject; Emit("$0")>]
         static member Create (``then``: Func<('T -> U2<'TResult1, PromiseLike<'TResult1>>) option, (obj -> U2<'TResult2, PromiseLike<'TResult2>>) option, PromiseLike<U2<'TResult1, 'TResult2>>>) : PromiseLike<'T> = jsNative
@@ -2331,15 +2328,15 @@ module Es =
         /// <summary>
         /// Attaches callbacks for the resolution and/or rejection of the Promise.
         /// </summary>
-        /// <remarks>@param onfulfilled The callback to execute when the Promise is resolved.</remarks>
-        /// <remarks>@param onrejected The callback to execute when the Promise is rejected.</remarks>
-        /// <remarks>@returns A Promise for the completion of which ever callback is executed.</remarks>
+        /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
+        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+        /// <returns>A Promise for the completion of which ever callback is executed.</returns>
         abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: ('T -> U2<'TResult1, PromiseLike<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, PromiseLike<'TResult2>>) -> Promise<U2<'TResult1, 'TResult2>>
         /// <summary>
         /// Attaches a callback for only the rejection of the Promise.
         /// </summary>
-        /// <remarks>@param onrejected The callback to execute when the Promise is rejected.</remarks>
-        /// <remarks>@returns A Promise for the completion of the callback.</remarks>
+        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+        /// <returns>A Promise for the completion of the callback.</returns>
         abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, PromiseLike<'TResult>>) -> Promise<U2<'T, 'TResult>>
         [<ParamObject; Emit("$0")>]
         static member Create (``then``: Func<('T -> U2<'TResult1, PromiseLike<'TResult1>>) option, (obj -> U2<'TResult2, PromiseLike<'TResult2>>) option, Promise<U2<'TResult1, 'TResult2>>>, catch: ((obj -> U2<'TResult, PromiseLike<'TResult>>) option -> Promise<U2<'T, 'TResult>>)) : Promise<'T> = jsNative
@@ -2530,109 +2527,109 @@ module Es =
         /// Gets the Float32 value at the specified byte offset from the start of the view. There is
         /// no alignment constraint; multi-byte values may be fetched from any offset.
         /// </summary>
-        /// <remarks>@param byteOffset The place in the buffer at which the value should be retrieved.</remarks>
-        /// <remarks>@param littleEndian If false or undefined, a big-endian value should be read.</remarks>
+        /// <param name="byteOffset">The place in the buffer at which the value should be retrieved.</param>
+        /// <param name="littleEndian">If false or undefined, a big-endian value should be read.</param>
         abstract getFloat32: byteOffset: float * ?littleEndian: bool -> float
         /// <summary>
         /// Gets the Float64 value at the specified byte offset from the start of the view. There is
         /// no alignment constraint; multi-byte values may be fetched from any offset.
         /// </summary>
-        /// <remarks>@param byteOffset The place in the buffer at which the value should be retrieved.</remarks>
-        /// <remarks>@param littleEndian If false or undefined, a big-endian value should be read.</remarks>
+        /// <param name="byteOffset">The place in the buffer at which the value should be retrieved.</param>
+        /// <param name="littleEndian">If false or undefined, a big-endian value should be read.</param>
         abstract getFloat64: byteOffset: float * ?littleEndian: bool -> float
         /// <summary>
         /// Gets the Int8 value at the specified byte offset from the start of the view. There is
         /// no alignment constraint; multi-byte values may be fetched from any offset.
         /// </summary>
-        /// <remarks>@param byteOffset The place in the buffer at which the value should be retrieved.</remarks>
+        /// <param name="byteOffset">The place in the buffer at which the value should be retrieved.</param>
         abstract getInt8: byteOffset: float -> float
         /// <summary>
         /// Gets the Int16 value at the specified byte offset from the start of the view. There is
         /// no alignment constraint; multi-byte values may be fetched from any offset.
         /// </summary>
-        /// <remarks>@param byteOffset The place in the buffer at which the value should be retrieved.</remarks>
-        /// <remarks>@param littleEndian If false or undefined, a big-endian value should be read.</remarks>
+        /// <param name="byteOffset">The place in the buffer at which the value should be retrieved.</param>
+        /// <param name="littleEndian">If false or undefined, a big-endian value should be read.</param>
         abstract getInt16: byteOffset: float * ?littleEndian: bool -> float
         /// <summary>
         /// Gets the Int32 value at the specified byte offset from the start of the view. There is
         /// no alignment constraint; multi-byte values may be fetched from any offset.
         /// </summary>
-        /// <remarks>@param byteOffset The place in the buffer at which the value should be retrieved.</remarks>
-        /// <remarks>@param littleEndian If false or undefined, a big-endian value should be read.</remarks>
+        /// <param name="byteOffset">The place in the buffer at which the value should be retrieved.</param>
+        /// <param name="littleEndian">If false or undefined, a big-endian value should be read.</param>
         abstract getInt32: byteOffset: float * ?littleEndian: bool -> float
         /// <summary>
         /// Gets the Uint8 value at the specified byte offset from the start of the view. There is
         /// no alignment constraint; multi-byte values may be fetched from any offset.
         /// </summary>
-        /// <remarks>@param byteOffset The place in the buffer at which the value should be retrieved.</remarks>
+        /// <param name="byteOffset">The place in the buffer at which the value should be retrieved.</param>
         abstract getUint8: byteOffset: float -> float
         /// <summary>
         /// Gets the Uint16 value at the specified byte offset from the start of the view. There is
         /// no alignment constraint; multi-byte values may be fetched from any offset.
         /// </summary>
-        /// <remarks>@param byteOffset The place in the buffer at which the value should be retrieved.</remarks>
-        /// <remarks>@param littleEndian If false or undefined, a big-endian value should be read.</remarks>
+        /// <param name="byteOffset">The place in the buffer at which the value should be retrieved.</param>
+        /// <param name="littleEndian">If false or undefined, a big-endian value should be read.</param>
         abstract getUint16: byteOffset: float * ?littleEndian: bool -> float
         /// <summary>
         /// Gets the Uint32 value at the specified byte offset from the start of the view. There is
         /// no alignment constraint; multi-byte values may be fetched from any offset.
         /// </summary>
-        /// <remarks>@param byteOffset The place in the buffer at which the value should be retrieved.</remarks>
-        /// <remarks>@param littleEndian If false or undefined, a big-endian value should be read.</remarks>
+        /// <param name="byteOffset">The place in the buffer at which the value should be retrieved.</param>
+        /// <param name="littleEndian">If false or undefined, a big-endian value should be read.</param>
         abstract getUint32: byteOffset: float * ?littleEndian: bool -> float
         /// <summary>
         /// Stores an Float32 value at the specified byte offset from the start of the view.
         /// </summary>
-        /// <remarks>@param byteOffset The place in the buffer at which the value should be set.</remarks>
-        /// <remarks>@param value The value to set.</remarks>
-        /// <remarks>@param littleEndian If false or undefined, a big-endian value should be written.</remarks>
+        /// <param name="byteOffset">The place in the buffer at which the value should be set.</param>
+        /// <param name="value">The value to set.</param>
+        /// <param name="littleEndian">If false or undefined, a big-endian value should be written.</param>
         abstract setFloat32: byteOffset: float * value: float * ?littleEndian: bool -> unit
         /// <summary>
         /// Stores an Float64 value at the specified byte offset from the start of the view.
         /// </summary>
-        /// <remarks>@param byteOffset The place in the buffer at which the value should be set.</remarks>
-        /// <remarks>@param value The value to set.</remarks>
-        /// <remarks>@param littleEndian If false or undefined, a big-endian value should be written.</remarks>
+        /// <param name="byteOffset">The place in the buffer at which the value should be set.</param>
+        /// <param name="value">The value to set.</param>
+        /// <param name="littleEndian">If false or undefined, a big-endian value should be written.</param>
         abstract setFloat64: byteOffset: float * value: float * ?littleEndian: bool -> unit
         /// <summary>
         /// Stores an Int8 value at the specified byte offset from the start of the view.
         /// </summary>
-        /// <remarks>@param byteOffset The place in the buffer at which the value should be set.</remarks>
-        /// <remarks>@param value The value to set.</remarks>
+        /// <param name="byteOffset">The place in the buffer at which the value should be set.</param>
+        /// <param name="value">The value to set.</param>
         abstract setInt8: byteOffset: float * value: float -> unit
         /// <summary>
         /// Stores an Int16 value at the specified byte offset from the start of the view.
         /// </summary>
-        /// <remarks>@param byteOffset The place in the buffer at which the value should be set.</remarks>
-        /// <remarks>@param value The value to set.</remarks>
-        /// <remarks>@param littleEndian If false or undefined, a big-endian value should be written.</remarks>
+        /// <param name="byteOffset">The place in the buffer at which the value should be set.</param>
+        /// <param name="value">The value to set.</param>
+        /// <param name="littleEndian">If false or undefined, a big-endian value should be written.</param>
         abstract setInt16: byteOffset: float * value: float * ?littleEndian: bool -> unit
         /// <summary>
         /// Stores an Int32 value at the specified byte offset from the start of the view.
         /// </summary>
-        /// <remarks>@param byteOffset The place in the buffer at which the value should be set.</remarks>
-        /// <remarks>@param value The value to set.</remarks>
-        /// <remarks>@param littleEndian If false or undefined, a big-endian value should be written.</remarks>
+        /// <param name="byteOffset">The place in the buffer at which the value should be set.</param>
+        /// <param name="value">The value to set.</param>
+        /// <param name="littleEndian">If false or undefined, a big-endian value should be written.</param>
         abstract setInt32: byteOffset: float * value: float * ?littleEndian: bool -> unit
         /// <summary>
         /// Stores an Uint8 value at the specified byte offset from the start of the view.
         /// </summary>
-        /// <remarks>@param byteOffset The place in the buffer at which the value should be set.</remarks>
-        /// <remarks>@param value The value to set.</remarks>
+        /// <param name="byteOffset">The place in the buffer at which the value should be set.</param>
+        /// <param name="value">The value to set.</param>
         abstract setUint8: byteOffset: float * value: float -> unit
         /// <summary>
         /// Stores an Uint16 value at the specified byte offset from the start of the view.
         /// </summary>
-        /// <remarks>@param byteOffset The place in the buffer at which the value should be set.</remarks>
-        /// <remarks>@param value The value to set.</remarks>
-        /// <remarks>@param littleEndian If false or undefined, a big-endian value should be written.</remarks>
+        /// <param name="byteOffset">The place in the buffer at which the value should be set.</param>
+        /// <param name="value">The value to set.</param>
+        /// <param name="littleEndian">If false or undefined, a big-endian value should be written.</param>
         abstract setUint16: byteOffset: float * value: float * ?littleEndian: bool -> unit
         /// <summary>
         /// Stores an Uint32 value at the specified byte offset from the start of the view.
         /// </summary>
-        /// <remarks>@param byteOffset The place in the buffer at which the value should be set.</remarks>
-        /// <remarks>@param value The value to set.</remarks>
-        /// <remarks>@param littleEndian If false or undefined, a big-endian value should be written.</remarks>
+        /// <param name="byteOffset">The place in the buffer at which the value should be set.</param>
+        /// <param name="value">The value to set.</param>
+        /// <param name="littleEndian">If false or undefined, a big-endian value should be written.</param>
         abstract setUint32: byteOffset: float * value: float * ?littleEndian: bool -> unit
         [<ParamObject; Emit("$0")>]
         static member Create (buffer: 'TArrayBuffer, byteLength: float, byteOffset: float, getFloat32: Func<float, bool option, float>, getFloat64: Func<float, bool option, float>, getInt8: (float -> float), getInt16: Func<float, bool option, float>, getInt32: Func<float, bool option, float>, getUint8: (float -> float), getUint16: Func<float, bool option, float>, getUint32: Func<float, bool option, float>, setFloat32: Action<float, float, bool option>, setFloat64: Action<float, float, bool option>, setInt8: Action<float, float>, setInt16: Action<float, float, bool option>, setInt32: Action<float, float, bool option>, setUint8: Action<float, float>, setUint16: Action<float, float, bool option>, setUint32: Action<float, float, bool option>) : DataView<'TArrayBuffer> = jsNative
@@ -2666,136 +2663,119 @@ module Es =
         /// Returns the this object after copying a section of the array identified by start and end
         /// to the same array starting at position target
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// target If target is negative, it is treated as length+target where length is the
+        /// <param name="target">
+        /// If target is negative, it is treated as length+target where length is the
         /// length of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// start If start is negative, it is treated as length+start. If end is negative, it
+        /// </param>
+        /// <param name="start">
+        /// If start is negative, it is treated as length+start. If end is negative, it
         /// is treated as length+end.
-        /// </remarks>
-        /// <remarks>@param end If not specified, length of the this object is used as its default value.</remarks>
+        /// </param>
+        /// <param name="end">If not specified, length of the this object is used as its default value.</param>
         abstract copyWithin: target: float * start: float * ?``end``: float -> Int8Array<'TArrayBuffer>
         /// <summary>
         /// Determines whether all the members of an array satisfy the specified test.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate A function that accepts up to three arguments. The every method calls
+        /// <param name="predicate">
+        /// A function that accepts up to three arguments. The every method calls
         /// the predicate function for each element in the array until the predicate returns a value
         /// which is coercible to the Boolean value false, or until the end of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the predicate function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract every: predicate: Int8Array.Every.Predicate * ?thisArg: obj -> bool
         /// <summary>
         /// Changes all array elements from <c>start</c> to <c>end</c> index to a static <c>value</c> and returns the modified array
         /// </summary>
-        /// <remarks>@param value value to fill array section with</remarks>
-        /// <remarks>
-        /// @param
-        /// start index to start filling the array at. If start is negative, it is treated as
+        /// <param name="value">value to fill array section with</param>
+        /// <param name="start">
+        /// index to start filling the array at. If start is negative, it is treated as
         /// length+start where length is the length of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// end index to stop filling the array at. If end is negative, it is treated as
+        /// </param>
+        /// <param name="end">
+        /// index to stop filling the array at. If end is negative, it is treated as
         /// length+end.
-        /// </remarks>
+        /// </param>
         abstract fill: value: float * ?start: float * ?``end``: float -> Int8Array<'TArrayBuffer>
         /// <summary>
         /// Returns the elements of an array that meet the condition specified in a callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate A function that accepts up to three arguments. The filter method calls
+        /// <param name="predicate">
+        /// A function that accepts up to three arguments. The filter method calls
         /// the predicate function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the predicate function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract filter: predicate: Int8Array.Filter.Predicate * ?thisArg: obj -> Int8Array<ArrayBuffer>
         /// <summary>
         /// Returns the value of the first element in the array where predicate is true, and undefined
         /// otherwise.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate find calls predicate once for each element of the array, in ascending
+        /// <param name="predicate">
+        /// find calls predicate once for each element of the array, in ascending
         /// order, until it finds one where predicate returns true. If such an element is found, find
         /// immediately returns that element value. Otherwise, find returns undefined.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg If provided, it will be used as the this value for each invocation of
+        /// </param>
+        /// <param name="thisArg">
+        /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
-        /// </remarks>
+        /// </param>
         abstract find: predicate: Int8Array.Find.Predicate * ?thisArg: obj -> float option
         /// <summary>
         /// Returns the index of the first element in the array where predicate is true, and -1
         /// otherwise.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate find calls predicate once for each element of the array, in ascending
+        /// <param name="predicate">
+        /// find calls predicate once for each element of the array, in ascending
         /// order, until it finds one where predicate returns true. If such an element is found,
         /// findIndex immediately returns that element index. Otherwise, findIndex returns -1.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg If provided, it will be used as the this value for each invocation of
+        /// </param>
+        /// <param name="thisArg">
+        /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
-        /// </remarks>
+        /// </param>
         abstract findIndex: predicate: Int8Array.FindIndex.Predicate * ?thisArg: obj -> float
         /// <summary>
         /// Performs the specified action for each element in an array.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to three arguments. forEach calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to three arguments. forEach calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the callbackfn function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract forEach: callbackfn: Int8Array.ForEach.Callbackfn * ?thisArg: obj -> unit
         /// <summary>
         /// Returns the index of the first occurrence of a value in an array, or -1 if it is not present.
         /// </summary>
-        /// <remarks>@param searchElement The value to locate in the array.</remarks>
-        /// <remarks>
-        /// @param
-        /// fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+        /// <param name="searchElement">The value to locate in the array.</param>
+        /// <param name="fromIndex">
+        /// The array index at which to begin the search. If fromIndex is omitted, the
         /// search starts at index 0.
-        /// </remarks>
+        /// </param>
         abstract indexOf: searchElement: float * ?fromIndex: float -> float
         /// <summary>
         /// Adds all the elements of an array separated by the specified separator string.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// separator A string used to separate one element of an array from the next in the
+        /// <param name="separator">
+        /// A string used to separate one element of an array from the next in the
         /// resulting String. If omitted, the array elements are separated with a comma.
-        /// </remarks>
+        /// </param>
         abstract join: ?separator: string -> string
         /// <summary>
         /// Returns the index of the last occurrence of a value in an array, or -1 if it is not present.
         /// </summary>
-        /// <remarks>@param searchElement The value to locate in the array.</remarks>
-        /// <remarks>
-        /// @param
-        /// fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+        /// <param name="searchElement">The value to locate in the array.</param>
+        /// <param name="fromIndex">
+        /// The array index at which to begin the search. If fromIndex is omitted, the
         /// search starts at index 0.
-        /// </remarks>
+        /// </param>
         abstract lastIndexOf: searchElement: float * ?fromIndex: float -> float
         /// <summary>
         /// The length of the array.
@@ -2805,184 +2785,158 @@ module Es =
         /// Calls a defined callback function on each element of an array, and returns an array that
         /// contains the results.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to three arguments. The map method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to three arguments. The map method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the callbackfn function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract map: callbackfn: Int8Array.Map.Callbackfn * ?thisArg: obj -> Int8Array<ArrayBuffer>
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
         /// call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduce: callbackfn: Int8Array.Reduce.Callbackfn -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
         /// call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduce: callbackfn: Int8Array.Reduce.Callbackfn2 * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
         /// call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduce<'U>: callbackfn: Int8Array.Reduce.Callbackfn3<'U> * initialValue: 'U -> 'U
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
         /// argument in the next call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an
         /// argument instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduceRight: callbackfn: Int8Array.ReduceRight.Callbackfn -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
         /// argument in the next call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an
         /// argument instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduceRight: callbackfn: Int8Array.ReduceRight.Callbackfn2 * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
         /// argument in the next call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an
         /// argument instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduceRight<'U>: callbackfn: Int8Array.ReduceRight.Callbackfn3<'U> * initialValue: 'U -> 'U
         /// <summary>
         /// Reverses the elements in an Array.
@@ -2991,49 +2945,46 @@ module Es =
         /// <summary>
         /// Sets a value or an array of values.
         /// </summary>
-        /// <remarks>@param array A typed or untyped array of values to set.</remarks>
-        /// <remarks>@param offset The index in the current array at which the values are to be written.</remarks>
+        /// <param name="array">A typed or untyped array of values to set.</param>
+        /// <param name="offset">The index in the current array at which the values are to be written.</param>
         abstract set: array: ArrayLike<float> * ?offset: float -> unit
         /// <summary>
         /// Returns a section of an array.
         /// </summary>
-        /// <remarks>@param start The beginning of the specified portion of the array.</remarks>
-        /// <remarks>@param end The end of the specified portion of the array. This is exclusive of the element at the index 'end'.</remarks>
+        /// <param name="start">The beginning of the specified portion of the array.</param>
+        /// <param name="end">The end of the specified portion of the array. This is exclusive of the element at the index 'end'.</param>
         abstract slice: ?start: float * ?``end``: float -> Int8Array<ArrayBuffer>
         /// <summary>
         /// Determines whether the specified callback function returns true for any element of an array.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate A function that accepts up to three arguments. The some method calls
+        /// <param name="predicate">
+        /// A function that accepts up to three arguments. The some method calls
         /// the predicate function for each element in the array until the predicate returns a value
         /// which is coercible to the Boolean value true, or until the end of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the predicate function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract some: predicate: Int8Array.Some.Predicate * ?thisArg: obj -> bool
         /// <summary>
         /// Sorts an array.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// compareFn Function used to determine the order of the elements. It is expected to return
+        /// <param name="compareFn">
+        /// Function used to determine the order of the elements. It is expected to return
         /// a negative value if first argument is less than second argument, zero if they're equal and a positive
         /// value otherwise. If omitted, the elements are sorted in ascending order.
         /// <code lang="ts">
         /// [11,2,22,1].sort((a, b) =&gt; a - b)
         /// </code>
-        /// </remarks>
+        /// </param>
         abstract sort: ?compareFn: Int8Array.Sort.CompareFn -> Int8Array<'TArrayBuffer>
         /// <summary>
         /// Gets a new Int8Array view of the ArrayBuffer store for this array, referencing the elements
         /// at begin, inclusive, up to end, exclusive.
         /// </summary>
-        /// <remarks>@param begin The index of the beginning of the array.</remarks>
-        /// <remarks>@param end The index of the end of the array.</remarks>
+        /// <param name="begin">The index of the beginning of the array.</param>
+        /// <param name="end">The index of the end of the array.</param>
         abstract subarray: ?``begin``: float * ?``end``: float -> Int8Array<'TArrayBuffer>
         /// <summary>
         /// Converts a number to a string by using the current locale.
@@ -3058,23 +3009,23 @@ module Es =
         /// <summary>
         /// Returns a new array from a set of elements.
         /// </summary>
-        /// <remarks>@param items A set of elements to include in the new array object.</remarks>
+        /// <param name="items">A set of elements to include in the new array object.</param>
         abstract ``of``: [<ParamArray>] items: float[] -> Int8Array<ArrayBuffer>
         /// <summary>
         /// Creates an array from an array-like or iterable object.
         /// </summary>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param mapfn A mapping function to call on every element of the array.</remarks>
-        /// <remarks>@param thisArg Value of 'this' used to invoke the mapfn.</remarks>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="mapfn">A mapping function to call on every element of the array.</param>
+        /// <param name="thisArg">Value of 'this' used to invoke the mapfn.</param>
         abstract from: arrayLike: ArrayLike<float> -> Int8Array<ArrayBuffer>
         /// <summary>
         /// Creates an array from an array-like or iterable object.
         /// </summary>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param mapfn A mapping function to call on every element of the array.</remarks>
-        /// <remarks>@param thisArg Value of 'this' used to invoke the mapfn.</remarks>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="mapfn">A mapping function to call on every element of the array.</param>
+        /// <param name="thisArg">Value of 'this' used to invoke the mapfn.</param>
         abstract from<'T>: arrayLike: ArrayLike<'T> * mapfn: Int8ArrayConstructor.From.Mapfn<'T> * ?thisArg: obj -> Int8Array<ArrayBuffer>
         [<EmitConstructor>]
         abstract Create: length: float -> Int8Array<ArrayBuffer>
@@ -3112,136 +3063,119 @@ module Es =
         /// Returns the this object after copying a section of the array identified by start and end
         /// to the same array starting at position target
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// target If target is negative, it is treated as length+target where length is the
+        /// <param name="target">
+        /// If target is negative, it is treated as length+target where length is the
         /// length of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// start If start is negative, it is treated as length+start. If end is negative, it
+        /// </param>
+        /// <param name="start">
+        /// If start is negative, it is treated as length+start. If end is negative, it
         /// is treated as length+end.
-        /// </remarks>
-        /// <remarks>@param end If not specified, length of the this object is used as its default value.</remarks>
+        /// </param>
+        /// <param name="end">If not specified, length of the this object is used as its default value.</param>
         abstract copyWithin: target: float * start: float * ?``end``: float -> Uint8Array<'TArrayBuffer>
         /// <summary>
         /// Determines whether all the members of an array satisfy the specified test.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate A function that accepts up to three arguments. The every method calls
+        /// <param name="predicate">
+        /// A function that accepts up to three arguments. The every method calls
         /// the predicate function for each element in the array until the predicate returns a value
         /// which is coercible to the Boolean value false, or until the end of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the predicate function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract every: predicate: Uint8Array.Every.Predicate * ?thisArg: obj -> bool
         /// <summary>
         /// Changes all array elements from <c>start</c> to <c>end</c> index to a static <c>value</c> and returns the modified array
         /// </summary>
-        /// <remarks>@param value value to fill array section with</remarks>
-        /// <remarks>
-        /// @param
-        /// start index to start filling the array at. If start is negative, it is treated as
+        /// <param name="value">value to fill array section with</param>
+        /// <param name="start">
+        /// index to start filling the array at. If start is negative, it is treated as
         /// length+start where length is the length of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// end index to stop filling the array at. If end is negative, it is treated as
+        /// </param>
+        /// <param name="end">
+        /// index to stop filling the array at. If end is negative, it is treated as
         /// length+end.
-        /// </remarks>
+        /// </param>
         abstract fill: value: float * ?start: float * ?``end``: float -> Uint8Array<'TArrayBuffer>
         /// <summary>
         /// Returns the elements of an array that meet the condition specified in a callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate A function that accepts up to three arguments. The filter method calls
+        /// <param name="predicate">
+        /// A function that accepts up to three arguments. The filter method calls
         /// the predicate function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the predicate function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract filter: predicate: Uint8Array.Filter.Predicate * ?thisArg: obj -> Uint8Array<ArrayBuffer>
         /// <summary>
         /// Returns the value of the first element in the array where predicate is true, and undefined
         /// otherwise.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate find calls predicate once for each element of the array, in ascending
+        /// <param name="predicate">
+        /// find calls predicate once for each element of the array, in ascending
         /// order, until it finds one where predicate returns true. If such an element is found, find
         /// immediately returns that element value. Otherwise, find returns undefined.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg If provided, it will be used as the this value for each invocation of
+        /// </param>
+        /// <param name="thisArg">
+        /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
-        /// </remarks>
+        /// </param>
         abstract find: predicate: Uint8Array.Find.Predicate * ?thisArg: obj -> float option
         /// <summary>
         /// Returns the index of the first element in the array where predicate is true, and -1
         /// otherwise.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate find calls predicate once for each element of the array, in ascending
+        /// <param name="predicate">
+        /// find calls predicate once for each element of the array, in ascending
         /// order, until it finds one where predicate returns true. If such an element is found,
         /// findIndex immediately returns that element index. Otherwise, findIndex returns -1.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg If provided, it will be used as the this value for each invocation of
+        /// </param>
+        /// <param name="thisArg">
+        /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
-        /// </remarks>
+        /// </param>
         abstract findIndex: predicate: Uint8Array.FindIndex.Predicate * ?thisArg: obj -> float
         /// <summary>
         /// Performs the specified action for each element in an array.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to three arguments. forEach calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to three arguments. forEach calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the callbackfn function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract forEach: callbackfn: Uint8Array.ForEach.Callbackfn * ?thisArg: obj -> unit
         /// <summary>
         /// Returns the index of the first occurrence of a value in an array, or -1 if it is not present.
         /// </summary>
-        /// <remarks>@param searchElement The value to locate in the array.</remarks>
-        /// <remarks>
-        /// @param
-        /// fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+        /// <param name="searchElement">The value to locate in the array.</param>
+        /// <param name="fromIndex">
+        /// The array index at which to begin the search. If fromIndex is omitted, the
         /// search starts at index 0.
-        /// </remarks>
+        /// </param>
         abstract indexOf: searchElement: float * ?fromIndex: float -> float
         /// <summary>
         /// Adds all the elements of an array separated by the specified separator string.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// separator A string used to separate one element of an array from the next in the
+        /// <param name="separator">
+        /// A string used to separate one element of an array from the next in the
         /// resulting String. If omitted, the array elements are separated with a comma.
-        /// </remarks>
+        /// </param>
         abstract join: ?separator: string -> string
         /// <summary>
         /// Returns the index of the last occurrence of a value in an array, or -1 if it is not present.
         /// </summary>
-        /// <remarks>@param searchElement The value to locate in the array.</remarks>
-        /// <remarks>
-        /// @param
-        /// fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+        /// <param name="searchElement">The value to locate in the array.</param>
+        /// <param name="fromIndex">
+        /// The array index at which to begin the search. If fromIndex is omitted, the
         /// search starts at index 0.
-        /// </remarks>
+        /// </param>
         abstract lastIndexOf: searchElement: float * ?fromIndex: float -> float
         /// <summary>
         /// The length of the array.
@@ -3251,184 +3185,158 @@ module Es =
         /// Calls a defined callback function on each element of an array, and returns an array that
         /// contains the results.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to three arguments. The map method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to three arguments. The map method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the callbackfn function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract map: callbackfn: Uint8Array.Map.Callbackfn * ?thisArg: obj -> Uint8Array<ArrayBuffer>
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
         /// call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduce: callbackfn: Uint8Array.Reduce.Callbackfn -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
         /// call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduce: callbackfn: Uint8Array.Reduce.Callbackfn2 * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
         /// call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduce<'U>: callbackfn: Uint8Array.Reduce.Callbackfn3<'U> * initialValue: 'U -> 'U
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
         /// argument in the next call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an
         /// argument instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduceRight: callbackfn: Uint8Array.ReduceRight.Callbackfn -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
         /// argument in the next call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an
         /// argument instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduceRight: callbackfn: Uint8Array.ReduceRight.Callbackfn2 * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
         /// argument in the next call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an
         /// argument instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduceRight<'U>: callbackfn: Uint8Array.ReduceRight.Callbackfn3<'U> * initialValue: 'U -> 'U
         /// <summary>
         /// Reverses the elements in an Array.
@@ -3437,49 +3345,46 @@ module Es =
         /// <summary>
         /// Sets a value or an array of values.
         /// </summary>
-        /// <remarks>@param array A typed or untyped array of values to set.</remarks>
-        /// <remarks>@param offset The index in the current array at which the values are to be written.</remarks>
+        /// <param name="array">A typed or untyped array of values to set.</param>
+        /// <param name="offset">The index in the current array at which the values are to be written.</param>
         abstract set: array: ArrayLike<float> * ?offset: float -> unit
         /// <summary>
         /// Returns a section of an array.
         /// </summary>
-        /// <remarks>@param start The beginning of the specified portion of the array.</remarks>
-        /// <remarks>@param end The end of the specified portion of the array. This is exclusive of the element at the index 'end'.</remarks>
+        /// <param name="start">The beginning of the specified portion of the array.</param>
+        /// <param name="end">The end of the specified portion of the array. This is exclusive of the element at the index 'end'.</param>
         abstract slice: ?start: float * ?``end``: float -> Uint8Array<ArrayBuffer>
         /// <summary>
         /// Determines whether the specified callback function returns true for any element of an array.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate A function that accepts up to three arguments. The some method calls
+        /// <param name="predicate">
+        /// A function that accepts up to three arguments. The some method calls
         /// the predicate function for each element in the array until the predicate returns a value
         /// which is coercible to the Boolean value true, or until the end of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the predicate function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract some: predicate: Uint8Array.Some.Predicate * ?thisArg: obj -> bool
         /// <summary>
         /// Sorts an array.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// compareFn Function used to determine the order of the elements. It is expected to return
+        /// <param name="compareFn">
+        /// Function used to determine the order of the elements. It is expected to return
         /// a negative value if first argument is less than second argument, zero if they're equal and a positive
         /// value otherwise. If omitted, the elements are sorted in ascending order.
         /// <code lang="ts">
         /// [11,2,22,1].sort((a, b) =&gt; a - b)
         /// </code>
-        /// </remarks>
+        /// </param>
         abstract sort: ?compareFn: Uint8Array.Sort.CompareFn -> Uint8Array<'TArrayBuffer>
         /// <summary>
         /// Gets a new Uint8Array view of the ArrayBuffer store for this array, referencing the elements
         /// at begin, inclusive, up to end, exclusive.
         /// </summary>
-        /// <remarks>@param begin The index of the beginning of the array.</remarks>
-        /// <remarks>@param end The index of the end of the array.</remarks>
+        /// <param name="begin">The index of the beginning of the array.</param>
+        /// <param name="end">The index of the end of the array.</param>
         abstract subarray: ?``begin``: float * ?``end``: float -> Uint8Array<'TArrayBuffer>
         /// <summary>
         /// Converts a number to a string by using the current locale.
@@ -3504,23 +3409,23 @@ module Es =
         /// <summary>
         /// Returns a new array from a set of elements.
         /// </summary>
-        /// <remarks>@param items A set of elements to include in the new array object.</remarks>
+        /// <param name="items">A set of elements to include in the new array object.</param>
         abstract ``of``: [<ParamArray>] items: float[] -> Uint8Array<ArrayBuffer>
         /// <summary>
         /// Creates an array from an array-like or iterable object.
         /// </summary>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param mapfn A mapping function to call on every element of the array.</remarks>
-        /// <remarks>@param thisArg Value of 'this' used to invoke the mapfn.</remarks>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="mapfn">A mapping function to call on every element of the array.</param>
+        /// <param name="thisArg">Value of 'this' used to invoke the mapfn.</param>
         abstract from: arrayLike: ArrayLike<float> -> Uint8Array<ArrayBuffer>
         /// <summary>
         /// Creates an array from an array-like or iterable object.
         /// </summary>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param mapfn A mapping function to call on every element of the array.</remarks>
-        /// <remarks>@param thisArg Value of 'this' used to invoke the mapfn.</remarks>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="mapfn">A mapping function to call on every element of the array.</param>
+        /// <param name="thisArg">Value of 'this' used to invoke the mapfn.</param>
         abstract from<'T>: arrayLike: ArrayLike<'T> * mapfn: Uint8ArrayConstructor.From.Mapfn<'T> * ?thisArg: obj -> Uint8Array<ArrayBuffer>
         [<EmitConstructor>]
         abstract Create: length: float -> Uint8Array<ArrayBuffer>
@@ -3558,136 +3463,119 @@ module Es =
         /// Returns the this object after copying a section of the array identified by start and end
         /// to the same array starting at position target
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// target If target is negative, it is treated as length+target where length is the
+        /// <param name="target">
+        /// If target is negative, it is treated as length+target where length is the
         /// length of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// start If start is negative, it is treated as length+start. If end is negative, it
+        /// </param>
+        /// <param name="start">
+        /// If start is negative, it is treated as length+start. If end is negative, it
         /// is treated as length+end.
-        /// </remarks>
-        /// <remarks>@param end If not specified, length of the this object is used as its default value.</remarks>
+        /// </param>
+        /// <param name="end">If not specified, length of the this object is used as its default value.</param>
         abstract copyWithin: target: float * start: float * ?``end``: float -> Uint8ClampedArray<'TArrayBuffer>
         /// <summary>
         /// Determines whether all the members of an array satisfy the specified test.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate A function that accepts up to three arguments. The every method calls
+        /// <param name="predicate">
+        /// A function that accepts up to three arguments. The every method calls
         /// the predicate function for each element in the array until the predicate returns a value
         /// which is coercible to the Boolean value false, or until the end of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the predicate function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract every: predicate: Uint8ClampedArray.Every.Predicate * ?thisArg: obj -> bool
         /// <summary>
         /// Changes all array elements from <c>start</c> to <c>end</c> index to a static <c>value</c> and returns the modified array
         /// </summary>
-        /// <remarks>@param value value to fill array section with</remarks>
-        /// <remarks>
-        /// @param
-        /// start index to start filling the array at. If start is negative, it is treated as
+        /// <param name="value">value to fill array section with</param>
+        /// <param name="start">
+        /// index to start filling the array at. If start is negative, it is treated as
         /// length+start where length is the length of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// end index to stop filling the array at. If end is negative, it is treated as
+        /// </param>
+        /// <param name="end">
+        /// index to stop filling the array at. If end is negative, it is treated as
         /// length+end.
-        /// </remarks>
+        /// </param>
         abstract fill: value: float * ?start: float * ?``end``: float -> Uint8ClampedArray<'TArrayBuffer>
         /// <summary>
         /// Returns the elements of an array that meet the condition specified in a callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate A function that accepts up to three arguments. The filter method calls
+        /// <param name="predicate">
+        /// A function that accepts up to three arguments. The filter method calls
         /// the predicate function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the predicate function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract filter: predicate: Uint8ClampedArray.Filter.Predicate * ?thisArg: obj -> Uint8ClampedArray<ArrayBuffer>
         /// <summary>
         /// Returns the value of the first element in the array where predicate is true, and undefined
         /// otherwise.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate find calls predicate once for each element of the array, in ascending
+        /// <param name="predicate">
+        /// find calls predicate once for each element of the array, in ascending
         /// order, until it finds one where predicate returns true. If such an element is found, find
         /// immediately returns that element value. Otherwise, find returns undefined.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg If provided, it will be used as the this value for each invocation of
+        /// </param>
+        /// <param name="thisArg">
+        /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
-        /// </remarks>
+        /// </param>
         abstract find: predicate: Uint8ClampedArray.Find.Predicate * ?thisArg: obj -> float option
         /// <summary>
         /// Returns the index of the first element in the array where predicate is true, and -1
         /// otherwise.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate find calls predicate once for each element of the array, in ascending
+        /// <param name="predicate">
+        /// find calls predicate once for each element of the array, in ascending
         /// order, until it finds one where predicate returns true. If such an element is found,
         /// findIndex immediately returns that element index. Otherwise, findIndex returns -1.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg If provided, it will be used as the this value for each invocation of
+        /// </param>
+        /// <param name="thisArg">
+        /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
-        /// </remarks>
+        /// </param>
         abstract findIndex: predicate: Uint8ClampedArray.FindIndex.Predicate * ?thisArg: obj -> float
         /// <summary>
         /// Performs the specified action for each element in an array.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to three arguments. forEach calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to three arguments. forEach calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the callbackfn function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract forEach: callbackfn: Uint8ClampedArray.ForEach.Callbackfn * ?thisArg: obj -> unit
         /// <summary>
         /// Returns the index of the first occurrence of a value in an array, or -1 if it is not present.
         /// </summary>
-        /// <remarks>@param searchElement The value to locate in the array.</remarks>
-        /// <remarks>
-        /// @param
-        /// fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+        /// <param name="searchElement">The value to locate in the array.</param>
+        /// <param name="fromIndex">
+        /// The array index at which to begin the search. If fromIndex is omitted, the
         /// search starts at index 0.
-        /// </remarks>
+        /// </param>
         abstract indexOf: searchElement: float * ?fromIndex: float -> float
         /// <summary>
         /// Adds all the elements of an array separated by the specified separator string.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// separator A string used to separate one element of an array from the next in the
+        /// <param name="separator">
+        /// A string used to separate one element of an array from the next in the
         /// resulting String. If omitted, the array elements are separated with a comma.
-        /// </remarks>
+        /// </param>
         abstract join: ?separator: string -> string
         /// <summary>
         /// Returns the index of the last occurrence of a value in an array, or -1 if it is not present.
         /// </summary>
-        /// <remarks>@param searchElement The value to locate in the array.</remarks>
-        /// <remarks>
-        /// @param
-        /// fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+        /// <param name="searchElement">The value to locate in the array.</param>
+        /// <param name="fromIndex">
+        /// The array index at which to begin the search. If fromIndex is omitted, the
         /// search starts at index 0.
-        /// </remarks>
+        /// </param>
         abstract lastIndexOf: searchElement: float * ?fromIndex: float -> float
         /// <summary>
         /// The length of the array.
@@ -3697,184 +3585,158 @@ module Es =
         /// Calls a defined callback function on each element of an array, and returns an array that
         /// contains the results.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to three arguments. The map method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to three arguments. The map method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the callbackfn function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract map: callbackfn: Uint8ClampedArray.Map.Callbackfn * ?thisArg: obj -> Uint8ClampedArray<ArrayBuffer>
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
         /// call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduce: callbackfn: Uint8ClampedArray.Reduce.Callbackfn -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
         /// call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduce: callbackfn: Uint8ClampedArray.Reduce.Callbackfn2 * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
         /// call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduce<'U>: callbackfn: Uint8ClampedArray.Reduce.Callbackfn3<'U> * initialValue: 'U -> 'U
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
         /// argument in the next call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an
         /// argument instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduceRight: callbackfn: Uint8ClampedArray.ReduceRight.Callbackfn -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
         /// argument in the next call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an
         /// argument instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduceRight: callbackfn: Uint8ClampedArray.ReduceRight.Callbackfn2 * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
         /// argument in the next call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an
         /// argument instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduceRight<'U>: callbackfn: Uint8ClampedArray.ReduceRight.Callbackfn3<'U> * initialValue: 'U -> 'U
         /// <summary>
         /// Reverses the elements in an Array.
@@ -3883,49 +3745,46 @@ module Es =
         /// <summary>
         /// Sets a value or an array of values.
         /// </summary>
-        /// <remarks>@param array A typed or untyped array of values to set.</remarks>
-        /// <remarks>@param offset The index in the current array at which the values are to be written.</remarks>
+        /// <param name="array">A typed or untyped array of values to set.</param>
+        /// <param name="offset">The index in the current array at which the values are to be written.</param>
         abstract set: array: ArrayLike<float> * ?offset: float -> unit
         /// <summary>
         /// Returns a section of an array.
         /// </summary>
-        /// <remarks>@param start The beginning of the specified portion of the array.</remarks>
-        /// <remarks>@param end The end of the specified portion of the array. This is exclusive of the element at the index 'end'.</remarks>
+        /// <param name="start">The beginning of the specified portion of the array.</param>
+        /// <param name="end">The end of the specified portion of the array. This is exclusive of the element at the index 'end'.</param>
         abstract slice: ?start: float * ?``end``: float -> Uint8ClampedArray<ArrayBuffer>
         /// <summary>
         /// Determines whether the specified callback function returns true for any element of an array.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate A function that accepts up to three arguments. The some method calls
+        /// <param name="predicate">
+        /// A function that accepts up to three arguments. The some method calls
         /// the predicate function for each element in the array until the predicate returns a value
         /// which is coercible to the Boolean value true, or until the end of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the predicate function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract some: predicate: Uint8ClampedArray.Some.Predicate * ?thisArg: obj -> bool
         /// <summary>
         /// Sorts an array.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// compareFn Function used to determine the order of the elements. It is expected to return
+        /// <param name="compareFn">
+        /// Function used to determine the order of the elements. It is expected to return
         /// a negative value if first argument is less than second argument, zero if they're equal and a positive
         /// value otherwise. If omitted, the elements are sorted in ascending order.
         /// <code lang="ts">
         /// [11,2,22,1].sort((a, b) =&gt; a - b)
         /// </code>
-        /// </remarks>
+        /// </param>
         abstract sort: ?compareFn: Uint8ClampedArray.Sort.CompareFn -> Uint8ClampedArray<'TArrayBuffer>
         /// <summary>
         /// Gets a new Uint8ClampedArray view of the ArrayBuffer store for this array, referencing the elements
         /// at begin, inclusive, up to end, exclusive.
         /// </summary>
-        /// <remarks>@param begin The index of the beginning of the array.</remarks>
-        /// <remarks>@param end The index of the end of the array.</remarks>
+        /// <param name="begin">The index of the beginning of the array.</param>
+        /// <param name="end">The index of the end of the array.</param>
         abstract subarray: ?``begin``: float * ?``end``: float -> Uint8ClampedArray<'TArrayBuffer>
         /// <summary>
         /// Converts a number to a string by using the current locale.
@@ -3950,23 +3809,23 @@ module Es =
         /// <summary>
         /// Returns a new array from a set of elements.
         /// </summary>
-        /// <remarks>@param items A set of elements to include in the new array object.</remarks>
+        /// <param name="items">A set of elements to include in the new array object.</param>
         abstract ``of``: [<ParamArray>] items: float[] -> Uint8ClampedArray<ArrayBuffer>
         /// <summary>
         /// Creates an array from an array-like or iterable object.
         /// </summary>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param mapfn A mapping function to call on every element of the array.</remarks>
-        /// <remarks>@param thisArg Value of 'this' used to invoke the mapfn.</remarks>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="mapfn">A mapping function to call on every element of the array.</param>
+        /// <param name="thisArg">Value of 'this' used to invoke the mapfn.</param>
         abstract from: arrayLike: ArrayLike<float> -> Uint8ClampedArray<ArrayBuffer>
         /// <summary>
         /// Creates an array from an array-like or iterable object.
         /// </summary>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param mapfn A mapping function to call on every element of the array.</remarks>
-        /// <remarks>@param thisArg Value of 'this' used to invoke the mapfn.</remarks>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="mapfn">A mapping function to call on every element of the array.</param>
+        /// <param name="thisArg">Value of 'this' used to invoke the mapfn.</param>
         abstract from<'T>: arrayLike: ArrayLike<'T> * mapfn: Uint8ClampedArrayConstructor.From.Mapfn<'T> * ?thisArg: obj -> Uint8ClampedArray<ArrayBuffer>
         [<EmitConstructor>]
         abstract Create: length: float -> Uint8ClampedArray<ArrayBuffer>
@@ -4004,136 +3863,119 @@ module Es =
         /// Returns the this object after copying a section of the array identified by start and end
         /// to the same array starting at position target
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// target If target is negative, it is treated as length+target where length is the
+        /// <param name="target">
+        /// If target is negative, it is treated as length+target where length is the
         /// length of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// start If start is negative, it is treated as length+start. If end is negative, it
+        /// </param>
+        /// <param name="start">
+        /// If start is negative, it is treated as length+start. If end is negative, it
         /// is treated as length+end.
-        /// </remarks>
-        /// <remarks>@param end If not specified, length of the this object is used as its default value.</remarks>
+        /// </param>
+        /// <param name="end">If not specified, length of the this object is used as its default value.</param>
         abstract copyWithin: target: float * start: float * ?``end``: float -> Int16Array<'TArrayBuffer>
         /// <summary>
         /// Determines whether all the members of an array satisfy the specified test.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate A function that accepts up to three arguments. The every method calls
+        /// <param name="predicate">
+        /// A function that accepts up to three arguments. The every method calls
         /// the predicate function for each element in the array until the predicate returns a value
         /// which is coercible to the Boolean value false, or until the end of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the predicate function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract every: predicate: Int16Array.Every.Predicate * ?thisArg: obj -> bool
         /// <summary>
         /// Changes all array elements from <c>start</c> to <c>end</c> index to a static <c>value</c> and returns the modified array
         /// </summary>
-        /// <remarks>@param value value to fill array section with</remarks>
-        /// <remarks>
-        /// @param
-        /// start index to start filling the array at. If start is negative, it is treated as
+        /// <param name="value">value to fill array section with</param>
+        /// <param name="start">
+        /// index to start filling the array at. If start is negative, it is treated as
         /// length+start where length is the length of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// end index to stop filling the array at. If end is negative, it is treated as
+        /// </param>
+        /// <param name="end">
+        /// index to stop filling the array at. If end is negative, it is treated as
         /// length+end.
-        /// </remarks>
+        /// </param>
         abstract fill: value: float * ?start: float * ?``end``: float -> Int16Array<'TArrayBuffer>
         /// <summary>
         /// Returns the elements of an array that meet the condition specified in a callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate A function that accepts up to three arguments. The filter method calls
+        /// <param name="predicate">
+        /// A function that accepts up to three arguments. The filter method calls
         /// the predicate function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the predicate function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract filter: predicate: Int16Array.Filter.Predicate * ?thisArg: obj -> Int16Array<ArrayBuffer>
         /// <summary>
         /// Returns the value of the first element in the array where predicate is true, and undefined
         /// otherwise.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate find calls predicate once for each element of the array, in ascending
+        /// <param name="predicate">
+        /// find calls predicate once for each element of the array, in ascending
         /// order, until it finds one where predicate returns true. If such an element is found, find
         /// immediately returns that element value. Otherwise, find returns undefined.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg If provided, it will be used as the this value for each invocation of
+        /// </param>
+        /// <param name="thisArg">
+        /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
-        /// </remarks>
+        /// </param>
         abstract find: predicate: Int16Array.Find.Predicate * ?thisArg: obj -> float option
         /// <summary>
         /// Returns the index of the first element in the array where predicate is true, and -1
         /// otherwise.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate find calls predicate once for each element of the array, in ascending
+        /// <param name="predicate">
+        /// find calls predicate once for each element of the array, in ascending
         /// order, until it finds one where predicate returns true. If such an element is found,
         /// findIndex immediately returns that element index. Otherwise, findIndex returns -1.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg If provided, it will be used as the this value for each invocation of
+        /// </param>
+        /// <param name="thisArg">
+        /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
-        /// </remarks>
+        /// </param>
         abstract findIndex: predicate: Int16Array.FindIndex.Predicate * ?thisArg: obj -> float
         /// <summary>
         /// Performs the specified action for each element in an array.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to three arguments. forEach calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to three arguments. forEach calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the callbackfn function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract forEach: callbackfn: Int16Array.ForEach.Callbackfn * ?thisArg: obj -> unit
         /// <summary>
         /// Returns the index of the first occurrence of a value in an array, or -1 if it is not present.
         /// </summary>
-        /// <remarks>@param searchElement The value to locate in the array.</remarks>
-        /// <remarks>
-        /// @param
-        /// fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+        /// <param name="searchElement">The value to locate in the array.</param>
+        /// <param name="fromIndex">
+        /// The array index at which to begin the search. If fromIndex is omitted, the
         /// search starts at index 0.
-        /// </remarks>
+        /// </param>
         abstract indexOf: searchElement: float * ?fromIndex: float -> float
         /// <summary>
         /// Adds all the elements of an array separated by the specified separator string.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// separator A string used to separate one element of an array from the next in the
+        /// <param name="separator">
+        /// A string used to separate one element of an array from the next in the
         /// resulting String. If omitted, the array elements are separated with a comma.
-        /// </remarks>
+        /// </param>
         abstract join: ?separator: string -> string
         /// <summary>
         /// Returns the index of the last occurrence of a value in an array, or -1 if it is not present.
         /// </summary>
-        /// <remarks>@param searchElement The value to locate in the array.</remarks>
-        /// <remarks>
-        /// @param
-        /// fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+        /// <param name="searchElement">The value to locate in the array.</param>
+        /// <param name="fromIndex">
+        /// The array index at which to begin the search. If fromIndex is omitted, the
         /// search starts at index 0.
-        /// </remarks>
+        /// </param>
         abstract lastIndexOf: searchElement: float * ?fromIndex: float -> float
         /// <summary>
         /// The length of the array.
@@ -4143,184 +3985,158 @@ module Es =
         /// Calls a defined callback function on each element of an array, and returns an array that
         /// contains the results.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to three arguments. The map method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to three arguments. The map method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the callbackfn function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract map: callbackfn: Int16Array.Map.Callbackfn * ?thisArg: obj -> Int16Array<ArrayBuffer>
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
         /// call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduce: callbackfn: Int16Array.Reduce.Callbackfn -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
         /// call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduce: callbackfn: Int16Array.Reduce.Callbackfn2 * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
         /// call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduce<'U>: callbackfn: Int16Array.Reduce.Callbackfn3<'U> * initialValue: 'U -> 'U
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
         /// argument in the next call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an
         /// argument instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduceRight: callbackfn: Int16Array.ReduceRight.Callbackfn -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
         /// argument in the next call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an
         /// argument instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduceRight: callbackfn: Int16Array.ReduceRight.Callbackfn2 * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
         /// argument in the next call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an
         /// argument instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduceRight<'U>: callbackfn: Int16Array.ReduceRight.Callbackfn3<'U> * initialValue: 'U -> 'U
         /// <summary>
         /// Reverses the elements in an Array.
@@ -4329,49 +4145,46 @@ module Es =
         /// <summary>
         /// Sets a value or an array of values.
         /// </summary>
-        /// <remarks>@param array A typed or untyped array of values to set.</remarks>
-        /// <remarks>@param offset The index in the current array at which the values are to be written.</remarks>
+        /// <param name="array">A typed or untyped array of values to set.</param>
+        /// <param name="offset">The index in the current array at which the values are to be written.</param>
         abstract set: array: ArrayLike<float> * ?offset: float -> unit
         /// <summary>
         /// Returns a section of an array.
         /// </summary>
-        /// <remarks>@param start The beginning of the specified portion of the array.</remarks>
-        /// <remarks>@param end The end of the specified portion of the array. This is exclusive of the element at the index 'end'.</remarks>
+        /// <param name="start">The beginning of the specified portion of the array.</param>
+        /// <param name="end">The end of the specified portion of the array. This is exclusive of the element at the index 'end'.</param>
         abstract slice: ?start: float * ?``end``: float -> Int16Array<ArrayBuffer>
         /// <summary>
         /// Determines whether the specified callback function returns true for any element of an array.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate A function that accepts up to three arguments. The some method calls
+        /// <param name="predicate">
+        /// A function that accepts up to three arguments. The some method calls
         /// the predicate function for each element in the array until the predicate returns a value
         /// which is coercible to the Boolean value true, or until the end of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the predicate function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract some: predicate: Int16Array.Some.Predicate * ?thisArg: obj -> bool
         /// <summary>
         /// Sorts an array.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// compareFn Function used to determine the order of the elements. It is expected to return
+        /// <param name="compareFn">
+        /// Function used to determine the order of the elements. It is expected to return
         /// a negative value if first argument is less than second argument, zero if they're equal and a positive
         /// value otherwise. If omitted, the elements are sorted in ascending order.
         /// <code lang="ts">
         /// [11,2,22,1].sort((a, b) =&gt; a - b)
         /// </code>
-        /// </remarks>
+        /// </param>
         abstract sort: ?compareFn: Int16Array.Sort.CompareFn -> Int16Array<'TArrayBuffer>
         /// <summary>
         /// Gets a new Int16Array view of the ArrayBuffer store for this array, referencing the elements
         /// at begin, inclusive, up to end, exclusive.
         /// </summary>
-        /// <remarks>@param begin The index of the beginning of the array.</remarks>
-        /// <remarks>@param end The index of the end of the array.</remarks>
+        /// <param name="begin">The index of the beginning of the array.</param>
+        /// <param name="end">The index of the end of the array.</param>
         abstract subarray: ?``begin``: float * ?``end``: float -> Int16Array<'TArrayBuffer>
         /// <summary>
         /// Converts a number to a string by using the current locale.
@@ -4396,23 +4209,23 @@ module Es =
         /// <summary>
         /// Returns a new array from a set of elements.
         /// </summary>
-        /// <remarks>@param items A set of elements to include in the new array object.</remarks>
+        /// <param name="items">A set of elements to include in the new array object.</param>
         abstract ``of``: [<ParamArray>] items: float[] -> Int16Array<ArrayBuffer>
         /// <summary>
         /// Creates an array from an array-like or iterable object.
         /// </summary>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param mapfn A mapping function to call on every element of the array.</remarks>
-        /// <remarks>@param thisArg Value of 'this' used to invoke the mapfn.</remarks>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="mapfn">A mapping function to call on every element of the array.</param>
+        /// <param name="thisArg">Value of 'this' used to invoke the mapfn.</param>
         abstract from: arrayLike: ArrayLike<float> -> Int16Array<ArrayBuffer>
         /// <summary>
         /// Creates an array from an array-like or iterable object.
         /// </summary>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param mapfn A mapping function to call on every element of the array.</remarks>
-        /// <remarks>@param thisArg Value of 'this' used to invoke the mapfn.</remarks>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="mapfn">A mapping function to call on every element of the array.</param>
+        /// <param name="thisArg">Value of 'this' used to invoke the mapfn.</param>
         abstract from<'T>: arrayLike: ArrayLike<'T> * mapfn: Int16ArrayConstructor.From.Mapfn<'T> * ?thisArg: obj -> Int16Array<ArrayBuffer>
         [<EmitConstructor>]
         abstract Create: length: float -> Int16Array<ArrayBuffer>
@@ -4450,136 +4263,119 @@ module Es =
         /// Returns the this object after copying a section of the array identified by start and end
         /// to the same array starting at position target
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// target If target is negative, it is treated as length+target where length is the
+        /// <param name="target">
+        /// If target is negative, it is treated as length+target where length is the
         /// length of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// start If start is negative, it is treated as length+start. If end is negative, it
+        /// </param>
+        /// <param name="start">
+        /// If start is negative, it is treated as length+start. If end is negative, it
         /// is treated as length+end.
-        /// </remarks>
-        /// <remarks>@param end If not specified, length of the this object is used as its default value.</remarks>
+        /// </param>
+        /// <param name="end">If not specified, length of the this object is used as its default value.</param>
         abstract copyWithin: target: float * start: float * ?``end``: float -> Uint16Array<'TArrayBuffer>
         /// <summary>
         /// Determines whether all the members of an array satisfy the specified test.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate A function that accepts up to three arguments. The every method calls
+        /// <param name="predicate">
+        /// A function that accepts up to three arguments. The every method calls
         /// the predicate function for each element in the array until the predicate returns a value
         /// which is coercible to the Boolean value false, or until the end of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the predicate function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract every: predicate: Uint16Array.Every.Predicate * ?thisArg: obj -> bool
         /// <summary>
         /// Changes all array elements from <c>start</c> to <c>end</c> index to a static <c>value</c> and returns the modified array
         /// </summary>
-        /// <remarks>@param value value to fill array section with</remarks>
-        /// <remarks>
-        /// @param
-        /// start index to start filling the array at. If start is negative, it is treated as
+        /// <param name="value">value to fill array section with</param>
+        /// <param name="start">
+        /// index to start filling the array at. If start is negative, it is treated as
         /// length+start where length is the length of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// end index to stop filling the array at. If end is negative, it is treated as
+        /// </param>
+        /// <param name="end">
+        /// index to stop filling the array at. If end is negative, it is treated as
         /// length+end.
-        /// </remarks>
+        /// </param>
         abstract fill: value: float * ?start: float * ?``end``: float -> Uint16Array<'TArrayBuffer>
         /// <summary>
         /// Returns the elements of an array that meet the condition specified in a callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate A function that accepts up to three arguments. The filter method calls
+        /// <param name="predicate">
+        /// A function that accepts up to three arguments. The filter method calls
         /// the predicate function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the predicate function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract filter: predicate: Uint16Array.Filter.Predicate * ?thisArg: obj -> Uint16Array<ArrayBuffer>
         /// <summary>
         /// Returns the value of the first element in the array where predicate is true, and undefined
         /// otherwise.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate find calls predicate once for each element of the array, in ascending
+        /// <param name="predicate">
+        /// find calls predicate once for each element of the array, in ascending
         /// order, until it finds one where predicate returns true. If such an element is found, find
         /// immediately returns that element value. Otherwise, find returns undefined.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg If provided, it will be used as the this value for each invocation of
+        /// </param>
+        /// <param name="thisArg">
+        /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
-        /// </remarks>
+        /// </param>
         abstract find: predicate: Uint16Array.Find.Predicate * ?thisArg: obj -> float option
         /// <summary>
         /// Returns the index of the first element in the array where predicate is true, and -1
         /// otherwise.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate find calls predicate once for each element of the array, in ascending
+        /// <param name="predicate">
+        /// find calls predicate once for each element of the array, in ascending
         /// order, until it finds one where predicate returns true. If such an element is found,
         /// findIndex immediately returns that element index. Otherwise, findIndex returns -1.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg If provided, it will be used as the this value for each invocation of
+        /// </param>
+        /// <param name="thisArg">
+        /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
-        /// </remarks>
+        /// </param>
         abstract findIndex: predicate: Uint16Array.FindIndex.Predicate * ?thisArg: obj -> float
         /// <summary>
         /// Performs the specified action for each element in an array.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to three arguments. forEach calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to three arguments. forEach calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the callbackfn function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract forEach: callbackfn: Uint16Array.ForEach.Callbackfn * ?thisArg: obj -> unit
         /// <summary>
         /// Returns the index of the first occurrence of a value in an array, or -1 if it is not present.
         /// </summary>
-        /// <remarks>@param searchElement The value to locate in the array.</remarks>
-        /// <remarks>
-        /// @param
-        /// fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+        /// <param name="searchElement">The value to locate in the array.</param>
+        /// <param name="fromIndex">
+        /// The array index at which to begin the search. If fromIndex is omitted, the
         /// search starts at index 0.
-        /// </remarks>
+        /// </param>
         abstract indexOf: searchElement: float * ?fromIndex: float -> float
         /// <summary>
         /// Adds all the elements of an array separated by the specified separator string.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// separator A string used to separate one element of an array from the next in the
+        /// <param name="separator">
+        /// A string used to separate one element of an array from the next in the
         /// resulting String. If omitted, the array elements are separated with a comma.
-        /// </remarks>
+        /// </param>
         abstract join: ?separator: string -> string
         /// <summary>
         /// Returns the index of the last occurrence of a value in an array, or -1 if it is not present.
         /// </summary>
-        /// <remarks>@param searchElement The value to locate in the array.</remarks>
-        /// <remarks>
-        /// @param
-        /// fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+        /// <param name="searchElement">The value to locate in the array.</param>
+        /// <param name="fromIndex">
+        /// The array index at which to begin the search. If fromIndex is omitted, the
         /// search starts at index 0.
-        /// </remarks>
+        /// </param>
         abstract lastIndexOf: searchElement: float * ?fromIndex: float -> float
         /// <summary>
         /// The length of the array.
@@ -4589,184 +4385,158 @@ module Es =
         /// Calls a defined callback function on each element of an array, and returns an array that
         /// contains the results.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to three arguments. The map method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to three arguments. The map method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the callbackfn function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract map: callbackfn: Uint16Array.Map.Callbackfn * ?thisArg: obj -> Uint16Array<ArrayBuffer>
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
         /// call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduce: callbackfn: Uint16Array.Reduce.Callbackfn -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
         /// call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduce: callbackfn: Uint16Array.Reduce.Callbackfn2 * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
         /// call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduce<'U>: callbackfn: Uint16Array.Reduce.Callbackfn3<'U> * initialValue: 'U -> 'U
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
         /// argument in the next call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an
         /// argument instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduceRight: callbackfn: Uint16Array.ReduceRight.Callbackfn -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
         /// argument in the next call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an
         /// argument instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduceRight: callbackfn: Uint16Array.ReduceRight.Callbackfn2 * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
         /// argument in the next call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an
         /// argument instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduceRight<'U>: callbackfn: Uint16Array.ReduceRight.Callbackfn3<'U> * initialValue: 'U -> 'U
         /// <summary>
         /// Reverses the elements in an Array.
@@ -4775,49 +4545,46 @@ module Es =
         /// <summary>
         /// Sets a value or an array of values.
         /// </summary>
-        /// <remarks>@param array A typed or untyped array of values to set.</remarks>
-        /// <remarks>@param offset The index in the current array at which the values are to be written.</remarks>
+        /// <param name="array">A typed or untyped array of values to set.</param>
+        /// <param name="offset">The index in the current array at which the values are to be written.</param>
         abstract set: array: ArrayLike<float> * ?offset: float -> unit
         /// <summary>
         /// Returns a section of an array.
         /// </summary>
-        /// <remarks>@param start The beginning of the specified portion of the array.</remarks>
-        /// <remarks>@param end The end of the specified portion of the array. This is exclusive of the element at the index 'end'.</remarks>
+        /// <param name="start">The beginning of the specified portion of the array.</param>
+        /// <param name="end">The end of the specified portion of the array. This is exclusive of the element at the index 'end'.</param>
         abstract slice: ?start: float * ?``end``: float -> Uint16Array<ArrayBuffer>
         /// <summary>
         /// Determines whether the specified callback function returns true for any element of an array.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate A function that accepts up to three arguments. The some method calls
+        /// <param name="predicate">
+        /// A function that accepts up to three arguments. The some method calls
         /// the predicate function for each element in the array until the predicate returns a value
         /// which is coercible to the Boolean value true, or until the end of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the predicate function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract some: predicate: Uint16Array.Some.Predicate * ?thisArg: obj -> bool
         /// <summary>
         /// Sorts an array.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// compareFn Function used to determine the order of the elements. It is expected to return
+        /// <param name="compareFn">
+        /// Function used to determine the order of the elements. It is expected to return
         /// a negative value if first argument is less than second argument, zero if they're equal and a positive
         /// value otherwise. If omitted, the elements are sorted in ascending order.
         /// <code lang="ts">
         /// [11,2,22,1].sort((a, b) =&gt; a - b)
         /// </code>
-        /// </remarks>
+        /// </param>
         abstract sort: ?compareFn: Uint16Array.Sort.CompareFn -> Uint16Array<'TArrayBuffer>
         /// <summary>
         /// Gets a new Uint16Array view of the ArrayBuffer store for this array, referencing the elements
         /// at begin, inclusive, up to end, exclusive.
         /// </summary>
-        /// <remarks>@param begin The index of the beginning of the array.</remarks>
-        /// <remarks>@param end The index of the end of the array.</remarks>
+        /// <param name="begin">The index of the beginning of the array.</param>
+        /// <param name="end">The index of the end of the array.</param>
         abstract subarray: ?``begin``: float * ?``end``: float -> Uint16Array<'TArrayBuffer>
         /// <summary>
         /// Converts a number to a string by using the current locale.
@@ -4842,23 +4609,23 @@ module Es =
         /// <summary>
         /// Returns a new array from a set of elements.
         /// </summary>
-        /// <remarks>@param items A set of elements to include in the new array object.</remarks>
+        /// <param name="items">A set of elements to include in the new array object.</param>
         abstract ``of``: [<ParamArray>] items: float[] -> Uint16Array<ArrayBuffer>
         /// <summary>
         /// Creates an array from an array-like or iterable object.
         /// </summary>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param mapfn A mapping function to call on every element of the array.</remarks>
-        /// <remarks>@param thisArg Value of 'this' used to invoke the mapfn.</remarks>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="mapfn">A mapping function to call on every element of the array.</param>
+        /// <param name="thisArg">Value of 'this' used to invoke the mapfn.</param>
         abstract from: arrayLike: ArrayLike<float> -> Uint16Array<ArrayBuffer>
         /// <summary>
         /// Creates an array from an array-like or iterable object.
         /// </summary>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param mapfn A mapping function to call on every element of the array.</remarks>
-        /// <remarks>@param thisArg Value of 'this' used to invoke the mapfn.</remarks>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="mapfn">A mapping function to call on every element of the array.</param>
+        /// <param name="thisArg">Value of 'this' used to invoke the mapfn.</param>
         abstract from<'T>: arrayLike: ArrayLike<'T> * mapfn: Uint16ArrayConstructor.From.Mapfn<'T> * ?thisArg: obj -> Uint16Array<ArrayBuffer>
         [<EmitConstructor>]
         abstract Create: length: float -> Uint16Array<ArrayBuffer>
@@ -4896,136 +4663,119 @@ module Es =
         /// Returns the this object after copying a section of the array identified by start and end
         /// to the same array starting at position target
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// target If target is negative, it is treated as length+target where length is the
+        /// <param name="target">
+        /// If target is negative, it is treated as length+target where length is the
         /// length of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// start If start is negative, it is treated as length+start. If end is negative, it
+        /// </param>
+        /// <param name="start">
+        /// If start is negative, it is treated as length+start. If end is negative, it
         /// is treated as length+end.
-        /// </remarks>
-        /// <remarks>@param end If not specified, length of the this object is used as its default value.</remarks>
+        /// </param>
+        /// <param name="end">If not specified, length of the this object is used as its default value.</param>
         abstract copyWithin: target: float * start: float * ?``end``: float -> Int32Array<'TArrayBuffer>
         /// <summary>
         /// Determines whether all the members of an array satisfy the specified test.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate A function that accepts up to three arguments. The every method calls
+        /// <param name="predicate">
+        /// A function that accepts up to three arguments. The every method calls
         /// the predicate function for each element in the array until the predicate returns a value
         /// which is coercible to the Boolean value false, or until the end of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the predicate function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract every: predicate: Int32Array.Every.Predicate * ?thisArg: obj -> bool
         /// <summary>
         /// Changes all array elements from <c>start</c> to <c>end</c> index to a static <c>value</c> and returns the modified array
         /// </summary>
-        /// <remarks>@param value value to fill array section with</remarks>
-        /// <remarks>
-        /// @param
-        /// start index to start filling the array at. If start is negative, it is treated as
+        /// <param name="value">value to fill array section with</param>
+        /// <param name="start">
+        /// index to start filling the array at. If start is negative, it is treated as
         /// length+start where length is the length of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// end index to stop filling the array at. If end is negative, it is treated as
+        /// </param>
+        /// <param name="end">
+        /// index to stop filling the array at. If end is negative, it is treated as
         /// length+end.
-        /// </remarks>
+        /// </param>
         abstract fill: value: float * ?start: float * ?``end``: float -> Int32Array<'TArrayBuffer>
         /// <summary>
         /// Returns the elements of an array that meet the condition specified in a callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate A function that accepts up to three arguments. The filter method calls
+        /// <param name="predicate">
+        /// A function that accepts up to three arguments. The filter method calls
         /// the predicate function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the predicate function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract filter: predicate: Int32Array.Filter.Predicate * ?thisArg: obj -> Int32Array<ArrayBuffer>
         /// <summary>
         /// Returns the value of the first element in the array where predicate is true, and undefined
         /// otherwise.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate find calls predicate once for each element of the array, in ascending
+        /// <param name="predicate">
+        /// find calls predicate once for each element of the array, in ascending
         /// order, until it finds one where predicate returns true. If such an element is found, find
         /// immediately returns that element value. Otherwise, find returns undefined.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg If provided, it will be used as the this value for each invocation of
+        /// </param>
+        /// <param name="thisArg">
+        /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
-        /// </remarks>
+        /// </param>
         abstract find: predicate: Int32Array.Find.Predicate * ?thisArg: obj -> float option
         /// <summary>
         /// Returns the index of the first element in the array where predicate is true, and -1
         /// otherwise.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate find calls predicate once for each element of the array, in ascending
+        /// <param name="predicate">
+        /// find calls predicate once for each element of the array, in ascending
         /// order, until it finds one where predicate returns true. If such an element is found,
         /// findIndex immediately returns that element index. Otherwise, findIndex returns -1.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg If provided, it will be used as the this value for each invocation of
+        /// </param>
+        /// <param name="thisArg">
+        /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
-        /// </remarks>
+        /// </param>
         abstract findIndex: predicate: Int32Array.FindIndex.Predicate * ?thisArg: obj -> float
         /// <summary>
         /// Performs the specified action for each element in an array.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to three arguments. forEach calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to three arguments. forEach calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the callbackfn function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract forEach: callbackfn: Int32Array.ForEach.Callbackfn * ?thisArg: obj -> unit
         /// <summary>
         /// Returns the index of the first occurrence of a value in an array, or -1 if it is not present.
         /// </summary>
-        /// <remarks>@param searchElement The value to locate in the array.</remarks>
-        /// <remarks>
-        /// @param
-        /// fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+        /// <param name="searchElement">The value to locate in the array.</param>
+        /// <param name="fromIndex">
+        /// The array index at which to begin the search. If fromIndex is omitted, the
         /// search starts at index 0.
-        /// </remarks>
+        /// </param>
         abstract indexOf: searchElement: float * ?fromIndex: float -> float
         /// <summary>
         /// Adds all the elements of an array separated by the specified separator string.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// separator A string used to separate one element of an array from the next in the
+        /// <param name="separator">
+        /// A string used to separate one element of an array from the next in the
         /// resulting String. If omitted, the array elements are separated with a comma.
-        /// </remarks>
+        /// </param>
         abstract join: ?separator: string -> string
         /// <summary>
         /// Returns the index of the last occurrence of a value in an array, or -1 if it is not present.
         /// </summary>
-        /// <remarks>@param searchElement The value to locate in the array.</remarks>
-        /// <remarks>
-        /// @param
-        /// fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+        /// <param name="searchElement">The value to locate in the array.</param>
+        /// <param name="fromIndex">
+        /// The array index at which to begin the search. If fromIndex is omitted, the
         /// search starts at index 0.
-        /// </remarks>
+        /// </param>
         abstract lastIndexOf: searchElement: float * ?fromIndex: float -> float
         /// <summary>
         /// The length of the array.
@@ -5035,184 +4785,158 @@ module Es =
         /// Calls a defined callback function on each element of an array, and returns an array that
         /// contains the results.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to three arguments. The map method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to three arguments. The map method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the callbackfn function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract map: callbackfn: Int32Array.Map.Callbackfn * ?thisArg: obj -> Int32Array<ArrayBuffer>
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
         /// call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduce: callbackfn: Int32Array.Reduce.Callbackfn -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
         /// call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduce: callbackfn: Int32Array.Reduce.Callbackfn2 * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
         /// call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduce<'U>: callbackfn: Int32Array.Reduce.Callbackfn3<'U> * initialValue: 'U -> 'U
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
         /// argument in the next call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an
         /// argument instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduceRight: callbackfn: Int32Array.ReduceRight.Callbackfn -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
         /// argument in the next call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an
         /// argument instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduceRight: callbackfn: Int32Array.ReduceRight.Callbackfn2 * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
         /// argument in the next call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an
         /// argument instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduceRight<'U>: callbackfn: Int32Array.ReduceRight.Callbackfn3<'U> * initialValue: 'U -> 'U
         /// <summary>
         /// Reverses the elements in an Array.
@@ -5221,49 +4945,46 @@ module Es =
         /// <summary>
         /// Sets a value or an array of values.
         /// </summary>
-        /// <remarks>@param array A typed or untyped array of values to set.</remarks>
-        /// <remarks>@param offset The index in the current array at which the values are to be written.</remarks>
+        /// <param name="array">A typed or untyped array of values to set.</param>
+        /// <param name="offset">The index in the current array at which the values are to be written.</param>
         abstract set: array: ArrayLike<float> * ?offset: float -> unit
         /// <summary>
         /// Returns a section of an array.
         /// </summary>
-        /// <remarks>@param start The beginning of the specified portion of the array.</remarks>
-        /// <remarks>@param end The end of the specified portion of the array. This is exclusive of the element at the index 'end'.</remarks>
+        /// <param name="start">The beginning of the specified portion of the array.</param>
+        /// <param name="end">The end of the specified portion of the array. This is exclusive of the element at the index 'end'.</param>
         abstract slice: ?start: float * ?``end``: float -> Int32Array<ArrayBuffer>
         /// <summary>
         /// Determines whether the specified callback function returns true for any element of an array.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate A function that accepts up to three arguments. The some method calls
+        /// <param name="predicate">
+        /// A function that accepts up to three arguments. The some method calls
         /// the predicate function for each element in the array until the predicate returns a value
         /// which is coercible to the Boolean value true, or until the end of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the predicate function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract some: predicate: Int32Array.Some.Predicate * ?thisArg: obj -> bool
         /// <summary>
         /// Sorts an array.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// compareFn Function used to determine the order of the elements. It is expected to return
+        /// <param name="compareFn">
+        /// Function used to determine the order of the elements. It is expected to return
         /// a negative value if first argument is less than second argument, zero if they're equal and a positive
         /// value otherwise. If omitted, the elements are sorted in ascending order.
         /// <code lang="ts">
         /// [11,2,22,1].sort((a, b) =&gt; a - b)
         /// </code>
-        /// </remarks>
+        /// </param>
         abstract sort: ?compareFn: Int32Array.Sort.CompareFn -> Int32Array<'TArrayBuffer>
         /// <summary>
         /// Gets a new Int32Array view of the ArrayBuffer store for this array, referencing the elements
         /// at begin, inclusive, up to end, exclusive.
         /// </summary>
-        /// <remarks>@param begin The index of the beginning of the array.</remarks>
-        /// <remarks>@param end The index of the end of the array.</remarks>
+        /// <param name="begin">The index of the beginning of the array.</param>
+        /// <param name="end">The index of the end of the array.</param>
         abstract subarray: ?``begin``: float * ?``end``: float -> Int32Array<'TArrayBuffer>
         /// <summary>
         /// Converts a number to a string by using the current locale.
@@ -5288,23 +5009,23 @@ module Es =
         /// <summary>
         /// Returns a new array from a set of elements.
         /// </summary>
-        /// <remarks>@param items A set of elements to include in the new array object.</remarks>
+        /// <param name="items">A set of elements to include in the new array object.</param>
         abstract ``of``: [<ParamArray>] items: float[] -> Int32Array<ArrayBuffer>
         /// <summary>
         /// Creates an array from an array-like or iterable object.
         /// </summary>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param mapfn A mapping function to call on every element of the array.</remarks>
-        /// <remarks>@param thisArg Value of 'this' used to invoke the mapfn.</remarks>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="mapfn">A mapping function to call on every element of the array.</param>
+        /// <param name="thisArg">Value of 'this' used to invoke the mapfn.</param>
         abstract from: arrayLike: ArrayLike<float> -> Int32Array<ArrayBuffer>
         /// <summary>
         /// Creates an array from an array-like or iterable object.
         /// </summary>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param mapfn A mapping function to call on every element of the array.</remarks>
-        /// <remarks>@param thisArg Value of 'this' used to invoke the mapfn.</remarks>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="mapfn">A mapping function to call on every element of the array.</param>
+        /// <param name="thisArg">Value of 'this' used to invoke the mapfn.</param>
         abstract from<'T>: arrayLike: ArrayLike<'T> * mapfn: Int32ArrayConstructor.From.Mapfn<'T> * ?thisArg: obj -> Int32Array<ArrayBuffer>
         [<EmitConstructor>]
         abstract Create: length: float -> Int32Array<ArrayBuffer>
@@ -5342,136 +5063,119 @@ module Es =
         /// Returns the this object after copying a section of the array identified by start and end
         /// to the same array starting at position target
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// target If target is negative, it is treated as length+target where length is the
+        /// <param name="target">
+        /// If target is negative, it is treated as length+target where length is the
         /// length of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// start If start is negative, it is treated as length+start. If end is negative, it
+        /// </param>
+        /// <param name="start">
+        /// If start is negative, it is treated as length+start. If end is negative, it
         /// is treated as length+end.
-        /// </remarks>
-        /// <remarks>@param end If not specified, length of the this object is used as its default value.</remarks>
+        /// </param>
+        /// <param name="end">If not specified, length of the this object is used as its default value.</param>
         abstract copyWithin: target: float * start: float * ?``end``: float -> Uint32Array<'TArrayBuffer>
         /// <summary>
         /// Determines whether all the members of an array satisfy the specified test.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate A function that accepts up to three arguments. The every method calls
+        /// <param name="predicate">
+        /// A function that accepts up to three arguments. The every method calls
         /// the predicate function for each element in the array until the predicate returns a value
         /// which is coercible to the Boolean value false, or until the end of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the predicate function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract every: predicate: Uint32Array.Every.Predicate * ?thisArg: obj -> bool
         /// <summary>
         /// Changes all array elements from <c>start</c> to <c>end</c> index to a static <c>value</c> and returns the modified array
         /// </summary>
-        /// <remarks>@param value value to fill array section with</remarks>
-        /// <remarks>
-        /// @param
-        /// start index to start filling the array at. If start is negative, it is treated as
+        /// <param name="value">value to fill array section with</param>
+        /// <param name="start">
+        /// index to start filling the array at. If start is negative, it is treated as
         /// length+start where length is the length of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// end index to stop filling the array at. If end is negative, it is treated as
+        /// </param>
+        /// <param name="end">
+        /// index to stop filling the array at. If end is negative, it is treated as
         /// length+end.
-        /// </remarks>
+        /// </param>
         abstract fill: value: float * ?start: float * ?``end``: float -> Uint32Array<'TArrayBuffer>
         /// <summary>
         /// Returns the elements of an array that meet the condition specified in a callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate A function that accepts up to three arguments. The filter method calls
+        /// <param name="predicate">
+        /// A function that accepts up to three arguments. The filter method calls
         /// the predicate function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the predicate function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract filter: predicate: Uint32Array.Filter.Predicate * ?thisArg: obj -> Uint32Array<ArrayBuffer>
         /// <summary>
         /// Returns the value of the first element in the array where predicate is true, and undefined
         /// otherwise.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate find calls predicate once for each element of the array, in ascending
+        /// <param name="predicate">
+        /// find calls predicate once for each element of the array, in ascending
         /// order, until it finds one where predicate returns true. If such an element is found, find
         /// immediately returns that element value. Otherwise, find returns undefined.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg If provided, it will be used as the this value for each invocation of
+        /// </param>
+        /// <param name="thisArg">
+        /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
-        /// </remarks>
+        /// </param>
         abstract find: predicate: Uint32Array.Find.Predicate * ?thisArg: obj -> float option
         /// <summary>
         /// Returns the index of the first element in the array where predicate is true, and -1
         /// otherwise.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate find calls predicate once for each element of the array, in ascending
+        /// <param name="predicate">
+        /// find calls predicate once for each element of the array, in ascending
         /// order, until it finds one where predicate returns true. If such an element is found,
         /// findIndex immediately returns that element index. Otherwise, findIndex returns -1.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg If provided, it will be used as the this value for each invocation of
+        /// </param>
+        /// <param name="thisArg">
+        /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
-        /// </remarks>
+        /// </param>
         abstract findIndex: predicate: Uint32Array.FindIndex.Predicate * ?thisArg: obj -> float
         /// <summary>
         /// Performs the specified action for each element in an array.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to three arguments. forEach calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to three arguments. forEach calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the callbackfn function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract forEach: callbackfn: Uint32Array.ForEach.Callbackfn * ?thisArg: obj -> unit
         /// <summary>
         /// Returns the index of the first occurrence of a value in an array, or -1 if it is not present.
         /// </summary>
-        /// <remarks>@param searchElement The value to locate in the array.</remarks>
-        /// <remarks>
-        /// @param
-        /// fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+        /// <param name="searchElement">The value to locate in the array.</param>
+        /// <param name="fromIndex">
+        /// The array index at which to begin the search. If fromIndex is omitted, the
         /// search starts at index 0.
-        /// </remarks>
+        /// </param>
         abstract indexOf: searchElement: float * ?fromIndex: float -> float
         /// <summary>
         /// Adds all the elements of an array separated by the specified separator string.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// separator A string used to separate one element of an array from the next in the
+        /// <param name="separator">
+        /// A string used to separate one element of an array from the next in the
         /// resulting String. If omitted, the array elements are separated with a comma.
-        /// </remarks>
+        /// </param>
         abstract join: ?separator: string -> string
         /// <summary>
         /// Returns the index of the last occurrence of a value in an array, or -1 if it is not present.
         /// </summary>
-        /// <remarks>@param searchElement The value to locate in the array.</remarks>
-        /// <remarks>
-        /// @param
-        /// fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+        /// <param name="searchElement">The value to locate in the array.</param>
+        /// <param name="fromIndex">
+        /// The array index at which to begin the search. If fromIndex is omitted, the
         /// search starts at index 0.
-        /// </remarks>
+        /// </param>
         abstract lastIndexOf: searchElement: float * ?fromIndex: float -> float
         /// <summary>
         /// The length of the array.
@@ -5481,184 +5185,158 @@ module Es =
         /// Calls a defined callback function on each element of an array, and returns an array that
         /// contains the results.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to three arguments. The map method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to three arguments. The map method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the callbackfn function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract map: callbackfn: Uint32Array.Map.Callbackfn * ?thisArg: obj -> Uint32Array<ArrayBuffer>
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
         /// call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduce: callbackfn: Uint32Array.Reduce.Callbackfn -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
         /// call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduce: callbackfn: Uint32Array.Reduce.Callbackfn2 * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
         /// call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduce<'U>: callbackfn: Uint32Array.Reduce.Callbackfn3<'U> * initialValue: 'U -> 'U
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
         /// argument in the next call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an
         /// argument instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduceRight: callbackfn: Uint32Array.ReduceRight.Callbackfn -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
         /// argument in the next call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an
         /// argument instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduceRight: callbackfn: Uint32Array.ReduceRight.Callbackfn2 * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
         /// argument in the next call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an
         /// argument instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduceRight<'U>: callbackfn: Uint32Array.ReduceRight.Callbackfn3<'U> * initialValue: 'U -> 'U
         /// <summary>
         /// Reverses the elements in an Array.
@@ -5667,49 +5345,46 @@ module Es =
         /// <summary>
         /// Sets a value or an array of values.
         /// </summary>
-        /// <remarks>@param array A typed or untyped array of values to set.</remarks>
-        /// <remarks>@param offset The index in the current array at which the values are to be written.</remarks>
+        /// <param name="array">A typed or untyped array of values to set.</param>
+        /// <param name="offset">The index in the current array at which the values are to be written.</param>
         abstract set: array: ArrayLike<float> * ?offset: float -> unit
         /// <summary>
         /// Returns a section of an array.
         /// </summary>
-        /// <remarks>@param start The beginning of the specified portion of the array.</remarks>
-        /// <remarks>@param end The end of the specified portion of the array. This is exclusive of the element at the index 'end'.</remarks>
+        /// <param name="start">The beginning of the specified portion of the array.</param>
+        /// <param name="end">The end of the specified portion of the array. This is exclusive of the element at the index 'end'.</param>
         abstract slice: ?start: float * ?``end``: float -> Uint32Array<ArrayBuffer>
         /// <summary>
         /// Determines whether the specified callback function returns true for any element of an array.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate A function that accepts up to three arguments. The some method calls
+        /// <param name="predicate">
+        /// A function that accepts up to three arguments. The some method calls
         /// the predicate function for each element in the array until the predicate returns a value
         /// which is coercible to the Boolean value true, or until the end of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the predicate function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract some: predicate: Uint32Array.Some.Predicate * ?thisArg: obj -> bool
         /// <summary>
         /// Sorts an array.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// compareFn Function used to determine the order of the elements. It is expected to return
+        /// <param name="compareFn">
+        /// Function used to determine the order of the elements. It is expected to return
         /// a negative value if first argument is less than second argument, zero if they're equal and a positive
         /// value otherwise. If omitted, the elements are sorted in ascending order.
         /// <code lang="ts">
         /// [11,2,22,1].sort((a, b) =&gt; a - b)
         /// </code>
-        /// </remarks>
+        /// </param>
         abstract sort: ?compareFn: Uint32Array.Sort.CompareFn -> Uint32Array<'TArrayBuffer>
         /// <summary>
         /// Gets a new Uint32Array view of the ArrayBuffer store for this array, referencing the elements
         /// at begin, inclusive, up to end, exclusive.
         /// </summary>
-        /// <remarks>@param begin The index of the beginning of the array.</remarks>
-        /// <remarks>@param end The index of the end of the array.</remarks>
+        /// <param name="begin">The index of the beginning of the array.</param>
+        /// <param name="end">The index of the end of the array.</param>
         abstract subarray: ?``begin``: float * ?``end``: float -> Uint32Array<'TArrayBuffer>
         /// <summary>
         /// Converts a number to a string by using the current locale.
@@ -5734,23 +5409,23 @@ module Es =
         /// <summary>
         /// Returns a new array from a set of elements.
         /// </summary>
-        /// <remarks>@param items A set of elements to include in the new array object.</remarks>
+        /// <param name="items">A set of elements to include in the new array object.</param>
         abstract ``of``: [<ParamArray>] items: float[] -> Uint32Array<ArrayBuffer>
         /// <summary>
         /// Creates an array from an array-like or iterable object.
         /// </summary>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param mapfn A mapping function to call on every element of the array.</remarks>
-        /// <remarks>@param thisArg Value of 'this' used to invoke the mapfn.</remarks>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="mapfn">A mapping function to call on every element of the array.</param>
+        /// <param name="thisArg">Value of 'this' used to invoke the mapfn.</param>
         abstract from: arrayLike: ArrayLike<float> -> Uint32Array<ArrayBuffer>
         /// <summary>
         /// Creates an array from an array-like or iterable object.
         /// </summary>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param mapfn A mapping function to call on every element of the array.</remarks>
-        /// <remarks>@param thisArg Value of 'this' used to invoke the mapfn.</remarks>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="mapfn">A mapping function to call on every element of the array.</param>
+        /// <param name="thisArg">Value of 'this' used to invoke the mapfn.</param>
         abstract from<'T>: arrayLike: ArrayLike<'T> * mapfn: Uint32ArrayConstructor.From.Mapfn<'T> * ?thisArg: obj -> Uint32Array<ArrayBuffer>
         [<EmitConstructor>]
         abstract Create: length: float -> Uint32Array<ArrayBuffer>
@@ -5788,136 +5463,119 @@ module Es =
         /// Returns the this object after copying a section of the array identified by start and end
         /// to the same array starting at position target
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// target If target is negative, it is treated as length+target where length is the
+        /// <param name="target">
+        /// If target is negative, it is treated as length+target where length is the
         /// length of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// start If start is negative, it is treated as length+start. If end is negative, it
+        /// </param>
+        /// <param name="start">
+        /// If start is negative, it is treated as length+start. If end is negative, it
         /// is treated as length+end.
-        /// </remarks>
-        /// <remarks>@param end If not specified, length of the this object is used as its default value.</remarks>
+        /// </param>
+        /// <param name="end">If not specified, length of the this object is used as its default value.</param>
         abstract copyWithin: target: float * start: float * ?``end``: float -> Float32Array<'TArrayBuffer>
         /// <summary>
         /// Determines whether all the members of an array satisfy the specified test.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate A function that accepts up to three arguments. The every method calls
+        /// <param name="predicate">
+        /// A function that accepts up to three arguments. The every method calls
         /// the predicate function for each element in the array until the predicate returns a value
         /// which is coercible to the Boolean value false, or until the end of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the predicate function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract every: predicate: Float32Array.Every.Predicate * ?thisArg: obj -> bool
         /// <summary>
         /// Changes all array elements from <c>start</c> to <c>end</c> index to a static <c>value</c> and returns the modified array
         /// </summary>
-        /// <remarks>@param value value to fill array section with</remarks>
-        /// <remarks>
-        /// @param
-        /// start index to start filling the array at. If start is negative, it is treated as
+        /// <param name="value">value to fill array section with</param>
+        /// <param name="start">
+        /// index to start filling the array at. If start is negative, it is treated as
         /// length+start where length is the length of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// end index to stop filling the array at. If end is negative, it is treated as
+        /// </param>
+        /// <param name="end">
+        /// index to stop filling the array at. If end is negative, it is treated as
         /// length+end.
-        /// </remarks>
+        /// </param>
         abstract fill: value: float * ?start: float * ?``end``: float -> Float32Array<'TArrayBuffer>
         /// <summary>
         /// Returns the elements of an array that meet the condition specified in a callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate A function that accepts up to three arguments. The filter method calls
+        /// <param name="predicate">
+        /// A function that accepts up to three arguments. The filter method calls
         /// the predicate function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the predicate function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract filter: predicate: Float32Array.Filter.Predicate * ?thisArg: obj -> Float32Array<ArrayBuffer>
         /// <summary>
         /// Returns the value of the first element in the array where predicate is true, and undefined
         /// otherwise.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate find calls predicate once for each element of the array, in ascending
+        /// <param name="predicate">
+        /// find calls predicate once for each element of the array, in ascending
         /// order, until it finds one where predicate returns true. If such an element is found, find
         /// immediately returns that element value. Otherwise, find returns undefined.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg If provided, it will be used as the this value for each invocation of
+        /// </param>
+        /// <param name="thisArg">
+        /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
-        /// </remarks>
+        /// </param>
         abstract find: predicate: Float32Array.Find.Predicate * ?thisArg: obj -> float option
         /// <summary>
         /// Returns the index of the first element in the array where predicate is true, and -1
         /// otherwise.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate find calls predicate once for each element of the array, in ascending
+        /// <param name="predicate">
+        /// find calls predicate once for each element of the array, in ascending
         /// order, until it finds one where predicate returns true. If such an element is found,
         /// findIndex immediately returns that element index. Otherwise, findIndex returns -1.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg If provided, it will be used as the this value for each invocation of
+        /// </param>
+        /// <param name="thisArg">
+        /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
-        /// </remarks>
+        /// </param>
         abstract findIndex: predicate: Float32Array.FindIndex.Predicate * ?thisArg: obj -> float
         /// <summary>
         /// Performs the specified action for each element in an array.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to three arguments. forEach calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to three arguments. forEach calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the callbackfn function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract forEach: callbackfn: Float32Array.ForEach.Callbackfn * ?thisArg: obj -> unit
         /// <summary>
         /// Returns the index of the first occurrence of a value in an array, or -1 if it is not present.
         /// </summary>
-        /// <remarks>@param searchElement The value to locate in the array.</remarks>
-        /// <remarks>
-        /// @param
-        /// fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+        /// <param name="searchElement">The value to locate in the array.</param>
+        /// <param name="fromIndex">
+        /// The array index at which to begin the search. If fromIndex is omitted, the
         /// search starts at index 0.
-        /// </remarks>
+        /// </param>
         abstract indexOf: searchElement: float * ?fromIndex: float -> float
         /// <summary>
         /// Adds all the elements of an array separated by the specified separator string.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// separator A string used to separate one element of an array from the next in the
+        /// <param name="separator">
+        /// A string used to separate one element of an array from the next in the
         /// resulting String. If omitted, the array elements are separated with a comma.
-        /// </remarks>
+        /// </param>
         abstract join: ?separator: string -> string
         /// <summary>
         /// Returns the index of the last occurrence of a value in an array, or -1 if it is not present.
         /// </summary>
-        /// <remarks>@param searchElement The value to locate in the array.</remarks>
-        /// <remarks>
-        /// @param
-        /// fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+        /// <param name="searchElement">The value to locate in the array.</param>
+        /// <param name="fromIndex">
+        /// The array index at which to begin the search. If fromIndex is omitted, the
         /// search starts at index 0.
-        /// </remarks>
+        /// </param>
         abstract lastIndexOf: searchElement: float * ?fromIndex: float -> float
         /// <summary>
         /// The length of the array.
@@ -5927,184 +5585,158 @@ module Es =
         /// Calls a defined callback function on each element of an array, and returns an array that
         /// contains the results.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to three arguments. The map method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to three arguments. The map method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the callbackfn function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract map: callbackfn: Float32Array.Map.Callbackfn * ?thisArg: obj -> Float32Array<ArrayBuffer>
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
         /// call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduce: callbackfn: Float32Array.Reduce.Callbackfn -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
         /// call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduce: callbackfn: Float32Array.Reduce.Callbackfn2 * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
         /// call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduce<'U>: callbackfn: Float32Array.Reduce.Callbackfn3<'U> * initialValue: 'U -> 'U
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
         /// argument in the next call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an
         /// argument instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduceRight: callbackfn: Float32Array.ReduceRight.Callbackfn -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
         /// argument in the next call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an
         /// argument instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduceRight: callbackfn: Float32Array.ReduceRight.Callbackfn2 * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
         /// argument in the next call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an
         /// argument instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduceRight<'U>: callbackfn: Float32Array.ReduceRight.Callbackfn3<'U> * initialValue: 'U -> 'U
         /// <summary>
         /// Reverses the elements in an Array.
@@ -6113,49 +5745,46 @@ module Es =
         /// <summary>
         /// Sets a value or an array of values.
         /// </summary>
-        /// <remarks>@param array A typed or untyped array of values to set.</remarks>
-        /// <remarks>@param offset The index in the current array at which the values are to be written.</remarks>
+        /// <param name="array">A typed or untyped array of values to set.</param>
+        /// <param name="offset">The index in the current array at which the values are to be written.</param>
         abstract set: array: ArrayLike<float> * ?offset: float -> unit
         /// <summary>
         /// Returns a section of an array.
         /// </summary>
-        /// <remarks>@param start The beginning of the specified portion of the array.</remarks>
-        /// <remarks>@param end The end of the specified portion of the array. This is exclusive of the element at the index 'end'.</remarks>
+        /// <param name="start">The beginning of the specified portion of the array.</param>
+        /// <param name="end">The end of the specified portion of the array. This is exclusive of the element at the index 'end'.</param>
         abstract slice: ?start: float * ?``end``: float -> Float32Array<ArrayBuffer>
         /// <summary>
         /// Determines whether the specified callback function returns true for any element of an array.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate A function that accepts up to three arguments. The some method calls
+        /// <param name="predicate">
+        /// A function that accepts up to three arguments. The some method calls
         /// the predicate function for each element in the array until the predicate returns a value
         /// which is coercible to the Boolean value true, or until the end of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the predicate function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract some: predicate: Float32Array.Some.Predicate * ?thisArg: obj -> bool
         /// <summary>
         /// Sorts an array.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// compareFn Function used to determine the order of the elements. It is expected to return
+        /// <param name="compareFn">
+        /// Function used to determine the order of the elements. It is expected to return
         /// a negative value if first argument is less than second argument, zero if they're equal and a positive
         /// value otherwise. If omitted, the elements are sorted in ascending order.
         /// <code lang="ts">
         /// [11,2,22,1].sort((a, b) =&gt; a - b)
         /// </code>
-        /// </remarks>
+        /// </param>
         abstract sort: ?compareFn: Float32Array.Sort.CompareFn -> Float32Array<'TArrayBuffer>
         /// <summary>
         /// Gets a new Float32Array view of the ArrayBuffer store for this array, referencing the elements
         /// at begin, inclusive, up to end, exclusive.
         /// </summary>
-        /// <remarks>@param begin The index of the beginning of the array.</remarks>
-        /// <remarks>@param end The index of the end of the array.</remarks>
+        /// <param name="begin">The index of the beginning of the array.</param>
+        /// <param name="end">The index of the end of the array.</param>
         abstract subarray: ?``begin``: float * ?``end``: float -> Float32Array<'TArrayBuffer>
         /// <summary>
         /// Converts a number to a string by using the current locale.
@@ -6180,23 +5809,23 @@ module Es =
         /// <summary>
         /// Returns a new array from a set of elements.
         /// </summary>
-        /// <remarks>@param items A set of elements to include in the new array object.</remarks>
+        /// <param name="items">A set of elements to include in the new array object.</param>
         abstract ``of``: [<ParamArray>] items: float[] -> Float32Array<ArrayBuffer>
         /// <summary>
         /// Creates an array from an array-like or iterable object.
         /// </summary>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param mapfn A mapping function to call on every element of the array.</remarks>
-        /// <remarks>@param thisArg Value of 'this' used to invoke the mapfn.</remarks>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="mapfn">A mapping function to call on every element of the array.</param>
+        /// <param name="thisArg">Value of 'this' used to invoke the mapfn.</param>
         abstract from: arrayLike: ArrayLike<float> -> Float32Array<ArrayBuffer>
         /// <summary>
         /// Creates an array from an array-like or iterable object.
         /// </summary>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param mapfn A mapping function to call on every element of the array.</remarks>
-        /// <remarks>@param thisArg Value of 'this' used to invoke the mapfn.</remarks>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="mapfn">A mapping function to call on every element of the array.</param>
+        /// <param name="thisArg">Value of 'this' used to invoke the mapfn.</param>
         abstract from<'T>: arrayLike: ArrayLike<'T> * mapfn: Float32ArrayConstructor.From.Mapfn<'T> * ?thisArg: obj -> Float32Array<ArrayBuffer>
         [<EmitConstructor>]
         abstract Create: length: float -> Float32Array<ArrayBuffer>
@@ -6234,136 +5863,119 @@ module Es =
         /// Returns the this object after copying a section of the array identified by start and end
         /// to the same array starting at position target
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// target If target is negative, it is treated as length+target where length is the
+        /// <param name="target">
+        /// If target is negative, it is treated as length+target where length is the
         /// length of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// start If start is negative, it is treated as length+start. If end is negative, it
+        /// </param>
+        /// <param name="start">
+        /// If start is negative, it is treated as length+start. If end is negative, it
         /// is treated as length+end.
-        /// </remarks>
-        /// <remarks>@param end If not specified, length of the this object is used as its default value.</remarks>
+        /// </param>
+        /// <param name="end">If not specified, length of the this object is used as its default value.</param>
         abstract copyWithin: target: float * start: float * ?``end``: float -> Float64Array<'TArrayBuffer>
         /// <summary>
         /// Determines whether all the members of an array satisfy the specified test.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate A function that accepts up to three arguments. The every method calls
+        /// <param name="predicate">
+        /// A function that accepts up to three arguments. The every method calls
         /// the predicate function for each element in the array until the predicate returns a value
         /// which is coercible to the Boolean value false, or until the end of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the predicate function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract every: predicate: Float64Array.Every.Predicate * ?thisArg: obj -> bool
         /// <summary>
         /// Changes all array elements from <c>start</c> to <c>end</c> index to a static <c>value</c> and returns the modified array
         /// </summary>
-        /// <remarks>@param value value to fill array section with</remarks>
-        /// <remarks>
-        /// @param
-        /// start index to start filling the array at. If start is negative, it is treated as
+        /// <param name="value">value to fill array section with</param>
+        /// <param name="start">
+        /// index to start filling the array at. If start is negative, it is treated as
         /// length+start where length is the length of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// end index to stop filling the array at. If end is negative, it is treated as
+        /// </param>
+        /// <param name="end">
+        /// index to stop filling the array at. If end is negative, it is treated as
         /// length+end.
-        /// </remarks>
+        /// </param>
         abstract fill: value: float * ?start: float * ?``end``: float -> Float64Array<'TArrayBuffer>
         /// <summary>
         /// Returns the elements of an array that meet the condition specified in a callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate A function that accepts up to three arguments. The filter method calls
+        /// <param name="predicate">
+        /// A function that accepts up to three arguments. The filter method calls
         /// the predicate function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the predicate function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract filter: predicate: Float64Array.Filter.Predicate * ?thisArg: obj -> Float64Array<ArrayBuffer>
         /// <summary>
         /// Returns the value of the first element in the array where predicate is true, and undefined
         /// otherwise.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate find calls predicate once for each element of the array, in ascending
+        /// <param name="predicate">
+        /// find calls predicate once for each element of the array, in ascending
         /// order, until it finds one where predicate returns true. If such an element is found, find
         /// immediately returns that element value. Otherwise, find returns undefined.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg If provided, it will be used as the this value for each invocation of
+        /// </param>
+        /// <param name="thisArg">
+        /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
-        /// </remarks>
+        /// </param>
         abstract find: predicate: Float64Array.Find.Predicate * ?thisArg: obj -> float option
         /// <summary>
         /// Returns the index of the first element in the array where predicate is true, and -1
         /// otherwise.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate find calls predicate once for each element of the array, in ascending
+        /// <param name="predicate">
+        /// find calls predicate once for each element of the array, in ascending
         /// order, until it finds one where predicate returns true. If such an element is found,
         /// findIndex immediately returns that element index. Otherwise, findIndex returns -1.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg If provided, it will be used as the this value for each invocation of
+        /// </param>
+        /// <param name="thisArg">
+        /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
-        /// </remarks>
+        /// </param>
         abstract findIndex: predicate: Float64Array.FindIndex.Predicate * ?thisArg: obj -> float
         /// <summary>
         /// Performs the specified action for each element in an array.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to three arguments. forEach calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to three arguments. forEach calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the callbackfn function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract forEach: callbackfn: Float64Array.ForEach.Callbackfn * ?thisArg: obj -> unit
         /// <summary>
         /// Returns the index of the first occurrence of a value in an array, or -1 if it is not present.
         /// </summary>
-        /// <remarks>@param searchElement The value to locate in the array.</remarks>
-        /// <remarks>
-        /// @param
-        /// fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+        /// <param name="searchElement">The value to locate in the array.</param>
+        /// <param name="fromIndex">
+        /// The array index at which to begin the search. If fromIndex is omitted, the
         /// search starts at index 0.
-        /// </remarks>
+        /// </param>
         abstract indexOf: searchElement: float * ?fromIndex: float -> float
         /// <summary>
         /// Adds all the elements of an array separated by the specified separator string.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// separator A string used to separate one element of an array from the next in the
+        /// <param name="separator">
+        /// A string used to separate one element of an array from the next in the
         /// resulting String. If omitted, the array elements are separated with a comma.
-        /// </remarks>
+        /// </param>
         abstract join: ?separator: string -> string
         /// <summary>
         /// Returns the index of the last occurrence of a value in an array, or -1 if it is not present.
         /// </summary>
-        /// <remarks>@param searchElement The value to locate in the array.</remarks>
-        /// <remarks>
-        /// @param
-        /// fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+        /// <param name="searchElement">The value to locate in the array.</param>
+        /// <param name="fromIndex">
+        /// The array index at which to begin the search. If fromIndex is omitted, the
         /// search starts at index 0.
-        /// </remarks>
+        /// </param>
         abstract lastIndexOf: searchElement: float * ?fromIndex: float -> float
         /// <summary>
         /// The length of the array.
@@ -6373,184 +5985,158 @@ module Es =
         /// Calls a defined callback function on each element of an array, and returns an array that
         /// contains the results.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to three arguments. The map method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to three arguments. The map method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the callbackfn function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract map: callbackfn: Float64Array.Map.Callbackfn * ?thisArg: obj -> Float64Array<ArrayBuffer>
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
         /// call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduce: callbackfn: Float64Array.Reduce.Callbackfn -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
         /// call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduce: callbackfn: Float64Array.Reduce.Callbackfn2 * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
         /// call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduce method calls the
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduce method calls the
         /// callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduce<'U>: callbackfn: Float64Array.Reduce.Callbackfn3<'U> * initialValue: 'U -> 'U
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
         /// argument in the next call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an
         /// argument instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduceRight: callbackfn: Float64Array.ReduceRight.Callbackfn -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
         /// argument in the next call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an
         /// argument instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduceRight: callbackfn: Float64Array.ReduceRight.Callbackfn2 * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
         /// argument in the next call to the callback function.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an
         /// argument instead of an array value.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// callbackfn A function that accepts up to four arguments. The reduceRight method calls
+        /// </param>
+        /// <param name="callbackfn">
+        /// A function that accepts up to four arguments. The reduceRight method calls
         /// the callbackfn function one time for each element in the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// initialValue If initialValue is specified, it is used as the initial value to start
+        /// </param>
+        /// <param name="initialValue">
+        /// If initialValue is specified, it is used as the initial value to start
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
-        /// </remarks>
+        /// </param>
         abstract reduceRight<'U>: callbackfn: Float64Array.ReduceRight.Callbackfn3<'U> * initialValue: 'U -> 'U
         /// <summary>
         /// Reverses the elements in an Array.
@@ -6559,49 +6145,46 @@ module Es =
         /// <summary>
         /// Sets a value or an array of values.
         /// </summary>
-        /// <remarks>@param array A typed or untyped array of values to set.</remarks>
-        /// <remarks>@param offset The index in the current array at which the values are to be written.</remarks>
+        /// <param name="array">A typed or untyped array of values to set.</param>
+        /// <param name="offset">The index in the current array at which the values are to be written.</param>
         abstract set: array: ArrayLike<float> * ?offset: float -> unit
         /// <summary>
         /// Returns a section of an array.
         /// </summary>
-        /// <remarks>@param start The beginning of the specified portion of the array.</remarks>
-        /// <remarks>@param end The end of the specified portion of the array. This is exclusive of the element at the index 'end'.</remarks>
+        /// <param name="start">The beginning of the specified portion of the array.</param>
+        /// <param name="end">The end of the specified portion of the array. This is exclusive of the element at the index 'end'.</param>
         abstract slice: ?start: float * ?``end``: float -> Float64Array<ArrayBuffer>
         /// <summary>
         /// Determines whether the specified callback function returns true for any element of an array.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// predicate A function that accepts up to three arguments. The some method calls
+        /// <param name="predicate">
+        /// A function that accepts up to three arguments. The some method calls
         /// the predicate function for each element in the array until the predicate returns a value
         /// which is coercible to the Boolean value true, or until the end of the array.
-        /// </remarks>
-        /// <remarks>
-        /// @param
-        /// thisArg An object to which the this keyword can refer in the predicate function.
+        /// </param>
+        /// <param name="thisArg">
+        /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
-        /// </remarks>
+        /// </param>
         abstract some: predicate: Float64Array.Some.Predicate * ?thisArg: obj -> bool
         /// <summary>
         /// Sorts an array.
         /// </summary>
-        /// <remarks>
-        /// @param
-        /// compareFn Function used to determine the order of the elements. It is expected to return
+        /// <param name="compareFn">
+        /// Function used to determine the order of the elements. It is expected to return
         /// a negative value if first argument is less than second argument, zero if they're equal and a positive
         /// value otherwise. If omitted, the elements are sorted in ascending order.
         /// <code lang="ts">
         /// [11,2,22,1].sort((a, b) =&gt; a - b)
         /// </code>
-        /// </remarks>
+        /// </param>
         abstract sort: ?compareFn: Float64Array.Sort.CompareFn -> Float64Array<'TArrayBuffer>
         /// <summary>
         /// Gets a new Float64Array view of the ArrayBuffer store for this array, referencing the elements
         /// at begin, inclusive, up to end, exclusive.
         /// </summary>
-        /// <remarks>@param begin The index of the beginning of the array.</remarks>
-        /// <remarks>@param end The index of the end of the array.</remarks>
+        /// <param name="begin">The index of the beginning of the array.</param>
+        /// <param name="end">The index of the end of the array.</param>
         abstract subarray: ?``begin``: float * ?``end``: float -> Float64Array<'TArrayBuffer>
         /// <summary>
         /// Converts a number to a string by using the current locale.
@@ -6626,23 +6209,23 @@ module Es =
         /// <summary>
         /// Returns a new array from a set of elements.
         /// </summary>
-        /// <remarks>@param items A set of elements to include in the new array object.</remarks>
+        /// <param name="items">A set of elements to include in the new array object.</param>
         abstract ``of``: [<ParamArray>] items: float[] -> Float64Array<ArrayBuffer>
         /// <summary>
         /// Creates an array from an array-like or iterable object.
         /// </summary>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param mapfn A mapping function to call on every element of the array.</remarks>
-        /// <remarks>@param thisArg Value of 'this' used to invoke the mapfn.</remarks>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="mapfn">A mapping function to call on every element of the array.</param>
+        /// <param name="thisArg">Value of 'this' used to invoke the mapfn.</param>
         abstract from: arrayLike: ArrayLike<float> -> Float64Array<ArrayBuffer>
         /// <summary>
         /// Creates an array from an array-like or iterable object.
         /// </summary>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param arrayLike An array-like object to convert to an array.</remarks>
-        /// <remarks>@param mapfn A mapping function to call on every element of the array.</remarks>
-        /// <remarks>@param thisArg Value of 'this' used to invoke the mapfn.</remarks>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="arrayLike">An array-like object to convert to an array.</param>
+        /// <param name="mapfn">A mapping function to call on every element of the array.</param>
+        /// <param name="thisArg">Value of 'this' used to invoke the mapfn.</param>
         abstract from<'T>: arrayLike: ArrayLike<'T> * mapfn: Float64ArrayConstructor.From.Mapfn<'T> * ?thisArg: obj -> Float64Array<ArrayBuffer>
         [<EmitConstructor>]
         abstract Create: length: float -> Float64Array<ArrayBuffer>

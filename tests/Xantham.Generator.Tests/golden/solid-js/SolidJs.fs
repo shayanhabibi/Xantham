@@ -933,9 +933,9 @@ type Exports =
     /// <summary>
     /// Creates a new non-tracked reactive context that doesn't auto-dispose
     /// </summary>
-    /// <remarks>@param fn a function in which the reactive state is scoped</remarks>
-    /// <remarks>@param detachedOwner optional reactive context to bind the root to</remarks>
-    /// <remarks>@returns the output of <c>fn</c>.</remarks>
+    /// <param name="fn">a function in which the reactive state is scoped</param>
+    /// <param name="detachedOwner">optional reactive context to bind the root to</param>
+    /// <returns>the output of <c>fn</c>.</returns>
     /// <remarks>@description https://docs.solidjs.com/reference/reactive-utilities/create-root</remarks>
     [<Import("createRoot", "solid-js")>]
     static member createRoot<'T> (fn: ((unit -> unit) -> 'T), ?detachedOwner: Owner) : 'T = jsNative
@@ -948,10 +948,9 @@ type Exports =
     /// )
     /// </code>
     /// </summary>
-    /// <remarks>@param value initial value of the state; if empty, the state's type will automatically extended with undefined; otherwise you need to extend the type manually if you want setting to undefined not be an error</remarks>
-    /// <remarks>@param options optional object with a name for debugging purposes and equals, a comparator function for the previous and next value to allow fine-grained control over the reactivity</remarks>
-    /// <remarks>
-    /// @returns
+    /// <param name="value">initial value of the state; if empty, the state's type will automatically extended with undefined; otherwise you need to extend the type manually if you want setting to undefined not be an error</param>
+    /// <param name="options">optional object with a name for debugging purposes and equals, a comparator function for the previous and next value to allow fine-grained control over the reactivity</param>
+    /// <returns>
     /// <code lang="typescript">
     /// [state: Accessor&lt;T&gt;, setState: Setter&lt;T&gt;]
     /// </code>
@@ -961,7 +960,7 @@ type Exports =
     /// const [count, setCount] = createSignal(0);
     /// setCount(count =&gt; count + 1);
     /// </code>
-    /// </remarks>
+    /// </returns>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-signal</remarks>
     [<Import("createSignal", "solid-js")>]
     static member createSignal<'T> () : (unit -> 'T option) * (obj[] -> unit) = jsNative
@@ -974,10 +973,9 @@ type Exports =
     /// )
     /// </code>
     /// </summary>
-    /// <remarks>@param value initial value of the state; if empty, the state's type will automatically extended with undefined; otherwise you need to extend the type manually if you want setting to undefined not be an error</remarks>
-    /// <remarks>@param options optional object with a name for debugging purposes and equals, a comparator function for the previous and next value to allow fine-grained control over the reactivity</remarks>
-    /// <remarks>
-    /// @returns
+    /// <param name="value">initial value of the state; if empty, the state's type will automatically extended with undefined; otherwise you need to extend the type manually if you want setting to undefined not be an error</param>
+    /// <param name="options">optional object with a name for debugging purposes and equals, a comparator function for the previous and next value to allow fine-grained control over the reactivity</param>
+    /// <returns>
     /// <code lang="typescript">
     /// [state: Accessor&lt;T&gt;, setState: Setter&lt;T&gt;]
     /// </code>
@@ -987,7 +985,7 @@ type Exports =
     /// const [count, setCount] = createSignal(0);
     /// setCount(count =&gt; count + 1);
     /// </code>
-    /// </remarks>
+    /// </returns>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-signal</remarks>
     [<Import("createSignal", "solid-js")>]
     static member createSignal<'T> (value: 'T, ?options: SignalOptions<'T>) : (unit -> 'T) * (obj -> obj) = jsNative
@@ -1001,9 +999,9 @@ type Exports =
     /// ): void;
     /// </code>
     /// </summary>
-    /// <remarks>@param fn a function that receives its previous or the initial value, if set, and returns a new value used to react on a computation</remarks>
-    /// <remarks>@param value an optional initial value for the computation; if set, fn will never receive undefined as first argument</remarks>
-    /// <remarks>@param options allows to set a name in dev mode for debugging purposes</remarks>
+    /// <param name="fn">a function that receives its previous or the initial value, if set, and returns a new value used to react on a computation</param>
+    /// <param name="value">an optional initial value for the computation; if set, fn will never receive undefined as first argument</param>
+    /// <param name="options">allows to set a name in dev mode for debugging purposes</param>
     /// <remarks>@description https://docs.solidjs.com/reference/secondary-primitives/create-computed</remarks>
     [<Import("createComputed", "solid-js")>]
     static member createComputed<'Next> (fn: (JS.NoInfer<'Next> option -> 'Next)) : unit = jsNative
@@ -1017,9 +1015,9 @@ type Exports =
     /// ): void;
     /// </code>
     /// </summary>
-    /// <remarks>@param fn a function that receives its previous or the initial value, if set, and returns a new value used to react on a computation</remarks>
-    /// <remarks>@param value an optional initial value for the computation; if set, fn will never receive undefined as first argument</remarks>
-    /// <remarks>@param options allows to set a name in dev mode for debugging purposes</remarks>
+    /// <param name="fn">a function that receives its previous or the initial value, if set, and returns a new value used to react on a computation</param>
+    /// <param name="value">an optional initial value for the computation; if set, fn will never receive undefined as first argument</param>
+    /// <param name="options">allows to set a name in dev mode for debugging purposes</param>
     /// <remarks>@description https://docs.solidjs.com/reference/secondary-primitives/create-computed</remarks>
     [<Import("createComputed", "solid-js")>]
     static member createComputed<'Next, 'Init> (fn: (U2<'Init, 'Next> -> 'Next), value: 'Init, ?options: EffectOptions) : unit = jsNative
@@ -1033,9 +1031,9 @@ type Exports =
     /// ): void;
     /// </code>
     /// </summary>
-    /// <remarks>@param fn a function that receives its previous or the initial value, if set, and returns a new value used to react on a computation</remarks>
-    /// <remarks>@param value an optional initial value for the computation; if set, fn will never receive undefined as first argument</remarks>
-    /// <remarks>@param options allows to set a name in dev mode for debugging purposes</remarks>
+    /// <param name="fn">a function that receives its previous or the initial value, if set, and returns a new value used to react on a computation</param>
+    /// <param name="value">an optional initial value for the computation; if set, fn will never receive undefined as first argument</param>
+    /// <param name="options">allows to set a name in dev mode for debugging purposes</param>
     /// <remarks>@description https://docs.solidjs.com/reference/secondary-primitives/create-render-effect</remarks>
     [<Import("createRenderEffect", "solid-js")>]
     static member createRenderEffect<'Next> (fn: (JS.NoInfer<'Next> option -> 'Next)) : unit = jsNative
@@ -1049,9 +1047,9 @@ type Exports =
     /// ): void;
     /// </code>
     /// </summary>
-    /// <remarks>@param fn a function that receives its previous or the initial value, if set, and returns a new value used to react on a computation</remarks>
-    /// <remarks>@param value an optional initial value for the computation; if set, fn will never receive undefined as first argument</remarks>
-    /// <remarks>@param options allows to set a name in dev mode for debugging purposes</remarks>
+    /// <param name="fn">a function that receives its previous or the initial value, if set, and returns a new value used to react on a computation</param>
+    /// <param name="value">an optional initial value for the computation; if set, fn will never receive undefined as first argument</param>
+    /// <param name="options">allows to set a name in dev mode for debugging purposes</param>
     /// <remarks>@description https://docs.solidjs.com/reference/secondary-primitives/create-render-effect</remarks>
     [<Import("createRenderEffect", "solid-js")>]
     static member createRenderEffect<'Next, 'Init> (fn: (U2<'Init, 'Next> -> 'Next), value: 'Init, ?options: EffectOptions) : unit = jsNative
@@ -1065,9 +1063,9 @@ type Exports =
     /// ): void;
     /// </code>
     /// </summary>
-    /// <remarks>@param fn a function that receives its previous or the initial value, if set, and returns a new value used to react on a computation</remarks>
-    /// <remarks>@param value an optional initial value for the computation; if set, fn will never receive undefined as first argument</remarks>
-    /// <remarks>@param options allows to set a name in dev mode for debugging purposes</remarks>
+    /// <param name="fn">a function that receives its previous or the initial value, if set, and returns a new value used to react on a computation</param>
+    /// <param name="value">an optional initial value for the computation; if set, fn will never receive undefined as first argument</param>
+    /// <param name="options">allows to set a name in dev mode for debugging purposes</param>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-effect</remarks>
     [<Import("createEffect", "solid-js")>]
     static member createEffect<'Next> (fn: (JS.NoInfer<'Next> option -> 'Next)) : unit = jsNative
@@ -1081,9 +1079,9 @@ type Exports =
     /// ): void;
     /// </code>
     /// </summary>
-    /// <remarks>@param fn a function that receives its previous or the initial value, if set, and returns a new value used to react on a computation</remarks>
-    /// <remarks>@param value an optional initial value for the computation; if set, fn will never receive undefined as first argument</remarks>
-    /// <remarks>@param options allows to set a name in dev mode for debugging purposes</remarks>
+    /// <param name="fn">a function that receives its previous or the initial value, if set, and returns a new value used to react on a computation</param>
+    /// <param name="value">an optional initial value for the computation; if set, fn will never receive undefined as first argument</param>
+    /// <param name="options">allows to set a name in dev mode for debugging purposes</param>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-effect</remarks>
     [<Import("createEffect", "solid-js")>]
     static member createEffect<'Next, 'Init> (fn: (U2<'Init, 'Next> -> 'Next), value: 'Init, ?options: CreateEffect.Options) : unit = jsNative
@@ -1096,8 +1094,8 @@ type Exports =
     /// ): (fn: () =&gt; void) =&gt; void;
     /// </code>
     /// </summary>
-    /// <remarks>@param invalidated a function that is called when tracked function is invalidated.</remarks>
-    /// <remarks>@param options allows to set a name in dev mode for debugging purposes</remarks>
+    /// <param name="invalidated">a function that is called when tracked function is invalidated.</param>
+    /// <param name="options">allows to set a name in dev mode for debugging purposes</param>
     /// <remarks>@description https://docs.solidjs.com/reference/secondary-primitives/create-reaction</remarks>
     [<Import("createReaction", "solid-js")>]
     static member createReaction (onInvalidate: (unit -> unit), ?options: EffectOptions) : ((unit -> unit) -> unit) = jsNative
@@ -1111,9 +1109,9 @@ type Exports =
     /// ): () =&gt; T;
     /// </code>
     /// </summary>
-    /// <remarks>@param fn a function that receives its previous or the initial value, if set, and returns a new value used to react on a computation</remarks>
-    /// <remarks>@param value an optional initial value for the computation; if set, fn will never receive undefined as first argument</remarks>
-    /// <remarks>@param options allows to set a name in dev mode for debugging purposes and use a custom comparison function in equals</remarks>
+    /// <param name="fn">a function that receives its previous or the initial value, if set, and returns a new value used to react on a computation</param>
+    /// <param name="value">an optional initial value for the computation; if set, fn will never receive undefined as first argument</param>
+    /// <param name="options">allows to set a name in dev mode for debugging purposes and use a custom comparison function in equals</param>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-memo</remarks>
     [<Import("createMemo", "solid-js")>]
     static member createMemo<'Next, 'Prev> (fn: (JS.NoInfer<'Prev> option -> 'Next)) : (unit -> 'Next) = jsNative
@@ -1127,9 +1125,9 @@ type Exports =
     /// ): () =&gt; T;
     /// </code>
     /// </summary>
-    /// <remarks>@param fn a function that receives its previous or the initial value, if set, and returns a new value used to react on a computation</remarks>
-    /// <remarks>@param value an optional initial value for the computation; if set, fn will never receive undefined as first argument</remarks>
-    /// <remarks>@param options allows to set a name in dev mode for debugging purposes and use a custom comparison function in equals</remarks>
+    /// <param name="fn">a function that receives its previous or the initial value, if set, and returns a new value used to react on a computation</param>
+    /// <param name="value">an optional initial value for the computation; if set, fn will never receive undefined as first argument</param>
+    /// <param name="options">allows to set a name in dev mode for debugging purposes and use a custom comparison function in equals</param>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-memo</remarks>
     [<Import("createMemo", "solid-js")>]
     static member createMemo<'Next, 'Init, 'Prev> (fn: (U2<'Init, 'Prev> -> 'Next), value: 'Init, ?options: MemoOptions<'Next>) : (unit -> 'Next) = jsNative
@@ -1142,20 +1140,18 @@ type Exports =
     /// const [resource, { mutate, refetch }] = createResource(source, fetcher, options);
     /// </code>
     /// </summary>
-    /// <remarks>@param source - reactive data function which has its non-nullish and non-false values passed to the fetcher, optional</remarks>
-    /// <remarks>
-    /// @param
-    /// fetcher - function that receives the source (true if source not provided), the last or initial value, and whether the resource is being refetched, and returns a value or a Promise:
+    /// <param name="source">- reactive data function which has its non-nullish and non-false values passed to the fetcher, optional</param>
+    /// <param name="fetcher">
+    /// - function that receives the source (true if source not provided), the last or initial value, and whether the resource is being refetched, and returns a value or a Promise:
     /// <code lang="typescript">
     /// const fetcher: ResourceFetcher&lt;S, T, R&gt; = (
     /// sourceOutput: S,
     /// info: { value: T | undefined, refetching: R | boolean }
     /// ) =&gt; T | Promise&lt;T&gt;;
     /// </code>
-    /// </remarks>
-    /// <remarks>@param options - an optional object with the initialValue and the name (for debugging purposes); see {@link ResourceOptions}</remarks>
-    /// <remarks>
-    /// @returns
+    /// </param>
+    /// <param name="options">- an optional object with the initialValue and the name (for debugging purposes); see {@link ResourceOptions}</param>
+    /// <returns>
     /// <code lang="typescript">
     /// [Resource&lt;T&gt;, { mutate: Setter&lt;T&gt;, refetch: () =&gt; void }]
     /// </code>
@@ -1163,7 +1159,7 @@ type Exports =
     /// * Setting an <c>initialValue</c> in the options will mean that both the prev() accessor and the resource should never return undefined (if that is wanted, you need to extend the type with undefined)
     /// * <c>mutate</c> allows to manually overwrite the resource without calling the fetcher
     /// * <c>refetch</c> will re-run the fetcher without changing the source, and if called with a value, that value will be passed to the fetcher via the <c>refetching</c> property on the fetcher's second parameter
-    /// </remarks>
+    /// </returns>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-resource</remarks>
     [<Import("createResource", "solid-js")>]
     static member createResource<'T, 'R, 'I> (fetcher: CreateResource.Fetcher<'I, 'T, 'R>, options: CreateResource.Options<'I, 'T>) : U3<Errored, Ready<U2<'I, 'T>>, Refreshing<U2<'I, 'T>>> * CreateResource.Result.Item<'R, 'I, 'T> = jsNative
@@ -1176,20 +1172,18 @@ type Exports =
     /// const [resource, { mutate, refetch }] = createResource(source, fetcher, options);
     /// </code>
     /// </summary>
-    /// <remarks>@param source - reactive data function which has its non-nullish and non-false values passed to the fetcher, optional</remarks>
-    /// <remarks>
-    /// @param
-    /// fetcher - function that receives the source (true if source not provided), the last or initial value, and whether the resource is being refetched, and returns a value or a Promise:
+    /// <param name="source">- reactive data function which has its non-nullish and non-false values passed to the fetcher, optional</param>
+    /// <param name="fetcher">
+    /// - function that receives the source (true if source not provided), the last or initial value, and whether the resource is being refetched, and returns a value or a Promise:
     /// <code lang="typescript">
     /// const fetcher: ResourceFetcher&lt;S, T, R&gt; = (
     /// sourceOutput: S,
     /// info: { value: T | undefined, refetching: R | boolean }
     /// ) =&gt; T | Promise&lt;T&gt;;
     /// </code>
-    /// </remarks>
-    /// <remarks>@param options - an optional object with the initialValue and the name (for debugging purposes); see {@link ResourceOptions}</remarks>
-    /// <remarks>
-    /// @returns
+    /// </param>
+    /// <param name="options">- an optional object with the initialValue and the name (for debugging purposes); see {@link ResourceOptions}</param>
+    /// <returns>
     /// <code lang="typescript">
     /// [Resource&lt;T&gt;, { mutate: Setter&lt;T&gt;, refetch: () =&gt; void }]
     /// </code>
@@ -1197,7 +1191,7 @@ type Exports =
     /// * Setting an <c>initialValue</c> in the options will mean that both the prev() accessor and the resource should never return undefined (if that is wanted, you need to extend the type with undefined)
     /// * <c>mutate</c> allows to manually overwrite the resource without calling the fetcher
     /// * <c>refetch</c> will re-run the fetcher without changing the source, and if called with a value, that value will be passed to the fetcher via the <c>refetching</c> property on the fetcher's second parameter
-    /// </remarks>
+    /// </returns>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-resource</remarks>
     [<Import("createResource", "solid-js")>]
     static member createResource<'T, 'R> (fetcher: Func<bool, CreateResource.Fetcher.Info2<'T, 'R>, U2<'T, JS.Promise<'T>>>, ?options: CreateResource.Options2) : U5<Errored, Pending, Ready<'T>, Refreshing<'T>, Unresolved> * CreateResource.Result.Item2<'R, 'T> = jsNative
@@ -1210,20 +1204,18 @@ type Exports =
     /// const [resource, { mutate, refetch }] = createResource(source, fetcher, options);
     /// </code>
     /// </summary>
-    /// <remarks>@param source - reactive data function which has its non-nullish and non-false values passed to the fetcher, optional</remarks>
-    /// <remarks>
-    /// @param
-    /// fetcher - function that receives the source (true if source not provided), the last or initial value, and whether the resource is being refetched, and returns a value or a Promise:
+    /// <param name="source">- reactive data function which has its non-nullish and non-false values passed to the fetcher, optional</param>
+    /// <param name="fetcher">
+    /// - function that receives the source (true if source not provided), the last or initial value, and whether the resource is being refetched, and returns a value or a Promise:
     /// <code lang="typescript">
     /// const fetcher: ResourceFetcher&lt;S, T, R&gt; = (
     /// sourceOutput: S,
     /// info: { value: T | undefined, refetching: R | boolean }
     /// ) =&gt; T | Promise&lt;T&gt;;
     /// </code>
-    /// </remarks>
-    /// <remarks>@param options - an optional object with the initialValue and the name (for debugging purposes); see {@link ResourceOptions}</remarks>
-    /// <remarks>
-    /// @returns
+    /// </param>
+    /// <param name="options">- an optional object with the initialValue and the name (for debugging purposes); see {@link ResourceOptions}</param>
+    /// <returns>
     /// <code lang="typescript">
     /// [Resource&lt;T&gt;, { mutate: Setter&lt;T&gt;, refetch: () =&gt; void }]
     /// </code>
@@ -1231,7 +1223,7 @@ type Exports =
     /// * Setting an <c>initialValue</c> in the options will mean that both the prev() accessor and the resource should never return undefined (if that is wanted, you need to extend the type with undefined)
     /// * <c>mutate</c> allows to manually overwrite the resource without calling the fetcher
     /// * <c>refetch</c> will re-run the fetcher without changing the source, and if called with a value, that value will be passed to the fetcher via the <c>refetching</c> property on the fetcher's second parameter
-    /// </remarks>
+    /// </returns>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-resource</remarks>
     [<Import("createResource", "solid-js")>]
     static member createResource<'T, 'S, 'R, 'I> (source: U3<bool, 'S, (unit -> U2<bool, 'S> option)> option, fetcher: CreateResource.Fetcher2<'S, 'I, 'T, 'R>, options: CreateResource.Options3<'I, 'T, 'S>) : U3<Errored, Ready<U2<'I, 'T>>, Refreshing<U2<'I, 'T>>> * CreateResource.Result.Item3<'R, 'I, 'T> = jsNative
@@ -1244,20 +1236,18 @@ type Exports =
     /// const [resource, { mutate, refetch }] = createResource(source, fetcher, options);
     /// </code>
     /// </summary>
-    /// <remarks>@param source - reactive data function which has its non-nullish and non-false values passed to the fetcher, optional</remarks>
-    /// <remarks>
-    /// @param
-    /// fetcher - function that receives the source (true if source not provided), the last or initial value, and whether the resource is being refetched, and returns a value or a Promise:
+    /// <param name="source">- reactive data function which has its non-nullish and non-false values passed to the fetcher, optional</param>
+    /// <param name="fetcher">
+    /// - function that receives the source (true if source not provided), the last or initial value, and whether the resource is being refetched, and returns a value or a Promise:
     /// <code lang="typescript">
     /// const fetcher: ResourceFetcher&lt;S, T, R&gt; = (
     /// sourceOutput: S,
     /// info: { value: T | undefined, refetching: R | boolean }
     /// ) =&gt; T | Promise&lt;T&gt;;
     /// </code>
-    /// </remarks>
-    /// <remarks>@param options - an optional object with the initialValue and the name (for debugging purposes); see {@link ResourceOptions}</remarks>
-    /// <remarks>
-    /// @returns
+    /// </param>
+    /// <param name="options">- an optional object with the initialValue and the name (for debugging purposes); see {@link ResourceOptions}</param>
+    /// <returns>
     /// <code lang="typescript">
     /// [Resource&lt;T&gt;, { mutate: Setter&lt;T&gt;, refetch: () =&gt; void }]
     /// </code>
@@ -1265,7 +1255,7 @@ type Exports =
     /// * Setting an <c>initialValue</c> in the options will mean that both the prev() accessor and the resource should never return undefined (if that is wanted, you need to extend the type with undefined)
     /// * <c>mutate</c> allows to manually overwrite the resource without calling the fetcher
     /// * <c>refetch</c> will re-run the fetcher without changing the source, and if called with a value, that value will be passed to the fetcher via the <c>refetching</c> property on the fetcher's second parameter
-    /// </remarks>
+    /// </returns>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-resource</remarks>
     [<Import("createResource", "solid-js")>]
     static member createResource<'T, 'S, 'R> (source: U3<bool, 'S, (unit -> U2<bool, 'S> option)> option, fetcher: Func<'S, CreateResource.Fetcher.Info3<'T, 'R>, U2<'T, JS.Promise<'T>>>, ?options: CreateResource.Options4<'S>) : U5<Errored, Pending, Ready<'T>, Refreshing<'T>, Unresolved> * CreateResource.Result.Item4<'R, 'T> = jsNative
@@ -1278,8 +1268,8 @@ type Exports =
     /// ): () =&gt; T);
     /// </code>
     /// </summary>
-    /// <remarks>@param fn a function that receives its previous or the initial value, if set, and returns a new value used to react on a computation</remarks>
-    /// <remarks>@param options allows to set the timeout in milliseconds, use a custom comparison function and set a name in dev mode for debugging purposes</remarks>
+    /// <param name="fn">a function that receives its previous or the initial value, if set, and returns a new value used to react on a computation</param>
+    /// <param name="options">allows to set the timeout in milliseconds, use a custom comparison function and set a name in dev mode for debugging purposes</param>
     /// <remarks>@description https://docs.solidjs.com/reference/secondary-primitives/create-deferred</remarks>
     [<Import("createDeferred", "solid-js")>]
     static member createDeferred<'T> (source: (unit -> 'T), ?options: DeferredOptions<'T>) : (unit -> 'T) = jsNative
@@ -1293,11 +1283,9 @@ type Exports =
     /// ): (k: U) =&gt; boolean;
     /// </code>
     /// </summary>
-    /// <remarks>@param source</remarks>
-    /// <remarks>@param fn a function that receives its previous or the initial value, if set, and returns a new value used to react on a computation</remarks>
-    /// <remarks>
-    /// @param
-    /// options allows to set a name in dev mode for debugging purposes, optional
+    /// <param name="fn">a function that receives its previous or the initial value, if set, and returns a new value used to react on a computation</param>
+    /// <param name="options">
+    /// allows to set a name in dev mode for debugging purposes, optional
     ///
     /// <code lang="typescript">
     /// const isSelected = createSelector(selectedId);
@@ -1307,23 +1295,23 @@ type Exports =
     /// </code>
     ///
     /// This makes the operation O(2) instead of O(n).
-    /// </remarks>
+    /// </param>
     /// <remarks>@description https://docs.solidjs.com/reference/secondary-primitives/create-selector</remarks>
     [<Import("createSelector", "solid-js")>]
     static member createSelector<'T, 'U> (source: (unit -> 'T), ?fn: Func<'U, 'T, bool>, ?options: BaseOptions) : ('U -> bool) = jsNative
     /// <summary>
     /// Holds changes inside the block before the reactive context is updated
     /// </summary>
-    /// <remarks>@param fn wraps the reactive updates that should be batched</remarks>
-    /// <remarks>@returns the return value from <c>fn</c></remarks>
+    /// <param name="fn">wraps the reactive updates that should be batched</param>
+    /// <returns>the return value from <c>fn</c></returns>
     /// <remarks>@description https://docs.solidjs.com/reference/reactive-utilities/batch</remarks>
     [<Import("batch", "solid-js")>]
     static member batch<'T> (fn: (unit -> 'T)) : 'T = jsNative
     /// <summary>
     /// Ignores tracking context inside its scope
     /// </summary>
-    /// <remarks>@param fn the scope that is out of the tracking context</remarks>
-    /// <remarks>@returns the return value of <c>fn</c></remarks>
+    /// <param name="fn">the scope that is out of the tracking context</param>
+    /// <returns>the return value of <c>fn</c></returns>
     /// <remarks>@description https://docs.solidjs.com/reference/reactive-utilities/untrack</remarks>
     [<Import("untrack", "solid-js")>]
     static member untrack<'T> (fn: (unit -> 'T)) : 'T = jsNative
@@ -1337,11 +1325,10 @@ type Exports =
     /// ): (prevValue: U | undefined) =&gt; U;
     /// </code>
     /// </summary>
-    /// <remarks>@param deps list of reactive dependencies or a single reactive dependency</remarks>
-    /// <remarks>@param fn computation on input; the current previous content(s) of input and the previous value are given as arguments and it returns a new value</remarks>
-    /// <remarks>@param options optional, allows deferred computation until at the end of the next change</remarks>
-    /// <remarks>
-    /// @returns
+    /// <param name="deps">list of reactive dependencies or a single reactive dependency</param>
+    /// <param name="fn">computation on input; the current previous content(s) of input and the previous value are given as arguments and it returns a new value</param>
+    /// <param name="options">optional, allows deferred computation until at the end of the next change</param>
+    /// <returns>
     /// an effect function that is passed into createEffect. For example:
     ///
     /// <code lang="typescript">
@@ -1353,7 +1340,7 @@ type Exports =
     /// untrack(() =&gt; console.log(v, b()));
     /// });
     /// </code>
-    /// </remarks>
+    /// </returns>
     /// <remarks>@description https://docs.solidjs.com/reference/reactive-utilities/on-util</remarks>
     [<Import("on", "solid-js")>]
     static member on<'S, 'Next, 'Prev> (deps: U2<(unit -> 'S), obj[]>, fn: Func<'S, 'S option, JS.NoInfer<'Prev> option, 'Next>, ?options: On.Options) : (JS.NoInfer<'Next> option -> JS.NoInfer<'Next>) = jsNative
@@ -1367,11 +1354,10 @@ type Exports =
     /// ): (prevValue: U | undefined) =&gt; U;
     /// </code>
     /// </summary>
-    /// <remarks>@param deps list of reactive dependencies or a single reactive dependency</remarks>
-    /// <remarks>@param fn computation on input; the current previous content(s) of input and the previous value are given as arguments and it returns a new value</remarks>
-    /// <remarks>@param options optional, allows deferred computation until at the end of the next change</remarks>
-    /// <remarks>
-    /// @returns
+    /// <param name="deps">list of reactive dependencies or a single reactive dependency</param>
+    /// <param name="fn">computation on input; the current previous content(s) of input and the previous value are given as arguments and it returns a new value</param>
+    /// <param name="options">optional, allows deferred computation until at the end of the next change</param>
+    /// <returns>
     /// an effect function that is passed into createEffect. For example:
     ///
     /// <code lang="typescript">
@@ -1383,35 +1369,34 @@ type Exports =
     /// untrack(() =&gt; console.log(v, b()));
     /// });
     /// </code>
-    /// </remarks>
+    /// </returns>
     /// <remarks>@description https://docs.solidjs.com/reference/reactive-utilities/on-util</remarks>
     [<Import("on", "solid-js")>]
     static member on<'S, 'Next, 'Prev> (deps: U2<(unit -> 'S), obj[]>, fn: Func<'S, 'S option, JS.NoInfer<'Prev> option, 'Next>, options: U2<OnOptions, On.Options2>) : (JS.NoInfer<'Next> option -> JS.NoInfer<'Next> option) = jsNative
     /// <summary>
     /// Runs an effect only after initial render on mount
     /// </summary>
-    /// <remarks>@param fn an effect that should run only once on mount</remarks>
+    /// <param name="fn">an effect that should run only once on mount</param>
     /// <remarks>@description https://docs.solidjs.com/reference/lifecycle/on-mount</remarks>
     [<Import("onMount", "solid-js")>]
     static member onMount (fn: (unit -> unit)) : unit = jsNative
     /// <summary>
     /// Runs an effect once before the reactive scope is disposed
     /// </summary>
-    /// <remarks>@param fn an effect that should run only once on cleanup</remarks>
-    /// <remarks>@returns the same {@link fn} function that was passed in</remarks>
+    /// <param name="fn">an effect that should run only once on cleanup</param>
+    /// <returns>the same {@link fn} function that was passed in</returns>
     /// <remarks>@description https://docs.solidjs.com/reference/lifecycle/on-cleanup</remarks>
     [<Import("onCleanup", "solid-js")>]
     static member onCleanup<'T> (fn: 'T) : 'T = jsNative
     /// <summary>
     /// Runs an effect whenever an error is thrown within the context of the child scopes
     /// </summary>
-    /// <remarks>@param fn boundary for the error</remarks>
-    /// <remarks>
-    /// @param
-    /// handler an error handler that receives the error
+    /// <param name="fn">boundary for the error</param>
+    /// <param name="handler">
+    /// an error handler that receives the error
     ///
     /// * If the error is thrown again inside the error handler, it will trigger the next available parent handler
-    /// </remarks>
+    /// </param>
     /// <remarks>@description https://docs.solidjs.com/reference/reactive-utilities/catch-error</remarks>
     [<Import("catchError", "solid-js")>]
     static member catchError<'T> (fn: (unit -> 'T), handler: (exn -> unit)) : 'T option = jsNative
@@ -1439,7 +1424,7 @@ type Exports =
     /// ];
     /// </code>
     /// </summary>
-    /// <remarks>@returns a tuple; first value is an accessor if the transition is pending and a callback to start the transition</remarks>
+    /// <returns>a tuple; first value is an accessor if the transition is pending and a callback to start the transition</returns>
     /// <remarks>@description https://docs.solidjs.com/reference/reactive-utilities/use-transition</remarks>
     [<Import("useTransition", "solid-js")>]
     static member useTransition () : Transition = jsNative
@@ -1457,9 +1442,9 @@ type Exports =
     /// ): Context&lt;T | undefined&gt;;
     /// </code>
     /// </summary>
-    /// <remarks>@param defaultValue optional default to inject into context</remarks>
-    /// <remarks>@param options allows to set a name in dev mode for debugging purposes</remarks>
-    /// <remarks>@returns The context that contains the Provider Component and that can be used with <c>useContext</c></remarks>
+    /// <param name="defaultValue">optional default to inject into context</param>
+    /// <param name="options">allows to set a name in dev mode for debugging purposes</param>
+    /// <returns>The context that contains the Provider Component and that can be used with <c>useContext</c></returns>
     /// <remarks>@description https://docs.solidjs.com/reference/component-apis/create-context</remarks>
     [<Import("createContext", "solid-js")>]
     static member createContext<'T> (?defaultValue: unit, ?options: EffectOptions) : Context<'T option> = jsNative
@@ -1477,25 +1462,25 @@ type Exports =
     /// ): Context&lt;T | undefined&gt;;
     /// </code>
     /// </summary>
-    /// <remarks>@param defaultValue optional default to inject into context</remarks>
-    /// <remarks>@param options allows to set a name in dev mode for debugging purposes</remarks>
-    /// <remarks>@returns The context that contains the Provider Component and that can be used with <c>useContext</c></remarks>
+    /// <param name="defaultValue">optional default to inject into context</param>
+    /// <param name="options">allows to set a name in dev mode for debugging purposes</param>
+    /// <returns>The context that contains the Provider Component and that can be used with <c>useContext</c></returns>
     /// <remarks>@description https://docs.solidjs.com/reference/component-apis/create-context</remarks>
     [<Import("createContext", "solid-js")>]
     static member createContext<'T> (defaultValue: 'T, ?options: EffectOptions) : Context<'T> = jsNative
     /// <summary>
     /// Uses a context to receive a scoped state from a parent's Context.Provider
     /// </summary>
-    /// <remarks>@param context Context object made by <c>createContext</c></remarks>
-    /// <remarks>@returns the current or <c>defaultValue</c>, if present</remarks>
+    /// <param name="context">Context object made by <c>createContext</c></param>
+    /// <returns>the current or <c>defaultValue</c>, if present</returns>
     /// <remarks>@description https://docs.solidjs.com/reference/component-apis/use-context</remarks>
     [<Import("useContext", "solid-js")>]
     static member useContext<'T> (context: Context<'T>) : 'T = jsNative
     /// <summary>
     /// Resolves child elements to help interact with children
     /// </summary>
-    /// <remarks>@param fn an accessor for the children</remarks>
-    /// <remarks>@returns a accessor of the same children, but resolved</remarks>
+    /// <param name="fn">an accessor for the children</param>
+    /// <returns>a accessor of the same children, but resolved</returns>
     /// <remarks>@description https://docs.solidjs.com/reference/component-apis/children</remarks>
     [<Import("children", "solid-js")>]
     static member children (fn: (unit -> JSXElement option)) : ChildrenReturn = jsNative
@@ -1506,12 +1491,11 @@ type Exports =
     /// since version 1.7.0 and will be removed in next major - use catchError instead
     /// onError - run an effect whenever an error is thrown within the context of the child scopes
     /// </remarks>
-    /// <remarks>
-    /// @param
-    /// fn an error handler that receives the error
+    /// <param name="fn">
+    /// an error handler that receives the error
     ///
     /// * If the error is thrown again inside the error handler, it will trigger the next available parent handler
-    /// </remarks>
+    /// </param>
     /// <remarks>@description https://docs.solidjs.com/reference/reactive-utilities/catch-error</remarks>
     [<Import("onError", "solid-js")>]
     static member onError (fn: (exn -> unit)) : unit = jsNative
