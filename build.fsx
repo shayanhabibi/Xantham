@@ -223,7 +223,6 @@ module Stages =
     let docs =
         input {
             let! watch = Options.watch
-
             and! buildStage =
                 build (
                     Spec.srcProjects

@@ -142,6 +142,63 @@ channel's cwd.
 - `channel.Diagnostics` returns everything the process has written to stderr — panics and log
   noise. Include it when reporting a failure; it is usually the only explanation.
 
+
+<ul class="list bg-base-100 rounded-box shadow-md">
+    <li class="flex p-4 pb-2 text-xs opacity-60 tracking-wide bullet-none">API Reference</li>
+    <li class="list-row">
+        <div class="list-col-grow">
+            <div>
+                <span class="font-bold">Api</span>
+            </div>
+            <div class="pr-3">
+                Api method functions taking the channel and the method's parameter record.
+            </div>
+        </div>
+        <a class="btn btn-square btn-ghost" href="https://shayanhabibi.github.io/Xantham/reference/xantham-typescript-wire/xantham-typescript-wire/api">
+            <svg class="w-5 h-5 " fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+        </a>
+    </li>
+    <li class="list-row">
+        <div class="list-col-grow">
+            <div>
+                <span class="font-bold">Proto</span>
+            </div>
+            <div class="pr-3">
+                Message Content records for different api methods
+            </div>
+        </div>
+        <a class="btn btn-square btn-ghost" href="https://shayanhabibi.github.io/Xantham/reference/xantham-typescript-wire/xantham-typescript-wire/proto">
+            <svg class="w-5 h-5 " fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+        </a>
+    </li>
+    <li class="list-row">
+        <div class="list-col-grow">
+            <div>
+                <span class="font-bold">Sync Channel Extensions</span>
+            </div>
+            <div>
+                Per API method extensions for the <a href="https://shayanhabibi.github.io/Xantham/reference/xantham-typescript-wire/xantham-typescript-wire/tscchannel/">TscChannel</a>
+            </div>
+        </div>
+        <a class="btn btn-square btn-ghost" href="https://shayanhabibi.github.io/Xantham/reference/xantham-typescript-wire/xantham-typescript-wire/tscchannelextensions/">
+            <svg class="w-5 h-5 " fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+        </a>
+    </li>
+    <li class="list-row">
+        <div class="list-col-grow">
+            <div>
+                <span class="font-bold">Async Mailbox Extensions</span>
+            </div>
+            <div>
+                Per API method extensions for the <a href="https://shayanhabibi.github.io/Xantham/reference/xantham-typescript-wire/xantham-typescript-wire/tscmailbox/">TscMailbox</a>
+            </div>
+        </div>
+        <a class="btn btn-square btn-ghost" href="https://shayanhabibi.github.io/Xantham/reference/xantham-typescript-wire/xantham-typescript-wire/tscmailboxextensions/">
+            <svg class="w-5 h-5 " fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+        </a>
+    </li>
+</ul>
+
 ## A session binds the snapshot and the project
 
 126 of the 142 methods lead with the same two arguments — the snapshot and the project — because
