@@ -107,12 +107,27 @@ module Options =
 
     let skipTests =
         Input.option<bool> "--skip-tests" |> Input.description "Skip running tests"
+    
+    type Generate =
+        | Ast
+        | Proto
+        | Session
+        | Schema
+        | CompilerLib
+        | NodeLib
 
     let generateOnly =
-        Input.option<string> "--only"
+        Input.optionMaybe<Generate> "--only"
+        |> Input.mapFromAmong [
+            "ast", Some Ast
+            "proto", Some Proto
+            "session", Some Session
+            "schema", Some Schema
+            "compiler-lib", Some CompilerLib
+            "node-lib", Some NodeLib
+        ]
         |> Input.description
-            "Limit generation to one layer: ast | proto | session | schema | compiler-lib. The first four by default."
-        |> Input.def ""
+            "Limit generation to one layer: ast | proto | session | schema | compiler-lib | node-lib. The first four by default."
 
     /// The generator's inner loop, in three flags. An agent iterating on a pass runs
     /// `test --quick --update --no-run-gate` until the Expecto suite is green, then drops all
@@ -298,21 +313,21 @@ module Stages =
                     }
                     // Named rather than excluded, so a third layer does not turn `--only` into a list of
                     // everything it is not.
-                    let wanted layer = only = "" || only = layer
+                    let wanted layer = only.IsNone || only |> Option.contains layer
 
                     stage "generate ast" {
-                        when' (wanted "ast")
+                        when' (wanted Options.Ast)
                         run "dotnet fsi tools/generate-wire.fsx -- generate ast"
                     }
 
                     stage "generate proto" {
-                        when' (wanted "proto")
+                        when' (wanted Options.Proto)
                         run "dotnet fsi tools/generate-wire.fsx -- generate proto"
                     }
                     // After proto: it reads the same schema, but the file it emits compiles against the
                     // surface proto emits.
                     stage "generate session" {
-                        when' (wanted "session")
+                        when' (wanted Options.Session)
                         run "dotnet fsi tools/generate-wire.fsx -- generate session"
                     }
                     // The generator's own table rather than a wire layer, and it reads a NuGet family
@@ -321,13 +336,13 @@ module Stages =
                     // ships it - so a key added to `GeneratorConfig` reaches an editor by
                     // rerunning this rather than by a second hand edit.
                     stage "generate schema" {
-                        when' (wanted "schema")
+                        when' (wanted Options.Schema)
                         run "dotnet run --project src/Xantham.Cli -- schema -o xantham.schema.json"
                     }
                     // The compiler library is a shipped artifact, not a normal generator input:
                     // opt in explicitly so ordinary generated-layer runs do not rewrite it.
                     stage "generate compiler-lib" {
-                        when' (only = "compiler-lib")
+                        when' (only |> Option.contains Options.CompilerLib)
 
                         run
                             "dotnet run --project src/Xantham.Cli -- generate tools/fable-core-ts-input -o src/Xantham.Fable.Core.TS"
@@ -340,6 +355,12 @@ module Stages =
 
                         run
                             "powershell -NoProfile -Command \"Remove-Item -Force src/Xantham.Fable.Core.TS/symbols.jsonl\""
+                    }
+                    // The node library is a shipped artifact, not a normal generator input:
+                    // opt in explicitly so ordinary generated-layer runs do not rewrite it.
+                    stage "generate node-lib" {
+                        when' (only |> Option.contains Options.NodeLib)
+                        run "dotnet run --project src/Xantham.Cli -- generate node_modules/@types/node -o src/Xantham.Fable.Node --config src/Xantham.Fable.Node/xantham.json"
                     }
                 }
         }

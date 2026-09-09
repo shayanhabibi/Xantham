@@ -1,0 +1,4 @@
+﻿{
+  "$schema": "../../xantham.schema.json",
+  "lib": [ "node" ]
+}
