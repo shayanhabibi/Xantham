@@ -7,6 +7,7 @@ on:
       - '**.fs'
       - 'src/**/**.fsproj'
       - 'package.json'
+      - '!site/Site.fs'
       - '!**/*.fsx'
       - '!build.fsx'
   workflow_dispatch: 
