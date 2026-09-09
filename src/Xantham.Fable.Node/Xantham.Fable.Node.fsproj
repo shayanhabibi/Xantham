@@ -16,6 +16,7 @@
 
     <ItemGroup>
         <Compile Include="Node.fs" />
+        <Content Include="README.md" />
         <Content Include="xantham.json" />
     </ItemGroup>
 
