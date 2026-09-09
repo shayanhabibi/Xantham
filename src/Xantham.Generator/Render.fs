@@ -265,8 +265,7 @@ let rec private inlineCode (line: string) =
         let content = line[contentStart..contentEnd]
         let content = if tag = "c" then xmlEscape content else inlineCode content
 
-        rendered.Append($"<{tag}>{content}</{tag}>")
-        |> ignore
+        rendered.Append($"<{tag}>{content}</{tag}>") |> ignore
 
         index <- closing
         prose <- index
@@ -341,25 +340,29 @@ let private docBody (indent: string) (lines: string seq) =
 
     let prose (line: string) =
         $"{indent}/// {inlineCode line}".TrimEnd()
+    
+    let br = $"{indent}/// <br /><br />"
 
     let opener (info: string) =
         match info.Split([| ' '; '\t' |]) |> Array.head with
         | "" -> "<code>"
         | language -> $"""<code lang="{xmlEscape (language.Replace("\"", ""))}">"""
 
-    let rec walk fence lines =
+    let rec walk followsEmptyLine fence lines =
         match lines with
         | [] -> if fence > 0 then [ $"{indent}/// </code>" ] else []
         | line :: rest ->
             match line, fence with
-            | CodeFence(ticks, info), 0 -> $"{indent}/// {opener info}" :: walk ticks rest
+            | CodeFence(ticks, info), 0 -> $"{indent}/// {opener info}" :: walk false ticks rest
             // Markdown closes a block on a bare fence at least as long as the one that opened
             // it; anything else inside the block is code, backticks and all.
-            | CodeFence(ticks, ""), _ when ticks >= fence -> $"{indent}/// </code>" :: walk 0 rest
-            | line, 0 -> prose line :: walk 0 rest
-            | line, _ -> escaped line :: walk fence rest
+            | CodeFence(ticks, ""), _ when ticks >= fence -> $"{indent}/// </code>" :: walk false 0 rest
+            | line, 0 when String.IsNullOrWhiteSpace line -> walk true 0 rest
+            | line, 0 when followsEmptyLine -> br :: prose line :: walk false 0 rest
+            | line, 0 -> prose line :: walk false 0 rest
+            | line, _ -> escaped line :: walk false fence rest
 
-    walk 0 (List.ofSeq lines)
+    walk false 0 (List.ofSeq lines)
 
 /// JSDoc as XML docs: the comment as `<summary>`, each tag as a `<remarks>` line or block.
 /// The tier annotation lands in the manifest, not here.
@@ -375,43 +378,76 @@ let private docLines (indent: string) (docs: string) (tags: JSDocTagInfo list) =
         for tag in tags do
             match tag.Name with
             | "param" when tag.Text.IsSome ->
-                match tag.Text.Value.Trim().Split(' ', 2, StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries) with
+                match
+                    tag.Text.Value
+                        .Trim()
+                        .Split(' ', 2, StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries)
+                with
                 | [| name; text |] ->
                     match splitLines text with
-                    | [| single |] ->
-                        yield $"{indent}/// <param name=\"{name}\">{inlineCode single}</param>"
+                    | [| single |] -> yield $"{indent}/// <param name=\"{name}\">{inlineCode single}</param>"
                     | lines ->
                         yield $"{indent}/// <param name=\"{name}\">"
                         yield! docBody indent lines
                         yield $"{indent}/// </param>"
                 | _ -> ()
-            | "returns" | "return" when tag.Text.IsSome ->
-                match splitLines tag.Text.Value  with
-                | [||] as arr | arr when arr |> Array.forall String.IsNullOrEmpty -> ()
-                | [| single |] ->
-                    yield $"{indent}/// <returns>{inlineCode single}</returns>"
+            | "returns"
+            | "return" when tag.Text.IsSome ->
+                match splitLines tag.Text.Value with
+                | [||] as arr
+                | arr when arr |> Array.forall String.IsNullOrEmpty -> ()
+                | [| single |] -> yield $"{indent}/// <returns>{inlineCode single}</returns>"
                 | lines ->
                     yield $"{indent}/// <returns>"
                     yield! docBody indent lines
                     yield $"{indent}/// </returns>"
-            | "param" | "returns" | "return" -> ()
+            | "example" when tag.Text.IsSome ->
+                match splitLines tag.Text.Value with
+                | [||] as arr
+                | arr when arr |> Array.forall String.IsNullOrEmpty -> ()
+                | [| single |] ->
+                    yield $"{indent}/// <example><c>{xmlEscape single}</c></example>"
+                | lines ->
+                    yield $"{indent}/// <example>"
+                    yield! docBody indent [|
+                        yield "```"
+                        yield! lines
+                        yield "```"
+                    |]
+                    yield $"{indent}/// </example>"
+            | "default" | "defaultValue" when tag.Text.IsSome ->
+                match splitLines tag.Text.Value with
+                | [||] as arr
+                | arr when arr |> Array.forall String.IsNullOrEmpty -> ()
+                | [| single |] ->
+                    yield $"{indent}/// <defaultValue>{inlineCode single}</defaultValue>"
+                | lines -> 
+                    yield $"{indent}/// <defaultValue>"
+                    yield! docBody indent lines
+                    yield $"{indent}/// </defaultValue>"
+            | "default"
+            | "defaultValue"
+            | "example"
+            | "param"
+            | "returns"
+            | "return" -> ()
             | _ ->
-            let text = tag.Text |> ValueOption.defaultValue ""
+                let text = tag.Text |> ValueOption.defaultValue ""
 
-            match splitLines text with
-            | [| single |] ->
-                let content =
-                    if single = "" then
-                        $"@{tag.Name}"
-                    else
-                        $"@{tag.Name} {single}"
+                match splitLines text with
+                | [| single |] ->
+                    let content =
+                        if single = "" then
+                            $"@{tag.Name}"
+                        else
+                            $"@{tag.Name} {single}"
 
-                yield $"{indent}/// <remarks>{inlineCode content}</remarks>"
-            | lines ->
-                yield $"{indent}/// <remarks>"
-                yield $"{indent}/// @{tag.Name}"
-                yield! docBody indent lines
-                yield $"{indent}/// </remarks>"
+                    yield $"{indent}/// <remarks>{inlineCode content}</remarks>"
+                | lines ->
+                    yield $"{indent}/// <remarks>"
+                    yield $"{indent}/// @{tag.Name}"
+                    yield! docBody indent lines
+                    yield $"{indent}/// </remarks>"
     ]
 
 let private patternCases =
@@ -1362,14 +1398,21 @@ let private compilerLibChild (layout: CompilerLibLayout) =
 
 /// The compiler library's two families live under one recursive root module. References still
 /// use each child's canonical module name, regardless of whether that child is auto-opened.
-let private renderCompilerLib (layout: CompilerLibLayout) (groups: GroupModule list) (foreignTo: GroupModule -> Map<string, string>) =
+let private renderCompilerLib
+    (layout: CompilerLibLayout)
+    (groups: GroupModule list)
+    (foreignTo: GroupModule -> Map<string, string>)
+    =
     let rendered =
         groups
         |> List.choose (fun group ->
             group.CompilerLib
             |> Option.map (fun family ->
                 let moduleName = compilerLibModule layout family
-                let body, decls = renderBody { group with Module = moduleName } (foreignTo group) "    "
+
+                let body, decls =
+                    renderBody { group with Module = moduleName } (foreignTo group) "    "
+
                 family, body, decls))
         |> List.sortBy (fun (family, _, _) -> family)
 
@@ -1377,7 +1420,13 @@ let private renderCompilerLib (layout: CompilerLibLayout) (groups: GroupModule l
         rendered
         |> List.map (fun (family, body, _) ->
             let child, autoOpen = compilerLibChild layout family
-            let declaration = if autoOpen then [ "[<AutoOpen>]"; $"module {ident child} =" ] else [ $"module {ident child} =" ]
+
+            let declaration =
+                if autoOpen then
+                    [ "[<AutoOpen>]"; $"module {ident child} =" ]
+                else
+                    [ $"module {ident child} =" ]
+
             String.concat "\n" (declaration @ [ body ]))
         |> String.concat "\n\n"
 
@@ -1470,7 +1519,9 @@ let renderSources (modules: GroupModule list) : Pass<RenderModel> =
                     let owners =
                         written
                         |> List.collect (fun group ->
-                            group.Decls |> List.choose declName |> List.map (fun name -> name, effectiveModule group))
+                            group.Decls
+                            |> List.choose declName
+                            |> List.map (fun name -> name, effectiveModule group))
                         |> Map.ofList
 
                     let foreignTo (group: GroupModule) =
@@ -1490,7 +1541,12 @@ let renderSources (modules: GroupModule list) : Pass<RenderModel> =
                                 else
                                     $"groups/{group.Module}.fs"
 
-                            file, renderModule { group with Module = effectiveModule group } (foreignTo group))
+                            file,
+                            renderModule
+                                { group with
+                                    Module = effectiveModule group
+                                }
+                                (foreignTo group))
 
                     let namespaced =
                         ordered
@@ -1505,7 +1561,11 @@ let renderSources (modules: GroupModule list) : Pass<RenderModel> =
                     let compilerLibFile =
                         match compilerLib with
                         | [] -> []
-                        | groups -> [ $"groups/{compilerLibLayout.RootModule}.fs", renderCompilerLib compilerLibLayout groups foreignTo ]
+                        | groups ->
+                            [
+                                $"groups/{compilerLibLayout.RootModule}.fs",
+                                renderCompilerLib compilerLibLayout groups foreignTo
+                            ]
 
                     let files = files @ namespaced @ compilerLibFile
 

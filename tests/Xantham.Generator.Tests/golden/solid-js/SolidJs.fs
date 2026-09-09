@@ -706,18 +706,19 @@ type ValidComponent = U2<string, (obj -> JSXElement option)>
 /// <summary>
 /// Takes the props of the passed component and returns its type
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
+/// <code>
 /// ComponentProps&lt;typeof Portal&gt; // { mount?: Node; useShadow?: boolean; children: JSX.Element }
 /// ComponentProps&lt;'div'&gt; // JSX.HTMLAttributes&lt;HTMLDivElement&gt;
-/// </remarks>
+/// </code>
+/// </example>
 [<Erase>]
 type ComponentProps<'T> = private ComponentProps__ of obj
 
 /// <summary>
 /// Type of <c>props.ref</c>, for use in <c>Component</c> or <c>props</c> typing.
 /// </summary>
-/// <remarks>@example Component&lt;{ref: Ref&lt;Element&gt;}&gt;</remarks>
+/// <example><c>Component&lt;{ref: Ref&lt;Element&gt;}&gt;</c></example>
 type Ref<'T> = U2<'T, ('T -> unit)>
 
 [<Erase>]
@@ -888,7 +889,7 @@ type Exports =
     static member DEV: DEV option = jsNative
     /// <summary>
     /// Reactively transforms an array with a callback function - underlying helper for the <c>&lt;For&gt;</c> control flow
-    ///
+    /// <br /><br />
     /// similar to <c>Array.prototype.map</c>, but gets the index as accessor, transforms only values that changed and returns an accessor and reactively tracks changes to the list.
     /// </summary>
     /// <remarks>@description https://docs.solidjs.com/reference/reactive-utilities/map-array</remarks>
@@ -896,7 +897,7 @@ type Exports =
     static member mapArray<'T, 'U> (list: (unit -> U2<bool, 'T[]> option), mapFn: MapArray.MapFn<'T, 'U>, ?options: MapArray.Options) : (unit -> 'U[]) = jsNative
     /// <summary>
     /// Reactively maps arrays by index instead of value - underlying helper for the <c>&lt;Index&gt;</c> control flow
-    ///
+    /// <br /><br />
     /// similar to <c>Array.prototype.map</c>, but gets the value as an accessor, transforms only changed items of the original arrays anew and returns an accessor.
     /// </summary>
     /// <remarks>@description https://docs.solidjs.com/reference/reactive-utilities/index-array</remarks>
@@ -1155,7 +1156,7 @@ type Exports =
     /// <code lang="typescript">
     /// [Resource&lt;T&gt;, { mutate: Setter&lt;T&gt;, refetch: () =&gt; void }]
     /// </code>
-    ///
+    /// <br /><br />
     /// * Setting an <c>initialValue</c> in the options will mean that both the prev() accessor and the resource should never return undefined (if that is wanted, you need to extend the type with undefined)
     /// * <c>mutate</c> allows to manually overwrite the resource without calling the fetcher
     /// * <c>refetch</c> will re-run the fetcher without changing the source, and if called with a value, that value will be passed to the fetcher via the <c>refetching</c> property on the fetcher's second parameter
@@ -1187,7 +1188,7 @@ type Exports =
     /// <code lang="typescript">
     /// [Resource&lt;T&gt;, { mutate: Setter&lt;T&gt;, refetch: () =&gt; void }]
     /// </code>
-    ///
+    /// <br /><br />
     /// * Setting an <c>initialValue</c> in the options will mean that both the prev() accessor and the resource should never return undefined (if that is wanted, you need to extend the type with undefined)
     /// * <c>mutate</c> allows to manually overwrite the resource without calling the fetcher
     /// * <c>refetch</c> will re-run the fetcher without changing the source, and if called with a value, that value will be passed to the fetcher via the <c>refetching</c> property on the fetcher's second parameter
@@ -1219,7 +1220,7 @@ type Exports =
     /// <code lang="typescript">
     /// [Resource&lt;T&gt;, { mutate: Setter&lt;T&gt;, refetch: () =&gt; void }]
     /// </code>
-    ///
+    /// <br /><br />
     /// * Setting an <c>initialValue</c> in the options will mean that both the prev() accessor and the resource should never return undefined (if that is wanted, you need to extend the type with undefined)
     /// * <c>mutate</c> allows to manually overwrite the resource without calling the fetcher
     /// * <c>refetch</c> will re-run the fetcher without changing the source, and if called with a value, that value will be passed to the fetcher via the <c>refetching</c> property on the fetcher's second parameter
@@ -1251,7 +1252,7 @@ type Exports =
     /// <code lang="typescript">
     /// [Resource&lt;T&gt;, { mutate: Setter&lt;T&gt;, refetch: () =&gt; void }]
     /// </code>
-    ///
+    /// <br /><br />
     /// * Setting an <c>initialValue</c> in the options will mean that both the prev() accessor and the resource should never return undefined (if that is wanted, you need to extend the type with undefined)
     /// * <c>mutate</c> allows to manually overwrite the resource without calling the fetcher
     /// * <c>refetch</c> will re-run the fetcher without changing the source, and if called with a value, that value will be passed to the fetcher via the <c>refetching</c> property on the fetcher's second parameter
@@ -1286,14 +1287,13 @@ type Exports =
     /// <param name="fn">a function that receives its previous or the initial value, if set, and returns a new value used to react on a computation</param>
     /// <param name="options">
     /// allows to set a name in dev mode for debugging purposes, optional
-    ///
     /// <code lang="typescript">
     /// const isSelected = createSelector(selectedId);
     /// &lt;For each={list()}&gt;
     /// {(item) =&gt; &lt;li classList={{ active: isSelected(item.id) }}&gt;{item.name}&lt;/li&gt;}
     /// &lt;/For&gt;
     /// </code>
-    ///
+    /// <br /><br />
     /// This makes the operation O(2) instead of O(n).
     /// </param>
     /// <remarks>@description https://docs.solidjs.com/reference/secondary-primitives/create-selector</remarks>
@@ -1330,7 +1330,6 @@ type Exports =
     /// <param name="options">optional, allows deferred computation until at the end of the next change</param>
     /// <returns>
     /// an effect function that is passed into createEffect. For example:
-    ///
     /// <code lang="typescript">
     /// createEffect(on(a, (v) =&gt; console.log(v, b())));
     ///
@@ -1359,7 +1358,6 @@ type Exports =
     /// <param name="options">optional, allows deferred computation until at the end of the next change</param>
     /// <returns>
     /// an effect function that is passed into createEffect. For example:
-    ///
     /// <code lang="typescript">
     /// createEffect(on(a, (v) =&gt; console.log(v, b())));
     ///
@@ -1394,7 +1392,7 @@ type Exports =
     /// <param name="fn">boundary for the error</param>
     /// <param name="handler">
     /// an error handler that receives the error
-    ///
+    /// <br /><br />
     /// * If the error is thrown again inside the error handler, it will trigger the next available parent handler
     /// </param>
     /// <remarks>@description https://docs.solidjs.com/reference/reactive-utilities/catch-error</remarks>
@@ -1493,7 +1491,7 @@ type Exports =
     /// </remarks>
     /// <param name="fn">
     /// an error handler that receives the error
-    ///
+    /// <br /><br />
     /// * If the error is thrown again inside the error handler, it will trigger the next available parent handler
     /// </param>
     /// <remarks>@description https://docs.solidjs.com/reference/reactive-utilities/catch-error</remarks>
@@ -1513,7 +1511,7 @@ type Exports =
     static member createUniqueId () : string = jsNative
     /// <summary>
     /// Creates a list elements from a list
-    ///
+    /// <br /><br />
     /// it receives a map function as its child that receives a list element and an accessor with the index and returns a JSX-Element; if the list is empty, an optional fallback is returned:
     /// <code lang="typescript">
     /// &lt;For each={items} fallback={&lt;div&gt;No items&lt;/div&gt;}&gt;
@@ -1527,7 +1525,7 @@ type Exports =
     static member For<'T, 'U> (props: For.Props<'T, 'U>) : JSXElement option = jsNative
     /// <summary>
     /// Non-keyed iteration over a list creating elements from its items
-    ///
+    /// <br /><br />
     /// To be used if you have a list with fixed indices, but changing values.
     /// <code lang="typescript">
     /// &lt;Index each={items} fallback={&lt;div&gt;No items&lt;/div&gt;}&gt;
@@ -1593,7 +1591,7 @@ type Exports =
     static member resetErrorBoundaries () : unit = jsNative
     /// <summary>
     /// Catches uncaught errors inside components and renders a fallback content
-    ///
+    /// <br /><br />
     /// Also supports a callback form that passes the error and a reset function:
     /// <code lang="typescript">
     /// &lt;ErrorBoundary fallback={

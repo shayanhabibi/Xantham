@@ -669,12 +669,12 @@ module Es =
             /// <summary>
             /// Invokes the getter on the provided object.
             /// </summary>
-            /// <remarks>@example let value = context.access.get(instance);</remarks>
+            /// <example><c>let value = context.access.get(instance);</c></example>
             abstract get: ``object``: 'This -> 'Value
             /// <summary>
             /// Invokes the setter on the provided object.
             /// </summary>
-            /// <remarks>@example context.access.set(instance, value);</remarks>
+            /// <example><c>context.access.set(instance, value);</c></example>
             abstract set: ``object``: 'This * value: 'Value -> unit
             [<ParamObject; Emit("$0")>]
             static member Create (has: ('This -> bool), get: ('This -> 'Value), set: Action<'This, 'Value>) : Access<'This, 'Value> = jsNative
@@ -707,7 +707,7 @@ module Es =
             /// <summary>
             /// Invokes the getter on the provided object.
             /// </summary>
-            /// <remarks>@example let value = context.access.get(instance);</remarks>
+            /// <example><c>let value = context.access.get(instance);</c></example>
             abstract get: ``object``: 'This -> 'Value
             [<ParamObject; Emit("$0")>]
             static member Create (has: ('This -> bool), get: ('This -> 'Value)) : Access<'This, 'Value> = jsNative
@@ -727,7 +727,7 @@ module Es =
             /// <summary>
             /// Gets the current value of the method from the provided object.
             /// </summary>
-            /// <remarks>@example let fn = context.access.get(instance);</remarks>
+            /// <example><c>let fn = context.access.get(instance);</c></example>
             abstract get: ``object``: 'This -> 'Value
             [<ParamObject; Emit("$0")>]
             static member Create (has: ('This -> bool), get: ('This -> 'Value)) : Access<'This, 'Value> = jsNative
@@ -742,7 +742,7 @@ module Es =
             /// <summary>
             /// Invokes the setter on the provided object.
             /// </summary>
-            /// <remarks>@example context.access.set(instance, value);</remarks>
+            /// <example><c>context.access.set(instance, value);</c></example>
             abstract set: ``object``: 'This * value: 'Value -> unit
             [<ParamObject; Emit("$0")>]
             static member Create (has: ('This -> bool), set: Action<'This, 'Value>) : Access<'This, 'Value> = jsNative
@@ -778,9 +778,9 @@ module Es =
         /// <summary>
         /// Adds a callback to be invoked after the class definition has been finalized.
         /// </summary>
-        /// <remarks>
-        /// @example
-        /// <code lang="ts">
+        /// <example>
+        /// <code>
+        /// ```ts
         /// function customElement(name: string): ClassDecoratorFunction {
         ///   return (target, context) =&gt; {
         ///     context.addInitializer(function () {
@@ -792,7 +792,9 @@ module Es =
         /// @customElement("my-element")
         /// class MyElement {}
         /// </code>
-        /// </remarks>
+        /// <code>
+        /// </code>
+        /// </example>
         abstract addInitializer: initializer: (unit -> unit) -> unit
         abstract metadata: obj option
         [<ParamObject; Emit("$0")>]
@@ -834,9 +836,9 @@ module Es =
         /// static initializers are run (when decorating a <c>static</c> element), or before instance
         /// initializers are run (when decorating a non-<c>static</c> element).
         /// </summary>
-        /// <remarks>
-        /// @example
-        /// <code lang="ts">
+        /// <example>
+        /// <code>
+        /// ```ts
         /// const bound: ClassMethodDecoratorFunction = (value, context) {
         ///   if (context.private) throw new TypeError("Not supported on private methods.");
         ///   context.addInitializer(function () {
@@ -853,7 +855,9 @@ module Es =
         ///   }
         /// }
         /// </code>
-        /// </remarks>
+        /// <code>
+        /// </code>
+        /// </example>
         abstract addInitializer: initializer: (unit -> unit) -> unit
         abstract metadata: obj option
         [<ParamObject; Emit("$0")>]
@@ -991,12 +995,12 @@ module Es =
         /// <summary>
         /// Invokes the getter that was defined prior to decorator application.
         /// </summary>
-        /// <remarks>@example let value = target.get.call(instance);</remarks>
+        /// <example><c>let value = target.get.call(instance);</c></example>
         abstract get: unit -> 'Value
         /// <summary>
         /// Invokes the setter that was defined prior to decorator application.
         /// </summary>
-        /// <remarks>@example target.set.call(instance, value);</remarks>
+        /// <example><c>target.set.call(instance, value);</c></example>
         abstract set: value: 'Value -> unit
         [<ParamObject; Emit("$0")>]
         static member Create (get: (unit -> 'Value), set: ('Value -> unit)) : ClassAccessorDecoratorTarget<'This, 'Value> = jsNative
@@ -1615,7 +1619,7 @@ module Es =
 
     /// <summary>
     /// The type of <c>import.meta</c>.
-    ///
+    /// <br /><br />
     /// If you need to declare that a given property exists on <c>import.meta</c>,
     /// this type may be augmented via interface merging.
     /// </summary>
@@ -1623,7 +1627,7 @@ module Es =
 
     /// <summary>
     /// The type for the optional second argument to <c>import()</c>.
-    ///
+    /// <br /><br />
     /// If your host environment supports additional options, this type may be
     /// augmented via interface merging.
     /// </summary>

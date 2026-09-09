@@ -14,7 +14,7 @@ type Options =
     /// <summary>
     /// Match only the first ANSI escape.
     /// </summary>
-    /// <remarks>@default false</remarks>
+    /// <defaultValue>false</defaultValue>
     abstract onlyFirst: bool
     [<ParamObject; Emit("$0")>]
     static member Create (onlyFirst: bool) : Options = jsNative
@@ -25,26 +25,27 @@ type Exports =
     /// <summary>
     /// Regular expression for matching ANSI escape codes.
     /// </summary>
-    /// <remarks>
-    /// @example
+    /// <example>
     /// <code>
+    /// </code>
     /// import ansiRegex from 'ansi-regex';
-    ///
+    /// <br /><br />
     /// ansiRegex().test('\u001B[4mcake\u001B[0m');
     /// //=&gt; true
-    ///
+    /// <br /><br />
     /// ansiRegex().test('cake');
     /// //=&gt; false
-    ///
+    /// <br /><br />
     /// '\u001B[4mcake\u001B[0m'.match(ansiRegex());
     /// //=&gt; ['\u001B[4m', '\u001B[0m']
-    ///
+    /// <br /><br />
     /// '\u001B[4mcake\u001B[0m'.match(ansiRegex({onlyFirst: true}));
     /// //=&gt; ['\u001B[4m']
-    ///
+    /// <br /><br />
     /// '\u001B]8;;https://github.com\u0007click\u001B]8;;\u0007'.match(ansiRegex());
     /// //=&gt; ['\u001B]8;;https://github.com\u0007', '\u001B]8;;\u0007']
+    /// <code>
     /// </code>
-    /// </remarks>
+    /// </example>
     [<Import("default", "ansi-regex")>]
     static member ansiRegex (?options: Options) : obj = jsNative

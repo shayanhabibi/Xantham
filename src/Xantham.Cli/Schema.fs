@@ -82,8 +82,7 @@ let private configKeys =
           Defaults to false, which emits `NoInfer<T>` and reaches the support package's own abbreviation.")
 
             "CompilerLib",
-            ("compilerLib",
-             "The module layout and opening policy for the combined TypeScript compiler-library binding.")
+            ("compilerLib", "The module layout and opening policy for the combined TypeScript compiler-library binding.")
         ]
 
 /// The JSON key and description of one `CompilerLibConfig` field.
@@ -178,7 +177,8 @@ let private writeCompilerLib (w: Utf8JsonWriter) =
                 elif fieldType = typeof<bool> then
                     w.WriteString("type", "boolean")
                 else
-                    failwith $"CompilerLibConfig.{field.Name} has type {fieldType.FullName}, which Schema.fs writes no JSON form for")
+                    failwith
+                        $"CompilerLibConfig.{field.Name} has type {fieldType.FullName}, which Schema.fs writes no JSON form for")
 
     w.WriteEndObject()
 

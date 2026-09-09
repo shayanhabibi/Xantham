@@ -11,20 +11,20 @@ open Fable.Core.JS
 
 /// <summary>
 /// The <b><c>DOMException</c></b> interface represents an abnormal event (called an exception) that occurs as a result of calling a method or accessing a property of a web API. This is how error conditions are described in web APIs.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/DOMException">MDN Reference</a>
 /// </summary>
 [<Interface>]
 type DOMException =
     /// <summary>
     /// The <b><c>message</c></b> read-only property of the DOMException interface returns a string representing a message or description associated with the given error name.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/DOMException/message">MDN Reference</a>
     /// </summary>
     abstract message: string
     /// <summary>
     /// The <b><c>name</c></b> read-only property of the DOMException interface returns a string that contains one of the strings associated with an error name.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/DOMException/name">MDN Reference</a>
     /// </summary>
     abstract name: string
@@ -308,19 +308,19 @@ type WorkerGlobalScope =
     abstract EventTarget: EventTargetConstructor with get, set
     /// <summary>
     /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
     /// </summary>
     abstract addEventListener<'Type>: ``type``: 'Type * handler: U2<(U4<FetchEvent, QueueEvent<obj>, PromiseRejectionEvent, ScheduledEvent> -> unit), EventListenerObject<Event>> * ?options: U2<bool, EventTargetAddEventListenerOptions> -> unit
     /// <summary>
     /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
     /// </summary>
     abstract removeEventListener<'Type>: ``type``: 'Type * handler: U2<(U4<FetchEvent, QueueEvent<obj>, PromiseRejectionEvent, ScheduledEvent> -> unit), EventListenerObject<Event>> * ?options: U2<bool, EventTargetEventListenerOptions> -> unit
     /// <summary>
     /// The <b><c>dispatchEvent()</c></b> method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent">MDN Reference</a>
     /// </summary>
     abstract dispatchEvent: ``event``: U4<FetchEvent, PromiseRejectionEvent, QueueEvent<obj>, ScheduledEvent> -> bool
@@ -332,110 +332,110 @@ type Console =
     abstract ``assert``: condition: bool option * [<ParamArray>] data: obj[] -> unit
     /// <summary>
     /// The <b><c>console.clear()</c></b> static method clears the console if possible.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/console/clear_static">MDN Reference</a>
     /// </summary>
     abstract clear: unit -> unit
     /// <summary>
     /// The <b><c>console.count()</c></b> static method logs the number of times that this particular call to count() has been called.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/console/count_static">MDN Reference</a>
     /// </summary>
     abstract count: ?label: string -> unit
     /// <summary>
     /// The <b><c>console.countReset()</c></b> static method resets counter used with console.count().
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/console/countReset_static">MDN Reference</a>
     /// </summary>
     abstract countReset: ?label: string -> unit
     /// <summary>
     /// The <b><c>console.debug()</c></b> static method outputs a message to the console at the "debug" log level. The message is only displayed to the user if the console is configured to display debug output. In most cases, the log level is configured within the console UI. This log level might correspond to the Debug or Verbose log level.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/console/debug_static">MDN Reference</a>
     /// </summary>
     abstract debug: [<ParamArray>] data: obj[] -> unit
     /// <summary>
     /// The <b><c>console.dir()</c></b> static method displays a list of the properties of the specified JavaScript object. In browser consoles, the output is presented as a hierarchical listing with disclosure triangles that let you see the contents of child objects.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/console/dir_static">MDN Reference</a>
     /// </summary>
     abstract dir: ?item: obj * ?options: obj -> unit
     /// <summary>
     /// The <b><c>console.dirxml()</c></b> static method displays an interactive tree of the descendant elements of the specified XML/HTML element. If it is not possible to display as an element the JavaScript Object view is shown instead. The output is presented as a hierarchical listing of expandable nodes that let you see the contents of child nodes.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/console/dirxml_static">MDN Reference</a>
     /// </summary>
     abstract dirxml: [<ParamArray>] data: obj[] -> unit
     /// <summary>
     /// The <b><c>console.error()</c></b> static method outputs a message to the console at the "error" log level. The message is only displayed to the user if the console is configured to display error output. In most cases, the log level is configured within the console UI. The message may be formatted as an error, with red colors and call stack information.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/console/error_static">MDN Reference</a>
     /// </summary>
     abstract error: [<ParamArray>] data: obj[] -> unit
     /// <summary>
     /// The <b><c>console.group()</c></b> static method creates a new inline group in the Web console log, causing any subsequent console messages to be indented by an additional level, until console.groupEnd() is called.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/console/group_static">MDN Reference</a>
     /// </summary>
     abstract group: [<ParamArray>] data: obj[] -> unit
     /// <summary>
     /// The <b><c>console.groupCollapsed()</c></b> static method creates a new inline group in the console. Unlike console.group(), however, the new group is created collapsed. The user will need to use the disclosure button next to it to expand it, revealing the entries created in the group.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/console/groupCollapsed_static">MDN Reference</a>
     /// </summary>
     abstract groupCollapsed: [<ParamArray>] data: obj[] -> unit
     /// <summary>
     /// The <b><c>console.groupEnd()</c></b> static method exits the current inline group in the console. See Using groups in the console in the console documentation for details and examples.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/console/groupEnd_static">MDN Reference</a>
     /// </summary>
     abstract groupEnd: unit -> unit
     /// <summary>
     /// The <b><c>console.info()</c></b> static method outputs a message to the console at the "info" log level. The message is only displayed to the user if the console is configured to display info output. In most cases, the log level is configured within the console UI. The message may receive special formatting, such as a small "i" icon next to it.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/console/info_static">MDN Reference</a>
     /// </summary>
     abstract info: [<ParamArray>] data: obj[] -> unit
     /// <summary>
     /// The <b><c>console.log()</c></b> static method outputs a message to the console.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/console/log_static">MDN Reference</a>
     /// </summary>
     abstract log: [<ParamArray>] data: obj[] -> unit
     /// <summary>
     /// The <b><c>console.table()</c></b> static method displays tabular data as a table.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/console/table_static">MDN Reference</a>
     /// </summary>
     abstract table: ?tabularData: obj * ?properties: string[] -> unit
     /// <summary>
     /// The <b><c>console.time()</c></b> static method starts a timer you can use to track how long an operation takes. You give each timer a unique name, and may have up to 10,000 timers running on a given page. When you call console.timeEnd() with the same name, the browser will output the time, in milliseconds, that elapsed since the timer was started.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/console/time_static">MDN Reference</a>
     /// </summary>
     abstract time: ?label: string -> unit
     /// <summary>
     /// The <b><c>console.timeEnd()</c></b> static method stops a timer that was previously started by calling console.time().
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/console/timeEnd_static">MDN Reference</a>
     /// </summary>
     abstract timeEnd: ?label: string -> unit
     /// <summary>
     /// The <b><c>console.timeLog()</c></b> static method logs the current value of a timer that was previously started by calling console.time().
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/console/timeLog_static">MDN Reference</a>
     /// </summary>
     abstract timeLog: label: string option * [<ParamArray>] data: obj[] -> unit
     abstract timeStamp: ?label: string -> unit
     /// <summary>
     /// The <b><c>console.trace()</c></b> static method outputs a stack trace to the console.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/console/trace_static">MDN Reference</a>
     /// </summary>
     abstract trace: [<ParamArray>] data: obj[] -> unit
     /// <summary>
     /// The <b><c>console.warn()</c></b> static method outputs a warning message to the console at the "warning" log level. The message is only displayed to the user if the console is configured to display warning output. In most cases, the log level is configured within the console UI. The message may receive special formatting, such as yellow colors and a warning icon.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/console/warn_static">MDN Reference</a>
     /// </summary>
     abstract warn: [<ParamArray>] data: obj[] -> unit
@@ -618,19 +618,19 @@ type AbortControllerConstructor =
 type AbortSignalConstructor =
     /// <summary>
     /// The <b><c>AbortSignal.abort()</c></b> static method returns an AbortSignal that is already set as aborted (and which does not trigger an abort event).
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/AbortSignal/abort_static">MDN Reference</a>
     /// </summary>
     abstract abort: ?reason: obj -> AbortSignal
     /// <summary>
     /// The <b><c>AbortSignal.timeout()</c></b> static method returns an AbortSignal that will automatically abort after a specified time.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/AbortSignal/timeout_static">MDN Reference</a>
     /// </summary>
     abstract timeout: delay: float -> AbortSignal
     /// <summary>
     /// The <b><c>AbortSignal.any()</c></b> static method takes an iterable of abort signals and returns an AbortSignal. The returned abort signal is aborted when any of the input iterable abort signals are aborted. The abort reason will be set to the reason of the first signal that is aborted. If any of the given abort signals are already aborted then so will be the returned AbortSignal.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/AbortSignal/any_static">MDN Reference</a>
     /// </summary>
     abstract any: signals: AbortSignal[] -> AbortSignal
@@ -881,7 +881,7 @@ type ScheduledEventConstructor =
 /// <summary>
 /// The <b><c>ServiceWorkerGlobalScope</c></b> interface of the Service Worker API represents the global execution context of a service worker.
 /// Available only in secure contexts.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/ServiceWorkerGlobalScope">MDN Reference</a>
 /// </summary>
 type ServiceWorkerGlobalScope =
@@ -1036,25 +1036,25 @@ module Transformer =
 type URLConstructor =
     /// <summary>
     /// The <b><c>URL.canParse()</c></b> static method of the URL interface returns a boolean indicating whether or not an absolute URL, or a relative URL combined with a base URL, are parsable and valid.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URL/canParse_static">MDN Reference</a>
     /// </summary>
     abstract canParse: url: string * ?``base``: string -> bool
     /// <summary>
     /// The <b><c>URL.parse()</c></b> static method of the URL interface returns a newly created URL object representing the URL defined by the parameters.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URL/parse_static">MDN Reference</a>
     /// </summary>
     abstract parse: url: string * ?``base``: string -> URL option
     /// <summary>
     /// The <b><c>createObjectURL()</c></b> static method of the URL interface creates a string containing a blob URL pointing to the object given in the parameter.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URL/createObjectURL_static">MDN Reference</a>
     /// </summary>
     abstract createObjectURL: ``object``: U2<Blob, File> -> string
     /// <summary>
     /// The <b><c>revokeObjectURL()</c></b> static method of the URL interface releases an existing object URL which was previously created by calling URL.createObjectURL().
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URL/revokeObjectURL_static">MDN Reference</a>
     /// </summary>
     abstract revokeObjectURL: object_url: string -> unit
@@ -1873,44 +1873,44 @@ type AnalyticsEngineDataPoint =
 
 /// <summary>
 /// The <b><c>Event</c></b> interface represents an event which takes place on an EventTarget.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/Event">MDN Reference</a>
 /// </summary>
 [<Interface>]
 type Event =
     /// <summary>
     /// The <b><c>type</c></b> read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Event/type">MDN Reference</a>
     /// </summary>
     abstract ``type``: string
     /// <summary>
     /// The <b><c>eventPhase</c></b> read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Event/eventPhase">MDN Reference</a>
     /// </summary>
     abstract eventPhase: float
     /// <summary>
     /// The read-only <b><c>composed</c></b> property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Event/composed">MDN Reference</a>
     /// </summary>
     abstract composed: bool
     /// <summary>
     /// The <b><c>bubbles</c></b> read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Event/bubbles">MDN Reference</a>
     /// </summary>
     abstract bubbles: bool
     /// <summary>
     /// The <b><c>cancelable</c></b> read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Event/cancelable">MDN Reference</a>
     /// </summary>
     abstract cancelable: bool
     /// <summary>
     /// The <b><c>defaultPrevented</c></b> read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented">MDN Reference</a>
     /// </summary>
     abstract defaultPrevented: bool
@@ -1921,13 +1921,13 @@ type Event =
     abstract returnValue: bool
     /// <summary>
     /// The <b><c>currentTarget</c></b> read-only property of the Event interface identifies the element to which the event handler has been attached.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Event/currentTarget">MDN Reference</a>
     /// </summary>
     abstract currentTarget: EventTarget<Record<string, Event>> option
     /// <summary>
     /// The read-only <b><c>target</c></b> property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Event/target">MDN Reference</a>
     /// </summary>
     abstract target: EventTarget<Record<string, Event>> option
@@ -1938,13 +1938,13 @@ type Event =
     abstract srcElement: EventTarget<Record<string, Event>> option
     /// <summary>
     /// The <b><c>timeStamp</c></b> read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Event/timeStamp">MDN Reference</a>
     /// </summary>
     abstract timeStamp: float
     /// <summary>
     /// The <b><c>isTrusted</c></b> read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Event/isTrusted">MDN Reference</a>
     /// </summary>
     abstract isTrusted: bool
@@ -1956,25 +1956,25 @@ type Event =
     abstract cancelBubble: bool with get, set
     /// <summary>
     /// The <b><c>stopImmediatePropagation()</c></b> method of the Event interface prevents other listeners of the same event from being called.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Event/stopImmediatePropagation">MDN Reference</a>
     /// </summary>
     abstract stopImmediatePropagation: unit -> unit
     /// <summary>
     /// The <b><c>preventDefault()</c></b> method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Event/preventDefault">MDN Reference</a>
     /// </summary>
     abstract preventDefault: unit -> unit
     /// <summary>
     /// The <b><c>stopPropagation()</c></b> method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Event/stopPropagation">MDN Reference</a>
     /// </summary>
     abstract stopPropagation: unit -> unit
     /// <summary>
     /// The <b><c>composedPath()</c></b> method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Event/composedPath">MDN Reference</a>
     /// </summary>
     abstract composedPath: unit -> EventTarget<Record<string, Event>>[]
@@ -2009,26 +2009,26 @@ type EventListenerOrEventListenerObject<'EventType when 'EventType :> Event> = U
 
 /// <summary>
 /// The <b><c>EventTarget</c></b> interface is implemented by objects that can receive events and may have listeners for them. In other words, any target of events implements the three methods associated with this interface.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget">MDN Reference</a>
 /// </summary>
 [<Interface>]
 type EventTarget<'EventMap> =
     /// <summary>
     /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
     /// </summary>
     abstract addEventListener<'R>: ``type``: typekeyof<'EventMap, 'R> * handler: U2<('R -> unit), EventListenerObject<Event>> * ?options: U2<bool, EventTargetAddEventListenerOptions> -> unit
     /// <summary>
     /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
     /// </summary>
     abstract removeEventListener<'R>: ``type``: typekeyof<'EventMap, 'R> * handler: U2<('R -> unit), EventListenerObject<Event>> * ?options: U2<bool, EventTargetEventListenerOptions> -> unit
     /// <summary>
     /// The <b><c>dispatchEvent()</c></b> method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent">MDN Reference</a>
     /// </summary>
     abstract dispatchEvent: ``event``: Event -> bool
@@ -2058,20 +2058,20 @@ type EventTargetHandlerObject =
 
 /// <summary>
 /// The <b><c>AbortController</c></b> interface represents a controller object that allows you to abort one or more Web requests as and when desired.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/AbortController">MDN Reference</a>
 /// </summary>
 [<Interface>]
 type AbortController =
     /// <summary>
     /// The <b><c>signal</c></b> read-only property of the AbortController interface returns an AbortSignal object instance, which can be used to communicate with/abort an asynchronous operation as desired.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/AbortController/signal">MDN Reference</a>
     /// </summary>
     abstract signal: AbortSignal
     /// <summary>
     /// The <b><c>abort()</c></b> method of the AbortController interface aborts an asynchronous operation before it has completed. This is able to abort fetch requests, the consumption of any response bodies, or streams.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/AbortController/abort">MDN Reference</a>
     /// </summary>
     abstract abort: ?reason: obj -> unit
@@ -2080,7 +2080,7 @@ type AbortController =
 
 /// <summary>
 /// The <b><c>AbortSignal</c></b> interface represents a signal object that allows you to communicate with an asynchronous operation (such as a fetch request) and abort it if required via an AbortController object.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/AbortSignal">MDN Reference</a>
 /// </summary>
 [<Interface>]
@@ -2088,32 +2088,32 @@ type AbortSignal =
     inherit EventTarget<Record<string, Event>>
     /// <summary>
     /// The <b><c>aborted</c></b> read-only property returns a value that indicates whether the asynchronous operations the signal is communicating with are aborted (true) or not (false).
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/AbortSignal/aborted">MDN Reference</a>
     /// </summary>
     abstract aborted: bool
     /// <summary>
     /// The <b><c>reason</c></b> read-only property returns a JavaScript value that indicates the abort reason.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/AbortSignal/reason">MDN Reference</a>
     /// </summary>
     abstract reason: obj
     abstract onabort: obj with get, set
     /// <summary>
     /// The <b><c>throwIfAborted()</c></b> method throws the signal's abort reason if the signal has been aborted; otherwise it does nothing.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/AbortSignal/throwIfAborted">MDN Reference</a>
     /// </summary>
     abstract throwIfAborted: unit -> unit
     /// <summary>
     /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
     /// </summary>
     abstract addEventListener<'Type>: ``type``: 'Type * handler: U2<(Event -> unit), EventListenerObject<Event>> * ?options: U2<bool, EventTargetAddEventListenerOptions> -> unit
     /// <summary>
     /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
     /// </summary>
     abstract removeEventListener<'Type>: ``type``: 'Type * handler: U2<(Event -> unit), EventListenerObject<Event>> * ?options: U2<bool, EventTargetEventListenerOptions> -> unit
@@ -2121,21 +2121,21 @@ type AbortSignal =
     static member Create (aborted: bool, reason: obj, onabort: obj, throwIfAborted: (unit -> unit), addEventListener: Action<'Type, U2<(Event -> unit), EventListenerObject<Event>>, U2<bool, EventTargetAddEventListenerOptions> option>, removeEventListener: Action<'Type, U2<(Event -> unit), EventListenerObject<Event>>, U2<bool, EventTargetEventListenerOptions> option>, dispatchEvent: (Event -> bool)) : AbortSignal = jsNative
     /// <summary>
     /// The <b><c>AbortSignal.abort()</c></b> static method returns an AbortSignal that is already set as aborted (and which does not trigger an abort event).
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/AbortSignal/abort_static">MDN Reference</a>
     /// </summary>
     [<Global("AbortSignal.abort")>]
     static member abort (?reason: obj) : AbortSignal = jsNative
     /// <summary>
     /// The <b><c>AbortSignal.timeout()</c></b> static method returns an AbortSignal that will automatically abort after a specified time.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/AbortSignal/timeout_static">MDN Reference</a>
     /// </summary>
     [<Global("AbortSignal.timeout")>]
     static member timeout (delay: float) : AbortSignal = jsNative
     /// <summary>
     /// The <b><c>AbortSignal.any()</c></b> static method takes an iterable of abort signals and returns an AbortSignal. The returned abort signal is aborted when any of the input iterable abort signals are aborted. The abort reason will be set to the reason of the first signal that is aborted. If any of the given abort signals are already aborted then so will be the returned AbortSignal.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/AbortSignal/any_static">MDN Reference</a>
     /// </summary>
     [<Global("AbortSignal.any")>]
@@ -2143,7 +2143,7 @@ type AbortSignal =
 
 /// <summary>
 /// The <b><c>Scheduler</c></b> interface of the Prioritized Task Scheduling API provides methods for scheduling prioritized tasks.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/Scheduler">MDN Reference</a>
 /// </summary>
 [<Interface>]
@@ -2160,7 +2160,7 @@ type SchedulerWaitOptions =
 
 /// <summary>
 /// The <b><c>ExtendableEvent</c></b> interface extends the lifetime of the install and activate events dispatched on the global scope as part of the service worker lifecycle. This ensures that any functional events (like FetchEvent) are not dispatched until it upgrades database schemas and deletes the outdated cache entries.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/ExtendableEvent">MDN Reference</a>
 /// </summary>
 [<Interface>]
@@ -2168,7 +2168,7 @@ type ExtendableEvent =
     inherit Event
     /// <summary>
     /// The <b><c>ExtendableEvent.waitUntil()</c></b> method tells the event dispatcher that work is ongoing. It can also be used to detect whether that work was successful. In service workers, waitUntil() tells the browser that work is ongoing until the promise settles, and it shouldn't terminate the service worker if it wants that work to complete.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ExtendableEvent/waitUntil">MDN Reference</a>
     /// </summary>
     abstract waitUntil: promise: JS.Promise<obj> -> unit
@@ -2185,7 +2185,7 @@ type ExtendableEvent =
 
 /// <summary>
 /// The <b><c>CustomEvent</c></b> interface can be used to attach custom data to an event generated by an application.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/CustomEvent">MDN Reference</a>
 /// </summary>
 [<Interface>]
@@ -2193,7 +2193,7 @@ type CustomEvent<'T> =
     inherit Event
     /// <summary>
     /// The read-only <b><c>detail</c></b> property of the CustomEvent interface returns any data passed when initializing the event.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/CustomEvent/detail">MDN Reference</a>
     /// </summary>
     abstract detail: 'T
@@ -2219,50 +2219,50 @@ type CustomEventCustomEventInit =
 
 /// <summary>
 /// The <b><c>Blob</c></b> interface represents a blob, which is a file-like object of immutable, raw data; they can be read as text or binary data, or converted into a ReadableStream so its methods can be used for processing the data.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/Blob">MDN Reference</a>
 /// </summary>
 [<Interface>]
 type Blob =
     /// <summary>
     /// The <b><c>size</c></b> read-only property of the Blob interface returns the size of the Blob or File in bytes.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Blob/size">MDN Reference</a>
     /// </summary>
     abstract size: float
     /// <summary>
     /// The <b><c>type</c></b> read-only property of the Blob interface returns the MIME type of the file.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Blob/type">MDN Reference</a>
     /// </summary>
     abstract ``type``: string
     /// <summary>
     /// The <b><c>slice()</c></b> method of the Blob interface creates and returns a new Blob object which contains data from a subset of the blob on which it's called.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Blob/slice">MDN Reference</a>
     /// </summary>
     abstract slice: ?start: float * ?``end``: float * ?``type``: string -> Blob
     /// <summary>
     /// The <b><c>arrayBuffer()</c></b> method of the Blob interface returns a Promise that resolves with the contents of the blob as binary data contained in an ArrayBuffer.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Blob/arrayBuffer">MDN Reference</a>
     /// </summary>
     abstract arrayBuffer: unit -> JS.Promise<JS.ArrayBuffer>
     /// <summary>
     /// The <b><c>bytes()</c></b> method of the Blob interface returns a Promise that resolves with a Uint8Array containing the contents of the blob as an array of bytes.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Blob/bytes">MDN Reference</a>
     /// </summary>
     abstract bytes: unit -> JS.Promise<JS.Uint8Array>
     /// <summary>
     /// The <b><c>text()</c></b> method of the Blob interface returns a Promise that resolves with a string containing the contents of the blob, interpreted as UTF-8.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Blob/text">MDN Reference</a>
     /// </summary>
     abstract text: unit -> JS.Promise<string>
     /// <summary>
     /// The <b><c>stream()</c></b> method of the Blob interface returns a ReadableStream which upon reading returns the data contained within the Blob.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Blob/stream">MDN Reference</a>
     /// </summary>
     abstract stream: unit -> ReadableStream<obj>
@@ -2277,7 +2277,7 @@ type BlobOptions =
 
 /// <summary>
 /// The <b><c>File</c></b> interface provides information about files and allows JavaScript in a web page to access their content.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/File">MDN Reference</a>
 /// </summary>
 [<Interface>]
@@ -2285,13 +2285,13 @@ type File =
     inherit Blob
     /// <summary>
     /// The <b><c>name</c></b> read-only property of the File interface returns the name of the file represented by a File object. For security reasons, the path is excluded from this property.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/File/name">MDN Reference</a>
     /// </summary>
     abstract name: string
     /// <summary>
     /// The <b><c>lastModified</c></b> read-only property of the File interface provides the last modified date of the file as the number of milliseconds since the Unix epoch (January 1, 1970 at midnight). Files without a known last modified date return the current date.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/File/lastModified">MDN Reference</a>
     /// </summary>
     abstract lastModified: float
@@ -2307,14 +2307,14 @@ type FileOptions =
 
 /// <summary>
 /// The Cache API allows fine grained control of reading and writing from the Cloudflare global network cache.
-///
+/// <br /><br />
 /// <a href="https://developers.cloudflare.com/workers/runtime-apis/cache/">Cloudflare Docs Reference</a>
 /// </summary>
 [<Interface>]
 type CacheStorage =
     /// <summary>
     /// The <b><c>open()</c></b> method of the CacheStorage interface returns a Promise that resolves to the Cache object matching the cacheName.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/CacheStorage/open">MDN Reference</a>
     /// </summary>
     abstract ``open``: cacheName: string -> JS.Promise<Cache>
@@ -2324,7 +2324,7 @@ type CacheStorage =
 
 /// <summary>
 /// The Cache API allows fine grained control of reading and writing from the Cloudflare global network cache.
-///
+/// <br /><br />
 /// <a href="https://developers.cloudflare.com/workers/runtime-apis/cache/">Cloudflare Docs Reference</a>
 /// </summary>
 [<Interface>]
@@ -2346,7 +2346,7 @@ type CacheQueryOptions =
 /// The Workers runtime implements the full surface of this API, but with some differences in
 /// the <a href="https://developers.cloudflare.com/workers/runtime-apis/web-crypto/#supported-algorithms">supported algorithms</a>
 /// compared to those implemented in most browsers.
-///
+/// <br /><br />
 /// <a href="https://developers.cloudflare.com/workers/runtime-apis/web-crypto/">Cloudflare Docs Reference</a>
 /// </summary>
 [<Interface>]
@@ -2354,20 +2354,20 @@ type Crypto =
     /// <summary>
     /// The <b><c>Crypto.subtle</c></b> read-only property returns a SubtleCrypto which can then be used to perform low-level cryptographic operations.
     /// Available only in secure contexts.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Crypto/subtle">MDN Reference</a>
     /// </summary>
     abstract subtle: SubtleCrypto
     /// <summary>
     /// The <b><c>Crypto.getRandomValues()</c></b> method lets you get cryptographically strong random values. The array given as the parameter is filled with random numbers (random in its cryptographic meaning).
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Crypto/getRandomValues">MDN Reference</a>
     /// </summary>
     abstract getRandomValues<'T>: buffer: 'T -> 'T
     /// <summary>
     /// The <b><c>randomUUID()</c></b> method of the Crypto interface is used to generate a v4 UUID using a cryptographically secure random number generator.
     /// Available only in secure contexts.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Crypto/randomUUID">MDN Reference</a>
     /// </summary>
     abstract randomUUID: unit -> string
@@ -2382,80 +2382,80 @@ type DigestStreamConstructor =
 /// <summary>
 /// The <b><c>SubtleCrypto</c></b> interface of the Web Crypto API provides a number of low-level cryptographic functions.
 /// Available only in secure contexts.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/SubtleCrypto">MDN Reference</a>
 /// </summary>
 [<Interface>]
 type SubtleCrypto =
     /// <summary>
     /// The <b><c>encrypt()</c></b> method of the SubtleCrypto interface encrypts data.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/SubtleCrypto/encrypt">MDN Reference</a>
     /// </summary>
     abstract encrypt: algorithm: U2<string, SubtleCryptoEncryptAlgorithm> * key: CryptoKey * plainText: U2<JS.ArrayBuffer, JS.ArrayBufferView> -> JS.Promise<JS.ArrayBuffer>
     /// <summary>
     /// The <b><c>decrypt()</c></b> method of the SubtleCrypto interface decrypts some encrypted data. It takes as arguments a key to decrypt with, some optional extra parameters, and the data to decrypt (also known as "ciphertext"). It returns a Promise which will be fulfilled with the decrypted data (also known as "plaintext").
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/SubtleCrypto/decrypt">MDN Reference</a>
     /// </summary>
     abstract decrypt: algorithm: U2<string, SubtleCryptoEncryptAlgorithm> * key: CryptoKey * cipherText: U2<JS.ArrayBuffer, JS.ArrayBufferView> -> JS.Promise<JS.ArrayBuffer>
     /// <summary>
     /// The <b><c>sign()</c></b> method of the SubtleCrypto interface generates a digital signature.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/SubtleCrypto/sign">MDN Reference</a>
     /// </summary>
     abstract sign: algorithm: U2<string, SubtleCryptoSignAlgorithm> * key: CryptoKey * data: U2<JS.ArrayBuffer, JS.ArrayBufferView> -> JS.Promise<JS.ArrayBuffer>
     /// <summary>
     /// The <b><c>verify()</c></b> method of the SubtleCrypto interface verifies a digital signature.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/SubtleCrypto/verify">MDN Reference</a>
     /// </summary>
     abstract verify: algorithm: U2<string, SubtleCryptoSignAlgorithm> * key: CryptoKey * signature: U2<JS.ArrayBuffer, JS.ArrayBufferView> * data: U2<JS.ArrayBuffer, JS.ArrayBufferView> -> JS.Promise<bool>
     /// <summary>
     /// The <b><c>digest()</c></b> method of the SubtleCrypto interface generates a digest of the given data, using the specified hash function. A digest is a short fixed-length value derived from some variable-length input. Cryptographic digests should exhibit collision-resistance, meaning that it's hard to come up with two different inputs that have the same digest value.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/SubtleCrypto/digest">MDN Reference</a>
     /// </summary>
     abstract digest: algorithm: U2<string, SubtleCryptoHashAlgorithm> * data: U2<JS.ArrayBuffer, JS.ArrayBufferView> -> JS.Promise<JS.ArrayBuffer>
     /// <summary>
     /// The <b><c>generateKey()</c></b> method of the SubtleCrypto interface is used to generate a new key (for symmetric algorithms) or key pair (for public-key algorithms).
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/SubtleCrypto/generateKey">MDN Reference</a>
     /// </summary>
     abstract generateKey: algorithm: U2<string, SubtleCryptoGenerateKeyAlgorithm> * extractable: bool * keyUsages: string[] -> JS.Promise<U2<CryptoKey, CryptoKeyPair>>
     /// <summary>
     /// The <b><c>deriveKey()</c></b> method of the SubtleCrypto interface can be used to derive a secret key from a master key.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/SubtleCrypto/deriveKey">MDN Reference</a>
     /// </summary>
     abstract deriveKey: algorithm: U2<string, SubtleCryptoDeriveKeyAlgorithm> * baseKey: CryptoKey * derivedKeyAlgorithm: U2<string, SubtleCryptoImportKeyAlgorithm> * extractable: bool * keyUsages: string[] -> JS.Promise<CryptoKey>
     /// <summary>
     /// The <b><c>deriveBits()</c></b> method of the SubtleCrypto interface can be used to derive an array of bits from a base key.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/SubtleCrypto/deriveBits">MDN Reference</a>
     /// </summary>
     abstract deriveBits: algorithm: U2<string, SubtleCryptoDeriveKeyAlgorithm> * baseKey: CryptoKey * ?length: float -> JS.Promise<JS.ArrayBuffer>
     /// <summary>
     /// The <b><c>importKey()</c></b> method of the SubtleCrypto interface imports a key: that is, it takes as input a key in an external, portable format and gives you a CryptoKey object that you can use in the Web Crypto API.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/SubtleCrypto/importKey">MDN Reference</a>
     /// </summary>
     abstract importKey: format: string * keyData: U3<JS.ArrayBuffer, JS.ArrayBufferView, JsonWebKey> * algorithm: U2<string, SubtleCryptoImportKeyAlgorithm> * extractable: bool * keyUsages: string[] -> JS.Promise<CryptoKey>
     /// <summary>
     /// The <b><c>exportKey()</c></b> method of the SubtleCrypto interface exports a key: that is, it takes as input a CryptoKey object and gives you the key in an external, portable format.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/SubtleCrypto/exportKey">MDN Reference</a>
     /// </summary>
     abstract exportKey: format: string * key: CryptoKey -> JS.Promise<U2<JS.ArrayBuffer, JsonWebKey>>
     /// <summary>
     /// The <b><c>wrapKey()</c></b> method of the SubtleCrypto interface "wraps" a key. This means that it exports the key in an external, portable format, then encrypts the exported key. Wrapping a key helps protect it in untrusted environments, such as inside an otherwise unprotected data store or in transmission over an unprotected network.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/SubtleCrypto/wrapKey">MDN Reference</a>
     /// </summary>
     abstract wrapKey: format: string * key: CryptoKey * wrappingKey: CryptoKey * wrapAlgorithm: U2<string, SubtleCryptoEncryptAlgorithm> -> JS.Promise<JS.ArrayBuffer>
     /// <summary>
     /// The <b><c>unwrapKey()</c></b> method of the SubtleCrypto interface "unwraps" a key. This means that it takes as its input a key that has been exported and then encrypted (also called "wrapped"). It decrypts the key and then imports it, returning a CryptoKey object that can be used in the Web Crypto API.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/SubtleCrypto/unwrapKey">MDN Reference</a>
     /// </summary>
     abstract unwrapKey: format: string * wrappedKey: U2<JS.ArrayBuffer, JS.ArrayBufferView> * unwrappingKey: CryptoKey * unwrapAlgorithm: U2<string, SubtleCryptoEncryptAlgorithm> * unwrappedKeyAlgorithm: U2<string, SubtleCryptoImportKeyAlgorithm> * extractable: bool * keyUsages: string[] -> JS.Promise<CryptoKey>
@@ -2466,32 +2466,32 @@ type SubtleCrypto =
 /// <summary>
 /// The <b><c>CryptoKey</c></b> interface of the Web Crypto API represents a cryptographic key obtained from one of the SubtleCrypto methods generateKey(), deriveKey(), importKey(), or unwrapKey().
 /// Available only in secure contexts.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/CryptoKey">MDN Reference</a>
 /// </summary>
 [<Interface>]
 type CryptoKey =
     /// <summary>
     /// The read-only <b><c>type</c></b> property of the CryptoKey interface indicates which kind of key is represented by the object. It can have the following values:
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/CryptoKey/type">MDN Reference</a>
     /// </summary>
     abstract ``type``: string
     /// <summary>
     /// The read-only <b><c>extractable</c></b> property of the CryptoKey interface indicates whether or not the key may be extracted using SubtleCrypto.exportKey() or SubtleCrypto.wrapKey().
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/CryptoKey/extractable">MDN Reference</a>
     /// </summary>
     abstract extractable: bool
     /// <summary>
     /// The read-only <b><c>algorithm</c></b> property of the CryptoKey interface returns an object describing the algorithm for which this key can be used, and any associated extra parameters.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/CryptoKey/algorithm">MDN Reference</a>
     /// </summary>
     abstract algorithm: U6<CryptoKeyAesKeyAlgorithm, CryptoKeyArbitraryKeyAlgorithm, CryptoKeyEllipticKeyAlgorithm, CryptoKeyHmacKeyAlgorithm, CryptoKeyKeyAlgorithm, CryptoKeyRsaKeyAlgorithm>
     /// <summary>
     /// The read-only <b><c>usages</c></b> property of the CryptoKey interface indicates what can be done with the key.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/CryptoKey/usages">MDN Reference</a>
     /// </summary>
     abstract usages: string[]
@@ -2648,7 +2648,7 @@ type DigestStream =
     abstract bytesWritten: U2<float, bigint>
     /// <summary>
     /// The <b><c>getWriter()</c></b> method of the WritableStream interface returns a new instance of WritableStreamDefaultWriter and locks the stream to that instance. While the stream is locked, no other writer can be acquired until this one is released.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStream/getWriter">MDN Reference</a>
     /// </summary>
     abstract getWriter: unit -> WritableStreamDefaultWriter<U2<JS.ArrayBuffer, JS.ArrayBufferView>>
@@ -2663,14 +2663,14 @@ type DigestStreamOptions =
 
 /// <summary>
 /// The <b><c>TextDecoder</c></b> interface represents a decoder for a specific text encoding, such as UTF-8, ISO-8859-2, or GBK. A decoder takes an array of bytes as input and returns a JavaScript string.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/TextDecoder">MDN Reference</a>
 /// </summary>
 [<Interface>]
 type TextDecoder =
     /// <summary>
     /// The <b><c>TextDecoder.decode()</c></b> method returns a string containing text decoded from the buffer passed as a parameter.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/TextDecoder/decode">MDN Reference</a>
     /// </summary>
     abstract decode: ?input: U2<JS.ArrayBuffer, JS.ArrayBufferView> * ?options: TextDecoderDecodeOptions -> string
@@ -2682,20 +2682,20 @@ type TextDecoder =
 
 /// <summary>
 /// The <b><c>TextEncoder</c></b> interface enables you to encode a JavaScript string using UTF-8.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/TextEncoder">MDN Reference</a>
 /// </summary>
 [<Interface>]
 type TextEncoder =
     /// <summary>
     /// The <b><c>TextEncoder.encode()</c></b> method takes a string as input, and returns a Uint8Array containing the string encoded using UTF-8.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/TextEncoder/encode">MDN Reference</a>
     /// </summary>
     abstract encode: ?input: string -> JS.Uint8Array
     /// <summary>
     /// The <b><c>TextEncoder.encodeInto()</c></b> method takes a string to encode and a destination Uint8Array to put resulting UTF-8 encoded text into, and returns an object indicating the progress of the encoding. This is potentially more performant than the encode() method — especially when the target buffer is a view into a Wasm heap.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/TextEncoder/encodeInto">MDN Reference</a>
     /// </summary>
     abstract encodeInto: input: string * buffer: JS.Uint8Array -> TextEncoderEncodeIntoResult
@@ -2725,7 +2725,7 @@ type TextEncoderEncodeIntoResult =
 
 /// <summary>
 /// The <b><c>ErrorEvent</c></b> interface represents events providing information related to errors in scripts or in files.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/ErrorEvent">MDN Reference</a>
 /// </summary>
 [<Interface>]
@@ -2733,31 +2733,31 @@ type ErrorEvent =
     inherit Event
     /// <summary>
     /// The <b><c>filename</c></b> read-only property of the ErrorEvent interface returns a string containing the name of the script file in which the error occurred.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ErrorEvent/filename">MDN Reference</a>
     /// </summary>
     abstract filename: string
     /// <summary>
     /// The <b><c>message</c></b> read-only property of the ErrorEvent interface returns a string containing a human-readable error message describing the problem.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ErrorEvent/message">MDN Reference</a>
     /// </summary>
     abstract message: string
     /// <summary>
     /// The <b><c>lineno</c></b> read-only property of the ErrorEvent interface returns an integer containing the line number of the script file on which the error occurred.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ErrorEvent/lineno">MDN Reference</a>
     /// </summary>
     abstract lineno: float
     /// <summary>
     /// The <b><c>colno</c></b> read-only property of the ErrorEvent interface returns an integer containing the column number of the script file on which the error occurred.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ErrorEvent/colno">MDN Reference</a>
     /// </summary>
     abstract colno: float
     /// <summary>
     /// The <b><c>error</c></b> read-only property of the ErrorEvent interface returns a JavaScript value, such as an Error or DOMException, representing the error associated with this event.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ErrorEvent/error">MDN Reference</a>
     /// </summary>
     abstract error: obj
@@ -2787,7 +2787,7 @@ type ErrorEventErrorEventInit =
 
 /// <summary>
 /// The <b><c>MessageEvent</c></b> interface represents a message received by a target object.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/MessageEvent">MDN Reference</a>
 /// </summary>
 [<Interface>]
@@ -2795,31 +2795,31 @@ type MessageEvent =
     inherit Event
     /// <summary>
     /// The <b><c>data</c></b> read-only property of the MessageEvent interface represents the data sent by the message emitter.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/MessageEvent/data">MDN Reference</a>
     /// </summary>
     abstract data: obj
     /// <summary>
     /// The <b><c>origin</c></b> read-only property of the MessageEvent interface is a string representing the origin of the message emitter.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/MessageEvent/origin">MDN Reference</a>
     /// </summary>
     abstract origin: string option
     /// <summary>
     /// The <b><c>lastEventId</c></b> read-only property of the MessageEvent interface is a string representing a unique ID for the event.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/MessageEvent/lastEventId">MDN Reference</a>
     /// </summary>
     abstract lastEventId: string
     /// <summary>
     /// The <b><c>source</c></b> read-only property of the MessageEvent interface is a MessageEventSource (which can be a WindowProxy, MessagePort, or ServiceWorker object) representing the message emitter.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/MessageEvent/source">MDN Reference</a>
     /// </summary>
     abstract source: MessagePort option
     /// <summary>
     /// The <b><c>ports</c></b> read-only property of the MessageEvent interface is an array of MessagePort objects containing all MessagePort objects sent with the message, in order.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/MessageEvent/ports">MDN Reference</a>
     /// </summary>
     abstract ports: MessagePort[]
@@ -2849,7 +2849,7 @@ type MessageEventInit =
 
 /// <summary>
 /// The <b><c>PromiseRejectionEvent</c></b> interface represents events which are sent to the global script context when JavaScript Promises are rejected. These events are particularly useful for telemetry and debugging purposes.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/PromiseRejectionEvent">MDN Reference</a>
 /// </summary>
 [<Interface>]
@@ -2857,13 +2857,13 @@ type PromiseRejectionEvent =
     inherit Event
     /// <summary>
     /// The PromiseRejectionEvent interface's <b><c>promise</c></b> read-only property indicates the JavaScript Promise which was rejected. You can examine the event's PromiseRejectionEvent.reason property to learn why the promise was rejected.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PromiseRejectionEvent/promise">MDN Reference</a>
     /// </summary>
     abstract promise: JS.Promise<obj>
     /// <summary>
     /// The PromiseRejectionEvent <b><c>reason</c></b> read-only property is any JavaScript value or Object which provides the reason passed into Promise.reject(). This in theory provides information about why the promise was rejected.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PromiseRejectionEvent/reason">MDN Reference</a>
     /// </summary>
     abstract reason: obj
@@ -2880,67 +2880,67 @@ type PromiseRejectionEvent =
 
 /// <summary>
 /// The <b><c>FormData</c></b> interface provides a way to construct a set of key/value pairs representing form fields and their values, which can be sent using the fetch(), XMLHttpRequest.send() or navigator.sendBeacon() methods. It uses the same format a form would use if the encoding type were set to "multipart/form-data".
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/FormData">MDN Reference</a>
 /// </summary>
 type FormData =
     /// <summary>
     /// The <b><c>append()</c></b> method of the FormData interface appends a new value onto an existing key inside a FormData object, or adds the key if it does not already exist.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/FormData/append">MDN Reference</a>
     /// </summary>
     abstract append: name: string * value: U2<string, Blob> -> unit
     /// <summary>
     /// The <b><c>append()</c></b> method of the FormData interface appends a new value onto an existing key inside a FormData object, or adds the key if it does not already exist.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/FormData/append">MDN Reference</a>
     /// </summary>
     abstract append: name: string * value: string -> unit
     /// <summary>
     /// The <b><c>append()</c></b> method of the FormData interface appends a new value onto an existing key inside a FormData object, or adds the key if it does not already exist.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/FormData/append">MDN Reference</a>
     /// </summary>
     abstract append: name: string * value: Blob * ?filename: string -> unit
     /// <summary>
     /// The <b><c>delete()</c></b> method of the FormData interface deletes a key and its value(s) from a FormData object.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/FormData/delete">MDN Reference</a>
     /// </summary>
     abstract delete: name: string -> unit
     /// <summary>
     /// The <b><c>get()</c></b> method of the FormData interface returns the first value associated with a given key from within a FormData object. If you expect multiple values and want all of them, use the getAll() method instead.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/FormData/get">MDN Reference</a>
     /// </summary>
     abstract get: name: string -> U2<string, File> option
     /// <summary>
     /// The <b><c>getAll()</c></b> method of the FormData interface returns all the values associated with a given key from within a FormData object.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/FormData/getAll">MDN Reference</a>
     /// </summary>
     abstract getAll: name: string -> U2<string, File>[]
     /// <summary>
     /// The <b><c>has()</c></b> method of the FormData interface returns whether a FormData object contains a certain key.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/FormData/has">MDN Reference</a>
     /// </summary>
     abstract has: name: string -> bool
     /// <summary>
     /// The <b><c>set()</c></b> method of the FormData interface sets a new value for an existing key inside a FormData object, or adds the key/value if it does not already exist.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/FormData/set">MDN Reference</a>
     /// </summary>
     abstract set: name: string * value: U2<string, Blob> -> unit
     /// <summary>
     /// The <b><c>set()</c></b> method of the FormData interface sets a new value for an existing key inside a FormData object, or adds the key/value if it does not already exist.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/FormData/set">MDN Reference</a>
     /// </summary>
     abstract set: name: string * value: string -> unit
     /// <summary>
     /// The <b><c>set()</c></b> method of the FormData interface sets a new value for an existing key inside a FormData object, or adds the key/value if it does not already exist.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/FormData/set">MDN Reference</a>
     /// </summary>
     abstract set: name: string * value: Blob * ?filename: string -> unit
@@ -3050,7 +3050,7 @@ type DocumentEnd =
 
 /// <summary>
 /// This is the event type for fetch events dispatched on the service worker global scope. It contains information about the fetch, including the request and how the receiver will treat the response. It provides the event.respondWith() method, which allows us to provide a response to this fetch.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/FetchEvent">MDN Reference</a>
 /// </summary>
 [<Interface>]
@@ -3058,13 +3058,13 @@ type FetchEvent =
     inherit ExtendableEvent
     /// <summary>
     /// The <b><c>request</c></b> read-only property of the FetchEvent interface returns the Request that triggered the event handler.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/FetchEvent/request">MDN Reference</a>
     /// </summary>
     abstract request: Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>
     /// <summary>
     /// The <b><c>respondWith()</c></b> method of FetchEvent prevents the browser's default fetch handling, and allows you to provide a promise for a Response yourself.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/FetchEvent/respondWith">MDN Reference</a>
     /// </summary>
     abstract respondWith: promise: U2<JS.Promise<Response>, Response> -> unit
@@ -3084,45 +3084,45 @@ type HeadersInit = obj
 
 /// <summary>
 /// The <b><c>Headers</c></b> interface of the Fetch API allows you to perform various actions on HTTP request and response headers. These actions include retrieving, setting, adding to, and removing headers from the list of the request's headers.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/Headers">MDN Reference</a>
 /// </summary>
 [<Interface>]
 type Headers =
     /// <summary>
     /// The <b><c>get()</c></b> method of the Headers interface returns a byte string of all the values of a header within a Headers object with a given name. If the requested header doesn't exist in the Headers object, it returns null.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Headers/get">MDN Reference</a>
     /// </summary>
     abstract get: name: string -> string option
     abstract getAll: name: string -> string[]
     /// <summary>
     /// The <b><c>getSetCookie()</c></b> method of the Headers interface returns an array containing the values of all Set-Cookie headers associated with a response. This allows Headers objects to handle having multiple Set-Cookie headers, which wasn't possible prior to its implementation.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Headers/getSetCookie">MDN Reference</a>
     /// </summary>
     abstract getSetCookie: unit -> string[]
     /// <summary>
     /// The <b><c>has()</c></b> method of the Headers interface returns a boolean stating whether a Headers object contains a certain header.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Headers/has">MDN Reference</a>
     /// </summary>
     abstract has: name: string -> bool
     /// <summary>
     /// The <b><c>set()</c></b> method of the Headers interface sets a new value for an existing header inside a Headers object, or adds the header if it does not already exist.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Headers/set">MDN Reference</a>
     /// </summary>
     abstract set: name: string * value: string -> unit
     /// <summary>
     /// The <b><c>append()</c></b> method of the Headers interface appends a new value onto an existing header inside a Headers object, or adds the header if it does not already exist.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Headers/append">MDN Reference</a>
     /// </summary>
     abstract append: name: string * value: string -> unit
     /// <summary>
     /// The <b><c>delete()</c></b> method of the Headers interface deletes a header from the current Headers object.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Headers/delete">MDN Reference</a>
     /// </summary>
     abstract delete: name: string -> unit
@@ -3150,7 +3150,7 @@ type Body =
 
 /// <summary>
 /// The <b><c>Response</c></b> interface of the Fetch API represents the response to a request.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/Response">MDN Reference</a>
 /// </summary>
 [<Interface>]
@@ -3158,43 +3158,43 @@ type Response =
     inherit Body
     /// <summary>
     /// The <b><c>clone()</c></b> method of the Response interface creates a clone of a response object, identical in every way, but stored in a different variable.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Response/clone">MDN Reference</a>
     /// </summary>
     abstract clone: unit -> Response
     /// <summary>
     /// The <b><c>status</c></b> read-only property of the Response interface contains the HTTP status codes of the response.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Response/status">MDN Reference</a>
     /// </summary>
     abstract status: float with get, set
     /// <summary>
     /// The <b><c>statusText</c></b> read-only property of the Response interface contains the status message corresponding to the HTTP status code in Response.status.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Response/statusText">MDN Reference</a>
     /// </summary>
     abstract statusText: string with get, set
     /// <summary>
     /// The <b><c>headers</c></b> read-only property of the Response interface contains the Headers object associated with the response.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Response/headers">MDN Reference</a>
     /// </summary>
     abstract headers: Headers with get, set
     /// <summary>
     /// The <b><c>ok</c></b> read-only property of the Response interface contains a Boolean stating whether the response was successful (status in the range 200-299) or not.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Response/ok">MDN Reference</a>
     /// </summary>
     abstract ok: bool with get, set
     /// <summary>
     /// The <b><c>redirected</c></b> read-only property of the Response interface indicates whether or not the response is the result of a request you made which was redirected.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Response/redirected">MDN Reference</a>
     /// </summary>
     abstract redirected: bool with get, set
     /// <summary>
     /// The <b><c>url</c></b> read-only property of the Response interface contains the URL of the response. The value of the url property will be the final URL obtained after any redirects.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Response/url">MDN Reference</a>
     /// </summary>
     abstract url: string with get, set
@@ -3202,7 +3202,7 @@ type Response =
     abstract cf: obj with get, set
     /// <summary>
     /// The <b><c>type</c></b> read-only property of the Response interface contains the type of the response. The type determines whether scripts are able to access the response body and headers.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Response/type">MDN Reference</a>
     /// </summary>
     abstract ``type``: Response.Type with get, set
@@ -3231,7 +3231,7 @@ type RequestInfo<'CfHostMetadata, 'Cf> = U2<string, Request<'CfHostMetadata, 'Cf
 
 /// <summary>
 /// The <b><c>Request</c></b> interface of the Fetch API represents a resource request.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/Request">MDN Reference</a>
 /// </summary>
 [<Interface>]
@@ -3239,57 +3239,57 @@ type Request<'CfHostMetadata, 'Cf> =
     inherit Body
     /// <summary>
     /// The <b><c>clone()</c></b> method of the Request interface creates a copy of the current Request object.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Request/clone">MDN Reference</a>
     /// </summary>
     abstract clone: unit -> Request<'CfHostMetadata, 'Cf>
     /// <summary>
     /// The <b><c>method</c></b> read-only property of the Request interface contains the request's method (GET, POST, etc.)
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Request/method">MDN Reference</a>
     /// </summary>
     abstract ``method``: string with get, set
     /// <summary>
     /// The <b><c>url</c></b> read-only property of the Request interface contains the URL of the request.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Request/url">MDN Reference</a>
     /// </summary>
     abstract url: string with get, set
     /// <summary>
     /// The <b><c>headers</c></b> read-only property of the Request interface contains the Headers object associated with the request.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Request/headers">MDN Reference</a>
     /// </summary>
     abstract headers: Headers with get, set
     /// <summary>
     /// The <b><c>redirect</c></b> read-only property of the Request interface contains the mode for how redirects are handled.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Request/redirect">MDN Reference</a>
     /// </summary>
     abstract redirect: string with get, set
     abstract fetcher: Request.Fetcher option with get, set
     /// <summary>
     /// The read-only <b><c>signal</c></b> property of the Request interface returns the AbortSignal associated with the request.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Request/signal">MDN Reference</a>
     /// </summary>
     abstract signal: AbortSignal with get, set
     abstract cf: 'Cf option with get, set
     /// <summary>
     /// The <b><c>integrity</c></b> read-only property of the Request interface contains the subresource integrity value of the request.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Request/integrity">MDN Reference</a>
     /// </summary>
     abstract integrity: string with get, set
     /// <summary>
     /// The <b><c>keepalive</c></b> read-only property of the Request interface contains the request's keepalive setting (true or false), which indicates whether the browser will keep the associated request alive if the page that initiated it is unloaded before the request is complete.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Request/keepalive">MDN Reference</a>
     /// </summary>
     abstract keepalive: bool with get, set
     /// <summary>
     /// The <b><c>cache</c></b> read-only property of the Request interface contains the cache mode of the request. It controls how the request will interact with the browser's HTTP cache.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Request/cache">MDN Reference</a>
     /// </summary>
     abstract cache: RequestInit.Cache option with get, set
@@ -3914,19 +3914,19 @@ type StreamPipeOptions =
     abstract preventCancel: bool option with get, set
     /// <summary>
     /// Pipes this readable stream to a given writable stream destination. The way in which the piping process behaves under various error conditions can be customized with a number of passed options. It returns a promise that fulfills when the piping process completes successfully, or rejects if any errors were encountered.
-    ///
+    /// <br /><br />
     /// Piping a stream will lock it for the duration of the pipe, preventing any other consumer from acquiring a reader.
-    ///
+    /// <br /><br />
     /// Errors and closures of the source and destination streams propagate as follows:
-    ///
+    /// <br /><br />
     /// An error in this source readable stream will abort destination, unless preventAbort is truthy. The returned promise will be rejected with the source's error, or with any error that occurs during aborting the destination.
-    ///
+    /// <br /><br />
     /// An error in destination will cancel this source readable stream, unless preventCancel is truthy. The returned promise will be rejected with the destination's error, or with any error that occurs during canceling the source.
-    ///
+    /// <br /><br />
     /// When this source readable stream closes, destination will be closed, unless preventClose is truthy. The returned promise will be fulfilled once this process completes, unless an error is encountered while closing the destination, in which case it will be rejected with that error.
-    ///
+    /// <br /><br />
     /// If destination starts out closed or closing, this source readable stream will be canceled, unless preventCancel is true. The returned promise will be rejected with an error indicating piping to a closed stream failed, or with any error that occurs during canceling the source.
-    ///
+    /// <br /><br />
     /// The signal option can be set to an AbortSignal to allow aborting an ongoing pipe operation via the corresponding AbortController. In this case, this source readable stream will be canceled, and destination aborted, unless the respective options preventCancel or preventAbort are set.
     /// </summary>
     abstract preventClose: bool option with get, set
@@ -3945,49 +3945,49 @@ type ReadableStreamReadResult2<'R> =
 
 /// <summary>
 /// The <b><c>ReadableStream</c></b> interface of the Streams API represents a readable stream of byte data. The Fetch API offers a concrete instance of a ReadableStream through the body property of a Response object.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStream">MDN Reference</a>
 /// </summary>
 type ReadableStream<'R> =
     /// <summary>
     /// The <b><c>locked</c></b> read-only property of the ReadableStream interface returns whether or not the readable stream is locked to a reader.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStream/locked">MDN Reference</a>
     /// </summary>
     abstract locked: bool
     /// <summary>
     /// The <b><c>cancel()</c></b> method of the ReadableStream interface returns a Promise that resolves when the stream is canceled.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStream/cancel">MDN Reference</a>
     /// </summary>
     abstract cancel: ?reason: obj -> JS.Promise<unit>
     /// <summary>
     /// The <b><c>getReader()</c></b> method of the ReadableStream interface creates a reader and locks the stream to it. While the stream is locked, no other reader can be acquired until this one is released.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStream/getReader">MDN Reference</a>
     /// </summary>
     abstract getReader: unit -> ReadableStreamDefaultReader<'R>
     /// <summary>
     /// The <b><c>getReader()</c></b> method of the ReadableStream interface creates a reader and locks the stream to it. While the stream is locked, no other reader can be acquired until this one is released.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStream/getReader">MDN Reference</a>
     /// </summary>
     abstract getReader: options: ReadableStreamGetReaderOptions -> ReadableStreamBYOBReader
     /// <summary>
     /// The <b><c>pipeThrough()</c></b> method of the ReadableStream interface provides a chainable way of piping the current stream through a transform stream or any other writable/readable pair.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStream/pipeThrough">MDN Reference</a>
     /// </summary>
     abstract pipeThrough<'T>: transform: ReadableWritablePair<'T, 'R> * ?options: StreamPipeOptions -> ReadableStream<'T>
     /// <summary>
     /// The <b><c>pipeTo()</c></b> method of the ReadableStream interface pipes the current ReadableStream to a given WritableStream and returns a Promise that fulfills when the piping process completes successfully, or rejects if any errors were encountered.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStream/pipeTo">MDN Reference</a>
     /// </summary>
     abstract pipeTo: destination: WritableStream<'R> * ?options: StreamPipeOptions -> JS.Promise<unit>
     /// <summary>
     /// The <b><c>tee()</c></b> method of the ReadableStream interface tees the current readable stream, returning a two-element array containing the two resulting branches as new ReadableStream instances.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStream/tee">MDN Reference</a>
     /// </summary>
     abstract tee: unit -> ReadableStream<'R> * ReadableStream<'R>
@@ -4001,7 +4001,7 @@ type ReadableStreamConstructor =
 
 /// <summary>
 /// The <b><c>ReadableStreamDefaultReader</c></b> interface of the Streams API represents a default reader that can be used to read stream data supplied from a network (such as a fetch request).
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStreamDefaultReader">MDN Reference</a>
 /// </summary>
 [<Interface>]
@@ -4010,13 +4010,13 @@ type ReadableStreamDefaultReader<'R> =
     abstract cancel: ?reason: obj -> JS.Promise<unit>
     /// <summary>
     /// The <b><c>read()</c></b> method of the ReadableStreamDefaultReader interface returns a Promise providing access to the next chunk in the stream's internal queue.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStreamDefaultReader/read">MDN Reference</a>
     /// </summary>
     abstract read: unit -> JS.Promise<U2<ReadableStreamDefaultReader.Read.Result.Item<'R>, ReadableStreamDefaultReader.Read.Result.Item2>>
     /// <summary>
     /// The <b><c>releaseLock()</c></b> method of the ReadableStreamDefaultReader interface releases the reader's lock on the stream.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStreamDefaultReader/releaseLock">MDN Reference</a>
     /// </summary>
     abstract releaseLock: unit -> unit
@@ -4025,7 +4025,7 @@ type ReadableStreamDefaultReader<'R> =
 
 /// <summary>
 /// The <b><c>ReadableStreamBYOBReader</c></b> interface of the Streams API defines a reader for a ReadableStream that supports zero-copy reading from an underlying byte source. It is used for efficient copying from underlying sources where the data is delivered as an "anonymous" sequence of bytes, such as files.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStreamBYOBReader">MDN Reference</a>
 /// </summary>
 [<Interface>]
@@ -4034,13 +4034,13 @@ type ReadableStreamBYOBReader =
     abstract cancel: ?reason: obj -> JS.Promise<unit>
     /// <summary>
     /// The <b><c>read()</c></b> method of the ReadableStreamBYOBReader interface is used to read data into a view on a user-supplied buffer from an associated readable byte stream. A request for data will be satisfied from the stream's internal queues if there is any data present. If the stream queues are empty, the request may be supplied as a zero-copy transfer from the underlying byte source.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStreamBYOBReader/read">MDN Reference</a>
     /// </summary>
     abstract read<'T when 'T :> JS.ArrayBufferView>: view: 'T -> JS.Promise<U2<ReadableStreamBYOBReader.Read.Result.Item<'T>, ReadableStreamDefaultReader.Read.Result.Item2>>
     /// <summary>
     /// The <b><c>releaseLock()</c></b> method of the ReadableStreamBYOBReader interface releases the reader's lock on the stream. After the lock is released, the reader is no longer active.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStreamBYOBReader/releaseLock">MDN Reference</a>
     /// </summary>
     abstract releaseLock: unit -> unit
@@ -4058,7 +4058,7 @@ type ReadableStreamBYOBReaderReadableStreamBYOBReaderReadOptions =
 type ReadableStreamGetReaderOptions =
     /// <summary>
     /// Creates a ReadableStreamBYOBReader and locks the stream to the new reader.
-    ///
+    /// <br /><br />
     /// This call behaves the same way as the no-argument variant, except that it only works on readable byte streams, i.e. streams which were constructed specifically with the ability to handle "bring your own buffer" reading. The returned BYOB reader provides the ability to directly read individual chunks from the stream via its read() method, into developer-supplied buffers, allowing more precise control over allocation.
     /// </summary>
     abstract mode: string with get, set
@@ -4067,26 +4067,26 @@ type ReadableStreamGetReaderOptions =
 
 /// <summary>
 /// The <b><c>ReadableStreamBYOBRequest</c></b> interface of the Streams API represents a "pull request" for data from an underlying source that will made as a zero-copy transfer to a consumer (bypassing the stream's internal queues).
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStreamBYOBRequest">MDN Reference</a>
 /// </summary>
 [<Interface>]
 type ReadableStreamBYOBRequest =
     /// <summary>
     /// The <b><c>view</c></b> getter property of the ReadableStreamBYOBRequest interface returns the current view.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStreamBYOBRequest/view">MDN Reference</a>
     /// </summary>
     abstract view: JS.Uint8Array option
     /// <summary>
     /// The <b><c>respond()</c></b> method of the ReadableStreamBYOBRequest interface is used to signal to the associated readable byte stream that the specified number of bytes were written into the ReadableStreamBYOBRequest.view.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStreamBYOBRequest/respond">MDN Reference</a>
     /// </summary>
     abstract respond: bytesWritten: float -> unit
     /// <summary>
     /// The <b><c>respondWithNewView()</c></b> method of the ReadableStreamBYOBRequest interface specifies a new view that the consumer of the associated readable byte stream should write to instead of ReadableStreamBYOBRequest.view.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStreamBYOBRequest/respondWithNewView">MDN Reference</a>
     /// </summary>
     abstract respondWithNewView: view: U2<JS.ArrayBuffer, JS.ArrayBufferView> -> unit
@@ -4096,32 +4096,32 @@ type ReadableStreamBYOBRequest =
 
 /// <summary>
 /// The <b><c>ReadableStreamDefaultController</c></b> interface of the Streams API represents a controller allowing control of a ReadableStream's state and internal queue. Default controllers are for streams that are not byte streams.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStreamDefaultController">MDN Reference</a>
 /// </summary>
 [<Interface>]
 type ReadableStreamDefaultController<'R> =
     /// <summary>
     /// The <b><c>desiredSize</c></b> read-only property of the ReadableStreamDefaultController interface returns the desired size required to fill the stream's internal queue.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStreamDefaultController/desiredSize">MDN Reference</a>
     /// </summary>
     abstract desiredSize: float option
     /// <summary>
     /// The <b><c>close()</c></b> method of the ReadableStreamDefaultController interface closes the associated stream.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStreamDefaultController/close">MDN Reference</a>
     /// </summary>
     abstract close: unit -> unit
     /// <summary>
     /// The <b><c>enqueue()</c></b> method of the ReadableStreamDefaultController interface enqueues a given chunk in the associated stream.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStreamDefaultController/enqueue">MDN Reference</a>
     /// </summary>
     abstract enqueue: ?chunk: 'R -> unit
     /// <summary>
     /// The <b><c>error()</c></b> method of the ReadableStreamDefaultController interface causes any future interactions with the associated stream to error.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStreamDefaultController/error">MDN Reference</a>
     /// </summary>
     abstract error: reason: obj -> unit
@@ -4130,38 +4130,38 @@ type ReadableStreamDefaultController<'R> =
 
 /// <summary>
 /// The <b><c>ReadableByteStreamController</c></b> interface of the Streams API represents a controller for a readable byte stream. It allows control of the state and internal queue of a ReadableStream with an underlying byte source, and enables efficient zero-copy transfer of data from the underlying source to a consumer when the stream's internal queue is empty.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableByteStreamController">MDN Reference</a>
 /// </summary>
 [<Interface>]
 type ReadableByteStreamController =
     /// <summary>
     /// The <b><c>byobRequest</c></b> read-only property of the ReadableByteStreamController interface returns the current BYOB request, or null if there are no pending requests.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableByteStreamController/byobRequest">MDN Reference</a>
     /// </summary>
     abstract byobRequest: ReadableStreamBYOBRequest option
     /// <summary>
     /// The <b><c>desiredSize</c></b> read-only property of the ReadableByteStreamController interface returns the number of bytes required to fill the stream's internal queue to its "desired size".
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableByteStreamController/desiredSize">MDN Reference</a>
     /// </summary>
     abstract desiredSize: float option
     /// <summary>
     /// The <b><c>close()</c></b> method of the ReadableByteStreamController interface closes the associated stream.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableByteStreamController/close">MDN Reference</a>
     /// </summary>
     abstract close: unit -> unit
     /// <summary>
     /// The <b><c>enqueue()</c></b> method of the ReadableByteStreamController interface enqueues a given chunk on the associated readable byte stream (the chunk is transferred into the stream's internal queues).
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableByteStreamController/enqueue">MDN Reference</a>
     /// </summary>
     abstract enqueue: chunk: U2<JS.ArrayBuffer, JS.ArrayBufferView> -> unit
     /// <summary>
     /// The <b><c>error()</c></b> method of the ReadableByteStreamController interface causes any future interactions with the associated stream to error with the specified reason.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableByteStreamController/error">MDN Reference</a>
     /// </summary>
     abstract error: reason: obj -> unit
@@ -4170,20 +4170,20 @@ type ReadableByteStreamController =
 
 /// <summary>
 /// The <b><c>WritableStreamDefaultController</c></b> interface of the Streams API represents a controller allowing control of a WritableStream's state. When constructing a WritableStream, the underlying sink is given a corresponding WritableStreamDefaultController instance to manipulate.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultController">MDN Reference</a>
 /// </summary>
 [<Interface>]
 type WritableStreamDefaultController =
     /// <summary>
     /// The read-only <b><c>signal</c></b> property of the WritableStreamDefaultController interface returns the AbortSignal associated with the controller.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultController/signal">MDN Reference</a>
     /// </summary>
     abstract signal: AbortSignal
     /// <summary>
     /// The <b><c>error()</c></b> method of the WritableStreamDefaultController interface causes any future interactions with the associated stream to error.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultController/error">MDN Reference</a>
     /// </summary>
     abstract error: ?reason: obj -> unit
@@ -4192,32 +4192,32 @@ type WritableStreamDefaultController =
 
 /// <summary>
 /// The <b><c>TransformStreamDefaultController</c></b> interface of the Streams API provides methods to manipulate the associated ReadableStream and WritableStream.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/TransformStreamDefaultController">MDN Reference</a>
 /// </summary>
 [<Interface>]
 type TransformStreamDefaultController<'O> =
     /// <summary>
     /// The <b><c>desiredSize</c></b> read-only property of the TransformStreamDefaultController interface returns the desired size to fill the queue of the associated ReadableStream.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/TransformStreamDefaultController/desiredSize">MDN Reference</a>
     /// </summary>
     abstract desiredSize: float option
     /// <summary>
     /// The <b><c>enqueue()</c></b> method of the TransformStreamDefaultController interface enqueues the given chunk in the readable side of the stream.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/TransformStreamDefaultController/enqueue">MDN Reference</a>
     /// </summary>
     abstract enqueue: ?chunk: 'O -> unit
     /// <summary>
     /// The <b><c>error()</c></b> method of the TransformStreamDefaultController interface errors both sides of the stream. Any further interactions with it will fail with the given error message, and any chunks in the queue will be discarded.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/TransformStreamDefaultController/error">MDN Reference</a>
     /// </summary>
     abstract error: reason: obj -> unit
     /// <summary>
     /// The <b><c>terminate()</c></b> method of the TransformStreamDefaultController interface closes the readable side and errors the writable side of the stream.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/TransformStreamDefaultController/terminate">MDN Reference</a>
     /// </summary>
     abstract terminate: unit -> unit
@@ -4229,7 +4229,7 @@ type ReadableWritablePair<'R, 'W> =
     abstract readable: ReadableStream<'R> with get, set
     /// <summary>
     /// Provides a convenient, chainable way of piping this readable stream through a transform stream (or any other { writable, readable } pair). It simply pipes the stream into the writable side of the supplied pair, and returns the readable side for further use.
-    ///
+    /// <br /><br />
     /// Piping a stream will lock it for the duration of the pipe, preventing any other consumer from acquiring a reader.
     /// </summary>
     abstract writable: WritableStream<'W> with get, set
@@ -4238,32 +4238,32 @@ type ReadableWritablePair<'R, 'W> =
 
 /// <summary>
 /// The <b><c>WritableStream</c></b> interface of the Streams API provides a standard abstraction for writing streaming data to a destination, known as a sink. This object comes with built-in backpressure and queuing.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStream">MDN Reference</a>
 /// </summary>
 [<Interface>]
 type WritableStream<'W> =
     /// <summary>
     /// The <b><c>locked</c></b> read-only property of the WritableStream interface returns a boolean indicating whether the WritableStream is locked to a writer.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStream/locked">MDN Reference</a>
     /// </summary>
     abstract locked: bool
     /// <summary>
     /// The <b><c>abort()</c></b> method of the WritableStream interface aborts the stream, signaling that the producer can no longer successfully write to the stream and it is to be immediately moved to an error state, with any queued writes discarded.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStream/abort">MDN Reference</a>
     /// </summary>
     abstract abort: ?reason: obj -> JS.Promise<unit>
     /// <summary>
     /// The <b><c>close()</c></b> method of the WritableStream interface closes the associated stream. All chunks written before this method is called are sent before the returned promise is fulfilled.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStream/close">MDN Reference</a>
     /// </summary>
     abstract close: unit -> JS.Promise<unit>
     /// <summary>
     /// The <b><c>getWriter()</c></b> method of the WritableStream interface returns a new instance of WritableStreamDefaultWriter and locks the stream to that instance. While the stream is locked, no other writer can be acquired until this one is released.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStream/getWriter">MDN Reference</a>
     /// </summary>
     abstract getWriter: unit -> WritableStreamDefaultWriter<'W>
@@ -4272,50 +4272,50 @@ type WritableStream<'W> =
 
 /// <summary>
 /// The <b><c>WritableStreamDefaultWriter</c></b> interface of the Streams API is the object returned by WritableStream.getWriter() and once created locks the writer to the WritableStream ensuring that no other streams can write to the underlying sink.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultWriter">MDN Reference</a>
 /// </summary>
 [<Interface>]
 type WritableStreamDefaultWriter<'W> =
     /// <summary>
     /// The <b><c>closed</c></b> read-only property of the WritableStreamDefaultWriter interface returns a Promise that fulfills if the stream becomes closed, or rejects if the stream errors or the writer's lock is released.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultWriter/closed">MDN Reference</a>
     /// </summary>
     abstract closed: JS.Promise<unit>
     /// <summary>
     /// The <b><c>ready</c></b> read-only property of the WritableStreamDefaultWriter interface returns a Promise that resolves when the desired size of the stream's internal queue transitions from non-positive to positive, signaling that it is no longer applying backpressure.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultWriter/ready">MDN Reference</a>
     /// </summary>
     abstract ready: JS.Promise<unit>
     /// <summary>
     /// The <b><c>desiredSize</c></b> read-only property of the WritableStreamDefaultWriter interface returns the desired size required to fill the stream's internal queue.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultWriter/desiredSize">MDN Reference</a>
     /// </summary>
     abstract desiredSize: float option
     /// <summary>
     /// The <b><c>abort()</c></b> method of the WritableStreamDefaultWriter interface aborts the stream, signaling that the producer can no longer successfully write to the stream and it is to be immediately moved to an error state, with any queued writes discarded.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultWriter/abort">MDN Reference</a>
     /// </summary>
     abstract abort: ?reason: obj -> JS.Promise<unit>
     /// <summary>
     /// The <b><c>close()</c></b> method of the WritableStreamDefaultWriter interface closes the associated writable stream.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultWriter/close">MDN Reference</a>
     /// </summary>
     abstract close: unit -> JS.Promise<unit>
     /// <summary>
     /// The <b><c>write()</c></b> method of the WritableStreamDefaultWriter interface writes a passed chunk of data to a WritableStream and its underlying sink, then returns a Promise that resolves to indicate the success or failure of the write operation.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultWriter/write">MDN Reference</a>
     /// </summary>
     abstract write: ?chunk: 'W -> JS.Promise<unit>
     /// <summary>
     /// The <b><c>releaseLock()</c></b> method of the WritableStreamDefaultWriter interface releases the writer's lock on the corresponding stream. After the lock is released, the writer is no longer active. If the associated stream is errored when the lock is released, the writer will appear errored in the same way from now on; otherwise, the writer will appear closed.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultWriter/releaseLock">MDN Reference</a>
     /// </summary>
     abstract releaseLock: unit -> unit
@@ -4324,20 +4324,20 @@ type WritableStreamDefaultWriter<'W> =
 
 /// <summary>
 /// The <b><c>TransformStream</c></b> interface of the Streams API represents a concrete implementation of the pipe chain transform stream concept.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/TransformStream">MDN Reference</a>
 /// </summary>
 [<Interface>]
 type TransformStream<'I, 'O> =
     /// <summary>
     /// The <b><c>readable</c></b> read-only property of the TransformStream interface returns the ReadableStream instance controlled by this TransformStream. This stream emits the transformed output data.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/TransformStream/readable">MDN Reference</a>
     /// </summary>
     abstract readable: ReadableStream<'O>
     /// <summary>
     /// The <b><c>writable</c></b> read-only property of the TransformStream interface returns the WritableStream instance controlled by this TransformStream. This stream accepts input data that will be transformed and emitted to the readable stream.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/TransformStream/writable">MDN Reference</a>
     /// </summary>
     abstract writable: WritableStream<'I>
@@ -4355,13 +4355,13 @@ type IdentityTransformStream =
     inherit TransformStream<U2<JS.ArrayBuffer, JS.ArrayBufferView>, JS.Uint8Array>
     /// <summary>
     /// The <b><c>readable</c></b> read-only property of the TransformStream interface returns the ReadableStream instance controlled by this TransformStream. This stream emits the transformed output data.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/TransformStream/readable">MDN Reference</a>
     /// </summary>
     abstract readable: ReadableStream<JS.Uint8Array>
     /// <summary>
     /// The <b><c>writable</c></b> read-only property of the TransformStream interface returns the WritableStream instance controlled by this TransformStream. This stream accepts input data that will be transformed and emitted to the readable stream.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/TransformStream/writable">MDN Reference</a>
     /// </summary>
     abstract writable: WritableStream<U2<JS.ArrayBuffer, JS.ArrayBufferView>>
@@ -4382,7 +4382,7 @@ type ReadableStreamValuesOptions =
 
 /// <summary>
 /// The <b><c>CompressionStream</c></b> interface of the Compression Streams API compresses a stream of data. It implements the same shape as a TransformStream, allowing it to be used in ReadableStream.pipeThrough() and similar methods.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/CompressionStream">MDN Reference</a>
 /// </summary>
 [<Interface>]
@@ -4390,13 +4390,13 @@ type CompressionStream =
     inherit TransformStream<U2<JS.ArrayBuffer, JS.ArrayBufferView>, JS.Uint8Array>
     /// <summary>
     /// The <b><c>readable</c></b> read-only property of the TransformStream interface returns the ReadableStream instance controlled by this TransformStream. This stream emits the transformed output data.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/TransformStream/readable">MDN Reference</a>
     /// </summary>
     abstract readable: ReadableStream<JS.Uint8Array>
     /// <summary>
     /// The <b><c>writable</c></b> read-only property of the TransformStream interface returns the WritableStream instance controlled by this TransformStream. This stream accepts input data that will be transformed and emitted to the readable stream.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/TransformStream/writable">MDN Reference</a>
     /// </summary>
     abstract writable: WritableStream<U2<JS.ArrayBuffer, JS.ArrayBufferView>>
@@ -4405,7 +4405,7 @@ type CompressionStream =
 
 /// <summary>
 /// The <b><c>DecompressionStream</c></b> interface of the Compression Streams API decompresses a stream of data. It implements the same shape as a TransformStream, allowing it to be used in ReadableStream.pipeThrough() and similar methods.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/DecompressionStream">MDN Reference</a>
 /// </summary>
 [<Interface>]
@@ -4413,13 +4413,13 @@ type DecompressionStream =
     inherit TransformStream<U2<JS.ArrayBuffer, JS.ArrayBufferView>, JS.Uint8Array>
     /// <summary>
     /// The <b><c>readable</c></b> read-only property of the TransformStream interface returns the ReadableStream instance controlled by this TransformStream. This stream emits the transformed output data.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/TransformStream/readable">MDN Reference</a>
     /// </summary>
     abstract readable: ReadableStream<JS.Uint8Array>
     /// <summary>
     /// The <b><c>writable</c></b> read-only property of the TransformStream interface returns the WritableStream instance controlled by this TransformStream. This stream accepts input data that will be transformed and emitted to the readable stream.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/TransformStream/writable">MDN Reference</a>
     /// </summary>
     abstract writable: WritableStream<U2<JS.ArrayBuffer, JS.ArrayBufferView>>
@@ -4428,7 +4428,7 @@ type DecompressionStream =
 
 /// <summary>
 /// The <b><c>TextEncoderStream</c></b> interface of the Encoding API converts a stream of strings into bytes in the UTF-8 encoding. It is the streaming equivalent of TextEncoder. It implements the same shape as a TransformStream, allowing it to be used in ReadableStream.pipeThrough() and similar methods.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/TextEncoderStream">MDN Reference</a>
 /// </summary>
 [<Interface>]
@@ -4437,13 +4437,13 @@ type TextEncoderStream =
     abstract encoding: string
     /// <summary>
     /// The <b><c>readable</c></b> read-only property of the TransformStream interface returns the ReadableStream instance controlled by this TransformStream. This stream emits the transformed output data.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/TransformStream/readable">MDN Reference</a>
     /// </summary>
     abstract readable: ReadableStream<JS.Uint8Array>
     /// <summary>
     /// The <b><c>writable</c></b> read-only property of the TransformStream interface returns the WritableStream instance controlled by this TransformStream. This stream accepts input data that will be transformed and emitted to the readable stream.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/TransformStream/writable">MDN Reference</a>
     /// </summary>
     abstract writable: WritableStream<string>
@@ -4452,7 +4452,7 @@ type TextEncoderStream =
 
 /// <summary>
 /// The <b><c>TextDecoderStream</c></b> interface of the Encoding API converts a stream of text in a binary encoding, such as UTF-8 etc., to a stream of strings. It is the streaming equivalent of TextDecoder. It implements the same shape as a TransformStream, allowing it to be used in ReadableStream.pipeThrough() and similar methods.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/TextDecoderStream">MDN Reference</a>
 /// </summary>
 [<Interface>]
@@ -4463,13 +4463,13 @@ type TextDecoderStream =
     abstract ignoreBOM: bool
     /// <summary>
     /// The <b><c>readable</c></b> read-only property of the TransformStream interface returns the ReadableStream instance controlled by this TransformStream. This stream emits the transformed output data.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/TransformStream/readable">MDN Reference</a>
     /// </summary>
     abstract readable: ReadableStream<string>
     /// <summary>
     /// The <b><c>writable</c></b> read-only property of the TransformStream interface returns the WritableStream instance controlled by this TransformStream. This stream accepts input data that will be transformed and emitted to the readable stream.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/TransformStream/writable">MDN Reference</a>
     /// </summary>
     abstract writable: WritableStream<U2<JS.ArrayBuffer, JS.ArrayBufferView>>
@@ -4485,14 +4485,14 @@ type TextDecoderStreamTextDecoderStreamInit =
 
 /// <summary>
 /// The <b><c>ByteLengthQueuingStrategy</c></b> interface of the Streams API provides a built-in byte length queuing strategy that can be used when constructing streams.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/ByteLengthQueuingStrategy">MDN Reference</a>
 /// </summary>
 [<Interface>]
 type ByteLengthQueuingStrategy =
     /// <summary>
     /// The read-only <b><c>ByteLengthQueuingStrategy.highWaterMark</c></b> property returns the total number of bytes that can be contained in the internal queue before backpressure is applied.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ByteLengthQueuingStrategy/highWaterMark">MDN Reference</a>
     /// </summary>
     abstract highWaterMark: float
@@ -4502,14 +4502,14 @@ type ByteLengthQueuingStrategy =
 
 /// <summary>
 /// The <b><c>CountQueuingStrategy</c></b> interface of the Streams API provides a built-in chunk counting queuing strategy that can be used when constructing streams.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/CountQueuingStrategy">MDN Reference</a>
 /// </summary>
 [<Interface>]
 type CountQueuingStrategy =
     /// <summary>
     /// The read-only <b><c>CountQueuingStrategy.highWaterMark</c></b> property returns the total number of chunks that can be contained in the internal queue before backpressure is applied.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/CountQueuingStrategy/highWaterMark">MDN Reference</a>
     /// </summary>
     abstract highWaterMark: float
@@ -4521,7 +4521,7 @@ type CountQueuingStrategy =
 type QueuingStrategyInit =
     /// <summary>
     /// Creates a new ByteLengthQueuingStrategy with the provided high water mark.
-    ///
+    /// <br /><br />
     /// Note that the provided high water mark will not be validated ahead of time. Instead, if it is negative, NaN, or not a number, the resulting ByteLengthQueuingStrategy will cause the corresponding stream constructor to throw.
     /// </summary>
     abstract highWaterMark: float with get, set
@@ -4731,86 +4731,86 @@ type UnsafeTraceMetrics =
 
 /// <summary>
 /// The <b><c>URL</c></b> interface is used to parse, construct, normalize, and encode URLs. It works by providing properties which allow you to easily read and modify the components of a URL.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/URL">MDN Reference</a>
 /// </summary>
 [<Interface>]
 type URL =
     /// <summary>
     /// The <b><c>origin</c></b> read-only property of the URL interface returns a string containing the Unicode serialization of the origin of the represented URL.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URL/origin">MDN Reference</a>
     /// </summary>
     abstract origin: string
     /// <summary>
     /// The <b><c>href</c></b> property of the URL interface is a string containing the whole URL.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URL/href">MDN Reference</a>
     /// </summary>
     abstract href: string with get, set
     /// <summary>
     /// The <b><c>protocol</c></b> property of the URL interface is a string containing the protocol or scheme of the URL, including the final ":".
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URL/protocol">MDN Reference</a>
     /// </summary>
     abstract protocol: string with get, set
     /// <summary>
     /// The <b><c>username</c></b> property of the URL interface is a string containing the username component of the URL. If the URL does not have a username, this property contains an empty string, "".
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URL/username">MDN Reference</a>
     /// </summary>
     abstract username: string with get, set
     /// <summary>
     /// The <b><c>password</c></b> property of the URL interface is a string containing the password component of the URL. If the URL does not have a password, this property contains an empty string, "".
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URL/password">MDN Reference</a>
     /// </summary>
     abstract password: string with get, set
     /// <summary>
     /// The <b><c>host</c></b> property of the URL interface is a string containing the host, which is the hostname, and then, if the port of the URL is nonempty, a ":", followed by the port of the URL. If the URL does not have a hostname, this property contains an empty string, "".
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URL/host">MDN Reference</a>
     /// </summary>
     abstract host: string with get, set
     /// <summary>
     /// The <b><c>hostname</c></b> property of the URL interface is a string containing either the domain name or IP address of the URL. If the URL does not have a hostname, this property contains an empty string, "". IPv4 and IPv6 addresses are normalized, such as stripping leading zeros, and domain names are converted to IDN.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URL/hostname">MDN Reference</a>
     /// </summary>
     abstract hostname: string with get, set
     /// <summary>
     /// The <b><c>port</c></b> property of the URL interface is a string containing the port number of the URL. If the port is the default for the protocol (80 for ws: and http:, 443 for wss: and https:, and 21 for ftp:), this property contains an empty string, "".
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URL/port">MDN Reference</a>
     /// </summary>
     abstract port: string with get, set
     /// <summary>
     /// The <b><c>pathname</c></b> property of the URL interface represents a location in a hierarchical structure. It is a string constructed from a list of path segments, each of which is prefixed by a / character.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URL/pathname">MDN Reference</a>
     /// </summary>
     abstract pathname: string with get, set
     /// <summary>
     /// The <b><c>search</c></b> property of the URL interface is a search string, also called a query string, that is a string containing a "?" followed by the parameters of the URL. If the URL does not have a search query, this property contains an empty string, "".
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URL/search">MDN Reference</a>
     /// </summary>
     abstract search: string with get, set
     /// <summary>
     /// The <b><c>hash</c></b> property of the URL interface is a string containing a "#" followed by the fragment identifier of the URL. If the URL does not have a fragment identifier, this property contains an empty string, "".
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URL/hash">MDN Reference</a>
     /// </summary>
     abstract hash: string with get, set
     /// <summary>
     /// The <b><c>searchParams</c></b> read-only property of the URL interface returns a URLSearchParams object allowing access to the GET decoded query arguments contained in the URL.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URL/searchParams">MDN Reference</a>
     /// </summary>
     abstract searchParams: URLSearchParams
     /// <summary>
     /// The <b><c>toJSON()</c></b> method of the URL interface returns a string containing a serialized version of the URL, although in practice it seems to have the same effect as URL.toString().
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URL/toJSON">MDN Reference</a>
     /// </summary>
     abstract toJSON: unit -> string
@@ -4819,28 +4819,28 @@ type URL =
     static member Create (origin: string, href: string, protocol: string, username: string, password: string, host: string, hostname: string, port: string, pathname: string, search: string, hash: string, searchParams: URLSearchParams, toJSON: (unit -> string), toString: (unit -> string)) : URL = jsNative
     /// <summary>
     /// The <b><c>URL.canParse()</c></b> static method of the URL interface returns a boolean indicating whether or not an absolute URL, or a relative URL combined with a base URL, are parsable and valid.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URL/canParse_static">MDN Reference</a>
     /// </summary>
     [<Global("URL.canParse")>]
     static member canParse (url: string, ?``base``: string) : bool = jsNative
     /// <summary>
     /// The <b><c>URL.parse()</c></b> static method of the URL interface returns a newly created URL object representing the URL defined by the parameters.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URL/parse_static">MDN Reference</a>
     /// </summary>
     [<Global("URL.parse")>]
     static member parse (url: string, ?``base``: string) : URL option = jsNative
     /// <summary>
     /// The <b><c>createObjectURL()</c></b> static method of the URL interface creates a string containing a blob URL pointing to the object given in the parameter.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URL/createObjectURL_static">MDN Reference</a>
     /// </summary>
     [<Global("URL.createObjectURL")>]
     static member createObjectURL (``object``: U2<Blob, File>) : string = jsNative
     /// <summary>
     /// The <b><c>revokeObjectURL()</c></b> static method of the URL interface releases an existing object URL which was previously created by calling URL.createObjectURL().
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URL/revokeObjectURL_static">MDN Reference</a>
     /// </summary>
     [<Global("URL.revokeObjectURL")>]
@@ -4848,56 +4848,56 @@ type URL =
 
 /// <summary>
 /// The <b><c>URLSearchParams</c></b> interface defines utility methods to work with the query string of a URL.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/URLSearchParams">MDN Reference</a>
 /// </summary>
 [<Interface>]
 type URLSearchParams =
     /// <summary>
     /// The <b><c>size</c></b> read-only property of the URLSearchParams interface indicates the total number of search parameter entries.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URLSearchParams/size">MDN Reference</a>
     /// </summary>
     abstract size: float
     /// <summary>
     /// The <b><c>append()</c></b> method of the URLSearchParams interface appends a specified key/value pair as a new search parameter.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URLSearchParams/append">MDN Reference</a>
     /// </summary>
     abstract append: name: string * value: string -> unit
     /// <summary>
     /// The <b><c>delete()</c></b> method of the URLSearchParams interface deletes specified parameters and their associated value(s) from the list of all search parameters.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URLSearchParams/delete">MDN Reference</a>
     /// </summary>
     abstract delete: name: string * ?value: string -> unit
     /// <summary>
     /// The <b><c>get()</c></b> method of the URLSearchParams interface returns the first value associated to the given search parameter.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URLSearchParams/get">MDN Reference</a>
     /// </summary>
     abstract get: name: string -> string option
     /// <summary>
     /// The <b><c>getAll()</c></b> method of the URLSearchParams interface returns all the values associated with a given search parameter as an array.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URLSearchParams/getAll">MDN Reference</a>
     /// </summary>
     abstract getAll: name: string -> string[]
     /// <summary>
     /// The <b><c>has()</c></b> method of the URLSearchParams interface returns a boolean value that indicates whether the specified parameter is in the search parameters.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URLSearchParams/has">MDN Reference</a>
     /// </summary>
     abstract has: name: string * ?value: string -> bool
     /// <summary>
     /// The <b><c>set()</c></b> method of the URLSearchParams interface sets the value associated with a given search parameter to the given value. If there were several matching values, this method deletes the others. If the search parameter doesn't exist, this method creates it.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URLSearchParams/set">MDN Reference</a>
     /// </summary>
     abstract set: name: string * value: string -> unit
     /// <summary>
     /// The <b><c>URLSearchParams.sort()</c></b> method sorts all key/value pairs contained in this object in place and returns undefined. Key/value pairs are sorted by the values of the UTF-16 code units of the keys. This method uses a stable sorting algorithm (i.e., the relative order between key/value pairs with equal keys will be preserved).
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URLSearchParams/sort">MDN Reference</a>
     /// </summary>
     abstract sort: unit -> unit
@@ -4911,74 +4911,74 @@ type URLSearchParams =
 
 /// <summary>
 /// The <b><c>URLPattern</c></b> interface of the URL Pattern API matches URLs or parts of URLs against a pattern. The pattern can contain capturing groups that extract parts of the matched URL.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/URLPattern">MDN Reference</a>
 /// </summary>
 [<Interface>]
 type URLPattern =
     /// <summary>
     /// The <b><c>protocol</c></b> read-only property of the URLPattern interface is a string containing the pattern used to match the protocol part of a URL.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URLPattern/protocol">MDN Reference</a>
     /// </summary>
     abstract protocol: string
     /// <summary>
     /// The <b><c>username</c></b> read-only property of the URLPattern interface is a string containing the pattern used to match the username part of a URL.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URLPattern/username">MDN Reference</a>
     /// </summary>
     abstract username: string
     /// <summary>
     /// The <b><c>password</c></b> read-only property of the URLPattern interface is a string containing the pattern used to match the password part of a URL.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URLPattern/password">MDN Reference</a>
     /// </summary>
     abstract password: string
     /// <summary>
     /// The <b><c>hostname</c></b> read-only property of the URLPattern interface is a string containing the pattern used to match the hostname part of a URL.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URLPattern/hostname">MDN Reference</a>
     /// </summary>
     abstract hostname: string
     /// <summary>
     /// The <b><c>port</c></b> read-only property of the URLPattern interface is a string containing the pattern used to match the port part of a URL.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URLPattern/port">MDN Reference</a>
     /// </summary>
     abstract port: string
     /// <summary>
     /// The <b><c>pathname</c></b> read-only property of the URLPattern interface is a string containing the pattern used to match the pathname part of a URL.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URLPattern/pathname">MDN Reference</a>
     /// </summary>
     abstract pathname: string
     /// <summary>
     /// The <b><c>search</c></b> read-only property of the URLPattern interface is a string containing the pattern used to match the search part of a URL.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URLPattern/search">MDN Reference</a>
     /// </summary>
     abstract search: string
     /// <summary>
     /// The <b><c>hash</c></b> read-only property of the URLPattern interface is a string containing the pattern used to match the fragment part of a URL.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URLPattern/hash">MDN Reference</a>
     /// </summary>
     abstract hash: string
     /// <summary>
     /// The <b><c>hasRegExpGroups</c></b> read-only property of the URLPattern interface is a boolean indicating whether or not any of the URLPattern components contain regular expression capturing groups.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URLPattern/hasRegExpGroups">MDN Reference</a>
     /// </summary>
     abstract hasRegExpGroups: bool
     /// <summary>
     /// The <b><c>test()</c></b> method of the URLPattern interface takes a URL string or object of URL parts, and returns a boolean indicating if the given input matches the current pattern.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URLPattern/test">MDN Reference</a>
     /// </summary>
     abstract test: ?input: U2<string, URLPatternInit> * ?baseURL: string -> bool
     /// <summary>
     /// The <b><c>exec()</c></b> method of the URLPattern interface takes a URL or object of URL parts, and returns either an object containing the results of matching the URL to the pattern, or null if the URL does not match the pattern.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URLPattern/exec">MDN Reference</a>
     /// </summary>
     abstract exec: ?input: U2<string, URLPatternInit> * ?baseURL: string -> URLPatternResult option
@@ -5028,7 +5028,7 @@ type URLPatternOptions =
 
 /// <summary>
 /// A <b><c>CloseEvent</c></b> is sent to clients using WebSockets when the connection is closed. This is delivered to the listener indicated by the WebSocket object's onclose attribute.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/CloseEvent">MDN Reference</a>
 /// </summary>
 [<Interface>]
@@ -5036,19 +5036,19 @@ type CloseEvent =
     inherit Event
     /// <summary>
     /// The <b><c>code</c></b> read-only property of the CloseEvent interface returns a WebSocket connection close code indicating the reason the connection was closed.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/CloseEvent/code">MDN Reference</a>
     /// </summary>
     abstract code: float
     /// <summary>
     /// The <b><c>reason</c></b> read-only property of the CloseEvent interface returns the WebSocket connection close reason the server gave for closing the connection; that is, a concise human-readable prose explanation for the closure.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/CloseEvent/reason">MDN Reference</a>
     /// </summary>
     abstract reason: string
     /// <summary>
     /// The <b><c>wasClean</c></b> read-only property of the CloseEvent interface returns true if the connection closed cleanly.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/CloseEvent/wasClean">MDN Reference</a>
     /// </summary>
     abstract wasClean: bool
@@ -5085,7 +5085,7 @@ type WebSocketEventMap =
 
 /// <summary>
 /// The <b><c>WebSocket</c></b> object provides the API for creating and managing a WebSocket connection to a server, as well as for sending and receiving data on the connection.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket">MDN Reference</a>
 /// </summary>
 [<Interface>]
@@ -5094,13 +5094,13 @@ type WebSocket =
     abstract accept: ?options: WebSocketAcceptOptions -> unit
     /// <summary>
     /// The <b><c>WebSocket.send()</c></b> method enqueues the specified data to be transmitted to the server over the WebSocket connection, increasing the value of bufferedAmount by the number of bytes needed to contain the data. If the data can't be sent (for example, because it needs to be buffered but the buffer is full), the socket is closed automatically. The browser will throw an exception if you call send() when the connection is in the CONNECTING state. If you call send() when the connection is in the CLOSING or CLOSED states, the browser will silently discard the data.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/send">MDN Reference</a>
     /// </summary>
     abstract send: message: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> -> unit
     /// <summary>
     /// The <b><c>WebSocket.close()</c></b> method closes the WebSocket connection or connection attempt, if any. If the connection is already CLOSED, this method does nothing.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/close">MDN Reference</a>
     /// </summary>
     abstract close: ?code: float * ?reason: string -> unit
@@ -5108,49 +5108,49 @@ type WebSocket =
     abstract deserializeAttachment: unit -> obj
     /// <summary>
     /// The <b><c>WebSocket.readyState</c></b> read-only property returns the current state of the WebSocket connection.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/readyState">MDN Reference</a>
     /// </summary>
     abstract readyState: float with get, set
     /// <summary>
     /// The <b><c>WebSocket.url</c></b> read-only property returns the absolute URL of the WebSocket as resolved by the constructor.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/url">MDN Reference</a>
     /// </summary>
     abstract url: string option with get, set
     /// <summary>
     /// The <b><c>WebSocket.protocol</c></b> read-only property returns the name of the sub-protocol the server selected; this will be one of the strings specified in the protocols parameter when creating the WebSocket object, or the empty string if no connection is established.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/protocol">MDN Reference</a>
     /// </summary>
     abstract protocol: string option with get, set
     /// <summary>
     /// The <b><c>WebSocket.extensions</c></b> read-only property returns the extensions selected by the server. This is currently only the empty string or a list of extensions as negotiated by the connection.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/extensions">MDN Reference</a>
     /// </summary>
     abstract extensions: string option with get, set
     /// <summary>
     /// The <b><c>WebSocket.binaryType</c></b> property controls the type of binary data being received over the WebSocket connection.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/binaryType">MDN Reference</a>
     /// </summary>
     abstract binaryType: WebSocket.BinaryType with get, set
     /// <summary>
     /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
     /// </summary>
     abstract addEventListener<'Type>: ``type``: 'Type * handler: U2<(U4<CloseEvent, ErrorEvent, MessageEvent, Event> -> unit), EventListenerObject<Event>> * ?options: U2<bool, EventTargetAddEventListenerOptions> -> unit
     /// <summary>
     /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
     /// </summary>
     abstract removeEventListener<'Type>: ``type``: 'Type * handler: U2<(U4<CloseEvent, ErrorEvent, MessageEvent, Event> -> unit), EventListenerObject<Event>> * ?options: U2<bool, EventTargetEventListenerOptions> -> unit
     /// <summary>
     /// The <b><c>dispatchEvent()</c></b> method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent">MDN Reference</a>
     /// </summary>
     abstract dispatchEvent: ``event``: U4<CloseEvent, ErrorEvent, Event, MessageEvent> -> bool
@@ -5262,7 +5262,7 @@ type SocketInfo =
 
 /// <summary>
 /// The <b><c>EventSource</c></b> interface is web content's interface to server-sent events.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/EventSource">MDN Reference</a>
 /// </summary>
 [<Interface>]
@@ -5270,25 +5270,25 @@ type EventSource =
     inherit EventTarget<Record<string, Event>>
     /// <summary>
     /// The <b><c>close()</c></b> method of the EventSource interface closes the connection, if one is made, and sets the EventSource.readyState attribute to 2 (closed).
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventSource/close">MDN Reference</a>
     /// </summary>
     abstract close: unit -> unit
     /// <summary>
     /// The <b><c>url</c></b> read-only property of the EventSource interface returns a string representing the URL of the source.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventSource/url">MDN Reference</a>
     /// </summary>
     abstract url: string
     /// <summary>
     /// The <b><c>withCredentials</c></b> read-only property of the EventSource interface returns a boolean value indicating whether the EventSource object was instantiated with CORS credentials set.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventSource/withCredentials">MDN Reference</a>
     /// </summary>
     abstract withCredentials: bool
     /// <summary>
     /// The <b><c>readyState</c></b> read-only property of the EventSource interface returns a number representing the state of the connection.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventSource/readyState">MDN Reference</a>
     /// </summary>
     abstract readyState: float
@@ -5297,13 +5297,13 @@ type EventSource =
     abstract onerror: obj with get, set
     /// <summary>
     /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
     /// </summary>
     abstract addEventListener<'Type>: ``type``: 'Type * handler: U2<(Event -> unit), EventListenerObject<Event>> * ?options: U2<bool, EventTargetAddEventListenerOptions> -> unit
     /// <summary>
     /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
     /// </summary>
     abstract removeEventListener<'Type>: ``type``: 'Type * handler: U2<(Event -> unit), EventListenerObject<Event>> * ?options: U2<bool, EventTargetEventListenerOptions> -> unit
@@ -5448,7 +5448,7 @@ type ContainerStartResources =
 
 /// <summary>
 /// The <b><c>MessagePort</c></b> interface of the Channel Messaging API represents one of the two ports of a MessageChannel, allowing messages to be sent from one port and listening out for them arriving at the other.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/MessagePort">MDN Reference</a>
 /// </summary>
 [<Interface>]
@@ -5456,32 +5456,32 @@ type MessagePort =
     inherit EventTarget<Record<string, Event>>
     /// <summary>
     /// The <b><c>postMessage()</c></b> method of the MessagePort interface sends a message from the port, and optionally, transfers ownership of objects to other browsing contexts.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/MessagePort/postMessage">MDN Reference</a>
     /// </summary>
     abstract postMessage: ?data: obj * ?options: U2<obj[], MessagePortPostMessageOptions> -> unit
     /// <summary>
     /// The <b><c>close()</c></b> method of the MessagePort interface disconnects the port, so it is no longer active. This stops the flow of messages to that port.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/MessagePort/close">MDN Reference</a>
     /// </summary>
     abstract close: unit -> unit
     /// <summary>
     /// The <b><c>start()</c></b> method of the MessagePort interface starts the sending of messages queued on the port. This method is only needed when using EventTarget.addEventListener; it is implied when using onmessage.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/MessagePort/start">MDN Reference</a>
     /// </summary>
     abstract start: unit -> unit
     abstract onmessage: obj with get, set
     /// <summary>
     /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
     /// </summary>
     abstract addEventListener<'Type>: ``type``: 'Type * handler: U2<(Event -> unit), EventListenerObject<Event>> * ?options: U2<bool, EventTargetAddEventListenerOptions> -> unit
     /// <summary>
     /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
     /// </summary>
     abstract removeEventListener<'Type>: ``type``: 'Type * handler: U2<(Event -> unit), EventListenerObject<Event>> * ?options: U2<bool, EventTargetEventListenerOptions> -> unit
@@ -5490,20 +5490,20 @@ type MessagePort =
 
 /// <summary>
 /// The <b><c>MessageChannel</c></b> interface of the Channel Messaging API allows us to create a new message channel and send data through it via its two MessagePort properties.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/MessageChannel">MDN Reference</a>
 /// </summary>
 [<Interface>]
 type MessageChannel =
     /// <summary>
     /// The <b><c>port1</c></b> read-only property of the MessageChannel interface returns the first port of the message channel — the port attached to the context that originated the channel.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/MessageChannel/port1">MDN Reference</a>
     /// </summary>
     abstract port1: MessagePort
     /// <summary>
     /// The <b><c>port2</c></b> read-only property of the MessageChannel interface returns the second port of the message channel — the port attached to the context at the other end of the channel, which the message is initially sent to.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/MessageChannel/port2">MDN Reference</a>
     /// </summary>
     abstract port2: MessagePort
@@ -5618,7 +5618,7 @@ type workerdResourceLimits =
 /// <summary>
 /// The Workers runtime supports a subset of the Performance API, used to measure timing and performance,
 /// as well as timing of subrequests and other operations.
-///
+/// <br /><br />
 /// <a href="https://developers.cloudflare.com/workers/runtime-apis/performance/">Cloudflare Docs Reference</a>
 /// </summary>
 [<Interface>]
@@ -5629,61 +5629,61 @@ type Performance =
     abstract eventCounts: EventCounts
     /// <summary>
     /// The <b><c>clearMarks()</c></b> method removes all or specific PerformanceMark objects from the browser's performance timeline.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Performance/clearMarks">MDN Reference</a>
     /// </summary>
     abstract clearMarks: ?name: string -> unit
     /// <summary>
     /// The <b><c>clearMeasures()</c></b> method removes all or specific PerformanceMeasure objects from the browser's performance timeline.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Performance/clearMeasures">MDN Reference</a>
     /// </summary>
     abstract clearMeasures: ?name: string -> unit
     /// <summary>
     /// The <b><c>clearResourceTimings()</c></b> method removes all performance entries with an entryType of "resource" from the browser's performance timeline and sets the size of the performance resource data buffer to zero.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Performance/clearResourceTimings">MDN Reference</a>
     /// </summary>
     abstract clearResourceTimings: unit -> unit
     /// <summary>
     /// The <b><c>getEntries()</c></b> method returns an array of all PerformanceEntry objects currently present in the performance timeline.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Performance/getEntries">MDN Reference</a>
     /// </summary>
     abstract getEntries: unit -> PerformanceEntry[]
     /// <summary>
     /// The <b><c>getEntriesByName()</c></b> method returns an array of PerformanceEntry objects currently present in the performance timeline with the given name and type.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Performance/getEntriesByName">MDN Reference</a>
     /// </summary>
     abstract getEntriesByName: name: string * ?``type``: string -> PerformanceEntry[]
     /// <summary>
     /// The <b><c>getEntriesByType()</c></b> method returns an array of PerformanceEntry objects currently present in the performance timeline for a given type.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Performance/getEntriesByType">MDN Reference</a>
     /// </summary>
     abstract getEntriesByType: ``type``: string -> PerformanceEntry[]
     /// <summary>
     /// The <b><c>mark()</c></b> method creates a named PerformanceMark object representing a high resolution timestamp marker in the browser's performance timeline.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Performance/mark">MDN Reference</a>
     /// </summary>
     abstract mark: name: string * ?options: PerformanceMarkOptions -> PerformanceMark
     /// <summary>
     /// The <b><c>measure()</c></b> method creates a named PerformanceMeasure object representing a time measurement between two marks in the browser's performance timeline.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Performance/measure">MDN Reference</a>
     /// </summary>
     abstract measure: measureName: string * ?measureOptionsOrStartMark: U2<string, PerformanceMeasureOptions> * ?maybeEndMark: string -> PerformanceMeasure
     /// <summary>
     /// The <b><c>setResourceTimingBufferSize()</c></b> method sets the desired size of the browser's resource timing buffer which stores the "resource" performance entries.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Performance/setResourceTimingBufferSize">MDN Reference</a>
     /// </summary>
     abstract setResourceTimingBufferSize: size: float -> unit
     /// <summary>
     /// The <b><c>toJSON()</c></b> method of the Performance interface is a serializer; it returns a JSON representation of the Performance object.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Performance/toJSON">MDN Reference</a>
     /// </summary>
     abstract toJSON: unit -> obj
@@ -5693,13 +5693,13 @@ type Performance =
     abstract timerify: fn: (unit -> unit) -> (unit -> unit)
     /// <summary>
     /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
     /// </summary>
     abstract addEventListener<'Type>: ``type``: 'Type * handler: U2<(Event -> unit), EventListenerObject<Event>> * ?options: U2<bool, EventTargetAddEventListenerOptions> -> unit
     /// <summary>
     /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
     /// </summary>
     abstract removeEventListener<'Type>: ``type``: 'Type * handler: U2<(Event -> unit), EventListenerObject<Event>> * ?options: U2<bool, EventTargetEventListenerOptions> -> unit
@@ -5738,7 +5738,7 @@ type UvMetricsInfo =
 
 /// <summary>
 /// <b><c>PerformanceMark</c></b> is an interface for PerformanceEntry objects with an entryType of "mark".
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceMark">MDN Reference</a>
 /// </summary>
 [<Interface>]
@@ -5746,7 +5746,7 @@ type PerformanceMark =
     inherit PerformanceEntry
     /// <summary>
     /// The read-only <b><c>detail</c></b> property returns arbitrary metadata that was included in the mark upon construction (either when using performance.mark() or the PerformanceMark() constructor).
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceMark/detail">MDN Reference</a>
     /// </summary>
     abstract detail: obj
@@ -5755,7 +5755,7 @@ type PerformanceMark =
 
 /// <summary>
 /// <b><c>PerformanceMeasure</c></b> is an abstract interface for PerformanceEntry objects with an entryType of "measure". Entries of this type are created by calling performance.measure() to add a named DOMHighResTimeStamp (the measure) between two marks to the browser's performance timeline.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceMeasure">MDN Reference</a>
 /// </summary>
 [<Interface>]
@@ -5763,7 +5763,7 @@ type PerformanceMeasure =
     inherit PerformanceEntry
     /// <summary>
     /// The read-only <b><c>detail</c></b> property returns arbitrary metadata that was included in the mark upon construction (when using performance.measure().
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceMeasure/detail">MDN Reference</a>
     /// </summary>
     abstract detail: obj
@@ -5788,26 +5788,26 @@ type PerformanceMeasureOptions =
 
 /// <summary>
 /// The <b><c>PerformanceObserverEntryList</c></b> interface is a list of performance events that were explicitly observed via the observe() method.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceObserverEntryList">MDN Reference</a>
 /// </summary>
 [<Interface>]
 type PerformanceObserverEntryList =
     /// <summary>
     /// The <b><c>getEntries()</c></b> method of the PerformanceObserverEntryList interface returns a list of explicitly observed performance entry objects. The list's members are determined by the set of entry types specified in the call to the observe() method. The list is available in the observer's callback function (as the first parameter in the callback).
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceObserverEntryList/getEntries">MDN Reference</a>
     /// </summary>
     abstract getEntries: unit -> PerformanceEntry[]
     /// <summary>
     /// The <b><c>getEntriesByType()</c></b> method of the PerformanceObserverEntryList returns a list of explicitly observed performance entry objects for a given performance entry type. The list's members are determined by the set of entry types specified in the call to the observe() method. The list is available in the observer's callback function (as the first parameter in the callback).
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceObserverEntryList/getEntriesByType">MDN Reference</a>
     /// </summary>
     abstract getEntriesByType: ``type``: string -> PerformanceEntry[]
     /// <summary>
     /// The <b><c>getEntriesByName()</c></b> method of the PerformanceObserverEntryList interface returns a list of explicitly observed PerformanceEntry objects for a given name and entryType. The list's members are determined by the set of entry types specified in the call to the observe() method. The list is available in the observer's callback function (as the first parameter in the callback).
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceObserverEntryList/getEntriesByName">MDN Reference</a>
     /// </summary>
     abstract getEntriesByName: name: string * ?``type``: string -> PerformanceEntry[]
@@ -5816,38 +5816,38 @@ type PerformanceObserverEntryList =
 
 /// <summary>
 /// The <b><c>PerformanceEntry</c></b> object encapsulates a single performance metric that is part of the browser's performance timeline.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceEntry">MDN Reference</a>
 /// </summary>
 [<Interface>]
 type PerformanceEntry =
     /// <summary>
     /// The read-only <b><c>name</c></b> property of the PerformanceEntry interface is a string representing the name for a performance entry. It acts as an identifier, but it does not have to be unique. The value depends on the subclass.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceEntry/name">MDN Reference</a>
     /// </summary>
     abstract name: string
     /// <summary>
     /// The read-only <b><c>entryType</c></b> property returns a string representing the type of performance metric that this entry represents.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceEntry/entryType">MDN Reference</a>
     /// </summary>
     abstract entryType: string
     /// <summary>
     /// The read-only <b><c>startTime</c></b> property returns the first timestamp recorded for this PerformanceEntry. The meaning of this property depends on the value of this entry's entryType.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceEntry/startTime">MDN Reference</a>
     /// </summary>
     abstract startTime: float
     /// <summary>
     /// The read-only <b><c>duration</c></b> property returns a timestamp that is the duration of the performance entry. The meaning of this property depends on the value of this entry's entryType.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceEntry/duration">MDN Reference</a>
     /// </summary>
     abstract duration: float
     /// <summary>
     /// The <b><c>toJSON()</c></b> method is a serializer; it returns a JSON representation of the PerformanceEntry object.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceEntry/toJSON">MDN Reference</a>
     /// </summary>
     abstract toJSON: unit -> obj
@@ -5856,7 +5856,7 @@ type PerformanceEntry =
 
 /// <summary>
 /// The <b><c>PerformanceResourceTiming</c></b> interface enables retrieval and analysis of detailed network timing data regarding the loading of an application's resources. An application can use the timing metrics to determine, for example, the length of time it takes to fetch a specific resource, such as an XMLHttpRequest, &lt;SVG&gt;, image, or script.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming">MDN Reference</a>
 /// </summary>
 [<Interface>]
@@ -5864,109 +5864,109 @@ type PerformanceResourceTiming =
     inherit PerformanceEntry
     /// <summary>
     /// The <b><c>connectEnd</c></b> read-only property returns the timestamp immediately after the browser finishes establishing the connection to the server to retrieve the resource. The timestamp value includes the time interval to establish the transport connection, as well as other time intervals such as TLS handshake and SOCKS authentication.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/connectEnd">MDN Reference</a>
     /// </summary>
     abstract connectEnd: float
     /// <summary>
     /// The <b><c>connectStart</c></b> read-only property returns the timestamp immediately before the user agent starts establishing the connection to the server to retrieve the resource.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/connectStart">MDN Reference</a>
     /// </summary>
     abstract connectStart: float
     /// <summary>
     /// The <b><c>decodedBodySize</c></b> read-only property returns the size (in octets) received from the fetch (HTTP or cache) of the message body after removing any applied content encoding (like gzip or Brotli). If the resource is retrieved from an application cache or local resources, it returns the size of the payload after removing any applied content encoding.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/decodedBodySize">MDN Reference</a>
     /// </summary>
     abstract decodedBodySize: float
     /// <summary>
     /// The <b><c>domainLookupEnd</c></b> read-only property returns the timestamp immediately after the browser finishes the domain-name lookup for the resource.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/domainLookupEnd">MDN Reference</a>
     /// </summary>
     abstract domainLookupEnd: float
     /// <summary>
     /// The <b><c>domainLookupStart</c></b> read-only property returns the timestamp immediately before the browser starts the domain name lookup for the resource.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/domainLookupStart">MDN Reference</a>
     /// </summary>
     abstract domainLookupStart: float
     /// <summary>
     /// The <b><c>encodedBodySize</c></b> read-only property represents the size (in octets) received from the fetch (HTTP or cache) of the payload body before removing any applied content encodings (like gzip or Brotli). If the resource is retrieved from an application cache or a local resource, it must return the size of the payload body before removing any applied content encoding.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/encodedBodySize">MDN Reference</a>
     /// </summary>
     abstract encodedBodySize: float
     /// <summary>
     /// The <b><c>fetchStart</c></b> read-only property represents a timestamp immediately before the browser starts to fetch the resource.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/fetchStart">MDN Reference</a>
     /// </summary>
     abstract fetchStart: float
     /// <summary>
     /// The <b><c>initiatorType</c></b> read-only property is a string representing web platform feature that initiated the resource load.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/initiatorType">MDN Reference</a>
     /// </summary>
     abstract initiatorType: string
     /// <summary>
     /// The <b><c>nextHopProtocol</c></b> read-only property is a string representing the network protocol used to fetch the resource, as identified by the ALPN Protocol ID (RFC7301).
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/nextHopProtocol">MDN Reference</a>
     /// </summary>
     abstract nextHopProtocol: string
     /// <summary>
     /// The <b><c>redirectEnd</c></b> read-only property returns a timestamp immediately after receiving the last byte of the response of the last redirect.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/redirectEnd">MDN Reference</a>
     /// </summary>
     abstract redirectEnd: float
     /// <summary>
     /// The <b><c>redirectStart</c></b> read-only property returns a timestamp representing the start time of the fetch which that initiates the redirect.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/redirectStart">MDN Reference</a>
     /// </summary>
     abstract redirectStart: float
     /// <summary>
     /// The <b><c>requestStart</c></b> read-only property returns a timestamp of the time immediately before the browser starts requesting the resource from the server, cache, or local resource. If the transport connection fails and the browser retries the request, the value returned will be the start of the retry request.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/requestStart">MDN Reference</a>
     /// </summary>
     abstract requestStart: float
     /// <summary>
     /// The <b><c>responseEnd</c></b> read-only property returns a timestamp immediately after the browser receives the last byte of the resource or immediately before the transport connection is closed, whichever comes first.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/responseEnd">MDN Reference</a>
     /// </summary>
     abstract responseEnd: float
     /// <summary>
     /// The <b><c>responseStart</c></b> read-only property returns a timestamp immediately after the browser receives the first byte of the response from the server, cache, or local resource.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/responseStart">MDN Reference</a>
     /// </summary>
     abstract responseStart: float
     /// <summary>
     /// The <b><c>responseStatus</c></b> read-only property represents the HTTP response status code returned when fetching the resource.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/responseStatus">MDN Reference</a>
     /// </summary>
     abstract responseStatus: float
     /// <summary>
     /// The <b><c>secureConnectionStart</c></b> read-only property returns a timestamp immediately before the browser starts the handshake process to secure the current connection. If a secure connection is not used, the property returns zero.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/secureConnectionStart">MDN Reference</a>
     /// </summary>
     abstract secureConnectionStart: float option
     /// <summary>
     /// The <b><c>transferSize</c></b> read-only property represents the size (in octets) of the fetched resource. The size includes the response header fields plus the response payload body (as defined by RFC7230).
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/transferSize">MDN Reference</a>
     /// </summary>
     abstract transferSize: float
     /// <summary>
     /// The <b><c>workerStart</c></b> read-only property of the PerformanceResourceTiming interface returns a DOMHighResTimeStamp immediately before dispatching the FetchEvent if a Service Worker thread is already running, or immediately before starting the Service Worker thread if it is not already running. If the resource is not intercepted by a Service Worker the property will always return 0.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/workerStart">MDN Reference</a>
     /// </summary>
     abstract workerStart: float
@@ -5975,26 +5975,26 @@ type PerformanceResourceTiming =
 
 /// <summary>
 /// The <b><c>PerformanceObserver</c></b> interface is used to observe performance measurement events and be notified of new performance entries as they are recorded in the browser's performance timeline.
-///
+/// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceObserver">MDN Reference</a>
 /// </summary>
 [<Interface>]
 type PerformanceObserver =
     /// <summary>
     /// The <b><c>disconnect()</c></b> method of the PerformanceObserver interface is used to stop the performance observer from receiving any performance entry events.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceObserver/disconnect">MDN Reference</a>
     /// </summary>
     abstract disconnect: unit -> unit
     /// <summary>
     /// The <b><c>observe()</c></b> method of the PerformanceObserver interface is used to specify the set of performance entry types to observe.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceObserver/observe">MDN Reference</a>
     /// </summary>
     abstract observe: ?options: PerformanceObserverObserveOptions -> unit
     /// <summary>
     /// The <b><c>takeRecords()</c></b> method of the PerformanceObserver interface returns the current list of PerformanceEntry objects stored in the performance observer, emptying it out.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceObserver/takeRecords">MDN Reference</a>
     /// </summary>
     abstract takeRecords: unit -> PerformanceEntry[]
@@ -6048,7 +6048,7 @@ type Span =
 /// <summary>
 /// Represents the identity of a user authenticated via Cloudflare Access.
 /// This matches the result of calling /cdn-cgi/access/get-identity.
-///
+/// <br /><br />
 /// The exact structure of the returned object depends on the identity provider
 /// configuration for the Access application. The fields below represent commonly
 /// available properties, but additional provider-specific fields may be present.
@@ -6295,7 +6295,7 @@ type AgentMemoryGetSummaryResponse =
 
 /// <summary>
 /// Options for the recall() method.
-///
+/// <br /><br />
 /// <c>referenceDate</c> accepts a Date object, an ISO-8601 date string
 /// (YYYY-MM-DD), or a full ISO-8601 datetime string. When provided, this
 /// date is used as "today" for resolving relative time references
@@ -6340,7 +6340,7 @@ type AgentMemoryRecallResult =
 
 /// <summary>
 /// Options for the list() method.
-///
+/// <br /><br />
 /// <c>cursor</c> is the opaque continuation token returned by the previous page;
 /// pass it back unchanged to fetch the next page. <c>sessionId</c> and <c>type</c>
 /// are exact-match filters; combining them is allowed.
@@ -6381,7 +6381,7 @@ type AgentMemoryListMemoriesResult =
 
 /// <summary>
 /// A single Agent Memory profile, scoped to a profile name.
-///
+/// <br /><br />
 /// Returned by AgentMemoryNamespace.getProfile.
 /// </summary>
 [<Interface>]
@@ -6394,7 +6394,7 @@ type AgentMemoryProfile =
     abstract get: memoryId: string -> JS.Promise<AgentMemoryMemory>
     /// <summary>
     /// Delete a memory by ID.
-    ///
+    /// <br /><br />
     /// Removes the memory and any source messages linked by the memory's
     /// source message IDs.
     /// </summary>
@@ -6427,7 +6427,7 @@ type AgentMemoryProfile =
     abstract recall: query: string * ?options: AgentMemoryRecallOptions -> JS.Promise<AgentMemoryRecallResult>
     /// <summary>
     /// List active memories in this profile.
-    ///
+    /// <br /><br />
     /// Returns a paginated, filterable view of stored memories. Superseded
     /// versions are excluded. Use the returned <c>cursor</c> (when present) to
     /// fetch the next page.
@@ -6437,7 +6437,7 @@ type AgentMemoryProfile =
     /// <summary>
     /// Soft-delete every memory and message in this profile that is tagged
     /// with <c>sessionId</c>.
-    ///
+    /// <br /><br />
     /// Idempotent: deleting a sessionId that has no rows is a no-op.
     /// </summary>
     /// <param name="sessionId">- Session to delete.</param>
@@ -6447,13 +6447,13 @@ type AgentMemoryProfile =
 
 /// <summary>
 /// Namespace-level Agent Memory binding.
-///
+/// <br /><br />
 /// Used as the type of an <c>env.MEMORY</c>-style binding backed by the Agent
 /// Memory product.
 /// </summary>
-/// <remarks>
-/// @example
-/// <code lang="ts">
+/// <example>
+/// <code>
+/// ```ts
 /// export default {
 ///   async fetch(_request: Request, env: Env): Promise&lt;Response&gt; {
 ///     const profile = await env.MEMORY.getProfile("wrangler-e2e");
@@ -6462,7 +6462,9 @@ type AgentMemoryProfile =
 ///   },
 /// };
 /// </code>
-/// </remarks>
+/// <code>
+/// </code>
+/// </example>
 [<Interface>]
 type AgentMemoryNamespace =
     /// <summary>
@@ -7580,16 +7582,16 @@ type AiSearchJobs =
 
 /// <summary>
 /// Instance-level AI Search service.
-///
+/// <br /><br />
 /// Used as:
 /// - The return type of <c>AiSearchNamespace.get(name)</c> (namespace binding)
 /// - The type of <c>env.BLOG_SEARCH</c> (single instance binding via <c>ai_search</c>)
-///
+/// <br /><br />
 /// Provides search, chat, update, stats, items, and jobs operations.
 /// </summary>
-/// <remarks>
-/// @example
-/// <code lang="ts">
+/// <example>
+/// <code>
+/// ```ts
 /// // Via namespace binding
 /// const instance = env.AI_SEARCH.get("blog");
 /// const results = await instance.search({
@@ -7601,7 +7603,9 @@ type AiSearchJobs =
 ///   messages: [{ role: "user", content: "How does caching work?" }],
 /// });
 /// </code>
-/// </remarks>
+/// <code>
+/// </code>
+/// </example>
 type AiSearchInstance =
     /// <summary>
     /// Search the AI Search instance for relevant chunks.
@@ -7726,14 +7730,14 @@ module AiSearchInstance =
 
 /// <summary>
 /// Namespace-level AI Search service.
-///
+/// <br /><br />
 /// Used as the type of <c>env.AI_SEARCH</c> (namespace binding via <c>ai_search_namespaces</c>).
 /// Scoped to a single namespace. Provides dynamic instance access, creation, deletion,
 /// and multi-instance search/chat operations.
 /// </summary>
-/// <remarks>
-/// @example
-/// <code lang="ts">
+/// <example>
+/// <code>
+/// ```ts
 /// // Access an instance within the namespace
 /// const blog = env.AI_SEARCH.get("blog");
 /// const results = await blog.search({ query: "How does caching work?" });
@@ -7756,7 +7760,9 @@ module AiSearchInstance =
 /// // Delete an instance
 /// await env.AI_SEARCH.delete("tenant-123");
 /// </code>
-/// </remarks>
+/// <code>
+/// </code>
+/// </example>
 type AiSearchNamespace =
     /// <summary>
     /// Get an instance by name within the bound namespace.
@@ -7775,9 +7781,9 @@ type AiSearchNamespace =
     /// </summary>
     /// <param name="config">Instance configuration. Only <c>id</c> is required — omit <c>type</c> and <c>source</c> to create with built-in storage.</param>
     /// <returns>Instance service for the newly created instance.</returns>
-    /// <remarks>
-    /// @example
-    /// <code lang="ts">
+    /// <example>
+    /// <code>
+    /// ```ts
     /// // Create with built-in storage (upload items manually)
     /// const instance = await env.AI_SEARCH.create({ id: "my-search" });
     ///
@@ -7788,7 +7794,9 @@ type AiSearchNamespace =
     ///   source: "https://developers.cloudflare.com",
     /// });
     /// </code>
-    /// </remarks>
+    /// <code>
+    /// </code>
+    /// </example>
     abstract create: config: AiSearchConfig -> JS.Promise<AiSearchInstance>
     /// <summary>
     /// Delete an instance from the bound namespace.
@@ -8586,7 +8594,7 @@ module SystemMessage =
 
 /// <summary>
 /// Permissive merged content part used inside UserMessage arrays.
-///
+/// <br /><br />
 /// Cabidela has a limitation where anyOf/oneOf with enum-based discrimination
 /// inside nested array items does not correctly match different branches for
 /// different array elements, so the schema uses a single merged object.
@@ -9061,10 +9069,10 @@ module ResponseOutputMessage =
 /// <summary>
 /// Workers AI support for OpenAI's Responses API
 /// Reference: https://github.com/openai/openai-node/blob/master/src/resources/responses/responses.ts
-///
+/// <br /><br />
 /// It's a stripped down version from its source.
 /// It currently supports basic function calling, json mode and accepts images as input.
-///
+/// <br /><br />
 /// It does not include types for WebSearch, CodeInterpreter, FileInputs, MCP, CustomTools.
 /// We plan to add those incrementally as model + platform capabilities evolve.
 /// </summary>
@@ -16313,7 +16321,7 @@ type AiOptions =
     abstract websocket: bool option with get, set
     /// <summary>
     /// Tag your requests to group and view them in Cloudflare dashboard.
-    ///
+    /// <br /><br />
     /// Rules:
     /// Tags must only contain letters, numbers, and the symbols: : - . / @
     /// Each tag can have maximum 50 characters.
@@ -17009,7 +17017,7 @@ type ArtifactsTokenListResult =
 
 /// <summary>
 /// Handle for a single repository. Returned by Artifacts.get().
-///
+/// <br /><br />
 /// Methods may throw <c>ArtifactsError</c> with code <c>INTERNAL_ERROR</c> if an unexpected service error occurs.
 /// </summary>
 [<Interface>]
@@ -17072,7 +17080,7 @@ type ArtifactsErrorCode =
 
 /// <summary>
 /// Error thrown by Artifacts binding operations.
-///
+/// <br /><br />
 /// Uses a string <c>.code</c> discriminator following the Cloudflare platform
 /// convention (StreamError, ImagesError, etc.). The <c>.numericCode</c> matches
 /// the REST API <c>errors[].code</c> values.
@@ -17096,7 +17104,7 @@ type ArtifactsError =
 
 /// <summary>
 /// Artifacts binding — namespace-level operations.
-///
+/// <br /><br />
 /// Methods may throw <c>ArtifactsError</c> with code <c>INTERNAL_ERROR</c> if an unexpected service error occurs.
 /// </summary>
 [<Interface>]
@@ -17490,13 +17498,13 @@ type BrowserRunBaseOptions =
     /// <summary>
     /// Override the default user agent string.
     /// </summary>
-    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
+    /// <defaultValue>"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</defaultValue>
     abstract userAgent: string option with get, set
     /// <summary>
     /// Set the browser viewport size.
     /// </summary>
     /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
-    /// <remarks>@default {width:1920,height:1080}</remarks>
+    /// <defaultValue>{width:1920,height:1080}</defaultValue>
     abstract viewport: BrowserRunBaseOptions.Viewport option with get, set
     /// <summary>
     /// Wait for a CSS selector to appear in the page before proceeding.
@@ -17518,7 +17526,7 @@ type BrowserRunBaseOptions =
     /// <summary>
     /// Cache time to live in seconds (0-86400). Set to 0 to disable.
     /// </summary>
-    /// <remarks>@default 5</remarks>
+    /// <defaultValue>5</defaultValue>
     abstract cacheTTL: float option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float) : BrowserRunBaseOptions = jsNative
@@ -17593,12 +17601,12 @@ module BrowserRunBaseOptions =
         /// <summary>
         /// Navigation timeout in milliseconds (max 60 000).
         /// </summary>
-        /// <remarks>@default 30000</remarks>
+        /// <defaultValue>30000</defaultValue>
         abstract timeout: float option with get, set
         /// <summary>
         /// When to consider navigation complete.
         /// </summary>
-        /// <remarks>@default "domcontentloaded"</remarks>
+        /// <defaultValue>"domcontentloaded"</defaultValue>
         abstract waitUntil: U2<string, BrowserRunLifecycleEvent[]> option with get, set
         abstract referer: string option with get, set
         abstract referrerPolicy: string option with get, set
@@ -17669,9 +17677,9 @@ type BrowserRunCommonOptions3 =
 
 [<Interface>]
 type BrowserRunPuppeteerScreenshotOptions =
-    /// <remarks>@default "png"</remarks>
+    /// <defaultValue>"png"</defaultValue>
     abstract ``type``: BrowserRunPuppeteerScreenshotOptions.Type option with get, set
-    /// <remarks>@default "binary"</remarks>
+    /// <defaultValue>"binary"</defaultValue>
     abstract encoding: BrowserRunPuppeteerScreenshotOptions.Encoding option with get, set
     abstract quality: float option with get, set
     abstract fullPage: bool option with get, set
@@ -17767,31 +17775,31 @@ type BrowserRunPDFOptions2 =
 module BrowserRunPDFOptions2 =
     [<Interface>]
     type PdfOptions =
-        /// <remarks>@default 1</remarks>
+        /// <defaultValue>1</defaultValue>
         abstract scale: float option with get, set
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract displayHeaderFooter: bool option with get, set
         abstract headerTemplate: string option with get, set
         abstract footerTemplate: string option with get, set
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract printBackground: bool option with get, set
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract landscape: bool option with get, set
         abstract pageRanges: string option with get, set
-        /// <remarks>@default "letter"</remarks>
+        /// <defaultValue>"letter"</defaultValue>
         abstract format: BrowserRunPDFOptions2.PdfOptions.Format option with get, set
         abstract width: U2<string, float> option with get, set
         abstract height: U2<string, float> option with get, set
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract preferCSSPageSize: bool option with get, set
         abstract margin: BrowserRunPDFOptions2.PdfOptions.Margin option with get, set
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract omitBackground: bool option with get, set
-        /// <remarks>@default true</remarks>
+        /// <defaultValue>true</defaultValue>
         abstract tagged: bool option with get, set
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract outline: bool option with get, set
-        /// <remarks>@default 30000</remarks>
+        /// <defaultValue>30000</defaultValue>
         abstract timeout: float option with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (?scale: float, ?displayHeaderFooter: bool, ?headerTemplate: string, ?footerTemplate: string, ?printBackground: bool, ?landscape: bool, ?pageRanges: string, ?format: BrowserRunPDFOptions2.PdfOptions.Format, ?width: U2<string, float>, ?height: U2<string, float>, ?preferCSSPageSize: bool, ?margin: BrowserRunPDFOptions2.PdfOptions.Margin, ?omitBackground: bool, ?tagged: bool, ?outline: bool, ?timeout: float) : PdfOptions = jsNative
@@ -17883,12 +17891,12 @@ type BrowserRunLinksOptions2 =
     /// <summary>
     /// When true, only return links that are visible on the page.
     /// </summary>
-    /// <remarks>@default false</remarks>
+    /// <defaultValue>false</defaultValue>
     abstract visibleLinksOnly: bool option with get, set
     /// <summary>
     /// When true, exclude links pointing to external domains.
     /// </summary>
-    /// <remarks>@default false</remarks>
+    /// <defaultValue>false</defaultValue>
     abstract excludeExternalLinks: bool option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (url: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?visibleLinksOnly: bool, ?excludeExternalLinks: bool) : BrowserRunLinksOptions2 = jsNative
@@ -17903,12 +17911,12 @@ type BrowserRunLinksOptions3 =
     /// <summary>
     /// When true, only return links that are visible on the page.
     /// </summary>
-    /// <remarks>@default false</remarks>
+    /// <defaultValue>false</defaultValue>
     abstract visibleLinksOnly: bool option with get, set
     /// <summary>
     /// When true, exclude links pointing to external domains.
     /// </summary>
-    /// <remarks>@default false</remarks>
+    /// <defaultValue>false</defaultValue>
     abstract excludeExternalLinks: bool option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (html: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?visibleLinksOnly: bool, ?excludeExternalLinks: bool) : BrowserRunLinksOptions3 = jsNative
@@ -17933,7 +17941,7 @@ type BrowserRunSnapshotOptions2 =
     /// Which representations of the page to return. At least two distinct formats
     /// are required; request a single format from its dedicated action instead.
     /// </summary>
-    /// <remarks>@default ["content","screenshot"]</remarks>
+    /// <defaultValue>["content","screenshot"]</defaultValue>
     abstract formats: BrowserRunSnapshotFormat[] option with get, set
     /// <remarks>@see https://pptr.dev/api/puppeteer.screenshotoptions</remarks>
     abstract screenshotOptions: BrowserRunSnapshotOptions2.ScreenshotOptions option with get, set
@@ -17943,7 +17951,7 @@ type BrowserRunSnapshotOptions2 =
 module BrowserRunSnapshotOptions2 =
     [<Interface>]
     type ScreenshotOptions =
-        /// <remarks>@default "png"</remarks>
+        /// <defaultValue>"png"</defaultValue>
         abstract ``type``: BrowserRunPuppeteerScreenshotOptions.Type option with get, set
         abstract quality: float option with get, set
         abstract fullPage: bool option with get, set
@@ -17966,7 +17974,7 @@ type BrowserRunSnapshotOptions3 =
     /// Which representations of the page to return. At least two distinct formats
     /// are required; request a single format from its dedicated action instead.
     /// </summary>
-    /// <remarks>@default ["content","screenshot"]</remarks>
+    /// <defaultValue>["content","screenshot"]</defaultValue>
     abstract formats: BrowserRunSnapshotFormat[] option with get, set
     /// <remarks>@see https://pptr.dev/api/puppeteer.screenshotoptions</remarks>
     abstract screenshotOptions: BrowserRunSnapshotOptions2.ScreenshotOptions option with get, set
@@ -18549,14 +18557,14 @@ type BrowserRun =
     /// <param name="options">- Screenshot options including viewport, selectors, and image format.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - Binary image data with <c>Content-Type: image/png</c>, <c>image/jpeg</c>, or <c>image/webp</c> (when <c>encoding: 'binary'</c>, the default)
     /// - Data URI string with <c>Content-Type: text/plain</c> (when <c>encoding: 'base64'</c>)
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -18564,13 +18572,13 @@ type BrowserRun =
     /// <param name="options">- PDF generation options including page size, margins, and headers/footers.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - Binary PDF data with <c>Content-Type: application/pdf</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -18578,13 +18586,13 @@ type BrowserRun =
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunContentSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -18592,13 +18600,13 @@ type BrowserRun =
     /// <param name="options">- Scrape options with CSS selectors for elements to extract.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunScrapeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -18606,13 +18614,13 @@ type BrowserRun =
     /// <param name="options">- Options to filter visible or internal links only.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunLinksSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -18623,13 +18631,13 @@ type BrowserRun =
     /// </param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunSnapshotSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -18637,15 +18645,15 @@ type BrowserRun =
     /// <param name="options">- JSON extraction options with prompt or response_format schema.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunJsonSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
     /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
     /// - HTTP 422/500 for AI extraction failures (may include <c>rawAiResponse</c> field)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -18653,14 +18661,14 @@ type BrowserRun =
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunMarkdownSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
     /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -18671,16 +18679,16 @@ type BrowserRun =
     /// </param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunAccessibilityTreeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
     /// - <c>result.accessibilityTree</c> is <c>null</c> when <c>root</c> matched no element
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
     /// - HTTP 422 for a malformed <c>root</c> selector
     /// - HTTP 500 with code <c>2017</c> or <c>2018</c> when the tree could not be built
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -18700,14 +18708,14 @@ type BrowserRun =
     /// <param name="options">- Screenshot options including viewport, selectors, and image format.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - Binary image data with <c>Content-Type: image/png</c>, <c>image/jpeg</c>, or <c>image/webp</c> (when <c>encoding: 'binary'</c>, the default)
     /// - Data URI string with <c>Content-Type: text/plain</c> (when <c>encoding: 'base64'</c>)
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -18715,13 +18723,13 @@ type BrowserRun =
     /// <param name="options">- PDF generation options including page size, margins, and headers/footers.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - Binary PDF data with <c>Content-Type: application/pdf</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -18729,13 +18737,13 @@ type BrowserRun =
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunContentSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -18743,13 +18751,13 @@ type BrowserRun =
     /// <param name="options">- Scrape options with CSS selectors for elements to extract.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunScrapeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -18757,13 +18765,13 @@ type BrowserRun =
     /// <param name="options">- Options to filter visible or internal links only.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunLinksSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -18774,13 +18782,13 @@ type BrowserRun =
     /// </param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunSnapshotSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -18788,15 +18796,15 @@ type BrowserRun =
     /// <param name="options">- JSON extraction options with prompt or response_format schema.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunJsonSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
     /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
     /// - HTTP 422/500 for AI extraction failures (may include <c>rawAiResponse</c> field)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -18804,14 +18812,14 @@ type BrowserRun =
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunMarkdownSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
     /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -18822,16 +18830,16 @@ type BrowserRun =
     /// </param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunAccessibilityTreeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
     /// - <c>result.accessibilityTree</c> is <c>null</c> when <c>root</c> matched no element
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
     /// - HTTP 422 for a malformed <c>root</c> selector
     /// - HTTP 500 with code <c>2017</c> or <c>2018</c> when the tree could not be built
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -18851,14 +18859,14 @@ type BrowserRun =
     /// <param name="options">- Screenshot options including viewport, selectors, and image format.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - Binary image data with <c>Content-Type: image/png</c>, <c>image/jpeg</c>, or <c>image/webp</c> (when <c>encoding: 'binary'</c>, the default)
     /// - Data URI string with <c>Content-Type: text/plain</c> (when <c>encoding: 'base64'</c>)
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -18866,13 +18874,13 @@ type BrowserRun =
     /// <param name="options">- PDF generation options including page size, margins, and headers/footers.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - Binary PDF data with <c>Content-Type: application/pdf</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -18880,13 +18888,13 @@ type BrowserRun =
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunContentSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -18894,13 +18902,13 @@ type BrowserRun =
     /// <param name="options">- Scrape options with CSS selectors for elements to extract.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunScrapeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -18908,13 +18916,13 @@ type BrowserRun =
     /// <param name="options">- Options to filter visible or internal links only.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunLinksSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -18925,13 +18933,13 @@ type BrowserRun =
     /// </param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunSnapshotSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -18939,15 +18947,15 @@ type BrowserRun =
     /// <param name="options">- JSON extraction options with prompt or response_format schema.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunJsonSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
     /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
     /// - HTTP 422/500 for AI extraction failures (may include <c>rawAiResponse</c> field)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -18955,14 +18963,14 @@ type BrowserRun =
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunMarkdownSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
     /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -18973,16 +18981,16 @@ type BrowserRun =
     /// </param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunAccessibilityTreeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
     /// - <c>result.accessibilityTree</c> is <c>null</c> when <c>root</c> matched no element
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
     /// - HTTP 422 for a malformed <c>root</c> selector
     /// - HTTP 500 with code <c>2017</c> or <c>2018</c> when the tree could not be built
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19002,14 +19010,14 @@ type BrowserRun =
     /// <param name="options">- Screenshot options including viewport, selectors, and image format.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - Binary image data with <c>Content-Type: image/png</c>, <c>image/jpeg</c>, or <c>image/webp</c> (when <c>encoding: 'binary'</c>, the default)
     /// - Data URI string with <c>Content-Type: text/plain</c> (when <c>encoding: 'base64'</c>)
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19017,13 +19025,13 @@ type BrowserRun =
     /// <param name="options">- PDF generation options including page size, margins, and headers/footers.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - Binary PDF data with <c>Content-Type: application/pdf</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19031,13 +19039,13 @@ type BrowserRun =
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunContentSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19045,13 +19053,13 @@ type BrowserRun =
     /// <param name="options">- Scrape options with CSS selectors for elements to extract.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunScrapeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19059,13 +19067,13 @@ type BrowserRun =
     /// <param name="options">- Options to filter visible or internal links only.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunLinksSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19076,13 +19084,13 @@ type BrowserRun =
     /// </param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunSnapshotSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19090,15 +19098,15 @@ type BrowserRun =
     /// <param name="options">- JSON extraction options with prompt or response_format schema.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunJsonSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
     /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
     /// - HTTP 422/500 for AI extraction failures (may include <c>rawAiResponse</c> field)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19106,14 +19114,14 @@ type BrowserRun =
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunMarkdownSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
     /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19124,16 +19132,16 @@ type BrowserRun =
     /// </param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunAccessibilityTreeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
     /// - <c>result.accessibilityTree</c> is <c>null</c> when <c>root</c> matched no element
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
     /// - HTTP 422 for a malformed <c>root</c> selector
     /// - HTTP 500 with code <c>2017</c> or <c>2018</c> when the tree could not be built
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19153,14 +19161,14 @@ type BrowserRun =
     /// <param name="options">- Screenshot options including viewport, selectors, and image format.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - Binary image data with <c>Content-Type: image/png</c>, <c>image/jpeg</c>, or <c>image/webp</c> (when <c>encoding: 'binary'</c>, the default)
     /// - Data URI string with <c>Content-Type: text/plain</c> (when <c>encoding: 'base64'</c>)
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19168,13 +19176,13 @@ type BrowserRun =
     /// <param name="options">- PDF generation options including page size, margins, and headers/footers.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - Binary PDF data with <c>Content-Type: application/pdf</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19182,13 +19190,13 @@ type BrowserRun =
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunContentSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19196,13 +19204,13 @@ type BrowserRun =
     /// <param name="options">- Scrape options with CSS selectors for elements to extract.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunScrapeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19210,13 +19218,13 @@ type BrowserRun =
     /// <param name="options">- Options to filter visible or internal links only.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunLinksSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19227,13 +19235,13 @@ type BrowserRun =
     /// </param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunSnapshotSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19241,15 +19249,15 @@ type BrowserRun =
     /// <param name="options">- JSON extraction options with prompt or response_format schema.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunJsonSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
     /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
     /// - HTTP 422/500 for AI extraction failures (may include <c>rawAiResponse</c> field)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19257,14 +19265,14 @@ type BrowserRun =
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunMarkdownSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
     /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19275,16 +19283,16 @@ type BrowserRun =
     /// </param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunAccessibilityTreeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
     /// - <c>result.accessibilityTree</c> is <c>null</c> when <c>root</c> matched no element
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
     /// - HTTP 422 for a malformed <c>root</c> selector
     /// - HTTP 500 with code <c>2017</c> or <c>2018</c> when the tree could not be built
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19304,14 +19312,14 @@ type BrowserRun =
     /// <param name="options">- Screenshot options including viewport, selectors, and image format.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - Binary image data with <c>Content-Type: image/png</c>, <c>image/jpeg</c>, or <c>image/webp</c> (when <c>encoding: 'binary'</c>, the default)
     /// - Data URI string with <c>Content-Type: text/plain</c> (when <c>encoding: 'base64'</c>)
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19319,13 +19327,13 @@ type BrowserRun =
     /// <param name="options">- PDF generation options including page size, margins, and headers/footers.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - Binary PDF data with <c>Content-Type: application/pdf</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19333,13 +19341,13 @@ type BrowserRun =
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunContentSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19347,13 +19355,13 @@ type BrowserRun =
     /// <param name="options">- Scrape options with CSS selectors for elements to extract.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunScrapeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19361,13 +19369,13 @@ type BrowserRun =
     /// <param name="options">- Options to filter visible or internal links only.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunLinksSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19378,13 +19386,13 @@ type BrowserRun =
     /// </param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunSnapshotSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19392,15 +19400,15 @@ type BrowserRun =
     /// <param name="options">- JSON extraction options with prompt or response_format schema.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunJsonSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
     /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
     /// - HTTP 422/500 for AI extraction failures (may include <c>rawAiResponse</c> field)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19408,14 +19416,14 @@ type BrowserRun =
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunMarkdownSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
     /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19426,16 +19434,16 @@ type BrowserRun =
     /// </param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunAccessibilityTreeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
     /// - <c>result.accessibilityTree</c> is <c>null</c> when <c>root</c> matched no element
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
     /// - HTTP 422 for a malformed <c>root</c> selector
     /// - HTTP 500 with code <c>2017</c> or <c>2018</c> when the tree could not be built
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19455,14 +19463,14 @@ type BrowserRun =
     /// <param name="options">- Screenshot options including viewport, selectors, and image format.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - Binary image data with <c>Content-Type: image/png</c>, <c>image/jpeg</c>, or <c>image/webp</c> (when <c>encoding: 'binary'</c>, the default)
     /// - Data URI string with <c>Content-Type: text/plain</c> (when <c>encoding: 'base64'</c>)
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19470,13 +19478,13 @@ type BrowserRun =
     /// <param name="options">- PDF generation options including page size, margins, and headers/footers.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - Binary PDF data with <c>Content-Type: application/pdf</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19484,13 +19492,13 @@ type BrowserRun =
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunContentSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19498,13 +19506,13 @@ type BrowserRun =
     /// <param name="options">- Scrape options with CSS selectors for elements to extract.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunScrapeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19512,13 +19520,13 @@ type BrowserRun =
     /// <param name="options">- Options to filter visible or internal links only.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunLinksSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19529,13 +19537,13 @@ type BrowserRun =
     /// </param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunSnapshotSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19543,15 +19551,15 @@ type BrowserRun =
     /// <param name="options">- JSON extraction options with prompt or response_format schema.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunJsonSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
     /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
     /// - HTTP 422/500 for AI extraction failures (may include <c>rawAiResponse</c> field)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19559,14 +19567,14 @@ type BrowserRun =
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunMarkdownSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
     /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19577,16 +19585,16 @@ type BrowserRun =
     /// </param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunAccessibilityTreeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
     /// - <c>result.accessibilityTree</c> is <c>null</c> when <c>root</c> matched no element
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
     /// - HTTP 422 for a malformed <c>root</c> selector
     /// - HTTP 500 with code <c>2017</c> or <c>2018</c> when the tree could not be built
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19606,14 +19614,14 @@ type BrowserRun =
     /// <param name="options">- Screenshot options including viewport, selectors, and image format.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - Binary image data with <c>Content-Type: image/png</c>, <c>image/jpeg</c>, or <c>image/webp</c> (when <c>encoding: 'binary'</c>, the default)
     /// - Data URI string with <c>Content-Type: text/plain</c> (when <c>encoding: 'base64'</c>)
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19621,13 +19629,13 @@ type BrowserRun =
     /// <param name="options">- PDF generation options including page size, margins, and headers/footers.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - Binary PDF data with <c>Content-Type: application/pdf</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19635,13 +19643,13 @@ type BrowserRun =
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunContentSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19649,13 +19657,13 @@ type BrowserRun =
     /// <param name="options">- Scrape options with CSS selectors for elements to extract.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunScrapeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19663,13 +19671,13 @@ type BrowserRun =
     /// <param name="options">- Options to filter visible or internal links only.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunLinksSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19680,13 +19688,13 @@ type BrowserRun =
     /// </param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunSnapshotSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19694,15 +19702,15 @@ type BrowserRun =
     /// <param name="options">- JSON extraction options with prompt or response_format schema.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunJsonSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
     /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
     /// - HTTP 422/500 for AI extraction failures (may include <c>rawAiResponse</c> field)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19710,14 +19718,14 @@ type BrowserRun =
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunMarkdownSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
     /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19728,16 +19736,16 @@ type BrowserRun =
     /// </param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunAccessibilityTreeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
     /// - <c>result.accessibilityTree</c> is <c>null</c> when <c>root</c> matched no element
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
     /// - HTTP 422 for a malformed <c>root</c> selector
     /// - HTTP 500 with code <c>2017</c> or <c>2018</c> when the tree could not be built
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19757,14 +19765,14 @@ type BrowserRun =
     /// <param name="options">- Screenshot options including viewport, selectors, and image format.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - Binary image data with <c>Content-Type: image/png</c>, <c>image/jpeg</c>, or <c>image/webp</c> (when <c>encoding: 'binary'</c>, the default)
     /// - Data URI string with <c>Content-Type: text/plain</c> (when <c>encoding: 'base64'</c>)
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19772,13 +19780,13 @@ type BrowserRun =
     /// <param name="options">- PDF generation options including page size, margins, and headers/footers.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - Binary PDF data with <c>Content-Type: application/pdf</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19786,13 +19794,13 @@ type BrowserRun =
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunContentSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19800,13 +19808,13 @@ type BrowserRun =
     /// <param name="options">- Scrape options with CSS selectors for elements to extract.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunScrapeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19814,13 +19822,13 @@ type BrowserRun =
     /// <param name="options">- Options to filter visible or internal links only.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunLinksSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19831,13 +19839,13 @@ type BrowserRun =
     /// </param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunSnapshotSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19845,15 +19853,15 @@ type BrowserRun =
     /// <param name="options">- JSON extraction options with prompt or response_format schema.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunJsonSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
     /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
     /// - HTTP 422/500 for AI extraction failures (may include <c>rawAiResponse</c> field)
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19861,14 +19869,14 @@ type BrowserRun =
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunMarkdownSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
     /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19879,16 +19887,16 @@ type BrowserRun =
     /// </param>
     /// <returns>
     /// A <c>Response</c> containing one of:
-    ///
+    /// <br /><br />
     /// <b>Success (HTTP 200):</b>
     /// - <c>BrowserRunAccessibilityTreeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
     /// - <c>result.accessibilityTree</c> is <c>null</c> when <c>root</c> matched no element
-    ///
+    /// <br /><br />
     /// <b>Error:</b>
     /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
     /// - HTTP 422 for a malformed <c>root</c> selector
     /// - HTTP 500 with code <c>2017</c> or <c>2018</c> when the tree could not be built
-    ///
+    /// <br /><br />
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
@@ -19908,7 +19916,7 @@ module BrowserRun =
 /// that you pass as an argument to the Request constructor, you can
 /// set certain properties of a <c>cf</c> object to control how Cloudflare
 /// features are applied to that new Request.
-///
+/// <br /><br />
 /// Note: Currently, these properties cannot be tested in the
 /// playground.
 /// </summary>
@@ -19919,7 +19927,7 @@ type RequestInitCfProperties =
     /// "the same" for caching purposes. If a request has the same cache key
     /// as some previous request, then we can serve the same cached response for
     /// both. (e.g. 'some-key')
-    ///
+    /// <br /><br />
     /// Only available for Enterprise customers.
     /// </summary>
     abstract cacheKey: string option with get, set
@@ -19928,7 +19936,7 @@ type RequestInitCfProperties =
     /// to the origin response without modifications to the origin server.
     /// This will allow for greater control over the Purge by Cache Tag feature
     /// utilizing changes only in the Workers process.
-    ///
+    /// <br /><br />
     /// Only available for Enterprise customers.
     /// </summary>
     abstract cacheTags: string[] option with get, set
@@ -19948,10 +19956,10 @@ type RequestInitCfProperties =
     /// <summary>
     /// Explicit Cache-Control header value to set on the response stored in cache.
     /// This gives full control over cache directives (e.g. 'public, max-age=3600, s-maxage=86400').
-    ///
+    /// <br /><br />
     /// Cannot be used together with <c>cacheTtl</c> or the <c>cache</c> request option (<c>no-store</c>/<c>no-cache</c>),
     /// as these are mutually exclusive cache control mechanisms. Setting both will throw a TypeError.
-    ///
+    /// <br /><br />
     /// Can be used together with <c>cacheTtlByStatus</c>.
     /// </summary>
     abstract cacheControl: string option with get, set
@@ -19985,10 +19993,10 @@ type RequestInitCfProperties =
     /// <summary>
     /// Controls whether an outbound gRPC-web subrequest from this Worker is
     /// converted to gRPC at the Cloudflare edge.
-    ///
+    /// <br /><br />
     /// - <c>"passthrough"</c>: forward the subrequest unchanged as gRPC-web (default).
     /// - <c>"convert"</c>: convert the gRPC-web subrequest to gRPC at the edge.
-    ///
+    /// <br /><br />
     /// Provides per-request control over the same edge conversion behavior
     /// gated by the <c>auto_grpc_convert</c> compatibility flag.
     /// </summary>
@@ -20002,7 +20010,7 @@ type RequestInitCfProperties =
     /// Redirects the request to an alternate origin server. You can use this,
     /// for example, to implement load balancing across several origins.
     /// (e.g.us-east.example.com)
-    ///
+    /// <br /><br />
     /// Note - For security reasons, the hostname set in resolveOverride must
     /// be proxied on the same Cloudflare zone of the incoming request.
     /// Otherwise, the setting is ignored. CNAME hosts are allowed, so to
@@ -20032,7 +20040,7 @@ type RequestInitCfPropertiesVary =
     abstract ``default``: RequestInitCfPropertiesVaryHeader with get, set
     /// <summary>
     /// Lowercase request header names and their Vary configuration.
-    ///
+    /// <br /><br />
     /// The <c>accept</c> header can include <c>media_types</c>, the <c>accept-language</c>
     /// header can include <c>languages</c>, and other headers support only <c>action</c>.
     /// </summary>
@@ -20060,7 +20068,7 @@ type RequestInitCfPropertiesVaryAcceptHeader =
     inherit RequestInitCfPropertiesVaryHeader
     /// <summary>
     /// Media types to keep when normalizing the <c>Accept</c> request header.
-    ///
+    /// <br /><br />
     /// Named <c>media_types</c> to match the serialized <c>cf.vary</c> configuration.
     /// </summary>
     abstract media_types: string[] option with get, set
@@ -20083,7 +20091,7 @@ type RequestInitCfPropertiesVaryAcceptLanguageHeader =
 
 /// <summary>
 /// Lowercase request header names and their Vary behavior.
-///
+/// <br /><br />
 /// The index signature allows arbitrary custom request headers beyond the
 /// well-known <c>accept</c> and <c>accept-language</c> specializations.
 /// </summary>
@@ -20156,7 +20164,7 @@ type BasicImageTransformations =
     /// <summary>
     /// Allows you to trim your image. Takes dpr into account and is performed before
     /// resizing or rotation.
-    ///
+    /// <br /><br />
     /// It can be used as:
     /// - left, top, right, bottom - it will specify the number of pixels to cut
     ///   off each side
@@ -20291,9 +20299,9 @@ type RequestInitCfPropertiesImageDraw =
     /// positions left side of the overlay 10 pixels from the left edge of the
     /// image it's drawn over. bottom: 0 aligns bottom of the overlay with bottom
     /// of the background image.
-    ///
+    /// <br /><br />
     /// Setting both left &amp; right, or both top &amp; bottom is an error.
-    ///
+    /// <br /><br />
     /// If no position is specified, the image will be centered.
     /// </summary>
     abstract top: float option with get, set
@@ -20676,66 +20684,66 @@ type IncomingRequestCfPropertiesBase =
     /// <summary>
     /// <a href="https://www.iana.org/assignments/as-numbers/as-numbers.xhtml">ASN</a> of the incoming request.
     /// </summary>
-    /// <remarks>@example 395747</remarks>
+    /// <example><c>395747</c></example>
     abstract asn: float option with get, set
     /// <summary>
     /// The organization which owns the ASN of the incoming request.
     /// </summary>
-    /// <remarks>@example "Google Cloud"</remarks>
+    /// <example><c>"Google Cloud"</c></example>
     abstract asOrganization: string option with get, set
     /// <summary>
     /// The original value of the <c>Accept-Encoding</c> header if Cloudflare modified it.
     /// </summary>
-    /// <remarks>@example "gzip, deflate, br"</remarks>
+    /// <example><c>"gzip, deflate, br"</c></example>
     abstract clientAcceptEncoding: string option with get, set
     /// <summary>
     /// The number of milliseconds it took for the request to reach your worker.
     /// </summary>
-    /// <remarks>@example 22</remarks>
+    /// <example><c>22</c></example>
     abstract clientTcpRtt: float option with get, set
     /// <summary>
     /// The three-letter <a href="https://en.wikipedia.org/wiki/IATA_airport_code">IATA</a>
     /// airport code of the data center that the request hit.
     /// </summary>
-    /// <remarks>@example "DFW"</remarks>
+    /// <example><c>"DFW"</c></example>
     abstract colo: string with get, set
     /// <summary>
     /// Represents the upstream's response to a
     /// <a href="https://tldp.org/HOWTO/TCP-Keepalive-HOWTO/overview.html">TCP <c>keepalive</c> message</a>
     /// from cloudflare.
-    ///
+    /// <br /><br />
     /// For workers with no upstream, this will always be <c>1</c>.
     /// </summary>
-    /// <remarks>@example 3</remarks>
+    /// <example><c>3</c></example>
     abstract edgeRequestKeepAliveStatus: IncomingRequestCfPropertiesEdgeRequestKeepAliveStatus with get, set
     /// <summary>
     /// The HTTP Protocol the request used.
     /// </summary>
-    /// <remarks>@example "HTTP/2"</remarks>
+    /// <example><c>"HTTP/2"</c></example>
     abstract httpProtocol: string with get, set
     /// <summary>
     /// The browser-requested prioritization information in the request object.
-    ///
+    /// <br /><br />
     /// If no information was set, defaults to the empty string <c>""</c>
     /// </summary>
-    /// <remarks>@example "weight=192;exclusive=0;group=3;group-weight=127"</remarks>
-    /// <remarks>@default ""</remarks>
+    /// <example><c>"weight=192;exclusive=0;group=3;group-weight=127"</c></example>
+    /// <defaultValue>""</defaultValue>
     abstract requestPriority: string with get, set
     /// <summary>
     /// The TLS version of the connection to Cloudflare.
     /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
     /// </summary>
-    /// <remarks>@example "TLSv1.3"</remarks>
+    /// <example><c>"TLSv1.3"</c></example>
     abstract tlsVersion: string with get, set
     /// <summary>
     /// The cipher for the connection to Cloudflare.
     /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
     /// </summary>
-    /// <remarks>@example "AEAD-AES128-GCM-SHA256"</remarks>
+    /// <example><c>"AEAD-AES128-GCM-SHA256"</c></example>
     abstract tlsCipher: string with get, set
     /// <summary>
     /// Metadata containing the <a href="https://www.rfc-editor.org/rfc/rfc5246#section-7.4.1.2"><c>HELLO</c></a> and <a href="https://www.rfc-editor.org/rfc/rfc5246#section-7.4.9"><c>FINISHED</c></a> messages from this request's TLS handshake.
-    ///
+    /// <br /><br />
     /// If the incoming request was served over plaintext (without TLS) this field is undefined.
     /// </summary>
     abstract tlsExportedAuthenticator: IncomingRequestCfPropertiesExportedAuthenticatorMetadata option with get, set
@@ -20748,7 +20756,7 @@ type IncomingRequestCfPropertiesBotManagementBase =
     /// Cloudflare’s <a href="https://developers.cloudflare.com/bots/concepts/bot-score/">level of certainty</a> that a request comes from a bot,
     /// represented as an integer percentage between <c>1</c> (almost certainly a bot) and <c>99</c> (almost certainly human).
     /// </summary>
-    /// <remarks>@example 54</remarks>
+    /// <example><c>54</c></example>
     abstract score: float with get, set
     /// <summary>
     /// A boolean value that is true if the request comes from a good bot, like Google or Bing.
@@ -20799,7 +20807,7 @@ type IncomingRequestCfPropertiesBotManagementEnterprise =
 type IncomingRequestCfPropertiesCloudflareForSaaSEnterprise<'HostMetadata> =
     /// <summary>
     /// Custom metadata set per-host in <a href="https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/">Cloudflare for SaaS</a>.
-    ///
+    /// <br /><br />
     /// This field is only present if you have Cloudflare for SaaS enabled on your account
     /// and you have followed the <a href="(https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/domain-support/custom-metadata/">required steps to enable it</a>).
     /// </summary>
@@ -20811,15 +20819,15 @@ type IncomingRequestCfPropertiesCloudflareForSaaSEnterprise<'HostMetadata> =
 type IncomingRequestCfPropertiesCloudflareAccessOrApiShield =
     /// <summary>
     /// Information about the client certificate presented to Cloudflare.
-    ///
+    /// <br /><br />
     /// This is populated when the incoming request is served over TLS using
     /// either Cloudflare Access or API Shield (mTLS)
     /// and the presented SSL certificate has a valid
     /// <a href="https://ldapwiki.com/wiki/Certificate%20Serial%20Number">Certificate Serial Number</a>
     /// (i.e., not <c>null</c> or <c>""</c>).
-    ///
+    /// <br /><br />
     /// Otherwise, a set of placeholder values are used.
-    ///
+    /// <br /><br />
     /// The property <c>certPresented</c> will be set to <c>"1"</c> when
     /// the object is populated (i.e. the above conditions were met).
     /// </summary>
@@ -20835,22 +20843,22 @@ type IncomingRequestCfPropertiesExportedAuthenticatorMetadata =
     /// <summary>
     /// The client's <a href="https://www.rfc-editor.org/rfc/rfc5246#section-7.4.1.2"><c>HELLO</c> message</a>, encoded in hexadecimal
     /// </summary>
-    /// <remarks>@example "44372ba35fa1270921d318f34c12f155dc87b682cf36a790cfaa3ba8737a1b5d"</remarks>
+    /// <example><c>"44372ba35fa1270921d318f34c12f155dc87b682cf36a790cfaa3ba8737a1b5d"</c></example>
     abstract clientHandshake: string with get, set
     /// <summary>
     /// The server's <a href="https://www.rfc-editor.org/rfc/rfc5246#section-7.4.1.2"><c>HELLO</c> message</a>, encoded in hexadecimal
     /// </summary>
-    /// <remarks>@example "44372ba35fa1270921d318f34c12f155dc87b682cf36a790cfaa3ba8737a1b5d"</remarks>
+    /// <example><c>"44372ba35fa1270921d318f34c12f155dc87b682cf36a790cfaa3ba8737a1b5d"</c></example>
     abstract serverHandshake: string with get, set
     /// <summary>
     /// The client's <a href="https://www.rfc-editor.org/rfc/rfc5246#section-7.4.9"><c>FINISHED</c> message</a>, encoded in hexadecimal
     /// </summary>
-    /// <remarks>@example "084ee802fe1348f688220e2a6040a05b2199a761f33cf753abb1b006792d3f8b"</remarks>
+    /// <example><c>"084ee802fe1348f688220e2a6040a05b2199a761f33cf753abb1b006792d3f8b"</c></example>
     abstract clientFinished: string with get, set
     /// <summary>
     /// The server's <a href="https://www.rfc-editor.org/rfc/rfc5246#section-7.4.9"><c>FINISHED</c> message</a>, encoded in hexadecimal
     /// </summary>
-    /// <remarks>@example "084ee802fe1348f688220e2a6040a05b2199a761f33cf753abb1b006792d3f8b"</remarks>
+    /// <example><c>"084ee802fe1348f688220e2a6040a05b2199a761f33cf753abb1b006792d3f8b"</c></example>
     abstract serverFinished: string with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (clientHandshake: string, serverHandshake: string, clientFinished: string, serverFinished: string) : IncomingRequestCfPropertiesExportedAuthenticatorMetadata = jsNative
@@ -20862,66 +20870,66 @@ type IncomingRequestCfPropertiesExportedAuthenticatorMetadata =
 type IncomingRequestCfPropertiesGeographicInformation =
     /// <summary>
     /// The <a href="https://www.iso.org/iso-3166-country-codes.html">ISO 3166-1 Alpha 2</a> country code the request originated from.
-    ///
+    /// <br /><br />
     /// If your worker is <a href="https://support.cloudflare.com/hc/en-us/articles/203306930-Understanding-Cloudflare-Tor-support-and-Onion-Routing">configured to accept TOR connections</a>, this may also be <c>"T1"</c>, indicating a request that originated over TOR.
-    ///
+    /// <br /><br />
     /// If Cloudflare is unable to determine where the request originated this property is omitted.
-    ///
+    /// <br /><br />
     /// The country code <c>"T1"</c> is used for requests originating on TOR.
     /// </summary>
-    /// <remarks>@example "GB"</remarks>
+    /// <example><c>"GB"</c></example>
     abstract country: IncomingRequestCfProperties.Country option with get, set
     /// <summary>
     /// If present, this property indicates that the request originated in the EU
     /// </summary>
-    /// <remarks>@example "1"</remarks>
+    /// <example><c>"1"</c></example>
     abstract isEUCountry: string option with get, set
     /// <summary>
     /// A two-letter code indicating the continent the request originated from.
     /// </summary>
-    /// <remarks>@example "AN"</remarks>
+    /// <example><c>"AN"</c></example>
     abstract continent: ContinentCode option with get, set
     /// <summary>
     /// The city the request originated from
     /// </summary>
-    /// <remarks>@example "Austin"</remarks>
+    /// <example><c>"Austin"</c></example>
     abstract city: string option with get, set
     /// <summary>
     /// Postal code of the incoming request
     /// </summary>
-    /// <remarks>@example "78701"</remarks>
+    /// <example><c>"78701"</c></example>
     abstract postalCode: string option with get, set
     /// <summary>
     /// Latitude of the incoming request
     /// </summary>
-    /// <remarks>@example "30.27130"</remarks>
+    /// <example><c>"30.27130"</c></example>
     abstract latitude: string option with get, set
     /// <summary>
     /// Longitude of the incoming request
     /// </summary>
-    /// <remarks>@example "-97.74260"</remarks>
+    /// <example><c>"-97.74260"</c></example>
     abstract longitude: string option with get, set
     /// <summary>
     /// Timezone of the incoming request
     /// </summary>
-    /// <remarks>@example "America/Chicago"</remarks>
+    /// <example><c>"America/Chicago"</c></example>
     abstract timezone: string option with get, set
     /// <summary>
     /// If known, the ISO 3166-2 name for the first level region associated with
     /// the IP address of the incoming request
     /// </summary>
-    /// <remarks>@example "Texas"</remarks>
+    /// <example><c>"Texas"</c></example>
     abstract region: string option with get, set
     /// <summary>
     /// If known, the ISO 3166-2 code for the first-level region associated with
     /// the IP address of the incoming request
     /// </summary>
-    /// <remarks>@example "TX"</remarks>
+    /// <example><c>"TX"</c></example>
     abstract regionCode: string option with get, set
     /// <summary>
     /// Metro code (DMA) of the incoming request
     /// </summary>
-    /// <remarks>@example "635"</remarks>
+    /// <example><c>"635"</c></example>
     abstract metroCode: string option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?country: IncomingRequestCfProperties.Country, ?isEUCountry: string, ?continent: ContinentCode, ?city: string, ?postalCode: string, ?latitude: string, ?longitude: string, ?timezone: string, ?region: string, ?regionCode: string, ?metroCode: string) : IncomingRequestCfPropertiesGeographicInformation = jsNative
@@ -20938,11 +20946,11 @@ type IncomingRequestCfPropertiesTLSClientAuth =
     /// <summary>
     /// Result of certificate verification.
     /// </summary>
-    /// <remarks>@example "FAILED:self signed certificate"</remarks>
+    /// <example><c>"FAILED:self signed certificate"</c></example>
     abstract certVerified: IncomingRequestCfPropertiesTLSClientAuth.CertVerified with get, set
     /// <summary>
     /// The presented certificate's revokation status.
-    ///
+    /// <br /><br />
     /// - A value of <c>"1"</c> indicates the certificate has been revoked
     /// - A value of <c>"0"</c> indicates the certificate has not been revoked
     /// </summary>
@@ -20950,22 +20958,22 @@ type IncomingRequestCfPropertiesTLSClientAuth =
     /// <summary>
     /// The certificate issuer's <a href="https://knowledge.digicert.com/generalinformation/INFO1745.html">distinguished name</a>
     /// </summary>
-    /// <remarks>@example "CN=cloudflareaccess.com, C=US, ST=Texas, L=Austin, O=Cloudflare"</remarks>
+    /// <example><c>"CN=cloudflareaccess.com, C=US, ST=Texas, L=Austin, O=Cloudflare"</c></example>
     abstract certIssuerDN: string with get, set
     /// <summary>
     /// The certificate subject's <a href="https://knowledge.digicert.com/generalinformation/INFO1745.html">distinguished name</a>
     /// </summary>
-    /// <remarks>@example "CN=*.cloudflareaccess.com, C=US, ST=Texas, L=Austin, O=Cloudflare"</remarks>
+    /// <example><c>"CN=*.cloudflareaccess.com, C=US, ST=Texas, L=Austin, O=Cloudflare"</c></example>
     abstract certSubjectDN: string with get, set
     /// <summary>
     /// The certificate issuer's <a href="https://knowledge.digicert.com/generalinformation/INFO1745.html">distinguished name</a> (<a href="https://www.rfc-editor.org/rfc/rfc2253.html">RFC 2253</a> formatted)
     /// </summary>
-    /// <remarks>@example "CN=cloudflareaccess.com, C=US, ST=Texas, L=Austin, O=Cloudflare"</remarks>
+    /// <example><c>"CN=cloudflareaccess.com, C=US, ST=Texas, L=Austin, O=Cloudflare"</c></example>
     abstract certIssuerDNRFC2253: string with get, set
     /// <summary>
     /// The certificate subject's <a href="https://knowledge.digicert.com/generalinformation/INFO1745.html">distinguished name</a> (<a href="https://www.rfc-editor.org/rfc/rfc2253.html">RFC 2253</a> formatted)
     /// </summary>
-    /// <remarks>@example "CN=*.cloudflareaccess.com, C=US, ST=Texas, L=Austin, O=Cloudflare"</remarks>
+    /// <example><c>"CN=*.cloudflareaccess.com, C=US, ST=Texas, L=Austin, O=Cloudflare"</c></example>
     abstract certSubjectDNRFC2253: string with get, set
     /// <summary>
     /// The certificate issuer's distinguished name (legacy policies)
@@ -20978,48 +20986,48 @@ type IncomingRequestCfPropertiesTLSClientAuth =
     /// <summary>
     /// The certificate's serial number
     /// </summary>
-    /// <remarks>@example "00936EACBE07F201DF"</remarks>
+    /// <example><c>"00936EACBE07F201DF"</c></example>
     abstract certSerial: string with get, set
     /// <summary>
     /// The certificate issuer's serial number
     /// </summary>
-    /// <remarks>@example "2489002934BDFEA34"</remarks>
+    /// <example><c>"2489002934BDFEA34"</c></example>
     abstract certIssuerSerial: string with get, set
     /// <summary>
     /// The certificate's Subject Key Identifier
     /// </summary>
-    /// <remarks>@example "BB:AF:7E:02:3D:FA:A6:F1:3C:84:8E:AD:EE:38:98:EC:D9:32:32:D4"</remarks>
+    /// <example><c>"BB:AF:7E:02:3D:FA:A6:F1:3C:84:8E:AD:EE:38:98:EC:D9:32:32:D4"</c></example>
     abstract certSKI: string with get, set
     /// <summary>
     /// The certificate issuer's Subject Key Identifier
     /// </summary>
-    /// <remarks>@example "BB:AF:7E:02:3D:FA:A6:F1:3C:84:8E:AD:EE:38:98:EC:D9:32:32:D4"</remarks>
+    /// <example><c>"BB:AF:7E:02:3D:FA:A6:F1:3C:84:8E:AD:EE:38:98:EC:D9:32:32:D4"</c></example>
     abstract certIssuerSKI: string with get, set
     /// <summary>
     /// The certificate's SHA-1 fingerprint
     /// </summary>
-    /// <remarks>@example "6b9109f323999e52259cda7373ff0b4d26bd232e"</remarks>
+    /// <example><c>"6b9109f323999e52259cda7373ff0b4d26bd232e"</c></example>
     abstract certFingerprintSHA1: string with get, set
     /// <summary>
     /// The certificate's SHA-256 fingerprint
     /// </summary>
-    /// <remarks>@example "acf77cf37b4156a2708e34c4eb755f9b5dbbe5ebb55adfec8f11493438d19e6ad3f157f81fa3b98278453d5652b0c1fd1d71e5695ae4d709803a4d3f39de9dea"</remarks>
+    /// <example><c>"acf77cf37b4156a2708e34c4eb755f9b5dbbe5ebb55adfec8f11493438d19e6ad3f157f81fa3b98278453d5652b0c1fd1d71e5695ae4d709803a4d3f39de9dea"</c></example>
     abstract certFingerprintSHA256: string with get, set
     /// <summary>
     /// The effective starting date of the certificate
     /// </summary>
-    /// <remarks>@example "Dec 22 19:39:00 2018 GMT"</remarks>
+    /// <example><c>"Dec 22 19:39:00 2018 GMT"</c></example>
     abstract certNotBefore: string with get, set
     /// <summary>
     /// The effective expiration date of the certificate
     /// </summary>
-    /// <remarks>@example "Dec 22 19:39:00 2018 GMT"</remarks>
+    /// <example><c>"Dec 22 19:39:00 2018 GMT"</c></example>
     abstract certNotAfter: string with get, set
     /// <summary>
     /// The client leaf certificate in <a href="https://www.rfc-editor.org/rfc/rfc9440">RFC 9440</a>
     /// format (<c>:base64-DER:</c>). Empty if no client certificate was presented or if
     /// the leaf certificate exceeded 10 KB (see certRFC9440TooLarge).
-    ///
+    /// <br /><br />
     /// Suitable for forwarding to an origin via the <c>Client-Cert</c> HTTP header.
     /// </summary>
     abstract certRFC9440: string with get, set
@@ -21032,7 +21040,7 @@ type IncomingRequestCfPropertiesTLSClientAuth =
     /// The intermediate certificate chain in <a href="https://www.rfc-editor.org/rfc/rfc9440">RFC 9440</a>
     /// format as a comma-separated list. Empty if no intermediates were sent or
     /// if the chain exceeded 16 KB (see certChainRFC9440TooLarge).
-    ///
+    /// <br /><br />
     /// Suitable for forwarding to an origin via the <c>Client-Cert-Chain</c> HTTP header.
     /// </summary>
     abstract certChainRFC9440: string with get, set
@@ -21713,9 +21721,9 @@ type FlagshipEvaluationError =
 /// <summary>
 /// Feature flags binding for evaluating feature flags from a Cloudflare Workers script.
 /// </summary>
-/// <remarks>
-/// @example
-/// <code lang="typescript">
+/// <example>
+/// <code>
+/// ```typescript
 /// // Get a boolean flag value with a default
 /// const enabled = await env.FLAGS.getBooleanValue('my-feature', false);
 ///
@@ -21729,7 +21737,9 @@ type FlagshipEvaluationError =
 /// const details = await env.FLAGS.getBooleanDetails('my-feature', false);
 /// console.log(details.variant, details.reason);
 /// </code>
-/// </remarks>
+/// <code>
+/// </code>
+/// </example>
 [<Interface>]
 type Flagship =
     /// <summary>
@@ -21828,11 +21838,11 @@ module HelloWorldBinding =
 type Hyperdrive =
     /// <summary>
     /// Connect directly to Hyperdrive as if it's your database, returning a TCP socket.
-    ///
+    /// <br /><br />
     /// Calling this method returns an identical socket to if you call
     /// <c>connect("host:port")</c> using the <c>host</c> and <c>port</c> fields from this object.
     /// Pick whichever approach works better with your preferred DB client library.
-    ///
+    /// <br /><br />
     /// Note that this socket is not yet authenticated -- it's expected that your
     /// code (or preferably, the client library of your choice) will authenticate
     /// using the information in this class's readonly fields.
@@ -21902,7 +21912,7 @@ type HyperdriveDynamicConfig =
     /// <summary>
     /// Connection string for the origin database Hyperdrive should connect to.
     /// Contains credentials, so treat it as a secret.
-    ///
+    /// <br /><br />
     /// The scheme selects the database engine. PostgreSQL origins are supported.
     /// </summary>
     abstract connectionString: string with get, set
@@ -23309,7 +23319,7 @@ type SecretsStoreSecret =
 
 /// <summary>
 /// Binding entrypoint for Cloudflare Stream.
-///
+/// <br /><br />
 /// Usage:
 /// - Binding-level operations:
 ///   <c>await env.STREAM.videos.upload</c>
@@ -23319,7 +23329,7 @@ type SecretsStoreSecret =
 /// - Per-video operations:
 ///   <c>await env.STREAM.video(id).downloads.*</c>
 ///   <c>await env.STREAM.video(id).captions.*</c>
-///
+/// <br /><br />
 /// Example usage:
 /// <code lang="ts">
 /// await env.STREAM.video(id).downloads.generate();
@@ -24071,7 +24081,7 @@ type StreamVideosListParams =
     /// <summary>
     /// Comparison operator for the <c>before</c> field.
     /// </summary>
-    /// <remarks>@default 'lt'</remarks>
+    /// <defaultValue>'lt'</defaultValue>
     abstract beforeComp: StreamPaginationComparison option with get, set
     /// <summary>
     /// Return videos created after this timestamp.
@@ -24081,7 +24091,7 @@ type StreamVideosListParams =
     /// <summary>
     /// Comparison operator for the <c>after</c> field.
     /// </summary>
-    /// <remarks>@default 'gte'</remarks>
+    /// <defaultValue>'gte'</defaultValue>
     abstract afterComp: StreamPaginationComparison option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?limit: float, ?before: string, ?beforeComp: StreamPaginationComparison, ?after: string, ?afterComp: StreamPaginationComparison) : StreamVideosListParams = jsNative
@@ -24321,7 +24331,7 @@ type VectorizeIndexConfig3 =
 
 /// <summary>
 /// Metadata about an existing index.
-///
+/// <br /><br />
 /// This type is exclusively for the Vectorize <b>beta</b> and will be deprecated once Vectorize RC is released.
 /// See VectorizeIndexInfo for its post-beta equivalent.
 /// </summary>
@@ -24439,7 +24449,7 @@ type VectorizeMatches =
 /// <summary>
 /// Results of an operation that performed a mutation on a set of vectors.
 /// Here, <c>ids</c> is a list of vectors that were successfully processed.
-///
+/// <br /><br />
 /// This type is exclusively for the Vectorize <b>beta</b> and will be deprecated once Vectorize RC is released.
 /// See VectorizeAsyncMutation for its post-beta equivalent.
 /// </summary>
@@ -24465,7 +24475,7 @@ type VectorizeAsyncMutation =
 
 /// <summary>
 /// A Vectorize Vector Search Index for querying vectors/embeddings.
-///
+/// <br /><br />
 /// This type is exclusively for the Vectorize <b>beta</b> and will be deprecated once Vectorize RC is released.
 /// See Vectorize for its new implementation.
 /// </summary>
@@ -24512,7 +24522,7 @@ type VectorizeIndex =
 
 /// <summary>
 /// A Vectorize Vector Search Index for querying vectors/embeddings.
-///
+/// <br /><br />
 /// Mutations in this version are async, returning a mutation id.
 /// </summary>
 [<Interface>]
@@ -24603,7 +24613,7 @@ type WebSearchSearchOptions =
 
 /// <summary>
 /// A single Web Search result.
-///
+/// <br /><br />
 /// Web Search is discovery-only -- results carry catalog metadata about a page
 /// but never the page body. To read a result's content the caller invokes the
 /// global <c>fetch()</c> API against the result's <c>url</c>, at which point the
@@ -24672,21 +24682,20 @@ type WebSearchSearchResponse =
 
 /// <summary>
 /// Cloudflare Web Search binding.
-///
+/// <br /><br />
 /// Discovery-only primitive for agents and Workers. Returns URLs and catalog
 /// metadata for a query; never returns page content or excerpts. To read a
 /// result's body, fetch the URL with the global <c>fetch()</c> API.
-///
+/// <br /><br />
 /// Declared in wrangler with a single object (there is exactly one corpus, the
 /// public web, so there is no name, namespace, or instance to specify):
-///
 /// <code lang="jsonc">
 /// { "web_search": { "binding": "WEBSEARCH" } }
 /// </code>
 /// </summary>
-/// <remarks>
-/// @example
-/// <code lang="ts">
+/// <example>
+/// <code>
+/// ```ts
 /// const { items, metadata } = await env.WEBSEARCH.search({
 ///   query: "Cloudflare Workers",
 /// });
@@ -24698,7 +24707,9 @@ type WebSearchSearchResponse =
 /// // controls apply at the fetch site, not at search time.
 /// const page = await fetch(top.url);
 /// </code>
-/// </remarks>
+/// <code>
+/// </code>
+/// </example>
 [<Interface>]
 type WebSearch =
     /// <summary>
@@ -24855,7 +24866,7 @@ module WorkflowInstanceRestartOptions =
         /// <summary>
         /// 1-indexed occurrence of this step name. Use when the same step name appears multiple times (e.g. in a loop).
         /// </summary>
-        /// <remarks>@default 1</remarks>
+        /// <defaultValue>1</defaultValue>
         abstract count: float option with get, set
         /// <summary>
         /// Step type filter. Use when different step types share the same name.
@@ -25008,7 +25019,7 @@ type Exports =
         and set (_: unit): unit = jsNative
     /// <summary>
     /// The <b><c>DOMException</c></b> interface represents an abnormal event (called an exception) that occurs as a result of calling a method or accessing a property of a web API. This is how error conditions are described in web APIs.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/DOMException">MDN Reference</a>
     /// </summary>
     [<Global("DOMException"); EmitConstructor>]
@@ -25025,7 +25036,7 @@ type Exports =
     static member removeEventListener<'Type> (``type``: 'Type, handler: U2<(U4<FetchEvent, QueueEvent<obj>, PromiseRejectionEvent, ScheduledEvent> -> unit), EventListenerObject<Event>>, ?options: U2<bool, EventTargetEventListenerOptions>) : unit = jsNative
     /// <summary>
     /// The <b><c>dispatchEvent()</c></b> method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent">MDN Reference</a>
     /// </summary>
     [<Global("dispatchEvent")>]
@@ -25061,14 +25072,14 @@ type Exports =
     /// The Workers runtime implements the full surface of this API, but with some differences in
     /// the <a href="https://developers.cloudflare.com/workers/runtime-apis/web-crypto/#supported-algorithms">supported algorithms</a>
     /// compared to those implemented in most browsers.
-    ///
+    /// <br /><br />
     /// <a href="https://developers.cloudflare.com/workers/runtime-apis/web-crypto/">Cloudflare Docs Reference</a>
     /// </summary>
     [<Global("crypto")>]
     static member crypto: Crypto = jsNative
     /// <summary>
     /// The Cache API allows fine grained control of reading and writing from the Cloudflare global network cache.
-    ///
+    /// <br /><br />
     /// <a href="https://developers.cloudflare.com/workers/runtime-apis/cache/">Cloudflare Docs Reference</a>
     /// </summary>
     [<Global("caches")>]
@@ -25078,7 +25089,7 @@ type Exports =
     /// <summary>
     /// The Workers runtime supports a subset of the Performance API, used to measure timing and performance,
     /// as well as timing of subrequests and other operations.
-    ///
+    /// <br /><br />
     /// <a href="https://developers.cloudflare.com/workers/runtime-apis/performance/">Cloudflare Docs Reference</a>
     /// </summary>
     [<Global("performance")>]
@@ -25109,70 +25120,70 @@ type Exports =
     static member WebSocketRequestResponsePair (request: string, response: string) : WebSocketRequestResponsePair = jsNative
     /// <summary>
     /// The <b><c>Event</c></b> interface represents an event which takes place on an EventTarget.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Event">MDN Reference</a>
     /// </summary>
     [<Global("Event"); EmitConstructor>]
     static member Event (``type``: string, ?init: EventInit) : Event = jsNative
     /// <summary>
     /// The <b><c>EventTarget</c></b> interface is implemented by objects that can receive events and may have listeners for them. In other words, any target of events implements the three methods associated with this interface.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget">MDN Reference</a>
     /// </summary>
     [<Global("EventTarget"); EmitConstructor>]
     static member EventTarget<'EventMap> () : EventTarget<'EventMap> = jsNative
     /// <summary>
     /// The <b><c>AbortController</c></b> interface represents a controller object that allows you to abort one or more Web requests as and when desired.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/AbortController">MDN Reference</a>
     /// </summary>
     [<Global("AbortController"); EmitConstructor>]
     static member AbortController () : AbortController = jsNative
     /// <summary>
     /// The <b><c>AbortSignal</c></b> interface represents a signal object that allows you to communicate with an asynchronous operation (such as a fetch request) and abort it if required via an AbortController object.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/AbortSignal">MDN Reference</a>
     /// </summary>
     [<Global("AbortSignal"); EmitConstructor>]
     static member AbortSignal () : AbortSignal = jsNative
     /// <summary>
     /// The <b><c>ExtendableEvent</c></b> interface extends the lifetime of the install and activate events dispatched on the global scope as part of the service worker lifecycle. This ensures that any functional events (like FetchEvent) are not dispatched until it upgrades database schemas and deletes the outdated cache entries.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ExtendableEvent">MDN Reference</a>
     /// </summary>
     [<Global("ExtendableEvent"); EmitConstructor>]
     static member ExtendableEvent (``type``: string, ?init: EventInit) : ExtendableEvent = jsNative
     /// <summary>
     /// The <b><c>CustomEvent</c></b> interface can be used to attach custom data to an event generated by an application.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/CustomEvent">MDN Reference</a>
     /// </summary>
     [<Global("CustomEvent"); EmitConstructor>]
     static member CustomEvent<'T> (``type``: string, ?init: CustomEventCustomEventInit) : CustomEvent<'T> = jsNative
     /// <summary>
     /// The <b><c>Blob</c></b> interface represents a blob, which is a file-like object of immutable, raw data; they can be read as text or binary data, or converted into a ReadableStream so its methods can be used for processing the data.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Blob">MDN Reference</a>
     /// </summary>
     [<Global("Blob"); EmitConstructor>]
     static member Blob (?bits: U4<string, JS.ArrayBuffer, JS.ArrayBufferView, Blob>[], ?options: BlobOptions) : Blob = jsNative
     /// <summary>
     /// The <b><c>File</c></b> interface provides information about files and allows JavaScript in a web page to access their content.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/File">MDN Reference</a>
     /// </summary>
     [<Global("File"); EmitConstructor>]
     static member File (bits: U4<string, JS.ArrayBuffer, JS.ArrayBufferView, Blob>[] option, name: string, ?options: FileOptions) : File = jsNative
     /// <summary>
     /// The Cache API allows fine grained control of reading and writing from the Cloudflare global network cache.
-    ///
+    /// <br /><br />
     /// <a href="https://developers.cloudflare.com/workers/runtime-apis/cache/">Cloudflare Docs Reference</a>
     /// </summary>
     [<Global("CacheStorage"); EmitConstructor>]
     static member CacheStorage () : CacheStorage = jsNative
     /// <summary>
     /// The Cache API allows fine grained control of reading and writing from the Cloudflare global network cache.
-    ///
+    /// <br /><br />
     /// <a href="https://developers.cloudflare.com/workers/runtime-apis/cache/">Cloudflare Docs Reference</a>
     /// </summary>
     [<Global("Cache"); EmitConstructor>]
@@ -25182,7 +25193,7 @@ type Exports =
     /// The Workers runtime implements the full surface of this API, but with some differences in
     /// the <a href="https://developers.cloudflare.com/workers/runtime-apis/web-crypto/#supported-algorithms">supported algorithms</a>
     /// compared to those implemented in most browsers.
-    ///
+    /// <br /><br />
     /// <a href="https://developers.cloudflare.com/workers/runtime-apis/web-crypto/">Cloudflare Docs Reference</a>
     /// </summary>
     [<Global("Crypto"); EmitConstructor>]
@@ -25190,7 +25201,7 @@ type Exports =
     /// <summary>
     /// The <b><c>SubtleCrypto</c></b> interface of the Web Crypto API provides a number of low-level cryptographic functions.
     /// Available only in secure contexts.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/SubtleCrypto">MDN Reference</a>
     /// </summary>
     [<Global("SubtleCrypto"); EmitConstructor>]
@@ -25198,7 +25209,7 @@ type Exports =
     /// <summary>
     /// The <b><c>CryptoKey</c></b> interface of the Web Crypto API represents a cryptographic key obtained from one of the SubtleCrypto methods generateKey(), deriveKey(), importKey(), or unwrapKey().
     /// Available only in secure contexts.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/CryptoKey">MDN Reference</a>
     /// </summary>
     [<Global("CryptoKey"); EmitConstructor>]
@@ -25207,42 +25218,42 @@ type Exports =
     static member DigestStream (algorithm: U2<string, SubtleCryptoHashAlgorithm>, ?options: DigestStreamOptions) : DigestStream = jsNative
     /// <summary>
     /// The <b><c>TextDecoder</c></b> interface represents a decoder for a specific text encoding, such as UTF-8, ISO-8859-2, or GBK. A decoder takes an array of bytes as input and returns a JavaScript string.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/TextDecoder">MDN Reference</a>
     /// </summary>
     [<Global("TextDecoder"); EmitConstructor>]
     static member TextDecoder (?label: string, ?options: TextDecoderConstructorOptions) : TextDecoder = jsNative
     /// <summary>
     /// The <b><c>TextEncoder</c></b> interface enables you to encode a JavaScript string using UTF-8.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/TextEncoder">MDN Reference</a>
     /// </summary>
     [<Global("TextEncoder"); EmitConstructor>]
     static member TextEncoder () : TextEncoder = jsNative
     /// <summary>
     /// The <b><c>ErrorEvent</c></b> interface represents events providing information related to errors in scripts or in files.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ErrorEvent">MDN Reference</a>
     /// </summary>
     [<Global("ErrorEvent"); EmitConstructor>]
     static member ErrorEvent (``type``: string, ?init: ErrorEventErrorEventInit) : ErrorEvent = jsNative
     /// <summary>
     /// The <b><c>MessageEvent</c></b> interface represents a message received by a target object.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/MessageEvent">MDN Reference</a>
     /// </summary>
     [<Global("MessageEvent"); EmitConstructor>]
     static member MessageEvent (``type``: string, ?initializer: MessageEventInit) : MessageEvent = jsNative
     /// <summary>
     /// The <b><c>PromiseRejectionEvent</c></b> interface represents events which are sent to the global script context when JavaScript Promises are rejected. These events are particularly useful for telemetry and debugging purposes.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PromiseRejectionEvent">MDN Reference</a>
     /// </summary>
     [<Global("PromiseRejectionEvent"); EmitConstructor>]
     static member PromiseRejectionEvent (``type``: string, ?init: EventInit) : PromiseRejectionEvent = jsNative
     /// <summary>
     /// The <b><c>FormData</c></b> interface provides a way to construct a set of key/value pairs representing form fields and their values, which can be sent using the fetch(), XMLHttpRequest.send() or navigator.sendBeacon() methods. It uses the same format a form would use if the encoding type were set to "multipart/form-data".
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/FormData">MDN Reference</a>
     /// </summary>
     [<Global("FormData"); EmitConstructor>]
@@ -25251,14 +25262,14 @@ type Exports =
     static member HTMLRewriter () : HTMLRewriter = jsNative
     /// <summary>
     /// This is the event type for fetch events dispatched on the service worker global scope. It contains information about the fetch, including the request and how the receiver will treat the response. It provides the event.respondWith() method, which allows us to provide a response to this fetch.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/FetchEvent">MDN Reference</a>
     /// </summary>
     [<Global("FetchEvent"); EmitConstructor>]
     static member FetchEvent (``type``: string, ?init: EventInit) : FetchEvent = jsNative
     /// <summary>
     /// The <b><c>Headers</c></b> interface of the Fetch API allows you to perform various actions on HTTP request and response headers. These actions include retrieving, setting, adding to, and removing headers from the list of the request's headers.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Headers">MDN Reference</a>
     /// </summary>
     [<Global("Headers"); EmitConstructor>]
@@ -25267,7 +25278,7 @@ type Exports =
     static member Body () : Body = jsNative
     /// <summary>
     /// The <b><c>Response</c></b> interface of the Fetch API represents the response to a request.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Response">MDN Reference</a>
     /// </summary>
     static member Response
@@ -25275,7 +25286,7 @@ type Exports =
         and set (_: ResponseConstructor): unit = jsNative
     /// <summary>
     /// The <b><c>Request</c></b> interface of the Fetch API represents a resource request.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Request">MDN Reference</a>
     /// </summary>
     static member Request
@@ -25287,77 +25298,77 @@ type Exports =
     static member ScheduledEvent (``type``: string, ?init: EventInit) : ScheduledEvent = jsNative
     /// <summary>
     /// The <b><c>ReadableStream</c></b> interface of the Streams API represents a readable stream of byte data. The Fetch API offers a concrete instance of a ReadableStream through the body property of a Response object.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStream">MDN Reference</a>
     /// </summary>
     [<Global("ReadableStream")>]
     static member ReadableStream: ReadableStreamConstructor = jsNative
     /// <summary>
     /// The <b><c>ReadableStreamDefaultReader</c></b> interface of the Streams API represents a default reader that can be used to read stream data supplied from a network (such as a fetch request).
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStreamDefaultReader">MDN Reference</a>
     /// </summary>
     [<Global("ReadableStreamDefaultReader"); EmitConstructor>]
     static member ReadableStreamDefaultReader<'R> (stream: ReadableStream<obj>) : ReadableStreamDefaultReader<'R> = jsNative
     /// <summary>
     /// The <b><c>ReadableStreamBYOBReader</c></b> interface of the Streams API defines a reader for a ReadableStream that supports zero-copy reading from an underlying byte source. It is used for efficient copying from underlying sources where the data is delivered as an "anonymous" sequence of bytes, such as files.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStreamBYOBReader">MDN Reference</a>
     /// </summary>
     [<Global("ReadableStreamBYOBReader"); EmitConstructor>]
     static member ReadableStreamBYOBReader (stream: ReadableStream<obj>) : ReadableStreamBYOBReader = jsNative
     /// <summary>
     /// The <b><c>ReadableStreamBYOBRequest</c></b> interface of the Streams API represents a "pull request" for data from an underlying source that will made as a zero-copy transfer to a consumer (bypassing the stream's internal queues).
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStreamBYOBRequest">MDN Reference</a>
     /// </summary>
     [<Global("ReadableStreamBYOBRequest"); EmitConstructor>]
     static member ReadableStreamBYOBRequest () : ReadableStreamBYOBRequest = jsNative
     /// <summary>
     /// The <b><c>ReadableStreamDefaultController</c></b> interface of the Streams API represents a controller allowing control of a ReadableStream's state and internal queue. Default controllers are for streams that are not byte streams.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStreamDefaultController">MDN Reference</a>
     /// </summary>
     [<Global("ReadableStreamDefaultController"); EmitConstructor>]
     static member ReadableStreamDefaultController<'R> () : ReadableStreamDefaultController<'R> = jsNative
     /// <summary>
     /// The <b><c>ReadableByteStreamController</c></b> interface of the Streams API represents a controller for a readable byte stream. It allows control of the state and internal queue of a ReadableStream with an underlying byte source, and enables efficient zero-copy transfer of data from the underlying source to a consumer when the stream's internal queue is empty.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableByteStreamController">MDN Reference</a>
     /// </summary>
     [<Global("ReadableByteStreamController"); EmitConstructor>]
     static member ReadableByteStreamController () : ReadableByteStreamController = jsNative
     /// <summary>
     /// The <b><c>WritableStreamDefaultController</c></b> interface of the Streams API represents a controller allowing control of a WritableStream's state. When constructing a WritableStream, the underlying sink is given a corresponding WritableStreamDefaultController instance to manipulate.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultController">MDN Reference</a>
     /// </summary>
     [<Global("WritableStreamDefaultController"); EmitConstructor>]
     static member WritableStreamDefaultController () : WritableStreamDefaultController = jsNative
     /// <summary>
     /// The <b><c>TransformStreamDefaultController</c></b> interface of the Streams API provides methods to manipulate the associated ReadableStream and WritableStream.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/TransformStreamDefaultController">MDN Reference</a>
     /// </summary>
     [<Global("TransformStreamDefaultController"); EmitConstructor>]
     static member TransformStreamDefaultController<'O> () : TransformStreamDefaultController<'O> = jsNative
     /// <summary>
     /// The <b><c>WritableStream</c></b> interface of the Streams API provides a standard abstraction for writing streaming data to a destination, known as a sink. This object comes with built-in backpressure and queuing.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStream">MDN Reference</a>
     /// </summary>
     [<Global("WritableStream"); EmitConstructor>]
     static member WritableStream<'W> (?underlyingSink: UnderlyingSink<obj>, ?queuingStrategy: QueuingStrategy<obj>) : WritableStream<'W> = jsNative
     /// <summary>
     /// The <b><c>WritableStreamDefaultWriter</c></b> interface of the Streams API is the object returned by WritableStream.getWriter() and once created locks the writer to the WritableStream ensuring that no other streams can write to the underlying sink.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultWriter">MDN Reference</a>
     /// </summary>
     [<Global("WritableStreamDefaultWriter"); EmitConstructor>]
     static member WritableStreamDefaultWriter<'W> (stream: WritableStream<obj>) : WritableStreamDefaultWriter<'W> = jsNative
     /// <summary>
     /// The <b><c>TransformStream</c></b> interface of the Streams API represents a concrete implementation of the pipe chain transform stream concept.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/TransformStream">MDN Reference</a>
     /// </summary>
     [<Global("TransformStream"); EmitConstructor>]
@@ -25368,42 +25379,42 @@ type Exports =
     static member IdentityTransformStream (?queuingStrategy: IdentityTransformStreamQueuingStrategy) : IdentityTransformStream = jsNative
     /// <summary>
     /// The <b><c>CompressionStream</c></b> interface of the Compression Streams API compresses a stream of data. It implements the same shape as a TransformStream, allowing it to be used in ReadableStream.pipeThrough() and similar methods.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/CompressionStream">MDN Reference</a>
     /// </summary>
     [<Global("CompressionStream"); EmitConstructor>]
     static member CompressionStream (format: ServiceWorkerGlobalScope.CompressionStream.Format) : CompressionStream = jsNative
     /// <summary>
     /// The <b><c>DecompressionStream</c></b> interface of the Compression Streams API decompresses a stream of data. It implements the same shape as a TransformStream, allowing it to be used in ReadableStream.pipeThrough() and similar methods.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/DecompressionStream">MDN Reference</a>
     /// </summary>
     [<Global("DecompressionStream"); EmitConstructor>]
     static member DecompressionStream (format: ServiceWorkerGlobalScope.CompressionStream.Format) : DecompressionStream = jsNative
     /// <summary>
     /// The <b><c>TextEncoderStream</c></b> interface of the Encoding API converts a stream of strings into bytes in the UTF-8 encoding. It is the streaming equivalent of TextEncoder. It implements the same shape as a TransformStream, allowing it to be used in ReadableStream.pipeThrough() and similar methods.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/TextEncoderStream">MDN Reference</a>
     /// </summary>
     [<Global("TextEncoderStream"); EmitConstructor>]
     static member TextEncoderStream () : TextEncoderStream = jsNative
     /// <summary>
     /// The <b><c>TextDecoderStream</c></b> interface of the Encoding API converts a stream of text in a binary encoding, such as UTF-8 etc., to a stream of strings. It is the streaming equivalent of TextDecoder. It implements the same shape as a TransformStream, allowing it to be used in ReadableStream.pipeThrough() and similar methods.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/TextDecoderStream">MDN Reference</a>
     /// </summary>
     [<Global("TextDecoderStream"); EmitConstructor>]
     static member TextDecoderStream (?label: string, ?options: TextDecoderStreamTextDecoderStreamInit) : TextDecoderStream = jsNative
     /// <summary>
     /// The <b><c>ByteLengthQueuingStrategy</c></b> interface of the Streams API provides a built-in byte length queuing strategy that can be used when constructing streams.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ByteLengthQueuingStrategy">MDN Reference</a>
     /// </summary>
     [<Global("ByteLengthQueuingStrategy"); EmitConstructor>]
     static member ByteLengthQueuingStrategy (init: QueuingStrategyInit) : ByteLengthQueuingStrategy = jsNative
     /// <summary>
     /// The <b><c>CountQueuingStrategy</c></b> interface of the Streams API provides a built-in chunk counting queuing strategy that can be used when constructing streams.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/CountQueuingStrategy">MDN Reference</a>
     /// </summary>
     [<Global("CountQueuingStrategy"); EmitConstructor>]
@@ -25412,35 +25423,35 @@ type Exports =
     static member TailEvent (``type``: string, ?init: EventInit) : TailEvent = jsNative
     /// <summary>
     /// The <b><c>URL</c></b> interface is used to parse, construct, normalize, and encode URLs. It works by providing properties which allow you to easily read and modify the components of a URL.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URL">MDN Reference</a>
     /// </summary>
     [<Global("URL"); EmitConstructor>]
     static member URL (url: U2<string, URL>, ?``base``: U2<string, URL>) : URL = jsNative
     /// <summary>
     /// The <b><c>URLSearchParams</c></b> interface defines utility methods to work with the query string of a URL.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URLSearchParams">MDN Reference</a>
     /// </summary>
     [<Global("URLSearchParams"); EmitConstructor>]
     static member URLSearchParams (?init: obj) : URLSearchParams = jsNative
     /// <summary>
     /// The <b><c>URLPattern</c></b> interface of the URL Pattern API matches URLs or parts of URLs against a pattern. The pattern can contain capturing groups that extract parts of the matched URL.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URLPattern">MDN Reference</a>
     /// </summary>
     [<Global("URLPattern"); EmitConstructor>]
     static member URLPattern (?input: U2<string, URLPatternInit>, ?baseURL: U2<string, URLPatternOptions>, ?patternOptions: URLPatternOptions) : URLPattern = jsNative
     /// <summary>
     /// A <b><c>CloseEvent</c></b> is sent to clients using WebSockets when the connection is closed. This is delivered to the listener indicated by the WebSocket object's onclose attribute.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/CloseEvent">MDN Reference</a>
     /// </summary>
     [<Global("CloseEvent"); EmitConstructor>]
     static member CloseEvent (``type``: string, ?initializer: CloseEventInit) : CloseEvent = jsNative
     /// <summary>
     /// The <b><c>WebSocket</c></b> object provides the API for creating and managing a WebSocket connection to a server, as well as for sending and receiving data on the connection.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket">MDN Reference</a>
     /// </summary>
     static member WebSocket
@@ -25454,21 +25465,21 @@ type Exports =
     static member SqlStorageCursor<'T> () : SqlStorageCursor<'T> = jsNative
     /// <summary>
     /// The <b><c>EventSource</c></b> interface is web content's interface to server-sent events.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventSource">MDN Reference</a>
     /// </summary>
     [<Global("EventSource"); EmitConstructor>]
     static member EventSource (url: string, ?init: EventSourceEventSourceInit) : EventSource = jsNative
     /// <summary>
     /// The <b><c>MessagePort</c></b> interface of the Channel Messaging API represents one of the two ports of a MessageChannel, allowing messages to be sent from one port and listening out for them arriving at the other.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/MessagePort">MDN Reference</a>
     /// </summary>
     [<Global("MessagePort"); EmitConstructor>]
     static member MessagePort () : MessagePort = jsNative
     /// <summary>
     /// The <b><c>MessageChannel</c></b> interface of the Channel Messaging API allows us to create a new message channel and send data through it via its two MessagePort properties.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/MessageChannel">MDN Reference</a>
     /// </summary>
     [<Global("MessageChannel"); EmitConstructor>]
@@ -25476,49 +25487,49 @@ type Exports =
     /// <summary>
     /// The Workers runtime supports a subset of the Performance API, used to measure timing and performance,
     /// as well as timing of subrequests and other operations.
-    ///
+    /// <br /><br />
     /// <a href="https://developers.cloudflare.com/workers/runtime-apis/performance/">Cloudflare Docs Reference</a>
     /// </summary>
     [<Global("Performance"); EmitConstructor>]
     static member Performance () : Performance = jsNative
     /// <summary>
     /// <b><c>PerformanceMark</c></b> is an interface for PerformanceEntry objects with an entryType of "mark".
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceMark">MDN Reference</a>
     /// </summary>
     [<Global("PerformanceMark"); EmitConstructor>]
     static member PerformanceMark (name: string, ?maybeOptions: PerformanceMarkOptions) : PerformanceMark = jsNative
     /// <summary>
     /// <b><c>PerformanceMeasure</c></b> is an abstract interface for PerformanceEntry objects with an entryType of "measure". Entries of this type are created by calling performance.measure() to add a named DOMHighResTimeStamp (the measure) between two marks to the browser's performance timeline.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceMeasure">MDN Reference</a>
     /// </summary>
     [<Global("PerformanceMeasure"); EmitConstructor>]
     static member PerformanceMeasure () : PerformanceMeasure = jsNative
     /// <summary>
     /// The <b><c>PerformanceObserverEntryList</c></b> interface is a list of performance events that were explicitly observed via the observe() method.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceObserverEntryList">MDN Reference</a>
     /// </summary>
     [<Global("PerformanceObserverEntryList"); EmitConstructor>]
     static member PerformanceObserverEntryList () : PerformanceObserverEntryList = jsNative
     /// <summary>
     /// The <b><c>PerformanceEntry</c></b> object encapsulates a single performance metric that is part of the browser's performance timeline.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceEntry">MDN Reference</a>
     /// </summary>
     [<Global("PerformanceEntry"); EmitConstructor>]
     static member PerformanceEntry () : PerformanceEntry = jsNative
     /// <summary>
     /// The <b><c>PerformanceResourceTiming</c></b> interface enables retrieval and analysis of detailed network timing data regarding the loading of an application's resources. An application can use the timing metrics to determine, for example, the length of time it takes to fetch a specific resource, such as an XMLHttpRequest, &lt;SVG&gt;, image, or script.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming">MDN Reference</a>
     /// </summary>
     [<Global("PerformanceResourceTiming"); EmitConstructor>]
     static member PerformanceResourceTiming () : PerformanceResourceTiming = jsNative
     /// <summary>
     /// The <b><c>PerformanceObserver</c></b> interface is used to observe performance measurement events and be notified of new performance entries as they are recorded in the browser's performance timeline.
-    ///
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceObserver">MDN Reference</a>
     /// </summary>
     [<Global("PerformanceObserver"); EmitConstructor>]
@@ -25527,20 +25538,20 @@ type Exports =
     static member Span () : Span = jsNative
     /// <summary>
     /// A single Agent Memory profile, scoped to a profile name.
-    ///
+    /// <br /><br />
     /// Returned by AgentMemoryNamespace.getProfile.
     /// </summary>
     [<Global("AgentMemoryProfile"); EmitConstructor>]
     static member AgentMemoryProfile () : AgentMemoryProfile = jsNative
     /// <summary>
     /// Namespace-level Agent Memory binding.
-    ///
+    /// <br /><br />
     /// Used as the type of an <c>env.MEMORY</c>-style binding backed by the Agent
     /// Memory product.
     /// </summary>
-    /// <remarks>
-    /// @example
-    /// <code lang="ts">
+    /// <example>
+    /// <code>
+    /// ```ts
     /// export default {
     ///   async fetch(_request: Request, env: Env): Promise&lt;Response&gt; {
     ///     const profile = await env.MEMORY.getProfile("wrangler-e2e");
@@ -25549,7 +25560,9 @@ type Exports =
     ///   },
     /// };
     /// </code>
-    /// </remarks>
+    /// <code>
+    /// </code>
+    /// </example>
     [<Global("AgentMemoryNamespace"); EmitConstructor>]
     static member AgentMemoryNamespace () : AgentMemoryNamespace = jsNative
     /// <summary>
@@ -25578,16 +25591,16 @@ type Exports =
     static member AiSearchJobs () : AiSearchJobs = jsNative
     /// <summary>
     /// Instance-level AI Search service.
-    ///
+    /// <br /><br />
     /// Used as:
     /// - The return type of <c>AiSearchNamespace.get(name)</c> (namespace binding)
     /// - The type of <c>env.BLOG_SEARCH</c> (single instance binding via <c>ai_search</c>)
-    ///
+    /// <br /><br />
     /// Provides search, chat, update, stats, items, and jobs operations.
     /// </summary>
-    /// <remarks>
-    /// @example
-    /// <code lang="ts">
+    /// <example>
+    /// <code>
+    /// ```ts
     /// // Via namespace binding
     /// const instance = env.AI_SEARCH.get("blog");
     /// const results = await instance.search({
@@ -25599,19 +25612,21 @@ type Exports =
     ///   messages: [{ role: "user", content: "How does caching work?" }],
     /// });
     /// </code>
-    /// </remarks>
+    /// <code>
+    /// </code>
+    /// </example>
     [<Global("AiSearchInstance"); EmitConstructor>]
     static member AiSearchInstance () : AiSearchInstance = jsNative
     /// <summary>
     /// Namespace-level AI Search service.
-    ///
+    /// <br /><br />
     /// Used as the type of <c>env.AI_SEARCH</c> (namespace binding via <c>ai_search_namespaces</c>).
     /// Scoped to a single namespace. Provides dynamic instance access, creation, deletion,
     /// and multi-instance search/chat operations.
     /// </summary>
-    /// <remarks>
-    /// @example
-    /// <code lang="ts">
+    /// <example>
+    /// <code>
+    /// ```ts
     /// // Access an instance within the namespace
     /// const blog = env.AI_SEARCH.get("blog");
     /// const results = await blog.search({ query: "How does caching work?" });
@@ -25634,7 +25649,9 @@ type Exports =
     /// // Delete an instance
     /// await env.AI_SEARCH.delete("tenant-123");
     /// </code>
-    /// </remarks>
+    /// <code>
+    /// </code>
+    /// </example>
     [<Global("AiSearchNamespace"); EmitConstructor>]
     static member AiSearchNamespace () : AiSearchNamespace = jsNative
     [<Global("BaseAiImageClassification"); EmitConstructor>]
@@ -25793,9 +25810,9 @@ type Exports =
     /// <summary>
     /// Feature flags binding for evaluating feature flags from a Cloudflare Workers script.
     /// </summary>
-    /// <remarks>
-    /// @example
-    /// <code lang="typescript">
+    /// <example>
+    /// <code>
+    /// ```typescript
     /// // Get a boolean flag value with a default
     /// const enabled = await env.FLAGS.getBooleanValue('my-feature', false);
     ///
@@ -25809,7 +25826,9 @@ type Exports =
     /// const details = await env.FLAGS.getBooleanDetails('my-feature', false);
     /// console.log(details.variant, details.reason);
     /// </code>
-    /// </remarks>
+    /// <code>
+    /// </code>
+    /// </example>
     [<Global("Flagship"); EmitConstructor>]
     static member Flagship () : Flagship = jsNative
     [<Import("httpServerHandler", "cloudflare:node")>]
@@ -25856,7 +25875,7 @@ type Exports =
     static member ToMarkdownService () : ToMarkdownService = jsNative
     /// <summary>
     /// A Vectorize Vector Search Index for querying vectors/embeddings.
-    ///
+    /// <br /><br />
     /// This type is exclusively for the Vectorize <b>beta</b> and will be deprecated once Vectorize RC is released.
     /// See Vectorize for its new implementation.
     /// </summary>
@@ -25864,28 +25883,27 @@ type Exports =
     static member VectorizeIndex () : VectorizeIndex = jsNative
     /// <summary>
     /// A Vectorize Vector Search Index for querying vectors/embeddings.
-    ///
+    /// <br /><br />
     /// Mutations in this version are async, returning a mutation id.
     /// </summary>
     [<Global("Vectorize"); EmitConstructor>]
     static member Vectorize () : Vectorize = jsNative
     /// <summary>
     /// Cloudflare Web Search binding.
-    ///
+    /// <br /><br />
     /// Discovery-only primitive for agents and Workers. Returns URLs and catalog
     /// metadata for a query; never returns page content or excerpts. To read a
     /// result's body, fetch the URL with the global <c>fetch()</c> API.
-    ///
+    /// <br /><br />
     /// Declared in wrangler with a single object (there is exactly one corpus, the
     /// public web, so there is no name, namespace, or instance to specify):
-    ///
     /// <code lang="jsonc">
     /// { "web_search": { "binding": "WEBSEARCH" } }
     /// </code>
     /// </summary>
-    /// <remarks>
-    /// @example
-    /// <code lang="ts">
+    /// <example>
+    /// <code>
+    /// ```ts
     /// const { items, metadata } = await env.WEBSEARCH.search({
     ///   query: "Cloudflare Workers",
     /// });
@@ -25897,7 +25915,9 @@ type Exports =
     /// // controls apply at the fetch site, not at search time.
     /// const page = await fetch(top.url);
     /// </code>
-    /// </remarks>
+    /// <code>
+    /// </code>
+    /// </example>
     [<Global("WebSearch"); EmitConstructor>]
     static member WebSearch () : WebSearch = jsNative
     /// <summary>

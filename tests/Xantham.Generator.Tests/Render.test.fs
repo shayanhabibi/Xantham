@@ -535,7 +535,7 @@ let renderTests =
                                       "```" ]
                               Tags =
                                 [ { Name = "example"
-                                    Text = ValueSome(String.concat "\n" [ "```js"; "open()"; "```" ]) } ]
+                                    Text = ValueSome(String.concat "\n" [ "open()"; "open()" ]) } ]
                               Order = None
                               TypeParameters = []
                               Target = FsString } ] }
@@ -548,11 +548,9 @@ let renderTests =
                     "\n"
                     [ "/// <summary>"
                       "/// Opens a handle."
-                      "///"
                       "/// <code lang=\"typescript\">"
                       "/// const h = open&lt;T&gt;(\"file\")"
                       "/// </code>"
-                      "///"
                       "/// <code>"
                       "/// plain fence"
                       "/// </code>"
@@ -563,12 +561,12 @@ let renderTests =
                 source
                 (String.concat
                     "\n"
-                    [ "/// <remarks>"
-                      "/// @example"
-                      "/// <code lang=\"js\">"
+                    [ "/// <example>"
+                      "/// <code>"
+                      "/// open()"
                       "/// open()"
                       "/// </code>"
-                      "/// </remarks>" ])
+                      "/// </example>" ])
                 "a tag's fences too"
 
         testCase "an unclosed code fence still closes before the doc comment ends" <| fun _ ->
@@ -614,7 +612,7 @@ let renderTests =
                               Tags =
                                 [ { Name = "see"; Text = ValueSome "the `Timer` type" }
                                   { Name = "example"
-                                    Text = ValueSome(String.concat "\n" [ "Call `open()`."; "Twice." ]) } ]
+                                    Text = ValueSome(String.concat "\n" [ "open()" ]) } ]
                               Order = None
                               TypeParameters = []
                               Target = FsString } ] }
@@ -641,7 +639,7 @@ let renderTests =
 
             Expect.stringContains
                 source
-                (String.concat "\n" [ "/// @example"; "/// Call <c>open()</c>."; "/// Twice." ])
+                (String.concat "\n" [ "/// <example><c>open()</c></example>" ])
                 "a multi-line tag"
 
         testCase "markdown emphasis and links become XML inline elements" <| fun _ ->

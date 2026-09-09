@@ -62,7 +62,15 @@ let site =
     |> Literate.register
     |> Sitemap.register
     // |> LinkValidator.register
-    |> TailwindCss.register
+    |> DaisyUI.registerWith (fun opts ->
+        { opts with
+            TailwindEntryHeader =
+                opts.TailwindEntryHeader
+                @ [
+                    //language=css
+                    "@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));"
+                ]
+        })
     |> Nuglify.minifyHtml
     |> Theme.register theme
     |> Site.collection (Theme.docs theme "content")

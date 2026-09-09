@@ -12,44 +12,46 @@ open Fable.Core.JS
 /// <summary>
 /// Returns the absolute value of the specified number or bigint.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Absolute} from 'type-fest';
-///
+/// <br /><br />
 /// type A = Absolute&lt;-1&gt;;
 /// //=&gt; 1
-///
+/// <br /><br />
 /// type B = Absolute&lt;1&gt;;
 /// //=&gt; 1
-///
+/// <br /><br />
 /// type C = Absolute&lt;0&gt;;
 /// //=&gt; 0
-///
+/// <br /><br />
 /// type D = Absolute&lt;-1.025&gt;;
 /// //=&gt; 1.025
-///
+/// <br /><br />
 /// type E = Absolute&lt;-9999n&gt;;
 /// //=&gt; 9999n
-/// </code>
+/// <code>
 ///
 /// Returns back the same type if the input is not a literal type.
-/// </remarks>
-/// <remarks>
-/// @example
+/// </code>
+/// </example>
+/// <example>
 /// <code>
+/// </code>
 /// import type {Absolute} from 'type-fest';
-///
+/// <br /><br />
 /// type A = Absolute&lt;number&gt;;
 /// //=&gt; number
-///
+/// <br /><br />
 /// type B = Absolute&lt;bigint&gt;;
 /// //=&gt; bigint
-///
+/// <br /><br />
 /// type C = Absolute&lt;number | bigint&gt;;
 /// //=&gt; number | bigint
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Numeric</remarks>
 [<Erase>]
 type Absolute<'N> = private Absolute__ of obj
@@ -59,41 +61,42 @@ type Absolute<'N> = private Absolute__ of obj
 type AllExtendOptions =
     /// <summary>
     /// Consider <c>never</c> elements to match the target type only if the target type itself is <c>never</c> (or <c>any</c>).
-    ///
+    /// <br /><br />
     /// - When set to <c>true</c> (default), <c>never</c> is _not_ treated as a bottom type, instead, it is treated as a type that matches only itself (or <c>any</c>).
     /// - When set to <c>false</c>, <c>never</c> is treated as a bottom type, and behaves as it normally would.
     /// </summary>
-    /// <remarks>@default true</remarks>
-    /// <remarks>
-    /// @example
+    /// <defaultValue>true</defaultValue>
+    /// <example>
     /// <code>
+    /// </code>
     /// import type {AllExtend} from 'type-fest';
-    ///
+    /// <br /><br />
     /// type A = AllExtend&lt;[1, 2, never], number, {strictNever: true}&gt;;
     /// //=&gt; false
-    ///
+    /// <br /><br />
     /// type B = AllExtend&lt;[1, 2, never], number, {strictNever: false}&gt;;
     /// //=&gt; true
-    ///
+    /// <br /><br />
     /// type C = AllExtend&lt;[never, never], never, {strictNever: true}&gt;;
     /// //=&gt; true
-    ///
+    /// <br /><br />
     /// type D = AllExtend&lt;[never, never], never, {strictNever: false}&gt;;
     /// //=&gt; true
-    ///
+    /// <br /><br />
     /// type E = AllExtend&lt;['a', 'b', never], any, {strictNever: true}&gt;;
     /// //=&gt; true
-    ///
+    /// <br /><br />
     /// type F = AllExtend&lt;['a', 'b', never], any, {strictNever: false}&gt;;
     /// //=&gt; true
-    ///
+    /// <br /><br />
     /// type G = AllExtend&lt;[never, 1], never, {strictNever: true}&gt;;
     /// //=&gt; false
-    ///
+    /// <br /><br />
     /// type H = AllExtend&lt;[never, 1], never, {strictNever: false}&gt;;
     /// //=&gt; false
+    /// <code>
     /// </code>
-    /// </remarks>
+    /// </example>
     abstract strictNever: bool option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?strictNever: bool) : AllExtendOptions = jsNative
@@ -101,45 +104,46 @@ type AllExtendOptions =
 /// <summary>
 /// Returns a boolean for whether every element in an array type extends another type.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {AllExtend} from 'type-fest';
-///
+/// <br /><br />
 /// type A = AllExtend&lt;[1, 2, 3], number&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type B = AllExtend&lt;[1, 2, '3'], number&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type C = AllExtend&lt;[number, number | string], number&gt;;
 /// //=&gt; boolean
-///
+/// <br /><br />
 /// type D = AllExtend&lt;[true, boolean, true], true&gt;;
 /// //=&gt; boolean
-/// </code>
-///
-/// Note: Behaviour of optional elements depend on the <c>exactOptionalPropertyTypes</c> compiler option. When the option is disabled, the target type must include <c>undefined</c> for a successful match.
-///
 /// <code>
+///
+/// Note: Behaviour of optional elements depend on the `exactOptionalPropertyTypes` compiler option. When the option is disabled, the target type must include `undefined` for a successful match.
+///
+/// </code>
 /// // @exactOptionalPropertyTypes: true
 /// import type {AllExtend} from 'type-fest';
-///
+/// <br /><br />
 /// type A = AllExtend&lt;[1?, 2?, 3?], number&gt;;
 /// //=&gt; true
-/// </code>
-///
 /// <code>
+///
+/// </code>
 /// // @exactOptionalPropertyTypes: false
 /// import type {AllExtend} from 'type-fest';
-///
+/// <br /><br />
 /// type A = AllExtend&lt;[1?, 2?, 3?], number&gt;;
 /// //=&gt; boolean
-///
+/// <br /><br />
 /// type B = AllExtend&lt;[1?, 2?, 3?], number | undefined&gt;;
 /// //=&gt; true
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@see {@link AllExtendOptions}</remarks>
 /// <remarks>@category Utilities</remarks>
 /// <remarks>@category Array</remarks>
@@ -148,27 +152,27 @@ type AllExtend<'TArray, 'Type, 'Options> = private AllExtend__ of obj
 
 /// <summary>
 /// Create a type with all fields from a union of object types.
-///
+/// <br /><br />
 /// Use-cases:
 /// - You want a safe object type where each key exists in the union object.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {AllUnionFields} from 'type-fest';
-///
+/// <br /><br />
 /// type Cat = {
 /// name: string;
 /// type: 'cat';
 /// catType: string;
 /// };
-///
+/// <br /><br />
 /// type Dog = {
 /// name: string;
 /// type: 'dog';
 /// dogType: string;
 /// };
-///
+/// <br /><br />
 /// function displayPetInfo(petInfo: Cat | Dog) {
 /// // typeof petInfo =&gt;
 /// // {
@@ -180,15 +184,15 @@ type AllExtend<'TArray, 'Type, 'Options> = private AllExtend__ of obj
 /// // 	type: 'dog';
 /// // 	dogType: string;
 /// // }
-///
+/// <br /><br />
 /// console.log('name:', petInfo.name);
 /// console.log('type:', petInfo.type);
-///
-/// // TypeScript complains about `catType` and `dogType` not existing on type `Cat | Dog`.
+/// <br /><br />
+/// // TypeScript complains about <c>catType</c> and <c>dogType</c> not existing on type <c>Cat | Dog</c>.
 /// // @ts-expect-error
 /// console.log('animal type:', petInfo.catType ?? petInfo.dogType);
 /// }
-///
+/// <br /><br />
 /// function displayPetInfoWithAllUnionFields(petInfo: AllUnionFields&lt;Cat | Dog&gt;) {
 /// // typeof petInfo =&gt;
 /// // {
@@ -197,15 +201,16 @@ type AllExtend<'TArray, 'Type, 'Options> = private AllExtend__ of obj
 /// // 	catType?: string;
 /// // 	dogType?: string;
 /// // }
-///
+/// <br /><br />
 /// console.log('name:', petInfo.name);
 /// console.log('type:', petInfo.type);
-///
+/// <br /><br />
 /// // No TypeScript error.
 /// console.log('animal type:', petInfo.catType ?? petInfo.dogType);
 /// }
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@see {@link SharedUnionFields}</remarks>
 /// <remarks>@category Object</remarks>
 /// <remarks>@category Union</remarks>
@@ -214,76 +219,80 @@ type AllUnionFields<'Union> = private AllUnionFields__ of obj
 
 /// <summary>
 /// Returns a boolean for whether all of the given elements are <c>true</c>.
-///
+/// <br /><br />
 /// Use-cases:
 /// - Check if all conditions in a list of booleans are met.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {AndAll} from 'type-fest';
-///
+/// <br /><br />
 /// type TTT = AndAll&lt;[true, true, true]&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type TTF = AndAll&lt;[true, true, false]&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type TFT = AndAll&lt;[true, false, true]&gt;;
 /// //=&gt; false
-/// </code>
-///
-/// Note: When <c>boolean</c> is passed as an element, it is distributed into separate cases, and the final result is a union of those cases.
-/// For example, <c>AndAll&lt;[true, boolean]&gt;</c> expands to <c>AndAll&lt;[true, true]&gt; | AndAll&lt;[true, false]&gt;</c>, which simplifies to <c>true | false</c> (i.e., <c>boolean</c>).
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
-/// import type {AndAll} from 'type-fest';
 ///
+/// Note: When `boolean` is passed as an element, it is distributed into separate cases, and the final result is a union of those cases.
+/// For example, `AndAll&lt;[true, boolean]&gt;` expands to `AndAll&lt;[true, true]&gt; | AndAll&lt;[true, false]&gt;`, which simplifies to `true | false` (i.e., `boolean`).
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
+/// import type {AndAll} from 'type-fest';
+/// <br /><br />
 /// type A = AndAll&lt;[true, boolean]&gt;;
 /// //=&gt; boolean
-///
+/// <br /><br />
 /// type B = AndAll&lt;[false, boolean]&gt;;
 /// //=&gt; false
-/// </code>
-///
-/// Note: If any of the elements is <c>never</c>, the result becomes <c>false</c>.
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
-/// import type {AndAll} from 'type-fest';
 ///
+/// Note: If any of the elements is `never`, the result becomes `false`.
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
+/// import type {AndAll} from 'type-fest';
+/// <br /><br />
 /// type A = AndAll&lt;[true, true, never]&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type B = AndAll&lt;[false, never, never]&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type C = AndAll&lt;[never, never, never]&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type D = AndAll&lt;[boolean, true, never]&gt;;
 /// //=&gt; false
-/// </code>
-///
-/// Note: If <c>any</c> is passed as an element, it is treated as <c>boolean</c> and the result is computed accordingly.
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
-/// import type {AndAll} from 'type-fest';
 ///
+/// Note: If `any` is passed as an element, it is treated as `boolean` and the result is computed accordingly.
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
+/// import type {AndAll} from 'type-fest';
+/// <br /><br />
 /// type A = AndAll&lt;[false, any]&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type B = AndAll&lt;[true, any]&gt;;
 /// //=&gt; boolean
-/// </code>
+/// <code>
 ///
-/// Note: <c>AndAll&lt;[]&gt;</c> evaluates to <c>true</c> due to the concept of <a href="https://en.wikipedia.org/wiki/Logical_conjunction#:~:text=In%20keeping%20with%20the%20concept%20of%20vacuous%20truth%2C%20when%20conjunction%20is%20defined%20as%20an%20operator%20or%20function%20of%20arbitrary%20arity%2C%20the%20empty%20conjunction%20(AND%2Ding%20over%20an%20empty%20set%20of%20operands">vacuous truth</a>%20is%20often%20defined%20as%20having%20the%20result%20true.), i.e., there are no <c>false</c> elements in an empty tuple.
-/// </remarks>
+/// Note: `AndAll&lt;[]&gt;` evaluates to `true` due to the concept of [vacuous truth](https://en.wikipedia.org/wiki/Logical_conjunction#:~:text=In%20keeping%20with%20the%20concept%20of%20vacuous%20truth%2C%20when%20conjunction%20is%20defined%20as%20an%20operator%20or%20function%20of%20arbitrary%20arity%2C%20the%20empty%20conjunction%20(AND%2Ding%20over%20an%20empty%20set%20of%20operands)%20is%20often%20defined%20as%20having%20the%20result%20true.), i.e., there are no `false` elements in an empty tuple.
+/// </code>
+/// </example>
 /// <remarks>@see {@link And}</remarks>
 /// <remarks>@see {@link OrAll}</remarks>
 [<Erase>]
@@ -291,80 +300,83 @@ type AndAll<'T> = private AndAll__ of obj
 
 /// <summary>
 /// Returns a boolean for whether two given types are both <c>true</c>.
-///
+/// <br /><br />
 /// Use-case: Constructing complex conditional types where multiple conditions must be satisfied.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {And} from 'type-fest';
-///
+/// <br /><br />
 /// type TT = And&lt;true, true&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type TF = And&lt;true, false&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type FT = And&lt;false, true&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type FF = And&lt;false, false&gt;;
 /// //=&gt; false
-/// </code>
-///
-/// Note: When <c>boolean</c> is passed as an argument, it is distributed into separate cases, and the final result is a union of those cases.
-/// For example, <c>And&lt;true, boolean&gt;</c> expands to <c>And&lt;true, true&gt; | And&lt;true, false&gt;</c>, which simplifies to <c>true | false</c> (i.e., <c>boolean</c>).
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
-/// import type {And} from 'type-fest';
 ///
+/// Note: When `boolean` is passed as an argument, it is distributed into separate cases, and the final result is a union of those cases.
+/// For example, `And&lt;true, boolean&gt;` expands to `And&lt;true, true&gt; | And&lt;true, false&gt;`, which simplifies to `true | false` (i.e., `boolean`).
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
+/// import type {And} from 'type-fest';
+/// <br /><br />
 /// type A = And&lt;true, boolean&gt;;
 /// //=&gt; boolean
-///
+/// <br /><br />
 /// type B = And&lt;boolean, true&gt;;
 /// //=&gt; boolean
-///
+/// <br /><br />
 /// type C = And&lt;false, boolean&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type D = And&lt;boolean, false&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type E = And&lt;boolean, boolean&gt;;
 /// //=&gt; boolean
-/// </code>
-///
-/// Note: If either of the types is <c>never</c>, the result becomes <c>false</c>.
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
-/// import type {And} from 'type-fest';
 ///
+/// Note: If either of the types is `never`, the result becomes `false`.
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
+/// import type {And} from 'type-fest';
+/// <br /><br />
 /// type A = And&lt;true, never&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type B = And&lt;never, true&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type C = And&lt;false, never&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type D = And&lt;never, false&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type E = And&lt;boolean, never&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type F = And&lt;never, boolean&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type G = And&lt;never, never&gt;;
 /// //=&gt; false
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@see {@link AndAll}</remarks>
 /// <remarks>@see {@link Or}</remarks>
 /// <remarks>@see {@link Xor}</remarks>
@@ -372,38 +384,39 @@ type And = obj
 
 /// <summary>
 /// Extracts the element type of an array or tuple.
-///
+/// <br /><br />
 /// Use-cases:
 /// - When you need type-safe element extraction that returns <c>never</c> for non-arrays.
 /// - When extracting element types from generic array parameters in function signatures.
 /// - For better readability and explicit intent over using <c>T[number]</c> directly.
-///
+/// <br /><br />
 /// Note: Returns <c>never</c> if the type is not an array.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {ArrayElement} from 'type-fest';
-///
+/// <br /><br />
 /// // Arrays
 /// type StringArray = ArrayElement&lt;string[]&gt;;
 /// //=&gt; string
-///
+/// <br /><br />
 /// // Tuples
 /// type Tuple = ArrayElement&lt;[1, 2, 3]&gt;;
 /// //=&gt; 1 | 2 | 3
-///
+/// <br /><br />
 /// // Type-safe
 /// type NotArray = ArrayElement&lt;{a: string}&gt;;
 /// //=&gt; never
-///
+/// <br /><br />
 /// // Practical example
 /// declare function getRandomElement&lt;T extends readonly unknown[]&gt;(array: T): ArrayElement&lt;T&gt;;
-///
+/// <br /><br />
 /// getRandomElement(['foo', 'bar', 'baz'] as const);
 /// //=&gt; 'foo' | 'bar' | 'baz'
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@see {@link ArrayValues} - For directly extracting values from a constant array type.</remarks>
 /// <remarks>@see {@link IterableElement} - For iterables like <c>Set</c>, <c>Map</c>, and generators (not suitable for all use cases due to different inference behavior).</remarks>
 /// <remarks>@category Array</remarks>
@@ -412,22 +425,23 @@ type ArrayElement<'T> = private ArrayElement__ of obj
 
 /// <summary>
 /// Provides valid indices for a constant array or tuple.
-///
+/// <br /><br />
 /// Use-case: This type is useful when working with constant arrays or tuples and you want to enforce type-safety for accessing elements by their indices.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {ArrayIndices, ArrayValues} from 'type-fest';
-///
+/// <br /><br />
 /// const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as const;
-///
+/// <br /><br />
 /// type Weekday = ArrayIndices&lt;typeof weekdays&gt;;
 /// type WeekdayName = ArrayValues&lt;typeof weekdays&gt;;
-///
+/// <br /><br />
 /// const getWeekdayName = (day: Weekday): WeekdayName =&gt; weekdays[day];
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@see {@link ArrayValues}</remarks>
 /// <remarks>@category Array</remarks>
 [<Erase>]
@@ -435,45 +449,46 @@ type ArrayIndices<'Element> = private ArrayIndices__ of obj
 
 /// <summary>
 /// Return the length of an array. Equivalent to <c>T['length']</c> where <c>T</c> extends any array.
-///
+/// <br /><br />
 /// Tuples resolve to numeric literals, while non-tuples resolve to the <c>number</c> type.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {ArrayLength} from 'type-fest';
-///
+/// <br /><br />
 /// type TupleLength = ArrayLength&lt;[1, 2, 3]&gt;;
 /// //=&gt; 3
-///
+/// <br /><br />
 /// type TupleWithOptionalMembersLength = ArrayLength&lt;[1, 2, number?]&gt;;
 /// //=&gt; 2 | 3
-///
+/// <br /><br />
 /// type NonTupleArrayLength = ArrayLength&lt;string[]&gt;;
 /// //=&gt; number
-///
+/// <br /><br />
 /// type TupleWithRestElementLength = ArrayLength&lt;[1, 2, ...string[]]&gt;;
 /// //=&gt; number
-///
+/// <br /><br />
 /// // Distinguish between arrays with fixed and non-fixed lengths
 /// type IsFixedLengthArray&lt;T extends readonly unknown[]&gt; = number extends ArrayLength&lt;T&gt; ? false : true;
-///
+/// <br /><br />
 /// type A = IsFixedLengthArray&lt;number[]&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type B = IsFixedLengthArray&lt;[1, 2, 3]&gt;;
 /// //=&gt; true
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Array</remarks>
 type ArrayLength = obj
 
 /// <summary>
 /// Reverse the order of elements in a tuple type.
 /// </summary>
-/// <remarks>
-/// @example
-/// <code lang="ts">
+/// <example>
+/// <code>
+/// ```ts
 /// import type {ArrayReverse} from 'type-fest';
 ///
 /// type A = ArrayReverse&lt;[string, number, boolean]&gt;;
@@ -491,12 +506,14 @@ type ArrayLength = obj
 /// type E = ArrayReverse&lt;[]&gt;;
 /// //=&gt; []
 /// </code>
-///
+/// <br /><br />
 /// Note: If the tuple contains optional elements, the result will be a union of tuples, refer to the examples below:
-/// </remarks>
-/// <remarks>
-/// @example
-/// <code lang="ts">
+/// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// ```ts
 /// import type {ArrayReverse} from 'type-fest';
 ///
 /// type A = ArrayReverse&lt;[string, number, boolean?]&gt;;
@@ -514,7 +531,9 @@ type ArrayLength = obj
 /// type E = ArrayReverse&lt;[string?, number?, ...boolean[]]&gt;;
 /// //=&gt; [] | [string] | [...boolean[], number, string]
 /// </code>
-/// </remarks>
+/// <code>
+/// </code>
+/// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
 type ArrayReverse<'TArray> = private ArrayReverse__ of obj
@@ -522,29 +541,29 @@ type ArrayReverse<'TArray> = private ArrayReverse__ of obj
 /// <summary>
 /// Returns an array slice of a given range, just like <c>Array#slice()</c>.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {ArraySlice} from 'type-fest';
-///
+/// <br /><br />
 /// type T0 = ArraySlice&lt;[0, 1, 2, 3, 4]&gt;;
 /// //=&gt; [0, 1, 2, 3, 4]
-///
+/// <br /><br />
 /// type T1 = ArraySlice&lt;[0, 1, 2, 3, 4], 0, -1&gt;;
 /// //=&gt; [0, 1, 2, 3]
-///
+/// <br /><br />
 /// type T2 = ArraySlice&lt;[0, 1, 2, 3, 4], 1, -2&gt;;
 /// //=&gt; [1, 2]
-///
+/// <br /><br />
 /// type T3 = ArraySlice&lt;[0, 1, 2, 3, 4], -2, 4&gt;;
 /// //=&gt; [3]
-///
+/// <br /><br />
 /// type T4 = ArraySlice&lt;[0, 1, 2, 3, 4], -2, -1&gt;;
 /// //=&gt; [3]
-///
+/// <br /><br />
 /// type T5 = ArraySlice&lt;[0, 1, 2, 3, 4], 0, -999&gt;;
 /// //=&gt; []
-///
+/// <br /><br />
 /// function arraySlice&lt;
 /// const Array_ extends readonly unknown[],
 /// Start extends number = 0,
@@ -552,48 +571,50 @@ type ArrayReverse<'TArray> = private ArrayReverse__ of obj
 /// &gt;(array: Array_, start?: Start, end?: End) {
 /// return array.slice(start, end) as ArraySlice&lt;Array_, Start, End&gt;;
 /// }
-///
+/// <br /><br />
 /// const slice = arraySlice([1, '2', {a: 3}, [4, 5]], 0, -1);
-///
+/// <br /><br />
 /// type Slice = typeof slice;
 /// //=&gt; [1, '2', {readonly a: 3}]
-///
+/// <br /><br />
 /// const value = slice[2].a;
 /// //=&gt; 3
-///
+/// <br /><br />
 /// // @ts-expect-error -- TS2493: Tuple type '[1, "2", {readonly a: 3}]' of length '3' has no element at index '3'.
 /// const invalidIndexAccess = slice[3];
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
 type ArraySlice<'Array_, 'Start, 'End> = private ArraySlice__ of obj
 
 /// <summary>
 /// Create a new array type by adding or removing elements at a specified index range in the original array.
-///
+/// <br /><br />
 /// Use-case: Replace or insert items in an array type.
-///
+/// <br /><br />
 /// Like <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/splice"><c>Array#splice()</c></a> but for types.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {ArraySplice} from 'type-fest';
-///
+/// <br /><br />
 /// type SomeMonths0 = ['January', 'April', 'June'];
 /// type Months0 = ArraySplice&lt;SomeMonths0, 1, 0, ['Feb', 'March']&gt;;
 /// //=&gt; ['January', 'Feb', 'March', 'April', 'June']
-///
+/// <br /><br />
 /// type SomeMonths1 = ['January', 'April', 'June'];
 /// type Months1 = ArraySplice&lt;SomeMonths1, 1, 1&gt;;
 /// //=&gt; ['January', 'June']
-///
+/// <br /><br />
 /// type SomeMonths2 = ['January', 'Foo', 'April'];
 /// type Months2 = ArraySplice&lt;SomeMonths2, 1, 1, ['Feb', 'March']&gt;;
 /// //=&gt; ['January', 'Feb', 'March', 'April']
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
 type ArraySplice<'T, 'Start, 'DeleteCount, 'Items> = private ArraySplice__ of obj
@@ -601,74 +622,77 @@ type ArraySplice<'T, 'Start, 'DeleteCount, 'Items> = private ArraySplice__ of ob
 /// <summary>
 /// Extract the type of an array or tuple minus the first element.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {ArrayTail} from 'type-fest';
-///
+/// <br /><br />
 /// type A = ArrayTail&lt;[1, 2, 3]&gt;;
 /// //=&gt; [2, 3]
-///
+/// <br /><br />
 /// type B = ArrayTail&lt;readonly [1, 2, 3]&gt;;
 /// //=&gt; readonly [2, 3]
-///
+/// <br /><br />
 /// type C = ArrayTail&lt;[1, 2, 3?, ...string[]]&gt;;
 /// //=&gt; [2, 3?, ...string[]]
-///
+/// <br /><br />
 /// type D = ArrayTail&lt;readonly [1]&gt;;
 /// //=&gt; readonly []
-///
+/// <br /><br />
 /// type E = ArrayTail&lt;[]&gt;;
 /// //=&gt; []
-///
+/// <br /><br />
 /// type F = ArrayTail&lt;string[]&gt;;
 /// //=&gt; string[]
-///
+/// <br /><br />
 /// type G = ArrayTail&lt;readonly [...string[], 1, 2]&gt;;
 /// //=&gt; readonly [...string[], 1, 2]
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// import type {ArrayTail} from 'type-fest';
-///
+/// <br /><br />
 /// type Curry&lt;Func&gt; = Func extends (...agruments_: infer Arguments) =&gt; infer Return
 /// ? Arguments extends readonly []
 /// ? Return
 /// : (agrument: Arguments[0]) =&gt; Curry&lt;(...agruments_: ArrayTail&lt;Arguments&gt;) =&gt; Return&gt;
 /// : never;
-///
+/// <br /><br />
 /// declare function curry&lt;Func extends Function&gt;(fn: Func): Curry&lt;Func&gt;;
-///
+/// <br /><br />
 /// declare function searchBooks(genre: string, minRating: number, available: boolean): string[];
-///
+/// <br /><br />
 /// const availableTopSciFi = curry(searchBooks)('sci-fi')(4.5)(true);
 /// //=&gt; string[]
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
 type ArrayTail<'TArray> = private ArrayTail__ of obj
 
 /// <summary>
 /// Provides all values for a constant array or tuple.
-///
+/// <br /><br />
 /// Use-case: This type is useful when working with constant arrays or tuples and you want to enforce type-safety with their values.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {ArrayValues, ArrayIndices} from 'type-fest';
-///
+/// <br /><br />
 /// const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as const;
-///
+/// <br /><br />
 /// type WeekdayName = ArrayValues&lt;typeof weekdays&gt;;
 /// type Weekday = ArrayIndices&lt;typeof weekdays&gt;;
-///
+/// <br /><br />
 /// const getWeekdayName = (day: Weekday): WeekdayName =&gt; weekdays[day];
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@see {@link ArrayIndices}</remarks>
 /// <remarks>@category Array</remarks>
 type ArrayValues = obj
@@ -677,36 +701,37 @@ type ArrayValues = obj
 /// Create a type that represents either the value or an array of the value.
 /// </summary>
 /// <remarks>@see {@link Promisable}</remarks>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Arrayable} from 'type-fest';
-///
+/// <br /><br />
 /// function bundle(input: string, output: Arrayable&lt;string&gt;) {
 /// const outputList = Array.isArray(output) ? output : [output];
-///
+/// <br /><br />
 /// // …
-///
+/// <br /><br />
 /// for (const output of outputList) {
-/// console.log(`write ${input} to: ${output}`);
+/// console.log(<c>write ${input} to: ${output}</c>);
 /// }
 /// }
-///
+/// <br /><br />
 /// bundle('src/index.js', 'dist/index.js');
 /// bundle('src/index.js', ['dist/index.cjs', 'dist/index.mjs']);
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Array</remarks>
 type Arrayable<'T> = U2<'T, 'T[]>
 
 /// <summary>
 /// Unwrap the return type of a function that returns a <c>Promise</c>.
-///
+/// <br /><br />
 /// There has been <a href="https://github.com/microsoft/TypeScript/pull/35998">discussion</a> about implementing this type in TypeScript.
 /// </summary>
-/// <remarks>
-/// @example
-/// <code lang="ts">
+/// <example>
+/// <code>
+/// ```ts
 /// import type {AsyncReturnType} from 'type-fest';
 ///
 /// declare function asyncFunction(): Promise&lt;{foo: string}&gt;;
@@ -720,30 +745,33 @@ type Arrayable<'T> = U2<'T, 'T[]>
 /// const value = await asyncFunction();
 /// doSomething(value);
 /// </code>
-/// </remarks>
+/// <code>
+/// </code>
+/// </example>
 /// <remarks>@category Async</remarks>
 [<Erase>]
 type AsyncReturnType<'Target> = private AsyncReturnType__ of obj
 
 /// <summary>
 /// Create an async version of the given function type, by boxing the return type in <c>Promise</c> while keeping the same parameter types.
-///
+/// <br /><br />
 /// Use-case: You have two functions, one synchronous and one asynchronous that do the same thing. Instead of having to duplicate the type definition, you can use <c>Asyncify</c> to reuse the synchronous type.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Asyncify} from 'type-fest';
-///
+/// <br /><br />
 /// // Synchronous function
 /// type Config = {featureFlags: Record&lt;string, boolean&gt;};
-///
+/// <br /><br />
 /// declare function loadConfigSync(path: string): Config;
-///
+/// <br /><br />
 /// type LoadConfigAsync = Asyncify&lt;typeof loadConfigSync&gt;;
 /// //=&gt; (path: string) =&gt; Promise&lt;Config&gt;
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Async</remarks>
 [<Erase>]
 type Asyncify<'Function_> = private Asyncify__ of obj
@@ -791,45 +819,45 @@ type CamelCaseOptions =
     /// <summary>
     /// Whether to preserved consecutive uppercase letter.
     /// </summary>
-    /// <remarks>@default false</remarks>
+    /// <defaultValue>false</defaultValue>
     abstract preserveConsecutiveUppercase: bool option with get, set
     /// <summary>
     /// Whether to preserve leading underscores.
-    ///
+    /// <br /><br />
     /// This matches the behavior of the <a href="https://github.com/sindresorhus/camelcase"><c>camelcase</c></a> package v9+.
     /// </summary>
-    /// <remarks>@default false</remarks>
+    /// <defaultValue>false</defaultValue>
     abstract preserveLeadingUnderscores: bool option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?splitOnNumbers: bool, ?splitOnPunctuation: bool, ?preserveConsecutiveUppercase: bool, ?preserveLeadingUnderscores: bool) : CamelCaseOptions = jsNative
 
 /// <summary>
 /// Convert a string literal to camel-case.
-///
+/// <br /><br />
 /// This can be useful when, for example, converting some kebab-cased command-line flags or a snake-cased database result.
-///
+/// <br /><br />
 /// By default, consecutive uppercase letter are preserved. See preserveConsecutiveUppercase option to change this behaviour.
-///
+/// <br /><br />
 /// Use the <c>preserveLeadingUnderscores</c> option to retain leading underscores, matching the runtime behavior of <a href="https://github.com/sindresorhus/camelcase"><c>camelcase</c></a> v9+.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {CamelCase} from 'type-fest';
-///
+/// <br /><br />
 /// // Simple
-///
+/// <br /><br />
 /// const someVariable: CamelCase&lt;'foo-bar'&gt; = 'fooBar';
 /// const preserveConsecutiveUppercase: CamelCase&lt;'foo-BAR-baz', {preserveConsecutiveUppercase: true}&gt; = 'fooBARBaz';
 /// const splitOnPunctuation: CamelCase&lt;'foo-bar:BAZ', {splitOnPunctuation: true}&gt; = 'fooBarBaz';
 /// const preserveLeadingUnderscores: CamelCase&lt;'_foo_bar', {preserveLeadingUnderscores: true}&gt; = '_fooBar';
-///
+/// <br /><br />
 /// // Advanced
-///
+/// <br /><br />
 /// type CamelCasedProperties&lt;T&gt; = {
 /// [K in keyof T as CamelCase&lt;K&gt;]: T[K]
 /// };
-///
+/// <br /><br />
 /// type RawOptions = {
 /// 'dry-run': boolean;
 /// 'full_family_name': string;
@@ -838,7 +866,7 @@ type CamelCaseOptions =
 /// QUZ_QUX: number;
 /// 'OTHER-FIELD': boolean;
 /// };
-///
+/// <br /><br />
 /// const dbResult: CamelCasedProperties&lt;RawOptions&gt; = {
 /// dryRun: true,
 /// fullFamilyName: 'bar.js',
@@ -847,8 +875,9 @@ type CamelCaseOptions =
 /// quzQux: 6,
 /// otherField: false,
 /// };
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
@@ -856,26 +885,26 @@ type CamelCase<'Type, 'Options> = private CamelCase__ of obj
 
 /// <summary>
 /// Convert object properties to camel case recursively.
-///
+/// <br /><br />
 /// This can be useful when, for example, converting some API types from a different style.
 /// </summary>
 /// <remarks>@see {@link CamelCasedProperties}</remarks>
 /// <remarks>@see {@link CamelCase}</remarks>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {CamelCasedPropertiesDeep} from 'type-fest';
-///
+/// <br /><br />
 /// type User = {
 /// UserId: number;
 /// UserName: string;
 /// };
-///
+/// <br /><br />
 /// type UserWithFriends = {
 /// UserInfo: User;
 /// UserFriends: User[];
 /// };
-///
+/// <br /><br />
 /// const result: CamelCasedPropertiesDeep&lt;UserWithFriends&gt; = {
 /// userInfo: {
 /// userId: 1,
@@ -892,7 +921,7 @@ type CamelCase<'Type, 'Options> = private CamelCase__ of obj
 /// },
 /// ],
 /// };
-///
+/// <br /><br />
 /// const preserveConsecutiveUppercase: CamelCasedPropertiesDeep&lt;{fooBAR: {fooBARBiz: [{fooBARBaz: string}]}}, {preserveConsecutiveUppercase: true}&gt; = {
 /// fooBAR: {
 /// fooBARBiz: [{
@@ -900,15 +929,16 @@ type CamelCase<'Type, 'Options> = private CamelCase__ of obj
 /// }],
 /// },
 /// };
-///
+/// <br /><br />
 /// const splitOnPunctuation: CamelCasedPropertiesDeep&lt;{'user@info': {'user::id': number; 'user::name': string}}, {splitOnPunctuation: true}&gt; = {
 /// userInfo: {
 /// userId: 1,
 /// userName: 'Tom',
 /// },
 /// };
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
@@ -917,35 +947,36 @@ type CamelCasedPropertiesDeep<'Value, 'Options> = private CamelCasedPropertiesDe
 
 /// <summary>
 /// Convert top-level object properties to camel case.
-///
+/// <br /><br />
 /// This can be useful when, for example, converting some API types from a different style.
 /// </summary>
 /// <remarks>@see {@link CamelCasedPropertiesDeep}</remarks>
 /// <remarks>@see {@link CamelCase}</remarks>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {CamelCasedProperties} from 'type-fest';
-///
+/// <br /><br />
 /// type User = {
 /// UserId: number;
 /// UserName: string;
 /// };
-///
+/// <br /><br />
 /// const result: CamelCasedProperties&lt;User&gt; = {
 /// userId: 1,
 /// userName: 'Tom',
 /// };
-///
+/// <br /><br />
 /// const preserveConsecutiveUppercase: CamelCasedProperties&lt;{fooBAR: string}, {preserveConsecutiveUppercase: true}&gt; = {
 /// fooBAR: 'string',
 /// };
-///
+/// <br /><br />
 /// const splitOnPunctuation: CamelCasedProperties&lt;{'foo::bar': string}, {splitOnPunctuation: true}&gt; = {
 /// fooBar: 'string',
 /// };
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
@@ -1090,91 +1121,95 @@ type Alphanumeric =
 
 /// <summary>
 /// Exclude keys from a shape that matches the given <c>Condition</c>.
-///
+/// <br /><br />
 /// This is useful when you want to create a new type with a specific set of keys from a shape. For example, you might want to exclude all the primitive properties from a class and form a new shape containing everything but the primitive properties.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Primitive, ConditionalExcept} from 'type-fest';
-///
+/// <br /><br />
 /// class Awesome {
 /// constructor(public name: string, public successes: number, public failures: bigint) {}
-///
+/// <br /><br />
 /// run() {
 /// // do something
 /// }
 /// }
-///
+/// <br /><br />
 /// type ExceptPrimitivesFromAwesome = ConditionalExcept&lt;Awesome, Primitive&gt;;
 /// //=&gt; {run: () =&gt; void}
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// import type {ConditionalExcept} from 'type-fest';
-///
+/// <br /><br />
 /// type Example = {
 /// a: string;
 /// b: string | number;
 /// c: () =&gt; void;
 /// d: {};
 /// };
-///
+/// <br /><br />
 /// type NonStringKeysOnly = ConditionalExcept&lt;Example, string&gt;;
 /// //=&gt; {b: string | number; c: () =&gt; void; d: {}}
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 type ConditionalExcept = obj
 
 /// <summary>
 /// Extract the keys from a type where the value type of the key extends the given <c>Condition</c>.
-///
+/// <br /><br />
 /// Internally this is used for the <c>ConditionalPick</c> and <c>ConditionalExcept</c> types.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {ConditionalKeys} from 'type-fest';
-///
+/// <br /><br />
 /// type Example = {
 /// a: string;
 /// b: string | number;
 /// c?: string;
 /// d: {};
 /// };
-///
+/// <br /><br />
 /// type StringKeysOnly = ConditionalKeys&lt;Example, string&gt;;
 /// //=&gt; 'a'
-/// </code>
-///
-/// Note: To extract optional keys, make sure your <c>Condition</c> is a union of <c>undefined</c> (for example, <c>string | undefined</c>) as demonstrated below.
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
-/// import type {ConditionalKeys} from 'type-fest';
 ///
+/// Note: To extract optional keys, make sure your `Condition` is a union of `undefined` (for example, `string | undefined`) as demonstrated below.
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
+/// import type {ConditionalKeys} from 'type-fest';
+/// <br /><br />
 /// type StringKeysAndUndefined = ConditionalKeys&lt;{a?: string}, string | undefined&gt;;
 /// //=&gt; 'a'
-///
+/// <br /><br />
 /// type NoMatchingKeys = ConditionalKeys&lt;{a?: string}, string&gt;;
 /// //=&gt; never
-/// </code>
+/// <code>
 ///
 /// You can also extract array indices whose value match the specified condition, as shown below:
-/// <code>
+/// </code>
 /// import type {ConditionalKeys} from 'type-fest';
-///
+/// <br /><br />
 /// type StringValueIndices = ConditionalKeys&lt;[string, number, string], string&gt;;
 /// //=&gt; '0' | '2'
-///
+/// <br /><br />
 /// type NumberValueIndices = ConditionalKeys&lt;[string, number?, string?], number | undefined&gt;;
 /// //=&gt; '1'
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
 type ConditionalKeys<'Base, 'Condition> = private ConditionalKeys__ of obj
@@ -1188,7 +1223,7 @@ type ConditionalPickDeepOptions =
     /// <summary>
     /// The condition assertion mode.
     /// </summary>
-    /// <remarks>@default 'extends'</remarks>
+    /// <defaultValue>'extends'</defaultValue>
     abstract condition: ConditionalPickDeepOptions.Condition option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?condition: ConditionalPickDeepOptions.Condition) : ConditionalPickDeepOptions = jsNative
@@ -1203,11 +1238,11 @@ module ConditionalPickDeepOptions =
 /// Pick keys recursively from the shape that matches the given condition.
 /// </summary>
 /// <remarks>@see {@link ConditionalPick}</remarks>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {ConditionalPickDeep} from 'type-fest';
-///
+/// <br /><br />
 /// type Example = {
 /// a: string;
 /// b: string | boolean;
@@ -1222,22 +1257,22 @@ module ConditionalPickDeepOptions =
 /// j: boolean;
 /// };
 /// };
-///
+/// <br /><br />
 /// type StringPick = ConditionalPickDeep&lt;Example, string&gt;;
 /// //=&gt; {a: string; c: {d: string}}
-///
+/// <br /><br />
 /// type StringPickOptional = ConditionalPickDeep&lt;Example, string | undefined&gt;;
 /// //=&gt; {a: string; c: {d: string; e: {f?: string}}}
-///
+/// <br /><br />
 /// type StringPickOptionalOnly = ConditionalPickDeep&lt;Example, string | undefined, {condition: 'equality'}&gt;;
 /// //=&gt; {c: {e: {f?: string}}}
-///
+/// <br /><br />
 /// type BooleanPick = ConditionalPickDeep&lt;Example, boolean | undefined&gt;;
 /// //=&gt; {c: {e: {g?: boolean}; j: boolean}}
-///
+/// <br /><br />
 /// type NumberPick = ConditionalPickDeep&lt;Example, number&gt;;
 /// //=&gt; never
-///
+/// <br /><br />
 /// type StringOrBooleanPick = ConditionalPickDeep&lt;Example, string | boolean&gt;;
 /// //=&gt; {
 /// // 	a: string;
@@ -1250,53 +1285,56 @@ module ConditionalPickDeepOptions =
 /// // 		j: boolean;
 /// // 	};
 /// // }
-///
+/// <br /><br />
 /// type StringOrBooleanPickOnly = ConditionalPickDeep&lt;Example, string | boolean, {condition: 'equality'}&gt;;
 /// //=&gt; {b: string | boolean; c: {e: {h: string | boolean}}}
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
 type ConditionalPickDeep<'Type, 'Condition, 'Options> = private ConditionalPickDeep__ of obj
 
 /// <summary>
 /// Pick keys from the shape that matches the given <c>Condition</c>.
-///
+/// <br /><br />
 /// This is useful when you want to create a new type from a specific subset of an existing type. For example, you might want to pick all the primitive properties from a class and form a new automatically derived type.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Primitive, ConditionalPick} from 'type-fest';
-///
+/// <br /><br />
 /// class Awesome {
 /// constructor(public name: string, public successes: number, public failures: bigint) {}
-///
+/// <br /><br />
 /// run() {
 /// // do something
 /// }
 /// }
-///
+/// <br /><br />
 /// type PickPrimitivesFromAwesome = ConditionalPick&lt;Awesome, Primitive&gt;;
 /// //=&gt; {name: string; successes: number; failures: bigint}
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// import type {ConditionalPick} from 'type-fest';
-///
+/// <br /><br />
 /// type Example = {
 /// a: string;
 /// b: string | number;
 /// c: () =&gt; void;
 /// d: {};
 /// };
-///
+/// <br /><br />
 /// type StringKeysOnly = ConditionalPick&lt;Example, string&gt;;
 /// //=&gt; {a: string}
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
 type ConditionalPick<'Base, 'Condition> = private ConditionalPick__ of obj
@@ -1304,58 +1342,59 @@ type ConditionalPick<'Base, 'Condition> = private ConditionalPick__ of obj
 /// <summary>
 /// Recursively simplifies a type while including and/or excluding certain types from being simplified.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {ConditionalSimplifyDeep} from 'type-fest';
-///
+/// <br /><br />
 /// type TypeA = {
 /// foo: {
 /// a: string;
 /// };
 /// };
-///
+/// <br /><br />
 /// type TypeB = {
 /// foo: {
 /// b: string;
 /// };
 /// };
-///
+/// <br /><br />
 /// type SimplifyDeepTypeAB = ConditionalSimplifyDeep&lt;TypeA &amp; TypeB, never, object&gt;;
 /// //=&gt; {foo: {a: string; b: string}}
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// import type {ConditionalSimplifyDeep} from 'type-fest';
-///
+/// <br /><br />
 /// type SomeComplexType1 = {
 /// a1: string;
 /// b1: number;
 /// c1: boolean;
 /// };
-///
+/// <br /><br />
 /// type SomeComplexType2 = {
 /// a2: string;
 /// b2: number;
 /// c2: boolean;
 /// };
-///
+/// <br /><br />
 /// type TypeA = {
 /// foo: {
 /// a: string;
 /// complexType: SomeComplexType1;
 /// };
 /// };
-///
+/// <br /><br />
 /// type TypeB = {
 /// foo: {
 /// b: string;
 /// complexType: SomeComplexType2;
 /// };
 /// };
-///
+/// <br /><br />
 /// type SimplifyDeepTypeAB = ConditionalSimplifyDeep&lt;TypeA &amp; TypeB, SomeComplexType1 | SomeComplexType2, object&gt;;
 /// //=&gt; {
 /// // 	foo: {
@@ -1364,8 +1403,9 @@ type ConditionalPick<'Base, 'Condition> = private ConditionalPick__ of obj
 /// // 		b: string;
 /// // 	};
 /// // }
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@see {@link SimplifyDeep}</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
@@ -1373,46 +1413,48 @@ type ConditionalSimplifyDeep<'Type, 'ExcludeType, 'IncludeType> = private Condit
 
 /// <summary>
 /// Simplifies a type while including and/or excluding certain types from being simplified.
-///
+/// <br /><br />
 /// Useful to improve type hints shown in editors. And also to transform an <c>interface</c> into a <c>type</c> to aid with assignability.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {ConditionalSimplify} from 'type-fest';
-///
+/// <br /><br />
 /// type TypeA = {
 /// a: string;
 /// };
-///
+/// <br /><br />
 /// type TypeB = {
 /// b: string;
 /// };
-///
+/// <br /><br />
 /// type TypeAB = TypeA &amp; TypeB;
 /// //=&gt; TypeA &amp; TypeB
-///
+/// <br /><br />
 /// type SimplifyTypeAB = ConditionalSimplify&lt;TypeAB, never, object&gt;;
 /// //=&gt; {a: string; b: string}
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// import type {ConditionalSimplify} from 'type-fest';
-///
+/// <br /><br />
 /// type Simplify&lt;T&gt; = ConditionalSimplify&lt;T, Set&lt;unknown&gt; | Map&lt;unknown, unknown&gt; | unknown[], object&gt;;
-///
+/// <br /><br />
 /// type A = Simplify&lt;Set&lt;number&gt; &amp; Set&lt;string&gt;&gt;;
 /// //=&gt; Set&lt;number&gt; &amp; Set&lt;string&gt;
-///
+/// <br /><br />
 /// type B = Simplify&lt;Map&lt;number, number&gt; &amp; Map&lt;string, string&gt;&gt;;
 /// //=&gt; Map&lt;number, number&gt; &amp; Map&lt;string, string&gt;
-///
+/// <br /><br />
 /// type C = Simplify&lt;{a: number} &amp; {b: string}&gt;;
 /// //=&gt; {a: number; b: string}
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@see {@link ConditionalSimplifyDeep}</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
@@ -1420,41 +1462,42 @@ type ConditionalSimplify<'Type, 'ExcludeType, 'IncludeType> = private Conditiona
 
 /// <summary>
 /// Convert a string literal to a custom string delimiter casing.
-///
+/// <br /><br />
 /// This can be useful when, for example, converting a camel-cased object property to an oddly cased one.
 /// </summary>
 /// <remarks>@see {@link KebabCase}</remarks>
 /// <remarks>@see {@link SnakeCase}</remarks>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {DelimiterCase} from 'type-fest';
-///
+/// <br /><br />
 /// // Simple
-///
+/// <br /><br />
 /// const someVariable: DelimiterCase&lt;'fooBar', '#'&gt; = 'foo#bar';
 /// const someVariableNoSplitOnNumbers: DelimiterCase&lt;'p2pNetwork', '#', {splitOnNumbers: false}&gt; = 'p2p#network';
 /// const someVariableWithPunctuation: DelimiterCase&lt;'div.card::after', '#', {splitOnPunctuation: true}&gt; = 'div#card#after';
-///
+/// <br /><br />
 /// // Advanced
-///
+/// <br /><br />
 /// type OddlyCasedProperties&lt;T&gt; = {
 /// [K in keyof T as DelimiterCase&lt;K, '#'&gt;]: T[K]
 /// };
-///
+/// <br /><br />
 /// type SomeOptions = {
 /// dryRun: boolean;
 /// includeFile: string;
 /// foo: number;
 /// };
-///
+/// <br /><br />
 /// const rawCliOptions: OddlyCasedProperties&lt;SomeOptions&gt; = {
 /// 'dry#run': true,
 /// 'include#file': 'bar.js',
 /// foo: 123,
 /// };
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
@@ -1462,26 +1505,26 @@ type DelimiterCase<'Value, 'Delimiter, 'Options> = private DelimiterCase__ of ob
 
 /// <summary>
 /// Convert object properties to a custom string delimiter casing recursively.
-///
+/// <br /><br />
 /// This can be useful when, for example, converting some API types from a different style.
 /// </summary>
 /// <remarks>@see {@link DelimiterCase}</remarks>
 /// <remarks>@see {@link DelimiterCasedProperties}</remarks>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {DelimiterCasedPropertiesDeep} from 'type-fest';
-///
+/// <br /><br />
 /// type User = {
 /// userId: number;
 /// userName: string;
 /// };
-///
+/// <br /><br />
 /// type UserWithFriends = {
 /// userInfo: User;
 /// userFriends: User[];
 /// };
-///
+/// <br /><br />
 /// const result: DelimiterCasedPropertiesDeep&lt;UserWithFriends, '-'&gt; = {
 /// 'user-info': {
 /// 'user-id': 1,
@@ -1498,7 +1541,7 @@ type DelimiterCase<'Value, 'Delimiter, 'Options> = private DelimiterCase__ of ob
 /// },
 /// ],
 /// };
-///
+/// <br /><br />
 /// const splitOnNumbers: DelimiterCasedPropertiesDeep&lt;{line1: {line2: [{line3: string}]}}, '-', {splitOnNumbers: true}&gt; = {
 /// 'line-1': {
 /// 'line-2': [
@@ -1508,15 +1551,16 @@ type DelimiterCase<'Value, 'Delimiter, 'Options> = private DelimiterCase__ of ob
 /// ],
 /// },
 /// };
-///
+/// <br /><br />
 /// const splitOnPunctuation: DelimiterCasedPropertiesDeep&lt;{'user@info': {'user::id': number; 'user::name': string}}, '-', {splitOnPunctuation: true}&gt; = {
 /// 'user-info': {
 /// 'user-id': 1,
 /// 'user-name': 'Tom',
 /// },
 /// };
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
@@ -1525,35 +1569,36 @@ type DelimiterCasedPropertiesDeep<'Value, 'Delimiter, 'Options> = private Delimi
 
 /// <summary>
 /// Convert object properties to a custom string delimiter casing.
-///
+/// <br /><br />
 /// This can be useful when, for example, converting some API types from a different style.
 /// </summary>
 /// <remarks>@see {@link DelimiterCase}</remarks>
 /// <remarks>@see {@link DelimiterCasedPropertiesDeep}</remarks>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {DelimiterCasedProperties} from 'type-fest';
-///
+/// <br /><br />
 /// type User = {
 /// userId: number;
 /// userName: string;
 /// };
-///
+/// <br /><br />
 /// const result: DelimiterCasedProperties&lt;User, '-'&gt; = {
 /// 'user-id': 1,
 /// 'user-name': 'Tom',
 /// };
-///
+/// <br /><br />
 /// const splitOnNumbers: DelimiterCasedProperties&lt;{line1: string}, '-', {splitOnNumbers: true}&gt; = {
 /// 'line-1': 'string',
 /// };
-///
+/// <br /><br />
 /// const splitOnPunctuation: DelimiterCasedProperties&lt;{'foo::bar': string}, '-', {splitOnPunctuation: true}&gt; = {
 /// 'foo-bar': 'string',
 /// };
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
@@ -1562,11 +1607,10 @@ type DelimiterCasedProperties<'Value, 'Delimiter, 'Options> = private DelimiterC
 
 /// <summary>
 /// Omits keys from a type, distributing the operation over a union.
-///
+/// <br /><br />
 /// TypeScript's <c>Omit</c> doesn't distribute over unions, leading to the erasure of unique properties from union members when omitting keys. This creates a type that only retains properties common to all union members, making it impossible to access member-specific properties after the Omit. Essentially, using <c>Omit</c> on a union type merges the types into a less specific one, hindering type narrowing and property access based on discriminants. This type solves that.
-///
+/// <br /><br />
 /// Example:
-///
 /// <code>
 /// type A = {
 /// 	discriminant: 'A';
@@ -1597,67 +1641,67 @@ type DelimiterCasedProperties<'Value, 'Delimiter, 'Options> = private DelimiterC
 /// 	// Error: `a` is not a property of `{discriminant: 'A' | 'B'}`
 /// }
 /// </code>
-///
+/// <br /><br />
 /// While <c>Except</c> solves this problem, it restricts the keys you can omit to the ones that are present in <b>ALL</b> union members, where <c>DistributedOmit</c> allows you to omit keys that are present in <b>ANY</b> union member.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {DistributedOmit} from 'type-fest';
-///
+/// <br /><br />
 /// type A = {
 /// discriminant: 'A';
 /// foo: string;
 /// a: number;
 /// };
-///
+/// <br /><br />
 /// type B = {
 /// discriminant: 'B';
 /// foo: string;
 /// bar: string;
 /// b: string;
 /// };
-///
+/// <br /><br />
 /// type C = {
 /// discriminant: 'C';
 /// bar: string;
 /// c: boolean;
 /// };
-///
-/// // Notice that `foo` exists in `A` and `B`, but not in `C`, and
-/// // `bar` exists in `B` and `C`, but not in `A`.
-///
+/// <br /><br />
+/// // Notice that <c>foo</c> exists in <c>A</c> and <c>B</c>, but not in <c>C</c>, and
+/// // <c>bar</c> exists in <c>B</c> and <c>C</c>, but not in <c>A</c>.
+/// <br /><br />
 /// type Union = A | B | C;
-///
+/// <br /><br />
 /// type OmittedUnion = DistributedOmit&lt;Union, 'foo' | 'bar'&gt;;
-///
+/// <br /><br />
 /// declare const omittedUnion: OmittedUnion;
-///
+/// <br /><br />
 /// if (omittedUnion.discriminant === 'A') {
 /// const aValue = omittedUnion.a;
 /// // OK
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// const fooValue = omittedUnion.foo;
-/// // Error: `foo` is not a property of `{discriminant: 'A'; a: string}`
-///
+/// // Error: <c>foo</c> is not a property of <c>{discriminant: 'A'; a: string}</c>
+/// <br /><br />
 /// // @ts-expect-error
 /// const barValue = omittedUnion.bar;
-/// // Error: `bar` is not a property of `{discriminant: 'A'; a: string}`
+/// // Error: <c>bar</c> is not a property of <c>{discriminant: 'A'; a: string}</c>
 /// }
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
 type DistributedOmit<'ObjectType, 'KeyType> = private DistributedOmit__ of obj
 
 /// <summary>
 /// Pick keys from a type, distributing the operation over a union.
-///
+/// <br /><br />
 /// TypeScript's <c>Pick</c> doesn't distribute over unions, leading to the erasure of unique properties from union members when picking keys. This creates a type that only retains properties common to all union members, making it impossible to access member-specific properties after the Pick. Essentially, using <c>Pick</c> on a union type merges the types into a less specific one, hindering type narrowing and property access based on discriminants. This type solves that.
-///
+/// <br /><br />
 /// Example:
-///
 /// <code>
 /// type A = {
 /// 	discriminant: 'A';
@@ -1691,11 +1735,11 @@ type DistributedOmit<'ObjectType, 'KeyType> = private DistributedOmit__ of obj
 /// }
 /// </code>
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {DistributedPick} from 'type-fest';
-///
+/// <br /><br />
 /// type A = {
 /// discriminant: 'A';
 /// foo: {
@@ -1703,7 +1747,7 @@ type DistributedOmit<'ObjectType, 'KeyType> = private DistributedOmit__ of obj
 /// };
 /// extraneous: boolean;
 /// };
-///
+/// <br /><br />
 /// type B = {
 /// discriminant: 'B';
 /// foo: {
@@ -1711,50 +1755,51 @@ type DistributedOmit<'ObjectType, 'KeyType> = private DistributedOmit__ of obj
 /// };
 /// extraneous: boolean;
 /// };
-///
-/// // Notice that `foo.bar` exists in `A` but not in `B`.
-///
+/// <br /><br />
+/// // Notice that <c>foo.bar</c> exists in <c>A</c> but not in <c>B</c>.
+/// <br /><br />
 /// type Union = A | B;
-///
+/// <br /><br />
 /// type PickedUnion = DistributedPick&lt;Union, 'discriminant' | 'foo'&gt;;
-///
+/// <br /><br />
 /// declare const pickedUnion: PickedUnion;
-///
+/// <br /><br />
 /// if (pickedUnion.discriminant === 'A') {
 /// const barValue = pickedUnion.foo.bar;
 /// // OK
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// const extraneousValue = pickedUnion.extraneous;
-/// // Error: Property `extraneous` does not exist on type `Pick&lt;A, 'discriminant' | 'foo'&gt;`.
-///
+/// // Error: Property <c>extraneous</c> does not exist on type <c>Pick&lt;A, 'discriminant' | 'foo'&gt;</c>.
+/// <br /><br />
 /// // @ts-expect-error
 /// const bazValue = pickedUnion.foo.baz;
-/// // Error: `bar` is not a property of `{discriminant: 'A'; a: string}`.
+/// // Error: <c>bar</c> is not a property of <c>{discriminant: 'A'; a: string}</c>.
 /// }
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
 type DistributedPick<'ObjectType, 'KeyType> = private DistributedPick__ of obj
 
 /// <summary>
 /// Represents a strictly empty plain object, the <c>{}</c> value.
-///
+/// <br /><br />
 /// When you annotate something as the type <c>{}</c>, it can be anything except <c>null</c> and <c>undefined</c>. This means that you cannot use <c>{}</c> to represent an empty plain object (<a href="https://stackoverflow.com/questions/47339869/typescript-empty-object-and-any-difference/52193484#52193484">read more</a>).
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {EmptyObject} from 'type-fest';
-///
-/// // The following illustrates the problem with `{}`.
+/// <br /><br />
+/// // The following illustrates the problem with <c>{}</c>.
 /// const foo1: {} = {}; // Pass
 /// const foo2: {} = []; // Pass
 /// const foo3: {} = 42; // Pass
 /// const foo4: {} = {a: 1}; // Pass
-///
-/// // With `EmptyObject` only the first case is valid.
+/// <br /><br />
+/// // With <c>EmptyObject</c> only the first case is valid.
 /// const bar1: EmptyObject = {}; // Pass
 /// // @ts-expect-error
 /// const bar2: EmptyObject = []; // Fail
@@ -1762,10 +1807,11 @@ type DistributedPick<'ObjectType, 'KeyType> = private DistributedPick__ of obj
 /// const bar3: EmptyObject = 42; // Fail
 /// // @ts-expect-error
 /// const bar4: EmptyObject = {a: 1}; // Fail
-/// </code>
+/// <code>
 ///
-/// Unfortunately, <c>Record&lt;string, never&gt;</c>, <c>Record&lt;keyof any, never&gt;</c> and <c>Record&lt;never, never&gt;</c> do not work. See {@link https://github.com/sindresorhus/type-fest/issues/395 #395}.
-/// </remarks>
+/// Unfortunately, `Record&lt;string, never&gt;`, `Record&lt;keyof any, never&gt;` and `Record&lt;never, never&gt;` do not work. See {@link https://github.com/sindresorhus/type-fest/issues/395 #395}.
+/// </code>
+/// </example>
 /// <remarks>@category Object</remarks>
 type EmptyObject =
     interface end
@@ -1773,16 +1819,17 @@ type EmptyObject =
 /// <summary>
 /// Returns a boolean for whether the type is strictly equal to an empty plain object, the <c>{}</c> value.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {IsEmptyObject} from 'type-fest';
-///
+/// <br /><br />
 /// type Pass = IsEmptyObject&lt;{}&gt;; //=&gt; true
 /// type Fail1 = IsEmptyObject&lt;[]&gt;; //=&gt; false
 /// type Fail2 = IsEmptyObject&lt;null&gt;; //=&gt; false
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@see {@link EmptyObject}</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
@@ -1790,48 +1837,49 @@ type IsEmptyObject<'T> = private IsEmptyObject__ of obj
 
 /// <summary>
 /// Create a type that describes the key-value pairs produced when calling a collection’s <c>entries</c> method.
-///
+/// <br /><br />
 /// For example the <c>Object</c> (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/entries), <c>Map</c> (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map/entries), <c>Array</c> (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/entries), and <c>Set</c> (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set/entries) collections all have this method. Note that <c>WeakMap</c> and <c>WeakSet</c> do not have this method since their entries are not enumerable.
 /// </summary>
 /// <remarks>@see <c>Entry</c> if you want to just access the type of a single entry.</remarks>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Entries} from 'type-fest';
-///
+/// <br /><br />
 /// type Example = {
 /// someKey: number;
 /// };
-///
+/// <br /><br />
 /// const manipulatesEntries = (examples: Entries&lt;Example&gt;) =&gt; examples.map(example =&gt; [
 /// // Does some arbitrary processing on the key (with type information available)
 /// example[0].toUpperCase(),
-///
+/// <br /><br />
 /// // Does some arbitrary processing on the value (with type information available)
 /// example[1].toFixed(0),
 /// ]);
-///
+/// <br /><br />
 /// const example: Example = {someKey: 1};
 /// const entries = Object.entries(example) as Entries&lt;Example&gt;;
 /// const output = manipulatesEntries(entries);
-///
+/// <br /><br />
 /// // Objects
 /// const objectExample = {a: 1};
 /// const objectEntries: Entries&lt;typeof objectExample&gt; = [['a', 1]];
-///
+/// <br /><br />
 /// // Arrays
 /// const arrayExample = ['a', 1];
 /// const arrayEntries: Entries&lt;typeof arrayExample&gt; = [[0, 'a'], [1, 1]];
-///
+/// <br /><br />
 /// // Maps
 /// const mapExample = new Map([['a', 1]]);
 /// const mapEntries: Entries&lt;typeof mapExample&gt; = [['a', 1]];
-///
+/// <br /><br />
 /// // Sets
 /// const setExample = new Set(['a', 1]);
 /// const setEntries: Entries&lt;typeof setExample&gt; = [['a', 'a'], [1, 1]];
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 /// <remarks>@category Map</remarks>
 /// <remarks>@category Set</remarks>
@@ -1841,50 +1889,51 @@ type Entries<'BaseType> = private Entries__ of obj
 
 /// <summary>
 /// Create a type that describes a single key-value pair produced when calling a collection’s <c>entries</c> method.
-///
+/// <br /><br />
 /// For example the <c>Object</c> (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/entries), <c>Map</c> (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map/entries), <c>Array</c> (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/entries), and <c>Set</c> (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set/entries) collections all have this method. Note that <c>WeakMap</c> and <c>WeakSet</c> do not have this method since their entries are not enumerable.
 /// </summary>
 /// <remarks>@see <c>Entries</c> if you want to just access the type of the array of entries (which is the return of the <c>.entries()</c> method).</remarks>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Entry} from 'type-fest';
-///
+/// <br /><br />
 /// type Example = {
 /// someKey: number;
 /// };
-///
+/// <br /><br />
 /// const manipulatesEntry = (example: Entry&lt;Example&gt;) =&gt; [
 /// // Does some arbitrary processing on the key (with type information available)
 /// example[0].toUpperCase(),
-///
+/// <br /><br />
 /// // Does some arbitrary processing on the value (with type information available)
 /// example[1].toFixed(0),
 /// ];
-///
+/// <br /><br />
 /// const example: Example = {someKey: 1};
 /// const entry = Object.entries(example)[0] as Entry&lt;Example&gt;;
 /// const output = manipulatesEntry(entry);
-///
+/// <br /><br />
 /// // Objects
 /// const objectExample = {a: 1};
 /// const objectEntry: Entry&lt;typeof objectExample&gt; = ['a', 1];
-///
+/// <br /><br />
 /// // Arrays
 /// const arrayExample = ['a', 1];
 /// const arrayEntryString: Entry&lt;typeof arrayExample&gt; = [0, 'a'];
 /// const arrayEntryNumber: Entry&lt;typeof arrayExample&gt; = [1, 1];
-///
+/// <br /><br />
 /// // Maps
 /// const mapExample = new Map([['a', 1]]);
 /// const mapEntry: Entry&lt;typeof mapExample&gt; = ['a', 1];
-///
+/// <br /><br />
 /// // Sets
 /// const setExample = new Set(['a', 1]);
 /// const setEntryString: Entry&lt;typeof setExample&gt; = ['a', 'a'];
 /// const setEntryNumber: Entry&lt;typeof setExample&gt; = [1, 1];
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 /// <remarks>@category Map</remarks>
 /// <remarks>@category Array</remarks>
@@ -1894,46 +1943,48 @@ type Entry<'BaseType> = private Entry__ of obj
 
 /// <summary>
 /// Create a type that does not allow extra properties, meaning it only allows properties that are explicitly declared.
-///
+/// <br /><br />
 /// This is useful for function type-guarding to reject arguments with excess properties. Due to the nature of TypeScript, it does not complain if excess properties are provided unless the provided value is an object literal.
-///
+/// <br /><br />
 /// Please upvote <a href="https://github.com/microsoft/TypeScript/issues/12936">this issue</a> if you want to have this type as a built-in in TypeScript.*
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// type OnlyAcceptName = {name: string};
-///
+/// <br /><br />
 /// declare function onlyAcceptName(arguments_: OnlyAcceptName): void;
-///
+/// <br /><br />
 /// // TypeScript complains about excess properties when an object literal is provided.
 /// // @ts-expect-error
 /// onlyAcceptName({name: 'name', id: 1});
-/// // `id` is excess
-///
+/// // <c>id</c> is excess
+/// <br /><br />
 /// // TypeScript does not complain about excess properties when the provided value is a variable (not an object literal).
 /// const invalidInput = {name: 'name', id: 1};
 /// onlyAcceptName(invalidInput); // No errors
-/// </code>
-///
-/// Having <c>Exact</c> allows TypeScript to reject excess properties.
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
+///
+/// Having `Exact` allows TypeScript to reject excess properties.
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// import type {Exact} from 'type-fest';
-///
+/// <br /><br />
 /// type OnlyAcceptName = {name: string};
-///
+/// <br /><br />
 /// declare function onlyAcceptNameImproved&lt;T extends Exact&lt;OnlyAcceptName, T&gt;&gt;(arguments_: T): void;
-///
+/// <br /><br />
 /// const invalidInput = {name: 'name', id: 1};
 /// // @ts-expect-error
 /// onlyAcceptNameImproved(invalidInput); // Compilation error
-/// </code>
+/// <code>
 ///
-/// <a href="https://stackoverflow.com/questions/49580725/is-it-possible-to-restrict-typescript-object-to-contain-only-properties-defined">Read more</a>
-/// </remarks>
+/// [Read more](https://stackoverflow.com/questions/49580725/is-it-possible-to-restrict-typescript-object-to-contain-only-properties-defined)
+/// </code>
+/// </example>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
 type Exact<'ParameterType, 'InputType> = private Exact__ of obj
@@ -1942,68 +1993,69 @@ type Exact<'ParameterType, 'InputType> = private Exact__ of obj
 type ExceptOptions =
     /// <summary>
     /// Disallow assigning non-specified properties.
-    ///
+    /// <br /><br />
     /// Note that any omitted properties in the resulting type will be present in autocomplete as <c>undefined</c>.
     /// </summary>
-    /// <remarks>@default false</remarks>
+    /// <defaultValue>false</defaultValue>
     abstract requireExactProps: bool option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?requireExactProps: bool) : ExceptOptions = jsNative
 
 /// <summary>
 /// Create a type from an object type without certain keys.
-///
+/// <br /><br />
 /// We recommend setting the <c>requireExactProps</c> option to <c>true</c>.
-///
+/// <br /><br />
 /// This type is a stricter version of <a href="https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-5.html#the-omit-helper-type"><c>Omit</c></a>. The <c>Omit</c> type does not restrict the omitted keys to be keys present on the given type, while <c>Except</c> does. The benefits of a stricter type are avoiding typos and allowing the compiler to pick up on rename refactors automatically.
-///
+/// <br /><br />
 /// This type was proposed to the TypeScript team, which declined it, saying they prefer that libraries implement stricter versions of the built-in types (<a href="https://github.com/microsoft/TypeScript/issues/30825#issuecomment-523668235">microsoft/TypeScript#30825</a>).
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Except} from 'type-fest';
-///
+/// <br /><br />
 /// type Foo = {
 /// a: number;
 /// b: string;
 /// };
-///
+/// <br /><br />
 /// type FooWithoutA = Except&lt;Foo, 'a'&gt;;
 /// //=&gt; {b: string}
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// const fooWithoutA: FooWithoutA = {a: 1, b: '2'};
 /// // errors: 'a' does not exist in type '{ b: string; }'
-///
+/// <br /><br />
 /// type FooWithoutB = Except&lt;Foo, 'b', {requireExactProps: true}&gt;;
 /// //=&gt; {a: number} &amp; Partial&lt;Record&lt;'b', never&gt;&gt;
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// const fooWithoutB: FooWithoutB = {a: 1, b: '2'};
 /// // errors at 'b': Type 'string' is not assignable to type 'undefined'.
-///
-/// // The `Omit` utility type doesn't work when omitting specific keys from objects containing index signatures.
-///
+/// <br /><br />
+/// // The <c>Omit</c> utility type doesn't work when omitting specific keys from objects containing index signatures.
+/// <br /><br />
 /// // Consider the following example:
-///
+/// <br /><br />
 /// type UserData = {
 /// [metadata: string]: string;
 /// email: string;
 /// name: string;
 /// role: 'admin' | 'user';
 /// };
-///
-/// // `Omit` clearly doesn't behave as expected in this case:
+/// <br /><br />
+/// // <c>Omit</c> clearly doesn't behave as expected in this case:
 /// type PostPayload = Omit&lt;UserData, 'email'&gt;;
 /// //=&gt; {[x: string]: string; [x: number]: string}
-///
-/// // In situations like this, `Except` works better.
-/// // It simply removes the `email` key while preserving all the other keys.
+/// <br /><br />
+/// // In situations like this, <c>Except</c> works better.
+/// // It simply removes the <c>email</c> key while preserving all the other keys.
 /// type PostPayloadFixed = Except&lt;UserData, 'email'&gt;;
 /// //=&gt; {[x: string]: string; name: string; role: 'admin' | 'user'}
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
 type Except<'ObjectType, 'KeysType, 'Options> = private Except__ of obj
@@ -2011,30 +2063,31 @@ type Except<'ObjectType, 'KeysType, 'Options> = private Except__ of obj
 /// <summary>
 /// A stricter version of <c>Exclude&lt;T, U&gt;</c> that excludes types only when they are exactly identical.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {ExcludeExactly} from 'type-fest';
-///
+/// <br /><br />
 /// type TestExclude1 = Exclude&lt;'a' | 'b' | 'c' | 1 | 2 | 3, string&gt;;
 /// //=&gt; 1 | 2 | 3
-///
+/// <br /><br />
 /// type TestExcludeExactly1 = ExcludeExactly&lt;'a' | 'b' | 'c' | 1 | 2 | 3, string&gt;;
 /// //=&gt; 'a' | 'b' | 'c' | 1 | 2 | 3
-///
+/// <br /><br />
 /// type TestExclude2 = Exclude&lt;'a' | 'b' | 'c' | 1 | 2 | 3, any&gt;;
 /// //=&gt; never
-///
+/// <br /><br />
 /// type TestExcludeExactly2 = ExcludeExactly&lt;'a' | 'b' | 'c' | 1 | 2 | 3, any&gt;;
 /// //=&gt; 'a' | 'b' | 'c' | 1 | 2 | 3
-///
+/// <br /><br />
 /// type TestExclude3 = Exclude&lt;{a: string} | {a: string; b: string}, {a: string}&gt;;
 /// //=&gt; never
-///
+/// <br /><br />
 /// type TestExcludeExactly3 = ExcludeExactly&lt;{a: string} | {a: string; b: string}, {a: string}&gt;;
 /// //=&gt; {a: string; b: string}
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Improved Built-in</remarks>
 [<Erase>]
 type ExcludeExactly<'Union, 'Delete> = private ExcludeExactly__ of obj
@@ -2042,24 +2095,25 @@ type ExcludeExactly<'Union, 'Delete> = private ExcludeExactly__ of obj
 /// <summary>
 /// Create a tuple with the <a href="https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types"><c>rest</c></a> element removed.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {ExcludeRestElement} from 'type-fest';
-///
+/// <br /><br />
 /// type T1 = ExcludeRestElement&lt;[number, ...string[], string, 'foo']&gt;;
 /// //=&gt; [number, string, 'foo']
-///
+/// <br /><br />
 /// type T2 = ExcludeRestElement&lt;[...boolean[], string]&gt;;
 /// //=&gt; [string]
-///
+/// <br /><br />
 /// type T3 = ExcludeRestElement&lt;[...Array&lt;'foo'&gt;, true]&gt;;
 /// //=&gt; [true]
-///
+/// <br /><br />
 /// type T4 = ExcludeRestElement&lt;[number, string]&gt;;
 /// //=&gt; [number, string]
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@see {@link ExtractRestElement}</remarks>
 /// <remarks>@see {@link SplitOnRestElement}</remarks>
 /// <remarks>@category Array</remarks>
@@ -2068,74 +2122,76 @@ type ExcludeRestElement<'Array_> = private ExcludeRestElement__ of obj
 
 /// <summary>
 /// A stricter version of &lt;T, U&gt; that ensures every member of <c>U</c> can successfully exclude something from <c>T</c>.
-///
+/// <br /><br />
 /// For example, <c>ExcludeStrict&lt;string | number | boolean, number | bigint&gt;</c> will error because <c>bigint</c> cannot exclude anything from <c>string | number | boolean</c>.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// // Valid Examples
 /// import type {ExcludeStrict} from 'type-fest';
-///
+/// <br /><br />
 /// type Example1 = ExcludeStrict&lt;{status: 'success'; data: string[]} | {status: 'error'; error: string}, {status: 'success'}&gt;;
 /// //=&gt; {status: 'error'; error: string}
-///
+/// <br /><br />
 /// type Example2 = ExcludeStrict&lt;'xs' | 's' | 'm' | 'l' | 'xl', 'xs' | 's'&gt;;
 /// //=&gt; 'm' | 'l' | 'xl'
-///
+/// <br /><br />
 /// type Example3 = ExcludeStrict&lt;{x: number; y: number} | [number, number], unknown[]&gt;;
 /// //=&gt; {x: number; y: number}
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// // Invalid Examples
 /// import type {ExcludeStrict} from 'type-fest';
-///
-/// // `'xxl'` cannot exclude anything from `'xs' | 's' | 'm' | 'l' | 'xl'`
+/// <br /><br />
+/// // <c>'xxl'</c> cannot exclude anything from <c>'xs' | 's' | 'm' | 'l' | 'xl'</c>
 /// // @ts-expect-error
 /// type Example1 = ExcludeStrict&lt;'xs' | 's' | 'm' | 'l' | 'xl', 'xl' | 'xxl'&gt;;
 /// //                                                           ~~~~~~~~~~~~
 /// // Error: Type "'xl' | 'xxl'" does not satisfy the constraint 'never'.
-///
-/// // `unknown[]` cannot exclude anything from `{x: number; y: number} | {x: string; y: string}`
+/// <br /><br />
+/// // <c>unknown[]</c> cannot exclude anything from <c>{x: number; y: number} | {x: string; y: string}</c>
 /// // @ts-expect-error
 /// type Example2 = ExcludeStrict&lt;{x: number; y: number} | {x: string; y: string}, unknown[]&gt;;
 /// //                                                                             ~~~~~~~~~
 /// // Error: Type 'unknown[]' does not satisfy the constraint 'never'.
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Improved Built-in</remarks>
 [<Erase>]
 type ExcludeStrict<'T, 'U> = private ExcludeStrict__ of 'T
 
 /// <summary>
 /// Ensure mutual exclusivity in object unions by adding other members’ keys as <c>?: never</c>.
-///
+/// <br /><br />
 /// Use-cases:
 /// - You want each union member to be exclusive, preventing overlapping object shapes.
 /// - You want to safely access any property defined across the union without additional type guards.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {ExclusifyUnion} from 'type-fest';
-///
+/// <br /><br />
 /// type FileConfig = {
 /// filePath: string;
 /// };
-///
+/// <br /><br />
 /// type InlineConfig = {
 /// content: string;
 /// };
-///
+/// <br /><br />
 /// declare function loadConfig1(options: FileConfig | InlineConfig): void;
-///
-/// // Someone could mistakenly provide both `filePath` and `content`.
+/// <br /><br />
+/// // Someone could mistakenly provide both <c>filePath</c> and <c>content</c>.
 /// loadConfig1({filePath: './config.json', content: '{ "name": "app" }'}); // No errors
-///
-/// // Use `ExclusifyUnion` to prevent that mistake.
+/// <br /><br />
+/// // Use <c>ExclusifyUnion</c> to prevent that mistake.
 /// type Config = ExclusifyUnion&lt;FileConfig | InlineConfig&gt;;
 /// //=&gt; {
 /// // 	filePath: string;
@@ -2144,38 +2200,39 @@ type ExcludeStrict<'T, 'U> = private ExcludeStrict__ of 'T
 /// // 	content: string;
 /// // 	filePath?: never;
 /// // }
-///
+/// <br /><br />
 /// declare function loadConfig2(options: Config): void;
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// loadConfig2({filePath: './config.json', content: '{ "name": "app" }'});
 /// // Error: Argument of type '{ filePath: string; content: string; }' is not assignable to parameter of type '{ filePath: string; content?: never; } | { content: string; filePath?: never; }'.
-///
+/// <br /><br />
 /// loadConfig2({filePath: './config.json'}); // Ok
-///
+/// <br /><br />
 /// loadConfig2({content: '{ "name": "app" }'}); // Ok
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// import type {ExclusifyUnion} from 'type-fest';
-///
+/// <br /><br />
 /// type CardPayment = {
 /// amount: number;
 /// cardNumber: string;
 /// };
-///
+/// <br /><br />
 /// type PaypalPayment = {
 /// amount: number;
 /// paypalId: string;
 /// };
-///
+/// <br /><br />
 /// function processPayment1(payment: CardPayment | PaypalPayment) {
 /// // @ts-expect-error
-/// const details = payment.cardNumber ?? payment.paypalId; // Cannot access `cardNumber` or `paypalId` directly
+/// const details = payment.cardNumber ?? payment.paypalId; // Cannot access <c>cardNumber</c> or <c>paypalId</c> directly
 /// }
-///
+/// <br /><br />
 /// type Payment = ExclusifyUnion&lt;CardPayment | PaypalPayment&gt;;
 /// //=&gt; {
 /// // 	amount: number;
@@ -2186,21 +2243,22 @@ type ExcludeStrict<'T, 'U> = private ExcludeStrict__ of 'T
 /// // 	paypalId: string;
 /// // 	cardNumber?: never;
 /// // }
-///
+/// <br /><br />
 /// function processPayment2(payment: Payment) {
 /// const details = payment.cardNumber ?? payment.paypalId; // Ok
 /// //=&gt; string
 /// }
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// import type {ExclusifyUnion} from 'type-fest';
-///
+/// <br /><br />
 /// type A = ExclusifyUnion&lt;{a: string} | {b: number}&gt;;
 /// //=&gt; {a: string; b?: never} | {b: number; a?: never}
-///
+/// <br /><br />
 /// type B = ExclusifyUnion&lt;{a: string} | {b: number} | {c: boolean}&gt;;
 /// //=&gt; {
 /// // 	a: string;
@@ -2215,7 +2273,7 @@ type ExcludeStrict<'T, 'U> = private ExcludeStrict__ of 'T
 /// // 	a?: never;
 /// // 	b?: never;
 /// // }
-///
+/// <br /><br />
 /// type C = ExclusifyUnion&lt;{a: string; b: number} | {b: string; c: number}&gt;;
 /// //=&gt; {
 /// // 	a: string;
@@ -2226,11 +2284,12 @@ type ExcludeStrict<'T, 'U> = private ExcludeStrict__ of 'T
 /// // 	c: number;
 /// // 	a?: never;
 /// // }
-///
+/// <br /><br />
 /// type D = ExclusifyUnion&lt;{a?: 1; readonly b: 2} | {d: 4}&gt;;
 /// //=&gt; {a?: 1; readonly b: 2; d?: never} | {d: 4; a?: never; b?: never}
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 /// <remarks>@category Union</remarks>
 [<Erase>]
@@ -2241,117 +2300,122 @@ type ExtendsStrictOptions =
     /// <summary>
     /// Whether to distribute over unions.
     /// </summary>
-    /// <remarks>@default false</remarks>
-    /// <remarks>
-    /// @example
+    /// <defaultValue>false</defaultValue>
+    /// <example>
     /// <code>
+    /// </code>
     /// import type {ExtendsStrict} from 'type-fest';
-    ///
+    /// <br /><br />
     /// type T1 = ExtendsStrict&lt;string | number, string, {distributiveUnions: true}&gt;;
     /// //=&gt; boolean
-    ///
+    /// <br /><br />
     /// type T2 = ExtendsStrict&lt;string | number, string, {distributiveUnions: false}&gt;;
     /// //=&gt; false
+    /// <code>
     /// </code>
-    /// </remarks>
+    /// </example>
     abstract distributiveUnions: bool option with get, set
     /// <summary>
     /// Whether <c>never</c> extends every other type.
-    ///
+    /// <br /><br />
     /// When enabled, <c>never</c> is not treated as a bottom type and only extends itself (or <c>any</c> / <c>unknown</c>).
     /// </summary>
-    /// <remarks>@default true</remarks>
-    /// <remarks>
-    /// @example
+    /// <defaultValue>true</defaultValue>
+    /// <example>
     /// <code>
+    /// </code>
     /// import type {ExtendsStrict} from 'type-fest';
-    ///
+    /// <br /><br />
     /// type T1 = ExtendsStrict&lt;never, number, {strictNever: true}&gt;;
     /// //=&gt; false
-    ///
+    /// <br /><br />
     /// type T2 = ExtendsStrict&lt;never, number, {strictNever: false}&gt;;
     /// //=&gt; true
-    ///
+    /// <br /><br />
     /// type T3 = ExtendsStrict&lt;never, never, {strictNever: true}&gt;;
     /// //=&gt; true
-    ///
+    /// <br /><br />
     /// type T4 = ExtendsStrict&lt;never, any, {strictNever: true}&gt;;
     /// //=&gt; true
-    ///
+    /// <br /><br />
     /// type T5 = ExtendsStrict&lt;never, unknown, {strictNever: true}&gt;;
     /// //=&gt; true
-    /// </code>
+    /// <code>
     ///
-    /// Note: This option only has an effect when checking assignability from <c>never</c> (<c>ExtendsStrict&lt;never, ...&gt;</c>), and not when checking assignability to <c>never</c> (<c>ExtendsStrict&lt;..., never&gt;</c>).
-    /// </remarks>
+    /// Note: This option only has an effect when checking assignability from `never` (`ExtendsStrict&lt;never, ...&gt;`), and not when checking assignability to `never` (`ExtendsStrict&lt;..., never&gt;`).
+    /// </code>
+    /// </example>
     abstract strictNever: bool option with get, set
     /// <summary>
     /// Whether <c>any</c> extends every other type.
-    ///
+    /// <br /><br />
     /// When enabled, <c>any</c> does not extend every other type, it only extends itself (or <c>unknown</c>).
     /// </summary>
-    /// <remarks>@default false</remarks>
-    /// <remarks>
-    /// @example
+    /// <defaultValue>false</defaultValue>
+    /// <example>
     /// <code>
+    /// </code>
     /// import type {ExtendsStrict} from 'type-fest';
-    ///
+    /// <br /><br />
     /// type T1 = ExtendsStrict&lt;any, number, {strictAny: true}&gt;;
     /// //=&gt; false
-    ///
+    /// <br /><br />
     /// type T2 = ExtendsStrict&lt;any, number, {strictAny: false; distributiveUnions: false}&gt;;
     /// //=&gt; true
-    ///
+    /// <br /><br />
     /// type T3 = ExtendsStrict&lt;any, any, {strictAny: true}&gt;;
     /// //=&gt; true
-    ///
+    /// <br /><br />
     /// type T4 = ExtendsStrict&lt;any, unknown, {strictAny: true}&gt;;
     /// //=&gt; true
-    /// </code>
-    ///
-    /// Note: If <c>strictAny</c> is <c>false</c> and <c>distributiveUnions</c> is <c>true</c>, then <c>any</c> would distribute and the result would be the <c>boolean</c> type, except when checking assignability to <c>any</c> or <c>unknown</c>.
-    /// </remarks>
-    /// <remarks>
-    /// @example
     /// <code>
-    /// import type {ExtendsStrict} from 'type-fest';
     ///
+    /// Note: If `strictAny` is `false` and `distributiveUnions` is `true`, then `any` would distribute and the result would be the `boolean` type, except when checking assignability to `any` or `unknown`.
+    /// </code>
+    /// </example>
+    /// <example>
+    /// <code>
+    /// </code>
+    /// import type {ExtendsStrict} from 'type-fest';
+    /// <br /><br />
     /// type T1 = ExtendsStrict&lt;any, number, {strictAny: false; distributiveUnions: true}&gt;;
     /// //=&gt; boolean
-    ///
+    /// <br /><br />
     /// type T2 = ExtendsStrict&lt;any, any, {strictAny: false; distributiveUnions: true}&gt;;
     /// //=&gt; true
-    ///
+    /// <br /><br />
     /// type T3 = ExtendsStrict&lt;any, unknown, {strictAny: false; distributiveUnions: true}&gt;;
     /// //=&gt; true
-    /// </code>
+    /// <code>
     ///
-    /// Note: This option only has an effect when checking assignability from <c>any</c> (<c>ExtendsStrict&lt;any, ...&gt;</c>), and not when checking assignability to <c>any</c> (<c>ExtendsStrict&lt;..., any&gt;</c>).
-    /// </remarks>
+    /// Note: This option only has an effect when checking assignability from `any` (`ExtendsStrict&lt;any, ...&gt;`), and not when checking assignability to `any` (`ExtendsStrict&lt;..., any&gt;`).
+    /// </code>
+    /// </example>
     abstract strictAny: bool option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?distributiveUnions: bool, ?strictNever: bool, ?strictAny: bool) : ExtendsStrictOptions = jsNative
 
 /// <summary>
 /// A customizable version of <c>extends</c> for checking whether one type is assignable to another.
-///
+/// <br /><br />
 /// Refer ExtendsStrictOptions for the different ways you can customize the behavior of this type.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {ExtendsStrict} from 'type-fest';
-///
+/// <br /><br />
 /// type T1 = ExtendsStrict&lt;number | string, string, {distributiveUnions: false}&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type T2 = ExtendsStrict&lt;never, number, {strictNever: true}&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type T3 = ExtendsStrict&lt;any, number, {strictAny: true}&gt;;
 /// //=&gt; false
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@see {@link ExtendsStrictOptions}</remarks>
 /// <remarks>@category Improved Built-in</remarks>
 [<Erase>]
@@ -2360,30 +2424,31 @@ type ExtendsStrict<'Left, 'Right, 'Options> = private ExtendsStrict__ of obj
 /// <summary>
 /// A stricter version of <c>Extract&lt;T, U&gt;</c> that extracts types only when they are exactly identical.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {ExtractExactly} from 'type-fest';
-///
+/// <br /><br />
 /// type TestExtract1 = Extract&lt;'a' | 'b' | 'c' | 1 | 2 | 3, string&gt;;
 /// //=&gt; 'a' | 'b' | 'c'
-///
+/// <br /><br />
 /// type TestExtractExactly1 = ExtractExactly&lt;'a' | 'b' | 'c' | 1 | 2 | 3, string&gt;;
 /// //=&gt; never
-///
+/// <br /><br />
 /// type TestExtract2 = Extract&lt;'a' | 'b' | 'c' | 1 | 2 | 3, any&gt;;
 /// //=&gt; 'a' | 'b' | 'c' | 1 | 2 | 3
-///
+/// <br /><br />
 /// type TestExtractExactly2 = ExtractExactly&lt;'a' | 'b' | 'c' | 1 | 2 | 3, any&gt;;
 /// //=&gt; never
-///
+/// <br /><br />
 /// type TestExtract3 = Extract&lt;{a: string} | {a: string; b: string}, {a: string}&gt;;
 /// //=&gt; {a: string} | {a: string; b: string}
-///
+/// <br /><br />
 /// type TestExtractExactly3 = ExtractExactly&lt;{a: string} | {a: string; b: string}, {a: string}&gt;;
 /// //=&gt; {a: string}
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Improved Built-in</remarks>
 [<Erase>]
 type ExtractExactly<'Union, 'Match> = private ExtractExactly__ of obj
@@ -2391,24 +2456,25 @@ type ExtractExactly<'Union, 'Match> = private ExtractExactly__ of obj
 /// <summary>
 /// Extract the <a href="https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types"><c>rest</c></a> element type from an array.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {ExtractRestElement} from 'type-fest';
-///
+/// <br /><br />
 /// type T1 = ExtractRestElement&lt;[number, ...string[], string, 'foo']&gt;;
 /// //=&gt; string
-///
+/// <br /><br />
 /// type T2 = ExtractRestElement&lt;[...boolean[], string]&gt;;
 /// //=&gt; boolean
-///
+/// <br /><br />
 /// type T3 = ExtractRestElement&lt;[...Array&lt;'foo'&gt;, true]&gt;;
 /// //=&gt; 'foo'
-///
+/// <br /><br />
 /// type T4 = ExtractRestElement&lt;[number, string]&gt;;
 /// //=&gt; never
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@see {@link ExcludeRestElement}</remarks>
 /// <remarks>@see {@link SplitOnRestElement}</remarks>
 /// <remarks>@category Array</remarks>
@@ -2416,199 +2482,207 @@ type ExtractRestElement = obj
 
 /// <summary>
 /// A stricter version of &lt;T, U&gt; that ensures every member of <c>U</c> can successfully extract something from <c>T</c>.
-///
+/// <br /><br />
 /// For example, <c>ExtractStrict&lt;string | number | boolean, number | bigint&gt;</c> will error because <c>bigint</c> cannot extract anything from <c>string | number | boolean</c>.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// // Valid Examples
 /// import type {ExtractStrict} from 'type-fest';
-///
+/// <br /><br />
 /// type Example1 = ExtractStrict&lt;{status: 'success'; data: string[]} | {status: 'error'; error: string}, {status: 'success'}&gt;;
 /// //=&gt; {status: 'success'; data: string[]}
-///
+/// <br /><br />
 /// type Example2 = ExtractStrict&lt;'xs' | 's' | 'm' | 'l' | 'xl', 'xs' | 's'&gt;;
 /// //=&gt; 'xs' | 's'
-///
+/// <br /><br />
 /// type Example3 = ExtractStrict&lt;{x: number; y: number} | [number, number], unknown[]&gt;;
 /// //=&gt; [number, number]
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// // Invalid Examples
 /// import type {ExtractStrict} from 'type-fest';
-///
-/// // `'xxl'` cannot extract anything from `'xs' | 's' | 'm' | 'l' | 'xl'`
+/// <br /><br />
+/// // <c>'xxl'</c> cannot extract anything from <c>'xs' | 's' | 'm' | 'l' | 'xl'</c>
 /// // @ts-expect-error
 /// type Example1 = ExtractStrict&lt;'xs' | 's' | 'm' | 'l' | 'xl', 'xl' | 'xxl'&gt;;
 /// //                                                           ~~~~~~~~~~~~
 /// // Error: Type "'xl' | 'xxl'" does not satisfy the constraint 'never'.
-///
-/// // `unknown[]` cannot extract anything from `{x: number; y: number} | {x: string; y: string}`
+/// <br /><br />
+/// // <c>unknown[]</c> cannot extract anything from <c>{x: number; y: number} | {x: string; y: string}</c>
 /// // @ts-expect-error
 /// type Example2 = ExtractStrict&lt;{x: number; y: number} | {x: string; y: string}, unknown[]&gt;;
 /// //                                                                             ~~~~~~~~~
 /// // Error: Type 'unknown[]' does not satisfy the constraint 'never'.
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Improved Built-in</remarks>
 [<Erase>]
 type ExtractStrict<'T, 'U> = private ExtractStrict__ of 'T
 
 /// <summary>
 /// Tries to find the type of a global with the given name.
-///
+/// <br /><br />
 /// Limitations: Due to peculiarities with the behavior of <c>globalThis</c>, "globally defined" only includes <c>var</c> declarations in <c>declare global</c> blocks, not <c>let</c> or <c>const</c> declarations.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {FindGlobalType} from 'type-fest';
-///
+/// <br /><br />
 /// declare global {
 /// const foo: number; // let and const don't work
 /// var bar: string; // var works
 /// }
-///
+/// <br /><br />
 /// type FooType = FindGlobalType&lt;'foo'&gt;; //=&gt; never (let/const don't work)
 /// type BarType = FindGlobalType&lt;'bar'&gt;; //=&gt; string
 /// type OtherType = FindGlobalType&lt;'other'&gt;; //=&gt; never (no global named 'other')
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
 type FindGlobalType<'Name> = private FindGlobalType__ of obj
 
 /// <summary>
 /// Tries to find one or more types from their globally-defined constructors.
-///
+/// <br /><br />
 /// Use-case: Conditionally referencing DOM types only when the DOM library present.
-///
+/// <br /><br />
 /// Limitations:<i> Due to peculiarities with the behavior of <c>globalThis</c>, "globally defined" has a narrow definition in this case. Declaring a class in a <c>declare global</c> block won't work, instead you must declare its type using an interface and declare its constructor as a <c>var</c> (</i>not* <c>let</c>/<c>const</c>) inside the <c>declare global</c> block.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {FindGlobalInstanceType} from 'type-fest';
-///
+/// <br /><br />
 /// class Point {
 /// constructor(public x: number, public y: number) {}
 /// }
-///
+/// <br /><br />
 /// type PointLike = Point | FindGlobalInstanceType&lt;'DOMPoint'&gt;;
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// import type {FindGlobalInstanceType} from 'type-fest';
-///
+/// <br /><br />
 /// declare global {
-/// // Class syntax won't add the key to `globalThis`
+/// // Class syntax won't add the key to <c>globalThis</c>
 /// class Foo {}
-///
+/// <br /><br />
 /// // interface + constructor style works
 /// interface Bar {
 /// bar: string;
 /// }
 /// var Bar: new () =&gt; Bar; // Not let or const
 /// }
-///
+/// <br /><br />
 /// type FindFoo = FindGlobalInstanceType&lt;'Foo'&gt;; // Doesn't work
 /// type FindBar = FindGlobalInstanceType&lt;'Bar'&gt;; // Works
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
 type FindGlobalInstanceType<'Name> = private FindGlobalInstanceType__ of obj
 
 /// <summary>
 /// Create a type that represents an array of the given type and length. The <c>Array</c> prototype methods that manipulate its length are excluded from the resulting type.
-///
+/// <br /><br />
 /// The problem with the built-in tuple type is that it allows mutating methods like <c>push</c>, <c>pop</c> etc, which can cause issues, like in the following example:
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
-/// const color: [number, number, number] = [255, 128, 64];
-///
-/// function toHex([r, g, b]: readonly [number, number, number]) {
-/// return `#${r.toString(16)}${g.toString(16)}${b.toString(16)}`;
-/// }
-///
-/// color.pop(); // Allowed
-///
-/// console.log(toHex(color)); // Compiles fine, but fails at runtime since index `2` no longer contains a `number`.
 /// </code>
-///
-/// <c>ArrayLengthMutationKeys</c> solves this problem by excluding methods like <c>push</c>, <c>pop</c> etc from the resulting type.
-/// </remarks>
-/// <remarks>
-/// @example
+/// const color: [number, number, number] = [255, 128, 64];
+/// <br /><br />
+/// function toHex([r, g, b]: readonly [number, number, number]) {
+/// return <c>#${r.toString(16)}${g.toString(16)}${b.toString(16)}</c>;
+/// }
+/// <br /><br />
+/// color.pop(); // Allowed
+/// <br /><br />
+/// console.log(toHex(color)); // Compiles fine, but fails at runtime since index <c>2</c> no longer contains a <c>number</c>.
 /// <code>
+///
+/// `ArrayLengthMutationKeys` solves this problem by excluding methods like `push`, `pop` etc from the resulting type.
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// import type {FixedLengthArray} from 'type-fest';
-///
+/// <br /><br />
 /// const color: FixedLengthArray&lt;number, 3&gt; = [255, 128, 64];
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// color.pop();
 /// // Error: Property 'pop' does not exist on type 'FixedLengthArray&lt;number, 3&gt;'.
-/// </code>
+/// <code>
 ///
 /// Use-cases:
 /// - Declaring fixed-length tuples or arrays with a large number of items.
 /// - Creating an array of coordinates with a static length, for example, length of 3 for a 3D vector.
-/// </remarks>
-/// <remarks>
-/// @example
+/// </code>
+/// </example>
+/// <example>
 /// <code>
+/// </code>
 /// import type {FixedLengthArray} from 'type-fest';
-///
+/// <br /><br />
 /// let color: FixedLengthArray&lt;number, 3&gt; = [255, 128, 64];
-///
+/// <br /><br />
 /// const red = color[0];
 /// //=&gt; number
 /// const green = color[1];
 /// //=&gt; number
 /// const blue = color[2];
 /// //=&gt; number
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// const alpha = color[3];
 /// // Error: Property '3' does not exist on type 'FixedLengthArray&lt;number, 3&gt;'.
-///
+/// <br /><br />
 /// // You can write to valid indices.
 /// color[0] = 128;
 /// color[1] = 64;
 /// color[2] = 32;
-///
+/// <br /><br />
 /// // But you cannot write to out-of-bounds indices.
 /// // @ts-expect-error
 /// color[3] = 0.5;
 /// // Error: Property '3' does not exist on type 'FixedLengthArray&lt;number, 3&gt;'.
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// color.push(0.5);
 /// // Error: Property 'push' does not exist on type 'FixedLengthArray&lt;number, 3&gt;'.
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// color = [0, 128, 255, 0.5];
 /// // Error: Type '[number, number, number, number]' is not assignable to type 'FixedLengthArray&lt;number, 3&gt;'. Types of property 'length' are incompatible.
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// color.length = 4;
 /// // Error: Cannot assign to 'length' because it is a read-only property.
-///
+/// <br /><br />
 /// function toHex([r, g, b]: readonly [number, number, number]) {
-/// return `#${r.toString(16)}${g.toString(16)}${b.toString(16)}`;
+/// return <c>#${r.toString(16)}${g.toString(16)}${b.toString(16)}</c>;
 /// }
-///
-/// console.log(toHex(color)); // `FixedLengthArray&lt;number, 3&gt;` is assignable to `readonly [number, number, number]`.
+/// <br /><br />
+/// console.log(toHex(color)); // <c>FixedLengthArray&lt;number, 3&gt;</c> is assignable to <c>readonly [number, number, number]</c>.
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
 type FixedLengthArray<'Element, 'Length> = private FixedLengthArray__ of obj
@@ -2617,26 +2691,26 @@ type FixedLengthArray<'Element, 'Length> = private FixedLengthArray__ of obj
 type GetOptions =
     /// <summary>
     /// Include <c>undefined</c> in the return type when accessing properties.
-    ///
+    /// <br /><br />
     /// Setting this to <c>false</c> is not recommended.
     /// </summary>
-    /// <remarks>@default true</remarks>
+    /// <defaultValue>true</defaultValue>
     abstract strict: bool option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?strict: bool) : GetOptions = jsNative
 
 /// <summary>
 /// Get a deeply-nested property from an object using a key path, like <a href="https://lodash.com/docs#get">Lodash's <c>.get()</c></a> function.
-///
+/// <br /><br />
 /// Use-case: Retrieve a property from deep inside an API response or some other complex object.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Get} from 'type-fest';
-///
+/// <br /><br />
 /// declare function get&lt;BaseType, const Path extends string | readonly string[]&gt;(object: BaseType, path: Path): Get&lt;BaseType, Path&gt;;
-///
+/// <br /><br />
 /// type ApiResponse = {
 /// hits: {
 /// hits: Array&lt;{
@@ -2651,28 +2725,29 @@ type GetOptions =
 /// }&gt;;
 /// };
 /// };
-///
+/// <br /><br />
 /// const getName = (apiResponse: ApiResponse) =&gt; get(apiResponse, 'hits.hits[0]._source.name');
 /// //=&gt; (apiResponse: ApiResponse) =&gt; {
 /// // 	given: string[];
 /// // 	family: string;
 /// // }[] | undefined
-///
+/// <br /><br />
 /// // Path also supports a readonly array of strings
 /// const getNameWithPathArray = (apiResponse: ApiResponse) =&gt; get(apiResponse, ['hits', 'hits', '0', '_source', 'name']);
 /// //=&gt; (apiResponse: ApiResponse) =&gt; {
 /// // 	given: string[];
 /// // 	family: string;
 /// // }[] | undefined
-///
+/// <br /><br />
 /// // Non-strict mode:
 /// type A = Get&lt;string[], '3', {strict: false}&gt;;
 /// //=&gt; string
-///
+/// <br /><br />
 /// type B = Get&lt;Record&lt;string, string&gt;, 'foo', {strict: true}&gt;;
 /// //=&gt; string | undefined
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 /// <remarks>@category Array</remarks>
 /// <remarks>@category Template literal</remarks>
@@ -2681,209 +2756,218 @@ type Get<'BaseType, 'Path, 'Options> = private Get__ of obj
 
 /// <summary>
 /// Declare locally scoped properties on <c>globalThis</c>.
-///
+/// <br /><br />
 /// When defining a global variable in a declaration file is inappropriate, it can be helpful to define a <c>type</c> or <c>interface</c> (say <c>ExtraGlobals</c>) with the global variable and then cast <c>globalThis</c> via code like <c>globalThis as unknown as ExtraGlobals</c>.
-///
+/// <br /><br />
 /// Instead of casting through <c>unknown</c>, you can update your <c>type</c> or <c>interface</c> to extend <c>GlobalThis</c> and then directly cast <c>globalThis</c>.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {GlobalThis} from 'type-fest';
-///
+/// <br /><br />
 /// type ExtraGlobals = GlobalThis &amp; {
 /// readonly GLOBAL_TOKEN: string;
 /// };
-///
+/// <br /><br />
 /// const globalToken = (globalThis as ExtraGlobals).GLOBAL_TOKEN;
 /// //=&gt; string
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type</remarks>
 type GlobalThis = obj
 
 /// <summary>
 /// Returns a boolean for whether a given number is greater than or equal to another number.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {GreaterThanOrEqual} from 'type-fest';
-///
+/// <br /><br />
 /// type A = GreaterThanOrEqual&lt;1, -5&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type B = GreaterThanOrEqual&lt;1, 1&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type C = GreaterThanOrEqual&lt;1, 5&gt;;
 /// //=&gt; false
-/// </code>
-///
-/// Note: If either argument is the non-literal <c>number</c> type, the result is <c>boolean</c>.
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
-/// import type {GreaterThanOrEqual} from 'type-fest';
 ///
+/// Note: If either argument is the non-literal `number` type, the result is `boolean`.
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
+/// import type {GreaterThanOrEqual} from 'type-fest';
+/// <br /><br />
 /// type A = GreaterThanOrEqual&lt;number, 1&gt;;
 /// //=&gt; boolean
-///
+/// <br /><br />
 /// type B = GreaterThanOrEqual&lt;1, number&gt;;
 /// //=&gt; boolean
-///
+/// <br /><br />
 /// type C = GreaterThanOrEqual&lt;number, number&gt;;
 /// //=&gt; boolean
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// import type {GreaterThanOrEqual} from 'type-fest';
-///
-/// // Use `GreaterThanOrEqual` to constrain a function parameter to non-negative numbers.
+/// <br /><br />
+/// // Use <c>GreaterThanOrEqual</c> to constrain a function parameter to non-negative numbers.
 /// declare function setNonNegative&lt;N extends number&gt;(value: GreaterThanOrEqual&lt;N, 0&gt; extends true ? N : never): void;
-///
+/// <br /><br />
 /// setNonNegative(0); // ✅ Allowed
 /// setNonNegative(1); // ✅ Allowed
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// setNonNegative(-1);
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// setNonNegative(-2);
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 [<Erase>]
 type GreaterThanOrEqual<'A, 'B> = private GreaterThanOrEqual__ of obj
 
 /// <summary>
 /// Returns a boolean for whether a given number is greater than another number.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {GreaterThan} from 'type-fest';
-///
+/// <br /><br />
 /// type A = GreaterThan&lt;1, -5&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type B = GreaterThan&lt;1, 1&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type C = GreaterThan&lt;1, 5&gt;;
 /// //=&gt; false
-/// </code>
-///
-/// Note: If either argument is the non-literal <c>number</c> type, the result is <c>boolean</c>.
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
-/// import type {GreaterThan} from 'type-fest';
 ///
+/// Note: If either argument is the non-literal `number` type, the result is `boolean`.
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
+/// import type {GreaterThan} from 'type-fest';
+/// <br /><br />
 /// type A = GreaterThan&lt;number, 1&gt;;
 /// //=&gt; boolean
-///
+/// <br /><br />
 /// type B = GreaterThan&lt;1, number&gt;;
 /// //=&gt; boolean
-///
+/// <br /><br />
 /// type C = GreaterThan&lt;number, number&gt;;
 /// //=&gt; boolean
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// import type {GreaterThan} from 'type-fest';
-///
-/// // Use `GreaterThan` to constrain a function parameter to positive numbers.
+/// <br /><br />
+/// // Use <c>GreaterThan</c> to constrain a function parameter to positive numbers.
 /// declare function setPositive&lt;N extends number&gt;(value: GreaterThan&lt;N, 0&gt; extends true ? N : never): void;
-///
+/// <br /><br />
 /// setPositive(1); // ✅ Allowed
 /// setPositive(2); // ✅ Allowed
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// setPositive(0);
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// setPositive(-1);
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 [<Erase>]
 type GreaterThan<'A, 'B> = private GreaterThan__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given type has any optional fields.
-///
+/// <br /><br />
 /// This is useful when you want to create an API whose behavior depends on the presence or absence of optional fields.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {HasOptionalKeys, OptionalKeysOf} from 'type-fest';
-///
+/// <br /><br />
 /// type UpdateService&lt;Entity extends object&gt; = {
 /// removeField: HasOptionalKeys&lt;Entity&gt; extends true
 /// ? (field: OptionalKeysOf&lt;Entity&gt;) =&gt; Promise&lt;void&gt;
 /// : never;
 /// };
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
 type HasOptionalKeys<'BaseType> = private HasOptionalKeys__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given type has any readonly fields.
-///
+/// <br /><br />
 /// This is useful when you want to create an API whose behavior depends on the presence or absence of readonly fields.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {HasReadonlyKeys, ReadonlyKeysOf} from 'type-fest';
-///
+/// <br /><br />
 /// type UpdateService&lt;Entity extends object&gt; = {
 /// removeField: HasReadonlyKeys&lt;Entity&gt; extends true
 /// ? (field: ReadonlyKeysOf&lt;Entity&gt;) =&gt; Promise&lt;void&gt;
 /// : never;
 /// };
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
 type HasReadonlyKeys<'BaseType> = private HasReadonlyKeys__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given type has any required fields.
-///
+/// <br /><br />
 /// This is useful when you want to create an API whose behavior depends on the presence or absence of required fields.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {HasRequiredKeys} from 'type-fest';
-///
+/// <br /><br />
 /// type GeneratorOptions&lt;Template extends object&gt; = {
 /// prop1: number;
 /// prop2: string;
 /// } &amp; (HasRequiredKeys&lt;Template&gt; extends true
 /// ? {template: Template}
 /// : {template?: Template});
-///
+/// <br /><br />
 /// type Template1 = {
 /// optionalSubParam?: string;
 /// };
-///
+/// <br /><br />
 /// type Template2 = {
 /// requiredSubParam: string;
 /// };
-///
+/// <br /><br />
 /// type Options1 = GeneratorOptions&lt;Template1&gt;;
 /// type Options2 = GeneratorOptions&lt;Template2&gt;;
-///
+/// <br /><br />
 /// const optA: Options1 = {
 /// prop1: 0,
 /// prop2: 'hi',
@@ -2900,7 +2984,7 @@ type HasReadonlyKeys<'BaseType> = private HasReadonlyKeys__ of obj
 /// optionalSubParam: 'optional value',
 /// },
 /// };
-///
+/// <br /><br />
 /// const optD: Options2 = {
 /// prop1: 0,
 /// prop2: 'hi',
@@ -2908,30 +2992,31 @@ type HasReadonlyKeys<'BaseType> = private HasReadonlyKeys__ of obj
 /// requiredSubParam: 'required value',
 /// },
 /// };
-///
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
 type HasRequiredKeys<'BaseType> = private HasRequiredKeys__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given type has any writable fields.
-///
+/// <br /><br />
 /// This is useful when you want to create an API whose behavior depends on the presence or absence of writable fields.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {HasWritableKeys, WritableKeysOf} from 'type-fest';
-///
+/// <br /><br />
 /// type UpdateService&lt;Entity extends object&gt; = {
 /// removeField: HasWritableKeys&lt;Entity&gt; extends true
 /// ? (field: WritableKeysOf&lt;Entity&gt;) =&gt; Promise&lt;void&gt;
 /// : never;
 /// };
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
 type HasWritableKeys<'BaseType> = private HasWritableKeys__ of obj
@@ -2941,18 +3026,19 @@ type HasWritableKeys<'BaseType> = private HasWritableKeys__ of obj
 /// </summary>
 /// <remarks>@deprecated This type will be removed in the next major version. Use the {@link If} type instead.</remarks>
 /// <remarks>@see {@link IsAny}</remarks>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {IfAny} from 'type-fest';
-///
+/// <br /><br />
 /// type ShouldBeTrue = IfAny&lt;any&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type ShouldBeBar = IfAny&lt;'not any', 'foo', 'bar'&gt;;
 /// //=&gt; 'bar'
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
@@ -2963,18 +3049,19 @@ type IfAny<'T, 'TypeIfAny, 'TypeIfNotAny> = private IfAny__ of obj
 /// </summary>
 /// <remarks>@deprecated This type will be removed in the next major version. Use the {@link If} type instead.</remarks>
 /// <remarks>@see {@link IsEmptyObject}</remarks>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {IfEmptyObject} from 'type-fest';
-///
+/// <br /><br />
 /// type ShouldBeTrue = IfEmptyObject&lt;{}&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type ShouldBeBar = IfEmptyObject&lt;{key: any}, 'foo', 'bar'&gt;;
 /// //=&gt; 'bar'
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
@@ -2985,18 +3072,19 @@ type IfEmptyObject<'T, 'TypeIfEmptyObject, 'TypeIfNotEmptyObject> = private IfEm
 /// </summary>
 /// <remarks>@deprecated This type will be removed in the next major version. Use the {@link If} type instead.</remarks>
 /// <remarks>@see {@link IsNever}</remarks>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {IfNever} from 'type-fest';
-///
+/// <br /><br />
 /// type ShouldBeTrue = IfNever&lt;never&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type ShouldBeBar = IfNever&lt;'not never', 'foo', 'bar'&gt;;
 /// //=&gt; 'bar'
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
@@ -3007,18 +3095,19 @@ type IfNever<'T, 'TypeIfNever, 'TypeIfNotNever> = private IfNever__ of obj
 /// </summary>
 /// <remarks>@deprecated This type will be removed in the next major version. Use the {@link If} type instead.</remarks>
 /// <remarks>@see {@link IsNull}</remarks>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {IfNull} from 'type-fest';
-///
+/// <br /><br />
 /// type ShouldBeTrue = IfNull&lt;null&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type ShouldBeBar = IfNull&lt;'not null', 'foo', 'bar'&gt;;
 /// //=&gt; 'bar'
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
@@ -3029,18 +3118,19 @@ type IfNull<'T, 'TypeIfNull, 'TypeIfNotNull> = private IfNull__ of obj
 /// </summary>
 /// <remarks>@deprecated This type will be removed in the next major version. Use the {@link If} type instead.</remarks>
 /// <remarks>@see {@link IsUnknown}</remarks>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {IfUnknown} from 'type-fest';
-///
+/// <br /><br />
 /// type ShouldBeTrue = IfUnknown&lt;unknown&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type ShouldBeBar = IfUnknown&lt;'not unknown', 'foo', 'bar'&gt;;
 /// //=&gt; 'bar'
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
@@ -3048,97 +3138,101 @@ type IfUnknown<'T, 'TypeIfUnknown, 'TypeIfNotUnknown> = private IfUnknown__ of o
 
 /// <summary>
 /// An if-else-like type that resolves depending on whether the given <c>boolean</c> type is <c>true</c> or <c>false</c>.
-///
+/// <br /><br />
 /// Use-cases:
 /// - You can use this in combination with <c>Is*</c> types to create an if-else-like experience. For example, <c>If&lt;IsAny&lt;any&gt;, 'is any', 'not any'&gt;</c>.
-///
+/// <br /><br />
 /// Note:
 /// - Returns a union of if branch and else branch if the given type is <c>boolean</c> or <c>any</c>. For example, <c>If&lt;boolean, 'Y', 'N'&gt;</c> will return <c>'Y' | 'N'</c>.
 /// - Returns the else branch if the given type is <c>never</c>. For example, <c>If&lt;never, 'Y', 'N'&gt;</c> will return <c>'N'</c>.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {If} from 'type-fest';
-///
+/// <br /><br />
 /// type A = If&lt;true, 'yes', 'no'&gt;;
 /// //=&gt; 'yes'
-///
+/// <br /><br />
 /// type B = If&lt;false, 'yes', 'no'&gt;;
 /// //=&gt; 'no'
-///
+/// <br /><br />
 /// type C = If&lt;boolean, 'yes', 'no'&gt;;
 /// //=&gt; 'yes' | 'no'
-///
+/// <br /><br />
 /// type D = If&lt;any, 'yes', 'no'&gt;;
 /// //=&gt; 'yes' | 'no'
-///
+/// <br /><br />
 /// type E = If&lt;never, 'yes', 'no'&gt;;
 /// //=&gt; 'no'
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// import type {If, IsAny, IsNever} from 'type-fest';
-///
+/// <br /><br />
 /// type A = If&lt;IsAny&lt;unknown&gt;, 'is any', 'not any'&gt;;
 /// //=&gt; 'not any'
-///
+/// <br /><br />
 /// type B = If&lt;IsNever&lt;never&gt;, 'is never', 'not never'&gt;;
 /// //=&gt; 'is never'
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// import type {If, IsEqual} from 'type-fest';
-///
+/// <br /><br />
 /// type IfEqual&lt;T, U, IfBranch, ElseBranch&gt; = If&lt;IsEqual&lt;T, U&gt;, IfBranch, ElseBranch&gt;;
-///
+/// <br /><br />
 /// type A = IfEqual&lt;string, string, 'equal', 'not equal'&gt;;
 /// //=&gt; 'equal'
-///
+/// <br /><br />
 /// type B = IfEqual&lt;string, number, 'equal', 'not equal'&gt;;
 /// //=&gt; 'not equal'
-/// </code>
-///
-/// Note: Sometimes using the <c>If</c> type can make an implementation non–tail-recursive, which can impact performance. In such cases, it’s better to use a conditional directly. Refer to the following example:
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
+///
+/// Note: Sometimes using the `If` type can make an implementation non–tail-recursive, which can impact performance. In such cases, it’s better to use a conditional directly. Refer to the following example:
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// import type {If, IsEqual, StringRepeat} from 'type-fest';
-///
+/// <br /><br />
 /// type HundredZeroes = StringRepeat&lt;'0', 100&gt;;
-///
+/// <br /><br />
 /// // The following implementation is not tail recursive
 /// type Includes&lt;S extends string, Char extends string&gt; =
-/// S extends `${infer First}${infer Rest}`
+/// S extends <c>${infer First}${infer Rest}</c>
 /// ? If&lt;IsEqual&lt;First, Char&gt;,
 /// 'found',
 /// Includes&lt;Rest, Char&gt;&gt;
 /// : 'not found';
-///
+/// <br /><br />
 /// // Hence, instantiations with long strings will fail
 /// // @ts-expect-error
 /// type Fails = Includes&lt;HundredZeroes, '1'&gt;;
 /// //           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /// // Error: Type instantiation is excessively deep and possibly infinite.
-///
-/// // However, if we use a simple conditional instead of `If`, the implementation becomes tail-recursive
+/// <br /><br />
+/// // However, if we use a simple conditional instead of <c>If</c>, the implementation becomes tail-recursive
 /// type IncludesWithoutIf&lt;S extends string, Char extends string&gt; =
-/// S extends `${infer First}${infer Rest}`
+/// S extends <c>${infer First}${infer Rest}</c>
 /// ? IsEqual&lt;First, Char&gt; extends true
 /// ? 'found'
 /// : IncludesWithoutIf&lt;Rest, Char&gt;
 /// : 'not found';
-///
+/// <br /><br />
 /// // Now, instantiations with long strings will work
 /// type Works = IncludesWithoutIf&lt;HundredZeroes, '1'&gt;;
 /// //=&gt; 'not found'
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
@@ -3146,187 +3240,194 @@ type If<'Type, 'IfBranch, 'ElseBranch> = private If__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given array includes the given item.
-///
+/// <br /><br />
 /// This can be useful if another type wants to make a decision based on whether the array includes that item.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
-/// import type {Includes} from 'type-fest';
-///
-/// type hasRed&lt;array extends any[]&gt; = Includes&lt;array, 'red'&gt;;
 /// </code>
-/// </remarks>
+/// import type {Includes} from 'type-fest';
+/// <br /><br />
+/// type hasRed&lt;array extends any[]&gt; = Includes&lt;array, 'red'&gt;;
+/// <code>
+/// </code>
+/// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
 type Includes<'Value, 'Item> = private Includes__ of obj
 
 /// <summary>
 /// Generate a union of numbers between a specified start and end (both inclusive), with an optional step.
-///
+/// <br /><br />
 /// You skip over numbers using the <c>Step</c> parameter (defaults to <c>1</c>). For example, <c>IntClosedRange&lt;0, 10, 2&gt;</c> will create a union of <c>0 | 2 | 4 | 6 | 8 | 10</c>.
-///
+/// <br /><br />
 /// Note: <c>Start</c> or <c>End</c> must be non-negative and smaller than <c>999</c>.
-///
+/// <br /><br />
 /// Use-cases:
 /// 1. This can be used to define a set of valid input/output values. for example:
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {IntClosedRange} from 'type-fest';
-///
+/// <br /><br />
 /// type Age = IntClosedRange&lt;0, 20&gt;;
 /// //=&gt; 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20
-///
+/// <br /><br />
 /// type FontSize = IntClosedRange&lt;10, 20&gt;;
 /// //=&gt; 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20
-///
+/// <br /><br />
 /// type EvenNumber = IntClosedRange&lt;0, 10, 2&gt;;
 /// //=&gt; 0 | 2 | 4 | 6 | 8 | 10
-/// </code>
-///
-/// 2. This can be used to define random numbers in a range. For example, <c>type RandomNumber = IntClosedRange&lt;0, 100&gt;;</c>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
-/// import type {IntClosedRange} from 'type-fest';
 ///
+/// 2. This can be used to define random numbers in a range. For example, `type RandomNumber = IntClosedRange&lt;0, 100&gt;;`
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
+/// import type {IntClosedRange} from 'type-fest';
+/// <br /><br />
 /// type ZeroToNine = IntClosedRange&lt;0, 9&gt;;
 /// //=&gt; 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
-///
+/// <br /><br />
 /// type Hundreds = IntClosedRange&lt;100, 900, 100&gt;;
 /// //=&gt; 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@see {@link IntRange}</remarks>
 [<Erase>]
 type IntClosedRange<'Start, 'End, 'Skip> = private IntClosedRange__ of obj
 
 /// <summary>
 /// Generate a union of numbers between a specified start (inclusive) and end (exclusive), with an optional step.
-///
+/// <br /><br />
 /// You skip over numbers using the <c>Step</c> parameter (defaults to <c>1</c>). For example, <c>IntRange&lt;0, 10, 2&gt;</c> will create a union of <c>0 | 2 | 4 | 6 | 8</c>.
-///
+/// <br /><br />
 /// Note: <c>Start</c> or <c>End</c> must be non-negative and smaller than <c>1000</c>.
-///
+/// <br /><br />
 /// Use-cases:
 /// 1. This can be used to define a set of valid input/output values. for example:
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {IntRange} from 'type-fest';
-///
+/// <br /><br />
 /// type Age = IntRange&lt;0, 20&gt;;
 /// //=&gt; 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19
-///
+/// <br /><br />
 /// type FontSize = IntRange&lt;10, 20&gt;;
 /// //=&gt; 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19
-///
+/// <br /><br />
 /// type EvenNumber = IntRange&lt;0, 11, 2&gt;;
 /// //=&gt; 0 | 2 | 4 | 6 | 8 | 10
-/// </code>
-///
-/// 2. This can be used to define random numbers in a range. For example, <c>type RandomNumber = IntRange&lt;0, 100&gt;;</c>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
-/// import type {IntRange} from 'type-fest';
 ///
+/// 2. This can be used to define random numbers in a range. For example, `type RandomNumber = IntRange&lt;0, 100&gt;;`
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
+/// import type {IntRange} from 'type-fest';
+/// <br /><br />
 /// type ZeroToNine = IntRange&lt;0, 10&gt;;
 /// //=&gt; 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
-///
+/// <br /><br />
 /// type Hundreds = IntRange&lt;100, 901, 100&gt;;
 /// //=&gt; 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@see {@link IntClosedRange}</remarks>
 [<Erase>]
 type IntRange<'Start, 'End, 'Step> = private IntRange__ of obj
 
 /// <summary>
 /// Create an <a href="https://basarat.gitbook.io/typescript/type-system/type-compatibility#footnote-invariance">invariant type</a>, which is a type that does not accept supertypes and subtypes.
-///
+/// <br /><br />
 /// Use-case:
 /// - Prevent runtime errors that may occur due to assigning subtypes to supertypes.
 /// - Improve type signature of object methods like <a href="https://github.com/microsoft/TypeScript/pull/12253#issuecomment-263132208"><c>Object.keys()</c> or <c>Object.entries()</c></a> by sealing the object type.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {InvariantOf} from 'type-fest';
-///
+/// <br /><br />
 /// class Animal {
 /// constructor(public name: string) {}
 /// }
-///
+/// <br /><br />
 /// class Cat extends Animal {
 /// meow() {
 /// // do something
 /// }
 /// }
-///
+/// <br /><br />
 /// let animalArray: Animal[] = [new Animal('jerry')];
 /// const catArray: Cat[] = [new Cat('tom')];
-///
+/// <br /><br />
 /// animalArray = catArray; // Okay if covariant
 /// animalArray.push(new Animal('another animal')); // Pushed an animal into catArray
 /// for (const c of catArray) {
 /// c.meow();
 /// } // Allowed but, error at runtime
-///
+/// <br /><br />
 /// let invariantAnimalArray: Array&lt;InvariantOf&lt;Animal&gt;&gt; = [new Animal('jerry')] as Array&lt;InvariantOf&lt;Animal&gt;&gt;;
 /// const invariantCatArray: Array&lt;InvariantOf&lt;Cat&gt;&gt; = [new Cat('tom')] as Array&lt;InvariantOf&lt;Cat&gt;&gt;;
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// invariantAnimalArray = invariantCatArray; // Error: Type 'InvariantOf&lt;Cat&gt;[]' is not assignable to type 'InvariantOf&lt;Animal&gt;[]'.
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// import type {InvariantOf} from 'type-fest';
-///
+/// <br /><br />
 /// // In covariance (default)
-///
+/// <br /><br />
 /// type FooBar = {
 /// foo: number;
 /// bar: string;
 /// };
-///
+/// <br /><br />
 /// type FooBarBaz = {
 /// baz: boolean;
 /// } &amp; FooBar;
-///
+/// <br /><br />
 /// declare const fooBar: FooBar;
 /// declare const fooBarBaz: FooBarBaz;
-///
+/// <br /><br />
 /// function keyOfFooBar(fooBar: FooBar) {
 /// return Object.keys(fooBar) as Array&lt;keyof FooBar&gt;;
 /// }
-///
+/// <br /><br />
 /// keyOfFooBar(fooBar); //=&gt; (keyof FooBar)[]
 /// keyOfFooBar(fooBarBaz); //=&gt; (keyof FooBar)[] but, (keyof FooBarBaz)[] at runtime
-///
+/// <br /><br />
 /// // In invariance
-///
+/// <br /><br />
 /// export function invariantOf&lt;Type&gt;(value: Type): InvariantOf&lt;Type&gt; {
 /// return value as InvariantOf&lt;Type&gt;;
 /// }
-///
+/// <br /><br />
 /// function keyOfInvariantFooBar(fooBar: InvariantOf&lt;FooBar&gt;) {
 /// return Object.keys(fooBar) as Array&lt;keyof FooBar&gt;;
 /// }
-///
+/// <br /><br />
 /// keyOfInvariantFooBar(invariantOf(fooBar)); // (keyof FooBar)[]
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// keyOfInvariantFooBar(invariantOf(fooBarBaz)); // Error: Argument of type 'InvariantOf&lt;FooBarBaz&gt;' is not assignable to parameter of type 'InvariantOf&lt;FooBar&gt;'.
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type</remarks>
 [<Erase>]
 type InvariantOf<'Type> = private InvariantOf__ of obj
@@ -3337,28 +3438,29 @@ type InvariantOf<'Type> = private InvariantOf__ of obj
 /// <remarks>
 /// @link
 /// https://stackoverflow.com/a/49928360/1490091
-///
+/// <br /><br />
 /// Useful in type utilities, such as disallowing <c>any</c>s to be passed to a function.
 /// </remarks>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {IsAny} from 'type-fest';
-///
+/// <br /><br />
 /// const typedObject = {a: 1, b: 2} as const;
 /// const anyObject: any = {a: 1, b: 2};
-///
+/// <br /><br />
 /// function get&lt;O extends (IsAny&lt;O&gt; extends true ? {} : Record&lt;string, number&gt;), K extends keyof O = keyof O&gt;(object: O, key: K) {
 /// return object[key];
 /// }
-///
+/// <br /><br />
 /// const typedA = get(typedObject, 'a');
 /// //=&gt; 1
-///
+/// <br /><br />
 /// const anyA = get(anyObject, 'a');
 /// //=&gt; any
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
@@ -3367,24 +3469,25 @@ type IsAny<'T> = private IsAny__ of obj
 /// <summary>
 /// Returns a boolean for whether the given type is a <c>true</c> or <c>false</c> <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types">literal type</a>.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {IsBooleanLiteral} from 'type-fest';
-///
+/// <br /><br />
 /// type A = IsBooleanLiteral&lt;true&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type B = IsBooleanLiteral&lt;false&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type C = IsBooleanLiteral&lt;boolean&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type D = IsBooleanLiteral&lt;true | false&gt;;
 /// //=&gt; false
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
@@ -3397,25 +3500,26 @@ type IsBooleanLiteral<'T> = private IsBooleanLiteral__ of obj
 /// <remarks>
 /// @link
 /// https://stackoverflow.com/questions/68961864/how-does-the-equals-work-in-typescript/68963796#68963796
-///
+/// <br /><br />
 /// Use-cases:
 /// - If you want to make a conditional branch based on the result of a comparison of two types.
 /// </remarks>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {IsEqual} from 'type-fest';
-///
+/// <br /><br />
 /// // This type returns a boolean for whether the given array includes the given item.
-/// // `IsEqual` is used to compare the given array at position 0 and the given item and then return true if they are equal.
+/// // <c>IsEqual</c> is used to compare the given array at position 0 and the given item and then return true if they are equal.
 /// type Includes&lt;Value extends readonly any[], Item&gt; =
 /// Value extends readonly [Value[0], ...infer rest]
 /// ? IsEqual&lt;Value[0], Item&gt; extends true
 /// ? true
 /// : Includes&lt;rest, Item&gt;
 /// : false;
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
@@ -3423,34 +3527,35 @@ type IsEqual<'A, 'B> = private IsEqual__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given number is a float, like <c>1.5</c> or <c>-1.5</c>.
-///
+/// <br /><br />
 /// Use-case:
 /// - If you want to make a conditional branch based on the result of whether a number is a float or not.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {IsFloat, PositiveInfinity} from 'type-fest';
-///
+/// <br /><br />
 /// type A = IsFloat&lt;1.5&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type B = IsFloat&lt;-1.5&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type C = IsFloat&lt;1e-7&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type D = IsFloat&lt;1.0&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type E = IsFloat&lt;PositiveInfinity&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type F = IsFloat&lt;1.23e+21&gt;;
 /// //=&gt; false
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Numeric</remarks>
 [<Erase>]
@@ -3458,46 +3563,47 @@ type IsFloat<'T> = private IsFloat__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given number is an integer, like <c>-5</c>, <c>1.0</c>, or <c>100</c>.
-///
+/// <br /><br />
 /// Use-case:
 /// - If you want to make a conditional branch based on the result of whether a number is an integer or not.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {IsInteger, PositiveInfinity} from 'type-fest';
-///
+/// <br /><br />
 /// type A = IsInteger&lt;1&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type B = IsInteger&lt;1.0&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type C = IsInteger&lt;-1&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type D = IsInteger&lt;0b10&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type E = IsInteger&lt;0o10&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type F = IsInteger&lt;0x10&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type G = IsInteger&lt;1.23e+21&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type H = IsInteger&lt;1.5&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type I = IsInteger&lt;PositiveInfinity&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type J = IsInteger&lt;1e-7&gt;;
 /// //=&gt; false
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Numeric</remarks>
 [<Erase>]
@@ -3506,58 +3612,59 @@ type IsInteger<'T> = private IsInteger__ of obj
 /// <summary>
 /// Returns a boolean for whether the given type is a <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types">literal type</a>.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {IsLiteral} from 'type-fest';
-///
+/// <br /><br />
 /// type A = IsLiteral&lt;1&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type B = IsLiteral&lt;number&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type C = IsLiteral&lt;1n&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type D = IsLiteral&lt;bigint&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type E = IsLiteral&lt;'type-fest'&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type F = IsLiteral&lt;string&gt;;
 /// //=&gt; false
-///
-/// type G = IsLiteral&lt;`on${string}`&gt;;
+/// <br /><br />
+/// type G = IsLiteral&lt;<c>on${string}</c>&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// declare const symbolLiteral: unique symbol;
 /// type H = IsLiteral&lt;typeof symbolLiteral&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type I = IsLiteral&lt;symbol&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type J = IsLiteral&lt;true&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type K = IsLiteral&lt;false&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type L = IsLiteral&lt;boolean&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type M = IsLiteral&lt;1 | 'foo' | false&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type N = IsLiteral&lt;string | number | symbol&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type O = IsLiteral&lt;1000n | string | true&gt;;
 /// //=&gt; boolean
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
@@ -3566,21 +3673,22 @@ type IsLiteral<'T> = private IsLiteral__ of obj
 /// <summary>
 /// Returns a boolean for whether the given string literal is lowercase.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {IsLowercase} from 'type-fest';
-///
+/// <br /><br />
 /// type A = IsLowercase&lt;'abc'&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type B = IsLowercase&lt;'Abc'&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type C = IsLowercase&lt;string&gt;;
 /// //=&gt; boolean
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 [<Erase>]
 type IsLowercase<'S> = private IsLowercase__ of obj
 
@@ -3592,52 +3700,54 @@ type IsLowercase<'S> = private IsLowercase__ of obj
 /// <remarks>
 /// @link
 /// https://www.zhenghao.io/posts/ts-never
-///
+/// <br /><br />
 /// Useful in type utilities, such as checking if something does not occur.
 /// </remarks>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {IsNever, And} from 'type-fest';
-///
+/// <br /><br />
 /// type A = IsNever&lt;never&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type B = IsNever&lt;any&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type C = IsNever&lt;unknown&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type D = IsNever&lt;never[]&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type E = IsNever&lt;object&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type F = IsNever&lt;string&gt;;
 /// //=&gt; false
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// import type {IsNever} from 'type-fest';
-///
+/// <br /><br />
 /// type IsTrue&lt;T&gt; = T extends true ? true : false;
-///
-/// // When a distributive conditional is instantiated with `never`, the entire conditional results in `never`.
+/// <br /><br />
+/// // When a distributive conditional is instantiated with <c>never</c>, the entire conditional results in <c>never</c>.
 /// type A = IsTrue&lt;never&gt;;
 /// //=&gt; never
-///
-/// // If you don't want that behaviour, you can explicitly add an `IsNever` check before the distributive conditional.
+/// <br /><br />
+/// // If you don't want that behaviour, you can explicitly add an <c>IsNever</c> check before the distributive conditional.
 /// type IsTrueFixed&lt;T&gt; =
 /// IsNever&lt;T&gt; extends true ? false : T extends true ? true : false;
-///
+/// <br /><br />
 /// type B = IsTrueFixed&lt;never&gt;;
 /// //=&gt; false
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
@@ -3646,20 +3756,21 @@ type IsNever<'T> = private IsNever__ of obj
 /// <summary>
 /// Returns a boolean for whether the given type is <c>null</c>.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {IsNull} from 'type-fest';
-///
+/// <br /><br />
 /// type NonNullFallback&lt;T, Fallback&gt; = IsNull&lt;T&gt; extends true ? Fallback : T;
-///
+/// <br /><br />
 /// type Example1 = NonNullFallback&lt;null, string&gt;;
 /// //=&gt; string
-///
+/// <br /><br />
 /// type Example2 = NonNullFallback&lt;number, string&gt;;
 /// //=&gt; number
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
@@ -3667,12 +3778,12 @@ type IsNull<'T> = private IsNull__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given type includes <c>null</c>.
-///
+/// <br /><br />
 /// Note: The built-in <c>NonNullable</c> type removes both <c>null</c> and <c>undefined</c>, which is not accurate for the name.
 /// </summary>
-/// <remarks>
-/// @example
-/// <code lang="ts">
+/// <example>
+/// <code>
+/// ```ts
 /// import type {IsNullable} from 'type-fest';
 ///
 /// type A = IsNullable&lt;string&gt;;
@@ -3687,7 +3798,9 @@ type IsNull<'T> = private IsNull__ of obj
 /// type D = IsNullable&lt;string | null | undefined&gt;;
 /// //=&gt; true
 /// </code>
-/// </remarks>
+/// <code>
+/// </code>
+/// </example>
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
@@ -3696,33 +3809,34 @@ type IsNullable<'T> = private IsNullable__ of obj
 /// <summary>
 /// Returns a boolean for whether the given type is a <c>number</c> or <c>bigint</c> <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types">literal type</a>.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {IsNumericLiteral} from 'type-fest';
-///
+/// <br /><br />
 /// type A = IsNumericLiteral&lt;0&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type B = IsNumericLiteral&lt;number&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type C = IsNumericLiteral&lt;100n&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type D = IsNumericLiteral&lt;bigint&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type E = IsNumericLiteral&lt;1 | 2 | 10n | 20n&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type F = IsNumericLiteral&lt;number | bigint&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type G = IsNumericLiteral&lt;1 | bigint&gt;;
 /// //=&gt; boolean
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
@@ -3730,42 +3844,43 @@ type IsNumericLiteral<'T> = private IsNumericLiteral__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given key is an optional key of type.
-///
+/// <br /><br />
 /// This is useful when writing utility types or schema validators that need to differentiate <c>optional</c> keys.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {IsOptionalKeyOf} from 'type-fest';
-///
+/// <br /><br />
 /// type User = {
 /// name: string;
 /// surname: string;
-///
+/// <br /><br />
 /// luckyNumber?: number;
 /// };
-///
+/// <br /><br />
 /// type Admin = {
 /// name: string;
 /// surname?: string;
 /// };
-///
+/// <br /><br />
 /// type T1 = IsOptionalKeyOf&lt;User, 'luckyNumber'&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type T2 = IsOptionalKeyOf&lt;User, 'name'&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type T3 = IsOptionalKeyOf&lt;User, 'name' | 'luckyNumber'&gt;;
 /// //=&gt; boolean
-///
+/// <br /><br />
 /// type T4 = IsOptionalKeyOf&lt;User | Admin, 'name'&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type T5 = IsOptionalKeyOf&lt;User | Admin, 'surname'&gt;;
 /// //=&gt; boolean
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
@@ -3774,9 +3889,9 @@ type IsOptionalKeyOf<'Type, 'Key> = private IsOptionalKeyOf__ of obj
 /// <summary>
 /// Returns a boolean for whether the given type includes <c>undefined</c>.
 /// </summary>
-/// <remarks>
-/// @example
-/// <code lang="ts">
+/// <example>
+/// <code>
+/// ```ts
 /// import type {IsOptional} from 'type-fest';
 ///
 /// type A = IsOptional&lt;string&gt;;
@@ -3791,7 +3906,9 @@ type IsOptionalKeyOf<'Type, 'Key> = private IsOptionalKeyOf__ of obj
 /// type D = IsOptional&lt;string | null | undefined&gt;;
 /// //=&gt; true
 /// </code>
-/// </remarks>
+/// <code>
+/// </code>
+/// </example>
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
@@ -3799,42 +3916,43 @@ type IsOptional<'T> = private IsOptional__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given key is a readonly key of type.
-///
+/// <br /><br />
 /// This is useful when writing utility types or schema validators that need to differentiate <c>readonly</c> keys.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {IsReadonlyKeyOf} from 'type-fest';
-///
+/// <br /><br />
 /// type User = {
 /// name: string;
 /// surname: string;
-///
+/// <br /><br />
 /// readonly id: number;
 /// };
-///
+/// <br /><br />
 /// type Admin = {
 /// name: string;
 /// id: string;
 /// };
-///
+/// <br /><br />
 /// type T1 = IsReadonlyKeyOf&lt;User, 'id'&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type T2 = IsReadonlyKeyOf&lt;User, 'name'&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type T3 = IsReadonlyKeyOf&lt;User, 'name' | 'id'&gt;;
 /// //=&gt; boolean
-///
+/// <br /><br />
 /// type T4 = IsReadonlyKeyOf&lt;User | Admin, 'name'&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type T5 = IsReadonlyKeyOf&lt;User | Admin, 'id'&gt;;
 /// //=&gt; boolean
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
@@ -3842,42 +3960,43 @@ type IsReadonlyKeyOf<'Type, 'Key> = private IsReadonlyKeyOf__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given key is a required key of type.
-///
+/// <br /><br />
 /// This is useful when writing utility types or schema validators that need to differentiate <c>required</c> keys.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {IsRequiredKeyOf} from 'type-fest';
-///
+/// <br /><br />
 /// type User = {
 /// name: string;
 /// surname: string;
-///
+/// <br /><br />
 /// luckyNumber?: number;
 /// };
-///
+/// <br /><br />
 /// type Admin = {
 /// name: string;
 /// surname?: string;
 /// };
-///
+/// <br /><br />
 /// type T1 = IsRequiredKeyOf&lt;User, 'name'&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type T2 = IsRequiredKeyOf&lt;User, 'luckyNumber'&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type T3 = IsRequiredKeyOf&lt;User, 'name' | 'luckyNumber'&gt;;
 /// //=&gt; boolean
-///
+/// <br /><br />
 /// type T4 = IsRequiredKeyOf&lt;User | Admin, 'name'&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type T5 = IsRequiredKeyOf&lt;User | Admin, 'surname'&gt;;
 /// //=&gt; boolean
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
@@ -3885,56 +4004,58 @@ type IsRequiredKeyOf<'Type, 'Key> = private IsRequiredKeyOf__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given type is a <c>string</c> <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types">literal type</a>.
-///
+/// <br /><br />
 /// The implementation of this type is inspired by the trick mentioned in this <a href="https://stackoverflow.com/a/68261113/420747">StackOverflow answer</a>.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {IsStringLiteral} from 'type-fest';
-///
+/// <br /><br />
 /// type A = IsStringLiteral&lt;'foo'&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type B = IsStringLiteral&lt;string&gt;;
 /// //=&gt; false
-///
-/// // String types with infinite set of possible values return `false`
-/// type C = IsStringLiteral&lt;`on${string}`&gt;;
+/// <br /><br />
+/// // String types with infinite set of possible values return <c>false</c>
+/// type C = IsStringLiteral&lt;<c>on${string}</c>&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type D = IsStringLiteral&lt;Uppercase&lt;string&gt;&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type E = IsStringLiteral&lt;'foo' | 'bar' | 'baz'&gt;;
 /// //=&gt; true
-///
-/// type F = IsStringLiteral&lt;'sm' | 'md' | 'lg' | `${number}px`&gt;;
+/// <br /><br />
+/// type F = IsStringLiteral&lt;'sm' | 'md' | 'lg' | <c>${number}px</c>&gt;;
 /// //=&gt; boolean
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// import type {IsStringLiteral} from 'type-fest';
-///
+/// <br /><br />
 /// type StringLength&lt;S extends string, Counter extends never[] = []&gt; =
 /// IsStringLiteral&lt;S&gt; extends true
-/// ? S extends `${string}${infer Tail}`
+/// ? S extends <c>${string}${infer Tail}</c>
 /// ? StringLength&lt;Tail, [...Counter, never]&gt;
 /// : Counter['length']
-/// : number; // return `number` for non-literal string types
-///
+/// : number; // return <c>number</c> for non-literal string types
+/// <br /><br />
 /// type L1 = StringLength&lt;'foobar'&gt;;
 /// //=&gt; 6
-///
+/// <br /><br />
 /// type L2 = StringLength&lt;Lowercase&lt;string&gt;&gt;;
 /// //=&gt; number
-///
-/// type L3 = StringLength&lt;`${number}`&gt;;
+/// <br /><br />
+/// type L3 = StringLength&lt;<c>${number}</c>&gt;;
 /// //=&gt; number
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
@@ -3943,24 +4064,25 @@ type IsStringLiteral<'S> = private IsStringLiteral__ of obj
 /// <summary>
 /// Returns a boolean for whether the given type is a <c>symbol</c> <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types">literal type</a>.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {IsSymbolLiteral} from 'type-fest';
-///
+/// <br /><br />
 /// declare const symbolLiteral1: unique symbol;
 /// declare const symbolLiteral2: unique symbol;
-///
+/// <br /><br />
 /// type A = IsSymbolLiteral&lt;typeof symbolLiteral1&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type B = IsSymbolLiteral&lt;symbol&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type C = IsSymbolLiteral&lt;typeof symbolLiteral1 | typeof symbolLiteral2&gt;;
 /// //=&gt; true
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
@@ -3971,14 +4093,14 @@ type IsSymbolLiteral<'T> = private IsSymbolLiteral__ of obj
 type IsTupleOptions =
     /// <summary>
     /// Consider only fixed length arrays as tuples.
-    ///
+    /// <br /><br />
     /// - When set to <c>true</c> (default), arrays with rest elements (e.g., <c>[1, ...number[]]</c>) are _not_ considered as tuples.
     /// - When set to <c>false</c>, arrays with at least one non-rest element (e.g., <c>[1, ...number[]]</c>) are considered as tuples.
     /// </summary>
-    /// <remarks>@default true</remarks>
-    /// <remarks>
-    /// @example
-    /// <code lang="ts">
+    /// <defaultValue>true</defaultValue>
+    /// <example>
+    /// <code>
+    /// ```ts
     /// import type {IsTuple} from 'type-fest';
     ///
     /// type Example1 = IsTuple&lt;[number, ...number[]], {fixedLengthOnly: true}&gt;;
@@ -3987,22 +4109,24 @@ type IsTupleOptions =
     /// type Example2 = IsTuple&lt;[number, ...number[]], {fixedLengthOnly: false}&gt;;
     /// //=&gt; true
     /// </code>
-    /// </remarks>
+    /// <code>
+    /// </code>
+    /// </example>
     abstract fixedLengthOnly: bool option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?fixedLengthOnly: bool) : IsTupleOptions = jsNative
 
 /// <summary>
 /// Returns a boolean for whether the given array is a tuple.
-///
+/// <br /><br />
 /// Use-case:
 /// - If you want to make a conditional branch based on the result of whether an array is a tuple or not.
-///
+/// <br /><br />
 /// Note: <c>IsTuple</c> returns <c>boolean</c> when instantiated with a union of tuple and non-tuple (e.g., <c>IsTuple&lt;[1, 2] | number[]&gt;</c>).
 /// </summary>
-/// <remarks>
-/// @example
-/// <code lang="ts">
+/// <example>
+/// <code>
+/// ```ts
 /// import type {IsTuple} from 'type-fest';
 ///
 /// type Tuple = IsTuple&lt;[1, 2, 3]&gt;;
@@ -4020,7 +4144,9 @@ type IsTupleOptions =
 /// type RestItemsAllowed = IsTuple&lt;[1, 2, ...number[]], {fixedLengthOnly: false}&gt;;
 /// //=&gt; true
 /// </code>
-/// </remarks>
+/// <code>
+/// </code>
+/// </example>
 /// <remarks>@see {@link IsTupleOptions}</remarks>
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
@@ -4030,20 +4156,21 @@ type IsTuple<'TArray, 'Options> = private IsTuple__ of obj
 /// <summary>
 /// Returns a boolean for whether the given type is <c>undefined</c>.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {IsUndefined} from 'type-fest';
-///
+/// <br /><br />
 /// type UndefinedFallback&lt;T, Fallback&gt; = IsUndefined&lt;T&gt; extends true ? Fallback : T;
-///
+/// <br /><br />
 /// type Example1 = UndefinedFallback&lt;undefined, string&gt;;
 /// //=&gt; string
-///
+/// <br /><br />
 /// type Example2 = UndefinedFallback&lt;number, string&gt;;
 /// //=&gt; number
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
@@ -4052,18 +4179,19 @@ type IsUndefined<'T> = private IsUndefined__ of obj
 /// <summary>
 /// Returns a boolean for whether the given type is a union.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {IsUnion} from 'type-fest';
-///
+/// <br /><br />
 /// type A = IsUnion&lt;string | number&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type B = IsUnion&lt;string&gt;;
 /// //=&gt; false
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 [<Erase>]
 type IsUnion<'T> = private IsUnion__ of obj
 
@@ -4073,33 +4201,34 @@ type IsUnion<'T> = private IsUnion__ of obj
 /// <remarks>
 /// @link
 /// https://github.com/dsherret/conditional-type-checks/pull/16
-///
+/// <br /><br />
 /// Useful in type utilities, such as when dealing with unknown data from API calls.
 /// </remarks>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {IsUnknown} from 'type-fest';
-///
+/// <br /><br />
 /// type A = IsUnknown&lt;unknown&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type B = IsUnknown&lt;any&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type C = IsUnknown&lt;never&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type D = IsUnknown&lt;unknown[]&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type E = IsUnknown&lt;object&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type F = IsUnknown&lt;string&gt;;
 /// //=&gt; false
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
 type IsUnknown<'T> = private IsUnknown__ of obj
@@ -4107,62 +4236,64 @@ type IsUnknown<'T> = private IsUnknown__ of obj
 /// <summary>
 /// Returns a boolean for whether the given string literal is uppercase.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {IsUppercase} from 'type-fest';
-///
+/// <br /><br />
 /// type A = IsUppercase&lt;'ABC'&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type B = IsUppercase&lt;'Abc'&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type C = IsUppercase&lt;string&gt;;
 /// //=&gt; boolean
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 [<Erase>]
 type IsUppercase<'S> = private IsUppercase__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given key is a writable key of type.
-///
+/// <br /><br />
 /// This is useful when writing utility types or schema validators that need to differentiate <c>writable</c> keys.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {IsWritableKeyOf} from 'type-fest';
-///
+/// <br /><br />
 /// type User = {
 /// name: string;
 /// surname: string;
-///
+/// <br /><br />
 /// readonly id: number;
 /// };
-///
+/// <br /><br />
 /// type Admin = {
 /// name: string;
 /// id: string;
 /// };
-///
+/// <br /><br />
 /// type T1 = IsWritableKeyOf&lt;User, 'name'&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type T2 = IsWritableKeyOf&lt;User, 'id'&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type T3 = IsWritableKeyOf&lt;User, 'name' | 'id'&gt;;
 /// //=&gt; boolean
-///
+/// <br /><br />
 /// type T4 = IsWritableKeyOf&lt;User | Admin, 'name'&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type T5 = IsWritableKeyOf&lt;User | Admin, 'id'&gt;;
 /// //=&gt; boolean
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
@@ -4170,115 +4301,120 @@ type IsWritableKeyOf<'Type, 'Key> = private IsWritableKeyOf__ of obj
 
 /// <summary>
 /// Get the element type of an <c>Iterable</c>/<c>AsyncIterable</c>. For example, <c>Array</c>, <c>Set</c>, <c>Map</c>, generator, stream, etc.
-///
+/// <br /><br />
 /// This can be useful, for example, if you want to get the type that is yielded in a generator function. Often the return type of those functions are not specified.
-///
+/// <br /><br />
 /// This type works with both <c>Iterable</c>s and <c>AsyncIterable</c>s, so it can be use with synchronous and asynchronous generators.
-///
+/// <br /><br />
 /// Here is an example of <c>IterableElement</c> in action with a generator function:
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {IterableElement} from 'type-fest';
-///
+/// <br /><br />
 /// function * iAmGenerator() {
 /// yield 1;
 /// yield 2;
 /// }
-///
+/// <br /><br />
 /// type MeNumber = IterableElement&lt;ReturnType&lt;typeof iAmGenerator&gt;&gt;;
-/// </code>
+/// <code>
 ///
 /// And here is an example with an async generator:
-/// </remarks>
-/// <remarks>
-/// @example
+/// </code>
+/// </example>
+/// <example>
 /// <code>
+/// </code>
 /// import type {IterableElement} from 'type-fest';
-///
+/// <br /><br />
 /// async function * iAmGeneratorAsync() {
 /// yield 'hi';
 /// yield true;
 /// }
-///
+/// <br /><br />
 /// type MeStringOrBoolean = IterableElement&lt;ReturnType&lt;typeof iAmGeneratorAsync&gt;&gt;;
-/// </code>
+/// <code>
 ///
 /// Many types in JavaScript/TypeScript are iterables. This type works on all types that implement those interfaces.
 ///
 /// An example with an array of strings:
-/// </remarks>
-/// <remarks>
-/// @example
-/// <code>
-/// import type {IterableElement} from 'type-fest';
-///
-/// type MeString = IterableElement&lt;string[]&gt;;
 /// </code>
-/// </remarks>
-/// <remarks>
-/// @example
+/// </example>
+/// <example>
 /// <code>
+/// </code>
 /// import type {IterableElement} from 'type-fest';
-///
+/// <br /><br />
+/// type MeString = IterableElement&lt;string[]&gt;;
+/// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
+/// import type {IterableElement} from 'type-fest';
+/// <br /><br />
 /// const fruits = new Set(['🍎', '🍌', '🍉'] as const);
-///
+/// <br /><br />
 /// type Fruit = IterableElement&lt;typeof fruits&gt;;
 /// //=&gt; '🍎' | '🍌' | '🍉'
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Iterable</remarks>
 [<Erase>]
 type IterableElement<'TargetIterable> = private IterableElement__ of obj
 
 /// <summary>
 /// Join an array of strings and/or numbers using the given string as a delimiter.
-///
+/// <br /><br />
 /// Use-case: Defining key paths in a nested object. For example, for dot-notation fields in MongoDB queries.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Join} from 'type-fest';
-///
+/// <br /><br />
 /// // Mixed (strings &amp; numbers) items
 /// const path1 = ['foo', 0, 'baz'].join('.') as Join&lt;['foo', 0, 'baz'], '.'&gt;;
 /// //=&gt; 'foo.0.baz'
-///
+/// <br /><br />
 /// // Only string items
 /// const path2 = ['foo', 'bar', 'baz'].join('.') as Join&lt;['foo', 'bar', 'baz'], '.'&gt;;
 /// //=&gt; 'foo.bar.baz'
-///
+/// <br /><br />
 /// // Only number items
 /// const path3 = [1, 2, 3].join('.') as Join&lt;[1, 2, 3], '.'&gt;;
 /// //=&gt; '1.2.3'
-///
+/// <br /><br />
 /// // Only bigint items
 /// const path4 = [1n, 2n, 3n].join('.') as Join&lt;[1n, 2n, 3n], '.'&gt;;
 /// //=&gt; '1.2.3'
-///
+/// <br /><br />
 /// // Only boolean items
 /// const path5 = [true, false, true].join('.') as Join&lt;[true, false, true], '.'&gt;;
 /// //=&gt; 'true.false.true'
-///
+/// <br /><br />
 /// // Contains nullish items
 /// const path6 = ['foo', undefined, 'baz', null, 'xyz'].join('.') as Join&lt;['foo', undefined, 'baz', null, 'xyz'], '.'&gt;;
 /// //=&gt; 'foo..baz..xyz'
-///
+/// <br /><br />
 /// // Partial tuple shapes (rest param last)
 /// const path7 = ['prefix'].join('.') as Join&lt;['prefix', ...string[]], '.'&gt;;
-/// //=&gt; `prefix.${string}`
-///
+/// //=&gt; <c>prefix.${string}</c>
+/// <br /><br />
 /// // Partial tuple shapes (rest param first)
 /// const path8 = ['suffix'].join('.') as Join&lt;[...string[], 'suffix'], '.'&gt;;
-/// //=&gt; `${string}.suffix`
-///
+/// //=&gt; <c>${string}.suffix</c>
+/// <br /><br />
 /// // Tuples items with nullish unions
 /// const path9 = ['hello', 'world'].join('.') as Join&lt;['hello' | undefined, 'world' | null], '.'&gt;;
 /// //=&gt; '.' | '.world' | 'hello.' | 'hello.world'
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Array</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
@@ -4286,7 +4422,7 @@ type Join<'Items, 'Delimiter> = private Join__ of obj
 
 /// <summary>
 /// Matches a JSON object.
-///
+/// <br /><br />
 /// This type can be useful to enforce some input to be JSON-compatible or as a super-type to be extended from. Don't use this as a direct return type as the user would have to double-cast it: <c>jsonObject as unknown as CustomResponse</c>. Instead, you could extend your CustomResponse type from it to ensure your type only uses JSON-compatible types: <c>interface CustomResponse extends JsonObject { … }</c>.
 /// </summary>
 /// <remarks>@category JSON</remarks>
@@ -4315,32 +4451,33 @@ type JsonValue = U5<string, float, bool, obj[], JsonObject> option
 
 /// <summary>
 /// Matches a value that can be losslessly converted to JSON.
-///
+/// <br /><br />
 /// Can be used to type values that you expect to pass to <c>JSON.stringify</c>.
-///
+/// <br /><br />
 /// <c>undefined</c> is allowed in object fields (for example, <c>{a?: number}</c>) as a special case even though <c>JSON.stringify({a: undefined})</c> is <c>{}</c> because it makes this class more widely useful and checking for undefined-but-present values is likely an anti-pattern.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Jsonifiable} from 'type-fest';
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// const error: Jsonifiable = {
 /// map: new Map([['a', 1]]),
 /// };
-///
+/// <br /><br />
 /// console.log(JSON.stringify(error)); // {"map": {}}
-///
+/// <br /><br />
 /// const good: Jsonifiable = {
 /// number: 3,
 /// date: new Date('2025-12-25'),
 /// missing: undefined,
 /// };
-///
+/// <br /><br />
 /// console.log(JSON.stringify(good)); // {"number": 3, "date": "2025-12-25T00:00:00.000Z"}
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category JSON</remarks>
 type Jsonifiable = U6<string, float, bool, obj[], Jsonifiable2, Jsonifiable2.Item> option
 
@@ -4357,55 +4494,57 @@ module Jsonifiable2 =
 
 /// <summary>
 /// Transform a type to one that is assignable to the <c>JsonValue</c> type.
-///
+/// <br /><br />
 /// This includes:
 /// 1. Transforming JSON <c>interface</c> to a <c>type</c> that is assignable to <c>JsonValue</c>.
 /// 2. Transforming non-JSON value that is <i>jsonable</i> to a type that is assignable to <c>JsonValue</c>, where <i>jsonable</i> means the non-JSON value implements the <c>.toJSON()</c> method that returns a value that is assignable to <c>JsonValue</c>.
 /// </summary>
 /// <remarks>@remarks An interface cannot be structurally compared to <c>JsonValue</c> because an interface can be re-opened to add properties that may not satisfy <c>JsonValue</c>.</remarks>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Jsonify, JsonValue} from 'type-fest';
-///
+/// <br /><br />
 /// interface Geometry {
 /// type: 'Point' | 'Polygon';
 /// coordinates: [number, number];
 /// }
-///
+/// <br /><br />
 /// const point: Geometry = {
 /// type: 'Point',
 /// coordinates: [1, 1],
 /// };
-///
+/// <br /><br />
 /// declare function problemFn(data: JsonValue): void;
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// problemFn(point); // Error: type Geometry is not assignable to parameter of type JsonValue because it is an interface
-///
+/// <br /><br />
 /// declare function fixedFn&lt;T&gt;(data: Jsonify&lt;T&gt;): void;
-///
+/// <br /><br />
 /// fixedFn(point); // Good: point is assignable. Jsonify&lt;T&gt; transforms Geometry into value assignable to JsonValue
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// fixedFn(new Date()); // Error: As expected, Date is not assignable. Jsonify&lt;T&gt; cannot transform Date into a value assignable to JsonValue
-/// </code>
-///
-/// Non-JSON values such as <c>Date</c> implement <c>.toJSON()</c>, so they can be transformed to a value assignable to <c>JsonValue</c>:
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
-/// import type {Jsonify} from 'type-fest';
 ///
+/// Non-JSON values such as `Date` implement `.toJSON()`, so they can be transformed to a value assignable to `JsonValue`:
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
+/// import type {Jsonify} from 'type-fest';
+/// <br /><br />
 /// const time = {
 /// timeValue: new Date(),
 /// };
-///
-/// // `Jsonify&lt;typeof time&gt;` is equivalent to `{timeValue: string}`
+/// <br /><br />
+/// // <c>Jsonify&lt;typeof time&gt;</c> is equivalent to <c>{timeValue: string}</c>
 /// const timeJson = JSON.parse(JSON.stringify(time)) as Jsonify&lt;typeof time&gt;;
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@link https://github.com/Microsoft/TypeScript/issues/1897#issuecomment-710744173</remarks>
 /// <remarks>@category JSON</remarks>
 [<Erase>]
@@ -4413,39 +4552,40 @@ type Jsonify<'T> = private Jsonify__ of obj
 
 /// <summary>
 /// Convert a string literal to kebab-case.
-///
+/// <br /><br />
 /// This can be useful when, for example, converting a camel-cased object property to a kebab-cased CSS class name or a command-line flag.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {KebabCase} from 'type-fest';
-///
+/// <br /><br />
 /// // Simple
-///
+/// <br /><br />
 /// const someVariable: KebabCase&lt;'fooBar'&gt; = 'foo-bar';
 /// const someVariableNoSplitOnNumbers: KebabCase&lt;'p2pNetwork', {splitOnNumbers: false}&gt; = 'p2p-network';
 /// const someVariableWithPunctuation: KebabCase&lt;'div.card::after', {splitOnPunctuation: true}&gt; = 'div-card-after';
-///
+/// <br /><br />
 /// // Advanced
-///
+/// <br /><br />
 /// type KebabCasedProperties&lt;T&gt; = {
 /// [K in keyof T as KebabCase&lt;K&gt;]: T[K]
 /// };
-///
+/// <br /><br />
 /// type CliOptions = {
 /// dryRun: boolean;
 /// includeFile: string;
 /// foo: number;
 /// };
-///
+/// <br /><br />
 /// const rawCliOptions: KebabCasedProperties&lt;CliOptions&gt; = {
 /// 'dry-run': true,
 /// 'include-file': 'bar.js',
 /// foo: 123,
 /// };
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
@@ -4453,26 +4593,26 @@ type KebabCase<'Value, 'Options> = private KebabCase__ of obj
 
 /// <summary>
 /// Convert object properties to kebab case recursively.
-///
+/// <br /><br />
 /// This can be useful when, for example, converting some API types from a different style.
 /// </summary>
 /// <remarks>@see {@link KebabCase}</remarks>
 /// <remarks>@see {@link KebabCasedProperties}</remarks>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {KebabCasedPropertiesDeep} from 'type-fest';
-///
+/// <br /><br />
 /// type User = {
 /// userId: number;
 /// userName: string;
 /// };
-///
+/// <br /><br />
 /// type UserWithFriends = {
 /// userInfo: User;
 /// userFriends: User[];
 /// };
-///
+/// <br /><br />
 /// const result: KebabCasedPropertiesDeep&lt;UserWithFriends&gt; = {
 /// 'user-info': {
 /// 'user-id': 1,
@@ -4489,7 +4629,7 @@ type KebabCase<'Value, 'Options> = private KebabCase__ of obj
 /// },
 /// ],
 /// };
-///
+/// <br /><br />
 /// const splitOnNumbers: KebabCasedPropertiesDeep&lt;{line1: {line2: [{line3: string}]}}, {splitOnNumbers: true}&gt; = {
 /// 'line-1': {
 /// 'line-2': [
@@ -4499,15 +4639,16 @@ type KebabCase<'Value, 'Options> = private KebabCase__ of obj
 /// ],
 /// },
 /// };
-///
+/// <br /><br />
 /// const splitOnPunctuation: KebabCasedPropertiesDeep&lt;{'user@info': {'user::id': number; 'user::name': string}}, {splitOnPunctuation: true}&gt; = {
 /// 'user-info': {
 /// 'user-id': 1,
 /// 'user-name': 'Tom',
 /// },
 /// };
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
@@ -4516,35 +4657,36 @@ type KebabCasedPropertiesDeep<'Value, 'Options> = private KebabCasedPropertiesDe
 
 /// <summary>
 /// Convert top-level object properties to kebab case.
-///
+/// <br /><br />
 /// This can be useful when, for example, converting some API types from a different style.
 /// </summary>
 /// <remarks>@see {@link KebabCase}</remarks>
 /// <remarks>@see {@link KebabCasedPropertiesDeep}</remarks>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {KebabCasedProperties} from 'type-fest';
-///
+/// <br /><br />
 /// type User = {
 /// userId: number;
 /// userName: string;
 /// };
-///
+/// <br /><br />
 /// const result: KebabCasedProperties&lt;User&gt; = {
 /// 'user-id': 1,
 /// 'user-name': 'Tom',
 /// };
-///
+/// <br /><br />
 /// const splitOnNumbers: KebabCasedProperties&lt;{line1: string}, {splitOnNumbers: true}&gt; = {
 /// 'line-1': 'string',
 /// };
-///
+/// <br /><br />
 /// const splitOnPunctuation: KebabCasedProperties&lt;{'foo::bar': string}, {splitOnPunctuation: true}&gt; = {
 /// 'foo-bar': 'string',
 /// };
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
@@ -4553,124 +4695,129 @@ type KebabCasedProperties<'Value, 'Options> = private KebabCasedProperties__ of 
 
 /// <summary>
 /// Get keys of the given type as strings.
-///
+/// <br /><br />
 /// Number keys are converted to strings.
-///
+/// <br /><br />
 /// Use-cases:
 /// - Get string keys from a type which may have number keys.
 /// - Makes it possible to index using strings retrieved from template types.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {KeyAsString} from 'type-fest';
-///
+/// <br /><br />
 /// type Foo = {
 /// 1: number;
 /// stringKey: string;
 /// };
-///
+/// <br /><br />
 /// type StringKeysOfFoo = KeyAsString&lt;Foo&gt;;
 /// //=&gt; 'stringKey' | '1'
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 type KeyAsString = string
 
 /// <summary>
 /// Create a union of all keys from a given type, even those exclusive to specific union members.
-///
+/// <br /><br />
 /// Unlike the native <c>keyof</c> keyword, which returns keys present in <b>all</b> union members, this type returns keys from <b>any</b> member.
 /// </summary>
 /// <remarks>@link https://stackoverflow.com/a/49402091</remarks>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {KeysOfUnion} from 'type-fest';
-///
+/// <br /><br />
 /// type A = {
 /// common: string;
 /// a: number;
 /// };
-///
+/// <br /><br />
 /// type B = {
 /// common: string;
 /// b: string;
 /// };
-///
+/// <br /><br />
 /// type C = {
 /// common: string;
 /// c: boolean;
 /// };
-///
+/// <br /><br />
 /// type Union = A | B | C;
-///
+/// <br /><br />
 /// type CommonKeys = keyof Union;
 /// //=&gt; 'common'
-///
+/// <br /><br />
 /// type AllKeys = KeysOfUnion&lt;Union&gt;;
 /// //=&gt; 'common' | 'a' | 'b' | 'c'
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 type KeysOfUnion = obj
 
 /// <summary>
 /// Extract the type of the last element of an array.
-///
+/// <br /><br />
 /// Use-case: Defining the return type of functions that extract the last element of an array, for example <a href="https://lodash.com/docs/4.17.15#last"><c>lodash.last</c></a>.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {LastArrayElement} from 'type-fest';
-///
+/// <br /><br />
 /// declare function lastOf&lt;const V extends readonly any[]&gt;(array: V): LastArrayElement&lt;V&gt;;
-///
+/// <br /><br />
 /// const last1 = lastOf(['foo', 'bar']);
 /// //=&gt; 'bar'
-///
+/// <br /><br />
 /// const last2 = lastOf([true, false, 'baz', 10]);
 /// //=&gt; 10
-/// </code>
+/// <code>
 ///
 /// Note: When the array ends with an optional or rest element, the last element's position becomes ambiguous. In such cases, the result is a union of the types of all elements that could potentially be the last element of the array.
-/// </remarks>
-/// <remarks>
-/// @example
+/// </code>
+/// </example>
+/// <example>
 /// <code>
+/// </code>
 /// import type {LastArrayElement} from 'type-fest';
-///
+/// <br /><br />
 /// type A = LastArrayElement&lt;[string, number?, bigint?]&gt;;
 /// //=&gt; bigint | number | string
-///
+/// <br /><br />
 /// type B = LastArrayElement&lt;[string, number, bigint?, ...boolean[]]&gt;;
 /// //=&gt; boolean | bigint | number
-/// </code>
-///
-/// Note: If empty array is a valid value for the array type, the result includes an <c>undefined</c>. This aligns with the runtime behavior of <c>[].at(-1)</c>.
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
-/// import type {LastArrayElement} from 'type-fest';
 ///
+/// Note: If empty array is a valid value for the array type, the result includes an `undefined`. This aligns with the runtime behavior of `[].at(-1)`.
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
+/// import type {LastArrayElement} from 'type-fest';
+/// <br /><br />
 /// type A = LastArrayElement&lt;[]&gt;;
 /// //=&gt; undefined
-///
-/// // `[]` is assignable to `string[]`
+/// <br /><br />
+/// // <c>[]</c> is assignable to <c>string[]</c>
 /// type B = LastArrayElement&lt;string[]&gt;;
 /// //=&gt; string | undefined
-///
-/// // `[]` is assignable to `[string?, number?]`
+/// <br /><br />
+/// // <c>[]</c> is assignable to <c>[string?, number?]</c>
 /// type C = LastArrayElement&lt;[string?, number?]&gt;;
 /// //=&gt; number | string | undefined
-///
-/// // `[]` is assignable to [string?, number?, ...bigint[]]`
+/// <br /><br />
+/// // <c>[]</c> is assignable to [string?, number?, ...bigint[]]`
 /// type D = LastArrayElement&lt;[string?, number?, ...bigint[]]&gt;;
 /// //=&gt; bigint | number | string | undefined
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Array</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
@@ -4679,126 +4826,132 @@ type LastArrayElement<'TArray> = private LastArrayElement__ of obj
 /// <summary>
 /// Returns a boolean for whether a given number is less than or equal to another number.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {LessThanOrEqual} from 'type-fest';
-///
+/// <br /><br />
 /// type A = LessThanOrEqual&lt;1, -5&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type B = LessThanOrEqual&lt;1, 1&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type C = LessThanOrEqual&lt;1, 5&gt;;
 /// //=&gt; true
-/// </code>
-///
-/// Note: If either argument is the non-literal <c>number</c> type, the result is <c>boolean</c>.
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
-/// import type {LessThanOrEqual} from 'type-fest';
 ///
+/// Note: If either argument is the non-literal `number` type, the result is `boolean`.
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
+/// import type {LessThanOrEqual} from 'type-fest';
+/// <br /><br />
 /// type A = LessThanOrEqual&lt;number, 1&gt;;
 /// //=&gt; boolean
-///
+/// <br /><br />
 /// type B = LessThanOrEqual&lt;1, number&gt;;
 /// //=&gt; boolean
-///
+/// <br /><br />
 /// type C = LessThanOrEqual&lt;number, number&gt;;
 /// //=&gt; boolean
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// import type {LessThanOrEqual} from 'type-fest';
-///
-/// // Use `LessThanOrEqual` to constrain a function parameter to non-positive numbers.
+/// <br /><br />
+/// // Use <c>LessThanOrEqual</c> to constrain a function parameter to non-positive numbers.
 /// declare function setNonPositive&lt;N extends number&gt;(value: LessThanOrEqual&lt;N, 0&gt; extends true ? N : never): void;
-///
+/// <br /><br />
 /// setNonPositive(0); // ✅ Allowed
 /// setNonPositive(-1); // ✅ Allowed
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// setNonPositive(1);
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// setNonPositive(2);
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 [<Erase>]
 type LessThanOrEqual<'A, 'B> = private LessThanOrEqual__ of obj
 
 /// <summary>
 /// Returns a boolean for whether a given number is less than another number.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {LessThan} from 'type-fest';
-///
+/// <br /><br />
 /// type A = LessThan&lt;1, -5&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type B = LessThan&lt;1, 1&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type C = LessThan&lt;1, 5&gt;;
 /// //=&gt; true
-/// </code>
-///
-/// Note: If either argument is the non-literal <c>number</c> type, the result is <c>boolean</c>.
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
-/// import type {LessThan} from 'type-fest';
 ///
+/// Note: If either argument is the non-literal `number` type, the result is `boolean`.
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
+/// import type {LessThan} from 'type-fest';
+/// <br /><br />
 /// type A = LessThan&lt;number, 1&gt;;
 /// //=&gt; boolean
-///
+/// <br /><br />
 /// type B = LessThan&lt;1, number&gt;;
 /// //=&gt; boolean
-///
+/// <br /><br />
 /// type C = LessThan&lt;number, number&gt;;
 /// //=&gt; boolean
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// import type {LessThan} from 'type-fest';
-///
-/// // Use `LessThan` to constrain a function parameter to negative numbers.
+/// <br /><br />
+/// // Use <c>LessThan</c> to constrain a function parameter to negative numbers.
 /// declare function setNegative&lt;N extends number&gt;(value: LessThan&lt;N, 0&gt; extends true ? N : never): void;
-///
+/// <br /><br />
 /// setNegative(-1); // ✅ Allowed
 /// setNegative(-2); // ✅ Allowed
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// setNegative(0);
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// setNegative(1);
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 [<Erase>]
 type LessThan<'A, 'B> = private LessThan__ of obj
 
 /// <summary>
 /// Like <c>LiteralToPrimitive</c> except it converts literal types inside an object or array deeply.
-///
+/// <br /><br />
 /// For example, given a constant object, it returns a new object type with the same keys but with all the values converted to primitives.
 /// </summary>
 /// <remarks>@see {@link LiteralToPrimitive}Use-case: Deal with data that is imported from a JSON file.</remarks>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {LiteralToPrimitiveDeep} from 'type-fest';
-///
+/// <br /><br />
 /// const config = {
 /// appName: 'MyApp',
 /// version: '1.0.0',
@@ -4806,33 +4959,33 @@ type LessThan<'A, 'B> = private LessThan__ of obj
 /// enableLogging: true,
 /// apiUrl: 'https://api.myapp.com/v1',
 /// } as const;
-///
+/// <br /><br />
 /// declare function updateConfig(newConfig: typeof config): void;
-///
+/// <br /><br />
 /// updateConfig({
 /// // @ts-expect-error
 /// appName: 'MyUpdatedApp',
 /// // Error: Type '"MyUpdatedApp"' is not assignable to type '"MyApp"'.
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// version: '2.0.0',
 /// // Error: Type '"2.0.0"' is not assignable to type '"1.0.0"'.
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// maxRetries: 1,
 /// // Error: Type '1' is not assignable to type '3'.
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// enableLogging: false,
 /// // Error: Type 'false' is not assignable to type 'true'.
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// apiUrl: 'https://api.myapp.com/v2',
 /// // Error: Type '"https://api.myapp.com/v2"' is not assignable to type '"https://api.myapp.com/v1"'.
 /// });
-///
+/// <br /><br />
 /// declare function updateConfigFixed(newConfig: LiteralToPrimitiveDeep&lt;typeof config&gt;): void;
-///
+/// <br /><br />
 /// updateConfigFixed({
 /// appName: 'MyUpdatedApp',
 /// version: '2.0.0',
@@ -4840,8 +4993,9 @@ type LessThan<'A, 'B> = private LessThan__ of obj
 /// enableLogging: false,
 /// apiUrl: 'https://api.myapp.com/v2',
 /// });
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
@@ -4849,56 +5003,58 @@ type LiteralToPrimitiveDeep<'T> = private LiteralToPrimitiveDeep__ of obj
 
 /// <summary>
 /// Given a <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types">literal type</a> return the <a href="https://developer.mozilla.org/en-US/docs/Glossary/Primitive">primitive type</a> it belongs to, or <c>never</c> if it's not a primitive.
-///
+/// <br /><br />
 /// Use-case: Working with generic types that may be literal types.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {LiteralToPrimitive} from 'type-fest';
-///
+/// <br /><br />
 /// // No overloads needed to get the correct return type
 /// function plus&lt;T extends number | bigint | string&gt;(x: T, y: T): LiteralToPrimitive&lt;T&gt; {
 /// return x + (y as any);
 /// }
-///
+/// <br /><br />
 /// plus('a', 'b'); // string
 /// plus(1, 2); // number
 /// plus(1n, 2n); // bigint
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type</remarks>
 [<Erase>]
 type LiteralToPrimitive<'T> = private LiteralToPrimitive__ of obj
 
 /// <summary>
 /// Create a union type by combining primitive types and literal types without sacrificing auto-completion in IDEs for the literal type part of the union.
-///
+/// <br /><br />
 /// Currently, when a union type of a primitive type is combined with literal types, TypeScript loses all information about the combined literals. Thus, when such type is used in an IDE with autocompletion, no suggestions are made for the declared literals.
-///
+/// <br /><br />
 /// This type is a workaround for <a href="https://github.com/Microsoft/TypeScript/issues/29729">Microsoft/TypeScript#29729</a>. It will be removed as soon as it's not needed anymore.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {LiteralUnion} from 'type-fest';
-///
+/// <br /><br />
 /// // Before
-///
+/// <br /><br />
 /// type Pet = 'dog' | 'cat' | string;
-///
+/// <br /><br />
 /// const petWithoutAutocomplete: Pet = '';
 /// // Start typing in your TypeScript-enabled IDE.
-/// // You **will not** get auto-completion for `dog` and `cat` literals.
-///
+/// // You <b>will not</b> get auto-completion for <c>dog</c> and <c>cat</c> literals.
+/// <br /><br />
 /// // After
-///
+/// <br /><br />
 /// type Pet2 = LiteralUnion&lt;'dog' | 'cat', string&gt;;
-///
+/// <br /><br />
 /// const petWithAutoComplete: Pet2 = '';
-/// // You **will** get auto-completion for `dog` and `cat` literals.
+/// // You <b>will</b> get auto-completion for <c>dog</c> and <c>cat</c> literals.
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type</remarks>
 type LiteralUnion<'LiteralType, 'BaseType> = U2<'LiteralType, 'BaseType>
 
@@ -4910,26 +5066,26 @@ type LiteralUnion<'LiteralType, 'BaseType> = U2<'LiteralType, 'BaseType>
 type MergeDeepOptions =
     /// <summary>
     /// Merge mode for array and tuple.
-    ///
+    /// <br /><br />
     /// When we walk through the properties of the objects and the same key is found and both are array or tuple, a merge mode must be chosen:
     /// - <c>replace</c>: Replaces the destination value by the source value. This is the default mode.
     /// - <c>spread</c>: Spreads the destination and the source values.
-    ///
+    /// <br /><br />
     /// See MergeDeep for usages and examples.
-    ///
+    /// <br /><br />
     /// Note: Top-level arrays and tuples are always spread.
     /// </summary>
-    /// <remarks>@default 'replace'</remarks>
+    /// <defaultValue>'replace'</defaultValue>
     abstract arrayMergeMode: MergeDeepOptions.ArrayMergeMode option with get, set
     /// <summary>
     /// Whether to affect the individual elements of arrays and tuples.
-    ///
+    /// <br /><br />
     /// If this option is set to <c>true</c> the following rules are applied:
     /// - If the source does not contain the key, the value of the destination is returned.
     /// - If the source contains the key and the destination does not contain the key, the value of the source is returned.
     /// - If both contain the key, try to merge according to the chosen arrayMergeMode or return the source if unable to merge.
     /// </summary>
-    /// <remarks>@default false</remarks>
+    /// <defaultValue>false</defaultValue>
     abstract recurseIntoArrays: bool option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?arrayMergeMode: MergeDeepOptions.ArrayMergeMode, ?recurseIntoArrays: bool) : MergeDeepOptions = jsNative
@@ -4942,30 +5098,30 @@ module MergeDeepOptions =
 
 /// <summary>
 /// Merge two objects or two arrays/tuples recursively into a new type.
-///
+/// <br /><br />
 /// - Properties that only exist in one object are copied into the new object.
 /// - Properties that exist in both objects are merged if possible or replaced by the one of the source if not.
 /// - Top-level arrays and tuples are always spread.
 /// - By default, inner arrays and tuples are replaced. See arrayMergeMode option to change this behaviour.
 /// - By default, individual array/tuple elements are not affected. See recurseIntoArrays option to change this behaviour.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {MergeDeep} from 'type-fest';
-///
+/// <br /><br />
 /// type Foo = {
 /// life: number;
 /// items: string[];
 /// a: {b: string; c: boolean; d: number[]};
 /// };
-///
+/// <br /><br />
 /// type Bar = {
 /// name: string;
 /// items: number[];
 /// a: {b: number; d: boolean[]};
 /// };
-///
+/// <br /><br />
 /// type FooBar1 = MergeDeep&lt;Foo, Bar&gt;;
 /// // {
 /// // 	life: number;
@@ -4973,7 +5129,7 @@ module MergeDeepOptions =
 /// // 	items: number[];
 /// // 	a: {b: number; c: boolean; d: boolean[]};
 /// // }
-///
+/// <br /><br />
 /// type FooBar2 = MergeDeep&lt;Foo, Bar, {arrayMergeMode: 'spread'}&gt;;
 /// // {
 /// // 	life: number;
@@ -4981,68 +5137,72 @@ module MergeDeepOptions =
 /// // 	items: (string | number)[];
 /// // 	a: {b: number; c: boolean; d: (number | boolean)[]};
 /// // }
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// import type {MergeDeep} from 'type-fest';
-///
+/// <br /><br />
 /// // Merge two arrays
 /// type ArrayMerge = MergeDeep&lt;string[], number[]&gt;; // =&gt; (string | number)[]
-///
+/// <br /><br />
 /// // Merge two tuples
 /// type TupleMerge = MergeDeep&lt;[1, 2, 3], ['a', 'b']&gt;; // =&gt; (1 | 2 | 3 | 'a' | 'b')[]
-///
+/// <br /><br />
 /// // Merge an array into a tuple
 /// type TupleArrayMerge = MergeDeep&lt;[1, 2, 3], string[]&gt;; // =&gt; (string | 1 | 2 | 3)[]
-///
+/// <br /><br />
 /// // Merge a tuple into an array
 /// type ArrayTupleMerge = MergeDeep&lt;number[], ['a', 'b']&gt;; // =&gt; (number | 'b' | 'a')[]
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// import type {MergeDeep, MergeDeepOptions} from 'type-fest';
-///
+/// <br /><br />
 /// type Foo = {foo: 'foo'; fooBar: string[]};
 /// type Bar = {bar: 'bar'; fooBar: number[]};
-///
+/// <br /><br />
 /// type FooBar = MergeDeep&lt;Foo, Bar&gt;;
 /// //=&gt; {foo: 'foo'; bar: 'bar'; fooBar: number[]}
-///
+/// <br /><br />
 /// type FooBarSpread = MergeDeep&lt;Foo, Bar, {arrayMergeMode: 'spread'}&gt;;
 /// //=&gt; {foo: 'foo'; bar: 'bar'; fooBar: (string | number)[]}
-///
+/// <br /><br />
 /// type FooBarArray = MergeDeep&lt;Foo[], Bar[]&gt;;
 /// //=&gt; (Foo | Bar)[]
-///
+/// <br /><br />
 /// type FooBarArrayDeep = MergeDeep&lt;Foo[], Bar[], {recurseIntoArrays: true}&gt;;
 /// //=&gt; {foo: 'foo'; bar: 'bar'; fooBar: number[]}[]
-///
+/// <br /><br />
 /// type FooBarArraySpreadDeep = MergeDeep&lt;Foo[], Bar[], {recurseIntoArrays: true; arrayMergeMode: 'spread'}&gt;;
 /// //=&gt; {foo: 'foo'; bar: 'bar'; fooBar: (string | number)[]}[]
-///
+/// <br /><br />
 /// type FooBarTupleDeep = MergeDeep&lt;[Foo, true, 42], [Bar, 'life'], {recurseIntoArrays: true}&gt;;
 /// //=&gt; [{foo: 'foo'; bar: 'bar'; fooBar: number[]}, 'life', 42]
-///
+/// <br /><br />
 /// type FooBarTupleWithArrayDeep = MergeDeep&lt;[Foo[], true], [Bar[], 'life', 42], {recurseIntoArrays: true}&gt;;
 /// //=&gt; [{foo: 'foo'; bar: 'bar'; fooBar: number[]}[], 'life', 42]
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// import type {MergeDeep, MergeDeepOptions} from 'type-fest';
-///
+/// <br /><br />
 /// declare function mergeDeep&lt;Destination, Source, Options extends MergeDeepOptions = {}&gt;(
 /// destination: Destination,
 /// source: Source,
 /// options?: Options,
 /// ): MergeDeep&lt;Destination, Source, Options&gt;;
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@experimental This type is marked as experimental because it depends on {@link ConditionalSimplifyDeep} which itself is experimental.</remarks>
 /// <remarks>@see {@link MergeDeepOptions}</remarks>
 /// <remarks>@category Array</remarks>
@@ -5053,91 +5213,93 @@ type MergeDeep<'Destination, 'Source, 'Options> = private MergeDeep__ of obj
 
 /// <summary>
 /// Create a type that has mutually exclusive keys.
-///
+/// <br /><br />
 /// This type was inspired by <a href="https://github.com/Microsoft/TypeScript/issues/14094#issuecomment-373782604">this comment</a>.
-///
+/// <br /><br />
 /// This type works with a helper type, called <c>Without</c>. <c>Without&lt;FirstType, SecondType&gt;</c> produces a type that has only keys from <c>FirstType</c> which are not present on <c>SecondType</c> and sets the value type for these keys to <c>never</c>. This helper type is then used in <c>MergeExclusive</c> to remove keys from either <c>FirstType</c> or <c>SecondType</c>.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {MergeExclusive} from 'type-fest';
-///
+/// <br /><br />
 /// type ExclusiveVariation1 = {
 /// exclusive1: boolean;
 /// };
-///
+/// <br /><br />
 /// type ExclusiveVariation2 = {
 /// exclusive2: string;
 /// };
-///
+/// <br /><br />
 /// type ExclusiveOptions = MergeExclusive&lt;ExclusiveVariation1, ExclusiveVariation2&gt;;
-///
+/// <br /><br />
 /// let exclusiveOptions: ExclusiveOptions;
-///
+/// <br /><br />
 /// exclusiveOptions = {exclusive1: true};
 /// // Works
-///
+/// <br /><br />
 /// exclusiveOptions = {exclusive2: 'hi'};
 /// // Works
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// exclusiveOptions = {exclusive1: true, exclusive2: 'hi'};
 /// // Error
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
 type MergeExclusive<'FirstType, 'SecondType> = private MergeExclusive__ of obj
 
 /// <summary>
 /// Merge two types into a new type. Keys of the second type overrides keys of the first type.
-///
+/// <br /><br />
 /// This is different from the TypeScript <c>&amp;</c> (intersection) operator. With <c>&amp;</c>, conflicting property types are intersected, which often results in <c>never</c>. For example, <c>{a: string} &amp; {a: number}</c> makes <c>a</c> become <c>string &amp; number</c>, which resolves to <c>never</c>. With <c>Merge</c>, the second type's keys cleanly override the first, so <c>Merge&lt;{a: string}, {a: number}&gt;</c> gives <c>{a: number}</c> as expected. <c>Merge</c> also produces a flattened type (via <c>Simplify</c>), making it more readable in IDE tooltips compared to <c>A &amp; B</c>.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Merge} from 'type-fest';
-///
+/// <br /><br />
 /// type Foo = {
 /// a: string;
 /// b: number;
 /// };
-///
+/// <br /><br />
 /// type Bar = {
 /// a: number; // Conflicts with Foo['a']
 /// c: boolean;
 /// };
-///
-/// // With `&amp;`, `a` becomes `string &amp; number` which is `never`. Not what you want.
+/// <br /><br />
+/// // With <c>&amp;</c>, <c>a</c> becomes <c>string &amp; number</c> which is <c>never</c>. Not what you want.
 /// type WithIntersection = (Foo &amp; Bar)['a'];
 /// //=&gt; never
-///
-/// // With `Merge`, `a` is cleanly overridden to `number`.
+/// <br /><br />
+/// // With <c>Merge</c>, <c>a</c> is cleanly overridden to <c>number</c>.
 /// type WithMerge = Merge&lt;Foo, Bar&gt;['a'];
 /// //=&gt; number
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// import type {Merge} from 'type-fest';
-///
+/// <br /><br />
 /// type Foo = {
 /// [x: string]: unknown;
 /// [x: number]: unknown;
 /// foo: string;
 /// bar: symbol;
 /// };
-///
+/// <br /><br />
 /// type Bar = {
 /// [x: number]: number;
 /// [x: symbol]: unknown;
 /// bar: Date;
 /// baz: boolean;
 /// };
-///
+/// <br /><br />
 /// export type FooBar = Merge&lt;Foo, Bar&gt;;
 /// //=&gt; {
 /// // 	[x: string]: unknown;
@@ -5147,10 +5309,11 @@ type MergeExclusive<'FirstType, 'SecondType> = private MergeExclusive__ of obj
 /// // 	bar: Date;
 /// // 	baz: boolean;
 /// // }
-/// </code>
+/// <code>
 ///
-/// Note: If you want a merge type that more accurately reflects the runtime behavior of object spread or <c>Object.assign</c>, refer to the {@link ObjectMerge} type.
-/// </remarks>
+/// Note: If you want a merge type that more accurately reflects the runtime behavior of object spread or `Object.assign`, refer to the {@link ObjectMerge} type.
+/// </code>
+/// </example>
 /// <remarks>@see {@link ObjectMerge}</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
@@ -5158,91 +5321,94 @@ type Merge<'Destination, 'Source> = private Merge__ of obj
 
 /// <summary>
 /// Create a type that represents a multidimensional array of the given type and dimension.
-///
+/// <br /><br />
 /// Use-cases:
 /// - Return a n-dimensional array from functions.
 /// - Declare a n-dimensional array by defining its dimensions rather than declaring <c>[]</c> repetitively.
 /// - Infer the dimensions of a n-dimensional array automatically from function arguments.
 /// - Avoid the need to know in advance the dimensions of a n-dimensional array allowing them to be dynamic.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {MultidimensionalArray} from 'type-fest';
-///
+/// <br /><br />
 /// declare function emptyMatrix&lt;Item = unknown&gt;(): &lt;Dimension extends number&gt;(
 /// dimensions: Dimension,
 /// ) =&gt; MultidimensionalArray&lt;Item, Dimension&gt;;
-///
+/// <br /><br />
 /// const unknown3DMatrix = emptyMatrix()(3);
 /// //=&gt; unknown[][][]
-///
+/// <br /><br />
 /// const boolean2DMatrix = emptyMatrix&lt;boolean&gt;()(2);
 /// //=&gt; boolean[][]
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
 type MultidimensionalArray<'Element, 'Dimensions> = private MultidimensionalArray__ of obj
 
 /// <summary>
 /// Create a type that represents a multidimensional readonly array of the given type and dimension.
-///
+/// <br /><br />
 /// Use-cases:
 /// - Return a n-dimensional array from functions.
 /// - Declare a n-dimensional array by defining its dimensions rather than declaring <c>[]</c> repetitively.
 /// - Infer the dimensions of a n-dimensional array automatically from function arguments.
 /// - Avoid the need to know in advance the dimensions of a n-dimensional array allowing them to be dynamic.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {MultidimensionalReadonlyArray} from 'type-fest';
-///
+/// <br /><br />
 /// declare function emptyMatrix&lt;Item = unknown&gt;(): &lt;Dimension extends number&gt;(
 /// dimensions: Dimension,
 /// ) =&gt; MultidimensionalReadonlyArray&lt;Item, Dimension&gt;;
-///
+/// <br /><br />
 /// const readonlyUnknown3DMatrix = emptyMatrix()(3);
 /// //=&gt; readonly (readonly (readonly unknown[])[])[]
-///
+/// <br /><br />
 /// const readonlyBoolean2DMatrix = emptyMatrix&lt;boolean&gt;()(2);
 /// //=&gt; readonly (readonly boolean[])[]
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
 type MultidimensionalReadonlyArray<'Element, 'Dimensions> = private MultidimensionalReadonlyArray__ of obj
 
 /// <summary>
 /// Represents an object with at least 1 non-optional key.
-///
+/// <br /><br />
 /// This is useful when you need an object where all keys are optional, but there must be at least 1 key.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {NonEmptyObject} from 'type-fest';
-///
+/// <br /><br />
 /// type User = {
 /// name: string;
 /// surname: string;
 /// id: number;
 /// };
-///
+/// <br /><br />
 /// type UpdateRequest&lt;Entity extends object&gt; = NonEmptyObject&lt;Partial&lt;Entity&gt;&gt;;
-///
+/// <br /><br />
 /// const update1: UpdateRequest&lt;User&gt; = {
 /// name: 'Alice',
 /// surname: 'Acme',
 /// };
-///
+/// <br /><br />
 /// // At least 1 key is required, therefore this will report a 2322 error:
 /// // Type '{}' is not assignable to type 'UpdateRequest&lt;User&gt;'
 /// // @ts-expect-error
 /// const update2: UpdateRequest&lt;User&gt; = {};
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@see Use <c>IsEmptyObject</c> to check whether an object is empty.</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
@@ -5250,71 +5416,73 @@ type NonEmptyObject<'T> = private NonEmptyObject__ of obj
 
 /// <summary>
 /// Matches any non-empty string.
-///
+/// <br /><br />
 /// This is useful when you need a string that is not empty, for example, as a function parameter.
-///
+/// <br /><br />
 /// NOTE:
 /// - This returns <c>never</c> not just when instantiated with an empty string, but also when an empty string is a subtype of the instantiated type, like <c>string</c> or <c>Uppercase&lt;string&gt;</c>.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {NonEmptyString} from 'type-fest';
-///
+/// <br /><br />
 /// declare function foo&lt;T extends string&gt;(string: NonEmptyString&lt;T&gt;): void;
-///
+/// <br /><br />
 /// foo('a');
 /// // OK
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// foo('');
 /// // Error: Argument of type '""' is not assignable to parameter of type 'never'.
-///
+/// <br /><br />
 /// declare const someString: string;
 /// // @ts-expect-error
 /// foo(someString);
 /// // Error: Argument of type 'string' is not assignable to parameter of type 'never'.
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category String</remarks>
 type NonEmptyString<'T> = 'T
 
 /// <summary>
 /// Matches any non-empty tuple.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {NonEmptyTuple} from 'type-fest';
-///
+/// <br /><br />
 /// const sum = (...numbers: NonEmptyTuple&lt;number&gt;) =&gt; numbers.reduce((total, value) =&gt; total + value, 0);
-///
+/// <br /><br />
 /// sum(1, 2, 3);
 /// // Ok
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// sum();
 /// // Error: Expected at least 1 arguments, but got 0.
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@see {@link RequireAtLeastOne} for objects</remarks>
 /// <remarks>@category Array</remarks>
 type NonEmptyTuple<'T> = 'T[]
 
 /// <summary>
 /// Recursively removes <c>null</c> and <c>undefined</c> from the specified type.
-///
+/// <br /><br />
 /// Use-cases:
 /// - Normalizing data received from external sources where <c>null</c>/<c>undefined</c> have been cleaned.
 /// - Creating non-nullable variants of deeply nested types.
-///
+/// <br /><br />
 /// NOTE: Optional modifiers (<c>?</c>) are not removed from properties. For example, <c>NonNullableDeep&lt;{foo?: string | null | undefined}&gt;</c> will result in <c>{foo?: string}</c>. To remove both optional modifiers and nullables, use RequiredDeep in conjunction with this type.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {NonNullableDeep} from 'type-fest';
-///
+/// <br /><br />
 /// type UserDraft = {
 /// name: string | null;
 /// address: {
@@ -5328,7 +5496,7 @@ type NonEmptyTuple<'T> = 'T[]
 /// notes: Set&lt;string | undefined&gt;;
 /// }&gt;;
 /// };
-///
+/// <br /><br />
 /// type User = NonNullableDeep&lt;UserDraft&gt;;
 /// //=&gt; {
 /// // 	name: string;
@@ -5343,29 +5511,31 @@ type NonEmptyTuple<'T> = 'T[]
 /// // 		notes: Set&lt;string&gt;;
 /// // 	}&gt;;
 /// // }
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// import type {NonNullableDeep} from 'type-fest';
-///
+/// <br /><br />
 /// type ArrayExample = NonNullableDeep&lt;[{a: number | undefined}, ...Array&lt;{b: string | null}&gt;]&gt;;
 /// //=&gt; [{a: number}, ...{b: string}[]]
-///
+/// <br /><br />
 /// type MapExample = NonNullableDeep&lt;{a: Map&lt;{a: string | null}, {c: number | undefined}&gt;}&gt;;
 /// //=&gt; {a: Map&lt;{a: string}, {c: number}&gt;}
-///
+/// <br /><br />
 /// type SetExample = NonNullableDeep&lt;Set&lt;{a: string | null}&gt; | null | undefined&gt;;
 /// //=&gt; Set&lt;{a: string}&gt;
-///
+/// <br /><br />
 /// type PromiseExample = NonNullableDeep&lt;{a: Promise&lt;{b: string | null}&gt;}&gt;;
 /// //=&gt; {a: Promise&lt;{b: string}&gt;}
-///
+/// <br /><br />
 /// type FunctionExample = NonNullableDeep&lt;(a: string | null) =&gt; number | undefined&gt;;
 /// //=&gt; (a: string) =&gt; number
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Utilities</remarks>
 /// <remarks>@category Object</remarks>
 /// <remarks>@category Array</remarks>
@@ -5377,64 +5547,67 @@ type NonNullableDeep<'T> = private NonNullableDeep__ of obj
 /// <summary>
 /// A finite <c>number</c>.
 /// You can't pass a <c>bigint</c> as they are already guaranteed to be finite.
-///
+/// <br /><br />
 /// Use-case: Validating and documenting parameters.
-///
+/// <br /><br />
 /// Note: This can't detect <c>NaN</c>, please upvote <a href="https://github.com/microsoft/TypeScript/issues/28682">this issue</a> if you want to have this type as a built-in in TypeScript.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
-/// import type {Finite} from 'type-fest';
-///
-/// declare function setScore&lt;T extends number&gt;(length: Finite&lt;T&gt;): void;
 /// </code>
-/// </remarks>
+/// import type {Finite} from 'type-fest';
+/// <br /><br />
+/// declare function setScore&lt;T extends number&gt;(length: Finite&lt;T&gt;): void;
+/// <code>
+/// </code>
+/// </example>
 /// <remarks>@category Numeric</remarks>
 type Finite<'T> = 'T
 
 /// <summary>
 /// A <c>number</c> that is an integer.
-///
+/// <br /><br />
 /// Use-case: Validating and documenting parameters.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Integer} from 'type-fest';
-///
+/// <br /><br />
 /// type SomeInteger = Integer&lt;1&gt;;
 /// //=&gt; 1
-///
+/// <br /><br />
 /// type IntegerWithDecimal = Integer&lt;1.0&gt;;
 /// //=&gt; 1
-///
+/// <br /><br />
 /// type NegativeInteger = Integer&lt;-1&gt;;
 /// //=&gt; -1
-///
+/// <br /><br />
 /// type Float = Integer&lt;1.5&gt;;
 /// //=&gt; never
-///
+/// <br /><br />
 /// // Supports non-decimal numbers
-///
+/// <br /><br />
 /// type OctalInteger = Integer&lt;0o10&gt;;
 /// //=&gt; 8
-///
+/// <br /><br />
 /// type BinaryInteger = Integer&lt;0b10&gt;;
 /// //=&gt; 2
-///
+/// <br /><br />
 /// type HexadecimalInteger = Integer&lt;0x10&gt;;
 /// //=&gt; 16
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
-/// import type {Integer} from 'type-fest';
-///
-/// declare function setYear&lt;T extends number&gt;(length: Integer&lt;T&gt;): void;
 /// </code>
-/// </remarks>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
+/// import type {Integer} from 'type-fest';
+/// <br /><br />
+/// declare function setYear&lt;T extends number&gt;(length: Integer&lt;T&gt;): void;
+/// <code>
+/// </code>
+/// </example>
 /// <remarks>@see {@link NegativeInteger}</remarks>
 /// <remarks>@see {@link NonNegativeInteger}</remarks>
 /// <remarks>@category Numeric</remarks>
@@ -5442,19 +5615,20 @@ type Integer<'T> = 'T
 
 /// <summary>
 /// A <c>number</c> that is not an integer.
-///
+/// <br /><br />
 /// Use-case: Validating and documenting parameters.
-///
+/// <br /><br />
 /// It does not accept <c>Infinity</c>.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
-/// import type {Float} from 'type-fest';
-///
-/// declare function setPercentage&lt;T extends number&gt;(length: Float&lt;T&gt;): void;
 /// </code>
-/// </remarks>
+/// import type {Float} from 'type-fest';
+/// <br /><br />
+/// declare function setPercentage&lt;T extends number&gt;(length: Float&lt;T&gt;): void;
+/// <code>
+/// </code>
+/// </example>
 /// <remarks>@see {@link Integer}</remarks>
 /// <remarks>@category Numeric</remarks>
 type Float<'T> = 'T
@@ -5462,7 +5636,7 @@ type Float<'T> = 'T
 /// <summary>
 /// A negative (<c>-∞ &lt; x &lt; 0</c>) <c>number</c> that is not an integer.
 /// Equivalent to <c>Negative&lt;Float&lt;T&gt;&gt;</c>.
-///
+/// <br /><br />
 /// Use-case: Validating and documenting parameters.
 /// </summary>
 /// <remarks>@see {@link Negative}</remarks>
@@ -5472,7 +5646,7 @@ type NegativeFloat<'T> = 'T
 
 /// <summary>
 /// A negative <c>number</c>/<c>bigint</c> (<c>-∞ &lt; x &lt; 0</c>)
-///
+/// <br /><br />
 /// Use-case: Validating and documenting parameters.
 /// </summary>
 /// <remarks>@see {@link NegativeInteger}</remarks>
@@ -5483,9 +5657,9 @@ type Negative<'T> = 'T
 /// <summary>
 /// A negative (<c>-∞ &lt; x &lt; 0</c>) <c>number</c> that is an integer.
 /// Equivalent to <c>Negative&lt;Integer&lt;T&gt;&gt;</c>.
-///
+/// <br /><br />
 /// You can't pass a <c>bigint</c> as they are already guaranteed to be integers, instead use <c>Negative&lt;T&gt;</c>.
-///
+/// <br /><br />
 /// Use-case: Validating and documenting parameters.
 /// </summary>
 /// <remarks>@see {@link Negative}</remarks>
@@ -5495,19 +5669,20 @@ type NegativeInteger<'T> = 'T
 
 /// <summary>
 /// A non-negative <c>number</c>/<c>bigint</c> (<c>0 &lt;= x &lt; ∞</c>).
-///
+/// <br /><br />
 /// Use-case: Validating and documenting parameters.
 /// </summary>
 /// <remarks>@see {@link NonNegativeInteger}</remarks>
 /// <remarks>@see {@link Negative}</remarks>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
-/// import type {NonNegative} from 'type-fest';
-///
-/// declare function setLength&lt;T extends number&gt;(length: NonNegative&lt;T&gt;): void;
 /// </code>
-/// </remarks>
+/// import type {NonNegative} from 'type-fest';
+/// <br /><br />
+/// declare function setLength&lt;T extends number&gt;(length: NonNegative&lt;T&gt;): void;
+/// <code>
+/// </code>
+/// </example>
 /// <remarks>@category Numeric</remarks>
 [<Erase>]
 type NonNegative<'T> = private NonNegative__ of obj
@@ -5515,21 +5690,22 @@ type NonNegative<'T> = private NonNegative__ of obj
 /// <summary>
 /// A non-negative (<c>0 &lt;= x &lt; ∞</c>) <c>number</c> that is an integer.
 /// Equivalent to <c>NonNegative&lt;Integer&lt;T&gt;&gt;</c>.
-///
+/// <br /><br />
 /// You can't pass a <c>bigint</c> as they are already guaranteed to be integers, instead use <c>NonNegative&lt;T&gt;</c>.
-///
+/// <br /><br />
 /// Use-case: Validating and documenting parameters.
 /// </summary>
 /// <remarks>@see {@link NonNegative}</remarks>
 /// <remarks>@see {@link Integer}</remarks>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
-/// import type {NonNegativeInteger} from 'type-fest';
-///
-/// declare function setLength&lt;T extends number&gt;(length: NonNegativeInteger&lt;T&gt;): void;
 /// </code>
-/// </remarks>
+/// import type {NonNegativeInteger} from 'type-fest';
+/// <br /><br />
+/// declare function setLength&lt;T extends number&gt;(length: NonNegativeInteger&lt;T&gt;): void;
+/// <code>
+/// </code>
+/// </example>
 /// <remarks>@category Numeric</remarks>
 [<Erase>]
 type NonNegativeInteger<'T> = private NonNegativeInteger__ of obj
@@ -5538,15 +5714,16 @@ type NonNegativeInteger<'T> = private NonNegativeInteger__ of obj
 /// Returns a boolean for whether the given number is a negative number.
 /// </summary>
 /// <remarks>@see {@link Negative}</remarks>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {IsNegative} from 'type-fest';
-///
+/// <br /><br />
 /// type ShouldBeFalse = IsNegative&lt;1&gt;;
 /// type ShouldBeTrue = IsNegative&lt;-1&gt;;
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Numeric</remarks>
 [<Erase>]
 type IsNegative<'T> = private IsNegative__ of obj
@@ -5554,9 +5731,9 @@ type IsNegative<'T> = private IsNegative__ of obj
 /// <summary>
 /// Merge two object types into a new object type, where keys from the second override keys from the first.
 /// </summary>
-/// <remarks>
-/// @example
-/// <code lang="ts">
+/// <example>
+/// <code>
+/// ```ts
 /// import type {ObjectMerge} from 'type-fest';
 ///
 /// type PartialOverride = ObjectMerge&lt;{foo: string; bar: string}, {foo: number; baz: number}&gt;;
@@ -5568,16 +5745,18 @@ type IsNegative<'T> = private IsNegative__ of obj
 /// type NoOverride = ObjectMerge&lt;{foo: string; bar: number}, {baz: boolean; qux: bigint}&gt;;
 /// //=&gt; {baz: boolean; qux: bigint; foo: string; bar: number}
 /// </code>
-///
+/// <br /><br />
 /// Use-cases:
-///
+/// <br /><br />
 /// Can be used to accurately type object spread and <c>Object.assign</c>. The built-in inference for these operations can sometimes be unsound, especially when index signatures are involved.
-///
+/// <br /><br />
 /// In the following example, both object spread and <c>Object.assign</c> produce a type that allows unsafe usage, whereas <c>ObjectMerge</c> produces a type that prevents this unsafe access.
-/// </remarks>
-/// <remarks>
-/// @example
-/// <code lang="ts">
+/// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// ```ts
 /// import type {ObjectMerge} from 'type-fest';
 ///
 /// const left: {a: string} = {a: '1'};
@@ -5599,14 +5778,16 @@ type IsNegative<'T> = private IsNegative__ of obj
 /// // @ts-expect-error
 /// objectMerge.a.toUpperCase(); // Correctly errors at compile time.
 /// </code>
-///
+/// <br /><br />
 /// Can be used to merge generic type arguments.
-///
+/// <br /><br />
 /// In the following example, object spread without <c>ObjectMerge</c> produces an intersection type that is not particularly usable, whereas <c>ObjectMerge</c> produces a correctly merged and usable result.
-/// </remarks>
-/// <remarks>
-/// @example
-/// <code lang="ts">
+/// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// ```ts
 /// import type {ObjectMerge} from 'type-fest';
 ///
 /// function withoutObjectMerge&lt;T extends object, U extends object&gt;(left: T, right: U) {
@@ -5629,9 +5810,11 @@ type IsNegative<'T> = private IsNegative__ of obj
 /// const {b} = result2;
 /// //=&gt; string
 /// </code>
-///
+/// <br /><br />
 /// Note: If you want a simple merge where properties from the second object always override properties from the first object without considering runtime implications, refer to the {@link Merge} type.
-/// </remarks>
+/// <code>
+/// </code>
+/// </example>
 /// <remarks>@see {@link Merge}</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
@@ -5639,20 +5822,20 @@ type ObjectMerge<'First, 'Second> = private ObjectMerge__ of obj
 
 /// <summary>
 /// Omit properties from a deeply-nested object.
-///
+/// <br /><br />
 /// It supports recursing into arrays.
-///
+/// <br /><br />
 /// It supports removing specific items from an array, replacing each removed item with unknown at the specified index.
-///
+/// <br /><br />
 /// Use-case: Remove unneeded parts of complex objects.
-///
+/// <br /><br />
 /// Use <a href="https://www.typescriptlang.org/docs/handbook/utility-types.html#omittype-keys"><c>Omit&lt;T&gt;</c></a> if you only need one level deep.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {OmitDeep} from 'type-fest';
-///
+/// <br /><br />
 /// type Info = {
 /// userInfo: {
 /// name: string;
@@ -5661,10 +5844,10 @@ type ObjectMerge<'First, 'Second> = private ObjectMerge__ of obj
 /// };
 /// };
 /// };
-///
+/// <br /><br />
 /// type UsefulInfo = OmitDeep&lt;Info, 'userInfo.uselessInfo'&gt;;
 /// //=&gt; {userInfo: {name: string}}
-///
+/// <br /><br />
 /// // Supports removing multiple paths
 /// type Info1 = {
 /// userInfo: {
@@ -5675,16 +5858,16 @@ type ObjectMerge<'First, 'Second> = private ObjectMerge__ of obj
 /// };
 /// };
 /// };
-///
+/// <br /><br />
 /// type UsefulInfo1 = OmitDeep&lt;Info1, 'userInfo.uselessInfo' | 'userInfo.uselessField'&gt;;
 /// //=&gt; {userInfo: {name: string}}
-///
+/// <br /><br />
 /// // Supports array
 /// type A = OmitDeep&lt;[1, 'foo', 2], '1'&gt;;
 /// //=&gt; [1, unknown, 2]
-///
+/// <br /><br />
 /// // Supports recursing into array
-///
+/// <br /><br />
 /// type Info2 = {
 /// address: [
 /// {
@@ -5696,11 +5879,12 @@ type ObjectMerge<'First, 'Second> = private ObjectMerge__ of obj
 /// },
 /// ];
 /// };
-///
+/// <br /><br />
 /// type AddressInfo = OmitDeep&lt;Info2, 'address.1.foo'&gt;;
 /// //=&gt; {address: [{street: string}, {street2: string}]}
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 /// <remarks>@category Array</remarks>
 [<Erase>]
@@ -5708,18 +5892,17 @@ type OmitDeep<'T, 'PathUnion> = private OmitDeep__ of obj
 
 /// <summary>
 /// Omit any index signatures from the given object type, leaving only explicitly defined properties.
-///
+/// <br /><br />
 /// This is the counterpart of <c>PickIndexSignature</c>.
-///
+/// <br /><br />
 /// Use-cases:
 /// - Remove overly permissive signatures from third-party types.
-///
+/// <br /><br />
 /// This type was taken from this <a href="https://stackoverflow.com/a/68261113/420747">StackOverflow answer</a>.
-///
+/// <br /><br />
 /// It relies on the fact that an empty object (<c>{}</c>) is assignable to an object with just an index signature, like <c>Record&lt;string, unknown&gt;</c>, but not to an object with explicitly defined keys, like <c>Record&lt;'foo' | 'bar', unknown&gt;</c>.
-///
+/// <br /><br />
 /// (The actual value type, <c>unknown</c>, is irrelevant and could be any type. Only the key type matters.)
-///
 /// <code>
 /// const indexed: Record&lt;string, unknown&gt; = {}; // Allowed
 ///
@@ -5727,9 +5910,8 @@ type OmitDeep<'T, 'PathUnion> = private OmitDeep__ of obj
 /// const keyed: Record&lt;'foo', unknown&gt; = {}; // Error
 /// // TS2739: Type '{}' is missing the following properties from type 'Record&lt;"foo" | "bar", unknown&gt;': foo, bar
 /// </code>
-///
+/// <br /><br />
 /// Instead of causing a type error like the above, you can also use a <a href="https://www.typescriptlang.org/docs/handbook/2/conditional-types.html">conditional type</a> to test whether a type is assignable to another:
-///
 /// <code>
 /// type Indexed = {} extends Record&lt;string, unknown&gt;
 /// 	? '✅ `{}` is assignable to `Record&lt;string, unknown&gt;`'
@@ -5745,18 +5927,16 @@ type OmitDeep<'T, 'PathUnion> = private OmitDeep__ of obj
 /// type KeyedResult = Keyed;
 /// //=&gt; '❌ `{}` is NOT assignable to `Record&lt;\'foo\' | \'bar\', unknown&gt;`'
 /// </code>
-///
+/// <br /><br />
 /// Using a <a href="https://www.typescriptlang.org/docs/handbook/2/mapped-types.html#further-exploration">mapped type</a>, you can then check for each <c>KeyType</c> of <c>ObjectType</c>...
-///
 /// <code>
 /// type OmitIndexSignature&lt;ObjectType&gt; = {
 /// 	[KeyType in keyof ObjectType // Map each key of `ObjectType`...
 /// 	]: ObjectType[KeyType]; // ...to its original value, i.e. `OmitIndexSignature&lt;Foo&gt; == Foo`.
 /// };
 /// </code>
-///
+/// <br /><br />
 /// ...whether an empty object (<c>{}</c>) would be assignable to an object with that <c>KeyType</c> (<c>Record&lt;KeyType, unknown&gt;</c>)...
-///
 /// <code>
 /// type OmitIndexSignature&lt;ObjectType&gt; = {
 /// 	[KeyType in keyof ObjectType
@@ -5767,34 +5947,35 @@ type OmitDeep<'T, 'PathUnion> = private OmitDeep__ of obj
 /// 	]: ObjectType[KeyType];
 /// };
 /// </code>
-///
+/// <br /><br />
 /// If <c>{}</c> is assignable, it means that <c>KeyType</c> is an index signature and we want to remove it. If it is not assignable, <c>KeyType</c> is a "real" key and we want to keep it.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {OmitIndexSignature} from 'type-fest';
-///
+/// <br /><br />
 /// type Example = {
 /// // These index signatures will be removed.
 /// [x: string]: any;
 /// [x: number]: any;
 /// [x: symbol]: any;
-/// [x: `head-${string}`]: string;
-/// [x: `${string}-tail`]: string;
-/// [x: `head-${string}-tail`]: string;
-/// [x: `${bigint}`]: string;
-/// [x: `embedded-${number}`]: string;
-///
+/// [x: <c>head-${string}</c>]: string;
+/// [x: <c>${string}-tail</c>]: string;
+/// [x: <c>head-${string}-tail</c>]: string;
+/// [x: <c>${bigint}</c>]: string;
+/// [x: <c>embedded-${number}</c>]: string;
+/// <br /><br />
 /// // These explicitly defined keys will remain.
 /// foo: 'bar';
 /// qux?: 'baz';
 /// };
-///
+/// <br /><br />
 /// type ExampleWithoutIndexSignatures = OmitIndexSignature&lt;Example&gt;;
 /// //=&gt; {foo: 'bar'; qux?: 'baz'}
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@see {@link PickIndexSignature}</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
@@ -5802,139 +5983,145 @@ type OmitIndexSignature<'ObjectType> = private OmitIndexSignature__ of obj
 
 /// <summary>
 /// Extract all optional keys from the given type.
-///
+/// <br /><br />
 /// This is useful when you want to create a new type that contains different type values for the optional keys only.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {OptionalKeysOf, Except} from 'type-fest';
-///
+/// <br /><br />
 /// type User = {
 /// name: string;
 /// surname: string;
-///
+/// <br /><br />
 /// luckyNumber?: number;
 /// };
-///
+/// <br /><br />
 /// const REMOVE_FIELD = Symbol('remove field symbol');
 /// type UpdateOperation&lt;Entity extends object&gt; = Except&lt;Partial&lt;Entity&gt;, OptionalKeysOf&lt;Entity&gt;&gt; &amp; {
 /// [Key in OptionalKeysOf&lt;Entity&gt;]?: Entity[Key] | typeof REMOVE_FIELD;
 /// };
-///
+/// <br /><br />
 /// const update1: UpdateOperation&lt;User&gt; = {
 /// name: 'Alice',
 /// };
-///
+/// <br /><br />
 /// const update2: UpdateOperation&lt;User&gt; = {
 /// name: 'Bob',
 /// luckyNumber: REMOVE_FIELD,
 /// };
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
 type OptionalKeysOf<'Type> = private OptionalKeysOf__ of obj
 
 /// <summary>
 /// Create a type that represents either the value or <c>undefined</c>, while stripping <c>null</c> from the type.
-///
+/// <br /><br />
 /// Use-cases:
 /// - Enforcing the practice of using <c>undefined</c> instead of <c>null</c> as the "absence of value" marker.
 /// - Converting APIs that return <c>null</c> (DOM, JSON, legacy libraries) to use <c>undefined</c> consistently.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Optional} from 'type-fest';
-///
-/// // Adds `undefined` to the type
+/// <br /><br />
+/// // Adds <c>undefined</c> to the type
 /// type MaybeNumber = Optional&lt;number&gt;;
 /// //=&gt; number | undefined
-///
-/// // Strips `null` from the type
+/// <br /><br />
+/// // Strips <c>null</c> from the type
 /// type NullableString = Optional&lt;string | null&gt;;
 /// //=&gt; string | undefined
-///
+/// <br /><br />
 /// type Config = {
 /// name: string;
 /// description: Optional&lt;string&gt;;
 /// //=&gt; string | undefined
 /// };
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Utilities</remarks>
 type Optional<'Value> = 'Value option
 
 /// <summary>
 /// Returns a boolean for whether any of the given elements is <c>true</c>.
-///
+/// <br /><br />
 /// Use-cases:
 /// - Check if at least one condition in a list of booleans is met.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {OrAll} from 'type-fest';
-///
+/// <br /><br />
 /// type FFT = OrAll&lt;[false, false, true]&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type FFF = OrAll&lt;[false, false, false]&gt;;
 /// //=&gt; false
-/// </code>
-///
-/// Note: When <c>boolean</c> is passed as an element, it is distributed into separate cases, and the final result is a union of those cases.
-/// For example, <c>OrAll&lt;[false, boolean]&gt;</c> expands to <c>OrAll&lt;[false, true]&gt; | OrAll&lt;[false, false]&gt;</c>, which simplifies to <c>true | false</c> (i.e., <c>boolean</c>).
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
-/// import type {OrAll} from 'type-fest';
 ///
+/// Note: When `boolean` is passed as an element, it is distributed into separate cases, and the final result is a union of those cases.
+/// For example, `OrAll&lt;[false, boolean]&gt;` expands to `OrAll&lt;[false, true]&gt; | OrAll&lt;[false, false]&gt;`, which simplifies to `true | false` (i.e., `boolean`).
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
+/// import type {OrAll} from 'type-fest';
+/// <br /><br />
 /// type A = OrAll&lt;[false, boolean]&gt;;
 /// //=&gt; boolean
-///
+/// <br /><br />
 /// type B = OrAll&lt;[true, boolean]&gt;;
 /// //=&gt; true
-/// </code>
-///
-/// Note: If <c>never</c> is passed as an element, it is treated as <c>false</c> and the result is computed accordingly.
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
-/// import type {OrAll} from 'type-fest';
 ///
+/// Note: If `never` is passed as an element, it is treated as `false` and the result is computed accordingly.
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
+/// import type {OrAll} from 'type-fest';
+/// <br /><br />
 /// type A = OrAll&lt;[never, never, true]&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type B = OrAll&lt;[never, never, false]&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type C = OrAll&lt;[never, never, never]&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type D = OrAll&lt;[never, never, boolean]&gt;;
 /// //=&gt; boolean
-/// </code>
-///
-/// Note: If <c>any</c> is passed as an element, it is treated as <c>boolean</c> and the result is computed accordingly.
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
-/// import type {OrAll} from 'type-fest';
 ///
+/// Note: If `any` is passed as an element, it is treated as `boolean` and the result is computed accordingly.
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
+/// import type {OrAll} from 'type-fest';
+/// <br /><br />
 /// type A = OrAll&lt;[false, any]&gt;;
 /// //=&gt; boolean
-///
+/// <br /><br />
 /// type B = OrAll&lt;[true, any]&gt;;
 /// //=&gt; true
-/// </code>
+/// <code>
 ///
-/// Note: <c>OrAll&lt;[]&gt;</c> evaluates to <c>false</c> because there are no <c>true</c> elements in an empty tuple. See <a href="https://en.wikipedia.org/wiki/Clause_(logic">Wikipedia: Clause (logic) &gt; Empty clauses</a>#Empty_clauses:~:text=The%20truth%20evaluation%20of%20an%20empty%20disjunctive%20clause%20is%20always%20false.).
-/// </remarks>
+/// Note: `OrAll&lt;[]&gt;` evaluates to `false` because there are no `true` elements in an empty tuple. See [Wikipedia: Clause (logic) &gt; Empty clauses](https://en.wikipedia.org/wiki/Clause_(logic)#Empty_clauses:~:text=The%20truth%20evaluation%20of%20an%20empty%20disjunctive%20clause%20is%20always%20false.).
+/// </code>
+/// </example>
 /// <remarks>@see {@link Or}</remarks>
 /// <remarks>@see {@link AndAll}</remarks>
 [<Erase>]
@@ -5942,80 +6129,83 @@ type OrAll<'T> = private OrAll__ of obj
 
 /// <summary>
 /// Returns a boolean for whether either of two given types is <c>true</c>.
-///
+/// <br /><br />
 /// Use-case: Constructing complex conditional types where at least one condition must be satisfied.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Or} from 'type-fest';
-///
+/// <br /><br />
 /// type TT = Or&lt;true, true&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type TF = Or&lt;true, false&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type FT = Or&lt;false, true&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type FF = Or&lt;false, false&gt;;
 /// //=&gt; false
-/// </code>
-///
-/// Note: When <c>boolean</c> is passed as an argument, it is distributed into separate cases, and the final result is a union of those cases.
-/// For example, <c>Or&lt;false, boolean&gt;</c> expands to <c>Or&lt;false, true&gt; | Or&lt;false, false&gt;</c>, which simplifies to <c>true | false</c> (i.e., <c>boolean</c>).
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
-/// import type {Or} from 'type-fest';
 ///
+/// Note: When `boolean` is passed as an argument, it is distributed into separate cases, and the final result is a union of those cases.
+/// For example, `Or&lt;false, boolean&gt;` expands to `Or&lt;false, true&gt; | Or&lt;false, false&gt;`, which simplifies to `true | false` (i.e., `boolean`).
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
+/// import type {Or} from 'type-fest';
+/// <br /><br />
 /// type A = Or&lt;false, boolean&gt;;
 /// //=&gt; boolean
-///
+/// <br /><br />
 /// type B = Or&lt;boolean, false&gt;;
 /// //=&gt; boolean
-///
+/// <br /><br />
 /// type C = Or&lt;true, boolean&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type D = Or&lt;boolean, true&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type E = Or&lt;boolean, boolean&gt;;
 /// //=&gt; boolean
-/// </code>
-///
-/// Note: If <c>never</c> is passed as an argument, it is treated as <c>false</c> and the result is computed accordingly.
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
-/// import type {Or} from 'type-fest';
 ///
+/// Note: If `never` is passed as an argument, it is treated as `false` and the result is computed accordingly.
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
+/// import type {Or} from 'type-fest';
+/// <br /><br />
 /// type A = Or&lt;true, never&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type B = Or&lt;never, true&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type C = Or&lt;false, never&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type D = Or&lt;never, false&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type E = Or&lt;boolean, never&gt;;
 /// //=&gt; boolean
-///
+/// <br /><br />
 /// type F = Or&lt;never, boolean&gt;;
 /// //=&gt; boolean
-///
+/// <br /><br />
 /// type G = Or&lt;never, never&gt;;
 /// //=&gt; false
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@see {@link OrAll}</remarks>
 /// <remarks>@see {@link And}</remarks>
 /// <remarks>@see {@link Xor}</remarks>
@@ -6023,31 +6213,32 @@ type Or = obj
 
 /// <summary>
 /// Override existing properties of the given type. Similar to <c>Merge</c>, but enforces that the original type has the properties you want to override.
-///
+/// <br /><br />
 /// This is useful when you want to override existing properties with a different type and make sure that these properties really exist in the original.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {OverrideProperties} from 'type-fest';
-///
+/// <br /><br />
 /// type Foo = {
 /// a: string;
 /// b: string;
 /// };
-///
+/// <br /><br />
 /// type Bar = OverrideProperties&lt;Foo, {b: number}&gt;;
 /// //=&gt; {a: string; b: number}
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// type Baz = OverrideProperties&lt;Foo, {c: number}&gt;;
 /// // Error, type '{ c: number; }' does not satisfy the constraint '{ c: never; }'
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// type Fizz = OverrideProperties&lt;Foo, {b: number; c: number}&gt;;
 /// // Error, type '{ b: number; c: number; }' does not satisfy the constraint '{ b: number; c: never; }'
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
 type OverrideProperties<'TOriginal, 'TOverride> = private OverrideProperties__ of obj
@@ -6060,17 +6251,19 @@ type PackageJson =
     inherit JsonObject
     /// <summary>
     /// Defines which package manager is expected to be used when working on the current project. It can set to any of the <a href="https://nodejs.org/api/corepack.html#supported-package-managers">supported package managers</a>, and will ensure that your teams use the exact same package manager versions without having to install anything else than Node.js.
-    ///
+    /// <br /><br />
     /// __This field is currently experimental and needs to be opted-in; check the <a href="https://nodejs.org/api/corepack.html">Corepack</a> page for details about the procedure.__
     /// </summary>
-    /// <remarks>
-    /// @example
-    /// <code lang="json">
+    /// <example>
+    /// <code>
+    /// ```json
     /// {
     /// 	"packageManager": "&lt;package manager name&gt;@&lt;version&gt;"
     /// }
     /// </code>
-    /// </remarks>
+    /// <code>
+    /// </code>
+    /// </example>
     abstract packageManager: string option with get, set
     /// <summary>
     /// The name of the package.
@@ -6119,7 +6312,7 @@ type PackageJson =
     abstract files: string[] option with get, set
     /// <summary>
     /// Resolution algorithm for importing ".js" files from the package's scope.
-    ///
+    /// <br /><br />
     /// <a href="https://nodejs.org/api/esm.html#esm_package_json_type_field">Read more.</a>
     /// </summary>
     abstract ``type``: PackageJson.Type option with get, set
@@ -6129,13 +6322,13 @@ type PackageJson =
     abstract main: string option with get, set
     /// <summary>
     /// Subpath exports to define entry points of the package.
-    ///
+    /// <br /><br />
     /// <a href="https://nodejs.org/api/packages.html#subpath-exports">Read more.</a>
     /// </summary>
     abstract exports: U3<string, U2<string, PackageJson.Exports.Item>[], PackageJson.Exports.Item> option with get, set
     /// <summary>
     /// Subpath imports to define internal package import maps that only apply to import specifiers from within the package itself.
-    ///
+    /// <br /><br />
     /// <a href="https://nodejs.org/api/packages.html#subpath-imports">Read more.</a>
     /// </summary>
     abstract imports: Record<string, U3<string, U2<string, PackageJson.Exports.Item>[], PackageJson.Exports.Item> option> option with get, set
@@ -6228,15 +6421,15 @@ type PackageJson =
     abstract publishConfig: PackageJson.PublishConfig option with get, set
     /// <summary>
     /// Describes and notifies consumers of a package's monetary support information.
-    ///
+    /// <br /><br />
     /// <a href="https://github.com/npm/rfcs/blob/main/implemented/0017-add-funding-support.md">Read more.</a>
     /// </summary>
     abstract funding: U2<string, PackageJson.Funding> option with get, set
     /// <summary>
     /// Used to configure <a href="https://docs.npmjs.com/cli/using-npm/workspaces">npm workspaces</a> / <a href="https://classic.yarnpkg.com/docs/workspaces/">Yarn workspaces</a>.
-    ///
+    /// <br /><br />
     /// Workspaces allow you to manage multiple packages within the same repository in such a way that you only need to run your install command once in order to install all of them in a single pass.
-    ///
+    /// <br /><br />
     /// Please note that the top-level <c>private</c> property of <c>package.json</c> <b>must</b> be set to <c>true</c> in order to use workspaces.
     /// </summary>
     abstract workspaces: U2<string[], PackageJson.Workspaces> option with get, set
@@ -6254,7 +6447,7 @@ type PackageJson =
     abstract browser: U2<string, Record<string, U2<string, bool> option>> option with get, set
     /// <summary>
     /// Denote which files in your project are "pure" and therefore safe for Webpack to prune if unused.
-    ///
+    /// <br /><br />
     /// <a href="https://webpack.js.org/guides/tree-shaking/">Read more.</a>
     /// </summary>
     abstract sideEffects: U2<bool, string[]> option with get, set
@@ -6272,7 +6465,7 @@ type PackageJson =
     abstract typings: string option with get, set
     /// <summary>
     /// If your package only allows one version of a given dependency, and you’d like to enforce the same behavior as <c>yarn install --flat</c> on the command-line, set this to <c>true</c>.
-    ///
+    /// <br /><br />
     /// Note that if your <c>package.json</c> contains <c>"flat": true</c> and other packages depend on yours (e.g. you are building a library rather than an app), those other packages will also need <c>"flat": true</c> in their <c>package.json</c> or be installed with <c>yarn install --flat</c> on the command-line.
     /// </summary>
     abstract flat: bool option with get, set
@@ -6419,13 +6612,13 @@ module PackageJson =
         abstract access: PackageJson.PublishConfig.Access option with get, set
         /// <summary>
         /// The base URL of the npm registry.
-        ///
+        /// <br /><br />
         /// Default: <c>'https://registry.npmjs.org/'</c>
         /// </summary>
         abstract registry: string option with get, set
         /// <summary>
         /// The tag to publish the package under.
-        ///
+        /// <br /><br />
         /// Default: <c>'latest'</c>
         /// </summary>
         abstract tag: string option with get, set
@@ -6444,7 +6637,7 @@ module PackageJson =
         abstract url: string with get, set
         /// <summary>
         /// Relative path to package.json if it is placed in non-root directory (for example if it is part of a monorepo).
-        ///
+        /// <br /><br />
         /// <a href="https://github.com/npm/rfcs/blob/latest/implemented/0010-monorepo-subdirectory-declaration.md">Read more.</a>
         /// </summary>
         abstract directory: string option with get, set
@@ -6580,7 +6773,7 @@ module PackageJson =
         abstract packages: string[] option with get, set
         /// <summary>
         /// Designed to solve the problem of packages which break when their <c>node_modules</c> are moved to the root workspace directory - a process known as hoisting. For these packages, both within your workspace, and also some that have been installed via <c>node_modules</c>, it is important to have a mechanism for preventing the default Yarn workspace behavior. By adding workspace pattern strings here, Yarn will resume non-workspace behavior for any package which matches the defined patterns.
-        ///
+        /// <br /><br />
         /// <a href="https://classic.yarnpkg.com/blog/2018/02/15/nohoist/">Supported</a> by Yarn.
         /// <a href="https://github.com/npm/rfcs/issues/287">Not supported</a> by npm.
         /// </summary>
@@ -6594,49 +6787,50 @@ type PartialDeepOptions =
     /// <summary>
     /// Whether to affect the individual elements of arrays and tuples.
     /// </summary>
-    /// <remarks>@default false</remarks>
+    /// <defaultValue>false</defaultValue>
     abstract recurseIntoArrays: bool option
     /// <summary>
     /// Allows <c>undefined</c> values in non-tuple arrays.
-    ///
+    /// <br /><br />
     /// - When set to <c>true</c>, elements of non-tuple arrays can be <c>undefined</c>.
     /// - When set to <c>false</c>, only explicitly defined elements are allowed in non-tuple arrays, ensuring stricter type checking.
     /// </summary>
-    /// <remarks>@default false</remarks>
-    /// <remarks>
-    /// @example
-    /// You can allow <c>undefined</c> values in non-tuple arrays by passing <c>{recurseIntoArrays: true; allowUndefinedInNonTupleArrays: true}</c> as the second type argument:
-    ///
+    /// <defaultValue>false</defaultValue>
+    /// <example>
     /// <code>
-    /// import type {PartialDeep} from 'type-fest';
+    /// You can allow `undefined` values in non-tuple arrays by passing `{recurseIntoArrays: true; allowUndefinedInNonTupleArrays: true}` as the second type argument:
     ///
+    /// </code>
+    /// import type {PartialDeep} from 'type-fest';
+    /// <br /><br />
     /// type Settings = {
     /// 	languages: string[];
     /// };
-    ///
+    /// <br /><br />
     /// declare const partialSettings: PartialDeep&lt;Settings, {recurseIntoArrays: true; allowUndefinedInNonTupleArrays: true}&gt;;
-    ///
+    /// <br /><br />
     /// partialSettings.languages = [undefined]; // OK
+    /// <code>
     /// </code>
-    /// </remarks>
+    /// </example>
     abstract allowUndefinedInNonTupleArrays: bool option
     [<ParamObject; Emit("$0")>]
     static member Create (?recurseIntoArrays: bool, ?allowUndefinedInNonTupleArrays: bool) : PartialDeepOptions = jsNative
 
 /// <summary>
 /// Create a deeply optional version of another type.
-///
+/// <br /><br />
 /// Use-cases:
 /// - Merging a default settings/config object with another object, the second object would be a deep partial of the default object.
 /// - Mocking and testing complex entities, where populating an entire object with its keys would be redundant in terms of the mock or test.
-///
+/// <br /><br />
 /// Use <a href="https://www.typescriptlang.org/docs/handbook/utility-types.html#partialtype"><c>Partial&lt;T&gt;</c></a> if you only need one level deep.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {PartialDeep} from 'type-fest';
-///
+/// <br /><br />
 /// let settings = {
 /// textEditor: {
 /// fontSize: 14,
@@ -6646,30 +6840,31 @@ type PartialDeepOptions =
 /// autocomplete: false,
 /// autosave: true,
 /// };
-///
+/// <br /><br />
 /// const applySavedSettings = (savedSettings: PartialDeep&lt;typeof settings&gt;) =&gt; (
 /// {...settings, ...savedSettings, textEditor: {...settings.textEditor, ...savedSettings.textEditor}}
 /// );
-///
+/// <br /><br />
 /// settings = applySavedSettings({textEditor: {fontWeight: 500}});
-/// </code>
-///
-/// By default, this does not affect elements in array and tuple types. You can change this by passing <c>{recurseIntoArrays: true}</c> as the second type argument:
-///
 /// <code>
-/// import type {PartialDeep} from 'type-fest';
 ///
+/// By default, this does not affect elements in array and tuple types. You can change this by passing `{recurseIntoArrays: true}` as the second type argument:
+///
+/// </code>
+/// import type {PartialDeep} from 'type-fest';
+/// <br /><br />
 /// type Shape = {
 /// dimensions: [number, number];
 /// };
-///
+/// <br /><br />
 /// const partialShape: PartialDeep&lt;Shape, {recurseIntoArrays: true}&gt; = {
 /// dimensions: [], // OK
 /// };
-///
+/// <br /><br />
 /// partialShape.dimensions = [15]; // OK
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@see {@link PartialDeepOptions}</remarks>
 /// <remarks>@category Object</remarks>
 /// <remarks>@category Array</remarks>
@@ -6684,24 +6879,24 @@ type PartialOnUndefinedDeepOptions =
     /// <summary>
     /// Whether to affect the individual elements of arrays and tuples.
     /// </summary>
-    /// <remarks>@default false</remarks>
+    /// <defaultValue>false</defaultValue>
     abstract recurseIntoArrays: bool option
     [<ParamObject; Emit("$0")>]
     static member Create (?recurseIntoArrays: bool) : PartialOnUndefinedDeepOptions = jsNative
 
 /// <summary>
 /// Create a deep version of another type where all keys accepting <c>undefined</c> type are set to optional.
-///
+/// <br /><br />
 /// This utility type is recursive, transforming at any level deep. By default, it does not affect arrays and tuples items unless you explicitly pass <c>{recurseIntoArrays: true}</c> as the second type argument.
-///
+/// <br /><br />
 /// Use-cases:
 /// - Make all properties of a type that can be undefined optional to not have to specify keys with undefined value.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {PartialOnUndefinedDeep} from 'type-fest';
-///
+/// <br /><br />
 /// type Settings = {
 /// optionA: string;
 /// optionB: number | undefined;
@@ -6710,7 +6905,7 @@ type PartialOnUndefinedDeepOptions =
 /// subOptionB: boolean | undefined;
 /// };
 /// };
-///
+/// <br /><br />
 /// const testSettings: PartialOnUndefinedDeep&lt;Settings&gt; = {
 /// optionA: 'foo',
 /// // 👉 optionB is now optional and can be omitted
@@ -6719,8 +6914,9 @@ type PartialOnUndefinedDeepOptions =
 /// // 👉 subOptionB is now optional as well and can be omitted
 /// },
 /// };
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
 type PartialOnUndefinedDeep<'T, 'Options> = private PartialOnUndefinedDeep__ of obj
@@ -6728,23 +6924,23 @@ type PartialOnUndefinedDeep<'T, 'Options> = private PartialOnUndefinedDeep__ of 
 /// <summary>
 /// Convert a string literal to pascal-case.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {PascalCase} from 'type-fest';
-///
+/// <br /><br />
 /// // Simple
-///
+/// <br /><br />
 /// const someVariable: PascalCase&lt;'foo-bar'&gt; = 'FooBar';
 /// const preserveConsecutiveUppercase: PascalCase&lt;'foo-BAR-baz', {preserveConsecutiveUppercase: true}&gt; = 'FooBARBaz';
 /// const splitOnPunctuation: PascalCase&lt;'foo-bar&gt;&gt;baz', {splitOnPunctuation: true}&gt; = 'FooBarBaz';
-///
+/// <br /><br />
 /// // Advanced
-///
+/// <br /><br />
 /// type PascalCasedProperties&lt;T&gt; = {
 /// [K in keyof T as PascalCase&lt;K&gt;]: T[K]
 /// };
-///
+/// <br /><br />
 /// type RawOptions = {
 /// 'dry-run': boolean;
 /// 'full_family_name': string;
@@ -6753,7 +6949,7 @@ type PartialOnUndefinedDeep<'T, 'Options> = private PartialOnUndefinedDeep__ of 
 /// QUZ_QUX: number;
 /// 'OTHER-FIELD': boolean;
 /// };
-///
+/// <br /><br />
 /// const dbResult: PascalCasedProperties&lt;RawOptions&gt; = {
 /// DryRun: true,
 /// FullFamilyName: 'bar.js',
@@ -6762,8 +6958,9 @@ type PartialOnUndefinedDeep<'T, 'Options> = private PartialOnUndefinedDeep__ of 
 /// QuzQux: 6,
 /// OtherField: false,
 /// };
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
@@ -6771,26 +6968,26 @@ type PascalCase<'Value, 'Options> = private PascalCase__ of obj
 
 /// <summary>
 /// Convert object properties to pascal case recursively.
-///
+/// <br /><br />
 /// This can be useful when, for example, converting some API types from a different style.
 /// </summary>
 /// <remarks>@see {@link PascalCase}</remarks>
 /// <remarks>@see {@link PascalCasedProperties}</remarks>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {PascalCasedPropertiesDeep} from 'type-fest';
-///
+/// <br /><br />
 /// type User = {
 /// userId: number;
 /// userName: string;
 /// };
-///
+/// <br /><br />
 /// type UserWithFriends = {
 /// userInfo: User;
 /// userFriends: User[];
 /// };
-///
+/// <br /><br />
 /// const result: PascalCasedPropertiesDeep&lt;UserWithFriends&gt; = {
 /// UserInfo: {
 /// UserId: 1,
@@ -6807,7 +7004,7 @@ type PascalCase<'Value, 'Options> = private PascalCase__ of obj
 /// },
 /// ],
 /// };
-///
+/// <br /><br />
 /// const preserveConsecutiveUppercase: PascalCasedPropertiesDeep&lt;{fooBAR: {fooBARBiz: [{fooBARBaz: string}]}}, {preserveConsecutiveUppercase: true}&gt; = {
 /// FooBAR: {
 /// FooBARBiz: [{
@@ -6815,15 +7012,16 @@ type PascalCase<'Value, 'Options> = private PascalCase__ of obj
 /// }],
 /// },
 /// };
-///
+/// <br /><br />
 /// const splitOnPunctuation: PascalCasedPropertiesDeep&lt;{'user@info': {'user::id': number; 'user::name': string}}, {splitOnPunctuation: true}&gt; = {
 /// UserInfo: {
 /// UserId: 1,
 /// UserName: 'Tom',
 /// },
 /// };
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
@@ -6832,35 +7030,36 @@ type PascalCasedPropertiesDeep<'Value, 'Options> = private PascalCasedProperties
 
 /// <summary>
 /// Convert top-level object properties to pascal case.
-///
+/// <br /><br />
 /// This can be useful when, for example, converting some API types from a different style.
 /// </summary>
 /// <remarks>@see {@link PascalCase}</remarks>
 /// <remarks>@see {@link PascalCasedPropertiesDeep}</remarks>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {PascalCasedProperties} from 'type-fest';
-///
+/// <br /><br />
 /// type User = {
 /// userId: number;
 /// userName: string;
 /// };
-///
+/// <br /><br />
 /// const result: PascalCasedProperties&lt;User&gt; = {
 /// UserId: 1,
 /// UserName: 'Tom',
 /// };
-///
+/// <br /><br />
 /// const preserveConsecutiveUppercase: PascalCasedProperties&lt;{fooBAR: string}, {preserveConsecutiveUppercase: true}&gt; = {
 /// FooBAR: 'string',
 /// };
-///
+/// <br /><br />
 /// const splitOnPunctuation: PascalCasedProperties&lt;{'foo::bar': string}, {splitOnPunctuation: true}&gt; = {
 /// FooBar: 'string',
 /// };
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
@@ -6876,54 +7075,56 @@ type PathsOptions =
     /// <summary>
     /// The maximum depth to recurse when searching for paths. Range: 0 ~ 10.
     /// </summary>
-    /// <remarks>@default 5</remarks>
+    /// <defaultValue>5</defaultValue>
     abstract maxRecursionDepth: float option with get, set
     /// <summary>
     /// Use bracket notation for array indices and numeric object keys.
     /// </summary>
-    /// <remarks>@default false</remarks>
-    /// <remarks>
-    /// @example
+    /// <defaultValue>false</defaultValue>
+    /// <example>
     /// <code>
+    /// </code>
     /// import type {Paths} from 'type-fest';
-    ///
+    /// <br /><br />
     /// type ArrayExample = {
     /// 	array: ['foo'];
     /// };
-    ///
+    /// <br /><br />
     /// type A = Paths&lt;ArrayExample, {bracketNotation: false}&gt;;
     /// //=&gt; 'array' | 'array.0'
-    ///
+    /// <br /><br />
     /// type B = Paths&lt;ArrayExample, {bracketNotation: true}&gt;;
     /// //=&gt; 'array' | 'array[0]'
-    /// </code>
-    /// </remarks>
-    /// <remarks>
-    /// @example
     /// <code>
+    /// </code>
+    /// </example>
+    /// <example>
+    /// <code>
+    /// </code>
     /// import type {Paths} from 'type-fest';
-    ///
+    /// <br /><br />
     /// type NumberKeyExample = {
     /// 	1: ['foo'];
     /// };
-    ///
+    /// <br /><br />
     /// type A = Paths&lt;NumberKeyExample, {bracketNotation: false}&gt;;
     /// //=&gt; 1 | '1' | '1.0'
-    ///
+    /// <br /><br />
     /// type B = Paths&lt;NumberKeyExample, {bracketNotation: true}&gt;;
     /// //=&gt; '[1]' | '[1][0]'
+    /// <code>
     /// </code>
-    /// </remarks>
+    /// </example>
     abstract bracketNotation: bool option with get, set
     /// <summary>
     /// Only include leaf paths in the output.
     /// </summary>
-    /// <remarks>@default false</remarks>
-    /// <remarks>
-    /// @example
+    /// <defaultValue>false</defaultValue>
+    /// <example>
     /// <code>
+    /// </code>
     /// import type {Paths} from 'type-fest';
-    ///
+    /// <br /><br />
     /// type Post = {
     /// 	id: number;
     /// 	author: {
@@ -6934,43 +7135,45 @@ type PathsOptions =
     /// 		};
     /// 	};
     /// };
-    ///
+    /// <br /><br />
     /// type AllPaths = Paths&lt;Post, {leavesOnly: false}&gt;;
     /// //=&gt; 'id' | 'author' | 'author.id' | 'author.name' | 'author.name.first' | 'author.name.last'
-    ///
+    /// <br /><br />
     /// type LeafPaths = Paths&lt;Post, {leavesOnly: true}&gt;;
     /// //=&gt; 'id' | 'author.id' | 'author.name.first' | 'author.name.last'
-    /// </code>
-    /// </remarks>
-    /// <remarks>
-    /// @example
     /// <code>
+    /// </code>
+    /// </example>
+    /// <example>
+    /// <code>
+    /// </code>
     /// import type {Paths} from 'type-fest';
-    ///
+    /// <br /><br />
     /// type ArrayExample = {
     /// 	array: Array&lt;{foo: string}&gt;;
     /// 	tuple: [string, {bar: string}];
     /// };
-    ///
+    /// <br /><br />
     /// type AllPaths = Paths&lt;ArrayExample, {leavesOnly: false}&gt;;
-    /// //=&gt; 'array' | 'tuple' | `array.${number}` | `array.${number}.foo` | 'tuple.0' | 'tuple.1' | 'tuple.1.bar'
-    ///
+    /// //=&gt; 'array' | 'tuple' | <c>array.${number}</c> | <c>array.${number}.foo</c> | 'tuple.0' | 'tuple.1' | 'tuple.1.bar'
+    /// <br /><br />
     /// type LeafPaths = Paths&lt;ArrayExample, {leavesOnly: true}&gt;;
-    /// //=&gt; `array.${number}.foo` | 'tuple.0' | 'tuple.1.bar'
+    /// //=&gt; <c>array.${number}.foo</c> | 'tuple.0' | 'tuple.1.bar'
+    /// <code>
     /// </code>
-    /// </remarks>
+    /// </example>
     abstract leavesOnly: bool option with get, set
     /// <summary>
     /// Only include paths at the specified depth. By default all paths up to <c>maxRecursionDepth</c> are included.
-    ///
+    /// <br /><br />
     /// Note: Depth starts at <c>0</c> for root properties.
     /// </summary>
-    /// <remarks>@default number</remarks>
-    /// <remarks>
-    /// @example
+    /// <defaultValue>number</defaultValue>
+    /// <example>
     /// <code>
+    /// </code>
     /// import type {Paths} from 'type-fest';
-    ///
+    /// <br /><br />
     /// type Post = {
     /// 	id: number;
     /// 	author: {
@@ -6981,36 +7184,37 @@ type PathsOptions =
     /// 		};
     /// 	};
     /// };
-    ///
+    /// <br /><br />
     /// type DepthZero = Paths&lt;Post, {depth: 0}&gt;;
     /// //=&gt; 'id' | 'author'
-    ///
+    /// <br /><br />
     /// type DepthOne = Paths&lt;Post, {depth: 1}&gt;;
     /// //=&gt; 'author.id' | 'author.name'
-    ///
+    /// <br /><br />
     /// type DepthTwo = Paths&lt;Post, {depth: 2}&gt;;
     /// //=&gt; 'author.name.first' | 'author.name.last'
-    ///
+    /// <br /><br />
     /// type LeavesAtDepthOne = Paths&lt;Post, {leavesOnly: true; depth: 1}&gt;;
     /// //=&gt; 'author.id'
+    /// <code>
     /// </code>
-    /// </remarks>
+    /// </example>
     abstract depth: float option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?maxRecursionDepth: float, ?bracketNotation: bool, ?leavesOnly: bool, ?depth: float) : PathsOptions = jsNative
 
 /// <summary>
 /// Generate a union of all possible paths to properties in the given object.
-///
+/// <br /><br />
 /// It also works with arrays.
-///
+/// <br /><br />
 /// Use-case: You want a type-safe way to access deeply nested properties in an object.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Paths} from 'type-fest';
-///
+/// <br /><br />
 /// type Project = {
 /// filename: string;
 /// listA: string[];
@@ -7021,25 +7225,26 @@ type PathsOptions =
 /// };
 /// };
 /// };
-///
+/// <br /><br />
 /// type ProjectPaths = Paths&lt;Project&gt;;
-/// //=&gt; 'filename' | 'listA' | 'listB' | 'folder' | `listA.${number}` | 'listB.0' | 'listB.0.filename' | 'folder.subfolder' | 'folder.subfolder.filename'
-///
+/// //=&gt; 'filename' | 'listA' | 'listB' | 'folder' | <c>listA.${number}</c> | 'listB.0' | 'listB.0.filename' | 'folder.subfolder' | 'folder.subfolder.filename'
+/// <br /><br />
 /// declare function open&lt;Path extends ProjectPaths&gt;(path: Path): void;
-///
+/// <br /><br />
 /// open('filename'); // Pass
 /// open('folder.subfolder'); // Pass
 /// open('folder.subfolder.filename'); // Pass
 /// // @ts-expect-error
 /// open('foo'); // TypeError
-///
+/// <br /><br />
 /// // Also works with arrays
 /// open('listA.1'); // Pass
 /// open('listB.0'); // Pass
 /// // @ts-expect-error
 /// open('listB.1'); // TypeError. Because listB only has one element.
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 /// <remarks>@category Array</remarks>
 [<Erase>]
@@ -7047,18 +7252,18 @@ type Paths<'T, 'Options> = private Paths__ of obj
 
 /// <summary>
 /// Pick properties from a deeply-nested object.
-///
+/// <br /><br />
 /// It supports recursing into arrays.
-///
+/// <br /><br />
 /// Use-case: Distill complex objects down to the components you need to target.
-///
+/// <br /><br />
 /// Use <a href="https://www.typescriptlang.org/docs/handbook/utility-types.html#picktype-keys"><c>Pick&lt;T&gt;</c></a> if you only need one level deep.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {PickDeep, PartialDeep} from 'type-fest';
-///
+/// <br /><br />
 /// type Configuration = {
 /// userConfig: {
 /// name: string;
@@ -7076,14 +7281,14 @@ type Paths<'T, 'Options> = private Paths__ of obj
 /// };
 /// otherConfig: any;
 /// };
-///
+/// <br /><br />
 /// type NameConfig = PickDeep&lt;Configuration, 'userConfig.name'&gt;;
 /// //=&gt; {userConfig: {name: string}}
-///
+/// <br /><br />
 /// // Supports optional properties
 /// type User = PickDeep&lt;PartialDeep&lt;Configuration&gt;, 'userConfig.name' | 'userConfig.age'&gt;;
 /// //=&gt; {userConfig?: {name?: string; age?: number}}
-///
+/// <br /><br />
 /// // Supports array
 /// type AddressConfig = PickDeep&lt;Configuration, 'userConfig.address.0'&gt;;
 /// //=&gt; {
@@ -7094,12 +7299,13 @@ type Paths<'T, 'Options> = private Paths__ of obj
 /// // 		}];
 /// // 	};
 /// // }
-///
+/// <br /><br />
 /// // Supports recurse into array
 /// type Street = PickDeep&lt;Configuration, 'userConfig.address.1.street2'&gt;;
 /// //=&gt; {userConfig: {address: [unknown, {street2: string}]}}
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 /// <remarks>@category Array</remarks>
 [<Erase>]
@@ -7107,47 +7313,48 @@ type PickDeep<'T, 'PathUnion> = private PickDeep__ of obj
 
 /// <summary>
 /// Pick only index signatures from the given object type, leaving out all explicitly defined properties.
-///
+/// <br /><br />
 /// This is the counterpart of <c>OmitIndexSignature</c>.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {PickIndexSignature} from 'type-fest';
-///
+/// <br /><br />
 /// declare const symbolKey: unique symbol;
-///
+/// <br /><br />
 /// type Example = {
 /// // These index signatures will remain.
 /// [x: string]: unknown;
 /// [x: number]: unknown;
 /// [x: symbol]: unknown;
-/// [x: `head-${string}`]: string;
-/// [x: `${string}-tail`]: string;
-/// [x: `head-${string}-tail`]: string;
-/// [x: `${bigint}`]: string;
-/// [x: `embedded-${number}`]: string;
-///
+/// [x: <c>head-${string}</c>]: string;
+/// [x: <c>${string}-tail</c>]: string;
+/// [x: <c>head-${string}-tail</c>]: string;
+/// [x: <c>${bigint}</c>]: string;
+/// [x: <c>embedded-${number}</c>]: string;
+/// <br /><br />
 /// // These explicitly defined keys will be removed.
 /// ['kebab-case-key']: string;
 /// [symbolKey]: string;
 /// foo: 'bar';
 /// qux?: 'baz';
 /// };
-///
+/// <br /><br />
 /// type ExampleIndexSignature = PickIndexSignature&lt;Example&gt;;
 /// // {
 /// // 	[x: string]: unknown;
 /// // 	[x: number]: unknown;
 /// // 	[x: symbol]: unknown;
-/// // 	[x: `head-${string}`]: string;
-/// // 	[x: `${string}-tail`]: string;
-/// // 	[x: `head-${string}-tail`]: string;
-/// // 	[x: `${bigint}`]: string;
-/// // 	[x: `embedded-${number}`]: string;
+/// // 	[x: <c>head-${string}</c>]: string;
+/// // 	[x: <c>${string}-tail</c>]: string;
+/// // 	[x: <c>head-${string}-tail</c>]: string;
+/// // 	[x: <c>${bigint}</c>]: string;
+/// // 	[x: <c>embedded-${number}</c>]: string;
 /// // }
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@see {@link OmitIndexSignature}</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
@@ -7161,97 +7368,99 @@ type Primitive = obj option
 
 /// <summary>
 /// Create a type that represents either the value or the value wrapped in <c>PromiseLike</c>.
-///
+/// <br /><br />
 /// Use-cases:
 /// - A function accepts a callback that may either return a value synchronously or may return a promised value.
 /// - This type could be the return type of <c>Promise#then()</c>, <c>Promise#catch()</c>, and <c>Promise#finally()</c> callbacks.
-///
+/// <br /><br />
 /// Please upvote <a href="https://github.com/microsoft/TypeScript/issues/31394">this issue</a> if you want to have this type as a built-in in TypeScript.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Promisable} from 'type-fest';
-///
+/// <br /><br />
 /// async function logger(getLogEntry: () =&gt; Promisable&lt;string&gt;): Promise&lt;void&gt; {
 /// const entry = await getLogEntry();
 /// console.log(entry);
 /// }
-///
+/// <br /><br />
 /// await logger(() =&gt; 'foo');
 /// await logger(() =&gt; Promise.resolve('bar'));
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Async</remarks>
 type Promisable<'T> = U2<'T, JS.Promise<'T>>
 
 /// <summary>
 /// Create a deeply immutable version of another type.
-///
+/// <br /><br />
 /// This is useful when a deeply nested structure needs to be exposed as completely immutable, for example, an imported JSON module or when receiving an API response that is passed around.
-///
+/// <br /><br />
 /// Please upvote <a href="https://github.com/microsoft/TypeScript/issues/13923">this issue</a> if you want to have this type as a built-in in TypeScript.
-///
+/// <br /><br />
 /// Use <a href="https://www.typescriptlang.org/docs/handbook/utility-types.html#readonlytype"><c>Readonly&lt;T&gt;</c></a> if you only need one level deep.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {ReadonlyDeep} from 'type-fest';
-///
+/// <br /><br />
 /// declare const foo: {
 /// a: string;
 /// b: {c: number};
 /// d: Array&lt;{e: number}&gt;;
 /// };
-///
+/// <br /><br />
 /// foo.a = 'bar'; // Allowed
-///
+/// <br /><br />
 /// foo.b = {c: 3}; // Allowed
-///
+/// <br /><br />
 /// foo.b.c = 4; // Allowed
-///
+/// <br /><br />
 /// foo.d = [{e: 5}]; // Allowed
-///
+/// <br /><br />
 /// foo.d.push({e: 6}); // Allowed
-///
+/// <br /><br />
 /// const last = foo.d.at(-1);
 /// if (last) {
 /// last.e = 7; // Allowed
 /// }
-///
+/// <br /><br />
 /// declare const readonlyFoo: ReadonlyDeep&lt;typeof foo&gt;;
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// readonlyFoo.a = 'bar';
 /// // Error: Cannot assign to 'a' because it is a read-only property.
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// readonlyFoo.b = {c: 3};
 /// // Error: Cannot assign to 'b' because it is a read-only property.
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// readonlyFoo.b.c = 4;
 /// // Error: Cannot assign to 'c' because it is a read-only property.
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// readonlyFoo.d = [{e: 5}];
 /// // Error: Cannot assign to 'd' because it is a read-only property.
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// readonlyFoo.d.push({e: 6});
 /// // Error: Property 'push' does not exist on type 'ReadonlyArray&lt;{readonly e: number}&gt;'.
-///
+/// <br /><br />
 /// const readonlyLast = readonlyFoo.d.at(-1);
 /// if (readonlyLast) {
 /// // @ts-expect-error
 /// readonlyLast.e = 8;
 /// // Error: Cannot assign to 'e' because it is a read-only property.
 /// }
-/// </code>
+/// <code>
 ///
-/// Note that types containing overloaded functions are not made deeply readonly due to a <a href="https://github.com/microsoft/TypeScript/issues/29732">TypeScript limitation</a>.
-/// </remarks>
+/// Note that types containing overloaded functions are not made deeply readonly due to a [TypeScript limitation](https://github.com/microsoft/TypeScript/issues/29732).
+/// </code>
+/// </example>
 /// <remarks>@category Object</remarks>
 /// <remarks>@category Array</remarks>
 /// <remarks>@category Set</remarks>
@@ -7261,58 +7470,60 @@ type ReadonlyDeep<'T> = private ReadonlyDeep__ of obj
 
 /// <summary>
 /// Extract all readonly keys from the given type.
-///
+/// <br /><br />
 /// This is useful when you want to create a new type that contains readonly keys only.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {ReadonlyKeysOf} from 'type-fest';
-///
+/// <br /><br />
 /// type User = {
 /// name: string;
 /// surname: string;
-///
+/// <br /><br />
 /// readonly id: number;
 /// };
-///
+/// <br /><br />
 /// type UpdateResponse&lt;Entity extends object&gt; = Pick&lt;Entity, ReadonlyKeysOf&lt;Entity&gt;&gt;;
-///
+/// <br /><br />
 /// const update1: UpdateResponse&lt;User&gt; = {
 /// id: 123,
 /// };
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
 type ReadonlyKeysOf<'Type> = private ReadonlyKeysOf__ of obj
 
 /// <summary>
 /// Create a type that represents a read-only tuple of the given type and length.
-///
+/// <br /><br />
 /// Use-cases:
 /// - Declaring fixed-length tuples with a large number of items.
 /// - Creating a range union (for example, <c>0 | 1 | 2 | 3 | 4</c> from the keys of such a type) without having to resort to recursive types.
 /// - Creating a tuple of coordinates with a static length, for example, length of 3 for a 3D vector.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {ReadonlyTuple} from 'type-fest';
-///
+/// <br /><br />
 /// type FencingTeam = ReadonlyTuple&lt;string, 3&gt;;
-///
+/// <br /><br />
 /// const guestFencingTeam: FencingTeam = ['Josh', 'Michael', 'Robert'];
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// const homeFencingTeam: FencingTeam = ['George', 'John'];
 /// // Error: Type '[string, string]' is not assignable to type 'readonly [string, string, string]'.
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// guestFencingTeam.push('Sam');
 /// // Error: Property 'push' does not exist on type 'readonly [string, string, string]'.
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@deprecated This type will be removed in the next major version. Use the built-in <c>Readonly</c> type in combination with the {@link TupleOf} type instead, like <c>Readonly&lt;TupleOf&lt;Length, Element&gt;&gt;</c>.</remarks>
 /// <remarks>@category Utilities</remarks>
 type ReadonlyTuple = obj[]
@@ -7322,57 +7533,59 @@ type ReadonlyTuple = obj[]
 type RemovePrefixOptions =
     /// <summary>
     /// When enabled, instantiations with non-literal prefixes (e.g., <c>string</c>, <c>Uppercase&lt;string&gt;</c>, <c> `on${string}` </c>) simply return <c>string</c>, since their precise structure cannot be statically determined.
-    ///
+    /// <br /><br />
     /// Note: Disabling this option can produce misleading results that might not reflect the actual runtime behavior.
     /// For example, <c>RemovePrefix&lt;'on-change', `${string}-`, {strict: false}&gt;</c> returns <c>'change'</c>, but at runtime, prefix could be <c>'handle-'</c> (which satisfies <c> `${string}-` </c>) and removing <c>'handle-'</c> from <c>'on-change'</c> would not result in <c>'change'</c>.
-    ///
+    /// <br /><br />
     /// So, it is recommended to not disable this option unless you are aware of the implications.
     /// </summary>
-    /// <remarks>@default true</remarks>
-    /// <remarks>
-    /// @example
+    /// <defaultValue>true</defaultValue>
+    /// <example>
     /// <code>
+    /// </code>
     /// import type {RemovePrefix} from 'type-fest';
-    ///
-    /// type A = RemovePrefix&lt;'on-change', `${string}-`, {strict: true}&gt;;
+    /// <br /><br />
+    /// type A = RemovePrefix&lt;'on-change', <c>${string}-</c>, {strict: true}&gt;;
     /// //=&gt; string
-    ///
-    /// type B = RemovePrefix&lt;'on-change', `${string}-`, {strict: false}&gt;;
+    /// <br /><br />
+    /// type B = RemovePrefix&lt;'on-change', <c>${string}-</c>, {strict: false}&gt;;
     /// //=&gt; 'change'
-    ///
+    /// <br /><br />
     /// type C = RemovePrefix&lt;'on-change', string, {strict: true}&gt;;
     /// //=&gt; string
-    ///
+    /// <br /><br />
     /// type D = RemovePrefix&lt;'on-change', string, {strict: false}&gt;;
     /// //=&gt; 'n-change'
-    ///
-    /// type E = RemovePrefix&lt;`${string}/${number}`, `${string}/`, {strict: true}&gt;;
+    /// <br /><br />
+    /// type E = RemovePrefix&lt;<c>${string}/${number}</c>, <c>${string}/</c>, {strict: true}&gt;;
     /// //=&gt; string
-    ///
-    /// type F = RemovePrefix&lt;`${string}/${number}`, `${string}/`, {strict: false}&gt;;
-    /// //=&gt; `${number}`
-    /// </code>
-    ///
-    /// Note: This option has no effect when only the input string type is non-literal. For example, <c>RemovePrefix&lt;`on-${string}`, 'on-'&gt;</c> will always return <c>string</c>.
-    /// </remarks>
-    /// <remarks>
-    /// @example
+    /// <br /><br />
+    /// type F = RemovePrefix&lt;<c>${string}/${number}</c>, <c>${string}/</c>, {strict: false}&gt;;
+    /// //=&gt; <c>${number}</c>
     /// <code>
-    /// import type {RemovePrefix} from 'type-fest';
     ///
-    /// type A = RemovePrefix&lt;`on-${string}`, 'on-', {strict: true}&gt;;
-    /// //=&gt; string
-    ///
-    /// type B = RemovePrefix&lt;`on-${string}`, 'on-', {strict: false}&gt;;
-    /// //=&gt; string
-    ///
-    /// type C = RemovePrefix&lt;`id-${number}`, 'id-', {strict: true}&gt;;
-    /// //=&gt; `${number}`
-    ///
-    /// type D = RemovePrefix&lt;`id-${number}`, 'id-', {strict: false}&gt;;
-    /// //=&gt; `${number}`
+    /// Note: This option has no effect when only the input string type is non-literal. For example, ``RemovePrefix&lt;`on-${string}`, 'on-'&gt;`` will always return `string`.
     /// </code>
-    /// </remarks>
+    /// </example>
+    /// <example>
+    /// <code>
+    /// </code>
+    /// import type {RemovePrefix} from 'type-fest';
+    /// <br /><br />
+    /// type A = RemovePrefix&lt;<c>on-${string}</c>, 'on-', {strict: true}&gt;;
+    /// //=&gt; string
+    /// <br /><br />
+    /// type B = RemovePrefix&lt;<c>on-${string}</c>, 'on-', {strict: false}&gt;;
+    /// //=&gt; string
+    /// <br /><br />
+    /// type C = RemovePrefix&lt;<c>id-${number}</c>, 'id-', {strict: true}&gt;;
+    /// //=&gt; <c>${number}</c>
+    /// <br /><br />
+    /// type D = RemovePrefix&lt;<c>id-${number}</c>, 'id-', {strict: false}&gt;;
+    /// //=&gt; <c>${number}</c>
+    /// <code>
+    /// </code>
+    /// </example>
     abstract strict: bool option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?strict: bool) : RemovePrefixOptions = jsNative
@@ -7380,24 +7593,25 @@ type RemovePrefixOptions =
 /// <summary>
 /// Remove the specified prefix from the start of a string.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {RemovePrefix} from 'type-fest';
-///
+/// <br /><br />
 /// type A = RemovePrefix&lt;'on-change', 'on-'&gt;;
 /// //=&gt; 'change'
-///
+/// <br /><br />
 /// type B = RemovePrefix&lt;'sm:flex' | 'sm:p-4' | 'sm:gap-2', 'sm:'&gt;;
 /// //=&gt; 'flex' | 'p-4' | 'gap-2'
-///
+/// <br /><br />
 /// type C = RemovePrefix&lt;'on-change', 'off-'&gt;;
 /// //=&gt; 'on-change'
-///
-/// type D = RemovePrefix&lt;`handle${Capitalize&lt;string&gt;}`, 'handle'&gt;;
+/// <br /><br />
+/// type D = RemovePrefix&lt;<c>handle${Capitalize&lt;string&gt;}</c>, 'handle'&gt;;
 /// //=&gt; Capitalize&lt;string&gt;
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@see {@link RemovePrefixOptions}</remarks>
 /// <remarks>@category String</remarks>
 /// <remarks>@category Template literal</remarks>
@@ -7409,57 +7623,59 @@ type RemovePrefix<'S, 'Prefix, 'Options> = private RemovePrefix__ of obj
 type RemoveSuffixOptions =
     /// <summary>
     /// When enabled, instantiations with non-literal suffixes (e.g., <c>string</c>, <c>Uppercase&lt;string&gt;</c>, <c> `.${string}` </c>) simply return <c>string</c>, since their precise structure cannot be statically determined.
-    ///
+    /// <br /><br />
     /// Note: Disabling this option can produce misleading results that might not reflect the actual runtime behavior.
     /// For example, <c>RemoveSuffix&lt;'report.pdf', `.${string}`, {strict: false}&gt;</c> returns <c>'report'</c>, but at runtime, suffix could be <c>'.txt'</c> (which satisfies <c> `.${string}` </c>) and removing <c>'.txt'</c> from <c>'report.pdf'</c> would not result in <c>'report'</c>.
-    ///
+    /// <br /><br />
     /// So, it is recommended to not disable this option unless you are aware of the implications.
     /// </summary>
-    /// <remarks>@default true</remarks>
-    /// <remarks>
-    /// @example
+    /// <defaultValue>true</defaultValue>
+    /// <example>
     /// <code>
+    /// </code>
     /// import type {RemoveSuffix} from 'type-fest';
-    ///
-    /// type A = RemoveSuffix&lt;'report.pdf', `.${string}`, {strict: true}&gt;;
+    /// <br /><br />
+    /// type A = RemoveSuffix&lt;'report.pdf', <c>.${string}</c>, {strict: true}&gt;;
     /// //=&gt; string
-    ///
-    /// type B = RemoveSuffix&lt;'report.pdf', `.${string}`, {strict: false}&gt;;
+    /// <br /><br />
+    /// type B = RemoveSuffix&lt;'report.pdf', <c>.${string}</c>, {strict: false}&gt;;
     /// //=&gt; 'report'
-    ///
+    /// <br /><br />
     /// type C = RemoveSuffix&lt;'on-change', string, {strict: true}&gt;;
     /// //=&gt; string
-    ///
+    /// <br /><br />
     /// type D = RemoveSuffix&lt;'on-change', string, {strict: false}&gt;;
     /// //=&gt; 'o'
-    ///
-    /// type E = RemoveSuffix&lt;`${number}/${string}`, `/${string}`, {strict: true}&gt;;
+    /// <br /><br />
+    /// type E = RemoveSuffix&lt;<c>${number}/${string}</c>, <c>/${string}</c>, {strict: true}&gt;;
     /// //=&gt; string
-    ///
-    /// type F = RemoveSuffix&lt;`${number}/${string}`, `/${string}`, {strict: false}&gt;;
-    /// //=&gt; `${number}`
-    /// </code>
-    ///
-    /// Note: This option has no effect when only the input string type is non-literal. For example, <c>RemoveSuffix&lt;`${string}.pdf`, '.pdf'&gt;</c> will always return <c>string</c>.
-    /// </remarks>
-    /// <remarks>
-    /// @example
+    /// <br /><br />
+    /// type F = RemoveSuffix&lt;<c>${number}/${string}</c>, <c>/${string}</c>, {strict: false}&gt;;
+    /// //=&gt; <c>${number}</c>
     /// <code>
-    /// import type {RemoveSuffix} from 'type-fest';
     ///
-    /// type A = RemoveSuffix&lt;`${string}.pdf`, '.pdf', {strict: true}&gt;;
-    /// //=&gt; string
-    ///
-    /// type B = RemoveSuffix&lt;`${string}.pdf`, '.pdf', {strict: false}&gt;;
-    /// //=&gt; string
-    ///
-    /// type C = RemoveSuffix&lt;`${number}px`, 'px', {strict: true}&gt;;
-    /// //=&gt; `${number}`
-    ///
-    /// type D = RemoveSuffix&lt;`${number}px`, 'px', {strict: false}&gt;;
-    /// //=&gt; `${number}`
+    /// Note: This option has no effect when only the input string type is non-literal. For example, ``RemoveSuffix&lt;`${string}.pdf`, '.pdf'&gt;`` will always return `string`.
     /// </code>
-    /// </remarks>
+    /// </example>
+    /// <example>
+    /// <code>
+    /// </code>
+    /// import type {RemoveSuffix} from 'type-fest';
+    /// <br /><br />
+    /// type A = RemoveSuffix&lt;<c>${string}.pdf</c>, '.pdf', {strict: true}&gt;;
+    /// //=&gt; string
+    /// <br /><br />
+    /// type B = RemoveSuffix&lt;<c>${string}.pdf</c>, '.pdf', {strict: false}&gt;;
+    /// //=&gt; string
+    /// <br /><br />
+    /// type C = RemoveSuffix&lt;<c>${number}px</c>, 'px', {strict: true}&gt;;
+    /// //=&gt; <c>${number}</c>
+    /// <br /><br />
+    /// type D = RemoveSuffix&lt;<c>${number}px</c>, 'px', {strict: false}&gt;;
+    /// //=&gt; <c>${number}</c>
+    /// <code>
+    /// </code>
+    /// </example>
     abstract strict: bool option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?strict: bool) : RemoveSuffixOptions = jsNative
@@ -7467,24 +7683,25 @@ type RemoveSuffixOptions =
 /// <summary>
 /// Remove the specified suffix from the end of a string.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {RemoveSuffix} from 'type-fest';
-///
+/// <br /><br />
 /// type A = RemoveSuffix&lt;'report.pdf', '.pdf'&gt;;
 /// //=&gt; 'report'
-///
+/// <br /><br />
 /// type B = RemoveSuffix&lt;'bg-blue-500' | 'text-green-500' | 'border-slate-500', '-500'&gt;;
 /// //=&gt; 'bg-blue' | 'border-slate' | 'text-green'
-///
+/// <br /><br />
 /// type C = RemoveSuffix&lt;'report.pdf', '.txt'&gt;;
 /// //=&gt; 'report.pdf'
-///
-/// type D = RemoveSuffix&lt;`api/${string}/analytics`, '/analytics'&gt;;
-/// //=&gt; `api/${string}`
+/// <br /><br />
+/// type D = RemoveSuffix&lt;<c>api/${string}/analytics</c>, '/analytics'&gt;;
+/// //=&gt; <c>api/${string}</c>
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@see {@link RemoveSuffixOptions}</remarks>
 /// <remarks>@category String</remarks>
 /// <remarks>@category Template literal</remarks>
@@ -7494,107 +7711,114 @@ type RemoveSuffix<'S, 'Suffix, 'Options> = private RemoveSuffix__ of obj
 /// <summary>
 /// Rename keys in an object type according to a map of old-to-new names.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {RenameKeys} from 'type-fest';
-///
+/// <br /><br />
 /// type User = {
 /// id: string;
 /// firstName: string;
 /// createdAt: Date;
 /// };
-///
+/// <br /><br />
 /// type Renamed = RenameKeys&lt;User, {firstName: 'first_name'; createdAt: 'created_at'}&gt;;
 /// //=&gt; {id: string; first_name: string; created_at: Date}
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// import type {RenameKeys} from 'type-fest';
-///
+/// <br /><br />
 /// type SearchInput = {
 /// textQuery: string;
 /// voiceQuery: Blob;
 /// imageQuery: File;
 /// };
-///
+/// <br /><br />
 /// type Normalized = RenameKeys&lt;SearchInput, {textQuery: 'query'; voiceQuery: 'query'; imageQuery: 'query'}&gt;;
 /// //=&gt; {query: string | Blob | File}
-/// </code>
-///
-/// Note: When multiple source keys map to the same target, the target's value type is the union of the contributors' value types. The target is optional only when every contributor is optional, and is <c>readonly</c> when any contributor is <c>readonly</c>. With <c>exactOptionalPropertyTypes</c> disabled, the value type of a mixed-optionality merge also includes <c>undefined</c>.
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
-/// import type {RenameKeys} from 'type-fest';
 ///
+/// Note: When multiple source keys map to the same target, the target's value type is the union of the contributors' value types. The target is optional only when every contributor is optional, and is `readonly` when any contributor is `readonly`. With `exactOptionalPropertyTypes` disabled, the value type of a mixed-optionality merge also includes `undefined`.
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
+/// import type {RenameKeys} from 'type-fest';
+/// <br /><br />
 /// // All colliding keys are required, so the target is required.
 /// type A = RenameKeys&lt;{a: 1; b: 2}, {a: 'x'; b: 'x'}&gt;;
 /// //=&gt; {x: 1 | 2}
-///
+/// <br /><br />
 /// // All colliding keys are optional, so the target is optional.
 /// type B = RenameKeys&lt;{a?: 1; b?: 2}, {a: 'x'; b: 'x'}&gt;;
 /// //=&gt; {x?: 1 | 2}
-///
+/// <br /><br />
 /// // One of the colliding keys is required, so the target is required.
 /// type C = RenameKeys&lt;{a: 1; b?: 2}, {a: 'x'; b: 'x'}&gt;;
 /// //=&gt; {x: 1 | 2}
-///
-/// // One of the colliding keys is `readonly`, so the target is `readonly`.
+/// <br /><br />
+/// // One of the colliding keys is <c>readonly</c>, so the target is <c>readonly</c>.
 /// type D = RenameKeys&lt;{readonly a: 1; b: 2}, {a: 'x'; b: 'x'}&gt;;
 /// //=&gt; {readonly x: 1 | 2}
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// // @exactOptionalPropertyTypes: false
 /// import type {RenameKeys} from 'type-fest';
-///
-/// // With `exactOptionalPropertyTypes` disabled, a mixed-optionality merge includes `undefined`.
+/// <br /><br />
+/// // With <c>exactOptionalPropertyTypes</c> disabled, a mixed-optionality merge includes <c>undefined</c>.
 /// type E = RenameKeys&lt;{a?: 1; b: 2}, {a: 'x'; b: 'x'}&gt;;
 /// //=&gt; {x: 1 | 2 | undefined}
-/// </code>
+/// <code>
 ///
 /// Note: A union target distributes, producing one output key per member.
-/// </remarks>
-/// <remarks>
-/// @example
+/// </code>
+/// </example>
+/// <example>
 /// <code>
+/// </code>
 /// import type {RenameKeys} from 'type-fest';
-///
+/// <br /><br />
 /// type A = RenameKeys&lt;{a: string}, {a: 'b' | 'c'}&gt;;
 /// //=&gt; {b: string; c: string}
-/// </code>
-///
-/// Note: An entry whose value is not a literal <c>PropertyKey</c> (such as <c>string</c>) is also ignored, leaving that key's name unchanged.
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
-/// import type {RenameKeys} from 'type-fest';
 ///
+/// Note: An entry whose value is not a literal `PropertyKey` (such as `string`) is also ignored, leaving that key's name unchanged.
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
+/// import type {RenameKeys} from 'type-fest';
+/// <br /><br />
 /// type A = RenameKeys&lt;{a: 1}, {a: string}&gt;;
 /// //=&gt; {a: 1}
-///
+/// <br /><br />
 /// type B = RenameKeys&lt;{a: 1; b: 2}, {a: 'x'; b: symbol}&gt;;
 /// //=&gt; {x: 1; b: 2}
-/// </code>
+/// <code>
 ///
 /// Note: A rename map entry whose key is not a property of the source type is ignored.
-/// </remarks>
-/// <remarks>
-/// @example
+/// </code>
+/// </example>
+/// <example>
 /// <code>
+/// </code>
 /// import type {RenameKeys} from 'type-fest';
-///
+/// <br /><br />
 /// type A = RenameKeys&lt;{a: 1; b: 2}, {a: 'x'; c: 'y'}&gt;;
 /// //=&gt; {x: 1; b: 2}
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
 type RenameKeys<'BaseType, 'RenameMap> = private RenameKeys__ of obj
@@ -7607,17 +7831,17 @@ type ReplaceOptions =
 
 /// <summary>
 /// Represents a string with some or all matches replaced by a replacement.
-///
+/// <br /><br />
 /// Use-case:
 /// - <c>kebab-case-path</c> to <c>dotted.path.notation</c>
 /// - Changing date/time format: <c>01-08-2042</c> → <c>01/08/2042</c>
 /// - Manipulation of type properties, for example, removal of prefixes
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Replace} from 'type-fest';
-///
+/// <br /><br />
 /// declare function replace&lt;
 /// Input extends string,
 /// Search extends string,
@@ -7627,7 +7851,7 @@ type ReplaceOptions =
 /// search: Search,
 /// replacement: Replacement,
 /// ): Replace&lt;Input, Search, Replacement&gt;;
-///
+/// <br /><br />
 /// declare function replaceAll&lt;
 /// Input extends string,
 /// Search extends string,
@@ -7637,25 +7861,26 @@ type ReplaceOptions =
 /// search: Search,
 /// replacement: Replacement,
 /// ): Replace&lt;Input, Search, Replacement, {all: true}&gt;;
-///
-/// // The return type is the exact string literal, not just `string`.
-///
+/// <br /><br />
+/// // The return type is the exact string literal, not just <c>string</c>.
+/// <br /><br />
 /// replace('hello ?', '?', '🦄');
 /// //=&gt; 'hello 🦄'
-///
+/// <br /><br />
 /// replace('hello ??', '?', '❓');
 /// //=&gt; 'hello ❓?'
-///
+/// <br /><br />
 /// replaceAll('10:42:00', ':', '-');
 /// //=&gt; '10-42-00'
-///
+/// <br /><br />
 /// replaceAll('__userName__', '__', '');
 /// //=&gt; 'userName'
-///
+/// <br /><br />
 /// replaceAll('My Cool Title', ' ', '');
 /// //=&gt; 'MyCoolTitle'
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category String</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
@@ -7663,34 +7888,35 @@ type Replace<'Input, 'Search, 'Replacement, 'Options> = private Replace__ of obj
 
 /// <summary>
 /// Create a type that requires all of the given keys or none of the given keys, while keeping the remaining keys as is.
-///
+/// <br /><br />
 /// Use-cases:
 /// - Creating interfaces for components with mutually-inclusive keys.
-///
+/// <br /><br />
 /// The caveat with <c>RequireAllOrNone</c> is that TypeScript doesn't always know at compile time every key that will exist at runtime. Therefore <c>RequireAllOrNone</c> can't do anything to prevent extra keys it doesn't know about.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {RequireAllOrNone} from 'type-fest';
-///
+/// <br /><br />
 /// type Responder = {
 /// text?: () =&gt; string;
 /// json?: () =&gt; string;
 /// secure: boolean;
 /// };
-///
+/// <br /><br />
 /// const responder1: RequireAllOrNone&lt;Responder, 'text' | 'json'&gt; = {
 /// secure: true,
 /// };
-///
+/// <br /><br />
 /// const responder2: RequireAllOrNone&lt;Responder, 'text' | 'json'&gt; = {
 /// text: () =&gt; '{"message": "hi"}',
 /// json: () =&gt; '{"message": "ok"}',
 /// secure: true,
 /// };
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
 type RequireAllOrNone<'ObjectType, 'KeysType> = private RequireAllOrNone__ of obj
@@ -7698,55 +7924,57 @@ type RequireAllOrNone<'ObjectType, 'KeysType> = private RequireAllOrNone__ of ob
 /// <summary>
 /// Create a type that requires at least one of the given keys, while keeping the remaining keys as is.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {RequireAtLeastOne} from 'type-fest';
-///
+/// <br /><br />
 /// type Responder = {
 /// text?: () =&gt; string;
 /// json?: () =&gt; string;
 /// secure?: boolean;
 /// };
-///
+/// <br /><br />
 /// const responder: RequireAtLeastOne&lt;Responder, 'text' | 'json'&gt; = {
 /// json: () =&gt; '{"message": "ok"}',
 /// secure: true,
 /// };
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
 type RequireAtLeastOne<'ObjectType, 'KeysType> = private RequireAtLeastOne__ of obj
 
 /// <summary>
 /// Create a type that requires exactly one of the given keys and disallows more, while keeping the remaining keys as is.
-///
+/// <br /><br />
 /// Use-cases:
 /// - Creating interfaces for components that only need one of the keys to display properly.
 /// - Declaring generic keys in a single place for a single use-case that gets narrowed down via <c>RequireExactlyOne</c>.
-///
+/// <br /><br />
 /// The caveat with <c>RequireExactlyOne</c> is that TypeScript doesn't always know at compile time every key that will exist at runtime. Therefore <c>RequireExactlyOne</c> can't do anything to prevent extra keys it doesn't know about.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {RequireExactlyOne} from 'type-fest';
-///
+/// <br /><br />
 /// type Responder = {
 /// text: () =&gt; string;
 /// json: () =&gt; string;
 /// secure: boolean;
 /// };
-///
+/// <br /><br />
 /// const responder: RequireExactlyOne&lt;Responder, 'text' | 'json'&gt; = {
-/// // Adding a `text` key here would cause a compile error.
-///
+/// // Adding a <c>text</c> key here would cause a compile error.
+/// <br /><br />
 /// json: () =&gt; '{"message": "ok"}',
 /// secure: true,
 /// };
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
 type RequireExactlyOne<'ObjectType, 'KeysType> = private RequireExactlyOne__ of obj
@@ -7754,50 +7982,51 @@ type RequireExactlyOne<'ObjectType, 'KeysType> = private RequireExactlyOne__ of 
 /// <summary>
 /// Create a type that requires exactly one of the given keys or none of the given keys, while keeping the remaining keys as is.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {RequireOneOrNone} from 'type-fest';
-///
+/// <br /><br />
 /// type Responder = RequireOneOrNone&lt;{
 /// text: () =&gt; string;
 /// json: () =&gt; string;
 /// secure: boolean;
 /// }, 'text' | 'json'&gt;;
-///
+/// <br /><br />
 /// const responder1: Responder = {
 /// secure: true,
 /// };
-///
+/// <br /><br />
 /// const responder2: Responder = {
 /// text: () =&gt; '{"message": "hi"}',
 /// secure: true,
 /// };
-///
+/// <br /><br />
 /// const responder3: Responder = {
 /// json: () =&gt; '{"message": "ok"}',
 /// secure: true,
 /// };
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
 type RequireOneOrNone<'ObjectType, 'KeysType> = private RequireOneOrNone__ of obj
 
 /// <summary>
 /// Create a deeply required version of another type.
-///
+/// <br /><br />
 /// Use-cases:
 /// - Creating optional configuration interfaces where the underlying implementation still requires all options to be fully specified.
 /// - Modeling the resulting type after a deep merge with a set of defaults.
-///
+/// <br /><br />
 /// Use <a href="https://www.typescriptlang.org/docs/handbook/utility-types.html#requiredtype"><c>Required&lt;T&gt;</c></a> if you only need one level deep.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {RequiredDeep} from 'type-fest';
-///
+/// <br /><br />
 /// type Settings = {
 /// textEditor?: {
 /// fontSize?: number;
@@ -7807,7 +8036,7 @@ type RequireOneOrNone<'ObjectType, 'KeysType> = private RequireOneOrNone__ of ob
 /// autocomplete?: boolean;
 /// autosave?: boolean | undefined;
 /// };
-///
+/// <br /><br />
 /// type RequiredSettings = RequiredDeep&lt;Settings&gt;;
 /// //=&gt; {
 /// // 	textEditor: {
@@ -7818,10 +8047,11 @@ type RequireOneOrNone<'ObjectType, 'KeysType> = private RequireOneOrNone__ of ob
 /// // 	autocomplete: boolean;
 /// // 	autosave: boolean | undefined;
 /// // }
-/// </code>
+/// <code>
 ///
-/// Note that types containing overloaded functions are not made deeply required due to a <a href="https://github.com/microsoft/TypeScript/issues/29732">TypeScript limitation</a>.
-/// </remarks>
+/// Note that types containing overloaded functions are not made deeply required due to a [TypeScript limitation](https://github.com/microsoft/TypeScript/issues/29732).
+/// </code>
+/// </example>
 /// <remarks>@category Utilities</remarks>
 /// <remarks>@category Object</remarks>
 /// <remarks>@category Array</remarks>
@@ -7832,33 +8062,34 @@ type RequiredDeep<'T> = private RequiredDeep__ of obj
 
 /// <summary>
 /// Extract all required keys from the given type.
-///
+/// <br /><br />
 /// This is useful when you want to create a new type that contains different type values for the required keys only or use the list of keys for validation purposes, etc...
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {RequiredKeysOf} from 'type-fest';
-///
+/// <br /><br />
 /// declare function createValidation&lt;
 /// Entity extends object,
 /// Key extends RequiredKeysOf&lt;Entity&gt; = RequiredKeysOf&lt;Entity&gt;,
 /// &gt;(field: Key, validator: (value: Entity[Key]) =&gt; boolean): (entity: Entity) =&gt; boolean;
-///
+/// <br /><br />
 /// type User = {
 /// name: string;
 /// surname: string;
 /// luckyNumber?: number;
 /// };
-///
+/// <br /><br />
 /// const validator1 = createValidation&lt;User&gt;('name', value =&gt; value.length &lt; 25);
 /// const validator2 = createValidation&lt;User&gt;('surname', value =&gt; value.length &lt; 25);
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// const validator3 = createValidation&lt;User&gt;('luckyNumber', value =&gt; value &gt; 0);
 /// // Error: Argument of type '"luckyNumber"' is not assignable to parameter of type '"name" | "surname"'.
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Utilities</remarks>
 type RequiredKeysOf<'Type> = keyof<'Type>
 
@@ -7870,16 +8101,16 @@ type SchemaOptions =
     /// - If <c>recurseIntoArrays</c> is set to <c>true</c> (default), array elements will be recursively processed as well.
     /// - If <c>recurseIntoArrays</c> is set to <c>false</c>, arrays will not be recursively processed, and the entire array will be replaced with the given value type.
     /// </summary>
-    /// <remarks>
-    /// @example
+    /// <example>
     /// <code>
+    /// </code>
     /// import type {Schema} from 'type-fest';
-    ///
+    /// <br /><br />
     /// type Participants = {
     /// 	attendees: string[];
     /// 	speakers: string[];
     /// };
-    ///
+    /// <br /><br />
     /// type ParticipantsWithMetadata = Schema&lt;Participants, {id: number; name: string}, {recurseIntoArrays: true}&gt;;
     /// //=&gt; {
     /// // 	attendees: {
@@ -7891,29 +8122,30 @@ type SchemaOptions =
     /// // 		name: string;
     /// // 	}[];
     /// // }
-    ///
+    /// <br /><br />
     /// type ParticipantsCount = Schema&lt;Participants, number, {recurseIntoArrays: false}&gt;;
     /// //=&gt; {attendees: number; speakers: number}
+    /// <code>
     /// </code>
-    /// </remarks>
-    /// <remarks>@default true</remarks>
+    /// </example>
+    /// <defaultValue>true</defaultValue>
     abstract recurseIntoArrays: bool option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?recurseIntoArrays: bool) : SchemaOptions = jsNative
 
 /// <summary>
 /// Create a deep version of another object type where property values are recursively replaced into a given value type.
-///
+/// <br /><br />
 /// Use-cases:
 /// - Form validation: Define how each field should be validated.
 /// - Form settings: Define configuration for input fields.
 /// - Parsing: Define types that specify special behavior for specific fields.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Schema} from 'type-fest';
-///
+/// <br /><br />
 /// type User = {
 /// id: string;
 /// name: {
@@ -7925,9 +8157,9 @@ type SchemaOptions =
 /// passwordHash: string;
 /// location: [latitude: number, longitude: number];
 /// };
-///
+/// <br /><br />
 /// type UserMask = Schema&lt;User, 'mask' | 'hide' | 'show'&gt;;
-///
+/// <br /><br />
 /// const userMaskSettings: UserMask = {
 /// id: 'show',
 /// name: {
@@ -7939,8 +8171,9 @@ type SchemaOptions =
 /// passwordHash: 'hide',
 /// location: ['hide', 'hide'],
 /// };
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@see {@link SchemaOptions}</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
@@ -7948,20 +8181,20 @@ type Schema<'Type, 'Value, 'Options> = private Schema__ of obj
 
 /// <summary>
 /// Convert a string literal to screaming-snake-case.
-///
+/// <br /><br />
 /// This can be useful when, for example, converting a camel-cased object property to a screaming-snake-cased SQL column name.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {ScreamingSnakeCase} from 'type-fest';
-///
+/// <br /><br />
 /// const someVariable: ScreamingSnakeCase&lt;'fooBar'&gt; = 'FOO_BAR';
 /// const someVariableNoSplitOnNumbers: ScreamingSnakeCase&lt;'p2pNetwork', {splitOnNumbers: false}&gt; = 'P2P_NETWORK';
 /// const someVariableWithPunctuation: ScreamingSnakeCase&lt;'div.card::after', {splitOnPunctuation: true}&gt; = 'DIV_CARD_AFTER';
-///
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
@@ -7971,62 +8204,63 @@ type ScreamingSnakeCase<'Value, 'Options> = private ScreamingSnakeCase__ of obj
 type SetFieldTypeOptions =
     /// <summary>
     /// Preserve optional and readonly modifiers for properties being updated.
-    ///
+    /// <br /><br />
     /// NOTE: Property modifiers will always be preserved for properties that are not being updated.
     /// </summary>
-    /// <remarks>@default true</remarks>
+    /// <defaultValue>true</defaultValue>
     abstract preservePropertyModifiers: bool option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?preservePropertyModifiers: bool) : SetFieldTypeOptions = jsNative
 
 /// <summary>
 /// Create a type that changes the type of the given keys.
-///
+/// <br /><br />
 /// Use-cases:
 /// - Creating variations of a base model.
 /// - Fixing incorrect external types.
 /// </summary>
 /// <remarks>@see <c>Merge</c> if you need to change multiple properties to different types.</remarks>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {SetFieldType} from 'type-fest';
-///
+/// <br /><br />
 /// type MyModel = {
 /// readonly id: number;
 /// readonly createdAt: Date;
 /// updatedAt?: Date;
 /// };
-///
+/// <br /><br />
 /// type MyModelApi1 = SetFieldType&lt;MyModel, 'createdAt' | 'updatedAt', string&gt;;
 /// // {
 /// // 	readonly id: number;
 /// // 	readonly createdAt: string;
 /// // 	updatedAt?: string;
 /// // }
-///
-/// // `preservePropertyModifiers` option can be set to `false` if you want to remove property modifiers for properties being updated
+/// <br /><br />
+/// // <c>preservePropertyModifiers</c> option can be set to <c>false</c> if you want to remove property modifiers for properties being updated
 /// type MyModelApi2 = SetFieldType&lt;MyModel, 'createdAt' | 'updatedAt', string, {preservePropertyModifiers: false}&gt;;
 /// // {
 /// // 	readonly id: number;
 /// // 	createdAt: string; // no longer readonly
 /// // 	updatedAt: string; // no longer optional
 /// // }
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 type SetFieldType = obj
 
 /// <summary>
 /// Create a type that makes the specified keys non-nullable (removes <c>null</c> and <c>undefined</c>), supports deeply nested key paths, and leaves all other keys unchanged.
-///
+/// <br /><br />
 /// NOTE: Optional modifiers (<c>?</c>) are not removed from properties. For example, <c>SetNonNullableDeep&lt;{foo?: string | null | undefined}, 'foo'&gt;</c> will result in <c>{foo?: string}</c>. To remove both optional modifiers and nullables, use SetRequiredDeep in conjunction with this type.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {SetNonNullableDeep} from 'type-fest';
-///
+/// <br /><br />
 /// type User = {
 /// name: string;
 /// address: {
@@ -8038,7 +8272,7 @@ type SetFieldType = obj
 /// phone: string | undefined;
 /// };
 /// };
-///
+/// <br /><br />
 /// type UpdatedUser = SetNonNullableDeep&lt;User, 'address.street' | 'contact.email' | 'contact.phone'&gt;;
 /// //=&gt; {
 /// // 	name: string;
@@ -8051,85 +8285,89 @@ type SetFieldType = obj
 /// // 		phone: string;
 /// // 	};
 /// // }
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// import type {SetNonNullableDeep} from 'type-fest';
-///
+/// <br /><br />
 /// // Set specific indices in an array to be non-nullable.
 /// type ArrayExample1 = SetNonNullableDeep&lt;{a: [number | null, number | null, number | undefined]}, 'a.1' | 'a.2'&gt;;
 /// //=&gt; {a: [number | null, number, number]}
-///
-/// // Optional modifier (`?`) is not removed.
+/// <br /><br />
+/// // Optional modifier (<c>?</c>) is not removed.
 /// type ArrayExample2 = SetNonNullableDeep&lt;{a: [(number | null)?, (number | null)?]}, 'a.1'&gt;;
 /// //=&gt; {a: [(number | null)?, number?]}
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
 type SetNonNullableDeep<'BaseType, 'KeyPaths> = private SetNonNullableDeep__ of obj
 
 /// <summary>
 /// Create a type that makes the given keys non-nullable, while keeping the remaining keys as is.
-///
+/// <br /><br />
 /// If no keys are given, all keys will be made non-nullable.
-///
+/// <br /><br />
 /// Use-case: You want to define a single model where the only thing that changes is whether or not some or all of the keys are non-nullable.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {SetNonNullable} from 'type-fest';
-///
+/// <br /><br />
 /// type Foo = {
 /// a: number | null;
 /// b: string | undefined;
 /// c?: boolean | null;
 /// };
-///
-/// // Note: In the following example, `c` can no longer be `null`, but it's still optional.
+/// <br /><br />
+/// // Note: In the following example, <c>c</c> can no longer be <c>null</c>, but it's still optional.
 /// type SomeNonNullable = SetNonNullable&lt;Foo, 'b' | 'c'&gt;;
 /// //=&gt; {a: null | number; b: string; c?: boolean}
-///
+/// <br /><br />
 /// type AllNonNullable = SetNonNullable&lt;Foo&gt;;
 /// //=&gt; {a: number; b: string; c?: boolean}
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
 type SetNonNullable<'BaseType, 'Keys> = private SetNonNullable__ of obj
 
 /// <summary>
 /// Create a type that makes the given keys optional, while keeping the remaining keys as is.
-///
+/// <br /><br />
 /// Use-case: You want to define a single model where the only thing that changes is whether or not some of the keys are optional.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {SetOptional} from 'type-fest';
-///
+/// <br /><br />
 /// type Foo = {
 /// a: number;
 /// b?: string;
 /// c: boolean;
 /// };
-///
+/// <br /><br />
 /// type SomeOptional = SetOptional&lt;Foo, 'b' | 'c'&gt;;
 /// //=&gt; {a: number; b?: string; c?: boolean}
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
 type SetOptional<'BaseType, 'Keys> = private SetOptional__ of obj
 
 /// <summary>
 /// Create a function that replaces some parameters with the given parameters.
-///
+/// <br /><br />
 /// The parameters that are not specified will be kept as-is.
-///
+/// <br /><br />
 /// Note:
 /// - This type will ignore the given function's generic type.
 /// - If you change the parameter type that return type depends on, the return type will not change:
@@ -8143,83 +8381,85 @@ type SetOptional<'BaseType, 'Keys> = private SetOptional__ of obj
 /// 	type Fn = SetParameterType&lt;typeof fn, {0: string}&gt;;
 ///  	//=&gt; (a: string) =&gt; number
 /// </code>
-///
+/// <br /><br />
 /// Use-case:
 /// - Define a wrapped function that receives something different while returning the same type.
 /// - Mocking and testing.
 /// - Overload function type. (See example)
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {SetParameterType} from 'type-fest';
-///
+/// <br /><br />
 /// type SuccessData = {success: true; value: number};
 /// type ErrorData = {success: false; error: string};
 /// type Data = SuccessData | ErrorData;
-///
+/// <br /><br />
 /// type HandleMessage = (data: Data, message: string, ...arguments_: any[]) =&gt; void;
-///
+/// <br /><br />
 /// type HandleOk = SetParameterType&lt;HandleMessage, {0: SuccessData; 1: 'ok'}&gt;;
 /// //=&gt; (data: SuccessData, message: 'ok', ...arguments_: any[]) =&gt; void
-///
+/// <br /><br />
 /// // Another way to define the parameters to replace.
 /// type HandleError = SetParameterType&lt;HandleMessage, [data: ErrorData, message: 'error']&gt;;
 /// //=&gt; (data: ErrorData, message: 'error', ...arguments_: any[]) =&gt; void
-///
+/// <br /><br />
 /// // Change single parameter type.
 /// type HandleWarn = SetParameterType&lt;HandleMessage, {1: 'warn'}&gt;;
 /// //=&gt; (data: Data, message: 'warn', ...arguments_: any[]) =&gt; void
-///
+/// <br /><br />
 /// // Change rest parameter type.
-///
+/// <br /><br />
 /// // Way 1: Input full parameter type.
 /// type HandleLog = SetParameterType&lt;HandleMessage, [data: Data, message: 'log', ...arguments_: string[]]&gt;;
 /// //=&gt; (data: Data, message: 'log', ...arguments_: string[]) =&gt; void
-///
+/// <br /><br />
 /// // Way 2: Input rest parameter type by Object index.
 /// type HandleLog2 = SetParameterType&lt;HandleMessage, {2: string}&gt;;
 /// //=&gt; (data: Data, message: string, ...arguments_: string[]) =&gt; void
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Function</remarks>
 [<Erase>]
 type SetParameterType<'Function_, 'P> = private SetParameterType__ of obj
 
 /// <summary>
 /// Create a type that makes the given keys readonly, while keeping the remaining keys as is.
-///
+/// <br /><br />
 /// Use-case: You want to define a single model where the only thing that changes is whether or not some of the keys are readonly.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {SetReadonly} from 'type-fest';
-///
+/// <br /><br />
 /// type Foo = {
 /// a: number;
 /// readonly b: string;
 /// c: boolean;
 /// };
-///
+/// <br /><br />
 /// type SomeReadonly = SetReadonly&lt;Foo, 'b' | 'c'&gt;;
 /// //=&gt; {a: number; readonly b: string; readonly c: boolean}
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
 type SetReadonly<'BaseType, 'Keys> = private SetReadonly__ of obj
 
 /// <summary>
 /// Create a type that makes the given keys required, with support for deeply nested key paths, while keeping the remaining keys as is.
-///
+/// <br /><br />
 /// Use-case: Selectively make nested properties required in complex types like models.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {SetRequiredDeep} from 'type-fest';
-///
+/// <br /><br />
 /// type Foo = {
 /// a?: number;
 /// b?: string;
@@ -8227,63 +8467,66 @@ type SetReadonly<'BaseType, 'Keys> = private SetReadonly__ of obj
 /// d?: number;
 /// }&gt;;
 /// };
-///
-/// type SomeRequiredDeep = SetRequiredDeep&lt;Foo, 'a' | `c.${number}.d`&gt;;
+/// <br /><br />
+/// type SomeRequiredDeep = SetRequiredDeep&lt;Foo, 'a' | <c>c.${number}.d</c>&gt;;
 /// //=&gt; {b?: string; c?: {d: number}[]; a: number}
-///
+/// <br /><br />
 /// // Set specific indices in an array to be required.
 /// type ArrayExample = SetRequiredDeep&lt;{a: [number?, number?, number?]}, 'a.0' | 'a.1'&gt;;
 /// //=&gt; {a: [number, number, number?]}
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
 type SetRequiredDeep<'BaseType, 'KeyPaths> = private SetRequiredDeep__ of obj
 
 /// <summary>
 /// Create a type that makes the given keys required, while keeping the remaining keys as is.
-///
+/// <br /><br />
 /// Use-case: You want to define a single model where the only thing that changes is whether or not some of the keys are required.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {SetRequired} from 'type-fest';
-///
+/// <br /><br />
 /// type Foo = {
 /// a?: number;
 /// b: string;
 /// c?: boolean;
 /// };
-///
+/// <br /><br />
 /// type SomeRequired = SetRequired&lt;Foo, 'b' | 'c'&gt;;
 /// //=&gt; {a?: number; b: string; c: boolean}
-///
+/// <br /><br />
 /// // Set specific indices in an array to be required.
 /// type ArrayExample = SetRequired&lt;[number?, number?, number?], 0 | 1&gt;;
 /// //=&gt; [number, number, number?]
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
 type SetRequired<'BaseType, 'Keys> = private SetRequired__ of obj
 
 /// <summary>
 /// Create a function type with a return type of your choice and the same parameters as the given function type.
-///
+/// <br /><br />
 /// Use-case: You want to define a wrapped function that returns something different while receiving the same parameters. For example, you might want to wrap a function that can throw an error into one that will return <c>undefined</c> instead.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {SetReturnType} from 'type-fest';
-///
+/// <br /><br />
 /// type MyFunctionThatCanThrow = (foo: string, bar: number) =&gt; boolean;
-///
+/// <br /><br />
 /// type MyWrappedFunction = SetReturnType&lt;MyFunctionThatCanThrow, ReturnType&lt;MyFunctionThatCanThrow&gt; | undefined&gt;;
 /// //=&gt; (foo: string, bar: number) =&gt; boolean | undefined
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Function</remarks>
 [<Erase>]
 type SetReturnType<'Function_, 'TypeToReturn> = private SetReturnType__ of obj
@@ -8297,25 +8540,25 @@ type SharedUnionFieldsDeepOptions =
     /// <summary>
     /// When set to true, this option impacts each element within arrays or tuples. If all union values are arrays or tuples, it constructs an array of the shortest possible length, ensuring every element exists in the union array.
     /// </summary>
-    /// <remarks>@default false</remarks>
+    /// <defaultValue>false</defaultValue>
     abstract recurseIntoArrays: bool option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?recurseIntoArrays: bool) : SharedUnionFieldsDeepOptions = jsNative
 
 /// <summary>
 /// Create a type with shared fields from a union of object types, deeply traversing nested structures.
-///
+/// <br /><br />
 /// Use the <c>Options</c> to specify the behavior for arrays.
-///
+/// <br /><br />
 /// Use-cases:
 /// - You want a safe object type where each key exists in the union object.
 /// - You want to focus on the common fields of the union type and don't want to have to care about the other fields.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {SharedUnionFieldsDeep} from 'type-fest';
-///
+/// <br /><br />
 /// type Cat = {
 /// info: {
 /// name: string;
@@ -8323,7 +8566,7 @@ type SharedUnionFieldsDeepOptions =
 /// catType: string;
 /// };
 /// };
-///
+/// <br /><br />
 /// type Dog = {
 /// info: {
 /// name: string;
@@ -8331,7 +8574,7 @@ type SharedUnionFieldsDeepOptions =
 /// dogType: string;
 /// };
 /// };
-///
+/// <br /><br />
 /// function displayPetInfo(petInfo: (Cat | Dog)['info']) {
 /// // typeof petInfo =&gt;
 /// // {
@@ -8343,27 +8586,28 @@ type SharedUnionFieldsDeepOptions =
 /// // 	type: 'dog';
 /// // 	dogType: string; // Needn't care about this field, because it's not a common pet info field.
 /// // }
-///
+/// <br /><br />
 /// // petInfo type is complex and have some needless fields
-///
+/// <br /><br />
 /// console.log('name:', petInfo.name);
 /// console.log('type:', petInfo.type);
 /// }
-///
+/// <br /><br />
 /// function displayPetInfoWithSharedUnionFieldsDeep(petInfo: SharedUnionFieldsDeep&lt;Cat | Dog&gt;['info']) {
 /// // typeof petInfo =&gt;
 /// // {
 /// // 	name: string;
 /// // 	type: 'cat' | 'dog';
 /// // }
-///
+/// <br /><br />
 /// // petInfo type is simple and clear
-///
+/// <br /><br />
 /// console.log('name:', petInfo.name);
 /// console.log('type:', petInfo.type);
 /// }
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@see {@link SharedUnionFields}</remarks>
 /// <remarks>@category Object</remarks>
 /// <remarks>@category Union</remarks>
@@ -8372,28 +8616,28 @@ type SharedUnionFieldsDeep<'Union, 'Options> = private SharedUnionFieldsDeep__ o
 
 /// <summary>
 /// Create a type with shared fields from a union of object types.
-///
+/// <br /><br />
 /// Use-cases:
 /// - You want a safe object type where each key exists in the union object.
 /// - You want to focus on the common fields of the union type and don't want to have to care about the other fields.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {SharedUnionFields} from 'type-fest';
-///
+/// <br /><br />
 /// type Cat = {
 /// name: string;
 /// type: 'cat';
 /// catType: string;
 /// };
-///
+/// <br /><br />
 /// type Dog = {
 /// name: string;
 /// type: 'dog';
 /// dogType: string;
 /// };
-///
+/// <br /><br />
 /// function displayPetInfo(petInfo: Cat | Dog) {
 /// // typeof petInfo =&gt;
 /// // {
@@ -8405,27 +8649,28 @@ type SharedUnionFieldsDeep<'Union, 'Options> = private SharedUnionFieldsDeep__ o
 /// // 	type: 'dog';
 /// // 	dogType: string; // Needn't care about this field, because it's not a common pet info field.
 /// // }
-///
+/// <br /><br />
 /// // petInfo type is complex and have some needless fields
-///
+/// <br /><br />
 /// console.log('name:', petInfo.name);
 /// console.log('type:', petInfo.type);
 /// }
-///
+/// <br /><br />
 /// function displayPetInfoWithSharedUnionFields(petInfo: SharedUnionFields&lt;Cat | Dog&gt;) {
 /// // typeof petInfo =&gt;
 /// // {
 /// // 	name: string;
 /// // 	type: 'cat' | 'dog';
 /// // }
-///
+/// <br /><br />
 /// // petInfo type is simple and clear
-///
+/// <br /><br />
 /// console.log('name:', petInfo.name);
 /// console.log('type:', petInfo.type);
 /// }
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@see {@link SharedUnionFieldsDeep}</remarks>
 /// <remarks>@see {@link AllUnionFields}</remarks>
 /// <remarks>@category Object</remarks>
@@ -8435,43 +8680,43 @@ type SharedUnionFields<'Union> = private SharedUnionFields__ of obj
 
 /// <summary>
 /// Deeply simplifies an object type.
-///
+/// <br /><br />
 /// You can exclude certain types from being simplified by providing them in the second generic <c>ExcludeType</c>.
-///
+/// <br /><br />
 /// Useful to flatten the type output to improve type hints shown in editors.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {SimplifyDeep} from 'type-fest';
-///
+/// <br /><br />
 /// type PositionX = {
 /// left: number;
 /// right: number;
 /// };
-///
+/// <br /><br />
 /// type PositionY = {
 /// top: number;
 /// bottom: number;
 /// };
-///
+/// <br /><br />
 /// type Properties1 = {
 /// height: number;
 /// position: PositionY;
 /// };
-///
+/// <br /><br />
 /// type Properties2 = {
 /// width: number;
 /// position: PositionX;
 /// };
-///
+/// <br /><br />
 /// type Properties = Properties1 &amp; Properties2;
-/// // In your editor, hovering over `Props` will show the following:
+/// // In your editor, hovering over <c>Props</c> will show the following:
 /// //
 /// // type Properties = Properties1 &amp; Properties2;
-///
+/// <br /><br />
 /// type SimplifyDeepProperties = SimplifyDeep&lt;Properties1 &amp; Properties2&gt;;
-/// // But if wrapped in SimplifyDeep, hovering over `SimplifyDeepProperties` will show a flattened object with all the properties:
+/// // But if wrapped in SimplifyDeep, hovering over <c>SimplifyDeepProperties</c> will show a flattened object with all the properties:
 /// //
 /// // SimplifyDeepProperties = {
 /// // 	height: number;
@@ -8483,46 +8728,47 @@ type SharedUnionFields<'Union> = private SharedUnionFields__ of obj
 /// // 		right: number;
 /// // 	};
 /// // };
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// import type {SimplifyDeep} from 'type-fest';
-///
+/// <br /><br />
 /// // A complex type that you don't want or need to simplify
 /// type ComplexType = {
 /// a: string;
 /// b: 'b';
 /// c: number;
 /// };
-///
+/// <br /><br />
 /// type PositionX = {
 /// left: number;
 /// right: number;
 /// };
-///
+/// <br /><br />
 /// type PositionY = {
 /// top: number;
 /// bottom: number;
 /// };
-///
+/// <br /><br />
 /// // You want to simplify all other types
 /// type Properties1 = {
 /// height: number;
 /// position: PositionY;
 /// foo: ComplexType;
 /// };
-///
+/// <br /><br />
 /// type Properties2 = {
 /// width: number;
 /// position: PositionX;
 /// foo: ComplexType;
 /// };
-///
+/// <br /><br />
 /// type SimplifyDeepProperties = SimplifyDeep&lt;Properties1 &amp; Properties2, ComplexType&gt;;
-/// // If wrapped in `SimplifyDeep` and set `ComplexType` to exclude, hovering over `SimplifyDeepProperties` will
-/// // show a flattened object with all the properties except `ComplexType`:
+/// // If wrapped in <c>SimplifyDeep</c> and set <c>ComplexType</c> to exclude, hovering over <c>SimplifyDeepProperties</c> will
+/// // show a flattened object with all the properties except <c>ComplexType</c>:
 /// //
 /// // SimplifyDeepProperties = {
 /// // 	height: number;
@@ -8535,8 +8781,9 @@ type SharedUnionFields<'Union> = private SharedUnionFields__ of obj
 /// // 	};
 /// //	foo: ComplexType;
 /// // };
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@see {@link Simplify}</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
@@ -8545,59 +8792,61 @@ type SimplifyDeep<'Type, 'ExcludeType> = private SimplifyDeep__ of obj
 /// <summary>
 /// Useful to flatten the type output to improve type hints shown in editors. And also to transform an interface into a type to aide with assignability.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Simplify} from 'type-fest';
-///
+/// <br /><br />
 /// type PositionProps = {
 /// top: number;
 /// left: number;
 /// };
-///
+/// <br /><br />
 /// type SizeProps = {
 /// width: number;
 /// height: number;
 /// };
-///
-/// // In your editor, hovering over `Props` will show a flattened object with all the properties.
+/// <br /><br />
+/// // In your editor, hovering over <c>Props</c> will show a flattened object with all the properties.
 /// type Props = Simplify&lt;PositionProps &amp; SizeProps&gt;;
-/// </code>
-///
-/// Sometimes it is desired to pass a value as a function argument that has a different type. At first inspection it may seem assignable, and then you discover it is not because the <c>value</c>'s type definition was defined as an interface. In the following example, <c>fn</c> requires an argument of type <c>Record&lt;string, unknown&gt;</c>. If the value is defined as a literal, then it is assignable. And if the <c>value</c> is defined as type using the <c>Simplify</c> utility the value is assignable.  But if the <c>value</c> is defined as an interface, it is not assignable because the interface is not sealed and elsewhere a non-string property could be added to the interface.
-///
-/// If the type definition must be an interface (perhaps it was defined in a third-party npm package), then the <c>value</c> can be defined as <c>const value: Simplify&lt;SomeInterface&gt; = ...</c>. Then <c>value</c> will be assignable to the <c>fn</c> argument.  Or the <c>value</c> can be cast as <c>Simplify&lt;SomeInterface&gt;</c> if you can't re-declare the <c>value</c>.
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
-/// import type {Simplify} from 'type-fest';
 ///
+/// Sometimes it is desired to pass a value as a function argument that has a different type. At first inspection it may seem assignable, and then you discover it is not because the `value`'s type definition was defined as an interface. In the following example, `fn` requires an argument of type `Record&lt;string, unknown&gt;`. If the value is defined as a literal, then it is assignable. And if the `value` is defined as type using the `Simplify` utility the value is assignable.  But if the `value` is defined as an interface, it is not assignable because the interface is not sealed and elsewhere a non-string property could be added to the interface.
+///
+/// If the type definition must be an interface (perhaps it was defined in a third-party npm package), then the `value` can be defined as `const value: Simplify&lt;SomeInterface&gt; = ...`. Then `value` will be assignable to the `fn` argument.  Or the `value` can be cast as `Simplify&lt;SomeInterface&gt;` if you can't re-declare the `value`.
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
+/// import type {Simplify} from 'type-fest';
+/// <br /><br />
 /// interface SomeInterface {
 /// foo: number;
 /// bar?: string;
 /// baz: number | undefined;
 /// }
-///
+/// <br /><br />
 /// type SomeType = {
 /// foo: number;
 /// bar?: string;
 /// baz: number | undefined;
 /// };
-///
+/// <br /><br />
 /// const literal = {foo: 123, bar: 'hello', baz: 456};
 /// const someType: SomeType = literal;
 /// const someInterface: SomeInterface = literal;
-///
+/// <br /><br />
 /// declare function fn(object: Record&lt;string, unknown&gt;): void;
-///
+/// <br /><br />
 /// fn(literal); // Good: literal object type is sealed
 /// fn(someType); // Good: type is sealed
 /// // @ts-expect-error
-/// fn(someInterface); // Error: Index signature for type 'string' is missing in type 'someInterface'. Because `interface` can be re-opened
-/// fn(someInterface as Simplify&lt;SomeInterface&gt;); // Good: transform an `interface` into a `type`
+/// fn(someInterface); // Error: Index signature for type 'string' is missing in type 'someInterface'. Because <c>interface</c> can be re-opened
+/// fn(someInterface as Simplify&lt;SomeInterface&gt;); // Good: transform an <c>interface</c> into a <c>type</c>
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@link https://github.com/microsoft/TypeScript/issues/15300</remarks>
 /// <remarks>@see {@link SimplifyDeep}</remarks>
 /// <remarks>@category Object</remarks>
@@ -8606,60 +8855,62 @@ type Simplify = obj
 /// <summary>
 /// Create a type that only accepts an object with a single key.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {SingleKeyObject} from 'type-fest';
-///
+/// <br /><br />
 /// declare function someFunction&lt;T&gt;(parameter: SingleKeyObject&lt;T&gt;): void;
-///
+/// <br /><br />
 /// someFunction({value: true});
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// someFunction({value: true, otherKey: true});
 /// // Error: Argument of type '{value: boolean; otherKey: boolean}' is not assignable to parameter of type 'never'.ts(2345)
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
 type SingleKeyObject<'ObjectType> = private SingleKeyObject__ of obj
 
 /// <summary>
 /// Convert a string literal to snake-case.
-///
+/// <br /><br />
 /// This can be useful when, for example, converting a camel-cased object property to a snake-cased SQL column name.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {SnakeCase} from 'type-fest';
-///
+/// <br /><br />
 /// // Simple
-///
+/// <br /><br />
 /// const someVariable: SnakeCase&lt;'fooBar'&gt; = 'foo_bar';
 /// const noSplitOnNumbers: SnakeCase&lt;'p2pNetwork'&gt; = 'p2p_network';
 /// const splitOnNumbers: SnakeCase&lt;'p2pNetwork', {splitOnNumbers: true}&gt; = 'p_2_p_network';
 /// const splitOnPunctuation: SnakeCase&lt;'div.card::after', {splitOnPunctuation: true}&gt; = 'div_card_after';
-///
+/// <br /><br />
 /// // Advanced
-///
+/// <br /><br />
 /// type SnakeCasedProperties&lt;T&gt; = {
 /// [K in keyof T as SnakeCase&lt;K&gt;]: T[K]
 /// };
-///
+/// <br /><br />
 /// type ModelProps = {
 /// isHappy: boolean;
 /// fullFamilyName: string;
 /// foo: number;
 /// };
-///
+/// <br /><br />
 /// const dbResult: SnakeCasedProperties&lt;ModelProps&gt; = {
 /// 'is_happy': true,
 /// 'full_family_name': 'Carla Smith',
 /// foo: 123,
 /// };
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
@@ -8667,26 +8918,26 @@ type SnakeCase<'Value, 'Options> = private SnakeCase__ of obj
 
 /// <summary>
 /// Convert object properties to snake case recursively.
-///
+/// <br /><br />
 /// This can be useful when, for example, converting some API types from a different style.
 /// </summary>
 /// <remarks>@see {@link SnakeCase}</remarks>
 /// <remarks>@see {@link SnakeCasedProperties}</remarks>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {SnakeCasedPropertiesDeep} from 'type-fest';
-///
+/// <br /><br />
 /// type User = {
 /// userId: number;
 /// userName: string;
 /// };
-///
+/// <br /><br />
 /// type UserWithFriends = {
 /// userInfo: User;
 /// userFriends: User[];
 /// };
-///
+/// <br /><br />
 /// const result: SnakeCasedPropertiesDeep&lt;UserWithFriends&gt; = {
 /// user_info: {
 /// user_id: 1,
@@ -8703,7 +8954,7 @@ type SnakeCase<'Value, 'Options> = private SnakeCase__ of obj
 /// },
 /// ],
 /// };
-///
+/// <br /><br />
 /// const splitOnNumbers: SnakeCasedPropertiesDeep&lt;{line1: {line2: [{line3: string}]}}, {splitOnNumbers: true}&gt; = {
 /// line_1: {
 /// line_2: [
@@ -8713,15 +8964,16 @@ type SnakeCase<'Value, 'Options> = private SnakeCase__ of obj
 /// ],
 /// },
 /// };
-///
+/// <br /><br />
 /// const splitOnPunctuation: SnakeCasedPropertiesDeep&lt;{'user@info': {'user::id': number; 'user::name': string}}, {splitOnPunctuation: true}&gt; = {
 /// 'user_info': {
 /// 'user_id': 1,
 /// 'user_name': 'Tom',
 /// },
 /// };
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
@@ -8730,35 +8982,36 @@ type SnakeCasedPropertiesDeep<'Value, 'Options> = private SnakeCasedPropertiesDe
 
 /// <summary>
 /// Convert top-level object properties to snake case.
-///
+/// <br /><br />
 /// This can be useful when, for example, converting some API types from a different style.
 /// </summary>
 /// <remarks>@see {@link SnakeCase}</remarks>
 /// <remarks>@see {@link SnakeCasedPropertiesDeep}</remarks>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {SnakeCasedProperties} from 'type-fest';
-///
+/// <br /><br />
 /// type User = {
 /// userId: number;
 /// userName: string;
 /// };
-///
+/// <br /><br />
 /// const result: SnakeCasedProperties&lt;User&gt; = {
 /// user_id: 1,
 /// user_name: 'Tom',
 /// };
-///
+/// <br /><br />
 /// const splitOnNumbers: SnakeCasedProperties&lt;{line1: string}, {splitOnNumbers: true}&gt; = {
 /// 'line_1': 'string',
 /// };
-///
+/// <br /><br />
 /// const splitOnPunctuation: SnakeCasedProperties&lt;{'foo::bar': string}, {splitOnPunctuation: true}&gt; = {
 /// 'foo_bar': 'string',
 /// };
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
@@ -8770,35 +9023,36 @@ type SnakeCasedProperties<'Value, 'Options> = private SnakeCasedProperties__ of 
 type SomeExtendOptions =
     /// <summary>
     /// Consider <c>never</c> elements to match the target type only if the target type itself is <c>never</c> (or <c>any</c>).
-    ///
+    /// <br /><br />
     /// - When set to <c>true</c> (default), <c>never</c> is _not_ treated as a bottom type, instead, it is treated as a type that matches only itself (or <c>any</c>).
     /// - When set to <c>false</c>, <c>never</c> is treated as a bottom type, and behaves as it normally would.
     /// </summary>
-    /// <remarks>@default true</remarks>
-    /// <remarks>
-    /// @example
+    /// <defaultValue>true</defaultValue>
+    /// <example>
     /// <code>
+    /// </code>
     /// import type {SomeExtend} from 'type-fest';
-    ///
+    /// <br /><br />
     /// type A = SomeExtend&lt;[1, 2, never], string, {strictNever: true}&gt;;
     /// //=&gt; false
-    ///
+    /// <br /><br />
     /// type B = SomeExtend&lt;[1, 2, never], string, {strictNever: false}&gt;;
     /// //=&gt; true
-    ///
+    /// <br /><br />
     /// type C = SomeExtend&lt;[1, never], never, {strictNever: true}&gt;;
     /// //=&gt; true
-    ///
+    /// <br /><br />
     /// type D = SomeExtend&lt;[1, never], never, {strictNever: false}&gt;;
     /// //=&gt; true
-    ///
+    /// <br /><br />
     /// type E = SomeExtend&lt;[never], any, {strictNever: true}&gt;;
     /// //=&gt; true
-    ///
+    /// <br /><br />
     /// type F = SomeExtend&lt;[never], any, {strictNever: false}&gt;;
     /// //=&gt; true
+    /// <code>
     /// </code>
-    /// </remarks>
+    /// </example>
     abstract strictNever: bool option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?strictNever: bool) : SomeExtendOptions = jsNative
@@ -8806,45 +9060,46 @@ type SomeExtendOptions =
 /// <summary>
 /// Returns a boolean for whether some element in an array type extends another type.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {SomeExtend} from 'type-fest';
-///
+/// <br /><br />
 /// type A = SomeExtend&lt;['1', '2', 3], number&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type B = SomeExtend&lt;[1, 2, 3], string&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type C = SomeExtend&lt;[string, number | string], number&gt;;
 /// //=&gt; boolean
-///
+/// <br /><br />
 /// type D = SomeExtend&lt;[true, boolean, true], false&gt;;
 /// //=&gt; boolean
-/// </code>
-///
-/// Note: Behaviour of optional elements depend on the <c>exactOptionalPropertyTypes</c> compiler option. When the option is disabled, the target type must include <c>undefined</c> for a successful match.
-///
 /// <code>
+///
+/// Note: Behaviour of optional elements depend on the `exactOptionalPropertyTypes` compiler option. When the option is disabled, the target type must include `undefined` for a successful match.
+///
+/// </code>
 /// // @exactOptionalPropertyTypes: true
 /// import type {SomeExtend} from 'type-fest';
-///
+/// <br /><br />
 /// type A = SomeExtend&lt;[1?, 2?, '3'?], string&gt;;
 /// //=&gt; true
-/// </code>
-///
 /// <code>
+///
+/// </code>
 /// // @exactOptionalPropertyTypes: false
 /// import type {SomeExtend} from 'type-fest';
-///
+/// <br /><br />
 /// type A = SomeExtend&lt;[1?, 2?, '3'?], string&gt;;
 /// //=&gt; boolean
-///
+/// <br /><br />
 /// type B = SomeExtend&lt;[1?, 2?, '3'?], string | undefined&gt;;
 /// //=&gt; true
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@see {@link SomeExtendOptions}</remarks>
 /// <remarks>@category Utilities</remarks>
 /// <remarks>@category Array</remarks>
@@ -8853,15 +9108,15 @@ type SomeExtend<'TArray, 'Type, 'Options> = private SomeExtend__ of obj
 
 /// <summary>
 /// Splits an array into three parts, where the first contains all elements before the rest element, the second is the <a href="https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types"><c>rest</c></a> element itself, and the third contains all elements after the rest element.
-///
+/// <br /><br />
 /// Note: If any of the parts are missing, then they will be represented as empty arrays. For example, <c>SplitOnRestElement&lt;[string, number]&gt;</c> returns <c>[[string, number], [], []]</c>, where parts corresponding to the rest element and elements after it are empty.
-///
+/// <br /><br />
 /// By default, the optional modifier (<c>?</c>) is preserved.
 /// See <c>SplitOnRestElementOptions</c>.
 /// </summary>
-/// <remarks>
-/// @example
-/// <code lang="ts">
+/// <example>
+/// <code>
+/// ```ts
 /// import type {SplitOnRestElement} from 'type-fest';
 ///
 /// type T1 = SplitOnRestElement&lt;[number, ...string[], boolean]&gt;;
@@ -8879,7 +9134,9 @@ type SomeExtend<'TArray, 'Type, 'Options> = private SomeExtend__ of obj
 /// type T5 = SplitOnRestElement&lt;readonly [string?, ...number[]], {preserveOptionalModifier: false}&gt;;
 /// //=&gt; readonly [[string], number[], []]
 /// </code>
-/// </remarks>
+/// <code>
+/// </code>
+/// </example>
 /// <remarks>@see {@link ExtractRestElement}</remarks>
 /// <remarks>@see {@link ExcludeRestElement}</remarks>
 /// <remarks>@category Array</remarks>
@@ -8895,10 +9152,10 @@ type SplitOptions =
     /// <summary>
     /// When enabled, instantiations with non-literal string types (e.g., <c>string</c>, <c>Uppercase&lt;string&gt;</c>, <c>on${string}</c>) simply return back <c>string[]</c> without performing any splitting, as the exact structure cannot be statically determined.
     /// </summary>
-    /// <remarks>@default true</remarks>
-    /// <remarks>
-    /// @example
-    /// <code lang="ts">
+    /// <defaultValue>true</defaultValue>
+    /// <example>
+    /// <code>
+    /// ```ts
     /// import type {Split} from 'type-fest';
     ///
     /// type Example1 = Split&lt;`foo.${string}.bar`, '.', {strictLiteralChecks: false}&gt;;
@@ -8913,28 +9170,31 @@ type SplitOptions =
     /// type Example4 = Split&lt;'foobarbaz', `b${string}`, {strictLiteralChecks: true}&gt;;
     /// //=&gt; string[]
     /// </code>
-    /// </remarks>
+    /// <code>
+    /// </code>
+    /// </example>
     abstract strictLiteralChecks: bool option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?strictLiteralChecks: bool) : SplitOptions = jsNative
 
 /// <summary>
 /// Represents an array of strings split using a given character or character set.
-///
+/// <br /><br />
 /// Use-case: Defining the return type of a method like <c>String.prototype.split</c>.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Split} from 'type-fest';
-///
+/// <br /><br />
 /// declare function split&lt;S extends string, D extends string&gt;(string: S, separator: D): Split&lt;S, D&gt;;
-///
+/// <br /><br />
 /// type Item = 'foo' | 'bar' | 'baz' | 'waldo';
 /// const items = 'foo,bar,baz,waldo';
 /// const array: Item[] = split(items, ',');
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@see {@link SplitOptions}</remarks>
 /// <remarks>@category String</remarks>
 /// <remarks>@category Template literal</remarks>
@@ -8944,50 +9204,52 @@ type Split<'S, 'Delimiter, 'Options> = private Split__ of obj
 /// <summary>
 /// Mimic the type inferred by TypeScript when merging two objects or two arrays/tuples using the spread syntax.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Spread} from 'type-fest';
-///
+/// <br /><br />
 /// type Foo = {
 /// a: number;
 /// b?: string;
 /// };
-///
+/// <br /><br />
 /// type Bar = {
 /// b?: number;
 /// c: boolean;
 /// };
-///
+/// <br /><br />
 /// const foo = {a: 1, b: '2'};
 /// const bar = {c: false};
 /// const fooBar = {...foo, ...bar};
-///
+/// <br /><br />
 /// type FooBar = Spread&lt;Foo, Bar&gt;;
 /// //=&gt; {a: number; b?: string | number; c: boolean}
-///
+/// <br /><br />
 /// declare function baz(argument: FooBar): void;
-///
+/// <br /><br />
 /// baz(fooBar);
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// import type {Spread} from 'type-fest';
-///
+/// <br /><br />
 /// const foo = [1, 2, 3];
 /// const bar = ['4', '5', '6'];
-///
+/// <br /><br />
 /// const fooBar = [...foo, ...bar];
 /// type FooBar = Spread&lt;typeof foo, typeof bar&gt;;
 /// // FooBar = (string | number)[]
-///
+/// <br /><br />
 /// declare function baz(argument: FooBar): void;
-///
+/// <br /><br />
 /// baz(fooBar);
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
 type Spread<'FirstType, 'SecondType> = private Spread__ of obj
@@ -8995,35 +9257,37 @@ type Spread<'FirstType, 'SecondType> = private Spread__ of obj
 /// <summary>
 /// Returns the length of the given string.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {StringLength} from 'type-fest';
-///
+/// <br /><br />
 /// type A = StringLength&lt;'abcde'&gt;;
 /// //=&gt; 5
-///
+/// <br /><br />
 /// type B = StringLength&lt;'abcde' | 'fgh'&gt;;
 /// //=&gt; 3 | 5
-/// </code>
-///
-/// For non-literal strings, the result is <c>number</c> because the length of a non-literal string can be any number.
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
-/// import type {StringLength} from 'type-fest';
 ///
+/// For non-literal strings, the result is `number` because the length of a non-literal string can be any number.
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
+/// import type {StringLength} from 'type-fest';
+/// <br /><br />
 /// type A = StringLength&lt;string&gt;;
 /// //=&gt; number
-///
+/// <br /><br />
 /// type B = StringLength&lt;Uppercase&lt;string&gt;&gt;;
 /// //=&gt; number
-///
-/// type C = StringLength&lt;`${string}abc`&gt;;
+/// <br /><br />
+/// type C = StringLength&lt;<c>${string}abc</c>&gt;;
 /// //=&gt; number
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category String</remarks>
 /// <remarks>@category Template literal</remarks>
 type StringLength = obj
@@ -9031,36 +9295,38 @@ type StringLength = obj
 /// <summary>
 /// Returns a new string which contains the specified number of copies of a given string, just like <c>String#repeat()</c>.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {StringRepeat} from 'type-fest';
-///
+/// <br /><br />
 /// declare function stringRepeat&lt;
 /// S extends string,
 /// Count extends number,
 /// &gt;(input: S, count: Count): StringRepeat&lt;S, Count&gt;;
-///
-/// // The return type is the exact string literal, not just `string`.
-///
+/// <br /><br />
+/// // The return type is the exact string literal, not just <c>string</c>.
+/// <br /><br />
 /// stringRepeat('foo', 2);
 /// //=&gt; 'foofoo'
-///
+/// <br /><br />
 /// stringRepeat('=', 3);
 /// //=&gt; '==='
-/// </code>
+/// <code>
 ///
 /// Note: If the specified count has a decimal part, the decimal part will be ignored.
-/// </remarks>
-/// <remarks>
-/// @example
+/// </code>
+/// </example>
+/// <example>
 /// <code>
+/// </code>
 /// import type {StringRepeat} from 'type-fest';
-///
+/// <br /><br />
 /// type DecimalCount = StringRepeat&lt;'foo', 2.5&gt;;
 /// //=&gt; 'foofoo'
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category String</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
@@ -9070,24 +9336,25 @@ type StringRepeat<'S, 'Count> = private StringRepeat__ of obj
 /// Returns a string slice of a given range, just like <c>String#slice()</c>.
 /// </summary>
 /// <remarks>@see {ArraySlice}</remarks>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {StringSlice} from 'type-fest';
-///
+/// <br /><br />
 /// type A = StringSlice&lt;'abcde', 0, 2&gt;;
 /// //=&gt; 'ab'
-///
+/// <br /><br />
 /// type B = StringSlice&lt;'abcde', 1&gt;;
 /// //=&gt; 'bcde'
-///
+/// <br /><br />
 /// type C = StringSlice&lt;'abcde', 0, -1&gt;;
 /// //=&gt; 'abcd'
-///
+/// <br /><br />
 /// type D = StringSlice&lt;'abcde', -2, -1&gt;;
 /// //=&gt; 'd'
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category String</remarks>
 [<Erase>]
 type StringSlice<'S, 'Start, 'End> = private StringSlice__ of obj
@@ -9097,37 +9364,38 @@ type StringSlice<'S, 'Start, 'End> = private StringSlice__ of obj
 type StringToArrayOptions =
     /// <summary>
     /// When enabled, non-literal parts of the string (e.g., <c>string</c>, <c>Uppercase&lt;string&gt;</c>) are mapped as single elements instead of being mapped as a rest element.
-    ///
+    /// <br /><br />
     /// Note: Enabling this option can produce misleading results that might not reflect the actual runtime behavior.
     /// For example, <c>StringToArray&lt;string, {mapNonLiteralsDirectly: true}&gt;</c> returns <c>[string]</c>, but at runtime, the string could be <c>'abc'</c> (which satisfies <c>string</c>), and converting it to an array would result in <c>['a', 'b', 'c']</c>, which doesn't satisfy <c>[string]</c>.
-    ///
+    /// <br /><br />
     /// So, it is recommended to not enable this option unless you are aware of the implications.
     /// </summary>
-    /// <remarks>@default false</remarks>
-    /// <remarks>
-    /// @example
+    /// <defaultValue>false</defaultValue>
+    /// <example>
     /// <code>
+    /// </code>
     /// import type {StringToArray} from 'type-fest';
-    ///
+    /// <br /><br />
     /// type A = StringToArray&lt;string, {mapNonLiteralsDirectly: false}&gt;;
     /// //=&gt; string[]
-    ///
+    /// <br /><br />
     /// type B = StringToArray&lt;string, {mapNonLiteralsDirectly: true}&gt;;
     /// //=&gt; [string]
-    ///
-    /// type C = StringToArray&lt;`on${string}`, {mapNonLiteralsDirectly: false}&gt;;
+    /// <br /><br />
+    /// type C = StringToArray&lt;<c>on${string}</c>, {mapNonLiteralsDirectly: false}&gt;;
     /// //=&gt; ['o', 'n', ...string[]]
-    ///
-    /// type D = StringToArray&lt;`on${string}`, {mapNonLiteralsDirectly: true}&gt;;
+    /// <br /><br />
+    /// type D = StringToArray&lt;<c>on${string}</c>, {mapNonLiteralsDirectly: true}&gt;;
     /// //=&gt; ['o', 'n', string]
-    ///
-    /// type E = StringToArray&lt;`${string}xyz`, {mapNonLiteralsDirectly: false}&gt;;
+    /// <br /><br />
+    /// type E = StringToArray&lt;<c>${string}xyz</c>, {mapNonLiteralsDirectly: false}&gt;;
     /// //=&gt; [...string[], 'x', 'y', 'z']
-    ///
-    /// type F = StringToArray&lt;`${string}xyz`, {mapNonLiteralsDirectly: true}&gt;;
+    /// <br /><br />
+    /// type F = StringToArray&lt;<c>${string}xyz</c>, {mapNonLiteralsDirectly: true}&gt;;
     /// //=&gt; [string, 'x', 'y', 'z']
+    /// <code>
     /// </code>
-    /// </remarks>
+    /// </example>
     abstract mapNonLiteralsDirectly: bool option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?mapNonLiteralsDirectly: bool) : StringToArrayOptions = jsNative
@@ -9135,27 +9403,28 @@ type StringToArrayOptions =
 /// <summary>
 /// Returns an array of the characters of the specified string.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {StringToArray} from 'type-fest';
-///
+/// <br /><br />
 /// type A = StringToArray&lt;'abcde'&gt;;
 /// //=&gt; ['a', 'b', 'c', 'd', 'e']
-///
+/// <br /><br />
 /// type B = StringToArray&lt;''&gt;;
 /// //=&gt; []
-///
+/// <br /><br />
 /// type C = StringToArray&lt;string&gt;;
 /// //=&gt; string[]
-///
-/// type D = StringToArray&lt;`foo${string}bar`&gt;;
+/// <br /><br />
+/// type D = StringToArray&lt;<c>foo${string}bar</c>&gt;;
 /// //=&gt; ['f', 'o', 'o', ...string[], 'b', 'a', 'r']
-///
-/// type E = StringToArray&lt;`foo${string}bar`, {mapNonLiteralsDirectly: true}&gt;;
+/// <br /><br />
+/// type E = StringToArray&lt;<c>foo${string}bar</c>, {mapNonLiteralsDirectly: true}&gt;;
 /// //=&gt; ['f', 'o', 'o', string, 'b', 'a', 'r']
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@see {@link StringToArrayOptions}</remarks>
 /// <remarks>@category String</remarks>
 [<Erase>]
@@ -9164,47 +9433,49 @@ type StringToArray<'S, 'Options> = private StringToArray__ of obj
 /// <summary>
 /// Converts a numeric string to a number.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {StringToNumber} from 'type-fest';
-///
+/// <br /><br />
 /// type PositiveInteger = StringToNumber&lt;'1234'&gt;;
 /// //=&gt; 1234
-///
+/// <br /><br />
 /// type NegativeInteger = StringToNumber&lt;'-1234'&gt;;
 /// //=&gt; -1234
-///
+/// <br /><br />
 /// type PositiveFloat = StringToNumber&lt;'1234.56'&gt;;
 /// //=&gt; 1234.56
-///
+/// <br /><br />
 /// type NegativeFloat = StringToNumber&lt;'-1234.56'&gt;;
 /// //=&gt; -1234.56
-///
+/// <br /><br />
 /// type PositiveInfinity = StringToNumber&lt;'Infinity'&gt;;
 /// //=&gt; Infinity
-///
+/// <br /><br />
 /// type NegativeInfinity = StringToNumber&lt;'-Infinity'&gt;;
 /// //=&gt; -Infinity
-/// </code>
-///
-/// Note: Some strings, such as <c>'1.50'</c>, <c>'0b10'</c>, or <c>'12_345'</c>, may look like they can be converted to numbers, but they don't actually have corresponding numeric literals. So, in such cases, this type produces <c>never</c>. See <a href="https://github.com/sindresorhus/type-fest/pull/1446">type-fest#1446</a> for more details.
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
-/// import type {StringToNumber} from 'type-fest';
 ///
+/// Note: Some strings, such as `'1.50'`, `'0b10'`, or `'12_345'`, may look like they can be converted to numbers, but they don't actually have corresponding numeric literals. So, in such cases, this type produces `never`. See [type-fest#1446](https://github.com/sindresorhus/type-fest/pull/1446) for more details.
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
+/// import type {StringToNumber} from 'type-fest';
+/// <br /><br />
 /// type FractionalsEndingInZero = StringToNumber&lt;'1.50'&gt;;
 /// //=&gt; never
-///
+/// <br /><br />
 /// type NonDecimalBases = StringToNumber&lt;'0b10' | '0o10' | '0x10'&gt;;
 /// //=&gt; never
-///
+/// <br /><br />
 /// type NumericSeparators = StringToNumber&lt;'12_345'&gt;;
 /// //=&gt; never
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category String</remarks>
 /// <remarks>@category Numeric</remarks>
 /// <remarks>@category Template literal</remarks>
@@ -9213,58 +9484,60 @@ type StringToNumber<'S> = private StringToNumber__ of obj
 
 /// <summary>
 /// Create a type with the keys of the given type changed to <c>string</c> type.
-///
+/// <br /><br />
 /// Use-case: Changing interface values to strings in order to use them in a form model.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Stringified} from 'type-fest';
-///
+/// <br /><br />
 /// type Car = {
 /// model: string;
 /// speed: number;
 /// };
-///
+/// <br /><br />
 /// const carForm: Stringified&lt;Car&gt; = {
 /// model: 'Foo',
 /// speed: '101',
 /// };
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
 type Stringified<'ObjectType> = private Stringified__ of obj
 
 /// <summary>
 /// Matches a value that can be losslessly cloned using <c>structuredClone</c>.
-///
+/// <br /><br />
 /// Note:
 /// - Custom error types will be cloned as the base <c>Error</c> type
 /// </summary>
 /// <remarks>@see https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm</remarks>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {StructuredCloneable} from 'type-fest';
-///
+/// <br /><br />
 /// class CustomClass {}
-///
+/// <br /><br />
 /// const error = {
 /// custom: new CustomClass(),
 /// // @ts-expect-error
 /// } satisfies StructuredCloneable;
-///
+/// <br /><br />
 /// const good = {
 /// number: 3,
 /// date: new Date(),
 /// map: new Map&lt;string, number&gt;(),
 /// } satisfies StructuredCloneable;
-///
+/// <br /><br />
 /// const clonedGood = structuredClone(good);
 /// //=&gt; {number: number; date: Date; map: Map&lt;string, number&gt;}
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Structured clone</remarks>
 type StructuredCloneable = obj option
 
@@ -9276,81 +9549,83 @@ type StructuredCloneable2 =
 
 /// <summary>
 /// Returns the difference between two numbers.
-///
+/// <br /><br />
 /// Note:
 /// - A or B can only support <c>-999</c> ~ <c>999</c>.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Subtract, PositiveInfinity} from 'type-fest';
-///
+/// <br /><br />
 /// type A = Subtract&lt;333, 222&gt;;
 /// //=&gt; 111
-///
+/// <br /><br />
 /// type B = Subtract&lt;111, -222&gt;;
 /// //=&gt; 333
-///
+/// <br /><br />
 /// type C = Subtract&lt;-111, 222&gt;;
 /// //=&gt; -333
-///
+/// <br /><br />
 /// type D = Subtract&lt;18, 96&gt;;
 /// //=&gt; -78
-///
+/// <br /><br />
 /// type E = Subtract&lt;PositiveInfinity, 9999&gt;;
 /// //=&gt; Infinity
-///
+/// <br /><br />
 /// type F = Subtract&lt;PositiveInfinity, PositiveInfinity&gt;;
 /// //=&gt; number
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Numeric</remarks>
 [<Erase>]
 type Subtract<'A, 'B> = private Subtract__ of obj
 
 /// <summary>
 /// Returns the sum of two numbers.
-///
+/// <br /><br />
 /// Note:
 /// - A or B can only support <c>-999</c> ~ <c>999</c>.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Sum, PositiveInfinity, NegativeInfinity} from 'type-fest';
-///
+/// <br /><br />
 /// type A = Sum&lt;111, 222&gt;;
 /// //=&gt; 333
-///
+/// <br /><br />
 /// type B = Sum&lt;-111, 222&gt;;
 /// //=&gt; 111
-///
+/// <br /><br />
 /// type C = Sum&lt;111, -222&gt;;
 /// //=&gt; -111
-///
+/// <br /><br />
 /// type D = Sum&lt;PositiveInfinity, -9999&gt;;
 /// //=&gt; Infinity
-///
+/// <br /><br />
 /// type E = Sum&lt;PositiveInfinity, NegativeInfinity&gt;;
 /// //=&gt; number
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Numeric</remarks>
 [<Erase>]
 type Sum<'A, 'B> = private Sum__ of obj
 
 /// <summary>
 /// Create a union of types that share a common discriminant property.
-///
+/// <br /><br />
 /// Use-case: A shorter way to declare tagged unions with multiple members.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {TaggedUnion} from 'type-fest';
-///
+/// <br /><br />
 /// type Tagged&lt;Fields extends Record&lt;string, Record&lt;string, unknown&gt;&gt;&gt; = TaggedUnion&lt;'type', Fields&gt;;
-///
+/// <br /><br />
 /// // The TaggedUnion utility reduces the amount of boilerplate needed to create a tagged union with multiple members, making the code more concise.
 /// type EventMessage = Tagged&lt;{
 /// OpenExternalUrl: {
@@ -9369,7 +9644,7 @@ type Sum<'A, 'B> = private Sum__ of obj
 /// navigation?: string;
 /// };
 /// }&gt;;
-///
+/// <br /><br />
 /// // Here is the same type created without this utility.
 /// type ManualEventMessage =
 /// | {
@@ -9381,207 +9656,213 @@ type Sum<'A, 'B> = private Sum__ of obj
 /// | {type: 'ToggleBackButtonVisibility'; visible: boolean}
 /// | {type: 'PurchaseButtonPressed'; price: number; time: Date}
 /// | {type: 'NavigationStateChanged'; navigation?: string};
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Utilities</remarks>
 type TaggedUnion = obj
 
 /// <summary>
 /// Create a <a href="https://medium.com/@KevinBGreene/surviving-the-typescript-ecosystem-branding-and-type-tagging-6cf6e516523d">tagged type</a> that can support <a href="https://github.com/sindresorhus/type-fest/issues/665">multiple tags</a> and <a href="https://medium.com/@ethanresnick/advanced-typescript-tagged-types-improved-with-type-level-metadata-5072fc125fcf">per-tag metadata</a>.
-///
+/// <br /><br />
 /// A type returned by <c>Tagged</c> can be passed to <c>Tagged</c> again, to create a type with multiple tags.
-///
+/// <br /><br />
 /// A tag's name is usually a string (and must be a string, number, or symbol), but each application of a tag can also contain an arbitrary type as its "metadata". See GetTagMetadata for examples and explanation.
-///
+/// <br /><br />
 /// A type <c>A</c> returned by <c>Tagged</c> is assignable to another type <c>B</c> returned by <c>Tagged</c> if and only if:
 ///   - the underlying (untagged) type of <c>A</c> is assignable to the underlying type of <c>B</c>;
 /// 	- <c>A</c> contains at least all the tags <c>B</c> has;
 /// 	- and the metadata type for each of <c>A</c>'s tags is assignable to the metadata type of <c>B</c>'s corresponding tag.
-///
+/// <br /><br />
 /// There have been several discussions about adding similar features to TypeScript. Unfortunately, nothing has (yet) moved forward:
 /// 	- <a href="https://github.com/microsoft/TypeScript/issues/202">Microsoft/TypeScript#202</a>
 /// 	- <a href="https://github.com/microsoft/TypeScript/issues/4895">Microsoft/TypeScript#4895</a>
 /// 	- <a href="https://github.com/microsoft/TypeScript/pull/33290">Microsoft/TypeScript#33290</a>
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Tagged} from 'type-fest';
-///
+/// <br /><br />
 /// type AccountNumber = Tagged&lt;number, 'AccountNumber'&gt;;
 /// type AccountBalance = Tagged&lt;number, 'AccountBalance'&gt;;
-///
+/// <br /><br />
 /// function createAccountNumber(): AccountNumber {
-/// // As you can see, casting from a `number` (the underlying type being tagged) is allowed.
+/// // As you can see, casting from a <c>number</c> (the underlying type being tagged) is allowed.
 /// return 2 as AccountNumber;
 /// }
-///
+/// <br /><br />
 /// declare function getMoneyForAccount(accountNumber: AccountNumber): AccountBalance;
-///
+/// <br /><br />
 /// // This will compile successfully.
 /// getMoneyForAccount(createAccountNumber());
-///
-/// // But this won't, because it has to be explicitly passed as an `AccountNumber` type!
-/// // Critically, you could not accidentally use an `AccountBalance` as an `AccountNumber`.
+/// <br /><br />
+/// // But this won't, because it has to be explicitly passed as an <c>AccountNumber</c> type!
+/// // Critically, you could not accidentally use an <c>AccountBalance</c> as an <c>AccountNumber</c>.
 /// // @ts-expect-error
 /// getMoneyForAccount(2);
-///
+/// <br /><br />
 /// // You can also use tagged values like their underlying, untagged type.
-/// // I.e., this will compile successfully because an `AccountNumber` can be used as a regular `number`.
+/// // I.e., this will compile successfully because an <c>AccountNumber</c> can be used as a regular <c>number</c>.
 /// // In this sense, the underlying base type is not hidden, which differentiates tagged types from opaque types in other languages.
 /// const accountNumber = createAccountNumber() + 2;
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// import type {Tagged} from 'type-fest';
-///
-/// // You can apply multiple tags to a type by using `Tagged` repeatedly.
+/// <br /><br />
+/// // You can apply multiple tags to a type by using <c>Tagged</c> repeatedly.
 /// type Url = Tagged&lt;string, 'URL'&gt;;
 /// type SpecialCacheKey = Tagged&lt;Url, 'SpecialCacheKey'&gt;;
-///
+/// <br /><br />
 /// // You can also pass a union of tag names, so this is equivalent to the above, although it doesn't give you the ability to assign distinct metadata to each tag.
 /// type SpecialCacheKey2 = Tagged&lt;string, 'URL' | 'SpecialCacheKey'&gt;;
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type</remarks>
 [<Erase>]
 type Tagged<'Type, 'TagName, 'TagMetadata> = private Tagged__ of obj
 
 /// <summary>
 /// Given a type and a tag name, returns the metadata associated with that tag on that type.
-///
+/// <br /><br />
 /// In the example below, one could use <c>Tagged&lt;string, 'JSON'&gt;</c> to represent "a string that is valid JSON". That type might be useful -- for instance, it communicates that the value can be safely passed to <c>JSON.parse</c> without it throwing an exception. However, it doesn't indicate what type of value will be produced on parse (which is sometimes known). <c>JsonOf&lt;T&gt;</c> solves this; it represents "a string that is valid JSON and that, if parsed, would produce a value of type T". The type T is held in the metadata associated with the <c>'JSON'</c> tag.
-///
+/// <br /><br />
 /// This article explains more about <a href="https://medium.com/@ethanresnick/advanced-typescript-tagged-types-improved-with-type-level-metadata-5072fc125fcf">how tag metadata works and when it can be useful</a>.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Tagged, GetTagMetadata} from 'type-fest';
-///
+/// <br /><br />
 /// type JsonOf&lt;T&gt; = Tagged&lt;string, 'JSON', T&gt;;
-///
+/// <br /><br />
 /// function stringify&lt;T&gt;(it: T) {
 /// return JSON.stringify(it) as JsonOf&lt;T&gt;;
 /// }
-///
+/// <br /><br />
 /// function parse&lt;T extends JsonOf&lt;unknown&gt;&gt;(it: T) {
 /// return JSON.parse(it) as GetTagMetadata&lt;T, 'JSON'&gt;;
 /// }
-///
+/// <br /><br />
 /// const x = stringify({hello: 'world'});
-/// const parsed = parse(x); // The type of `parsed` is { hello: string }
+/// const parsed = parse(x); // The type of <c>parsed</c> is { hello: string }
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type</remarks>
 type GetTagMetadata = obj
 
 /// <summary>
 /// Get the untagged portion of a tagged type created with <c>Tagged</c>.
-///
+/// <br /><br />
 /// Why is this necessary?
-///
+/// <br /><br />
 /// 1. Use a <c>Tagged</c> type as object keys
 /// 2. Prevent TS4058 error: "Return type of exported function has or is using name X from external module Y but cannot be named"
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Tagged, UnwrapTagged} from 'type-fest';
-///
+/// <br /><br />
 /// type AccountType = Tagged&lt;'SAVINGS' | 'CHECKING', 'AccountType'&gt;;
-///
+/// <br /><br />
 /// const moneyByAccountType: Record&lt;UnwrapTagged&lt;AccountType&gt;, number&gt; = {
 /// SAVINGS: 99,
 /// CHECKING: 0.1,
 /// };
-///
+/// <br /><br />
 /// // Without UnwrapTagged, the following expression would throw a type error.
 /// const money = moneyByAccountType.SAVINGS; // TS error: Property 'SAVINGS' does not exist
-///
+/// <br /><br />
 /// // Attempting to pass a non-Tagged type to UnwrapTagged will raise a type error.
 /// // @ts-expect-error
 /// type WontWork = UnwrapTagged&lt;string&gt;;
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type</remarks>
 [<Erase>]
 type UnwrapTagged<'TaggedType> = private UnwrapTagged__ of obj
 
 /// <summary>
 /// Note: The <c>Opaque</c> type is deprecated in favor of <c>Tagged</c>.
-///
+/// <br /><br />
 /// Attach a "tag" to an arbitrary type. This allows you to create distinct types, that aren't assignable to one another, for runtime values that would otherwise have the same type. (See examples.)
-///
+/// <br /><br />
 /// The generic type parameters can be anything.
-///
+/// <br /><br />
 /// Note that <c>Opaque</c> is somewhat of a misnomer here, in that, unlike <a href="https://github.com/microsoft/TypeScript/issues/4895#issuecomment-425132582">some alternative implementations</a>, the original, untagged type is not actually hidden. (E.g., functions that accept the untagged type can still be called with the "opaque" version -- but not vice-versa.)
-///
+/// <br /><br />
 /// Also note that this implementation is limited to a single tag. If you want to allow multiple tags, use <c>Tagged</c> instead.
-///
+/// <br /><br />
 /// <a href="https://medium.com/@KevinBGreene/surviving-the-typescript-ecosystem-branding-and-type-tagging-6cf6e516523d">Read more about tagged types.</a>
-///
+/// <br /><br />
 /// There have been several discussions about adding similar features to TypeScript. Unfortunately, nothing has (yet) moved forward:
 /// 	- <a href="https://github.com/microsoft/TypeScript/issues/202">Microsoft/TypeScript#202</a>
 /// 	- <a href="https://github.com/Microsoft/TypeScript/issues/15408">Microsoft/TypeScript#15408</a>
 /// 	- <a href="https://github.com/Microsoft/TypeScript/issues/15807">Microsoft/TypeScript#15807</a>
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Opaque} from 'type-fest';
-///
+/// <br /><br />
 /// type AccountNumber = Opaque&lt;number, 'AccountNumber'&gt;;
 /// type AccountBalance = Opaque&lt;number, 'AccountBalance'&gt;;
-///
-/// // The `Token` parameter allows the compiler to differentiate between types, whereas "unknown" will not. For example, consider the following structures:
+/// <br /><br />
+/// // The <c>Token</c> parameter allows the compiler to differentiate between types, whereas "unknown" will not. For example, consider the following structures:
 /// type ThingOne = Opaque&lt;string&gt;;
 /// type ThingTwo = Opaque&lt;string&gt;;
-///
-/// // To the compiler, these types are allowed to be cast to each other as they have the same underlying type. They are both `string &amp; { __opaque__: unknown }`.
+/// <br /><br />
+/// // To the compiler, these types are allowed to be cast to each other as they have the same underlying type. They are both <c>string &amp; { __opaque__: unknown }</c>.
 /// // To avoid this behaviour, you would instead pass the "Token" parameter, like so.
 /// type NewThingOne = Opaque&lt;string, 'ThingOne'&gt;;
 /// type NewThingTwo = Opaque&lt;string, 'ThingTwo'&gt;;
-///
+/// <br /><br />
 /// // Now they're completely separate types, so the following will fail to compile.
 /// function createNewThingOne(): NewThingOne {
 /// // As you can see, casting from a string is still allowed. However, you may not cast NewThingOne to NewThingTwo, and vice versa.
 /// return 'new thing one' as NewThingOne;
 /// }
-///
+/// <br /><br />
 /// // This will fail to compile, as they are fundamentally different types.
 /// // @ts-expect-error
 /// const thingTwo = createNewThingOne() as NewThingTwo;
-///
+/// <br /><br />
 /// // Here's another example of opaque typing.
 /// function createAccountNumber(): AccountNumber {
 /// return 2 as AccountNumber;
 /// }
-///
+/// <br /><br />
 /// declare function getMoneyForAccount(accountNumber: AccountNumber): AccountBalance;
-///
+/// <br /><br />
 /// // This will compile successfully.
 /// getMoneyForAccount(createAccountNumber());
-///
-/// // But this won't, because it has to be explicitly passed as an `AccountNumber` type.
+/// <br /><br />
+/// // But this won't, because it has to be explicitly passed as an <c>AccountNumber</c> type.
 /// // @ts-expect-error
 /// getMoneyForAccount(2);
-///
+/// <br /><br />
 /// // You can use opaque values like they aren't opaque too.
 /// const accountNumber = createAccountNumber();
-///
+/// <br /><br />
 /// // This will compile successfully.
 /// const newAccountNumber = accountNumber + 2;
-///
+/// <br /><br />
 /// // As a side note, you can (and should) use recursive types for your opaque types to make them stronger and hopefully easier to type.
 /// type Person = {
 /// id: Opaque&lt;number, Person&gt;;
 /// name: string;
 /// };
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type</remarks>
 /// <remarks>@deprecated Use {@link Tagged} instead</remarks>
 [<Erase>]
@@ -9589,38 +9870,39 @@ type Opaque<'Type, 'Token> = private Opaque__ of obj
 
 /// <summary>
 /// Note: The <c>UnwrapOpaque</c> type is deprecated in favor of <c>UnwrapTagged</c>.
-///
+/// <br /><br />
 /// Revert an opaque or tagged type back to its original type by removing the readonly <c>[tag]</c>.
-///
+/// <br /><br />
 /// Why is this necessary?
-///
+/// <br /><br />
 /// 1. Use an <c>Opaque</c> type as object keys
 /// 2. Prevent TS4058 error: "Return type of exported function has or is using name X from external module Y but cannot be named"
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Opaque, UnwrapOpaque} from 'type-fest';
-///
+/// <br /><br />
 /// type AccountType = Opaque&lt;'SAVINGS' | 'CHECKING', 'AccountType'&gt;;
-///
+/// <br /><br />
 /// const moneyByAccountType: Record&lt;UnwrapOpaque&lt;AccountType&gt;, number&gt; = {
 /// SAVINGS: 99,
 /// CHECKING: 0.1,
 /// };
-///
+/// <br /><br />
 /// // Without UnwrapOpaque, the following expression would throw a type error.
 /// const money = moneyByAccountType.SAVINGS; // TS error: Property 'SAVINGS' does not exist
-///
+/// <br /><br />
 /// // Attempting to pass a non-Opaque type to UnwrapOpaque will raise a type error.
 /// // @ts-expect-error
 /// type WontWork = UnwrapOpaque&lt;string&gt;;
-///
+/// <br /><br />
 /// // Using a Tagged type will work too.
 /// // @ts-expect-error
 /// type WillWork = UnwrapOpaque&lt;Tagged&lt;number, 'AccountNumber'&gt;&gt;; // number
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type</remarks>
 /// <remarks>@deprecated Use {@link UnwrapTagged} instead</remarks>
 [<Erase>]
@@ -9629,15 +9911,16 @@ type UnwrapOpaque<'OpaqueType> = private UnwrapOpaque__ of obj
 /// <summary>
 /// Remove leading and trailing spaces from a string.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Trim} from 'type-fest';
-///
+/// <br /><br />
 /// type Example = Trim&lt;' foo '&gt;;
 /// //=&gt; 'foo'
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category String</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
@@ -9675,13 +9958,13 @@ type TsConfigJson =
     abstract files: string[] option with get, set
     /// <summary>
     /// Specifies a list of files to be excluded from compilation. The <c>exclude</c> property only affects the files included via the <c>include</c> property and not the <c>files</c> property.
-    ///
+    /// <br /><br />
     /// Glob patterns require TypeScript version 2.0 or later.
     /// </summary>
     abstract exclude: string[] option with get, set
     /// <summary>
     /// Specifies a list of glob patterns that match files to be included in compilation.
-    ///
+    /// <br /><br />
     /// If no <c>files</c> or <c>include</c> property is present in a <c>tsconfig.json</c>, the compiler defaults to including all files in the containing directory and subdirectories except those specified by <c>exclude</c>.
     /// </summary>
     abstract ``include``: string[] option with get, set
@@ -9697,18 +9980,18 @@ module TsConfigJson =
         /// <summary>
         /// The character set of the input files.
         /// </summary>
-        /// <remarks>@default 'utf8'</remarks>
+        /// <defaultValue>'utf8'</defaultValue>
         /// <remarks>@deprecated This option will be removed in TypeScript 5.5.</remarks>
         abstract charset: string option with get, set
         /// <summary>
         /// Enables building for project references.
         /// </summary>
-        /// <remarks>@default true</remarks>
+        /// <defaultValue>true</defaultValue>
         abstract composite: bool option with get, set
         /// <summary>
         /// Generates corresponding d.ts files.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract declaration: bool option with get, set
         /// <summary>
         /// Specify output directory for generated declaration files.
@@ -9717,84 +10000,84 @@ module TsConfigJson =
         /// <summary>
         /// Show diagnostic information.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract diagnostics: bool option with get, set
         /// <summary>
         /// Reduce the number of projects loaded automatically by TypeScript.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract disableReferencedProjectLoad: bool option with get, set
         /// <summary>
         /// Enforces using indexed accessors for keys declared using an indexed type.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract noPropertyAccessFromIndexSignature: bool option with get, set
         /// <summary>
         /// Emit a UTF-8 Byte Order Mark (BOM) in the beginning of output files.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract emitBOM: bool option with get, set
         /// <summary>
         /// Only emit <c>.d.ts</c> declaration files.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract emitDeclarationOnly: bool option with get, set
         /// <summary>
         /// Differentiate between undefined and not present when type checking.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract exactOptionalPropertyTypes: bool option with get, set
         /// <summary>
         /// Enable incremental compilation.
         /// </summary>
-        /// <remarks>@default <c>composite</c></remarks>
+        /// <defaultValue><c>composite</c></defaultValue>
         abstract incremental: bool option with get, set
         /// <summary>
         /// Specify file to store incremental compilation information.
         /// </summary>
-        /// <remarks>@default '.tsbuildinfo'</remarks>
+        /// <defaultValue>'.tsbuildinfo'</defaultValue>
         abstract tsBuildInfoFile: string option with get, set
         /// <summary>
         /// Emit a single file with source maps instead of having a separate file.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract inlineSourceMap: bool option with get, set
         /// <summary>
         /// Emit the source alongside the sourcemaps within a single file.
-        ///
+        /// <br /><br />
         /// Requires <c>--inlineSourceMap</c> to be set.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract inlineSources: bool option with get, set
         /// <summary>
         /// Specify what JSX code is generated.
         /// </summary>
-        /// <remarks>@default 'preserve'</remarks>
+        /// <defaultValue>'preserve'</defaultValue>
         abstract jsx: TsConfigJson.CompilerOptions.Jsx option with get, set
         /// <summary>
         /// Specifies the object invoked for <c>createElement</c> and <c>__spread</c> when targeting <c>'react'</c> JSX emit.
         /// </summary>
-        /// <remarks>@default 'React'</remarks>
+        /// <defaultValue>'React'</defaultValue>
         abstract reactNamespace: string option with get, set
         /// <summary>
         /// Specify the JSX factory function to use when targeting React JSX emit, e.g. <c>React.createElement</c> or <c>h</c>.
         /// </summary>
-        /// <remarks>@default 'React.createElement'</remarks>
+        /// <defaultValue>'React.createElement'</defaultValue>
         abstract jsxFactory: string option with get, set
         /// <summary>
         /// Specify the JSX Fragment reference used for fragments when targeting React JSX emit e.g. 'React.Fragment' or 'Fragment'.
         /// </summary>
-        /// <remarks>@default 'React.Fragment'</remarks>
+        /// <defaultValue>'React.Fragment'</defaultValue>
         abstract jsxFragmentFactory: string option with get, set
         /// <summary>
         /// Specify module specifier used to import the JSX factory functions when using <c>jsx: react-jsx*</c>.
         /// </summary>
-        /// <remarks>@default 'react'</remarks>
+        /// <defaultValue>'react'</defaultValue>
         abstract jsxImportSource: string option with get, set
         /// <summary>
         /// Print names of files part of the compilation.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract listFiles: bool option with get, set
         /// <summary>
         /// Specifies the location where debugger should locate map files instead of generated locations.
@@ -9802,74 +10085,74 @@ module TsConfigJson =
         abstract mapRoot: string option with get, set
         /// <summary>
         /// Specify module code generation: 'None', 'CommonJS', 'AMD', 'System', 'UMD', 'ES6', 'ES2015' or 'ESNext'. Only 'AMD' and 'System' can be used in conjunction with <c>--outFile</c>. 'ES6' and 'ES2015' values may be used when targeting 'ES5' or lower.
-        ///
+        /// <br /><br />
         /// Default: <c>'ESNext'</c> since TypeScript 6.0, <c>['ES3', 'ES5'].includes(target) ? 'CommonJS' : 'ES6'</c> before.
         /// </summary>
         abstract ``module``: TsConfigJson.CompilerOptions.Module option with get, set
         /// <summary>
         /// Specifies module resolution strategy: 'node' (Node) or 'classic' (TypeScript pre 1.6).
         /// </summary>
-        /// <remarks>@default ['AMD', 'System', 'ES6'].includes(module) ? 'classic' : 'node'</remarks>
+        /// <defaultValue>['AMD', 'System', 'ES6'].includes(module) ? 'classic' : 'node'</defaultValue>
         abstract moduleResolution: TsConfigJson.CompilerOptions.ModuleResolution option with get, set
         /// <summary>
         /// Specifies the end of line sequence to be used when emitting files: 'crlf' (Windows) or 'lf' (Unix).
         /// </summary>
-        /// <remarks>@default 'LF'</remarks>
+        /// <defaultValue>'LF'</defaultValue>
         abstract newLine: TsConfigJson.CompilerOptions.NewLine option with get, set
         /// <summary>
         /// Disable full type checking (only critical parse and emit errors will be reported).
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract noCheck: bool option with get, set
         /// <summary>
         /// Do not emit output.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract noEmit: bool option with get, set
         /// <summary>
         /// Do not generate custom helper functions like <c>__extends</c> in compiled output.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract noEmitHelpers: bool option with get, set
         /// <summary>
         /// Do not emit outputs if any type checking errors were reported.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract noEmitOnError: bool option with get, set
         /// <summary>
         /// Warn on expressions and declarations with an implied 'any' type.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract noImplicitAny: bool option with get, set
         /// <summary>
         /// Raise error on 'this' expressions with an implied any type.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract noImplicitThis: bool option with get, set
         /// <summary>
         /// Report errors on unused locals.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract noUnusedLocals: bool option with get, set
         /// <summary>
         /// Report errors on unused parameters.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract noUnusedParameters: bool option with get, set
         /// <summary>
         /// Do not include the default library file (lib.d.ts).
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract noLib: bool option with get, set
         /// <summary>
         /// Do not add triple-slash references or module import targets to the list of compiled files.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract noResolve: bool option with get, set
         /// <summary>
         /// Disable strict checking of generic signatures in function types.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         /// <remarks>@deprecated This option will be removed in TypeScript 5.5.</remarks>
         abstract noStrictGenericChecks: bool option with get, set
         /// <remarks>@deprecated use <c>skipLibCheck</c> instead.</remarks>
@@ -9877,12 +10160,12 @@ module TsConfigJson =
         /// <summary>
         /// Skip type checking of declaration files.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract skipLibCheck: bool option with get, set
         /// <summary>
         /// Enforce stable type ordering.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract stableTypeOrdering: bool option with get, set
         /// <summary>
         /// Concatenate and emit output to single file.
@@ -9896,53 +10179,53 @@ module TsConfigJson =
         /// <summary>
         /// Do not erase const enum declarations in generated code.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract preserveConstEnums: bool option with get, set
         /// <summary>
         /// Do not resolve symlinks to their real path; treat a symlinked file like a real one.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract preserveSymlinks: bool option with get, set
         /// <summary>
         /// Keep outdated console output in watch mode instead of clearing the screen.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract preserveWatchOutput: bool option with get, set
         /// <summary>
         /// Stylize errors and messages using color and context (experimental).
         /// </summary>
-        /// <remarks>@default true // Unless piping to another program or redirecting output to a file.</remarks>
+        /// <defaultValue>true // Unless piping to another program or redirecting output to a file.</defaultValue>
         abstract pretty: bool option with get, set
         /// <summary>
         /// Do not emit comments to output.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract removeComments: bool option with get, set
         /// <summary>
         /// Rewrite '.ts', '.tsx', '.mts', and '.cts' file extensions in relative import paths to their JavaScript equivalent in output files.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract rewriteRelativeImportExtensions: bool option with get, set
         /// <summary>
         /// Specifies the root directory of input files.
-        ///
+        /// <br /><br />
         /// Use to control the output directory structure with <c>--outDir</c>.
         /// </summary>
         abstract rootDir: string option with get, set
         /// <summary>
         /// Unconditionally emit imports for unresolved files.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract isolatedModules: bool option with get, set
         /// <summary>
         /// Require sufficient annotation on exports so other tools can trivially generate declaration files.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract isolatedDeclarations: bool option with get, set
         /// <summary>
         /// Generates corresponding '.map' file.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract sourceMap: bool option with get, set
         /// <summary>
         /// Specifies the location where debugger should locate TypeScript files instead of source locations.
@@ -9951,13 +10234,13 @@ module TsConfigJson =
         /// <summary>
         /// Suppress excess property checks for object literals.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         /// <remarks>@deprecated This option will be removed in TypeScript 5.5.</remarks>
         abstract suppressExcessPropertyErrors: bool option with get, set
         /// <summary>
         /// Suppress noImplicitAny errors for indexing objects lacking index signatures.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         /// <remarks>@deprecated This option will be removed in TypeScript 5.5.</remarks>
         abstract suppressImplicitAnyIndexErrors: bool option with get, set
         /// <summary>
@@ -9966,19 +10249,19 @@ module TsConfigJson =
         abstract stripInternal: bool option with get, set
         /// <summary>
         /// Specify ECMAScript target version.
-        ///
+        /// <br /><br />
         /// Default: Current-year ES version since TypeScript 6.0, <c>'es3'</c> before.
         /// </summary>
         abstract target: TsConfigJson.CompilerOptions.Target option with get, set
         /// <summary>
         /// Default catch clause variables as <c>unknown</c> instead of <c>any</c>.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract useUnknownInCatchVariables: bool option with get, set
         /// <summary>
         /// Watch input files.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         /// <remarks>@deprecated Use watchOptions instead.</remarks>
         abstract watch: bool option with get, set
         /// <summary>
@@ -9989,70 +10272,70 @@ module TsConfigJson =
         /// <summary>
         /// Specify the strategy for watching directories under systems that lack recursive file-watching functionality.
         /// </summary>
-        /// <remarks>@default 'useFsEvents'</remarks>
+        /// <defaultValue>'useFsEvents'</defaultValue>
         /// <remarks>@deprecated Use watchOptions.watchDirectory instead.</remarks>
         abstract watchDirectory: TsConfigJson.CompilerOptions.WatchDirectory option with get, set
         /// <summary>
         /// Specify the strategy for watching individual files.
         /// </summary>
-        /// <remarks>@default 'useFsEvents'</remarks>
+        /// <defaultValue>'useFsEvents'</defaultValue>
         /// <remarks>@deprecated Use watchOptions.watchFile instead.</remarks>
         abstract watchFile: TsConfigJson.CompilerOptions.WatchFile option with get, set
         /// <summary>
         /// Enables experimental support for ES7 decorators.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract experimentalDecorators: bool option with get, set
         /// <summary>
         /// Emit design-type metadata for decorated declarations in source.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract emitDecoratorMetadata: bool option with get, set
         /// <summary>
         /// Do not report errors on unused labels.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract allowUnusedLabels: bool option with get, set
         /// <summary>
         /// Report error when not all code paths in function return a value.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract noImplicitReturns: bool option with get, set
         /// <summary>
         /// Add <c>undefined</c> to a type when accessed using an index.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract noUncheckedIndexedAccess: bool option with get, set
         /// <summary>
         /// Report error if failed to find a source file for a side effect import.
-        ///
+        /// <br /><br />
         /// Default: <c>true</c> since TypeScript 6.0, <c>false</c> before.
         /// </summary>
         abstract noUncheckedSideEffectImports: bool option with get, set
         /// <summary>
         /// Report errors for fallthrough cases in switch statement.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract noFallthroughCasesInSwitch: bool option with get, set
         /// <summary>
         /// Ensure overriding members in derived classes are marked with an override modifier.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract noImplicitOverride: bool option with get, set
         /// <summary>
         /// Do not report errors on unreachable code.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract allowUnreachableCode: bool option with get, set
         /// <summary>
         /// Disallow inconsistently-cased references to the same file.
         /// </summary>
-        /// <remarks>@default true</remarks>
+        /// <defaultValue>true</defaultValue>
         abstract forceConsistentCasingInFileNames: bool option with get, set
         /// <summary>
         /// Emit a v8 CPU profile of the compiler run for debugging.
         /// </summary>
-        /// <remarks>@default 'profile.cpuprofile'</remarks>
+        /// <defaultValue>'profile.cpuprofile'</defaultValue>
         abstract generateCpuProfile: string option with get, set
         /// <summary>
         /// Generates an event trace and a list of types.
@@ -10086,38 +10369,38 @@ module TsConfigJson =
         /// <summary>
         /// Enable tracing of the name resolution process.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract traceResolution: bool option with get, set
         /// <summary>
         /// Allow javascript files to be compiled.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract allowJs: bool option with get, set
         /// <summary>
         /// Do not truncate error messages.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract noErrorTruncation: bool option with get, set
         /// <summary>
         /// Allow default imports from modules with no default export. This does not affect code emit, just typechecking.
         /// </summary>
-        /// <remarks>@default module === 'system' || esModuleInterop</remarks>
+        /// <defaultValue>module === 'system' || esModuleInterop</defaultValue>
         abstract allowSyntheticDefaultImports: bool option with get, set
         /// <summary>
         /// Do not emit <c>'use strict'</c> directives in module output.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         /// <remarks>@deprecated This option will be removed in TypeScript 5.5.</remarks>
         abstract noImplicitUseStrict: bool option with get, set
         /// <summary>
         /// Enable to list all emitted files.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract listEmittedFiles: bool option with get, set
         /// <summary>
         /// Disable size limit for JavaScript project.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract disableSizeLimit: bool option with get, set
         /// <summary>
         /// List of library files to be included in the compilation.
@@ -10126,131 +10409,131 @@ module TsConfigJson =
         /// <summary>
         /// Enable strict null checks.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract strictNullChecks: bool option with get, set
         /// <summary>
         /// The maximum dependency depth to search under <c>node_modules</c> and load JavaScript files. Only applicable with <c>--allowJs</c>.
         /// </summary>
-        /// <remarks>@default 0</remarks>
+        /// <defaultValue>0</defaultValue>
         abstract maxNodeModuleJsDepth: float option with get, set
         /// <summary>
         /// Import emit helpers (e.g. <c>__extends</c>, <c>__rest</c>, etc..) from tslib.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract importHelpers: bool option with get, set
         /// <summary>
         /// Specify emit/checking behavior for imports that are only used for types.
         /// </summary>
-        /// <remarks>@default 'remove'</remarks>
+        /// <defaultValue>'remove'</defaultValue>
         /// <remarks>@deprecated Use <c>verbatimModuleSyntax</c> instead.</remarks>
         abstract importsNotUsedAsValues: TsConfigJson.CompilerOptions.ImportsNotUsedAsValues option with get, set
         /// <summary>
         /// Parse in strict mode and emit <c>'use strict'</c> for each source file.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract alwaysStrict: bool option with get, set
         /// <summary>
         /// Enable all strict type checking options.
-        ///
+        /// <br /><br />
         /// Default: <c>true</c> since TypeScript 6.0, <c>false</c> before.
         /// </summary>
         abstract strict: bool option with get, set
         /// <summary>
         /// Enable stricter checking of of the <c>bind</c>, <c>call</c>, and <c>apply</c> methods on functions.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract strictBindCallApply: bool option with get, set
         /// <summary>
         /// Provide full support for iterables in <c>for-of</c>, spread, and destructuring when targeting <c>ES5</c> or <c>ES3</c>.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         /// <remarks>@deprecated since TypeScript 6.0.</remarks>
         abstract downlevelIteration: bool option with get, set
         /// <summary>
         /// Report errors in <c>.js</c> files.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract checkJs: bool option with get, set
         /// <summary>
         /// Built-in iterators are instantiated with a <c>TReturn</c> type of undefined instead of <c>any</c>.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract strictBuiltinIteratorReturn: bool option with get, set
         /// <summary>
         /// Disable bivariant parameter checking for function types.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract strictFunctionTypes: bool option with get, set
         /// <summary>
         /// Ensure non-undefined class properties are initialized in the constructor.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract strictPropertyInitialization: bool option with get, set
         /// <summary>
         /// Emit <c>__importStar</c> and <c>__importDefault</c> helpers for runtime Babel ecosystem compatibility and enable <c>--allowSyntheticDefaultImports</c> for typesystem compatibility.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract esModuleInterop: bool option with get, set
         /// <summary>
         /// Allow accessing UMD globals from modules.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract allowUmdGlobalAccess: bool option with get, set
         /// <summary>
         /// Resolve <c>keyof</c> to string valued property names only (no numbers or symbols).
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         /// <remarks>@deprecated This option will be removed in TypeScript 5.5.</remarks>
         abstract keyofStringsOnly: bool option with get, set
         /// <summary>
         /// Emit ECMAScript standard class fields.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract useDefineForClassFields: bool option with get, set
         /// <summary>
         /// Generates a sourcemap for each corresponding <c>.d.ts</c> file.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract declarationMap: bool option with get, set
         /// <summary>
         /// Include modules imported with <c>.json</c> extension.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract resolveJsonModule: bool option with get, set
         /// <summary>
         /// Have recompiles in '--incremental' and '--watch' assume that changes within a file will only affect files directly depending on it.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract assumeChangesOnlyAffectDirectDependencies: bool option with get, set
         /// <summary>
         /// Output more detailed compiler performance information after building.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract extendedDiagnostics: bool option with get, set
         /// <summary>
         /// Print names of files that are part of the compilation and then stop processing.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract listFilesOnly: bool option with get, set
         /// <summary>
         /// Disable preferring source files instead of declaration files when referencing composite projects.
         /// </summary>
-        /// <remarks>@default true if composite, false otherwise</remarks>
+        /// <defaultValue>true if composite, false otherwise</defaultValue>
         abstract disableSourceOfProjectReferenceRedirect: bool option with get, set
         /// <summary>
         /// Opt a project out of multi-project reference checking when editing.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract disableSolutionSearching: bool option with get, set
         /// <summary>
         /// Print names of files which TypeScript sees as a part of your project and the reason they are part of the compilation.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract explainFiles: bool option with get, set
         /// <summary>
         /// Preserve unused imported values in the JavaScript output that would otherwise be removed.
         /// </summary>
-        /// <remarks>@default true</remarks>
+        /// <defaultValue>true</defaultValue>
         /// <remarks>@deprecated Use <c>verbatimModuleSyntax</c> instead.</remarks>
         abstract preserveValueImports: bool option with get, set
         /// <summary>
@@ -10260,27 +10543,27 @@ module TsConfigJson =
         /// <summary>
         /// Control what method is used to detect module-format JS files.
         /// </summary>
-        /// <remarks>@default 'auto'</remarks>
+        /// <defaultValue>'auto'</defaultValue>
         abstract moduleDetection: TsConfigJson.CompilerOptions.ModuleDetection option with get, set
         /// <summary>
         /// Allows TypeScript files to import each other with a TypeScript-specific extension like .ts, .mts, or .tsx.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract allowImportingTsExtensions: bool option with get, set
         /// <summary>
         /// Forces TypeScript to consult the exports field of package.json files if it ever reads from a package in node_modules.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract resolvePackageJsonExports: bool option with get, set
         /// <summary>
         /// Forces TypeScript to consult the imports field of package.json files when performing a lookup that starts with # from a file whose ancestor directory contains a package.json.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract resolvePackageJsonImports: bool option with get, set
         /// <summary>
         /// Suppress errors for file formats that TypeScript does not understand.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract allowArbitraryExtensions: bool option with get, set
         /// <summary>
         /// List of additional conditions that should succeed when TypeScript resolves from package.json.
@@ -10289,7 +10572,7 @@ module TsConfigJson =
         /// <summary>
         /// Anything that uses the type modifier is dropped entirely.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract verbatimModuleSyntax: bool option with get, set
         /// <summary>
         /// Suppress deprecation warnings
@@ -10298,11 +10581,11 @@ module TsConfigJson =
         /// <summary>
         /// Do not allow runtime constructs that are not part of ECMAScript.
         /// </summary>
-        /// <remarks>@default false</remarks>
+        /// <defaultValue>false</defaultValue>
         abstract erasableSyntaxOnly: bool option with get, set
         /// <summary>
         /// Enable lib replacement.
-        ///
+        /// <br /><br />
         /// Default: <c>false</c> since TypeScript 6.0, <c>true</c> before.
         /// </summary>
         abstract libReplacement: bool option with get, set
@@ -10682,7 +10965,7 @@ module TsConfigJson =
             abstract originalPath: string option with get, set
             /// <summary>
             /// True if the output of this reference should be prepended to the output of this project.
-            ///
+            /// <br /><br />
             /// Only valid for <c>--outFile</c> compilations.
             /// </summary>
             /// <remarks>@deprecated This option will be removed in TypeScript 5.5.</remarks>
@@ -10720,12 +11003,12 @@ module TsConfigJson =
         /// <summary>
         /// Specify the strategy for watching individual files.
         /// </summary>
-        /// <remarks>@default 'UseFsEvents'</remarks>
+        /// <defaultValue>'UseFsEvents'</defaultValue>
         abstract watchFile: TsConfigJson.WatchOptions.WatchFile option with get, set
         /// <summary>
         /// Specify the strategy for watching directories under systems that lack recursive file-watching functionality.
         /// </summary>
-        /// <remarks>@default 'UseFsEvents'</remarks>
+        /// <defaultValue>'UseFsEvents'</defaultValue>
         abstract watchDirectory: TsConfigJson.WatchOptions.WatchDirectory option with get, set
         /// <summary>
         /// Specify the polling strategy to use when the system runs out of or doesn't support native file watchers.
@@ -10787,174 +11070,183 @@ module TsConfigJson =
 /// <summary>
 /// Create a tuple type of the specified length with elements of the specified type.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {TupleOf} from 'type-fest';
-///
+/// <br /><br />
 /// type RGB = TupleOf&lt;3, number&gt;;
 /// //=&gt; [number, number, number]
-///
+/// <br /><br />
 /// type Line = TupleOf&lt;2, {x: number; y: number}&gt;;
 /// //=&gt; [{x: number; y: number}, {x: number; y: number}]
-///
+/// <br /><br />
 /// type TicTacToeBoard = TupleOf&lt;3, TupleOf&lt;3, 'X' | 'O' | null&gt;&gt;;
 /// //=&gt; [['X' | 'O' | null, 'X' | 'O' | null, 'X' | 'O' | null], ['X' | 'O' | null, 'X' | 'O' | null, 'X' | 'O' | null], ['X' | 'O' | null, 'X' | 'O' | null, 'X' | 'O' | null]]
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// import type {TupleOf} from 'type-fest';
-///
+/// <br /><br />
 /// type Range&lt;Start extends number, End extends number&gt; = Exclude&lt;keyof TupleOf&lt;End&gt;, keyof TupleOf&lt;Start&gt;&gt;;
-///
+/// <br /><br />
 /// type ZeroToFour = Range&lt;0, 5&gt;;
 /// //=&gt; '0' | '1' | '2' | '3' | '4'
-///
+/// <br /><br />
 /// type ThreeToEight = Range&lt;3, 9&gt;;
 /// //=&gt; '3' | '4' | '5' | '6' | '7' | '8'
-/// </code>
-///
-/// Note: If the specified length is the non-literal <c>number</c> type, the result will not be a tuple but a regular array.
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
-/// import type {TupleOf} from 'type-fest';
 ///
+/// Note: If the specified length is the non-literal `number` type, the result will not be a tuple but a regular array.
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
+/// import type {TupleOf} from 'type-fest';
+/// <br /><br />
 /// type StringArray = TupleOf&lt;number, string&gt;;
 /// //=&gt; string[]
-/// </code>
-///
-/// Note: If the type for elements is not specified, it will default to <c>unknown</c>.
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
-/// import type {TupleOf} from 'type-fest';
 ///
+/// Note: If the type for elements is not specified, it will default to `unknown`.
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
+/// import type {TupleOf} from 'type-fest';
+/// <br /><br />
 /// type UnknownTriplet = TupleOf&lt;3&gt;;
 /// //=&gt; [unknown, unknown, unknown]
-/// </code>
+/// <code>
 ///
 /// Note: If the specified length is negative, the result will be an empty tuple.
-/// </remarks>
-/// <remarks>
-/// @example
+/// </code>
+/// </example>
+/// <example>
 /// <code>
+/// </code>
 /// import type {TupleOf} from 'type-fest';
-///
+/// <br /><br />
 /// type EmptyTuple = TupleOf&lt;-3, string&gt;;
 /// //=&gt; []
-/// </code>
+/// <code>
 ///
 /// Note: If the specified length has a decimal part, the decimal part will be ignored.
-/// </remarks>
-/// <remarks>
-/// @example
+/// </code>
+/// </example>
+/// <example>
 /// <code>
+/// </code>
 /// import type {TupleOf} from 'type-fest';
-///
+/// <br /><br />
 /// type DecimalLength = TupleOf&lt;3.5, string&gt;;
 /// //=&gt; [string, string, string]
-/// </code>
+/// <code>
 ///
-/// Note: If you need a readonly tuple, simply wrap this type with <c>Readonly</c>, for example, to create <c>readonly [number, number, number]</c> use <c>Readonly&lt;TupleOf&lt;3, number&gt;&gt;</c>.
-/// </remarks>
+/// Note: If you need a readonly tuple, simply wrap this type with `Readonly`, for example, to create `readonly [number, number, number]` use `Readonly&lt;TupleOf&lt;3, number&gt;&gt;`.
+/// </code>
+/// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
 type TupleOf<'Length, 'Fill> = private TupleOf__ of obj
 
 /// <summary>
 /// Transforms a tuple into an object, mapping each tuple index to its corresponding type as a key-value pair.
-///
+/// <br /><br />
 /// Note: Tuple labels are <a href="https://stackoverflow.com/a/70398429/11719314">lost in the transformation process</a>. For example, <c>TupleToObject&lt;[x: number, y: number]&gt;</c> produces <c>{0: number; 1: number}</c>, and not <c>{x: number; y: number}</c>.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {TupleToObject} from 'type-fest';
-///
+/// <br /><br />
 /// type Example1 = TupleToObject&lt;[number, string, boolean]&gt;;
 /// //=&gt; {0: number; 1: string; 2: boolean}
-///
+/// <br /><br />
 /// // Tuples with optional indices
 /// type Example2 = TupleToObject&lt;[number, string?, boolean?]&gt;;
 /// //=&gt; {0: number; 1?: string; 2?: boolean}
-///
+/// <br /><br />
 /// // Readonly tuples
 /// type Example3 = TupleToObject&lt;readonly [number, string?]&gt;;
 /// //=&gt; {readonly 0: number; readonly 1?: string}
-///
+/// <br /><br />
 /// // Non-tuple arrays get transformed into index signatures
 /// type Example4 = TupleToObject&lt;string[]&gt;;
 /// //=&gt; {[x: number]: string}
-///
+/// <br /><br />
 /// // Tuples with rest elements
 /// type Example5 = TupleToObject&lt;[number, string, ...boolean[]]&gt;;
 /// //=&gt; {[x: number]: string | number | boolean; 0: number; 1: string}
-///
+/// <br /><br />
 /// // Tuple labels are not preserved
 /// type Example6 = TupleToObject&lt;[x: number, y: number]&gt;;
 /// //=&gt; {0: number; 1: number}
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
 type TupleToObject<'TArray> = private TupleToObject__ of obj
 
 /// <summary>
 /// Convert a tuple/array into a union type of its elements.
-///
+/// <br /><br />
 /// This can be useful when you have a fixed set of allowed values and want a type defining only the allowed values, but do not want to repeat yourself.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {TupleToUnion} from 'type-fest';
-///
+/// <br /><br />
 /// const destinations = ['a', 'b', 'c'] as const;
-///
+/// <br /><br />
 /// type Destination = TupleToUnion&lt;typeof destinations&gt;;
 /// //=&gt; 'a' | 'b' | 'c'
-///
+/// <br /><br />
 /// function verifyDestination(destination: unknown): destination is Destination {
 /// return destinations.includes(destination as any);
 /// }
-///
+/// <br /><br />
 /// type RequestBody = {
 /// deliverTo: Destination;
 /// };
-///
+/// <br /><br />
 /// function verifyRequestBody(body: unknown): body is RequestBody {
 /// const {deliverTo} = (body as any);
 /// return typeof body === 'object' &amp;&amp; body !== null &amp;&amp; verifyDestination(deliverTo);
 /// }
-/// </code>
-///
-/// Alternatively, you may use <c>typeof destinations[number]</c>. If <c>destinations</c> is a tuple, there is no difference. However if <c>destinations</c> is a string, the resulting type will the union of the characters in the string. Other types of <c>destinations</c> may result in a compile error. In comparison, TupleToUnion will return <c>never</c> if a tuple is not provided.
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
-/// const destinations = ['a', 'b', 'c'] as const;
 ///
+/// Alternatively, you may use `typeof destinations[number]`. If `destinations` is a tuple, there is no difference. However if `destinations` is a string, the resulting type will the union of the characters in the string. Other types of `destinations` may result in a compile error. In comparison, TupleToUnion will return `never` if a tuple is not provided.
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
+/// const destinations = ['a', 'b', 'c'] as const;
+/// <br /><br />
 /// type Destination = typeof destinations[number];
 /// //=&gt; 'a' | 'b' | 'c'
-///
+/// <br /><br />
 /// const erroringType = new Set(['a', 'b', 'c']);
-///
+/// <br /><br />
 /// // @ts-expect-error
 /// type ErroringType = typeof erroringType[number];
 /// // Error: Type 'Set&lt;string&gt;' has no matching index signature for type 'number'. ts(2537)
-///
+/// <br /><br />
 /// const numberBool: {[n: number]: boolean} = {1: true};
-///
+/// <br /><br />
 /// type NumberBool = typeof numberBool[number];
 /// //=&gt; boolean
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
 type TupleToUnion<'ArrayType> = private TupleToUnion__ of obj
@@ -10967,17 +11259,17 @@ type TypedArray = obj
 
 /// <summary>
 /// Create a deep version of another type where all optional keys are set to also accept <c>undefined</c>.
-///
+/// <br /><br />
 /// Note: This is only needed when the <a href="https://www.typescriptlang.org/tsconfig#exactOptionalPropertyTypes"><c>exactOptionalPropertyTypes</c></a> TSConfig setting is enabled.
-///
+/// <br /><br />
 /// Use-cases:
 /// - When <c>exactOptionalPropertyTypes</c> is enabled, an object like <c>{a: undefined}</c> is not assignable to the type <c>{a?: number}</c>. You can use <c>UndefinedOnPartialDeep&lt;{a?: number}&gt;</c> to make it assignable.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {UndefinedOnPartialDeep} from 'type-fest';
-///
+/// <br /><br />
 /// type Settings = {
 /// optionA: string;
 /// optionB?: number;
@@ -10986,251 +11278,262 @@ type TypedArray = obj
 /// subOptionB?: boolean;
 /// };
 /// };
-///
+/// <br /><br />
 /// const testSettingsA: Settings = {
 /// optionA: 'foo',
-/// optionB: undefined, // TypeScript error if `exactOptionalPropertyTypes` is true.
+/// optionB: undefined, // TypeScript error if <c>exactOptionalPropertyTypes</c> is true.
 /// // @ts-expect-error
 /// subOption: {
 /// subOptionA: true,
-/// subOptionB: undefined, // TypeScript error if `exactOptionalPropertyTypes` is true
+/// subOptionB: undefined, // TypeScript error if <c>exactOptionalPropertyTypes</c> is true
 /// },
 /// };
-///
+/// <br /><br />
 /// const testSettingsB: UndefinedOnPartialDeep&lt;Settings&gt; = {
 /// optionA: 'foo',
-/// optionB: undefined, // `optionB` can be set to `undefined` now.
+/// optionB: undefined, // <c>optionB</c> can be set to <c>undefined</c> now.
 /// subOption: {
 /// subOptionA: true,
-/// subOptionB: undefined, // `subOptionB` can be set to `undefined` now.
+/// subOptionB: undefined, // <c>subOptionB</c> can be set to <c>undefined</c> now.
 /// },
 /// };
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 [<Erase>]
 type UndefinedOnPartialDeep<'T> = private UndefinedOnPartialDeep__ of obj
 
 /// <summary>
 /// Returns the length of a union type.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {UnionLength} from 'type-fest';
-///
+/// <br /><br />
 /// type T1 = UnionLength&lt;'foo' | 'bar' | 'baz'&gt;;
 /// //=&gt; 3
-///
+/// <br /><br />
 /// type T2 = UnionLength&lt;[string, string, string] | {x: string; y: string; z: string}&gt;;
 /// //=&gt; 2
-///
+/// <br /><br />
 /// type T3 = UnionLength&lt;any&gt;;
 /// //=&gt; 1
-///
+/// <br /><br />
 /// type T4 = UnionLength&lt;never&gt;;
 /// //=&gt; 0
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type</remarks>
 type UnionLength = obj
 
 /// <summary>
 /// Returns an arbitrary member of a union type.
-///
+/// <br /><br />
 /// Use-cases:
 /// - Implementing recursive type functions that accept a union type.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {UnionMember, IsNever} from 'type-fest';
-///
+/// <br /><br />
 /// type UnionLength&lt;T, Acc extends any[] = []&gt; =
 /// UnionMember&lt;T&gt; extends infer Member
 /// ? IsNever&lt;Member&gt; extends false
 /// ? UnionLength&lt;Exclude&lt;T, Member&gt;, [...Acc, Member]&gt;
 /// : Acc['length']
 /// : never;
-///
+/// <br /><br />
 /// type T1 = UnionLength&lt;'foo' | 'bar' | 'baz'&gt;;
 /// //=&gt; 3
-///
+/// <br /><br />
 /// type T2 = UnionLength&lt;{a: string}&gt;;
 /// //=&gt; 1
-/// </code>
+/// <code>
 ///
 /// - Picking an arbitrary member from a union
-/// </remarks>
-/// <remarks>
-/// @example
+/// </code>
+/// </example>
+/// <example>
 /// <code>
+/// </code>
 /// import type {UnionMember, Primitive, LiteralToPrimitive} from 'type-fest';
-///
+/// <br /><br />
 /// type IsHomogenous&lt;T extends Primitive&gt; = [T] extends [LiteralToPrimitive&lt;UnionMember&lt;T&gt;&gt;] ? true : false;
-///
+/// <br /><br />
 /// type T1 = IsHomogenous&lt;1 | 2 | 3 | 4&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type T2 = IsHomogenous&lt;'foo' | 'bar'&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type T3 = IsHomogenous&lt;'foo' | 'bar' | 1&gt;;
 /// //=&gt; false
-/// </code>
-///
-/// Returns <c>never</c> when the input is <c>never</c>.
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
-/// import type {UnionMember} from 'type-fest';
 ///
+/// Returns `never` when the input is `never`.
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
+/// import type {UnionMember} from 'type-fest';
+/// <br /><br />
 /// type LastNever = UnionMember&lt;never&gt;;
 /// //=&gt; never
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type</remarks>
 [<Erase>]
 type UnionMember<'T> = private UnionMember__ of obj
 
 /// <summary>
 /// Convert a union type to an intersection type.
-///
+/// <br /><br />
 /// Inspired by <a href="https://stackoverflow.com/a/50375286/2172153">this Stack Overflow answer</a>.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {UnionToIntersection} from 'type-fest';
-///
+/// <br /><br />
 /// type Union = {the(): void} | {great(arg: string): void} | {escape: boolean};
-///
+/// <br /><br />
 /// type Intersection = UnionToIntersection&lt;Union&gt;;
 /// //=&gt; {the(): void} &amp; {great(arg: string): void} &amp; {escape: boolean}
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type</remarks>
 [<Erase>]
 type UnionToIntersection<'Union> = private UnionToIntersection__ of obj
 
 /// <summary>
 /// Convert a union type into an unordered tuple type of its elements.
-///
+/// <br /><br />
 /// "Unordered" means the elements of the tuple are not guaranteed to be in the same order as in the union type. The arrangement can appear random and may change at any time.
-///
+/// <br /><br />
 /// This can be useful when you have objects with a finite set of keys and want a type defining only the allowed keys, but do not want to repeat yourself.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {UnionToTuple} from 'type-fest';
-///
+/// <br /><br />
 /// type Numbers = 1 | 2 | 3;
 /// type NumbersTuple = UnionToTuple&lt;Numbers&gt;;
 /// //=&gt; [1, 2, 3]
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
 /// import type {UnionToTuple} from 'type-fest';
-///
+/// <br /><br />
 /// const pets = {
 /// dog: '🐶',
 /// cat: '🐱',
 /// snake: '🐍',
 /// };
-///
+/// <br /><br />
 /// type Pet = keyof typeof pets;
 /// //=&gt; 'dog' | 'cat' | 'snake'
-///
+/// <br /><br />
 /// const petList = Object.keys(pets) as UnionToTuple&lt;Pet&gt;;
 /// //=&gt; ['dog', 'cat', 'snake']
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
 type UnionToTuple<'Union> = private UnionToTuple__ of obj
 
 /// <summary>
 /// Represents an array with <c>unknown</c> value.
-///
+/// <br /><br />
 /// Use case: You want a type that all arrays can be assigned to, but you don't care about the value.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {UnknownArray} from 'type-fest';
-///
+/// <br /><br />
 /// type IsArray&lt;T&gt; = T extends UnknownArray ? true : false;
-///
+/// <br /><br />
 /// type A = IsArray&lt;['foo']&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type B = IsArray&lt;readonly number[]&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type C = IsArray&lt;string&gt;;
 /// //=&gt; false
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type</remarks>
 /// <remarks>@category Array</remarks>
 type UnknownArray = obj[]
 
 /// <summary>
 /// Represents a map with <c>unknown</c> key and value.
-///
+/// <br /><br />
 /// Use case: You want a type that all maps can be assigned to, but you don't care about the value.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {UnknownMap} from 'type-fest';
-///
+/// <br /><br />
 /// type IsMap&lt;T&gt; = T extends UnknownMap ? true : false;
-///
+/// <br /><br />
 /// type A = IsMap&lt;Map&lt;string, number&gt;&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type B = IsMap&lt;ReadonlyMap&lt;number, string&gt;&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type C = IsMap&lt;string&gt;;
 /// //=&gt; false
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type</remarks>
 type UnknownMap = JS.Map<obj, obj>
 
 /// <summary>
 /// Represents an object with <c>unknown</c> value. You probably want this instead of <c>{}</c>.
-///
+/// <br /><br />
 /// Use case: You have an object whose keys and values are unknown to you.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {UnknownRecord} from 'type-fest';
-///
+/// <br /><br />
 /// function toJson(object: UnknownRecord) {
 /// return JSON.stringify(object);
 /// }
-///
+/// <br /><br />
 /// toJson({hello: 'world'}); // Ok
-///
+/// <br /><br />
 /// function isObject(value: unknown): value is UnknownRecord {
 /// return typeof value === 'object' &amp;&amp; value !== null;
 /// }
-///
+/// <br /><br />
 /// const value: unknown = {hello: 'world'};
-///
+/// <br /><br />
 /// if (isObject(value)) {
 /// const v = value;
 /// //=&gt; UnknownRecord
 /// }
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type</remarks>
 /// <remarks>@category Object</remarks>
 type UnknownRecord =
@@ -11243,102 +11546,106 @@ type UnknownRecord =
 
 /// <summary>
 /// Represents a set with <c>unknown</c> value.
-///
+/// <br /><br />
 /// Use case: You want a type that all sets can be assigned to, but you don't care about the value.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {UnknownSet} from 'type-fest';
-///
+/// <br /><br />
 /// type IsSet&lt;T&gt; = T extends UnknownSet ? true : false;
-///
+/// <br /><br />
 /// type A = IsSet&lt;Set&lt;string&gt;&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type B = IsSet&lt;ReadonlySet&lt;number&gt;&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type C = IsSet&lt;string&gt;;
 /// //=&gt; false
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Type</remarks>
 type UnknownSet = JS.Set<obj>
 
 /// <summary>
 /// Revert the <c>Partial</c> modifier on an object type.
-///
+/// <br /><br />
 /// Use-case: Infer the underlying type <c>T</c> when only <c>Partial&lt;T&gt;</c> is available or the original type may not be directly accessible.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {UnwrapPartial} from 'type-fest';
-///
+/// <br /><br />
 /// type Config = Partial&lt;{
 /// port: number;
 /// host: string;
 /// secure?: boolean;
 /// }&gt;;
-///
+/// <br /><br />
 /// type InitializedConfig = UnwrapPartial&lt;Config&gt;;
 /// //=&gt; {port: number; host: string; secure?: boolean}
-/// </code>
+/// <code>
 ///
-/// Note: If the provided type isn’t of <c>Partial&lt;T&gt;</c>, <c>UnwrapPartial</c> has no effect on the original type.
-/// </remarks>
+/// Note: If the provided type isn’t of `Partial&lt;T&gt;`, `UnwrapPartial` has no effect on the original type.
+/// </code>
+/// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
 type UnwrapPartial<'PartialObjectType> = private UnwrapPartial__ of obj
 
 /// <summary>
 /// Revert the <c>Required</c> modifier on an object type.
-///
+/// <br /><br />
 /// Use-case: Infer the underlying type <c>T</c> when only <c>Required&lt;T&gt;</c> is available or the original type may not be directly accessible.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {UnwrapRequired} from 'type-fest';
-///
+/// <br /><br />
 /// type ContactFormData = Required&lt;{
 /// email: string;
 /// message?: string;
 /// }&gt;;
-///
+/// <br /><br />
 /// type DraftContactFormData = UnwrapRequired&lt;ContactFormData&gt;;
 /// //=&gt; {email: string; message?: string}
-/// </code>
+/// <code>
 ///
 /// Note:
-/// - If the provided type isn’t of the form <c>Required&lt;T&gt;</c>, <c>UnwrapRequired</c> simply returns the input type.
-/// - <c>UnwrapRequired</c> doesn't work with arrays, if instantiated with arrays, it simply returns the input type.
-/// </remarks>
+/// - If the provided type isn’t of the form `Required&lt;T&gt;`, `UnwrapRequired` simply returns the input type.
+/// - `UnwrapRequired` doesn't work with arrays, if instantiated with arrays, it simply returns the input type.
+/// </code>
+/// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
 type UnwrapRequired<'RequiredObjectType> = private UnwrapRequired__ of obj
 
 /// <summary>
 /// Create a union of the given object's values, and optionally specify which keys to get the values from.
-///
+/// <br /><br />
 /// Please upvote <a href="https://github.com/microsoft/TypeScript/issues/31438">this issue</a> if you want to have this type as a built-in in TypeScript.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {ValueOf} from 'type-fest';
-///
+/// <br /><br />
 /// type A = ValueOf&lt;{id: number; name: string; active: boolean}&gt;;
 /// //=&gt; string | number | boolean
-///
+/// <br /><br />
 /// type B = ValueOf&lt;{id: number; name: string; active: boolean}, 'name'&gt;;
 /// //=&gt; string
-///
+/// <br /><br />
 /// type C = ValueOf&lt;{id: number; name: string; active: boolean}, 'id' | 'name'&gt;;
 /// //=&gt; string | number
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 type ValueOf = obj
 
@@ -11351,80 +11658,83 @@ type WordsOptions =
     /// <summary>
     /// Split on numeric sequence.
     /// </summary>
-    /// <remarks>@default true</remarks>
-    /// <remarks>
-    /// @example
+    /// <defaultValue>true</defaultValue>
+    /// <example>
     /// <code>
+    /// </code>
     /// import type {Words} from 'type-fest';
-    ///
+    /// <br /><br />
     /// type Example1 = Words&lt;'p2pNetwork', {splitOnNumbers: true}&gt;;
     /// //=&gt; ['p', '2', 'p', 'Network']
-    ///
+    /// <br /><br />
     /// type Example2 = Words&lt;'p2pNetwork', {splitOnNumbers: false}&gt;;
     /// //=&gt; ['p2p', 'Network']
+    /// <code>
     /// </code>
-    /// </remarks>
+    /// </example>
     abstract splitOnNumbers: bool option with get, set
     /// <summary>
     /// Split on punctuation characters (e.g., <c>#</c>, <c>&amp;</c>, <c>*</c>, <c>:</c>, <c>?</c>, <c>@</c>, <c>~</c>).
     /// </summary>
-    /// <remarks>
-    /// @example
+    /// <example>
     /// <code>
+    /// </code>
     /// import type {Words} from 'type-fest';
-    ///
+    /// <br /><br />
     /// type Example1 = Words&lt;'hello:world', {splitOnPunctuation: true}&gt;;
     /// //=&gt; ['hello', 'world']
-    ///
+    /// <br /><br />
     /// type Example2 = Words&lt;'hello:world', {splitOnPunctuation: false}&gt;;
     /// //=&gt; ['hello', ':world']
+    /// <code>
     /// </code>
-    /// </remarks>
+    /// </example>
     abstract splitOnPunctuation: bool option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?splitOnNumbers: bool, ?splitOnPunctuation: bool) : WordsOptions = jsNative
 
 /// <summary>
 /// Split a string similar to Lodash's <c>_.words()</c> function.
-///
+/// <br /><br />
 /// - Split on each word that begins with a capital letter.
 /// - Split on each WordSeparators.
 /// - Split on each AsciiPunctuation (if WordsOptions.splitOnPunctuation is enabled).
 /// - Split on numeric sequence.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Words} from 'type-fest';
-///
+/// <br /><br />
 /// type Words0 = Words&lt;'helloWorld'&gt;;
 /// //=&gt; ['hello', 'World']
-///
+/// <br /><br />
 /// type Words1 = Words&lt;'helloWORLD'&gt;;
 /// //=&gt; ['hello', 'WORLD']
-///
+/// <br /><br />
 /// type Words2 = Words&lt;'hello-world'&gt;;
 /// //=&gt; ['hello', 'world']
-///
+/// <br /><br />
 /// type Words3 = Words&lt;'--hello the_world'&gt;;
 /// //=&gt; ['hello', 'the', 'world']
-///
+/// <br /><br />
 /// type Words4 = Words&lt;'lifeIs42'&gt;;
 /// //=&gt; ['life', 'Is', '42']
-///
+/// <br /><br />
 /// type Words5 = Words&lt;'p2pNetwork', {splitOnNumbers: false}&gt;;
 /// //=&gt; ['p2p', 'Network']
-///
+/// <br /><br />
 /// type Words6 = Words&lt;'hello:world', {splitOnPunctuation: true}&gt;;
 /// //=&gt; ['hello', 'world']
-///
+/// <br /><br />
 /// type Words7 = Words&lt;'hello:world', {splitOnPunctuation: false}&gt;;
 /// //=&gt; ['hello', ':world']
-///
+/// <br /><br />
 /// type Words8 = Words&lt;'hello::world', {splitOnPunctuation: true}&gt;;
 /// //=&gt; ['hello', 'world']
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
@@ -11432,28 +11742,29 @@ type Words<'Sentence, 'Options> = private Words__ of obj
 
 /// <summary>
 /// Create a deeply mutable version of an <c>object</c>/<c>ReadonlyMap</c>/<c>ReadonlySet</c>/<c>ReadonlyArray</c> type. The inverse of <c>ReadonlyDeep&lt;T&gt;</c>. Use <c>Writable&lt;T&gt;</c> if you only need one level deep.
-///
+/// <br /><br />
 /// This can be used to <a href="https://github.com/sindresorhus/pageres/blob/4a5d05fca19a5fbd2f53842cbf3eb7b1b63bddd2/source/index.ts#L72">store and mutate options within a class</a>, <a href="https://stackoverflow.com/questions/50703834">edit <c>readonly</c> objects within tests</a>, <a href="https://github.com/Microsoft/TypeScript/issues/24509">construct a <c>readonly</c> object within a function</a>, or to define a single model where the only thing that changes is whether or not some of the keys are writable.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {WritableDeep} from 'type-fest';
-///
+/// <br /><br />
 /// type Foo = {
 /// readonly a: number;
 /// readonly b: readonly string[]; // To show that mutability is deeply affected.
 /// readonly c: boolean;
 /// };
-///
+/// <br /><br />
 /// const writableDeepFoo: WritableDeep&lt;Foo&gt; = {a: 1, b: ['2'], c: true};
 /// writableDeepFoo.a = 3;
 /// writableDeepFoo.b[0] = 'new value';
 /// writableDeepFoo.b = ['something'];
-/// </code>
+/// <code>
 ///
-/// Note that types containing overloaded functions are not made deeply writable due to a <a href="https://github.com/microsoft/TypeScript/issues/29732">TypeScript limitation</a>.
-/// </remarks>
+/// Note that types containing overloaded functions are not made deeply writable due to a [TypeScript limitation](https://github.com/microsoft/TypeScript/issues/29732).
+/// </code>
+/// </example>
 /// <remarks>@see {@link Writable}</remarks>
 /// <remarks>@category Object</remarks>
 /// <remarks>@category Array</remarks>
@@ -11464,149 +11775,154 @@ type WritableDeep<'T> = private WritableDeep__ of obj
 
 /// <summary>
 /// Extract all writable keys from the given type.
-///
+/// <br /><br />
 /// This is useful when you want to create a new type that contains writable keys only.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {WritableKeysOf} from 'type-fest';
-///
+/// <br /><br />
 /// type User = {
 /// name: string;
 /// surname: string;
-///
+/// <br /><br />
 /// readonly id: number;
 /// };
-///
+/// <br /><br />
 /// type UpdateRequest&lt;Entity extends object&gt; = Pick&lt;Entity, WritableKeysOf&lt;Entity&gt;&gt;;
-///
+/// <br /><br />
 /// const update1: UpdateRequest&lt;User&gt; = {
 /// name: 'Alice',
 /// surname: 'Acme',
 /// };
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Utilities</remarks>
 type WritableKeysOf<'Type> = keyof<'Type>
 
 /// <summary>
 /// Create a type that strips <c>readonly</c> from the given type. Inverse of <c>Readonly&lt;T&gt;</c>.
-///
+/// <br /><br />
 /// The 2nd argument will be ignored if the input type is not an object.
-///
+/// <br /><br />
 /// Note: This type can make readonly <c>Set</c> and <c>Map</c> writable. This behavior is different from <c>Readonly&lt;T&gt;</c> (as of TypeScript 5.2.2). See: https://github.com/microsoft/TypeScript/issues/29655
-///
+/// <br /><br />
 /// This can be used to <a href="https://github.com/sindresorhus/pageres/blob/4a5d05fca19a5fbd2f53842cbf3eb7b1b63bddd2/source/index.ts#L72">store and mutate options within a class</a>, <a href="https://stackoverflow.com/questions/50703834">edit <c>readonly</c> objects within tests</a>, <a href="https://github.com/Microsoft/TypeScript/issues/24509">construct a <c>readonly</c> object within a function</a>, or to define a single model where the only thing that changes is whether or not some of the keys are writable.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Writable} from 'type-fest';
-///
+/// <br /><br />
 /// type Foo = {
 /// readonly a: number;
 /// readonly b: readonly string[]; // To show that only the mutability status of the properties, not their values, are affected.
 /// readonly c: boolean;
 /// };
-///
+/// <br /><br />
 /// const writableFoo: Writable&lt;Foo&gt; = {a: 1, b: ['2'], c: true};
 /// writableFoo.a = 3;
 /// // @ts-expect-error
 /// writableFoo.b[0] = 'new value'; // Will still fail as the value of property "b" is still a readonly type.
 /// writableFoo.b = ['something']; // Will work as the "b" property itself is no longer readonly.
-///
+/// <br /><br />
 /// type SomeWritable = Writable&lt;Foo, 'b' | 'c'&gt;;
 /// //=&gt; {readonly a: number; b: readonly string[]; c: boolean}
-///
+/// <br /><br />
 /// // Also supports array
 /// const readonlyArray: readonly number[] = [1, 2, 3];
 /// // @ts-expect-error
 /// readonlyArray.push(4); // Will fail as the array itself is readonly.
 /// const writableArray: Writable&lt;typeof readonlyArray&gt; = readonlyArray as Writable&lt;typeof readonlyArray&gt;;
 /// writableArray.push(4); // Will work as the array itself is now writable.
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
 type Writable<'BaseType, 'Keys> = private Writable__ of obj
 
 /// <summary>
 /// Returns a boolean for whether only one of two given types is <c>true</c>.
-///
+/// <br /><br />
 /// Use-case: Constructing complex conditional types where one single condition must be satisfied.
 /// </summary>
-/// <remarks>
-/// @example
+/// <example>
 /// <code>
+/// </code>
 /// import type {Xor} from 'type-fest';
-///
+/// <br /><br />
 /// type TT = Xor&lt;true, true&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type TF = Xor&lt;true, false&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type FT = Xor&lt;false, true&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type FF = Xor&lt;false, false&gt;;
 /// //=&gt; false
-/// </code>
-///
-/// Note: When <c>boolean</c> is passed as an argument, it is distributed into separate cases, and the final result is a union of those cases.
-/// For example, <c>Xor&lt;false, boolean&gt;</c> expands to <c>Xor&lt;false, true&gt; | Xor&lt;false, false&gt;</c>, which simplifies to <c>true | false</c> (i.e., <c>boolean</c>).
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
-/// import type {Xor} from 'type-fest';
 ///
+/// Note: When `boolean` is passed as an argument, it is distributed into separate cases, and the final result is a union of those cases.
+/// For example, `Xor&lt;false, boolean&gt;` expands to `Xor&lt;false, true&gt; | Xor&lt;false, false&gt;`, which simplifies to `true | false` (i.e., `boolean`).
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
+/// import type {Xor} from 'type-fest';
+/// <br /><br />
 /// type A = Xor&lt;false, boolean&gt;;
 /// //=&gt; boolean
-///
+/// <br /><br />
 /// type B = Xor&lt;boolean, false&gt;;
 /// //=&gt; boolean
-///
+/// <br /><br />
 /// type C = Xor&lt;true, boolean&gt;;
 /// //=&gt; boolean
-///
+/// <br /><br />
 /// type D = Xor&lt;boolean, true&gt;;
 /// //=&gt; boolean
-///
+/// <br /><br />
 /// type E = Xor&lt;boolean, boolean&gt;;
 /// //=&gt; boolean
-/// </code>
-///
-/// Note: If <c>never</c> is passed as an argument, it is treated as <c>false</c> and the result is computed accordingly.
-/// </remarks>
-/// <remarks>
-/// @example
 /// <code>
-/// import type {Xor} from 'type-fest';
 ///
+/// Note: If `never` is passed as an argument, it is treated as `false` and the result is computed accordingly.
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// </code>
+/// import type {Xor} from 'type-fest';
+/// <br /><br />
 /// type A = Xor&lt;true, never&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type B = Xor&lt;never, true&gt;;
 /// //=&gt; true
-///
+/// <br /><br />
 /// type C = Xor&lt;false, never&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type D = Xor&lt;never, false&gt;;
 /// //=&gt; false
-///
+/// <br /><br />
 /// type E = Xor&lt;boolean, never&gt;;
 /// //=&gt; boolean
-///
+/// <br /><br />
 /// type F = Xor&lt;never, boolean&gt;;
 /// //=&gt; boolean
-///
+/// <br /><br />
 /// type G = Xor&lt;never, never&gt;;
 /// //=&gt; false
+/// <code>
 /// </code>
-/// </remarks>
+/// </example>
 /// <remarks>@see {@link And}</remarks>
 /// <remarks>@see {@link Or}</remarks>
 [<Erase>]

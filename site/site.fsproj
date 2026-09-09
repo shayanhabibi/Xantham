@@ -6,7 +6,7 @@
     </PropertyGroup>
     <ItemGroup>
         <Compile Include="Site.fs"/>
-        <None Include="content/**/*.*" />
+        <None Include="**/*.*" Exclude="bin/**/*;obj/**/*;output/**/*;.nacara/**/*" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Nacara.Core" Version="2.0.0-*"/>
@@ -23,6 +23,6 @@
         <PackageReference Include="Nacara.Plugin.Assets.Nuglify" Version="1.0.0-*"/>
         <PackageReference Include="Nacara.Plugin.Deploy.GitHubPages" Version="1.0.0-*"/>
         <PackageReference Include="Nacara.Theme.Default" Version="1.0.0-*"/>
-        <PackageReference Include="Partas.Nacara.Plugins.Tailwind" Version="0.1.0" />
+        <PackageReference Include="Partas.Nacara.Plugins.DaisyUI" Version="0.1.0" />
     </ItemGroup>
 </Project>

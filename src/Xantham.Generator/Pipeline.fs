@@ -283,7 +283,8 @@ let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel)
                     (if family = "Dom" then
                          compilerLibLayout.DomQualifiedModule
                      else
-                         compilerLibLayout.EsQualifiedModule), None
+                         compilerLibLayout.EsQualifiedModule),
+                    None
                 | origin -> Naming.groupModule ctx.Config ctx.PackageName origin, None
 
             {
