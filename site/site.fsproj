@@ -9,7 +9,9 @@
         <None Include="**/*.*" Exclude="bin/**/*;obj/**/*;output/**/*;.nacara/**/*" />
     </ItemGroup>
     <ItemGroup>
+        <PackageReference Include="Fake.IO.FileSystem" Version="6.1.4" />
         <PackageReference Include="Nacara.Core" Version="2.0.0-*"/>
+        <PackageReference Include="Nacara.Plugin.FSharpApi" Version="1.0.0-beta.2" />
         <PackageReference Include="Nacara.Plugin.Markdown" Version="1.0.0-*"/>
         <PackageReference Include="Nacara.Plugin.Highlight.TreeSitter" Version="1.0.0-*"/>
         <PackageReference Include="Nacara.Plugin.Literate" Version="1.0.0-*"/>

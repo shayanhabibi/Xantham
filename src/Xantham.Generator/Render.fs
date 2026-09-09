@@ -340,7 +340,7 @@ let private docBody (indent: string) (lines: string seq) =
 
     let prose (line: string) =
         $"{indent}/// {inlineCode line}".TrimEnd()
-    
+
     let br = $"{indent}/// <br /><br />"
 
     let opener (info: string) =
@@ -405,23 +405,18 @@ let private docLines (indent: string) (docs: string) (tags: JSDocTagInfo list) =
                 match splitLines tag.Text.Value with
                 | [||] as arr
                 | arr when arr |> Array.forall String.IsNullOrEmpty -> ()
-                | [| single |] ->
-                    yield $"{indent}/// <example><c>{xmlEscape single}</c></example>"
+                | [| single |] -> yield $"{indent}/// <example><c>{xmlEscape single}</c></example>"
                 | lines ->
                     yield $"{indent}/// <example>"
-                    yield! docBody indent [|
-                        yield "```"
-                        yield! lines
-                        yield "```"
-                    |]
+                    yield! docBody indent [| yield "```"; yield! lines; yield "```" |]
                     yield $"{indent}/// </example>"
-            | "default" | "defaultValue" when tag.Text.IsSome ->
+            | "default"
+            | "defaultValue" when tag.Text.IsSome ->
                 match splitLines tag.Text.Value with
                 | [||] as arr
                 | arr when arr |> Array.forall String.IsNullOrEmpty -> ()
-                | [| single |] ->
-                    yield $"{indent}/// <defaultValue>{inlineCode single}</defaultValue>"
-                | lines -> 
+                | [| single |] -> yield $"{indent}/// <defaultValue>{inlineCode single}</defaultValue>"
+                | lines ->
                     yield $"{indent}/// <defaultValue>"
                     yield! docBody indent lines
                     yield $"{indent}/// </defaultValue>"

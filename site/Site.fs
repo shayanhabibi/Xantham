@@ -7,11 +7,26 @@ open Nacara.Theme
 
 // let versions = [ SiteVersion.root "0.0" ]
 
+let apiOptions =
+    { FSharpApi.defaults with
+        Root = "reference"
+        Title = "API reference"
+        Exclude = [ "JetBrains.Annotations" ]
+        Sources =
+            let root = AbsolutePath.create __SOURCE_DIRECTORY__ |> AbsolutePath.directory
+
+            [ "Xantham.TypeScript.Wire"; "Xantham.Fable.Core.TS"; "Xantham.Fable.Core" ]
+            |> List.choose (fun project -> Glob.files root $"src/{project}/*/Release/*/{project}.dll" |> List.tryHead)
+            |> List.map (AbsolutePath.value >> FSharpApiSource.create)
+    }
+
 let navbar =
     Theme.navbar
         [
             NavbarSection("Xantham", "xantham-cli", "/xantham-cli/")
             NavbarSection("Tsc Wire", "wire", "/wire/")
+            NavbarDivider
+            NavbarSection("Reference", "reference", "/reference/")
         ]
     >> Theme.navbarEnd
         [
@@ -51,6 +66,12 @@ let theme =
             ]
     )
 
+let reference =
+    FSharpApi.collection "reference" DocFrontMatter.decoder apiOptions
+    |> Collection.title _.Title
+    |> Collection.layout (Theme.layout theme)
+
+
 let site =
     Site.create "Xantham"
     |> Site.origin "https://shayanhabibi.github.io"
@@ -61,6 +82,7 @@ let site =
     |> TreeSitter.register
     |> Literate.register
     |> Sitemap.register
+    |> FSharpApi.register apiOptions
     // |> LinkValidator.register
     |> DaisyUI.registerWith (fun opts ->
         { opts with
@@ -74,6 +96,7 @@ let site =
     |> Nuglify.minifyHtml
     |> Theme.register theme
     |> Site.collection (Theme.docs theme "content")
+    |> Site.collection reference
 
 [<EntryPoint>]
 let main argv = Nacara.run site argv

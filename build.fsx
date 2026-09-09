@@ -224,12 +224,27 @@ module Stages =
         input {
             let! watch = Options.watch
 
+            and! buildStage =
+                build (
+                    Spec.srcProjects
+                    |> List.filter (function
+                        | { Name = "Xantham.TypeScript.Wire" }
+                        | { Name = "Xantham.Fable.Core" }
+                        | { Name = "Xantham.Fable.Core.TS" } -> true
+                        | _ -> false)
+                    |> List.map _.RelativePath
+                    |> InputSpec.ret
+                )
+
             return
                 stage "docs" {
                     if watch then
                         stage "watch" { run "dotnet run --project site/site.fsproj -- watch" }
                     else
-                        stage "build" { run "dotnet run --project site/site.fsproj -- build" }
+                        stage "build" {
+                            buildStage
+                            run "dotnet run --project site/site.fsproj -- build"
+                        }
 
                 }
         }
