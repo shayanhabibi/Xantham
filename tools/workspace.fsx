@@ -105,9 +105,7 @@ let tscExeIn (root: string) =
 /// the executable's directory - resolved from `XANTHAM_TSGO_EXE` when an agent or CI has pinned
 /// one, otherwise from the nearest checkout that has an install.
 ///
-/// `tools/browser-gen` reads them: the DOM binding table is the intersection of what the
-/// `Fable.Browser.*` family exports with what the *pinned* compiler declares, so it has to be
-/// the same compiler everything else in the repository runs against.
+/// Compiler-library generation reads this same pinned library set.
 let tscLibDir (root: string) =
     let pinned =
         match Environment.GetEnvironmentVariable TscEnvVar with

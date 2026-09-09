@@ -8,6 +8,7 @@ open System
 open Fable.Core
 open Fable.Core.JsInterop
 open Fable.Core.JS
+open Fable.Core.TS.Dom
 
 module CallTwo =
     type Handler = delegate of x: float * y: float -> string

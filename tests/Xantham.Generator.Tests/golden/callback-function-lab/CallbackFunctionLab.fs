@@ -8,6 +8,7 @@ open System
 open Fable.Core
 open Fable.Core.JsInterop
 open Fable.Core.JS
+open Fable.Core.TS.Dom
 
 module CallTwo =
     type Callback = delegate of a: float * b: float -> string
@@ -141,6 +142,16 @@ type UnionListenerObject =
 
 module AddListener =
     type Register = delegate of kind: string * listener: U2<UnionListenerObject, (float -> unit)> -> unit
+
+/// <summary>
+/// The same bound on a generic interface and one of its methods.
+/// </summary>
+[<Interface>]
+type CallbackBox<'T> =
+    abstract callback: 'T with get, set
+    abstract keep<'U>: callback: 'U -> 'U
+    [<ParamObject; Emit("$0")>]
+    static member Create (callback: 'T, keep: ('U -> 'U)) : CallbackBox<'T> = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
@@ -297,3 +308,13 @@ type Exports =
     /// </summary>
     [<Import("addListener", "callback-function-lab")>]
     static member addListener (register: AddListener.Register) : unit = jsNative
+    /// <summary>
+    /// Generic callable identity: F# functions do not inherit JS.Function.
+    /// </summary>
+    [<Import("keepFunction", "callback-function-lab")>]
+    static member keepFunction<'T> (callback: 'T) : 'T = jsNative
+    /// <summary>
+    /// A concrete callback argument must not be replaced with the dropped bound.
+    /// </summary>
+    [<Import("boxedFunction", "callback-function-lab")>]
+    static member boxedFunction (box: CallbackBox<(float -> float)>) : float = jsNative

@@ -1,4 +1,4 @@
-﻿/// Tier 2 - Resolve: the type table. Breadth-first from the harvested exports' types, batched
+/// Tier 2 - Resolve: the type table. Breadth-first from the harvested exports' types, batched
 /// per generation frontier through the mailbox, memoized on `TypeResponse.Id`. The tier's
 /// invariant is closure: every type id a `TypeFacts` refers to is in the table or recorded in
 /// `NotFollowed` with its reason.
@@ -824,6 +824,31 @@ let private deriveFacts
             if shapeName.IsSome then
                 // Identity only (O7): the shape tier renders references to this group by
                 // templated name or widens them, and either way nothing reads its members.
+                // Core.TS preserves DOM generic bounds and heritage. Read that declaration
+                // metadata without walking members, so references can satisfy the same bounds.
+                let! nominal =
+                    if
+                        origin = CompilerLib
+                        && (Grouping.declFile symbol |> Option.exists (fun file -> Grouping.libFamily file = "Dom"))
+                    then
+                        async {
+                            let! target =
+                                match ty.Target with
+                                | ValueSome target when target <> ty.Id ->
+                                    async {
+                                        let! declaration = ctx.Session.getTargetOfType ty.Id
+                                        return [ declaration ]
+                                    }
+                                | _ -> async.Return []
+
+                            let! bases = ctx.Session.getBaseTypes ty.Id
+                            return target, bases |> ValueOption.defaultValue [||] |> Array.toList
+                        }
+                    else
+                        async.Return([], [])
+
+                let targets, bases = nominal
+
                 return
                     { TypeFacts.shallow ty with
                         Origin = origin
@@ -832,9 +857,12 @@ let private deriveFacts
                         TypeArguments = typeArguments |> List.map _.Id
                         TupleElements = tupleElements
                         AliasTypeArguments = aliasTypeArguments |> List.map _.Id
+                        BaseTypes = bases |> List.map _.Id
                     },
                     channel trace "type-arguments" typeArguments
                     @ channel trace "alias-type-arguments" aliasTypeArguments
+                    @ channel trace "target" targets
+                    @ channel trace "base-types" bases
             else
 
                 // The generic declaration behind an instantiation (§4.9). `Ready<T>` reached only

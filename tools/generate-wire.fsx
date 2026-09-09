@@ -1,4 +1,4 @@
-﻿#r "nuget: Partas.Build, 0.3.0"
+#r "nuget: Partas.Build, 0.3.0"
 #r "nuget: Partas.TypeProvider.BuildHelper, 0.2.5"
 #r "nuget: Str"
 
@@ -188,23 +188,6 @@ module Options =
         |> Input.desc "Directory to emit the generated AST bindings into"
         |> Input.def (Repo.FileSystem.src.``Xantham.TypeScript.Wire``.ToString())
 
-    /// Where the pinned compiler's `lib.*.d.ts` files are; `browser-gen` intersects them with
-    /// what the `Fable.Browser.*` family exports.
-    let libDir =
-        Input.option<string> "--lib-dir"
-        |> Input.desc "Directory holding the compiler's lib.*.d.ts files"
-        |> Input.def (Workspace.tscLibDir __REPOSITORY_DIRECTORY__)
-
-    /// The generator project, which is where the browser table lands - not the wire project the
-    /// other layers are emitted into.
-    let generatorOutputDir =
-        Input.option<string> "--generator-output"
-        |> Input.def (Repo.FileSystem.src.``Xantham.Generator``.ToString())
-
-    let compileGateDir =
-        Input.option<string> "--compile-gate"
-        |> Input.def (Repo.FileSystem.tests.``Xantham.Generator.CompileGate``.ToString())
-
     let upstreamRef =
         Input.option<string> "--ref"
         |> Input.desc
@@ -322,32 +305,6 @@ let generateSession =
             }
     }
 
-/// Emits `BrowserBindingTable.generated.fs` into the generator, and the compile-gate file that
-/// proves every entry of it resolves.
-///
-/// The odd one out among these stages: it emits into `src/Xantham.Generator` rather than the
-/// wire, and its input is a NuGet family rather than the vendored compiler sources. It lives
-/// here anyway because "regenerate a generated file" is one command in this repository, and a
-/// second entry point for one table would be the surprising choice.
-let generateBrowser =
-    input {
-        let! libDir = Options.libDir
-        and! outputDir = Options.generatorOutputDir
-        and! gateDir = Options.compileGateDir
-        Workspace.ensureTsc __REPOSITORY_DIRECTORY__ |> ignore
-
-        return
-            stage "generate browser" {
-                echo "Generating Fable.Browser binding table"
-                workingDir Repo.FileSystem.``.``
-
-                run (
-                    cmd
-                        $"dotnet fsi tools/browser-gen/generate.fsx {libDir} {outputDir}/BrowserBindingTable.generated.fs {gateDir}/BrowserBindings.fs"
-                )
-            }
-    }
-
 rootCommand fsi.CommandLineArgs[1..] {
     command "sync" { command "tsc-ast" { syncTscAst } }
 
@@ -360,6 +317,5 @@ rootCommand fsi.CommandLineArgs[1..] {
         }
 
         command "session" { generateSession }
-        command "browser" { generateBrowser }
     }
 }

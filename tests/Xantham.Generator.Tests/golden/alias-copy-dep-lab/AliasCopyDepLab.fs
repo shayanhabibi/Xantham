@@ -8,6 +8,7 @@ open System
 open Fable.Core
 open Fable.Core.JsInterop
 open Fable.Core.JS
+open Fable.Core.TS.Dom
 
 /// <summary>
 /// A shape whose own symbol names it, so it reaches the O7 shortcut unaided.

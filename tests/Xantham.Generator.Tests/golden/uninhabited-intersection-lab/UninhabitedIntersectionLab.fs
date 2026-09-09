@@ -8,6 +8,7 @@ open System
 open Fable.Core
 open Fable.Core.JsInterop
 open Fable.Core.JS
+open Fable.Core.TS.Dom
 
 /// <summary>
 /// The positive: a method's own class collides with a <c>{ then: null }</c> marker on itself.

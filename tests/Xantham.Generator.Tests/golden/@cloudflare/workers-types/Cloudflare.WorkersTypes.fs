@@ -8,6 +8,7 @@ open System
 open Fable.Core
 open Fable.Core.JsInterop
 open Fable.Core.JS
+open Fable.Core.TS.Dom
 
 /// <summary>
 /// The <b><c>DOMException</c></b> interface represents an abnormal event (called an exception) that occurs as a result of calling a method or accessing a property of a web API. This is how error conditions are described in web APIs.

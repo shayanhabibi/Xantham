@@ -36,10 +36,12 @@ let private run executable directory arguments =
 let private compile directory (source: string) (consumer: string) =
     File.WriteAllText(Path.Combine(directory, "Binding.fs"), source)
     File.WriteAllText(Path.Combine(directory, "Consumer.fs"), consumer)
-    File.WriteAllText(Path.Combine(directory, "Consumer.fsproj"), """<Project Sdk="Microsoft.NET.Sdk">
+    let coreTs = Path.Combine(__SOURCE_DIRECTORY__, "..", "..", "src", "Xantham.Fable.Core.TS", "Xantham.Fable.Core.TS.fsproj") |> Path.GetFullPath
+    File.WriteAllText(Path.Combine(directory, "Consumer.fsproj"), $"""<Project Sdk="Microsoft.NET.Sdk">
 <PropertyGroup><TargetFramework>net10.0</TargetFramework><NuGetAudit>false</NuGetAudit></PropertyGroup>
 <ItemGroup><Compile Include="Binding.fs"/><Compile Include="Consumer.fs"/></ItemGroup>
 <ItemGroup><PackageReference Include="Fable.Core" Version="5.2.0"/></ItemGroup>
+<ItemGroup><ProjectReference Include="{coreTs}"/></ItemGroup>
 </Project>""")
     run "dotnet" directory [ "build"; "Consumer.fsproj"; "--verbosity"; "quiet" ]
 

@@ -57,6 +57,7 @@
     <ItemGroup>
         <!-- One Fable.Core across the support package, the compile gate and this gate. -->
         <PackageReference Include="Fable.Core" Version="5.2.0" />
+        <ProjectReference Include="..\..\src\Xantham.Fable.Core.TS\Xantham.Fable.Core.TS.fsproj" />
         <ProjectReference Include="..\..\src\Xantham.Fable.Core\Xantham.Fable.Core.fsproj" />
     </ItemGroup>
 

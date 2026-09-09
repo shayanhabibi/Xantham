@@ -8,6 +8,7 @@ open System
 open Fable.Core
 open Fable.Core.JsInterop
 open Fable.Core.JS
+open Fable.Core.TS.Dom
 
 /// <summary>
 /// A declaration of our own, so a mapped name can be seen passing through a generic.
@@ -67,7 +68,7 @@ type Exports =
     /// they had.
     /// </summary>
     [<Import("respond", "group-map-lab")>]
-    static member respond () : obj = jsNative
+    static member respond () : Fable.Core.TS.Dom.Response = jsNative
     /// <summary>
     /// A mapped name applied at an arity its destination does not take. A modern lib gives
     /// <c>Iterator</c> a return type and a next type beside its element, and <c>IEnumerator&lt;'T&gt;</c> takes the
@@ -85,4 +86,4 @@ type Exports =
     /// The DOM half, from the generated <c>Naming.BrowserBindings</c>.
     /// </summary>
     [<Import("handle", "group-map-lab")>]
-    static member handle (target: Browser.Types.EventTarget) : unit = jsNative
+    static member handle (target: Fable.Core.TS.Dom.EventTarget) : unit = jsNative

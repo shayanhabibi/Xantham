@@ -1,13 +1,9 @@
 // The compiler-lib group, per docs/plans/generator-architecture.md O7 and the mapping
 // document's 4.8.
 //
-// Every name below is declared by the compiler's own `lib.*.d.ts`, not by this package. O7
-// widens that group to `obj` for want of a shipped binding - but both halves of the lib have
-// one: `Fable.Core.JS` for the ECMAScript half, which every generated file already opens, and
-// the `Fable.Browser.*` family for the DOM half. What this fixture pins is where those lines
-// fall: which lib names come back as `JS.*`, which as `Browser.Types.*`, what the arity rule
-// does when TypeScript's lib and Fable's binding disagree, and which names are still honestly
-// `obj` because nothing shipped binds them.
+// Compiler-library names use Fable.Core.JS for the supported ECMAScript mappings
+// and Xantham.Fable.Core.TS for DOM declarations. This fixture covers their names,
+// generic arguments, and the losses retained by the ECMAScript mappings.
 
 // ---------------------------------------------------------------------------
 // Bound by Fable.Core, arities agreeing. These are exact: same runtime object,
@@ -62,10 +58,7 @@ export declare function thenable(): PromiseLike<string>;
 export declare function frozen(entries: ReadonlyMap<string, number>, values: ReadonlySet<string>): void;
 
 // ---------------------------------------------------------------------------
-// The DOM half, bound by the `Fable.Browser.*` family. The table is generated -
-// the intersection of what those assemblies export with what the pinned
-// compiler's `lib.*.d.ts` declares - so what this section pins is the *rule*,
-// not the entries: where a DOM name lands, and what happens at the edges.
+// The DOM half is generated from the same TypeScript pin as this input.
 // ---------------------------------------------------------------------------
 
 /** The one the group's widening used to cost most: a DOM name in an ordinary position. */
@@ -74,10 +67,10 @@ export declare function handle(target: EventTarget): void;
 /** Elements and events, which is most of what a browser-facing `.d.ts` traffics in. */
 export declare function mount(host: HTMLElement, on: Event): void;
 
-/** Binary and URL types, which come from separate packages of the same family. */
+/** Binary and URL types from the same Core.TS DOM module. */
 export declare function upload(body: Blob, to: URL): FormData;
 
-/** Bound at two arities: `CustomEvent` is in the family both bare and generic. */
+/** A generic DOM declaration retains its argument. */
 export declare function emit(detail: CustomEvent<string>): void;
 
 // ---------------------------------------------------------------------------
@@ -87,18 +80,10 @@ export declare function emit(detail: CustomEvent<string>): void;
 /** `seq<'T>` is not a JS iterable, whatever the two have in common. Widened, and noted. */
 export declare function each(values: Iterable<string>): void;
 
-/**
- * A DOM name two packages of the family both define (`Browser.IndexedDB` and
- * `Browser.MediaStream` each declare a `Range`). There is no qualification that picks one, so
- * the table drops it and this widens - the honest outcome, and the reason ambiguity is
- * resolved when the table is generated rather than when the reference is emitted.
- */
+/** Core.TS supplies the DOM Range without the former Browser package ambiguity. */
 export declare function select(over: Range): void;
 
-/**
- * A DOM name the family does not bind at all. `Response` and the rest of `fetch` live in
- * `Fable.Fetch`, a different package family, so this is still `obj`.
- */
+/** Fetch declarations are part of the shipped DOM module. */
 export declare function respond(): Response;
 
 // ---------------------------------------------------------------------------

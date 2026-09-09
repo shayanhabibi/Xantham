@@ -8,8 +8,9 @@ open System
 open Fable.Core
 open Fable.Core.JsInterop
 open Fable.Core.JS
+open Fable.Core.TS.Dom
 
-type JSXElement = U5<float, bool, obj[], Browser.Types.Node, string> option
+type JSXElement = U5<float, bool, obj[], Fable.Core.TS.Dom.Node, string> option
 
 [<Interface>]
 type Computation<'Init, 'Next> =
@@ -642,9 +643,9 @@ module Context =
             [<ParamObject; Emit("$0")>]
             static member Create (value: 'T, ?children: JSXElement) : Props<'T> = jsNative
 
-type ResolvedJSXElement = U4<float, bool, Browser.Types.Node, string> option
+type ResolvedJSXElement = U4<float, bool, Fable.Core.TS.Dom.Node, string> option
 
-type ResolvedChildren = U5<float, bool, ResolvedJSXElement option[], Browser.Types.Node, string> option
+type ResolvedChildren = U5<float, bool, ResolvedJSXElement option[], Fable.Core.TS.Dom.Node, string> option
 
 [<Interface>]
 type ChildrenReturn =
@@ -772,18 +773,18 @@ module Show =
         abstract ``when``: U2<bool, 'T> option with get, set
         abstract keyed: bool option with get, set
         abstract fallback: JSXElement option with get, set
-        abstract children: U6<float, bool, JSXElement option[], Browser.Types.Node, 'TRenderFunction, string> option with get, set
+        abstract children: U6<float, bool, JSXElement option[], Fable.Core.TS.Dom.Node, 'TRenderFunction, string> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?``when``: U2<bool, 'T>, ?keyed: bool, ?fallback: JSXElement, ?children: U6<float, bool, JSXElement option[], Browser.Types.Node, 'TRenderFunction, string>) : Props<'T, 'TRenderFunction> = jsNative
+        static member Create (?``when``: U2<bool, 'T>, ?keyed: bool, ?fallback: JSXElement, ?children: U6<float, bool, JSXElement option[], Fable.Core.TS.Dom.Node, 'TRenderFunction, string>) : Props<'T, 'TRenderFunction> = jsNative
 
     [<Interface>]
     type Props2<'T, 'TRenderFunction> =
         abstract ``when``: U2<bool, 'T> option with get, set
         abstract keyed: bool with get, set
         abstract fallback: JSXElement option with get, set
-        abstract children: U6<float, bool, JSXElement option[], Browser.Types.Node, 'TRenderFunction, string> option with get, set
+        abstract children: U6<float, bool, JSXElement option[], Fable.Core.TS.Dom.Node, 'TRenderFunction, string> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (keyed: bool, ?``when``: U2<bool, 'T>, ?fallback: JSXElement, ?children: U6<float, bool, JSXElement option[], Browser.Types.Node, 'TRenderFunction, string>) : Props2<'T, 'TRenderFunction> = jsNative
+        static member Create (keyed: bool, ?``when``: U2<bool, 'T>, ?fallback: JSXElement, ?children: U6<float, bool, JSXElement option[], Fable.Core.TS.Dom.Node, 'TRenderFunction, string>) : Props2<'T, 'TRenderFunction> = jsNative
 
 module Switch =
     [<Interface>]
@@ -797,34 +798,34 @@ module Switch =
 type MatchProps<'T> =
     abstract ``when``: U2<bool, 'T> option with get, set
     abstract keyed: bool option with get, set
-    abstract children: U6<float, bool, JSXElement option[], Browser.Types.Node, (obj -> JSXElement option), string> option with get, set
+    abstract children: U6<float, bool, JSXElement option[], Fable.Core.TS.Dom.Node, (obj -> JSXElement option), string> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?``when``: U2<bool, 'T>, ?keyed: bool, ?children: U6<float, bool, JSXElement option[], Browser.Types.Node, (obj -> JSXElement option), string>) : MatchProps<'T> = jsNative
+    static member Create (?``when``: U2<bool, 'T>, ?keyed: bool, ?children: U6<float, bool, JSXElement option[], Fable.Core.TS.Dom.Node, (obj -> JSXElement option), string>) : MatchProps<'T> = jsNative
 
 module Match =
     [<Interface>]
     type Props<'T, 'TRenderFunction> =
         abstract ``when``: U2<bool, 'T> option with get, set
         abstract keyed: bool option with get, set
-        abstract children: U6<float, bool, JSXElement option[], Browser.Types.Node, 'TRenderFunction, string> option with get, set
+        abstract children: U6<float, bool, JSXElement option[], Fable.Core.TS.Dom.Node, 'TRenderFunction, string> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?``when``: U2<bool, 'T>, ?keyed: bool, ?children: U6<float, bool, JSXElement option[], Browser.Types.Node, 'TRenderFunction, string>) : Props<'T, 'TRenderFunction> = jsNative
+        static member Create (?``when``: U2<bool, 'T>, ?keyed: bool, ?children: U6<float, bool, JSXElement option[], Fable.Core.TS.Dom.Node, 'TRenderFunction, string>) : Props<'T, 'TRenderFunction> = jsNative
 
     [<Interface>]
     type Props2<'T, 'TRenderFunction> =
         abstract ``when``: U2<bool, 'T> option with get, set
         abstract keyed: bool with get, set
-        abstract children: U6<float, bool, JSXElement option[], Browser.Types.Node, 'TRenderFunction, string> option with get, set
+        abstract children: U6<float, bool, JSXElement option[], Fable.Core.TS.Dom.Node, 'TRenderFunction, string> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (keyed: bool, ?``when``: U2<bool, 'T>, ?children: U6<float, bool, JSXElement option[], Browser.Types.Node, 'TRenderFunction, string>) : Props2<'T, 'TRenderFunction> = jsNative
+        static member Create (keyed: bool, ?``when``: U2<bool, 'T>, ?children: U6<float, bool, JSXElement option[], Fable.Core.TS.Dom.Node, 'TRenderFunction, string>) : Props2<'T, 'TRenderFunction> = jsNative
 
 module ErrorBoundary =
     [<Interface>]
     type Props =
-        abstract fallback: U6<float, bool, JSXElement option[], Browser.Types.Node, ErrorBoundary.Props.Fallback, string> option with get, set
+        abstract fallback: U6<float, bool, JSXElement option[], Fable.Core.TS.Dom.Node, ErrorBoundary.Props.Fallback, string> option with get, set
         abstract children: JSXElement option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?fallback: U6<float, bool, JSXElement option[], Browser.Types.Node, ErrorBoundary.Props.Fallback, string>, ?children: JSXElement) : Props = jsNative
+        static member Create (?fallback: U6<float, bool, JSXElement option[], Fable.Core.TS.Dom.Node, ErrorBoundary.Props.Fallback, string>, ?children: JSXElement) : Props = jsNative
 
     module Props =
         type Fallback = delegate of err: obj * reset: (unit -> unit) -> JSXElement option
@@ -836,14 +837,14 @@ type SharedConfig =
     abstract load: (string -> obj) option with get, set
     abstract has: (string -> bool) option with get, set
     abstract gather: (string -> unit) option with get, set
-    abstract registry: JS.Map<string, Browser.Types.Element> option with get, set
+    abstract registry: JS.Map<string, Fable.Core.TS.Dom.Element> option with get, set
     abstract ``done``: bool option with get, set
     abstract count: float option with get, set
     abstract effects: Computation<obj, obj>[] option with get, set
     abstract getContextId: unit -> string
     abstract getNextContextId: unit -> string
     [<ParamObject; Emit("$0")>]
-    static member Create (getContextId: (unit -> string), getNextContextId: (unit -> string), ?context: SharedConfig.Context, ?resources: Record<string, obj>, ?load: (string -> obj), ?has: (string -> bool), ?gather: (string -> unit), ?registry: JS.Map<string, Browser.Types.Element>, ?``done``: bool, ?count: float, ?effects: Computation<obj, obj>[]) : SharedConfig = jsNative
+    static member Create (getContextId: (unit -> string), getNextContextId: (unit -> string), ?context: SharedConfig.Context, ?resources: Record<string, obj>, ?load: (string -> obj), ?has: (string -> bool), ?gather: (string -> unit), ?registry: JS.Map<string, Fable.Core.TS.Dom.Element>, ?``done``: bool, ?count: float, ?effects: Computation<obj, obj>[]) : SharedConfig = jsNative
 
 module SharedConfig =
     [<Interface>]

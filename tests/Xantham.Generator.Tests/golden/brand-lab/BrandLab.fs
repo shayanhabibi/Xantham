@@ -8,6 +8,7 @@ open System
 open Fable.Core
 open Fable.Core.JsInterop
 open Fable.Core.JS
+open Fable.Core.TS.Dom
 
 /// <summary>
 /// The common hand-rolled brand: a primitive and a literal-typed marker property.

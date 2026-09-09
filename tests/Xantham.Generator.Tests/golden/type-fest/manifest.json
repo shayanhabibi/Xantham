@@ -28,10 +28,10 @@
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 625,
+      "total": 609,
       "exact": 1,
       "ergonomic": 237,
-      "widened": 387
+      "widened": 371
     },
     {
       "pass": "SP - synthesize-paramobjects",

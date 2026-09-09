@@ -17,5 +17,5 @@
 {"name":"upload","tier":"exact","findings":[]}
 {"name":"emit","tier":"exact","findings":[]}
 {"name":"each","tier":"widened","findings":[{"name":"TR.NotAmongGeneratedDeclarations","key":"TR023","pass":"shape-exports","tier":"widened","symbol":"each(values)","fields":{"shown":"Iterable"},"message":"Iterable is not among the generated declarations; widened to obj"}]}
-{"name":"select","tier":"widened","findings":[{"name":"TR.NotAmongGeneratedDeclarations","key":"TR023","pass":"shape-exports","tier":"widened","symbol":"select(over)","fields":{"shown":"Range"},"message":"Range is not among the generated declarations; widened to obj"}]}
-{"name":"respond","tier":"widened","findings":[{"name":"TR.NotAmongGeneratedDeclarations","key":"TR023","pass":"shape-exports","tier":"widened","symbol":"respond()","fields":{"shown":"Response"},"message":"Response is not among the generated declarations; widened to obj"}]}
+{"name":"select","tier":"exact","findings":[]}
+{"name":"respond","tier":"exact","findings":[]}

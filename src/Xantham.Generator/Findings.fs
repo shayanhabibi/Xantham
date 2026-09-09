@@ -152,6 +152,7 @@ module FindingCodes =
             "TP.UnnamedTypeParametersCounted", "TP007"
             "TP.ConstraintNotProvenNominal", "TP008"
             "TP.DuplicateTypeParameterCollapsed", "TP009"
+            "TP.FunctionConstraintDropped", "TP010"
             "MB.OptionalParameterAsOption", "MB001"
             "MB.SymbolKeyedMemberDropped", "MB002"
             "MB.OptionalMemberAsOption", "MB003"
@@ -627,6 +628,7 @@ type TypeParameters =
     /// Wave three, lane K. Several call signatures of one alias declare the same parameter name.
     /// The head writes it once, and every signature's uses bind to that single variable.
     | [<Ergonomic>] DuplicateTypeParameterCollapsed of name: string * declared: int
+    | [<Widened>] FunctionConstraintDropped of name: string
 
     interface IFindingKind with
         member this.Message =
@@ -644,6 +646,8 @@ type TypeParameters =
                 $"constraint {bound} on '{name}' is structural in TypeScript and nominal in F#; dropped from the head (§4.9)"
             | DuplicateTypeParameterCollapsed(name, declared) ->
                 $"'{name}' is declared by {declared} signatures of the same alias; the head writes one variable"
+            | FunctionConstraintDropped name ->
+                $"JS.Function constraint on '{name}' is dropped so F# functions can be type arguments; callability is no longer checked"
 
 /// Member and parameter shaping: `Shape.parametersOf` and `membersOf`.
 [<Prefix "MB">]

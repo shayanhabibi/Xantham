@@ -1,4 +1,4 @@
-﻿/// The facts and mappings every shaping pass is written against: what a resolved type *is*
+/// The facts and mappings every shaping pass is written against: what a resolved type *is*
 /// (literal, tuple, callback, branded primitive, constructor object, tagged union), the F#
 /// reference it maps to, its declared type parameters, and shared member and signature shaping.
 module Xantham.Generator.Shape.Spec
@@ -1742,8 +1742,8 @@ and internal objectRef
                             FsObj, [ Finding.make owner (TypeReference.NotAmongGeneratedDeclarations shown) ]
 
 /// A compiler-lib type a shipped Fable package already binds - `Promise` -> `JS.Promise<'T>`,
-/// `EventTarget` -> `Browser.Types.EventTarget`. The ECMAScript table answers first and does
-/// not fall through. Extra type arguments drop with a finding; too few widens.
+/// DOM declarations use the same names and arguments as the shipped Core.TS producer.
+/// The ECMAScript table retains its explicit arity and loss rules.
 and internal libBinding (ctx: Context) (model: ShapeModel) (self: string option) (owner: string) (facts: TypeFacts) =
     match facts.Origin, facts.SymbolName with
     | CompilerLib, Some name when GeneratorConfig.disposition ctx.Config CompilerLib <> Ship ->
@@ -1758,17 +1758,27 @@ and internal libBinding (ctx: Context) (model: ShapeModel) (self: string option)
                     None
                 else
                     Some(fsharpName, arity, Option.toList loss)
-            | None ->
-                Naming.BrowserBindings.tryFind name arguments.Length
-                |> Option.map (fun (fsharpName, arity) -> fsharpName, arity, [])
+            | None when facts.DeclFile |> Option.exists (fun file -> Grouping.libFamily file = "Dom") ->
+                Some($"Fable.Core.TS.Dom.{name}", arguments.Length, [])
+            | None -> None
 
         match bound with
         | None -> None
         | Some(fsharpName, arity, loss) ->
+            let parameters =
+                if fsharpName.StartsWith "Fable.Core.TS.Dom." then
+                    facts.Response.Target
+                    |> ValueOption.toOption
+                    |> Option.bind (fun target -> Map.tryFind target model.Types)
+                    |> Option.map ownArguments
+                    |> Option.defaultValue []
+                else
+                    []
+
             let reference, findings =
                 match arity with
                 | 0 -> FsNamed fsharpName, []
-                | _ -> appliedRef ctx model self owner fsharpName (List.truncate arity arguments)
+                | _ -> appliedRefTo ctx model self owner fsharpName parameters (List.truncate arity arguments)
 
             let dropped =
                 if arguments.Length > arity then
@@ -1886,7 +1896,13 @@ and internal appliedRefTo
                 && not (isTuple bound)
                 && not (isPureCallback bound)
                 ->
-                Map.tryFind boundId model.DeclNames |> Option.map (fun name -> boundId, name)
+                Map.tryFind boundId model.DeclNames
+                |> Option.orElseWith (fun () ->
+                    libBinding ctx model self owner bound
+                    |> Option.bind (function
+                        | FsNamed name, [] when name <> "JS.Function" -> Some name
+                        | _ -> None))
+                |> Option.map (fun name -> boundId, name)
             | _ -> None)
 
     let satisfies = satisfiesNominally model
@@ -2172,7 +2188,7 @@ and internal isOptionalParam (p: ResolvedMember) (reference: FsTypeRef) =
 /// A declaration's own type parameters, and the scope its members must be shaped under. Both
 /// come from one walk so they agree: a member may reference exactly the parameters that earn a
 /// name. A constraint survives only where it maps to a named type; `extends keyof T` drops.
-let internal typeParamsOf
+let typeParamsOf
     (ctx: Context)
     (model: ShapeModel)
     (owner: string)
@@ -2244,6 +2260,9 @@ let internal typeParamsOf
                 |> Option.defaultValue true
 
             match bound with
+            | Some(FsNamed "JS.Function", _) ->
+                findings <- findings @ [ Finding.make owner (TypeParameters.FunctionConstraintDropped name) ]
+                { Name = name; Constraint = None }
             | Some((FsNamed shown | FsApp(shown, _)), _) when not provable ->
                 findings <-
                     findings

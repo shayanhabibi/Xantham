@@ -17,15 +17,14 @@ Fable 4, no version-conditional emission, and no question to answer about an old
 a mapping needs something Fable 5 provides, use it. When a mapping is lossy it is lossy because
 of F# or because nothing shipped binds the name — never because of the Fable version.
 
-The bindings a generated file leans on are pinned in three places that must agree, because the
-compile gate is only evidence if it compiles against what a consumer will:
+The producer and compile gates must agree on binding dependencies: a compile gate is only
+evidence if it compiles against what a consumer will:
 
 - `Fable.Core` 5.2.0, in `src/Xantham.Fable.Core` and in `tests/Xantham.Generator.CompileGate`.
-- The `Fable.Browser.*` family, in `tools/browser-gen/generate.fsx` and in the gate's
-  `PackageReference` list. Bump both, then regenerate — the generated table is an intersection
-  with those exact versions.
-- The `typescript` 7.x pin in `package.json`, which supplies the `lib.*.d.ts` the table is
-  intersected against.
+- `Xantham.Fable.Core.TS`, generated from the root compiler pin and referenced by every consumer
+  compile gate. Generated consumer files open `Fable.Core.TS.Dom`; the producer omits that open
+  to avoid referencing itself.
+- The `typescript` 7.x pin in `package.json`, which supplies the producer's `lib.*.d.ts`.
 
 ## Project Structure
 
@@ -33,7 +32,7 @@ compile gate is only evidence if it compiles against what a consumer will:
   typed node layer, batching mailbox, virtual filesystem. Published to NuGet.
 - `src/Xantham.Generator` — the bindings generator. Harvest → Resolve → Shape → Render, one
   linear pass per tier, sequenced by `Pipeline.fs`; emits a binding file plus a `manifest.json`
-  of per-symbol findings. `BrowserBindingTable.generated.fs` is generated, not hand-written.
+  of per-symbol findings.
 - `src/Xantham.Cli` — the `xantham` command, packed as a .NET tool. `generate` is a shell over
   `Pipeline.run`; `schema` emits `xantham.schema.json` from the config record.
 - `src/Xantham.Fable.Core` — the hand-written support library generated bindings open.
@@ -42,7 +41,7 @@ compile gate is only evidence if it compiles against what a consumer will:
 - `tests/Xantham.Generator.Tests` — Expecto suite for the generator, including the golden corpus
   under `golden/`. `XANTHAM_UPDATE_GOLDEN=1` rewrites it; read the diff before committing it.
 - `tests/Xantham.Generator.CompileGate` — not a test project. An ordinary F# project that
-  compiles the committed goldens against `Fable.Core` and the `Fable.Browser.*` family on every
+  compiles the committed goldens against `Fable.Core` and `Xantham.Fable.Core.TS` on every
   build, so a binding that does not compile fails the build rather than a review.
 - `tests/fixtures` — the real `.d.ts` packages the generator runs against, pinned in
   `tests/fixtures/pins.json` and installed by `tools/xantham-fixtures.fsx`.
@@ -51,8 +50,7 @@ compile gate is only evidence if it compiles against what a consumer will:
 - `tools/tsc-ast` — vendors upstream compiler sources and emits the AST/enum F# layers.
 - `tools/proto-gen` — emits the protocol F# layers from the `typescript` package's shipped schema.
 - `tools/session-gen` — emits the session layer over the surface `proto` emits.
-- `tools/browser-gen` — emits the generator's DOM binding table and the gate that proves it, from
-  the pinned `Fable.Browser.*` packages intersected with the pinned compiler's `lib.*.d.ts`.
+- `src/Xantham.Fable.Core.TS` — the generated ECMAScript and DOM bindings used by consumers.
 - `build.fsx` — the current build pipeline (Partas.Build).
 - `package.json` — root manifest, tooling only. The single pin of the `typescript` 7.x compiler,
   used both as generation input and as the live `tsc --api` server. Nothing else pins it.
@@ -62,7 +60,7 @@ compile gate is only evidence if it compiles against what a consumer will:
 - `dotnet build Xantham.slnx` — build. `dotnet test` — run the Expecto suite.
 - `dotnet fsi build.fsx -- <build|test|generate|docs|pack|publish|bump>` — the full pipeline; the
   commands that need the compiler run `npm install` at the repository root first.
-- `dotnet fsi build.fsx -- generate [--only ast|proto|session|browser] [--sync]` — installs the
+- `dotnet fsi build.fsx -- generate [--only ast|proto|session|compiler-lib] [--sync]` — installs the
   root `typescript` pin, then routes to `tools/generate-wire.fsx` for every generated layer with
   repository defaults. `--sync` re-vendors the upstream sources first (network). `--only schema`
   re-emits `xantham.schema.json` from `GeneratorConfig` through the CLI.
@@ -75,10 +73,7 @@ compile gate is only evidence if it compiles against what a consumer will:
   (tags, `Node<'Tag>`, typed accessors, views) into `src/Xantham.TypeScript.Wire/`, from the
   vendored `ast.json` and `enums/`.
 - `dotnet fsi tools/generate-wire.fsx generate proto` — emit the `Proto*.generated.fs` files.
-- `dotnet fsi tools/generate-wire.fsx generate browser` — emit
-  `src/Xantham.Generator/BrowserBindingTable.generated.fs` and the gate file
-  `tests/Xantham.Generator.CompileGate/BrowserBindings.fs`. Reads NuGet and the pinned compiler's
-  `lib/`, so it needs neither `--sync` nor the other layers.
+- `dotnet fsi build.fsx -- generate --only compiler-lib` — regenerate the in-house standard-library binding from the pinned compiler.
 - `dotnet run --project src/Xantham.Cli -- generate <package-dir> [-o <dir>] [--config <path>]`
   — generate a binding outside the test harness. Exit codes: 0 generated, 1 usage, 2 no
   package, 3 configuration refused, 4 generation failed. The written paths go to standard
@@ -193,11 +188,10 @@ internals — treat its output as candidates to filter, not a work list.
 
 - Nothing is hand-transcribed that can be generated. Facts that must be transcribed are
   catalogued in `docs/wire-hand-written.md` with how each was derived and how to update it.
-  This is why the 439-entry DOM binding table is generated from the packages themselves and
-  `Naming.LibBindings` — the short, hand-pinned ECMAScript half — is not.
-- A generated table earns a generated gate. `tools/browser-gen` emits its compile-gate file
-  alongside the table, so a claim about a name or an arity that the pinned packages do not
-  support fails the build rather than a golden diff.
+  DOM types come from the generated `Xantham.Fable.Core.TS` package; the ECMAScript mappings
+  with explicit losses remain in `Naming.LibBindings`.
+- The compile gates reference the same support projects as consumers, including Core.TS, so
+  missing names, incorrect arities and unsatisfied constraints fail the build.
 - The AST is read in place out of the blob; `Node<'Tag>` is a struct over a blob index.
 - The generator is nano-passes over accumulating per-tier records, in linear lists — source
   order is execution order. `docs/.ai/plans/generator-architecture.md` carries the decisions

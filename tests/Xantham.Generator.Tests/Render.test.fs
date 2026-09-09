@@ -39,6 +39,10 @@ let private renderGroups ctx groups model =
 [<Tests>]
 let renderTests =
     testList "render" [
+        testCase "ordinary files open the shipped DOM bindings" <| fun _ ->
+            let source = renderAll baseModel |> Map.find "TestPkg.fs"
+            Expect.stringContains source "open Fable.Core.TS.Dom\n" "DOM names are in scope for consumers"
+
         let inline (=!>) input expected = input, expected
         testTheory "bound parameter names avoid pattern constructors and collisions" [
             [ "None"; "Error" ] =!> [ "_None"; "_Error" ]
@@ -100,6 +104,7 @@ let renderTests =
 
             let source = files |> Map.find "groups/Fable.Core.TS.fs"
             Expect.stringContains source "module rec Fable.Core.TS" "the configured dotted root module"
+            Expect.isFalse (source.Contains "open Fable.Core.TS.Dom") "the producer has no self dependency"
             Expect.stringContains source "[<AutoOpen>]\nmodule Es =" "only the requested ES child opens"
             Expect.stringContains source "module Dom =" "the DOM child remains explicit"
             Expect.isFalse (source.Contains "[<AutoOpen>]\nmodule Dom =") "DOM does not inherit ES opening"
@@ -479,6 +484,7 @@ let renderTests =
                       "open Fable.Core"
                       "open Fable.Core.JsInterop"
                       "open Fable.Core.JS"
+                      "open Fable.Core.TS.Dom"
                       ""
                       "/// <summary>"
                       "/// Opts."

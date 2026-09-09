@@ -1,4 +1,4 @@
-﻿/// End-to-end against the live compiler: fixtures through the whole pipeline, diffed against
+/// End-to-end against the live compiler: fixtures through the whole pipeline, diffed against
 /// the committed goldens, plus the run-twice determinism property.
 ///
 /// The npm fixture packages are installed and therefore untracked: a linked worktree carries
@@ -1582,35 +1582,31 @@ let pipelineTests =
                       Expect.stringContains source "abstract load: key: string -> JS.Promise<JS.Uint8Array>" "nested through a member"
                       Expect.stringContains source "abstract boxed: Box<JS.Date>" "and through a generic this run declares"
 
-                      // The DOM half, from the `Fable.Browser.*` family. The table is generated,
-                      // so these pin the rule that reads it: an ordinary position, the packages
-                      // of the family other than `Dom`, and a name bound at two arities.
+                      // DOM names and generic arguments come from the same compiler as Core.TS.
                       Expect.stringContains
                           source
-                          "static member handle (target: Browser.Types.EventTarget)"
+                          "static member handle (target: Fable.Core.TS.Dom.EventTarget)"
                           "a DOM name is written, not widened"
 
                       Expect.stringContains
                           source
-                          "mount (host: Browser.Types.HTMLElement, on: Browser.Types.Event)"
+                          "mount (host: Fable.Core.TS.Dom.HTMLElement, on: Fable.Core.TS.Dom.Event)"
                           "elements and events together"
 
                       Expect.stringContains
                           source
-                          "upload (body: Browser.Types.Blob, ``to``: Browser.Types.URL) : Browser.Types.FormData"
+                          "upload (body: Fable.Core.TS.Dom.Blob, ``to``: Fable.Core.TS.Dom.URL) : Fable.Core.TS.Dom.FormData"
                           "across three packages of the family"
 
                       Expect.stringContains
                           source
-                          "emit (detail: Browser.Types.CustomEvent<string>)"
+                          "emit (detail: Fable.Core.TS.Dom.CustomEvent<string>)"
                           "and the generic arity wins where the reference has an argument"
 
-                      // Names nothing shipped binds keep widening. `seq<'T>` is not a JS
-                      // iterable; `Range` is in two packages of the family at once and no
-                      // qualification picks one; `Response` belongs to `Fable.Fetch`.
+                      // Unbound ECMAScript types still widen; all three DOM names are shipped.
                       Expect.stringContains source "static member each (values: obj)" "the sync iteration protocol is unbound"
-                      Expect.stringContains source "static member ``select`` (over: obj)" "an ambiguous DOM name is not guessed at"
-                      Expect.stringContains source "static member respond () : obj" "and fetch is a different family"
+                      Expect.stringContains source "static member ``select`` (over: Fable.Core.TS.Dom.Range)" "Core.TS owns the DOM Range"
+                      Expect.stringContains source "static member respond () : Fable.Core.TS.Dom.Response" "fetch types are shipped by Core.TS"
 
                       // Every loss is in the manifest: the arity the lib drifted away from, and
                       // the restrictions the readonly views express and F# has no binding for.
@@ -1884,8 +1880,8 @@ let pipelineTests =
 
                       // A name outside the table keeps the widening the group had, so mapping
                       // is per name rather than per group.
-                      Expect.stringContains source "static member respond () : obj" "an unmapped name widens"
-                      Expect.isTrue (says "TR023" "Response is not among the generated declarations") "and says so"
+                      Expect.stringContains source "static member respond () : Fable.Core.TS.Dom.Response" "shipped DOM identities are available without a map"
+                      Expect.isFalse (says "TR023" "Response is not among the generated declarations") "no obsolete missing-binding finding"
 
                       // The arity rule: the destination takes one argument and the site applies
                       // three, so the application is not written at all.
@@ -1896,10 +1892,9 @@ let pipelineTests =
                       let rendered = Async.RunSynchronously(Pipeline.generate (handConfig groupMapLab) package)
                       let source = rendered.Files |> List.head |> snd
 
-                      // Mapping the compiler lib extends `Naming.LibBindings` and
-                      // `Naming.BrowserBindings` by name; it does not replace either.
+                      // Shipped ECMAScript and DOM bindings answer before custom group maps.
                       Expect.stringContains source "static member fetchOne (url: string) : JS.Promise<string>" "the ECMAScript table"
-                      Expect.stringContains source "static member handle (target: Browser.Types.EventTarget) : unit" "and the DOM table" ])
+                      Expect.stringContains source "static member handle (target: Fable.Core.TS.Dom.EventTarget) : unit" "and the DOM table" ])
 
 
         yield!
@@ -2540,7 +2535,7 @@ let pipelineTests =
                       let source = rendered.Files |> List.head |> snd
 
                       Expect.stringContains source "abstract dispatchEvent" "the member survives"
-                      Expect.stringContains source "Browser.Types.Event" "with its parameter type bound"
+                      Expect.stringContains source "Fable.Core.TS.Dom.Event" "with its parameter type bound"
 
                       // What is left under TR023 names a type this run does not declare. A
                       // member's name arriving there is the defect this lab pins.
@@ -2556,15 +2551,16 @@ let pipelineTests =
                       Expect.stringContains source "abstract at: JS.Date" "Date binds, and binds whole"
                       Expect.isFalse (source.Contains "abstract getTime") "with none of its members walked"
 
-                  testCase "an unbound lib declaration widens under its own name" <| fun _ ->
+                  testCase "a DOM declaration previously unbound now uses Core.TS" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
 
                       let named =
                           rendered.Findings
                           |> List.filter (fun f -> f.Key = "TR023" && f.Symbol = "Located.matrix")
 
-                      Expect.equal named.Length 1 "one finding, against the property"
-                      Expect.stringContains named.Head.Message "DOMMatrix" "naming the declaration, not a member" ])
+                      Expect.isEmpty named "DOMMatrix is shipped by Core.TS"
+                      let source = rendered.Files |> List.head |> snd
+                      Expect.stringContains source "Fable.Core.TS.Dom.DOMMatrix" "the DOM declaration is referenced" ])
 
         // Wave six lane AC's fixture. Five TypeScript spellings of absence reach two F# forms,
         // so the separation lives in the findings a site carries rather than in the binding.

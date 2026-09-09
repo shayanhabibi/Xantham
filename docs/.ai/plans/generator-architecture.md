@@ -1,4 +1,4 @@
-﻿---
+---
 category: Generator
 title: Plan - Architecture
 index: 1
@@ -1267,6 +1267,25 @@ when deliberately refreshed. The initial output is package version `0.1.0-alpha.
 schema version 1, with tier counts exact 544, ergonomic 1824, widened 624, and escape 658. The
 manifest is the fidelity record for the generated binding; those counts are not a claim that a
 future TypeScript compiler pin will reproduce the same shape.
+
+## DOM consumer bindings (2026-09-10)
+
+Generated consumer files now open `Fable.Core.TS.Dom` and reference DOM declarations
+from `Xantham.Fable.Core.TS`. The Browser reflection generator, lookup table, generated
+Browser gate, package references, and generation command have been removed. This supersedes
+the earlier Browser-family decision recorded above. Core.TS generation omits the consumer
+open so the producer remains bootstrappable.
+
+DOM references preserve the compiler's type arguments. Resolution retains target parameters
+and base types without walking DOM members, allowing the existing constrained-argument repair
+to handle widened indexed accesses such as `NodeListOf<obj>` and report the loss. The compile
+gate checks the resulting references against Core.TS itself. Package-owned declarations keep
+their identity, and explicitly shipped compiler libraries still use their configured modules.
+
+The `ConstrainFunction` investigation found that its current SRTP helper cannot replace all
+nominal `JS.Function` constraints: generic interfaces and abstract methods fail FS0670, while
+an annotated inline function specializes to an F# function. The generator retains its existing
+function constraints. Reproduction details are in `../probes/constrain-function/README.md`.
 
 # Easy Nits 
 

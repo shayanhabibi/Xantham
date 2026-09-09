@@ -8,6 +8,7 @@ open System
 open Fable.Core
 open Fable.Core.JsInterop
 open Fable.Core.JS
+open Fable.Core.TS.Dom
 
 /// <summary>
 /// A class no specifier exports: <c>globalThis.Mishap</c> is not a module entrypoint, so it keeps the

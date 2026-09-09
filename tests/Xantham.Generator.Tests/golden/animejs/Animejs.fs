@@ -8,6 +8,7 @@ open System
 open Fable.Core
 open Fable.Core.JsInterop
 open Fable.Core.JS
+open Fable.Core.TS.Dom
 
 /// <remarks>@import ;</remarks>
 [<Interface>]
@@ -69,7 +70,7 @@ module PercentageKeyframes =
 
 type ScrollContainer =
     /// <remarks>@type {HTMLElement}</remarks>
-    abstract element: Browser.Types.HTMLElement with get, set
+    abstract element: Fable.Core.TS.Dom.HTMLElement with get, set
     /// <remarks>@type {Boolean}</remarks>
     abstract useWin: bool with get, set
     /// <remarks>@type {Number}</remarks>
@@ -118,14 +119,14 @@ type ScrollContainer =
     abstract _head: ScrollObserver with get, set
     /// <remarks>@type {ScrollObserver}</remarks>
     abstract _tail: ScrollObserver with get, set
-    abstract resizeObserver: obj with get, set
+    abstract resizeObserver: Fable.Core.TS.Dom.ResizeObserver with get, set
     abstract updateScrollCoords: unit -> unit
     abstract updateWindowBounds: unit -> unit
     abstract updateBounds: unit -> unit
     abstract refreshScrollObservers: unit -> unit
     abstract refresh: unit -> unit
     abstract handleScroll: unit -> unit
-    abstract handleEvent: e: Browser.Types.Event -> unit
+    abstract handleEvent: e: Fable.Core.TS.Dom.Event -> unit
     abstract revert: unit -> unit
 
 module ScrollObserverAxisCallback =
@@ -250,12 +251,12 @@ module DOMProxy =
 
 type Draggable =
     abstract containerArray: float[] with get, set
-    abstract ``$container``: Browser.Types.HTMLElement with get, set
+    abstract ``$container``: Fable.Core.TS.Dom.HTMLElement with get, set
     abstract useWin: bool with get, set
     /// <remarks>@type {Window | HTMLElement}</remarks>
-    abstract ``$scrollContainer``: U2<Browser.Types.HTMLElement, Browser.Types.Window> with get, set
-    abstract ``$target``: Browser.Types.HTMLElement with get, set
-    abstract ``$trigger``: Browser.Types.HTMLElement with get, set
+    abstract ``$scrollContainer``: U2<Fable.Core.TS.Dom.HTMLElement, Fable.Core.TS.Dom.Window> with get, set
+    abstract ``$target``: Fable.Core.TS.Dom.HTMLElement with get, set
+    abstract ``$trigger``: Fable.Core.TS.Dom.HTMLElement with get, set
     abstract ``fixed``: bool with get, set
     abstract isFinePointer: bool with get, set
     /// <remarks>@type {[Number, Number, Number, Number]}</remarks>
@@ -373,7 +374,7 @@ type Draggable =
     abstract activeProp: string with get, set
     abstract resizeTicker: Timer with get, set
     abstract parameters: DraggableParams with get, set
-    abstract resizeObserver: obj with get, set
+    abstract resizeObserver: Fable.Core.TS.Dom.ResizeObserver with get, set
     abstract computeVelocity: dx: float * dy: float -> float
     abstract setX: x: float * ?muteUpdateCallback: bool -> Draggable
     abstract setY: y: float * ?muteUpdateCallback: bool -> Draggable
@@ -390,14 +391,14 @@ type Draggable =
     abstract scrollInView: ?duration: float * ?gap: float * ?ease: EasingParam -> Draggable
     abstract handleHover: unit -> unit
     abstract animateInView: ?duration: float * ?gap: float * ?ease: EasingParam -> Draggable
-    abstract handleDown: e: U2<Browser.Types.MouseEvent, Browser.Types.TouchEvent> -> unit
-    abstract handleMove: e: U2<Browser.Types.MouseEvent, Browser.Types.TouchEvent> -> unit
+    abstract handleDown: e: U2<Fable.Core.TS.Dom.MouseEvent, Fable.Core.TS.Dom.TouchEvent> -> unit
+    abstract handleMove: e: U2<Fable.Core.TS.Dom.MouseEvent, Fable.Core.TS.Dom.TouchEvent> -> unit
     abstract handleUp: unit -> unit
     abstract reset: unit -> Draggable
     abstract enable: unit -> Draggable
     abstract disable: unit -> Draggable
     abstract revert: unit -> Draggable
-    abstract handleEvent: e: Browser.Types.Event -> unit
+    abstract handleEvent: e: Fable.Core.TS.Dom.Event -> unit
 
 module Draggable =
     [<Interface>]
@@ -416,17 +417,17 @@ module Draggable =
 
 [<Interface>]
 type Transforms =
-    abstract ``$el``: U3<DOMProxy, Browser.Types.HTMLElement, Browser.Types.SVGElement> with get, set
+    abstract ``$el``: U3<DOMProxy, Fable.Core.TS.Dom.HTMLElement, Fable.Core.TS.Dom.SVGElement> with get, set
     abstract inlineTransforms: obj[] with get, set
-    abstract point: obj with get, set
-    abstract inversedMatrix: obj with get, set
-    abstract normalizePoint: x: float * y: float -> obj
+    abstract point: Fable.Core.TS.Dom.DOMPoint with get, set
+    abstract inversedMatrix: Fable.Core.TS.Dom.DOMMatrix with get, set
+    abstract normalizePoint: x: float * y: float -> Fable.Core.TS.Dom.DOMPoint
     abstract traverseUp: cb: Transforms.TraverseUp.Cb -> unit
-    abstract getMatrix: unit -> obj
+    abstract getMatrix: unit -> Fable.Core.TS.Dom.DOMMatrix
     abstract remove: unit -> unit
     abstract revert: unit -> unit
     [<ParamObject; Emit("$0")>]
-    static member Create (``$el``: U3<DOMProxy, Browser.Types.HTMLElement, Browser.Types.SVGElement>, inlineTransforms: obj[], point: obj, inversedMatrix: obj, normalizePoint: Func<float, float, obj>, traverseUp: (Transforms.TraverseUp.Cb -> unit), getMatrix: (unit -> obj), remove: (unit -> unit), revert: (unit -> unit)) : Transforms = jsNative
+    static member Create (``$el``: U3<DOMProxy, Fable.Core.TS.Dom.HTMLElement, Fable.Core.TS.Dom.SVGElement>, inlineTransforms: obj[], point: Fable.Core.TS.Dom.DOMPoint, inversedMatrix: Fable.Core.TS.Dom.DOMMatrix, normalizePoint: Func<float, float, Fable.Core.TS.Dom.DOMPoint>, traverseUp: (Transforms.TraverseUp.Cb -> unit), getMatrix: (unit -> Fable.Core.TS.Dom.DOMMatrix), remove: (unit -> unit), revert: (unit -> unit)) : Transforms = jsNative
 
 module Transforms =
     module TraverseUp =
@@ -564,7 +565,7 @@ type ScrollObserver =
     /// <remarks>@type {ScrollContainer}</remarks>
     abstract container: ScrollContainer with get, set
     /// <remarks>@type {HTMLElement}</remarks>
-    abstract target: Browser.Types.HTMLElement with get, set
+    abstract target: Fable.Core.TS.Dom.HTMLElement with get, set
     /// <remarks>@type {Tickable|WAAPIAnimation}</remarks>
     abstract linked: U4<JSAnimation, Timeline, Timer, WAAPIAnimation> with get, set
     /// <remarks>@type {Boolean}</remarks>
@@ -642,7 +643,7 @@ type ScrollObserver =
     /// <remarks>@type {JSAnimation}</remarks>
     abstract debugStyles: JSAnimation with get, set
     /// <remarks>@type {HTMLElement}</remarks>
-    abstract ``$debug``: Browser.Types.HTMLElement with get, set
+    abstract ``$debug``: Fable.Core.TS.Dom.HTMLElement with get, set
     /// <remarks>@type {ScrollObserverParams}</remarks>
     abstract _params: ScrollObserverParams with get, set
     /// <remarks>@type {Boolean}</remarks>
@@ -754,7 +755,7 @@ type LayoutSnapshot =
     [<ParamObject; Emit("$0")>]
     static member Create (layout: AutoLayout, rootNodes: JS.Set<LayoutNode>, nodes: JS.Map<string, LayoutNode>, scrollX: float, scrollY: float, revert: (unit -> LayoutSnapshot), getNode: (DOMTarget -> LayoutNode), getComputedValue: Func<DOMTarget, string, TimelinePosition>, forEach: Action<LayoutNode option, LayoutNodeIterator>, forEachRootNode: (LayoutNodeIterator -> unit), forEachNode: (LayoutNodeIterator -> unit), registerElement: Func<DOMTarget, LayoutNode option, LayoutNode option>, ensureDetachedNode: Func<DOMTarget, JS.Set<DOMTarget>, LayoutNode option>, record: (unit -> LayoutSnapshot), ?rootNode: LayoutNode) : LayoutSnapshot = jsNative
 
-type LayoutChildrenParam = U5<string, DOMTargetSelector[], Browser.Types.HTMLElement, Browser.Types.NodeList, Browser.Types.SVGElement>
+type LayoutChildrenParam = U5<string, DOMTargetSelector[], Fable.Core.TS.Dom.HTMLElement, Fable.Core.TS.Dom.NodeList, Fable.Core.TS.Dom.SVGElement>
 
 [<Interface>]
 type LayoutAnimationTimingsParams =
@@ -884,7 +885,7 @@ type Scope =
     /// <remarks>@type {DefaultsParams}</remarks>
     abstract defaults: DefaultsParams with get, set
     /// <remarks>@type {Document|DOMTarget}</remarks>
-    abstract root: U3<Browser.Types.Document, Browser.Types.HTMLElement, Browser.Types.SVGElement> with get, set
+    abstract root: U3<Fable.Core.TS.Dom.Document, Fable.Core.TS.Dom.HTMLElement, Fable.Core.TS.Dom.SVGElement> with get, set
     /// <remarks>@type {Array&lt;ScopeConstructorCallback&gt;}</remarks>
     abstract constructors: ScopeConstructorCallback[] with get, set
     /// <remarks>@type {Array&lt;ScopeCleanupCallback&gt;}</remarks>
@@ -906,7 +907,7 @@ type Scope =
     /// <remarks>@type {Record&lt;String, Boolean&gt;}</remarks>
     abstract matches: Record<string, bool> with get, set
     /// <remarks>@type {Record&lt;String, MediaQueryList&gt;}</remarks>
-    abstract mediaQueryLists: Record<string, Browser.Types.MediaQueryList> with get, set
+    abstract mediaQueryLists: Record<string, Fable.Core.TS.Dom.MediaQueryList> with get, set
     /// <remarks>@type {Record&lt;String, any&gt;}</remarks>
     abstract data: Record<string, obj> with get, set
     abstract register: revertible: Revertible -> unit
@@ -925,7 +926,7 @@ type Scope =
     abstract add: a1: ScopeConstructorCallback -> Scope
     abstract addOnce: scopeConstructorCallback: ScopeConstructorCallback -> Scope
     abstract keepTime: cb: (Scope -> Tickable) -> Tickable
-    abstract handleEvent: e: Browser.Types.Event -> unit
+    abstract handleEvent: e: Fable.Core.TS.Dom.Event -> unit
     abstract revert: unit -> unit
 
 module DrawableSVGGeometry =
@@ -1008,11 +1009,11 @@ type Text =
     /// </summary>
     /// <remarks>@class</remarks>
     abstract TextSplitter: TextSplitterConstructor with get, set
-    abstract splitText: Func<U4<string, Browser.Types.Element[], Browser.Types.Element, Browser.Types.NodeList>, TextSplitterParams option, TextSplitter> with get, set
-    abstract split: Func<U4<string, Browser.Types.HTMLElement[], Browser.Types.HTMLElement, Browser.Types.NodeList>, TextSplitterParams option, TextSplitter> with get, set
+    abstract splitText: Func<U4<string, Fable.Core.TS.Dom.Element[], Fable.Core.TS.Dom.Element, Fable.Core.TS.Dom.NodeList>, TextSplitterParams option, TextSplitter> with get, set
+    abstract split: Func<U4<string, Fable.Core.TS.Dom.HTMLElement[], Fable.Core.TS.Dom.HTMLElement, Fable.Core.TS.Dom.NodeList>, TextSplitterParams option, TextSplitter> with get, set
     abstract scrambleText: (ScrambleTextParams option -> Text.ScrambleText.Result) with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (TextSplitter: TextSplitterConstructor, splitText: Func<U4<string, Browser.Types.Element[], Browser.Types.Element, Browser.Types.NodeList>, TextSplitterParams option, TextSplitter>, split: Func<U4<string, Browser.Types.HTMLElement[], Browser.Types.HTMLElement, Browser.Types.NodeList>, TextSplitterParams option, TextSplitter>, scrambleText: (ScrambleTextParams option -> Text.ScrambleText.Result)) : Text = jsNative
+    static member Create (TextSplitter: TextSplitterConstructor, splitText: Func<U4<string, Fable.Core.TS.Dom.Element[], Fable.Core.TS.Dom.Element, Fable.Core.TS.Dom.NodeList>, TextSplitterParams option, TextSplitter>, split: Func<U4<string, Fable.Core.TS.Dom.HTMLElement[], Fable.Core.TS.Dom.HTMLElement, Fable.Core.TS.Dom.NodeList>, TextSplitterParams option, TextSplitter>, scrambleText: (ScrambleTextParams option -> Text.ScrambleText.Result)) : Text = jsNative
 
 module Text =
     module ScrambleText =
@@ -1020,7 +1021,7 @@ module Text =
 
 type TextSplitterConstructor =
     [<EmitConstructor>]
-    abstract Create: target: U4<string, Browser.Types.Element[], Browser.Types.Element, Browser.Types.NodeList> * ?parameters: TextSplitterParams -> TextSplitter
+    abstract Create: target: U4<string, Fable.Core.TS.Dom.Element[], Fable.Core.TS.Dom.Element, Fable.Core.TS.Dom.NodeList> * ?parameters: TextSplitterParams -> TextSplitter
 
 [<Interface>]
 type ScrambleTextTween =
@@ -1049,7 +1050,7 @@ type TextSplitter =
     abstract wordTemplate: U3<string, bool, SplitFunctionValue> with get, set
     /// <remarks>@type {String|false|SplitFunctionValue}</remarks>
     abstract charTemplate: U3<string, bool, SplitFunctionValue> with get, set
-    abstract ``$target``: Browser.Types.HTMLElement with get, set
+    abstract ``$target``: Fable.Core.TS.Dom.HTMLElement with get, set
     abstract html: string with get, set
     abstract lines: obj[] with get, set
     abstract words: obj[] with get, set
@@ -1060,18 +1061,18 @@ type TextSplitter =
     abstract ready: bool with get, set
     abstract width: float with get, set
     abstract resizeTimeout: obj with get, set
-    abstract resizeObserver: obj with get, set
+    abstract resizeObserver: Fable.Core.TS.Dom.ResizeObserver with get, set
     /// <returns>this</returns>
     abstract addEffect: effect: (obj[] -> U4<JSAnimation, Timeline, Timer, (unit -> unit)> option) -> TextSplitter
     abstract revert: unit -> TextSplitter
     /// <summary>
     /// Recursively processes a node and its children
     /// </summary>
-    abstract splitNode: node: Browser.Types.Node -> unit
+    abstract splitNode: node: Fable.Core.TS.Dom.Node -> unit
     abstract split: ?clearCache: bool -> TextSplitter
     abstract refresh: unit -> unit
     [<ParamObject; Emit("$0")>]
-    static member Create (debug: bool, includeSpaces: bool, accessible: bool, linesOnly: bool, lineTemplate: U3<string, bool, SplitFunctionValue>, wordTemplate: U3<string, bool, SplitFunctionValue>, charTemplate: U3<string, bool, SplitFunctionValue>, ``$target``: Browser.Types.HTMLElement, html: string, lines: obj[], words: obj[], chars: obj[], effects: obj[], effectsCleanups: obj[], cache: string, ready: bool, width: float, resizeTimeout: obj, resizeObserver: obj, addEffect: ((obj[] -> U4<JSAnimation, Timeline, Timer, (unit -> unit)> option) -> TextSplitter), revert: (unit -> TextSplitter), splitNode: (Browser.Types.Node -> unit), split: (bool option -> TextSplitter), refresh: (unit -> unit)) : TextSplitter = jsNative
+    static member Create (debug: bool, includeSpaces: bool, accessible: bool, linesOnly: bool, lineTemplate: U3<string, bool, SplitFunctionValue>, wordTemplate: U3<string, bool, SplitFunctionValue>, charTemplate: U3<string, bool, SplitFunctionValue>, ``$target``: Fable.Core.TS.Dom.HTMLElement, html: string, lines: obj[], words: obj[], chars: obj[], effects: obj[], effectsCleanups: obj[], cache: string, ready: bool, width: float, resizeTimeout: obj, resizeObserver: Fable.Core.TS.Dom.ResizeObserver, addEffect: ((obj[] -> U4<JSAnimation, Timeline, Timer, (unit -> unit)> option) -> TextSplitter), revert: (unit -> TextSplitter), splitNode: (Fable.Core.TS.Dom.Node -> unit), split: (bool option -> TextSplitter), refresh: (unit -> unit)) : TextSplitter = jsNative
 
 [<Interface>]
 type Segment =
@@ -1126,7 +1127,7 @@ type Timeline =
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    abstract sync: ?synced: obj * ?position: TimelinePosition -> Timeline
+    abstract sync: ?synced: Fable.Core.TS.Dom.Animation * ?position: TimelinePosition -> Timeline
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
@@ -1380,7 +1381,7 @@ type CallbackArgument =
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
-    abstract sync: ?synced: obj * ?position: TimelinePosition -> CallbackArgument
+    abstract sync: ?synced: Fable.Core.TS.Dom.Animation * ?position: TimelinePosition -> CallbackArgument
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
@@ -1478,7 +1479,7 @@ module CallbackArgument =
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
-            abstract sync: ?synced: obj * ?position: TimelinePosition -> CallbackArgument.Head.Parent
+            abstract sync: ?synced: Fable.Core.TS.Dom.Animation * ?position: TimelinePosition -> CallbackArgument.Head.Parent
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
@@ -1570,7 +1571,7 @@ module CallbackArgument =
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
-            abstract sync: ?synced: obj * ?position: TimelinePosition -> CallbackArgument.Head.Prev
+            abstract sync: ?synced: Fable.Core.TS.Dom.Animation * ?position: TimelinePosition -> CallbackArgument.Head.Prev
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
             /// <remarks>@overload</remarks>
@@ -1711,17 +1712,17 @@ module StaggerParams =
         | [<CompiledName("y")>] Y
         | [<CompiledName("z")>] Z
 
-type DOMTarget = U2<Browser.Types.HTMLElement, Browser.Types.SVGElement>
+type DOMTarget = U2<Fable.Core.TS.Dom.HTMLElement, Fable.Core.TS.Dom.SVGElement>
 
 type JSTarget = Record<string, obj>
 
-type Target = U3<Browser.Types.HTMLElement, JSTarget, Browser.Types.SVGElement>
+type Target = U3<Fable.Core.TS.Dom.HTMLElement, JSTarget, Fable.Core.TS.Dom.SVGElement>
 
-type TargetSelector = U5<string, Browser.Types.HTMLElement, JSTarget, Browser.Types.NodeList, Browser.Types.SVGElement>
+type TargetSelector = U5<string, Fable.Core.TS.Dom.HTMLElement, JSTarget, Fable.Core.TS.Dom.NodeList, Fable.Core.TS.Dom.SVGElement>
 
-type DOMTargetSelector = U4<string, Browser.Types.HTMLElement, Browser.Types.NodeList, Browser.Types.SVGElement>
+type DOMTargetSelector = U4<string, Fable.Core.TS.Dom.HTMLElement, Fable.Core.TS.Dom.NodeList, Fable.Core.TS.Dom.SVGElement>
 
-type DOMTargetsParam = U5<string, DOMTargetSelector[], Browser.Types.HTMLElement, Browser.Types.NodeList, Browser.Types.SVGElement>
+type DOMTargetsParam = U5<string, DOMTargetSelector[], Fable.Core.TS.Dom.HTMLElement, Fable.Core.TS.Dom.NodeList, Fable.Core.TS.Dom.SVGElement>
 
 type DOMTargetsArray = DOMTarget[]
 
@@ -1729,7 +1730,7 @@ type JSTargetsParam = U2<JSTarget[], JSTarget>
 
 type JSTargetsArray = JSTarget[]
 
-type TargetsParam = U6<string, TargetSelector[], Browser.Types.HTMLElement, JSTarget, Browser.Types.NodeList, Browser.Types.SVGElement>
+type TargetsParam = U6<string, TargetSelector[], Fable.Core.TS.Dom.HTMLElement, JSTarget, Fable.Core.TS.Dom.NodeList, Fable.Core.TS.Dom.SVGElement>
 
 type TargetsArray = Target[]
 
@@ -2196,11 +2197,11 @@ type AngularRef =
 
 [<Interface>]
 type ScopeParams =
-    abstract root: U6<string, AngularRef, Browser.Types.HTMLElement, Browser.Types.NodeList, ReactRef, Browser.Types.SVGElement> option with get, set
+    abstract root: U6<string, AngularRef, Fable.Core.TS.Dom.HTMLElement, Fable.Core.TS.Dom.NodeList, ReactRef, Fable.Core.TS.Dom.SVGElement> option with get, set
     abstract defaults: DefaultsParams option with get, set
     abstract mediaQueries: Record<string, string> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?root: U6<string, AngularRef, Browser.Types.HTMLElement, Browser.Types.NodeList, ReactRef, Browser.Types.SVGElement>, ?defaults: DefaultsParams, ?mediaQueries: Record<string, string>) : ScopeParams = jsNative
+    static member Create (?root: U6<string, AngularRef, Fable.Core.TS.Dom.HTMLElement, Fable.Core.TS.Dom.NodeList, ReactRef, Fable.Core.TS.Dom.SVGElement>, ?defaults: DefaultsParams, ?mediaQueries: Record<string, string>) : ScopeParams = jsNative
 
 type ScopedCallback<'T> = (Scope -> 'T)
 
@@ -2271,7 +2272,7 @@ type DraggableDragThresholdParams =
 
 type DraggableParams =
     abstract trigger: DOMTargetSelector option with get, set
-    abstract container: U6<string, float[], Browser.Types.HTMLElement, Browser.Types.NodeList, Browser.Types.SVGElement, (Draggable -> U5<string, float[], Browser.Types.HTMLElement, Browser.Types.NodeList, Browser.Types.SVGElement>)> option with get, set
+    abstract container: U6<string, float[], Fable.Core.TS.Dom.HTMLElement, Fable.Core.TS.Dom.NodeList, Fable.Core.TS.Dom.SVGElement, (Draggable -> U5<string, float[], Fable.Core.TS.Dom.HTMLElement, Fable.Core.TS.Dom.NodeList, Fable.Core.TS.Dom.SVGElement>)> option with get, set
     abstract x: U2<bool, DraggableAxisParam> option with get, set
     abstract y: U2<bool, DraggableAxisParam> option with get, set
     abstract modifier: TweenModifier option with get, set
@@ -2310,7 +2311,7 @@ type SplitTemplateParams =
 
 type SplitValue = U2<string, bool>
 
-type SplitFunctionValue = (U2<Browser.Types.HTMLElement, Browser.Types.Node> option -> obj)
+type SplitFunctionValue = (U2<Fable.Core.TS.Dom.HTMLElement, Fable.Core.TS.Dom.Node> option -> obj)
 
 [<Interface>]
 type TextSplitterParams =
@@ -2398,13 +2399,13 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/SVGGeometryElement/pathLength">MDN Reference</a>
     /// </summary>
-    abstract pathLength: Browser.Types.SVGAnimatedNumber
+    abstract pathLength: Fable.Core.TS.Dom.SVGAnimatedNumber
     /// <summary>
     /// The <b><c>SVGGeometryElement.getPointAtLength()</c></b> method returns the point at a given distance along the path.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/SVGGeometryElement/getPointAtLength">MDN Reference</a>
     /// </summary>
-    abstract getPointAtLength: distance: float -> obj
+    abstract getPointAtLength: distance: float -> Fable.Core.TS.Dom.DOMPoint
     /// <summary>
     /// The <b><c>SVGGeometryElement.getTotalLength()</c></b> method returns the user agent's computed value for the total length of the path in user units.
     /// <br /><br />
@@ -2416,41 +2417,41 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/SVGGeometryElement/isPointInFill">MDN Reference</a>
     /// </summary>
-    abstract isPointInFill: ?point: obj -> bool
+    abstract isPointInFill: ?point: Fable.Core.TS.Dom.DOMPointInit -> bool
     /// <summary>
     /// The <b><c>isPointInStroke()</c></b> method of the SVGGeometryElement interface determines whether a given point is within the stroke shape of an element. The point argument is interpreted as a point in the local coordinate system of the element.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/SVGGeometryElement/isPointInStroke">MDN Reference</a>
     /// </summary>
-    abstract isPointInStroke: ?point: obj -> bool
+    abstract isPointInStroke: ?point: Fable.Core.TS.Dom.DOMPointInit -> bool
     /// <summary>
     /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
     /// </summary>
-    abstract addEventListener<'K>: ``type``: 'K * listener: (obj -> obj) * ?options: U2<bool, Browser.Types.AddEventListenerOptions> -> unit
+    abstract addEventListener<'K>: ``type``: 'K * listener: (obj -> obj) * ?options: U2<bool, Fable.Core.TS.Dom.AddEventListenerOptions> -> unit
     /// <summary>
     /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
     /// </summary>
-    abstract addEventListener: ``type``: string * listener: obj * ?options: U2<bool, Browser.Types.AddEventListenerOptions> -> unit
+    abstract addEventListener: ``type``: string * listener: U2<Fable.Core.TS.Dom.EventListener, Fable.Core.TS.Dom.EventListenerObject> * ?options: U2<bool, Fable.Core.TS.Dom.AddEventListenerOptions> -> unit
     /// <summary>
     /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
     /// </summary>
-    abstract removeEventListener<'K>: ``type``: 'K * listener: (obj -> obj) * ?options: obj -> unit
+    abstract removeEventListener<'K>: ``type``: 'K * listener: (obj -> obj) * ?options: U2<bool, Fable.Core.TS.Dom.EventListenerOptions> -> unit
     /// <summary>
     /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
     /// </summary>
-    abstract removeEventListener: ``type``: string * listener: obj * ?options: obj -> unit
+    abstract removeEventListener: ``type``: string * listener: U2<Fable.Core.TS.Dom.EventListener, Fable.Core.TS.Dom.EventListenerObject> * ?options: U2<bool, Fable.Core.TS.Dom.EventListenerOptions> -> unit
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaActiveDescendantElement">MDN Reference</a>
     /// </summary>
-    abstract ariaActiveDescendantElement: Browser.Types.Element option with get, set
+    abstract ariaActiveDescendantElement: Fable.Core.TS.Dom.Element option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaAtomic">MDN Reference</a>
     /// </summary>
@@ -2494,7 +2495,7 @@ type DrawableSVGGeometry =
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaControlsElements">MDN Reference</a>
     /// </summary>
-    abstract ariaControlsElements: Browser.Types.Element[] option with get, set
+    abstract ariaControlsElements: Fable.Core.TS.Dom.Element[] option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaCurrent">MDN Reference</a>
     /// </summary>
@@ -2502,7 +2503,7 @@ type DrawableSVGGeometry =
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaDescribedByElements">MDN Reference</a>
     /// </summary>
-    abstract ariaDescribedByElements: Browser.Types.Element[] option with get, set
+    abstract ariaDescribedByElements: Fable.Core.TS.Dom.Element[] option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaDescription">MDN Reference</a>
     /// </summary>
@@ -2510,7 +2511,7 @@ type DrawableSVGGeometry =
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaDetailsElements">MDN Reference</a>
     /// </summary>
-    abstract ariaDetailsElements: Browser.Types.Element[] option with get, set
+    abstract ariaDetailsElements: Fable.Core.TS.Dom.Element[] option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaDisabled">MDN Reference</a>
     /// </summary>
@@ -2518,7 +2519,7 @@ type DrawableSVGGeometry =
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaErrorMessageElements">MDN Reference</a>
     /// </summary>
-    abstract ariaErrorMessageElements: Browser.Types.Element[] option with get, set
+    abstract ariaErrorMessageElements: Fable.Core.TS.Dom.Element[] option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaExpanded">MDN Reference</a>
     /// </summary>
@@ -2526,7 +2527,7 @@ type DrawableSVGGeometry =
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaFlowToElements">MDN Reference</a>
     /// </summary>
-    abstract ariaFlowToElements: Browser.Types.Element[] option with get, set
+    abstract ariaFlowToElements: Fable.Core.TS.Dom.Element[] option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaHasPopup">MDN Reference</a>
     /// </summary>
@@ -2550,7 +2551,7 @@ type DrawableSVGGeometry =
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaLabelledByElements">MDN Reference</a>
     /// </summary>
-    abstract ariaLabelledByElements: Browser.Types.Element[] option with get, set
+    abstract ariaLabelledByElements: Fable.Core.TS.Dom.Element[] option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaLevel">MDN Reference</a>
     /// </summary>
@@ -2578,7 +2579,7 @@ type DrawableSVGGeometry =
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaOwnsElements">MDN Reference</a>
     /// </summary>
-    abstract ariaOwnsElements: Browser.Types.Element[] option with get, set
+    abstract ariaOwnsElements: Fable.Core.TS.Dom.Element[] option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaPlaceholder">MDN Reference</a>
     /// </summary>
@@ -2658,11 +2659,11 @@ type DrawableSVGGeometry =
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/animate">MDN Reference</a>
     /// </summary>
-    abstract animate: ?keyframes: obj * ?options: obj -> obj
+    abstract animate: ?keyframes: U2<Fable.Core.TS.Dom.Keyframe[], Fable.Core.TS.Dom.PropertyIndexedKeyframes> * ?options: U2<float, Fable.Core.TS.Dom.KeyframeAnimationOptions> -> Fable.Core.TS.Dom.Animation
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getAnimations">MDN Reference</a>
     /// </summary>
-    abstract getAnimations: ?options: obj -> obj[]
+    abstract getAnimations: ?options: Fable.Core.TS.Dom.GetAnimationsOptions -> Fable.Core.TS.Dom.Animation[]
     /// <summary>
     /// Inserts nodes just after node, while replacing strings in nodes with equivalent Text nodes.
     /// <br /><br />
@@ -2670,7 +2671,7 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/CharacterData/after">MDN Reference</a>
     /// </summary>
-    abstract after: [<ParamArray>] nodes: U2<string, Browser.Types.Node>[] -> unit
+    abstract after: [<ParamArray>] nodes: U2<string, Fable.Core.TS.Dom.Node>[] -> unit
     /// <summary>
     /// Inserts nodes just before node, while replacing strings in nodes with equivalent Text nodes.
     /// <br /><br />
@@ -2678,7 +2679,7 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/CharacterData/before">MDN Reference</a>
     /// </summary>
-    abstract before: [<ParamArray>] nodes: U2<string, Browser.Types.Node>[] -> unit
+    abstract before: [<ParamArray>] nodes: U2<string, Fable.Core.TS.Dom.Node>[] -> unit
     /// <summary>
     /// Removes node.
     /// <br /><br />
@@ -2692,19 +2693,19 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/CharacterData/replaceWith">MDN Reference</a>
     /// </summary>
-    abstract replaceWith: [<ParamArray>] nodes: U2<string, Browser.Types.Node>[] -> unit
+    abstract replaceWith: [<ParamArray>] nodes: U2<string, Fable.Core.TS.Dom.Node>[] -> unit
     /// <summary>
     /// The <b><c>Element.attributes</c></b> property returns a live collection of all attribute nodes registered to the specified node. It is a NamedNodeMap, not an Array, so it has no Array methods and the Attr nodes' indexes may differ among browsers. To be more specific, attributes is a key/value pair of strings that represents any information regarding that attribute.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/attributes">MDN Reference</a>
     /// </summary>
-    abstract attributes: Browser.Types.NamedNodeMap
+    abstract attributes: Fable.Core.TS.Dom.NamedNodeMap
     /// <summary>
     /// The read-only <b><c>classList</c></b> property of the Element interface contains a live DOMTokenList collection representing the class attribute of the element. This can then be used to manipulate the class list.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/classList">MDN Reference</a>
     /// </summary>
-    abstract classList: Browser.Types.DOMTokenList with get, set
+    abstract classList: Fable.Core.TS.Dom.DOMTokenList with get, set
     /// <summary>
     /// The <b><c>clientHeight</c></b> read-only property of the Element interface is zero for elements with no CSS or inline layout boxes; otherwise, it's the inner height of an element in pixels. It includes padding but excludes borders, margins, and horizontal scrollbars (if present).
     /// <br /><br />
@@ -2735,7 +2736,7 @@ type DrawableSVGGeometry =
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/currentCSSZoom">MDN Reference</a>
     /// </summary>
     abstract currentCSSZoom: float
-    abstract customElementRegistry: obj option
+    abstract customElementRegistry: Fable.Core.TS.Dom.CustomElementRegistry option
     /// <summary>
     /// The <b><c>id</c></b> property of the Element interface represents the element's identifier, reflecting the id global attribute.
     /// <br /><br />
@@ -2763,11 +2764,11 @@ type DrawableSVGGeometry =
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/fullscreenchange_event">MDN Reference</a>
     /// </summary>
-    abstract onfullscreenchange: (Browser.Types.Event -> obj) option with get, set
+    abstract onfullscreenchange: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/fullscreenerror_event">MDN Reference</a>
     /// </summary>
-    abstract onfullscreenerror: (Browser.Types.Event -> obj) option with get, set
+    abstract onfullscreenerror: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// The <b><c>outerHTML</c></b> attribute of the Element interface gets or sets the HTML or XML markup of the element and its descendants, omitting any shadow roots in both cases.
     /// <br /><br />
@@ -2779,13 +2780,13 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/ownerDocument">MDN Reference</a>
     /// </summary>
-    abstract ownerDocument: Browser.Types.Document
+    abstract ownerDocument: Fable.Core.TS.Dom.Document
     /// <summary>
     /// The read-only <b><c>part</c></b> property of the Element interface contains a DOMTokenList object representing the part identifier(s) of the element. It reflects the element's part content attribute. These can be used to style parts of a shadow DOM, via the ::part pseudo-element.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/part">MDN Reference</a>
     /// </summary>
-    abstract part: Browser.Types.DOMTokenList with get, set
+    abstract part: Fable.Core.TS.Dom.DOMTokenList with get, set
     /// <summary>
     /// The <b><c>Element.prefix</c></b> read-only property returns the namespace prefix of the specified element, or null if no prefix is specified.
     /// <br /><br />
@@ -2821,7 +2822,7 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/shadowRoot">MDN Reference</a>
     /// </summary>
-    abstract shadowRoot: Browser.Types.ShadowRoot option
+    abstract shadowRoot: Fable.Core.TS.Dom.ShadowRoot option
     /// <summary>
     /// The <b><c>slot</c></b> property of the Element interface returns the name of the shadow DOM slot the element is inserted in.
     /// <br /><br />
@@ -2839,13 +2840,13 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/attachShadow">MDN Reference</a>
     /// </summary>
-    abstract attachShadow: init: Browser.Types.ShadowRootInit -> Browser.Types.ShadowRoot
+    abstract attachShadow: init: Fable.Core.TS.Dom.ShadowRootInit -> Fable.Core.TS.Dom.ShadowRoot
     /// <summary>
     /// The <b><c>checkVisibility()</c></b> method of the Element interface checks whether the element is visible.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/checkVisibility">MDN Reference</a>
     /// </summary>
-    abstract checkVisibility: ?options: obj -> bool
+    abstract checkVisibility: ?options: Fable.Core.TS.Dom.CheckVisibilityOptions -> bool
     /// <summary>
     /// The <b><c>closest()</c></b> method of the Element interface traverses the element and its parents (heading toward the document root) until it finds a node that matches the specified CSS selector.
     /// <br /><br />
@@ -2857,13 +2858,13 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/closest">MDN Reference</a>
     /// </summary>
-    abstract closest<'E when 'E :> Browser.Types.Element>: selectors: string -> 'E option
+    abstract closest<'E when 'E :> Fable.Core.TS.Dom.Element>: selectors: string -> 'E option
     /// <summary>
     /// The <b><c>computedStyleMap()</c></b> method of the Element interface returns a StylePropertyMapReadOnly interface which provides a read-only representation of a CSS declaration block that is an alternative to CSSStyleDeclaration.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/computedStyleMap">MDN Reference</a>
     /// </summary>
-    abstract computedStyleMap: unit -> obj
+    abstract computedStyleMap: unit -> Fable.Core.TS.Dom.StylePropertyMapReadOnly
     /// <summary>
     /// The <b><c>getAttribute()</c></b> method of the Element interface returns the value of a specified attribute on the element.
     /// <br /><br />
@@ -2887,75 +2888,75 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getAttributeNode">MDN Reference</a>
     /// </summary>
-    abstract getAttributeNode: qualifiedName: string -> Browser.Types.Attr option
+    abstract getAttributeNode: qualifiedName: string -> Fable.Core.TS.Dom.Attr option
     /// <summary>
     /// The <b><c>getAttributeNodeNS()</c></b> method of the Element interface returns the namespaced Attr node of an element.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getAttributeNodeNS">MDN Reference</a>
     /// </summary>
-    abstract getAttributeNodeNS: ``namespace``: string option * localName: string -> Browser.Types.Attr option
+    abstract getAttributeNodeNS: ``namespace``: string option * localName: string -> Fable.Core.TS.Dom.Attr option
     /// <summary>
     /// The <b><c>Element.getBoundingClientRect()</c></b> method returns a DOMRect object providing information about the size of an element and its position relative to the viewport.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getBoundingClientRect">MDN Reference</a>
     /// </summary>
-    abstract getBoundingClientRect: unit -> obj
+    abstract getBoundingClientRect: unit -> Fable.Core.TS.Dom.DOMRect
     /// <summary>
     /// The <b><c>getClientRects()</c></b> method of the Element interface returns a collection of DOMRect objects that indicate the bounding rectangles for each CSS border box in a client.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getClientRects">MDN Reference</a>
     /// </summary>
-    abstract getClientRects: unit -> obj
+    abstract getClientRects: unit -> Fable.Core.TS.Dom.DOMRectList
     /// <summary>
     /// The Element method <b><c>getElementsByClassName()</c></b> returns a live HTMLCollection which contains every descendant element which has the specified class name or names.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByClassName">MDN Reference</a>
     /// </summary>
-    abstract getElementsByClassName: classNames: string -> obj
+    abstract getElementsByClassName: classNames: string -> Fable.Core.TS.Dom.HTMLCollectionOf<Fable.Core.TS.Dom.Element>
     /// <summary>
     /// The <b><c>Element.getElementsByTagName()</c></b> method returns a live HTMLCollection of elements with the given tag name.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagName">MDN Reference</a>
     /// </summary>
     /// <remarks>@deprecated</remarks>
-    abstract getElementsByTagName<'K>: qualifiedName: 'K -> obj
+    abstract getElementsByTagName<'K>: qualifiedName: 'K -> Fable.Core.TS.Dom.HTMLCollectionOf<Fable.Core.TS.Dom.Element>
     /// <summary>
     /// The <b><c>Element.getElementsByTagName()</c></b> method returns a live HTMLCollection of elements with the given tag name.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagName">MDN Reference</a>
     /// </summary>
     /// <remarks>@deprecated</remarks>
-    abstract getElementsByTagName: qualifiedName: string -> obj
+    abstract getElementsByTagName: qualifiedName: string -> Fable.Core.TS.Dom.HTMLCollectionOf<Fable.Core.TS.Dom.Element>
     /// <summary>
     /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
     /// </summary>
-    abstract getElementsByTagNameNS: namespaceURI: DrawableSVGGeometry.HttpWwwW3Org1999Xhtml * localName: string -> obj
+    abstract getElementsByTagNameNS: namespaceURI: DrawableSVGGeometry.HttpWwwW3Org1999Xhtml * localName: string -> Fable.Core.TS.Dom.HTMLCollectionOf<Fable.Core.TS.Dom.HTMLElement>
     /// <summary>
     /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
     /// </summary>
-    abstract getElementsByTagNameNS: namespaceURI: DrawableSVGGeometry.HttpWwwW3Org2000Svg * localName: string -> obj
+    abstract getElementsByTagNameNS: namespaceURI: DrawableSVGGeometry.HttpWwwW3Org2000Svg * localName: string -> Fable.Core.TS.Dom.HTMLCollectionOf<Fable.Core.TS.Dom.SVGElement>
     /// <summary>
     /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
     /// </summary>
-    abstract getElementsByTagNameNS: namespaceURI: DrawableSVGGeometry.HttpWwwW3Org1998MathMathML * localName: string -> obj
+    abstract getElementsByTagNameNS: namespaceURI: DrawableSVGGeometry.HttpWwwW3Org1998MathMathML * localName: string -> Fable.Core.TS.Dom.HTMLCollectionOf<Fable.Core.TS.Dom.MathMLElement>
     /// <summary>
     /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
     /// </summary>
-    abstract getElementsByTagNameNS: ``namespace``: string option * localName: string -> obj
+    abstract getElementsByTagNameNS: ``namespace``: string option * localName: string -> Fable.Core.TS.Dom.HTMLCollectionOf<Fable.Core.TS.Dom.Element>
     /// <summary>
     /// The <b><c>getHTML()</c></b> method of the Element interface is used to serialize an element's DOM to an HTML string.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getHTML">MDN Reference</a>
     /// </summary>
-    abstract getHTML: ?options: obj -> string
+    abstract getHTML: ?options: Fable.Core.TS.Dom.GetHTMLOptions -> string
     /// <summary>
     /// The <b><c>Element.hasAttribute()</c></b> method returns a Boolean value indicating whether the specified element has the specified attribute or not.
     /// <br /><br />
@@ -2985,7 +2986,7 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/insertAdjacentElement">MDN Reference</a>
     /// </summary>
-    abstract insertAdjacentElement: where: DrawableSVGGeometry.InsertAdjacentElement.Where * element: Browser.Types.Element -> Browser.Types.Element option
+    abstract insertAdjacentElement: where: DrawableSVGGeometry.InsertAdjacentElement.Where * element: Fable.Core.TS.Dom.Element -> Fable.Core.TS.Dom.Element option
     /// <summary>
     /// The <b><c>insertAdjacentHTML()</c></b> method of the Element interface parses the specified input as HTML or XML and inserts the resulting nodes into the DOM tree at a specified position.
     /// <br /><br />
@@ -3033,25 +3034,25 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/removeAttributeNode">MDN Reference</a>
     /// </summary>
-    abstract removeAttributeNode: attr: Browser.Types.Attr -> Browser.Types.Attr
+    abstract removeAttributeNode: attr: Fable.Core.TS.Dom.Attr -> Fable.Core.TS.Dom.Attr
     /// <summary>
     /// The <b><c>Element.requestFullscreen()</c></b> method issues an asynchronous request to make the element be displayed in fullscreen mode.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/requestFullscreen">MDN Reference</a>
     /// </summary>
-    abstract requestFullscreen: ?options: obj -> JS.Promise<unit>
+    abstract requestFullscreen: ?options: Fable.Core.TS.Dom.FullscreenOptions -> JS.Promise<unit>
     /// <summary>
     /// The <b><c>requestPointerLock()</c></b> method of the Element interface lets you asynchronously ask for the pointer to be locked on the given element.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/requestPointerLock">MDN Reference</a>
     /// </summary>
-    abstract requestPointerLock: ?options: obj -> JS.Promise<unit>
+    abstract requestPointerLock: ?options: Fable.Core.TS.Dom.PointerLockOptions -> JS.Promise<unit>
     /// <summary>
     /// The <b><c>scroll()</c></b> method of the Element interface scrolls the element to a particular set of coordinates inside a given element.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/scroll">MDN Reference</a>
     /// </summary>
-    abstract scroll: ?options: obj -> unit
+    abstract scroll: ?options: Fable.Core.TS.Dom.ScrollToOptions -> unit
     /// <summary>
     /// The <b><c>scroll()</c></b> method of the Element interface scrolls the element to a particular set of coordinates inside a given element.
     /// <br /><br />
@@ -3063,7 +3064,7 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/scrollBy">MDN Reference</a>
     /// </summary>
-    abstract scrollBy: ?options: obj -> unit
+    abstract scrollBy: ?options: Fable.Core.TS.Dom.ScrollToOptions -> unit
     /// <summary>
     /// The <b><c>scrollBy()</c></b> method of the Element interface scrolls an element by the given amount.
     /// <br /><br />
@@ -3075,13 +3076,13 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/scrollIntoView">MDN Reference</a>
     /// </summary>
-    abstract scrollIntoView: ?arg: U2<bool, Browser.Types.ScrollIntoViewOptions> -> unit
+    abstract scrollIntoView: ?arg: U2<bool, Fable.Core.TS.Dom.ScrollIntoViewOptions> -> unit
     /// <summary>
     /// The <b><c>scrollTo()</c></b> method of the Element interface scrolls to a particular set of coordinates inside a given element.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/scrollTo">MDN Reference</a>
     /// </summary>
-    abstract scrollTo: ?options: obj -> unit
+    abstract scrollTo: ?options: Fable.Core.TS.Dom.ScrollToOptions -> unit
     /// <summary>
     /// The <b><c>scrollTo()</c></b> method of the Element interface scrolls to a particular set of coordinates inside a given element.
     /// <br /><br />
@@ -3105,13 +3106,13 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/setAttributeNode">MDN Reference</a>
     /// </summary>
-    abstract setAttributeNode: attr: Browser.Types.Attr -> Browser.Types.Attr option
+    abstract setAttributeNode: attr: Fable.Core.TS.Dom.Attr -> Fable.Core.TS.Dom.Attr option
     /// <summary>
     /// The <b><c>setAttributeNodeNS()</c></b> method of the Element interface adds a new namespaced Attr node to an element.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/setAttributeNodeNS">MDN Reference</a>
     /// </summary>
-    abstract setAttributeNodeNS: attr: Browser.Types.Attr -> Browser.Types.Attr option
+    abstract setAttributeNodeNS: attr: Fable.Core.TS.Dom.Attr -> Fable.Core.TS.Dom.Attr option
     /// <summary>
     /// The <b><c>setHTMLUnsafe()</c></b> method of the Element interface is used to parse HTML input into a DocumentFragment, optionally filtering out unwanted elements and attributes, and those that don't belong in the context, and then using it to replace the element's subtree in the DOM.
     /// <br /><br />
@@ -3147,433 +3148,433 @@ type DrawableSVGGeometry =
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/attributeStyleMap">MDN Reference</a>
     /// </summary>
-    abstract attributeStyleMap: obj
+    abstract attributeStyleMap: Fable.Core.TS.Dom.StylePropertyMap
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/style">MDN Reference</a>
     /// </summary>
-    abstract style: Browser.Types.CSSStyleDeclaration with get, set
+    abstract style: Fable.Core.TS.Dom.CSSStyleDeclaration with get, set
     /// <summary>
     /// The <b><c>dispatchEvent()</c></b> method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent">MDN Reference</a>
     /// </summary>
-    abstract dispatchEvent: ``event``: Browser.Types.Event -> bool
+    abstract dispatchEvent: ``event``: Fable.Core.TS.Dom.Event -> bool
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/abort_event">MDN Reference</a>
     /// </summary>
-    abstract onabort: (Browser.Types.UIEvent -> obj) option with get, set
+    abstract onabort: (Fable.Core.TS.Dom.UIEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/animationcancel_event">MDN Reference</a>
     /// </summary>
-    abstract onanimationcancel: (Browser.Types.AnimationEvent -> obj) option with get, set
+    abstract onanimationcancel: (Fable.Core.TS.Dom.AnimationEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/animationend_event">MDN Reference</a>
     /// </summary>
-    abstract onanimationend: (Browser.Types.AnimationEvent -> obj) option with get, set
+    abstract onanimationend: (Fable.Core.TS.Dom.AnimationEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/animationiteration_event">MDN Reference</a>
     /// </summary>
-    abstract onanimationiteration: (Browser.Types.AnimationEvent -> obj) option with get, set
+    abstract onanimationiteration: (Fable.Core.TS.Dom.AnimationEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/animationstart_event">MDN Reference</a>
     /// </summary>
-    abstract onanimationstart: (Browser.Types.AnimationEvent -> obj) option with get, set
+    abstract onanimationstart: (Fable.Core.TS.Dom.AnimationEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/auxclick_event">MDN Reference</a>
     /// </summary>
-    abstract onauxclick: (Browser.Types.PointerEvent -> obj) option with get, set
+    abstract onauxclick: (Fable.Core.TS.Dom.PointerEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/beforeinput_event">MDN Reference</a>
     /// </summary>
-    abstract onbeforeinput: (Browser.Types.InputEvent -> obj) option with get, set
+    abstract onbeforeinput: (Fable.Core.TS.Dom.InputEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/beforematch_event">MDN Reference</a>
     /// </summary>
-    abstract onbeforematch: (Browser.Types.Event -> obj) option with get, set
+    abstract onbeforematch: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/beforetoggle_event">MDN Reference</a>
     /// </summary>
-    abstract onbeforetoggle: (Browser.Types.ToggleEvent -> obj) option with get, set
+    abstract onbeforetoggle: (Fable.Core.TS.Dom.ToggleEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/blur_event">MDN Reference</a>
     /// </summary>
-    abstract onblur: (Browser.Types.FocusEvent -> obj) option with get, set
+    abstract onblur: (Fable.Core.TS.Dom.FocusEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLDialogElement/cancel_event">MDN Reference</a>
     /// </summary>
-    abstract oncancel: (Browser.Types.Event -> obj) option with get, set
+    abstract oncancel: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/canplay_event">MDN Reference</a>
     /// </summary>
-    abstract oncanplay: (Browser.Types.Event -> obj) option with get, set
+    abstract oncanplay: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/canplaythrough_event">MDN Reference</a>
     /// </summary>
-    abstract oncanplaythrough: (Browser.Types.Event -> obj) option with get, set
+    abstract oncanplaythrough: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/change_event">MDN Reference</a>
     /// </summary>
-    abstract onchange: (Browser.Types.Event -> obj) option with get, set
+    abstract onchange: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/click_event">MDN Reference</a>
     /// </summary>
-    abstract onclick: (Browser.Types.PointerEvent -> obj) option with get, set
+    abstract onclick: (Fable.Core.TS.Dom.PointerEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLDialogElement/close_event">MDN Reference</a>
     /// </summary>
-    abstract onclose: (Browser.Types.Event -> obj) option with get, set
+    abstract onclose: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/command_event">MDN Reference</a>
     /// </summary>
-    abstract oncommand: (Browser.Types.Event -> obj) option with get, set
+    abstract oncommand: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLCanvasElement/contextlost_event">MDN Reference</a>
     /// </summary>
-    abstract oncontextlost: (Browser.Types.Event -> obj) option with get, set
+    abstract oncontextlost: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/contextmenu_event">MDN Reference</a>
     /// </summary>
-    abstract oncontextmenu: (Browser.Types.PointerEvent -> obj) option with get, set
+    abstract oncontextmenu: (Fable.Core.TS.Dom.PointerEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLCanvasElement/contextrestored_event">MDN Reference</a>
     /// </summary>
-    abstract oncontextrestored: (Browser.Types.Event -> obj) option with get, set
+    abstract oncontextrestored: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/copy_event">MDN Reference</a>
     /// </summary>
-    abstract oncopy: (Browser.Types.ClipboardEvent -> obj) option with get, set
+    abstract oncopy: (Fable.Core.TS.Dom.ClipboardEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLTrackElement/cuechange_event">MDN Reference</a>
     /// </summary>
-    abstract oncuechange: (Browser.Types.Event -> obj) option with get, set
+    abstract oncuechange: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/cut_event">MDN Reference</a>
     /// </summary>
-    abstract oncut: (Browser.Types.ClipboardEvent -> obj) option with get, set
+    abstract oncut: (Fable.Core.TS.Dom.ClipboardEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/dblclick_event">MDN Reference</a>
     /// </summary>
-    abstract ondblclick: (Browser.Types.MouseEvent -> obj) option with get, set
+    abstract ondblclick: (Fable.Core.TS.Dom.MouseEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/drag_event">MDN Reference</a>
     /// </summary>
-    abstract ondrag: (Browser.Types.DragEvent -> obj) option with get, set
+    abstract ondrag: (Fable.Core.TS.Dom.DragEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/dragend_event">MDN Reference</a>
     /// </summary>
-    abstract ondragend: (Browser.Types.DragEvent -> obj) option with get, set
+    abstract ondragend: (Fable.Core.TS.Dom.DragEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/dragenter_event">MDN Reference</a>
     /// </summary>
-    abstract ondragenter: (Browser.Types.DragEvent -> obj) option with get, set
+    abstract ondragenter: (Fable.Core.TS.Dom.DragEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/dragleave_event">MDN Reference</a>
     /// </summary>
-    abstract ondragleave: (Browser.Types.DragEvent -> obj) option with get, set
+    abstract ondragleave: (Fable.Core.TS.Dom.DragEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/dragover_event">MDN Reference</a>
     /// </summary>
-    abstract ondragover: (Browser.Types.DragEvent -> obj) option with get, set
+    abstract ondragover: (Fable.Core.TS.Dom.DragEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/dragstart_event">MDN Reference</a>
     /// </summary>
-    abstract ondragstart: (Browser.Types.DragEvent -> obj) option with get, set
+    abstract ondragstart: (Fable.Core.TS.Dom.DragEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/drop_event">MDN Reference</a>
     /// </summary>
-    abstract ondrop: (Browser.Types.DragEvent -> obj) option with get, set
+    abstract ondrop: (Fable.Core.TS.Dom.DragEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/durationchange_event">MDN Reference</a>
     /// </summary>
-    abstract ondurationchange: (Browser.Types.Event -> obj) option with get, set
+    abstract ondurationchange: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/emptied_event">MDN Reference</a>
     /// </summary>
-    abstract onemptied: (Browser.Types.Event -> obj) option with get, set
+    abstract onemptied: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/ended_event">MDN Reference</a>
     /// </summary>
-    abstract onended: (Browser.Types.Event -> obj) option with get, set
+    abstract onended: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/error_event">MDN Reference</a>
     /// </summary>
-    abstract onerror: obj option with get, set
+    abstract onerror: Fable.Core.TS.Dom.OnErrorEventHandlerNonNull option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/focus_event">MDN Reference</a>
     /// </summary>
-    abstract onfocus: (Browser.Types.FocusEvent -> obj) option with get, set
+    abstract onfocus: (Fable.Core.TS.Dom.FocusEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLFormElement/formdata_event">MDN Reference</a>
     /// </summary>
-    abstract onformdata: (obj -> obj) option with get, set
+    abstract onformdata: (Fable.Core.TS.Dom.FormDataEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/gotpointercapture_event">MDN Reference</a>
     /// </summary>
-    abstract ongotpointercapture: (Browser.Types.PointerEvent -> obj) option with get, set
+    abstract ongotpointercapture: (Fable.Core.TS.Dom.PointerEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/input_event">MDN Reference</a>
     /// </summary>
-    abstract oninput: (Browser.Types.InputEvent -> obj) option with get, set
+    abstract oninput: (Fable.Core.TS.Dom.InputEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLInputElement/invalid_event">MDN Reference</a>
     /// </summary>
-    abstract oninvalid: (Browser.Types.Event -> obj) option with get, set
+    abstract oninvalid: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/keydown_event">MDN Reference</a>
     /// </summary>
-    abstract onkeydown: (Browser.Types.KeyboardEvent -> obj) option with get, set
+    abstract onkeydown: (Fable.Core.TS.Dom.KeyboardEvent -> obj) option with get, set
     /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Element/keypress_event">MDN Reference</a></remarks>
-    abstract onkeypress: (Browser.Types.KeyboardEvent -> obj) option with get, set
+    abstract onkeypress: (Fable.Core.TS.Dom.KeyboardEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/keyup_event">MDN Reference</a>
     /// </summary>
-    abstract onkeyup: (Browser.Types.KeyboardEvent -> obj) option with get, set
+    abstract onkeyup: (Fable.Core.TS.Dom.KeyboardEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/load_event">MDN Reference</a>
     /// </summary>
-    abstract onload: (Browser.Types.Event -> obj) option with get, set
+    abstract onload: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/loadeddata_event">MDN Reference</a>
     /// </summary>
-    abstract onloadeddata: (Browser.Types.Event -> obj) option with get, set
+    abstract onloadeddata: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/loadedmetadata_event">MDN Reference</a>
     /// </summary>
-    abstract onloadedmetadata: (Browser.Types.Event -> obj) option with get, set
+    abstract onloadedmetadata: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/loadstart_event">MDN Reference</a>
     /// </summary>
-    abstract onloadstart: (Browser.Types.Event -> obj) option with get, set
+    abstract onloadstart: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/lostpointercapture_event">MDN Reference</a>
     /// </summary>
-    abstract onlostpointercapture: (Browser.Types.PointerEvent -> obj) option with get, set
+    abstract onlostpointercapture: (Fable.Core.TS.Dom.PointerEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/mousedown_event">MDN Reference</a>
     /// </summary>
-    abstract onmousedown: (Browser.Types.MouseEvent -> obj) option with get, set
+    abstract onmousedown: (Fable.Core.TS.Dom.MouseEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/mouseenter_event">MDN Reference</a>
     /// </summary>
-    abstract onmouseenter: (Browser.Types.MouseEvent -> obj) option with get, set
+    abstract onmouseenter: (Fable.Core.TS.Dom.MouseEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/mouseleave_event">MDN Reference</a>
     /// </summary>
-    abstract onmouseleave: (Browser.Types.MouseEvent -> obj) option with get, set
+    abstract onmouseleave: (Fable.Core.TS.Dom.MouseEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/mousemove_event">MDN Reference</a>
     /// </summary>
-    abstract onmousemove: (Browser.Types.MouseEvent -> obj) option with get, set
+    abstract onmousemove: (Fable.Core.TS.Dom.MouseEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/mouseout_event">MDN Reference</a>
     /// </summary>
-    abstract onmouseout: (Browser.Types.MouseEvent -> obj) option with get, set
+    abstract onmouseout: (Fable.Core.TS.Dom.MouseEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/mouseover_event">MDN Reference</a>
     /// </summary>
-    abstract onmouseover: (Browser.Types.MouseEvent -> obj) option with get, set
+    abstract onmouseover: (Fable.Core.TS.Dom.MouseEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/mouseup_event">MDN Reference</a>
     /// </summary>
-    abstract onmouseup: (Browser.Types.MouseEvent -> obj) option with get, set
+    abstract onmouseup: (Fable.Core.TS.Dom.MouseEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/paste_event">MDN Reference</a>
     /// </summary>
-    abstract onpaste: (Browser.Types.ClipboardEvent -> obj) option with get, set
+    abstract onpaste: (Fable.Core.TS.Dom.ClipboardEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/pause_event">MDN Reference</a>
     /// </summary>
-    abstract onpause: (Browser.Types.Event -> obj) option with get, set
+    abstract onpause: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/play_event">MDN Reference</a>
     /// </summary>
-    abstract onplay: (Browser.Types.Event -> obj) option with get, set
+    abstract onplay: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/playing_event">MDN Reference</a>
     /// </summary>
-    abstract onplaying: (Browser.Types.Event -> obj) option with get, set
+    abstract onplaying: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointercancel_event">MDN Reference</a>
     /// </summary>
-    abstract onpointercancel: (Browser.Types.PointerEvent -> obj) option with get, set
+    abstract onpointercancel: (Fable.Core.TS.Dom.PointerEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointerdown_event">MDN Reference</a>
     /// </summary>
-    abstract onpointerdown: (Browser.Types.PointerEvent -> obj) option with get, set
+    abstract onpointerdown: (Fable.Core.TS.Dom.PointerEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointerenter_event">MDN Reference</a>
     /// </summary>
-    abstract onpointerenter: (Browser.Types.PointerEvent -> obj) option with get, set
+    abstract onpointerenter: (Fable.Core.TS.Dom.PointerEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointerleave_event">MDN Reference</a>
     /// </summary>
-    abstract onpointerleave: (Browser.Types.PointerEvent -> obj) option with get, set
+    abstract onpointerleave: (Fable.Core.TS.Dom.PointerEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointermove_event">MDN Reference</a>
     /// </summary>
-    abstract onpointermove: (Browser.Types.PointerEvent -> obj) option with get, set
+    abstract onpointermove: (Fable.Core.TS.Dom.PointerEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointerout_event">MDN Reference</a>
     /// </summary>
-    abstract onpointerout: (Browser.Types.PointerEvent -> obj) option with get, set
+    abstract onpointerout: (Fable.Core.TS.Dom.PointerEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointerover_event">MDN Reference</a>
     /// </summary>
-    abstract onpointerover: (Browser.Types.PointerEvent -> obj) option with get, set
+    abstract onpointerover: (Fable.Core.TS.Dom.PointerEvent -> obj) option with get, set
     /// <summary>
     /// Available only in secure contexts.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointerrawupdate_event">MDN Reference</a>
     /// </summary>
-    abstract onpointerrawupdate: (Browser.Types.Event -> obj) option with get, set
+    abstract onpointerrawupdate: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointerup_event">MDN Reference</a>
     /// </summary>
-    abstract onpointerup: (Browser.Types.PointerEvent -> obj) option with get, set
+    abstract onpointerup: (Fable.Core.TS.Dom.PointerEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/progress_event">MDN Reference</a>
     /// </summary>
-    abstract onprogress: (Browser.Types.ProgressEvent -> obj) option with get, set
+    abstract onprogress: (Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget> -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/ratechange_event">MDN Reference</a>
     /// </summary>
-    abstract onratechange: (Browser.Types.Event -> obj) option with get, set
+    abstract onratechange: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLFormElement/reset_event">MDN Reference</a>
     /// </summary>
-    abstract onreset: (Browser.Types.Event -> obj) option with get, set
+    abstract onreset: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLVideoElement/resize_event">MDN Reference</a>
     /// </summary>
-    abstract onresize: (Browser.Types.UIEvent -> obj) option with get, set
+    abstract onresize: (Fable.Core.TS.Dom.UIEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/scroll_event">MDN Reference</a>
     /// </summary>
-    abstract onscroll: (Browser.Types.Event -> obj) option with get, set
+    abstract onscroll: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/scrollend_event">MDN Reference</a>
     /// </summary>
-    abstract onscrollend: (Browser.Types.Event -> obj) option with get, set
+    abstract onscrollend: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/securitypolicyviolation_event">MDN Reference</a>
     /// </summary>
-    abstract onsecuritypolicyviolation: (obj -> obj) option with get, set
+    abstract onsecuritypolicyviolation: (Fable.Core.TS.Dom.SecurityPolicyViolationEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/seeked_event">MDN Reference</a>
     /// </summary>
-    abstract onseeked: (Browser.Types.Event -> obj) option with get, set
+    abstract onseeked: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/seeking_event">MDN Reference</a>
     /// </summary>
-    abstract onseeking: (Browser.Types.Event -> obj) option with get, set
+    abstract onseeking: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLInputElement/select_event">MDN Reference</a>
     /// </summary>
-    abstract onselect: (Browser.Types.Event -> obj) option with get, set
+    abstract onselect: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/selectionchange_event">MDN Reference</a>
     /// </summary>
-    abstract onselectionchange: (Browser.Types.Event -> obj) option with get, set
+    abstract onselectionchange: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/selectstart_event">MDN Reference</a>
     /// </summary>
-    abstract onselectstart: (Browser.Types.Event -> obj) option with get, set
+    abstract onselectstart: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLSlotElement/slotchange_event">MDN Reference</a>
     /// </summary>
-    abstract onslotchange: (Browser.Types.Event -> obj) option with get, set
+    abstract onslotchange: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/stalled_event">MDN Reference</a>
     /// </summary>
-    abstract onstalled: (Browser.Types.Event -> obj) option with get, set
+    abstract onstalled: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLFormElement/submit_event">MDN Reference</a>
     /// </summary>
-    abstract onsubmit: (Browser.Types.SubmitEvent -> obj) option with get, set
+    abstract onsubmit: (Fable.Core.TS.Dom.SubmitEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/suspend_event">MDN Reference</a>
     /// </summary>
-    abstract onsuspend: (Browser.Types.Event -> obj) option with get, set
+    abstract onsuspend: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/timeupdate_event">MDN Reference</a>
     /// </summary>
-    abstract ontimeupdate: (Browser.Types.Event -> obj) option with get, set
+    abstract ontimeupdate: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/toggle_event">MDN Reference</a>
     /// </summary>
-    abstract ontoggle: (Browser.Types.ToggleEvent -> obj) option with get, set
+    abstract ontoggle: (Fable.Core.TS.Dom.ToggleEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/touchcancel_event">MDN Reference</a>
     /// </summary>
-    abstract ontouchcancel: (Browser.Types.TouchEvent -> obj) option with get, set
+    abstract ontouchcancel: (Fable.Core.TS.Dom.TouchEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/touchend_event">MDN Reference</a>
     /// </summary>
-    abstract ontouchend: (Browser.Types.TouchEvent -> obj) option with get, set
+    abstract ontouchend: (Fable.Core.TS.Dom.TouchEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/touchmove_event">MDN Reference</a>
     /// </summary>
-    abstract ontouchmove: (Browser.Types.TouchEvent -> obj) option with get, set
+    abstract ontouchmove: (Fable.Core.TS.Dom.TouchEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/touchstart_event">MDN Reference</a>
     /// </summary>
-    abstract ontouchstart: (Browser.Types.TouchEvent -> obj) option with get, set
+    abstract ontouchstart: (Fable.Core.TS.Dom.TouchEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/transitioncancel_event">MDN Reference</a>
     /// </summary>
-    abstract ontransitioncancel: (Browser.Types.TransitionEvent -> obj) option with get, set
+    abstract ontransitioncancel: (Fable.Core.TS.Dom.TransitionEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/transitionend_event">MDN Reference</a>
     /// </summary>
-    abstract ontransitionend: (Browser.Types.TransitionEvent -> obj) option with get, set
+    abstract ontransitionend: (Fable.Core.TS.Dom.TransitionEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/transitionrun_event">MDN Reference</a>
     /// </summary>
-    abstract ontransitionrun: (Browser.Types.TransitionEvent -> obj) option with get, set
+    abstract ontransitionrun: (Fable.Core.TS.Dom.TransitionEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/transitionstart_event">MDN Reference</a>
     /// </summary>
-    abstract ontransitionstart: (Browser.Types.TransitionEvent -> obj) option with get, set
+    abstract ontransitionstart: (Fable.Core.TS.Dom.TransitionEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/volumechange_event">MDN Reference</a>
     /// </summary>
-    abstract onvolumechange: (Browser.Types.Event -> obj) option with get, set
+    abstract onvolumechange: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/waiting_event">MDN Reference</a>
     /// </summary>
-    abstract onwaiting: (Browser.Types.Event -> obj) option with get, set
+    abstract onwaiting: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <remarks>
     /// @deprecated
     /// This is a legacy alias of <c>onanimationend</c>.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/animationend_event">MDN Reference</a>
     /// </remarks>
-    abstract onwebkitanimationend: (Browser.Types.Event -> obj) option with get, set
+    abstract onwebkitanimationend: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <remarks>
     /// @deprecated
     /// This is a legacy alias of <c>onanimationiteration</c>.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/animationiteration_event">MDN Reference</a>
     /// </remarks>
-    abstract onwebkitanimationiteration: (Browser.Types.Event -> obj) option with get, set
+    abstract onwebkitanimationiteration: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <remarks>
     /// @deprecated
     /// This is a legacy alias of <c>onanimationstart</c>.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/animationstart_event">MDN Reference</a>
     /// </remarks>
-    abstract onwebkitanimationstart: (Browser.Types.Event -> obj) option with get, set
+    abstract onwebkitanimationstart: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <remarks>
     /// @deprecated
     /// This is a legacy alias of <c>ontransitionend</c>.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/transitionend_event">MDN Reference</a>
     /// </remarks>
-    abstract onwebkittransitionend: (Browser.Types.Event -> obj) option with get, set
+    abstract onwebkittransitionend: (Fable.Core.TS.Dom.Event -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/wheel_event">MDN Reference</a>
     /// </summary>
-    abstract onwheel: (Browser.Types.WheelEvent -> obj) option with get, set
+    abstract onwheel: (Fable.Core.TS.Dom.WheelEvent -> obj) option with get, set
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/autofocus">MDN Reference</a>
     /// </summary>
@@ -3581,7 +3582,7 @@ type DrawableSVGGeometry =
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/dataset">MDN Reference</a>
     /// </summary>
-    abstract dataset: Browser.Types.DOMStringMap
+    abstract dataset: Fable.Core.TS.Dom.DOMStringMap
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/nonce">MDN Reference</a>
     /// </summary>
@@ -3597,7 +3598,7 @@ type DrawableSVGGeometry =
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/focus">MDN Reference</a>
     /// </summary>
-    abstract focus: ?options: obj -> unit
+    abstract focus: ?options: Fable.Core.TS.Dom.FocusOptions -> unit
     /// <summary>
     /// The read-only <b><c>baseURI</c></b> property of the Node interface returns the absolute base URL of the document containing the node.
     /// <br /><br />
@@ -3609,13 +3610,13 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/childNodes">MDN Reference</a>
     /// </summary>
-    abstract childNodes: Browser.Types.NodeListOf<Browser.Types.ChildNode>
+    abstract childNodes: Fable.Core.TS.Dom.NodeListOf<Fable.Core.TS.Dom.ChildNode>
     /// <summary>
     /// The read-only <b><c>firstChild</c></b> property of the Node interface returns the node's first child in the tree, or null if the node has no children.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/firstChild">MDN Reference</a>
     /// </summary>
-    abstract firstChild: Browser.Types.ChildNode option
+    abstract firstChild: Fable.Core.TS.Dom.ChildNode option
     /// <summary>
     /// The read-only <b><c>isConnected</c></b> property of the Node interface returns a boolean indicating whether the node is connected (directly or indirectly) to a Document object.
     /// <br /><br />
@@ -3627,13 +3628,13 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/lastChild">MDN Reference</a>
     /// </summary>
-    abstract lastChild: Browser.Types.ChildNode option
+    abstract lastChild: Fable.Core.TS.Dom.ChildNode option
     /// <summary>
     /// The read-only <b><c>nextSibling</c></b> property of the Node interface returns the node immediately following the specified one in their parent's childNodes, or returns null if the specified node is the last child in the parent element.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/nextSibling">MDN Reference</a>
     /// </summary>
-    abstract nextSibling: Browser.Types.ChildNode option
+    abstract nextSibling: Fable.Core.TS.Dom.ChildNode option
     /// <summary>
     /// The read-only <b><c>nodeName</c></b> property of Node returns the name of the current node as a string.
     /// <br /><br />
@@ -3657,49 +3658,49 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/parentElement">MDN Reference</a>
     /// </summary>
-    abstract parentElement: Browser.Types.HTMLElement option
+    abstract parentElement: Fable.Core.TS.Dom.HTMLElement option
     /// <summary>
     /// The read-only <b><c>parentNode</c></b> property of the Node interface returns the parent of the specified node in the DOM tree.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/parentNode">MDN Reference</a>
     /// </summary>
-    abstract parentNode: obj option
+    abstract parentNode: Fable.Core.TS.Dom.ParentNode option
     /// <summary>
     /// The read-only <b><c>previousSibling</c></b> property of the Node interface returns the node immediately preceding the specified one in its parent's childNodes list, or null if the specified node is the first in that list.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/previousSibling">MDN Reference</a>
     /// </summary>
-    abstract previousSibling: Browser.Types.ChildNode option
+    abstract previousSibling: Fable.Core.TS.Dom.ChildNode option
     /// <summary>
     /// The <b><c>appendChild()</c></b> method of the Node interface adds a node to the end of the list of children of a specified parent node.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/appendChild">MDN Reference</a>
     /// </summary>
-    abstract appendChild<'T when 'T :> Browser.Types.Node>: node: 'T -> 'T
+    abstract appendChild<'T when 'T :> Fable.Core.TS.Dom.Node>: node: 'T -> 'T
     /// <summary>
     /// The <b><c>cloneNode()</c></b> method of the Node interface returns a duplicate of the node on which this method was called. Its parameter controls if the subtree contained in the node is also cloned or not.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/cloneNode">MDN Reference</a>
     /// </summary>
-    abstract cloneNode: ?subtree: bool -> Browser.Types.Node
+    abstract cloneNode: ?subtree: bool -> Fable.Core.TS.Dom.Node
     /// <summary>
     /// The <b><c>compareDocumentPosition()</c></b> method of the Node interface reports the position of its argument node relative to the node on which it is called.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/compareDocumentPosition">MDN Reference</a>
     /// </summary>
-    abstract compareDocumentPosition: other: Browser.Types.Node -> float
+    abstract compareDocumentPosition: other: Fable.Core.TS.Dom.Node -> float
     /// <summary>
     /// The <b><c>contains()</c></b> method of the Node interface returns a boolean value indicating whether a node is a descendant of a given node, that is the node itself, one of its direct children (childNodes), one of the children's direct children, and so on.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/contains">MDN Reference</a>
     /// </summary>
-    abstract contains: ?other: Browser.Types.Node -> bool
+    abstract contains: ?other: Fable.Core.TS.Dom.Node -> bool
     /// <summary>
     /// The <b><c>getRootNode()</c></b> method of the Node interface returns the context object's root, which optionally includes the shadow root if it is available.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/getRootNode">MDN Reference</a>
     /// </summary>
-    abstract getRootNode: ?options: obj -> Browser.Types.Node
+    abstract getRootNode: ?options: Fable.Core.TS.Dom.GetRootNodeOptions -> Fable.Core.TS.Dom.Node
     /// <summary>
     /// The <b><c>hasChildNodes()</c></b> method of the Node interface returns a boolean value indicating whether the given Node has child nodes or not.
     /// <br /><br />
@@ -3711,7 +3712,7 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/insertBefore">MDN Reference</a>
     /// </summary>
-    abstract insertBefore<'T when 'T :> Browser.Types.Node>: node: 'T * ?child: Browser.Types.Node -> 'T
+    abstract insertBefore<'T when 'T :> Fable.Core.TS.Dom.Node>: node: 'T * ?child: Fable.Core.TS.Dom.Node -> 'T
     /// <summary>
     /// The <b><c>isDefaultNamespace()</c></b> method of the Node interface accepts a namespace URI as an argument. It returns a boolean value that is true if the namespace is the default namespace on the given node and false if not. The default namespace can be retrieved with Node.lookupNamespaceURI() by passing null as the argument.
     /// <br /><br />
@@ -3723,13 +3724,13 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/isEqualNode">MDN Reference</a>
     /// </summary>
-    abstract isEqualNode: ?otherNode: Browser.Types.Node -> bool
+    abstract isEqualNode: ?otherNode: Fable.Core.TS.Dom.Node -> bool
     /// <summary>
     /// The <b><c>isSameNode()</c></b> method of the Node interface is a legacy alias the for the === strict equality operator. That is, it tests whether two nodes are the same (in other words, whether they reference the same object).
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/isSameNode">MDN Reference</a>
     /// </summary>
-    abstract isSameNode: ?otherNode: Browser.Types.Node -> bool
+    abstract isSameNode: ?otherNode: Fable.Core.TS.Dom.Node -> bool
     /// <summary>
     /// The <b><c>lookupNamespaceURI()</c></b> method of the Node interface takes a prefix as parameter and returns the namespace URI associated with it on the given node if found (and null if not). This method's existence allows Node objects to be passed as a namespace resolver to XPathEvaluator.createExpression() and XPathEvaluator.evaluate().
     /// <br /><br />
@@ -3753,13 +3754,13 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/removeChild">MDN Reference</a>
     /// </summary>
-    abstract removeChild<'T when 'T :> Browser.Types.Node>: child: 'T -> 'T
+    abstract removeChild<'T when 'T :> Fable.Core.TS.Dom.Node>: child: 'T -> 'T
     /// <summary>
     /// The <b><c>replaceChild()</c></b> method of the Node interface replaces a child node within the given (parent) node.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Node/replaceChild">MDN Reference</a>
     /// </summary>
-    abstract replaceChild<'T when 'T :> Browser.Types.Node>: node: Browser.Types.Node * child: 'T -> 'T
+    abstract replaceChild<'T when 'T :> Fable.Core.TS.Dom.Node>: node: Fable.Core.TS.Dom.Node * child: 'T -> 'T
     /// <summary>
     /// node is an element.
     /// </summary>
@@ -3822,13 +3823,13 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/CharacterData/nextElementSibling">MDN Reference</a>
     /// </summary>
-    abstract nextElementSibling: Browser.Types.Element option
+    abstract nextElementSibling: Fable.Core.TS.Dom.Element option
     /// <summary>
     /// Returns the first preceding sibling that is an element, and null otherwise.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/CharacterData/previousElementSibling">MDN Reference</a>
     /// </summary>
-    abstract previousElementSibling: Browser.Types.Element option
+    abstract previousElementSibling: Fable.Core.TS.Dom.Element option
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/childElementCount">MDN Reference</a>
     /// </summary>
@@ -3838,19 +3839,19 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/children">MDN Reference</a>
     /// </summary>
-    abstract children: Browser.Types.HTMLCollection
+    abstract children: Fable.Core.TS.Dom.HTMLCollection
     /// <summary>
     /// Returns the first child that is an element, and null otherwise.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/firstElementChild">MDN Reference</a>
     /// </summary>
-    abstract firstElementChild: Browser.Types.Element option
+    abstract firstElementChild: Fable.Core.TS.Dom.Element option
     /// <summary>
     /// Returns the last child that is an element, and null otherwise.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/lastElementChild">MDN Reference</a>
     /// </summary>
-    abstract lastElementChild: Browser.Types.Element option
+    abstract lastElementChild: Fable.Core.TS.Dom.Element option
     /// <summary>
     /// Inserts nodes after the last child of node, while replacing strings in nodes with equivalent Text nodes.
     /// <br /><br />
@@ -3858,11 +3859,11 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/append">MDN Reference</a>
     /// </summary>
-    abstract append: [<ParamArray>] nodes: U2<string, Browser.Types.Node>[] -> unit
+    abstract append: [<ParamArray>] nodes: U2<string, Fable.Core.TS.Dom.Node>[] -> unit
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/moveBefore">MDN Reference</a>
     /// </summary>
-    abstract moveBefore: node: Browser.Types.Node * ?child: Browser.Types.Node -> unit
+    abstract moveBefore: node: Fable.Core.TS.Dom.Node * ?child: Fable.Core.TS.Dom.Node -> unit
     /// <summary>
     /// Inserts nodes before the first child of node, while replacing strings in nodes with equivalent Text nodes.
     /// <br /><br />
@@ -3870,7 +3871,7 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/prepend">MDN Reference</a>
     /// </summary>
-    abstract prepend: [<ParamArray>] nodes: U2<string, Browser.Types.Node>[] -> unit
+    abstract prepend: [<ParamArray>] nodes: U2<string, Fable.Core.TS.Dom.Node>[] -> unit
     /// <summary>
     /// Returns the first element that is a descendant of node that matches selectors.
     /// <br /><br />
@@ -3884,21 +3885,21 @@ type DrawableSVGGeometry =
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelector">MDN Reference</a>
     /// </summary>
     /// <remarks>@deprecated</remarks>
-    abstract querySelector<'E when 'E :> Browser.Types.Element>: selectors: string -> 'E option
+    abstract querySelector<'E when 'E :> Fable.Core.TS.Dom.Element>: selectors: string -> 'E option
     /// <summary>
     /// Returns all element descendants of node that match selectors.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelectorAll">MDN Reference</a>
     /// </summary>
     /// <remarks>@deprecated</remarks>
-    abstract querySelectorAll<'K>: selectors: 'K -> Browser.Types.NodeListOf<obj>
+    abstract querySelectorAll<'K>: selectors: 'K -> Fable.Core.TS.Dom.NodeListOf<Fable.Core.TS.Dom.Node>
     /// <summary>
     /// Returns all element descendants of node that match selectors.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelectorAll">MDN Reference</a>
     /// </summary>
     /// <remarks>@deprecated</remarks>
-    abstract querySelectorAll<'E when 'E :> Browser.Types.Element>: selectors: string -> Browser.Types.NodeListOf<'E>
+    abstract querySelectorAll: selectors: string -> Fable.Core.TS.Dom.NodeListOf<Fable.Core.TS.Dom.Node>
     /// <summary>
     /// Replace all children of node with nodes, while replacing strings in nodes with equivalent Text nodes.
     /// <br /><br />
@@ -3906,7 +3907,7 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/replaceChildren">MDN Reference</a>
     /// </summary>
-    abstract replaceChildren: [<ParamArray>] nodes: U2<string, Browser.Types.Node>[] -> unit
+    abstract replaceChildren: [<ParamArray>] nodes: U2<string, Fable.Core.TS.Dom.Node>[] -> unit
     /// <remarks>@deprecated</remarks>
     abstract className: obj
     /// <summary>
@@ -3914,49 +3915,49 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/SVGElement/ownerSVGElement">MDN Reference</a>
     /// </summary>
-    abstract ownerSVGElement: Browser.Types.SVGSVGElement option
+    abstract ownerSVGElement: Fable.Core.TS.Dom.SVGSVGElement option
     /// <summary>
     /// The <b><c>viewportElement</c></b> property of the SVGElement interface represents the SVGElement which established the current viewport. Often the nearest ancestor &lt;svg&gt; element. null if the given element is the outermost &lt;svg&gt; element.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/SVGElement/viewportElement">MDN Reference</a>
     /// </summary>
-    abstract viewportElement: Browser.Types.SVGElement option
+    abstract viewportElement: Fable.Core.TS.Dom.SVGElement option
     /// <summary>
     /// The <b><c>transform</c></b> read-only property of the SVGGraphicsElement interface reflects the computed value of the transform property and its corresponding transform attribute of the given element.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/SVGGraphicsElement/transform">MDN Reference</a>
     /// </summary>
-    abstract transform: Browser.Types.SVGAnimatedTransformList
+    abstract transform: Fable.Core.TS.Dom.SVGAnimatedTransformList
     /// <summary>
     /// The <b><c>SVGGraphicsElement.getBBox()</c></b> method allows us to determine the coordinates of the smallest rectangle in which the object fits. The coordinates returned are with respect to the current SVG space (after the application of all geometry attributes on all the elements contained in the target element).
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/SVGGraphicsElement/getBBox">MDN Reference</a>
     /// </summary>
-    abstract getBBox: ?options: obj -> obj
+    abstract getBBox: ?options: Fable.Core.TS.Dom.SVGBoundingBoxOptions -> Fable.Core.TS.Dom.DOMRect
     /// <summary>
     /// The <b><c>getCTM()</c></b> method of the SVGGraphicsElement interface represents the matrix that transforms the current element's coordinate system to its SVG viewport's coordinate system.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/SVGGraphicsElement/getCTM">MDN Reference</a>
     /// </summary>
-    abstract getCTM: unit -> obj option
+    abstract getCTM: unit -> Fable.Core.TS.Dom.DOMMatrix option
     /// <summary>
     /// The <b><c>getScreenCTM()</c></b> method of the SVGGraphicsElement interface represents the matrix that transforms the current element's coordinate system to the coordinate system of the SVG viewport for the SVG document fragment.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/SVGGraphicsElement/getScreenCTM">MDN Reference</a>
     /// </summary>
-    abstract getScreenCTM: unit -> obj option
+    abstract getScreenCTM: unit -> Fable.Core.TS.Dom.DOMMatrix option
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/SVGAnimationElement/requiredExtensions">MDN Reference</a>
     /// </summary>
-    abstract requiredExtensions: Browser.Types.SVGStringList
+    abstract requiredExtensions: Fable.Core.TS.Dom.SVGStringList
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/SVGAnimationElement/systemLanguage">MDN Reference</a>
     /// </summary>
-    abstract systemLanguage: Browser.Types.SVGStringList
+    abstract systemLanguage: Fable.Core.TS.Dom.SVGStringList
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/assignedSlot">MDN Reference</a>
     /// </summary>
-    abstract assignedSlot: obj option
+    abstract assignedSlot: Fable.Core.TS.Dom.HTMLSlotElement option
     abstract draw: string with get, set
 
 type UtilityFunction = (obj[] -> TimelinePosition)
@@ -4156,9 +4157,9 @@ type WAAPIAnimation =
     /// <remarks>@type {DOMTargetsArray} ]</remarks>
     abstract targets: DOMTarget[] with get, set
     /// <remarks>@type {Array&lt;globalThis.Animation&gt;} ]</remarks>
-    abstract animations: obj[] with get, set
+    abstract animations: Fable.Core.TS.Dom.Animation[] with get, set
     /// <remarks>@type {globalThis.Animation} ]</remarks>
-    abstract controlAnimation: obj with get, set
+    abstract controlAnimation: Fable.Core.TS.Dom.Animation with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
     abstract onComplete: (WAAPIAnimation -> obj) with get, set
     /// <remarks>@type {Number}</remarks>
@@ -4183,7 +4184,7 @@ type WAAPIAnimation =
     abstract _completed: float with get, set
     /// <remarks>@type {Array.&lt;Object&gt;}</remarks>
     abstract _inlineStyles: obj[] with get, set
-    abstract forEach: callback: U2<string, (obj -> obj)> -> WAAPIAnimation
+    abstract forEach: callback: U2<string, (Fable.Core.TS.Dom.Animation -> obj)> -> WAAPIAnimation
     abstract speed: float with get, set
     abstract currentTime: float with get, set
     abstract progress: float with get, set
@@ -4323,11 +4324,11 @@ type Exports =
     /// </summary>
     /// <remarks>@class</remarks>
     [<Import("TextSplitter", "animejs"); EmitConstructor>]
-    static member TextSplitter (target: U4<string, Browser.Types.Element[], Browser.Types.Element, Browser.Types.NodeList>, ?parameters: TextSplitterParams) : TextSplitter = jsNative
+    static member TextSplitter (target: U4<string, Fable.Core.TS.Dom.Element[], Fable.Core.TS.Dom.Element, Fable.Core.TS.Dom.NodeList>, ?parameters: TextSplitterParams) : TextSplitter = jsNative
     [<Import("splitText", "animejs")>]
-    static member splitText (target: U4<string, Browser.Types.Element[], Browser.Types.Element, Browser.Types.NodeList>, ?parameters: TextSplitterParams) : TextSplitter = jsNative
+    static member splitText (target: U4<string, Fable.Core.TS.Dom.Element[], Fable.Core.TS.Dom.Element, Fable.Core.TS.Dom.NodeList>, ?parameters: TextSplitterParams) : TextSplitter = jsNative
     [<Import("split", "animejs")>]
-    static member split (target: U4<string, Browser.Types.HTMLElement[], Browser.Types.HTMLElement, Browser.Types.NodeList>, ?parameters: TextSplitterParams) : TextSplitter = jsNative
+    static member split (target: U4<string, Fable.Core.TS.Dom.HTMLElement[], Fable.Core.TS.Dom.HTMLElement, Fable.Core.TS.Dom.NodeList>, ?parameters: TextSplitterParams) : TextSplitter = jsNative
     [<Import("Timeline", "animejs"); EmitConstructor>]
     static member Timeline (?parameters: TimelineParams) : Timeline = jsNative
     [<Import("createTimeline", "animejs")>]

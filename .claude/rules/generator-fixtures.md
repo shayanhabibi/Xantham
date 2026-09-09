@@ -1,4 +1,4 @@
-﻿---
+---
 paths:
   - "src/Xantham.Generator/**"
   - "tests/Xantham.Generator.Tests/**"
@@ -67,7 +67,7 @@ The npm rungs (`@cloudflare/workers-types`, `animejs`, `type-fest`, `solid-js`, 
 later) are **still regenerated and still gated on every change**. Nothing here relaxes that:
 
 - `dotnet build Xantham.slnx` - the compile gate compiles the committed goldens against
-  Fable.Core and the `Fable.Browser.*` family. This is what decides whether a generated binding is
+  Fable.Core and `Xantham.Fable.Core.TS`. This is what decides whether a generated binding is
   legal F#, and it decides it by compiling, not by being read.
 - `dotnet fsi build.fsx -- test` - Expecto suites plus the Fable run gate.
 

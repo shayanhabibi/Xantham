@@ -8,6 +8,7 @@ open System
 open Fable.Core
 open Fable.Core.JsInterop
 open Fable.Core.JS
+open Fable.Core.TS.Dom
 
 /// <summary>
 /// A generated interface whose members are lib types throughout.
@@ -113,38 +114,34 @@ type Exports =
     /// The one the group's widening used to cost most: a DOM name in an ordinary position.
     /// </summary>
     [<Import("handle", "lib-lab")>]
-    static member handle (target: Browser.Types.EventTarget) : unit = jsNative
+    static member handle (target: Fable.Core.TS.Dom.EventTarget) : unit = jsNative
     /// <summary>
     /// Elements and events, which is most of what a browser-facing <c>.d.ts</c> traffics in.
     /// </summary>
     [<Import("mount", "lib-lab")>]
-    static member mount (host: Browser.Types.HTMLElement, on: Browser.Types.Event) : unit = jsNative
+    static member mount (host: Fable.Core.TS.Dom.HTMLElement, on: Fable.Core.TS.Dom.Event) : unit = jsNative
     /// <summary>
-    /// Binary and URL types, which come from separate packages of the same family.
+    /// Binary and URL types from the same Core.TS DOM module.
     /// </summary>
     [<Import("upload", "lib-lab")>]
-    static member upload (body: Browser.Types.Blob, ``to``: Browser.Types.URL) : Browser.Types.FormData = jsNative
+    static member upload (body: Fable.Core.TS.Dom.Blob, ``to``: Fable.Core.TS.Dom.URL) : Fable.Core.TS.Dom.FormData = jsNative
     /// <summary>
-    /// Bound at two arities: <c>CustomEvent</c> is in the family both bare and generic.
+    /// A generic DOM declaration retains its argument.
     /// </summary>
     [<Import("emit", "lib-lab")>]
-    static member emit (detail: Browser.Types.CustomEvent<string>) : unit = jsNative
+    static member emit (detail: Fable.Core.TS.Dom.CustomEvent<string>) : unit = jsNative
     /// <summary>
     /// <c>seq&lt;'T&gt;</c> is not a JS iterable, whatever the two have in common. Widened, and noted.
     /// </summary>
     [<Import("each", "lib-lab")>]
     static member each (values: obj) : unit = jsNative
     /// <summary>
-    /// A DOM name two packages of the family both define (<c>Browser.IndexedDB</c> and
-    /// <c>Browser.MediaStream</c> each declare a <c>Range</c>). There is no qualification that picks one, so
-    /// the table drops it and this widens - the honest outcome, and the reason ambiguity is
-    /// resolved when the table is generated rather than when the reference is emitted.
+    /// Core.TS supplies the DOM Range without the former Browser package ambiguity.
     /// </summary>
     [<Import("select", "lib-lab")>]
-    static member ``select`` (over: obj) : unit = jsNative
+    static member ``select`` (over: Fable.Core.TS.Dom.Range) : unit = jsNative
     /// <summary>
-    /// A DOM name the family does not bind at all. <c>Response</c> and the rest of <c>fetch</c> live in
-    /// <c>Fable.Fetch</c>, a different package family, so this is still <c>obj</c>.
+    /// Fetch declarations are part of the shipped DOM module.
     /// </summary>
     [<Import("respond", "lib-lab")>]
-    static member respond () : obj = jsNative
+    static member respond () : Fable.Core.TS.Dom.Response = jsNative

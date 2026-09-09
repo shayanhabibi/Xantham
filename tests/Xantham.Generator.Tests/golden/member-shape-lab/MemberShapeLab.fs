@@ -8,6 +8,7 @@ open System
 open Fable.Core
 open Fable.Core.JsInterop
 open Fable.Core.JS
+open Fable.Core.TS.Dom
 
 /// <summary>
 /// An intersection over a compiler-lib type: <c>then</c> / <c>catch</c> / <c>finally</c> arrive as method
@@ -50,21 +51,21 @@ type Recorder =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
     /// </summary>
-    abstract addEventListener: ``type``: string * ?callback: obj * ?options: U2<bool, Browser.Types.AddEventListenerOptions> -> unit
+    abstract addEventListener: ``type``: string * ?callback: U2<Fable.Core.TS.Dom.EventListener, Fable.Core.TS.Dom.EventListenerObject> * ?options: U2<bool, Fable.Core.TS.Dom.AddEventListenerOptions> -> unit
     /// <summary>
     /// The <b><c>dispatchEvent()</c></b> method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent">MDN Reference</a>
     /// </summary>
-    abstract dispatchEvent: ``event``: Browser.Types.Event -> bool
+    abstract dispatchEvent: ``event``: Fable.Core.TS.Dom.Event -> bool
     /// <summary>
     /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
     /// </summary>
-    abstract removeEventListener: ``type``: string * ?callback: obj * ?options: obj -> unit
+    abstract removeEventListener: ``type``: string * ?callback: U2<Fable.Core.TS.Dom.EventListener, Fable.Core.TS.Dom.EventListenerObject> * ?options: U2<bool, Fable.Core.TS.Dom.EventListenerOptions> -> unit
     [<ParamObject; Emit("$0")>]
-    static member Create (channel: string, addEventListener: Action<string, obj option, U2<bool, Browser.Types.AddEventListenerOptions> option>, dispatchEvent: (Browser.Types.Event -> bool), removeEventListener: Action<string, obj option, obj option>) : Recorder = jsNative
+    static member Create (channel: string, addEventListener: Action<string, U2<Fable.Core.TS.Dom.EventListener, Fable.Core.TS.Dom.EventListenerObject> option, U2<bool, Fable.Core.TS.Dom.AddEventListenerOptions> option>, dispatchEvent: (Fable.Core.TS.Dom.Event -> bool), removeEventListener: Action<string, U2<Fable.Core.TS.Dom.EventListener, Fable.Core.TS.Dom.EventListenerObject> option, U2<bool, Fable.Core.TS.Dom.EventListenerOptions> option>) : Recorder = jsNative
 
 /// <summary>
 /// A lib declaration at a reference position: a shipped package binds it, and the binding stands
@@ -82,9 +83,9 @@ type Stamped =
 /// </summary>
 [<Interface>]
 type Located =
-    abstract matrix: obj
+    abstract matrix: Fable.Core.TS.Dom.DOMMatrix
     [<ParamObject; Emit("$0")>]
-    static member Create (matrix: obj) : Located = jsNative
+    static member Create (matrix: Fable.Core.TS.Dom.DOMMatrix) : Located = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

@@ -8,6 +8,7 @@ open System
 open Fable.Core
 open Fable.Core.JsInterop
 open Fable.Core.JS
+open Fable.Core.TS.Dom
 
 type Frontier<'T> =
     abstract every: predicate: Frontier.Every.Predicate<'T> * ?thisArg: obj -> bool

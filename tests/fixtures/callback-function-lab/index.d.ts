@@ -167,3 +167,15 @@ export interface UnionListenerObject {
  * once nested inside the delegate's own type parameter is what this measures.
  */
 export declare function addListener(register: (kind: string, listener: ((x: number) => void) | UnionListenerObject) => void): void;
+
+/** Generic callable identity: F# functions do not inherit JS.Function. */
+export declare function keepFunction<T extends Function>(callback: T): T;
+
+/** The same bound on a generic interface and one of its methods. */
+export interface CallbackBox<T extends Function> {
+    callback: T;
+    keep<U extends Function>(callback: U): U;
+}
+
+/** A concrete callback argument must not be replaced with the dropped bound. */
+export declare function boxedFunction(box: CallbackBox<(value: number) => number>): number;

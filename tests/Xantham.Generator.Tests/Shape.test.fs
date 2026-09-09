@@ -1,4 +1,4 @@
-﻿/// The shape tier's nano-pass payoff: each pass exercised on a hand-built model, asserted on
+/// The shape tier's nano-pass payoff: each pass exercised on a hand-built model, asserted on
 /// the output model and its findings. No wire, no fixtures.
 module Xantham.Generator.Tests.ShapeTests
 
@@ -91,6 +91,85 @@ let private libType (id: int) (name: string) (arguments: int list) =
         Origin = CompilerLib
         SymbolName = Some name
         TypeArguments = arguments }
+
+[<Tests>]
+let shippedDomTests =
+    testList "shipped DOM" [
+        testTheory "compiler DOM identities keep the shipped name and all arguments" [
+            "EventTarget", [], FsNamed "Fable.Core.TS.Dom.EventTarget"
+            "Response", [], FsNamed "Fable.Core.TS.Dom.Response"
+            "Range", [], FsNamed "Fable.Core.TS.Dom.Range"
+            "ReadableStream", [ 1 ], FsApp("Fable.Core.TS.Dom.ReadableStream", [ FsString ])
+            "CustomEvent", [ 1 ], FsApp("Fable.Core.TS.Dom.CustomEvent", [ FsString ])
+        ] <| fun (name, arguments, expected) ->
+            let dom = { libType 10 name arguments with DeclFile = Some "/compiler/lib.dom.d.ts" }
+            let model = Build.shapeModel (dom :: Build.primitives)
+            let actual, findings = Spec.typeRef Build.context model None "consumer" 10
+            Expect.equal actual expected "same pinned compiler declaration as Core.TS"
+            Expect.isEmpty findings "no Browser package arity loss or missing binding"
+
+        testCase "a package DOM declaration keeps its local identity" <| fun _ ->
+            let local = { libType 10 "EventTarget" [] with Origin = EntryPackage; DeclFile = Some "/pkg/index.d.ts" }
+            let model = { Build.shapeModel [ local ] with DeclNames = Map.ofList [ 10, "EventTarget" ] }
+            let actual, findings = Spec.typeRef Build.context model None "consumer" 10
+            Expect.equal actual (FsNamed "EventTarget") "the package owns this declaration"
+            Expect.isEmpty findings "no remapping"
+
+        testCase "shipping compiler DOM declarations keeps the producer identity" <| fun _ ->
+            let dom = { libType 10 "EventTarget" [] with DeclFile = Some "/compiler/lib.dom.d.ts" }
+            let model = { Build.shapeModel [ dom ] with DeclNames = Map.ofList [ 10, "EventTarget" ] }
+            let ctx = { Build.context with Config = { GeneratorConfig.Default with Groups = Map.ofList [ "typescript/lib", Ship ] } }
+            let actual, findings = Spec.typeRef ctx model None "consumer" 10
+            Expect.equal actual (FsNamed "EventTarget") "the producer binds its own declaration"
+            Expect.isEmpty findings "no external dependency"
+
+        testCase "a widened DOM type argument satisfies its shipped nominal bound" <| fun _ ->
+            let node = { libType 11 "Node" [] with DeclFile = Some "/compiler/lib.dom.d.ts" }
+            let parameter =
+                { Build.facts (Build.typeResponse 12 TypeFlags.TypeParameter) with
+                    SymbolName = Some "TNode"
+                    Constraint = Some 11 }
+            let target =
+                { libType 13 "NodeListOf" [ 12 ] with
+                    DeclFile = node.DeclFile
+                    Response = { Build.typeResponse 13 TypeFlags.Object with Target = ValueSome 13; TypeParameters = ValueSome [| 12 |] } }
+            let applied =
+                { libType 10 "NodeListOf" [ 14 ] with
+                    DeclFile = node.DeclFile
+                    Response = { Build.typeResponse 10 TypeFlags.Object with Target = ValueSome 13 } }
+            let unknown = Build.facts (Build.typeResponse 14 TypeFlags.Any)
+            let actual, findings = Spec.typeRef Build.context (Build.shapeModel [ applied; target; parameter; node; unknown ]) None "consumer" 10
+            Expect.equal actual (FsApp("Fable.Core.TS.Dom.NodeListOf", [ FsNamed "Fable.Core.TS.Dom.Node" ])) "obj cannot satisfy the producer's Node constraint"
+            Expect.isTrue (findings |> List.exists (fun finding -> finding.Message.Contains "Fable.Core.TS.Dom.NodeListOf")) "the repair reports its loss"
+    ]
+
+[<Tests>]
+let functionConstraintTests =
+    testList "function constraints" [
+        testCase "JS.Function bounds are dropped without losing the type parameter" <| fun _ ->
+            let functionType = libType 10 "Function" []
+            let parameter =
+                { Build.facts (Build.typeResponse 11 TypeFlags.TypeParameter) with
+                    SymbolName = Some "T"
+                    Constraint = Some 10 }
+            let model = Build.shapeModel [ functionType; parameter ]
+            let parameters, scope, findings = Spec.typeParamsOf Build.context model "Holder" [ 11 ]
+            Expect.equal parameters [ { Name = "T"; Constraint = None } ] "F# functions can inhabit T"
+            Expect.equal (Map.find 11 scope) "T" "the generic identity remains"
+            Expect.isTrue (findings |> List.exists (fun finding -> finding.Key = "TP010" && finding.Tier = Widened)) "removing callability is an explicit loss"
+
+        testCase "other nominal bounds still apply" <| fun _ ->
+            let bound = libType 10 "Function" []
+            let bound = { bound with Origin = EntryPackage }
+            let parameter =
+                { Build.facts (Build.typeResponse 11 TypeFlags.TypeParameter) with
+                    SymbolName = Some "T"
+                    Constraint = Some 10 }
+            let model = { Build.shapeModel [ bound; parameter ] with DeclNames = Map.ofList [ 10, "Function" ] }
+            let parameters, _, findings = Spec.typeParamsOf Build.context model "Holder" [ 11 ]
+            Expect.equal parameters [ { Name = "T"; Constraint = Some(FsNamed "Function") } ] "a package's own Function is not JS.Function"
+            Expect.isEmpty findings "its nominal constraint is preserved"
+    ]
 
 /// `P & { marker }`: a branding intersection, given the ids of its constituents.
 let private intersection (id: int) (members: int list) =
@@ -3673,55 +3752,11 @@ let shapePassTests =
                 [ "TR025", "Error reads as exn; the JavaScript name, stack and cause properties are not on it" ]
                 "and the mapping records what it gives up"
 
-        testCase "a lib name nothing shipped binds keeps widening" <| fun _ ->
-            // The synchronous iteration protocol has no Fable.Core binding, and `seq<'T>` is not
-            // one however alike the two look. `Response` is the DOM's version of the same
-            // situation: it is a lib name, but `fetch` lives in `Fable.Fetch` rather than in the
-            // `Fable.Browser.*` family this generator's table is built from.
-            let model = Build.shapeModel (libType 10 "Iterable" [ 1 ] :: libType 11 "Response" [] :: Build.primitives)
-
-            for id in [ 10; 11 ] do
-                let reference, findings = Spec.typeRef Build.context model None "x" id
-                Expect.equal reference FsObj "still obj"
-                Expect.equal (findings |> List.map _.Tier) [ Widened ] "and still says so"
-
-        testCase "a lib name a Fable.Browser package binds is referenced, not widened" <| fun _ ->
-            // The DOM half of the same disposition. The table is generated from the family's
-            // assemblies, so this asserts the rule that reads it, not the entry: a DOM name in
-            // an ordinary position writes its `Browser.Types` spelling and loses nothing.
-            let model = Build.shapeModel (libType 10 "EventTarget" [] :: Build.primitives)
-
+        testCase "an unbound ECMAScript name keeps widening" <| fun _ ->
+            let model = Build.shapeModel (libType 10 "Iterable" [ 1 ] :: Build.primitives)
             let reference, findings = Spec.typeRef Build.context model None "x" 10
-
-            Expect.equal reference (FsNamed "Browser.Types.EventTarget") "the binding is written"
-            Expect.isEmpty findings "and nothing is lost saying it that way"
-
-        testCase "a DOM name bound at two arities takes the one the reference fits" <| fun _ ->
-            // `CustomEvent` is in `Browser.Event` both bare and generic, so arity is part of the
-            // table's key rather than a property of the name. A reference carrying an argument
-            // reaches the generic binding; a bare one reaches the other.
-            let model =
-                Build.shapeModel (libType 10 "CustomEvent" [ 1 ] :: libType 11 "CustomEvent" [] :: Build.primitives)
-
-            let generic, genericFindings = Spec.typeRef Build.context model None "x" 10
-            let bare, bareFindings = Spec.typeRef Build.context model None "x" 11
-
-            Expect.equal generic (FsApp("Browser.Types.CustomEvent", [ FsString ])) "the argument is carried"
-            Expect.isEmpty genericFindings "exactly"
-            Expect.equal bare (FsNamed "Browser.Types.CustomEvent") "and the bare form is the bare binding"
-            Expect.isEmpty bareFindings "also exactly"
-
-        testCase "a DOM name two packages of the family both define widens" <| fun _ ->
-            // `Browser.Types.Range` is declared by `Browser.IndexedDB` and by
-            // `Browser.MediaStream`, and no qualification picks one. The ambiguity is resolved
-            // when the table is generated - by leaving the name out - so what reaches here is
-            // an ordinary miss.
-            let model = Build.shapeModel (libType 10 "Range" [] :: Build.primitives)
-
-            let reference, findings = Spec.typeRef Build.context model None "x" 10
-
-            Expect.equal reference FsObj "an ambiguous name is not written"
-            Expect.equal (findings |> List.map _.Tier) [ Widened ] "and the widening is the ordinary one"
+            Expect.equal reference FsObj "synchronous iterables have no JS binding"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "the loss is reported"
 
         testCase "a package's own type named like a lib type is untouched" <| fun _ ->
             // The table is keyed by name, so what keeps it from hijacking a package's own

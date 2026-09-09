@@ -1,4 +1,4 @@
-﻿#r "nuget: Partas.Build, 0.4.0-alpha.3"
+#r "nuget: Partas.Build, 0.4.0-alpha.3"
 #r "nuget: Partas.TypeProvider.BuildHelper, 0.2.5"
 #r "nuget: Str"
 #r "nuget: Fake.IO.FileSystem"
@@ -111,7 +111,7 @@ module Options =
     let generateOnly =
         Input.option<string> "--only"
         |> Input.description
-            "Limit generation to one layer: ast | proto | session | browser | schema | compiler-lib. The first five by default."
+            "Limit generation to one layer: ast | proto | session | schema | compiler-lib. The first four by default."
         |> Input.def ""
 
     /// The generator's inner loop, in three flags. An agent iterating on a pass runs
@@ -317,10 +317,6 @@ module Stages =
                     }
                     // The generator's own table rather than a wire layer, and it reads a NuGet family
                     // instead of the vendored sources - so it needs neither `sync` nor the others.
-                    stage "generate browser" {
-                        when' (wanted "browser")
-                        run "dotnet fsi tools/generate-wire.fsx -- generate browser"
-                    }
                     // The `xantham.json` schema, emitted from the config record by the CLI that
                     // ships it - so a key added to `GeneratorConfig` reaches an editor by
                     // rerunning this rather than by a second hand edit.
@@ -546,6 +542,10 @@ exit (
         }
 
         command "generate" {
+            command "cli-tsc-version" {
+                hidden
+                PackageVersion.writeCliPackageVersion
+            }
             Stages.deps
             Stages.generate
         }

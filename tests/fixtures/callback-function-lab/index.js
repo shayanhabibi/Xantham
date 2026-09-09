@@ -165,3 +165,11 @@ export function addListener(register) {
     register("fn-arm", (x) => {});
     register("obj-arm", { handleEvent: (x) => {} });
 }
+
+export function keepFunction(callback) {
+    return callback;
+}
+
+export function boxedFunction(box) {
+    return box.callback(21);
+}

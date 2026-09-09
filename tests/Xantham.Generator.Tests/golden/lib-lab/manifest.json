@@ -3,9 +3,9 @@
   "package": "lib-lab",
   "module": "LibLab",
   "counts": {
-    "exact": 10,
+    "exact": 12,
     "ergonomic": 7,
-    "widened": 4,
+    "widened": 2,
     "escape": 0
   },
   "passes": [
@@ -16,9 +16,9 @@
     },
     {
       "pass": "SE - shape-exports",
-      "total": 14,
+      "total": 12,
       "ergonomic": 9,
-      "widened": 5
+      "widened": 3
     },
     {
       "pass": "SP - synthesize-paramobjects",

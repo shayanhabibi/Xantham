@@ -8,6 +8,7 @@ open System
 open Fable.Core
 open Fable.Core.JsInterop
 open Fable.Core.JS
+open Fable.Core.TS.Dom
 
 [<Erase>]
 type Setter<'T, 'U> = private Setter__ of (obj -> obj)

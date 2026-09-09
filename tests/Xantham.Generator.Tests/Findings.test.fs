@@ -116,6 +116,7 @@ let findingsTests =
                     "TP.UnnamedTypeParametersCounted TP007 widened"
                     "TP.ConstraintNotProvenNominal TP008 ergonomic"
                     "TP.DuplicateTypeParameterCollapsed TP009 ergonomic"
+                    "TP.FunctionConstraintDropped TP010 widened"
                     "MB.OptionalParameterAsOption MB001 ergonomic"
                     "MB.SymbolKeyedMemberDropped MB002 widened"
                     "MB.OptionalMemberAsOption MB003 ergonomic"
