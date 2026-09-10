@@ -6,8 +6,7 @@ module Xantham.Generator.Shape.Spec
 open Xantham.Generator
 open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
-
-open Xantham.TypeScript.Wire.Proto
+open Measure
 
 let internal hasAny (mask: SymbolFlags) (flags: SymbolFlags) = uint32 (flags &&& mask) <> 0u
 
@@ -210,7 +209,7 @@ let internal ArrayMembers =
 /// deferred tuple - carries `Array`'s members over a numeric index signature, and the element is
 /// that signature's value. A tuple has the same members and a mapping of its own (§4.12).
 let internal arrayElement (model: ShapeModel) (facts: TypeFacts) =
-    match (facts.SymbolName |> Option.map Measure.String.untag), facts.TypeArguments with
+    match (facts.SymbolName |> Option.map (fun value -> value / uom<symbolName>)), facts.TypeArguments with
     | Some("Array" | "ReadonlyArray"), [ element ] -> Some element
     | _ when
         isTuple facts
@@ -226,7 +225,8 @@ let internal arrayElement (model: ShapeModel) (facts: TypeFacts) =
 
 /// A symbol name the checker made up for an anonymous shape rather than one the author wrote.
 /// Module symbols are named by their quoted file path, which is no name either.
-let internal isSyntheticName (name: string) =
+let internal isSyntheticName (name: string<symbolName>) =
+    let name = string name
     name.StartsWith "__" || name.StartsWith "\""
 
 /// A pure index signature the checker gave no symbol of its own: reached through a type
@@ -295,7 +295,7 @@ let private reachesTypeId (model: ShapeModel) (target: int<Measure.typeId>) (roo
 /// instead.
 let internal isAnonymousIndexSignature (model: ShapeModel) (facts: TypeFacts) =
     isPureIndexSignature facts
-    && ((facts.SymbolName |> Option.map Measure.String.untag) |> Option.forall isSyntheticName)
+    && (facts.SymbolName |> Option.forall isSyntheticName)
     && (declParamIds facts
         |> List.forall (fun p ->
             let info = List.exactlyOne facts.IndexInfos
@@ -762,7 +762,7 @@ let internal isVacuousOperand (model: ShapeModel) (facts: TypeFacts) =
     && facts.ConstructSignatures.IsEmpty
     && facts.BaseTypes.IsEmpty
     && not (standsOverTypeParameter model facts)
-    && (match (facts.SymbolName |> Option.map Measure.String.untag) with
+    && (match facts.SymbolName with
         | None -> true
         | Some name -> isSyntheticName name)
 
@@ -1373,7 +1373,7 @@ and internal typeRefOnPath
     | None ->
         match Map.tryFind typeId model.NotFollowed with
         | Some reason -> FsObj, [ Finding.make owner (TypeReference.TypeNotResolved reason) ]
-        | None -> FsObj, [ Finding.make owner (TypeReference.MissingFromTypeTable (Measure.Int.untag typeId)) ]
+        | None -> FsObj, [ Finding.make owner (TypeReference.MissingFromTypeTable (typeId / uom<typeId>)) ]
     | Some facts ->
         let has f = flag f facts
 
@@ -1625,7 +1625,7 @@ and internal indexedAccessRef
     match binding, objectName with
     | Some(TypedKeyOf(operand, result)), Some name when operand = name -> FsTypeVar result, []
     | _ ->
-        match (facts.AliasIdentity |> Option.map (fun (name, id) -> Measure.String.untag name, id)) with
+        match (facts.AliasIdentity |> Option.map (fun (name, id) -> name / uom<symbolName>, id)) with
         | Some(name, operand) when Naming.SupportBindings.shadows name ->
             // `NoInfer<T>` (§4.11's carve-out): every declaration shipping it writes the same
             // identity, so the checker's flags never distinguish it from an ordinary indexed
@@ -1711,7 +1711,7 @@ and internal objectRef
                     | Some result -> result
                     | None ->
 
-                        match GeneratorConfig.disposition ctx.Config facts.Origin, (facts.SymbolName |> Option.map Measure.String.untag) with
+                        match GeneratorConfig.disposition ctx.Config facts.Origin, (facts.SymbolName |> Option.map (fun value -> value / uom<symbolName>)) with
                         | Reference, Some typeName -> referencedRef ctx model self owner facts typeName
                         | Reference, None -> FsObj, [ Finding.make owner TypeReference.AnonymousInReferencedGroup ]
                         | Map _, None -> FsObj, [ Finding.make owner TypeReference.AnonymousInMappedGroup ]
@@ -1724,7 +1724,7 @@ and internal objectRef
                             let constructs =
                                 facts.ConstructSignatures
                                 |> List.tryPick (fun signature -> Map.tryFind signature.ReturnTypeId model.DeclNames)
-                                |> Option.orElse ((facts.SymbolName |> Option.map Measure.String.untag) |> Option.filter (isSyntheticName >> not))
+                                |> Option.orElse (facts.SymbolName |> Option.filter (isSyntheticName >> not) |> Option.map (fun value -> value / uom<symbolName>))
                                 |> Option.defaultValue "an anonymous class"
 
                             FsObj, [ Finding.make owner (TypeReference.ConstructorObjectNotDeclared constructs) ]
@@ -1733,19 +1733,19 @@ and internal objectRef
                             // declaration it would have taken would hold the same. An
                             // author-written name read from somewhere else stays a declaration
                             // this run owes the reader.
-                            match (facts.SymbolName |> Option.map Measure.String.untag) with
-                            | Some shown when shown <> owner && not (isSyntheticName shown) ->
-                                FsObj, [ Finding.make owner (TypeReference.NotAmongGeneratedDeclarations shown) ]
+                            match facts.SymbolName with
+                            | Some shown when shown / uom<symbolName> <> owner && not (isSyntheticName shown) ->
+                                FsObj, [ Finding.make owner (TypeReference.NotAmongGeneratedDeclarations <| shown / uom<symbolName>) ]
                             | _ -> FsObj, [ Finding.make owner TypeReference.ObjectWithoutMembers ]
                         | (Ship | Widen | Map _), _ ->
-                            let shown = (facts.SymbolName |> Option.map Measure.String.untag) |> Option.defaultValue "an anonymous object type"
+                            let shown = (facts.SymbolName |> Option.map (fun value -> value / uom<symbolName>)) |> Option.defaultValue "an anonymous object type"
                             FsObj, [ Finding.make owner (TypeReference.NotAmongGeneratedDeclarations shown) ]
 
 /// A compiler-lib type a shipped Fable package already binds - `Promise` -> `JS.Promise<'T>`,
 /// DOM declarations use the same names and arguments as the shipped Core.TS producer.
 /// The ECMAScript table retains its explicit arity and loss rules.
 and internal libBinding (ctx: Context) (model: ShapeModel) (self: string option) (owner: string) (facts: TypeFacts) =
-    match facts.Origin, (facts.SymbolName |> Option.map Measure.String.untag) with
+    match facts.Origin, (facts.SymbolName |> Option.map (fun value -> value / uom<symbolName>)) with
     | CompilerLib, Some name when GeneratorConfig.disposition ctx.Config CompilerLib <> Ship ->
         let arguments = facts.TypeArguments
 
@@ -1758,7 +1758,7 @@ and internal libBinding (ctx: Context) (model: ShapeModel) (self: string option)
                     None
                 else
                     Some(fsharpName, arity, Option.toList loss)
-            | None when (facts.DeclFile |> Option.map Measure.String.untag) |> Option.exists (fun file -> Grouping.libFamily file = "Dom") ->
+            | None when (facts.DeclFile |> Option.map (fun value -> value / uom<declFile>)) |> Option.exists (fun file -> Grouping.libFamily file = "Dom") ->
                 Some($"Fable.Core.TS.Dom.{name}", arguments.Length, [])
             | None -> None
 
@@ -1807,7 +1807,7 @@ and internal mappedBinding
     (owner: string)
     (facts: TypeFacts)
     : (FsTypeRef * Finding list) option =
-    match GeneratorConfig.disposition ctx.Config facts.Origin, (facts.SymbolName |> Option.map Measure.String.untag) with
+    match GeneratorConfig.disposition ctx.Config facts.Origin, (facts.SymbolName |> Option.map (fun value -> value / uom<symbolName>)) with
     | Map names, Some name ->
         Map.tryFind name names
         |> Option.map (fun destination ->
@@ -1838,7 +1838,7 @@ and internal referencedRef
     (typeName: string)
     : FsTypeRef * Finding list =
     let moduleName =
-        match facts.Origin, (facts.DeclFile |> Option.map Measure.String.untag) with
+        match facts.Origin, (facts.DeclFile |> Option.map (fun value -> value / uom<declFile>)) with
         | CompilerLib, Some file -> Naming.compilerLibFamilyModule (Grouping.libFamily file)
         | CompilerLib, None -> Naming.CompilerLibEsModule
         | origin, _ -> Naming.groupModule ctx.Config ctx.PackageName origin
@@ -2199,10 +2199,10 @@ let typeParamsOf
     let named =
         ids
         |> List.choose (fun id ->
-            match Map.tryFind id model.Types |> Option.bind (_.SymbolName >> Option.map Measure.String.untag) with
+            match Map.tryFind id model.Types |> Option.bind (_.SymbolName >> Option.map (fun value -> value / uom<symbolName>)) with
             | Some name -> Some(id, name)
             | None ->
-                findings <- findings @ [ Finding.make owner (TypeParameters.UnnamedTypeParameter (Measure.Int.untag id)) ]
+                findings <- findings @ [ Finding.make owner (TypeParameters.UnnamedTypeParameter (id / uom<typeId>)) ]
 
                 None)
 
@@ -2309,7 +2309,7 @@ let internal aliasTypeParams (ctx: Context) (model: ShapeModel) (owner: string) 
     let identity id =
         let facts = Map.tryFind id model.Types
 
-        match facts |> Option.bind (_.SymbolName >> Option.map Measure.String.untag) with
+        match facts |> Option.bind (_.SymbolName >> Option.map (fun value -> value / uom<symbolName>)) with
         | Some name -> Ok(name, facts |> Option.bind _.Constraint)
         | None -> Error id
 

@@ -1287,6 +1287,26 @@ nominal `JS.Function` constraints: generic interfaces and abstract methods fail 
 an annotated inline function specializes to an F# function. The generator retains its existing
 function constraints. Reproduction details are in `../probes/constrain-function/README.md`.
 
+## Generator identity measures (2026-09-11)
+
+The generator keeps distinct measures for compiler symbol, type and node IDs, and for
+opaque strings carried through its records: source symbol names, declaration handles,
+declaration files, package names, directory paths and JavaScript import specifiers.
+Import specifiers are distinct from npm package identities because they also include
+ambient modules and public subpaths. Wire protocol records and JSON text remain boundary
+representations; the generator raises values when constructing its internal model.
+
+Raise with `value * uom<role>` and lower with `value / uom<role>`. Composite measures
+can lose only the relevant dimension: a declaration file becomes a file path through
+`file / uom<node>`. The operators support both strings and integer IDs and preserve the
+underlying value. The former tag/untag/retag helpers are removed.
+
+Measures describe a value's role, not a prohibition on transforming it. Lower once
+inside a naming, path-normalization or rendering boundary. Generated F# names, source
+fragments, diagnostic messages and joined header text remain ordinary strings; do not
+raise prose merely to satisfy an identity-bearing parameter. This changes internal F#
+signatures, not the generated binding or manifest format.
+
 # Easy Nits 
 
 To include in scope when a phases implementation/attempt ends up being small/quick.

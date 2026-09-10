@@ -1,6 +1,7 @@
 ﻿module Xantham.Generator.Shape.Classes
 
 open Xantham.Generator
+open Xantham.Generator.Measure
 open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator.Shape.Spec
@@ -60,7 +61,7 @@ let private exnBase (ctx: Context) (model: ShapeModel) (bases: int<Measure.typeI
         |> List.tryPick (fun baseId ->
             match Map.tryFind baseId model.Types with
             | Some facts ->
-                match facts.Origin, (facts.SymbolName |> Option.map Measure.String.untag) with
+                match facts.Origin, (facts.SymbolName |> Option.map (fun value -> value / uom<symbolName>)) with
                 | CompilerLib, Some baseName ->
                     match Naming.LibBindings.tryFind baseName with
                     | Some("exn", _, _) -> Some baseName
@@ -174,9 +175,9 @@ let shapeClasses: Pass<ShapeModel> =
                                     let declaredIn =
                                         Map.tryFind m.TypeId model.Types
                                         |> Option.bind (fun facts -> GeneratorConfig.groupKey facts.Origin)
-                                        |> Option.defaultValue "another group"
+                                        |> Option.defaultValue ("another group" * uom<npmDependency>)
 
-                                    emit (Finding.make owner (ShapeClasses.StaticMethodWithoutSignatures declaredIn))
+                                    emit (Finding.make owner (ShapeClasses.StaticMethodWithoutSignatures <| declaredIn / uom<npmDependency>))
                                 elif settable then
                                     emit (Finding.make owner ShapeClasses.StaticSettable)
 
@@ -237,7 +238,7 @@ let shapeClasses: Pass<ShapeModel> =
                                     match export.Origin with
                                     | FromAmbientModule specifier -> specifier
                                     | FromGlobal
-                                    | FromModule -> ""
+                                    | FromModule -> "" * uom<importSpecifier>
 
                                 let inheritsExn = exnBase ctx model bases
 
@@ -251,7 +252,7 @@ let shapeClasses: Pass<ShapeModel> =
                                         }
                                         entrypoints
 
-                                emit (Finding.make name (ShapeClasses.EntrypointClassEmitted specifier))
+                                emit (Finding.make name (ShapeClasses.EntrypointClassEmitted (specifier / uom<importSpecifier>)))
 
                                 match inheritsExn with
                                 | Some baseName ->

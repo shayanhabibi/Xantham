@@ -3,6 +3,7 @@
 /// exactly once, aliases followed to their origin.
 module Xantham.Generator.Harvest
 
+open Xantham.Generator.Measure
 open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 
@@ -12,13 +13,14 @@ let private hasAny (mask: SymbolFlags) (flags: SymbolFlags) = uint32 (flags &&& 
 /// where none of it classified as the entry package (reading `Grouping.classify`'s existing
 /// groups, not adding one). Most populous group first, so a reference chain dominated by one
 /// group names that group up front.
-let private elsewhere (packageDir: string) (symbols: SymbolResponse[]) =
+let private elsewhere (packageDir: string<dirPath>) (symbols: SymbolResponse[]) =
     symbols
     |> Array.countBy (fun symbol -> Grouping.classify packageDir (ValueSome symbol))
     |> Array.sortByDescending snd
     |> Array.map (fun (origin, count) ->
         let label =
             GeneratorConfig.groupKey origin
+            |> Option.map (fun name -> name / uom<npmDependency>)
             |> Option.defaultValue "unclassified declarations"
 
         $"{count} in {label}")
@@ -57,7 +59,7 @@ let harvestExports: Pass<HarvestModel> =
             fun ctx model ->
                 async {
                     let! moduleSymbol =
-                        ctx.Session.getSymbolOfSourceFile (DocumentIdentifier.FileName ctx.EntryFile)
+                        ctx.Session.getSymbolOfSourceFile (DocumentIdentifier.FileName (ctx.EntryFile / uom<_>))
 
                     match moduleSymbol with
                     | ValueNone -> return Advanced model
@@ -107,7 +109,7 @@ let harvestExports: Pass<HarvestModel> =
                         let! inScope =
                             ctx.Session.getSymbolsInScope (
                                 SymbolFlags.Module,
-                                file = DocumentIdentifier.FileName ctx.EntryFile,
+                                file = DocumentIdentifier.FileName (ctx.EntryFile / uom<_>),
                                 position = 0
                             )
 
@@ -189,7 +191,7 @@ let private harvestAmbientModule (ctx: Context) (moduleSymbol: SymbolResponse) =
                                     HasValueExport = hasValueExport
                                     Docs = ""
                                     Tags = []
-                                    Origin = FromAmbientModule specifier
+                                    Origin = FromAmbientModule (specifier * uom<importSpecifier>)
                                     Order = Grouping.declOrder origin.Declarations
                                 }
                         })
@@ -237,7 +239,7 @@ let harvestGlobals: Pass<HarvestModel> =
                         let! symbols =
                             ctx.Session.getSymbolsInScope (
                                 SymbolFlags.Type ||| SymbolFlags.Value,
-                                file = DocumentIdentifier.FileName ctx.EntryFile,
+                                file = DocumentIdentifier.FileName (ctx.EntryFile / uom<declFile>),
                                 position = 0
                             )
 
@@ -276,7 +278,7 @@ let harvestGlobals: Pass<HarvestModel> =
                         let! declared =
                             ctx.Session.getSymbolsInScope (
                                 SymbolFlags.Module,
-                                file = DocumentIdentifier.FileName ctx.EntryFile,
+                                file = DocumentIdentifier.FileName (ctx.EntryFile / uom<declFile>),
                                 position = 0
                             )
 
@@ -340,7 +342,7 @@ let harvestGlobals: Pass<HarvestModel> =
                                         Finding.make
                                             "<module>"
                                             (HarvestGlobals.NothingHarvested(
-                                                underPackage ctx.PackageDir ctx.EntryFile,
+                                                underPackage (ctx.PackageDir / uom<dirPath>) (ctx.EntryFile / uom<declFile>),
                                                 symbols.Length,
                                                 elsewhere ctx.PackageDir symbols
                                             ))
@@ -402,8 +404,8 @@ let orderExports: Pass<HarvestModel> =
                 model.Exports
                 |> List.sortBy (fun export ->
                     (match export.Order with
-                     | Some order -> Grouping.sourceOrderKey ctx.PackageDir (Measure.String.untag order.File), order.NodeIndex
-                     | None -> (2, "", ""), Measure.Int.tag<Measure.nodeId> System.Int32.MaxValue),
+                     | Some order -> Grouping.sourceOrderKey ctx.PackageDir (order.File / uom<node>), order.NodeIndex
+                     | None -> (2, "", ""), (System.Int32.MaxValue * uom<Measure.nodeId>)),
                     export.ExportName)
         })
 

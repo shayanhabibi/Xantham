@@ -9,6 +9,7 @@ open System
 open System.Text.Json
 open System.Text.Json.Nodes
 open System.Text.Json.Serialization
+open Xantham.Generator.Measure
 open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator.Shape.Spec
 
@@ -190,7 +191,8 @@ let rec private printTypeIn (atomic: bool) =
 let printType = printTypeIn false
 
 /// An F# string literal with the escapes source text needs.
-let stringLit (text: string) =
+let stringLit (text: string<_>) =
+    let text: string = text / uom<_>
     let escaped =
         text.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\n", "\\n").Replace("\r", "\\r").Replace("\t", "\\t")
 
@@ -638,7 +640,7 @@ let private renderMember (m: FsMember) =
 /// One binding attribute at `indent`, optionally carrying a second attribute inside the same
 /// brackets. A global names its own path off `globalThis`; an import names its specifier - the
 /// run's runtime package, or an ambient module's own quoted specifier.
-let private bindingAttribute (runtimePackage: string) (indent: string) (also: string) (binding: ImportBinding) =
+let private bindingAttribute (runtimePackage: string<importSpecifier>) (indent: string) (also: string) (binding: ImportBinding) =
     let package = stringLit runtimePackage
 
     match binding with
@@ -655,7 +657,7 @@ let private hoistedBinding (members: FsExportMember list) =
 
 /// One bound member - an `Exports` member or a class static - as its attribute line and its
 /// signature. Both hold an `ImportBinding` and neither has an F# body, so they render the same.
-let private renderBound (runtimePackage: string) (m: FsExportMember) =
+let private renderBound (runtimePackage: string<importSpecifier>) (m: FsExportMember) =
     [
         yield! docLines "    " m.Docs m.Tags
 
@@ -710,7 +712,7 @@ let private renderClassMember (m: FsMember) =
 ///
 /// The declaration is erased at its import, so an `inherit exn()` line carries the is-a relation
 /// to F# and nothing to JavaScript: the imported constructor is what runs.
-let private renderEntrypointClass (runtimePackage: string) (decl: FsInterfaceDecl) (entrypoint: FsEntrypoint) =
+let private renderEntrypointClass (runtimePackage: string<importSpecifier>) (decl: FsInterfaceDecl) (entrypoint: FsEntrypoint) =
     [
         yield! docLines "" decl.Docs decl.Tags
         yield bindingAttribute runtimePackage "" "; AbstractClass" entrypoint.Binding
@@ -736,7 +738,7 @@ let private renderEntrypointClass (runtimePackage: string) (decl: FsInterfaceDec
                 yield! renderBound runtimePackage m
     ]
 
-let private renderInterface (runtimePackage: string) (decl: FsInterfaceDecl) =
+let private renderInterface (runtimePackage: string<importSpecifier>) (decl: FsInterfaceDecl) =
     [
         yield! docLines "" decl.Docs decl.Tags
 
@@ -888,7 +890,7 @@ let private renderPhantom (decl: FsPhantomDecl) =
         yield $"type {declHead decl.Name decl.TypeParameters} = private {case} of {printType decl.Carrier}"
     ]
 
-let private renderExports (runtimePackage: string) (members: FsExportMember list) =
+let private renderExports (runtimePackage: string<importSpecifier>) (members: FsExportMember list) =
     [
         yield "/// <summary>The package's value exports, each bound to its import.</summary>"
         yield "[<Erase>]"
@@ -920,7 +922,7 @@ type GroupModule =
     {
         /// The npm name the group is addressed by under `xantham.json`'s `groups`; the entry
         /// package's own name for the entry group.
-        Group: string
+        Group: string<npmDependency>
         /// The group the run was asked to generate. Its module is written at the output root;
         /// every other shipped group is written under `groups/`.
         IsEntry: bool
@@ -930,7 +932,7 @@ type GroupModule =
         /// reference each other in both directions.
         Namespace: string option
         /// The npm package this module's `[<Import(…)>]` attributes name.
-        RuntimePackage: string
+        RuntimePackage: string<importSpecifier>
         /// Present only for one of the compiler library's two child modules.
         CompilerLib: CompilerLibFamily option
         Decls: FsDecl list
@@ -1379,7 +1381,7 @@ let private renderModule (group: GroupModule) (foreign: Map<string, string>) =
 
     String.concat
         "\n"
-        (fileHeader true group.Group $"module rec {group.Module}"
+        (fileHeader true (group.Group / uom<npmDependency>) $"module rec {group.Module}"
          @ [ body; renderFooter decls ])
 
 let private compilerLibModule (layout: CompilerLibLayout) =
@@ -1427,7 +1429,7 @@ let private renderCompilerLib
         |> String.concat "\n\n"
 
     let footer = rendered |> List.collect (fun (_, _, decls) -> decls) |> renderFooter
-    let sources = groups |> List.map _.Group |> List.distinct |> String.concat ", "
+    let sources = groups |> List.map (_.Group >> (fun x -> x / uom<npmDependency>)) |> List.distinct |> String.concat ", "
     // The producer must compile without referencing the assembly it generates.
     String.concat "\n" (fileHeader false sources $"module rec {layout.RootModule}" @ [ modules; footer ])
 
@@ -1446,7 +1448,7 @@ let private renderNamespace (ns: string) (groups: GroupModule list) (foreignTo: 
         |> String.concat "\n\n"
 
     let footer = rendered |> List.collect (snd >> snd) |> renderFooter
-    let sources = groups |> List.map _.Group |> List.distinct |> String.concat ", "
+    let sources = groups |> List.map (_.Group >> (fun x -> x / uom<npmDependency>)) |> List.distinct |> String.concat ", "
 
     String.concat "\n" (fileHeader true sources $"namespace rec {ns}" @ [ modules; footer ])
 
@@ -1607,14 +1609,14 @@ let renderSources (modules: GroupModule list) : Pass<RenderModel> =
 
                             for group in written do
                                 if not group.IsEntry then
-                                    Finding.make group.Group (EmitGroups.GroupShipped(group.Group, group.Decls.Length))
+                                    Finding.make (group.Group / uom<npmDependency>) (EmitGroups.GroupShipped(group.Group / uom<npmDependency>, group.Decls.Length))
 
                             for group in collided do
-                                Finding.make group.Group (EmitGroups.GroupModuleCollision(group.Group, group.Module))
+                                Finding.make (group.Group / uom<npmDependency>) (EmitGroups.GroupModuleCollision(group.Group / uom<npmDependency>, group.Module))
 
                             for key, disposition in Map.toList ctx.Config.Groups do
                                 if disposition = Ship && not (Set.contains key reached) then
-                                    Finding.make key (EmitGroups.ShippedGroupWithoutDeclarations key)
+                                    Finding.make (key / uom<npmDependency>) (EmitGroups.ShippedGroupWithoutDeclarations(key / uom<npmDependency>))
                         ]
 
                     let model =
@@ -1822,7 +1824,7 @@ let private sourceFile (packageDir: string) (order: DeclOrder option) : string =
     match order with
     | None -> null
     | Some order ->
-        let path = (Measure.String.untag order.File).Replace('\\', '/')
+        let path = (order.File / uom<declFile>).Replace('\\', '/')
         let root = packageDir.Replace('\\', '/').TrimEnd '/' + "/"
 
         if path.StartsWith(root, StringComparison.OrdinalIgnoreCase) then
@@ -1846,7 +1848,7 @@ let private declFiles (model: RenderModel) : Map<string, string> =
         | FsPhantom decl -> Some(decl.Name, decl.Order)
         | FsExports _ -> None)
     |> List.choose (fun (name, order) ->
-        match sourceFile model.PackageDir order with
+        match sourceFile (model.PackageDir / uom<dirPath>) order with
         | null -> None
         | file -> Some(name, file))
     |> Map.ofList
@@ -1886,7 +1888,7 @@ let renderManifest: Pass<RenderModel> =
         let manifest =
             {
                 schemaVersion = 1
-                package = model.PackageName
+                package = model.PackageName / uom<npmDependency>
                 ``module`` = model.ModuleName
                 counts =
                     {

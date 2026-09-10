@@ -7,6 +7,7 @@ open System.Security.Cryptography
 open System.Text
 open System.Text.Json
 open Xantham.TypeScript.Wire
+open Xantham.Generator.Measure
 
 [<CLIMutable>]
 type Source =
@@ -88,7 +89,7 @@ let private profile (config: GeneratorConfig) =
     |> hashText
 
 let private compiler (ctx: Context) =
-    match Tsc.locate ctx.PackageDir with
+    match Tsc.locate (ctx.PackageDir / uom<dirPath>) with
     | Some path -> File.ReadAllBytes path |> hash
     | None -> fail "the compiler executable could not be identified"
 
@@ -116,7 +117,7 @@ let private packageOf (ctx: Context) (file: string) =
             parent ()
 
     if file.StartsWith "bundled:" then
-        ctx.PackageDir, "typescript/lib", "bundled"
+        ctx.PackageDir / uom<dirPath>, "typescript/lib", "bundled"
     else
         find (Path.GetDirectoryName file)
 
@@ -125,7 +126,7 @@ let private sources (ctx: Context) (handles: string<Measure.declHandle> list) =
         let paths =
             handles
             |> List.map (fun handle ->
-                match (Measure.String.untag handle).Split([| '.' |], 3) with
+                match (handle / uom<declHandle>).Split([| '.' |], 3) with
                 | [| index; kind; file |] when not (String.IsNullOrWhiteSpace index || String.IsNullOrWhiteSpace kind) ->
                     file
                 | _ -> fail $"invalid declaration handle {handle}")
@@ -174,7 +175,7 @@ let private sources (ctx: Context) (handles: string<Measure.declHandle> list) =
     }
 
 let private normalizeHandle (sources: Map<string, Source>) (handle: string<Measure.declHandle>) =
-    match (Measure.String.untag handle).Split([| '.' |], 3) with
+    match (handle / uom<declHandle>).Split([| '.' |], 3) with
     | [| index; kind; file |] -> $"{sourceKey sources[file]}#{index}.{kind}"
     | _ -> fail $"invalid declaration handle {handle}"
 
@@ -216,7 +217,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
 
         let sources =
             rawHandles
-            |> List.map (fun handle -> sourceFiles[(Measure.String.untag handle).Split([| '.' |], 3)[2]])
+            |> List.map (fun handle -> sourceFiles[(handle / uom<declHandle>).Split([| '.' |], 3)[2]])
             |> List.distinct
             |> List.sortBy sourceKey
 
@@ -337,7 +338,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
 
                                     match Map.tryFind argument shape.Types with
                                     | Some argument when argument.Response.Flags.HasFlag TypeFlags.TypeParameter ->
-                                        "parameter:" + Option.defaultValue "" (argument.SymbolName |> Option.map Measure.String.untag)
+                                        "parameter:" + Option.defaultValue "" (argument.SymbolName |> Option.map (fun x -> x / uom<symbolName>))
                                     | Some argument when
                                         uint32 (
                                             argument.Response.Flags
@@ -551,7 +552,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                 | Some facts ->
                     if not (facts.Response.Flags.HasFlag TypeFlags.TypeParameter) then
                         for handle in facts.Declarations @ facts.AliasDeclarations do
-                            files.Add((Measure.String.untag handle).Split([| '.' |], 3)[2]) |> ignore
+                            files.Add((handle / uom<declHandle>).Split([| '.' |], 3)[2]) |> ignore
 
                     for dependency in dependencies facts do
                         pending.Push dependency
@@ -911,7 +912,7 @@ let apply (ctx: Context) (shape: ShapeModel) (groups: Render.GroupModule list) =
             let catalogs =
                 ctx.Config.DeclarationReferences
                 |> List.map (fun path ->
-                    load inferenceProfile compiler generator (Path.GetFullPath(Path.Combine(ctx.PackageDir, path))))
+                    load inferenceProfile compiler generator (Path.GetFullPath(Path.Combine(ctx.PackageDir / uom<dirPath>, path))))
 
             let inherited =
                 catalogs
@@ -937,7 +938,7 @@ let apply (ctx: Context) (shape: ShapeModel) (groups: Render.GroupModule list) =
                 sources
                     ctx
                     (rawHandles
-                     @ (inputFiles |> Array.map (fun file -> Measure.String.tag<Measure.declHandle> ("0.SourceFile." + file)) |> Array.toList))
+                     @ (inputFiles |> Array.map (fun file -> ("0.SourceFile." + file) * uom<Measure.declHandle>) |> Array.toList))
 
             let inputSources =
                 sourceFiles

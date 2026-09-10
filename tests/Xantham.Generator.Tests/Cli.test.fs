@@ -11,6 +11,7 @@ open System.Text
 open Expecto
 open Xantham.TypeScript.Wire
 open Xantham.Generator
+open Xantham.Generator.Measure
 
 let private root = Path.GetFullPath(Path.Combine(__SOURCE_DIRECTORY__, "..", ".."))
 
@@ -141,7 +142,7 @@ let schemaTests =
                     File.WriteAllText(Path.Combine(dir, "xantham.json"), $"""{{ "groups": {{ "dep": "{name}" }} }}""")
 
                     let config = GeneratorConfig.load dir
-                    Expect.isTrue (Map.containsKey "dep" config.Groups) $"the loader accepts '{name}'"
+                    Expect.isTrue (Map.containsKey ("dep" * uom<npmDependency>) config.Groups) $"the loader accepts '{name}'"
             finally
                 Directory.Delete(dir, true)
     ]

@@ -1,6 +1,7 @@
 ﻿module Xantham.Generator.Shape.Exports
 
 open Xantham.Generator
+open Xantham.Generator.Measure
 open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator.Shape.Spec
@@ -30,8 +31,8 @@ let shapeExports: Pass<ShapeModel> =
                     // convention this run had to guess from a name.
                     let runtimePackage = GeneratorConfig.runtimePackage ctx.Config ctx.PackageName
 
-                    if ctx.Config.RuntimePackage.IsNone && runtimePackage <> ctx.PackageName then
-                        emit (Finding.make "<module>" (ShapeExports.RuntimeSpecifierDerived runtimePackage))
+                    if ctx.Config.RuntimePackage.IsNone && runtimePackage / uom<importSpecifier> <> ctx.PackageName / uom<npmDependency> then
+                        emit (Finding.make "<module>" (ShapeExports.RuntimeSpecifierDerived (runtimePackage / uom<importSpecifier>)))
 
                     let fallback = defaultExportName ctx
 

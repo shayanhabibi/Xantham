@@ -642,7 +642,7 @@ let private deriveFacts
                     SymbolName = alias |> ValueOption.map _.SymbolName |> ValueOption.toOption
                     SymbolParent = alias |> ValueOption.bind _.ParentSymbolId |> ValueOption.toOption
                     Origin = Grouping.classify ctx.PackageDir alias
-                    DeclFile = Grouping.declFile alias |> Option.map String.tag<Measure.declFile>
+                    DeclFile = Grouping.declFile alias |> Option.map (fun value -> value * uom<Measure.declFile>)
                 },
                 channel trace "union-members" members
                 @ channel trace "alias-type-arguments" aliasTypeArguments
@@ -710,7 +710,7 @@ let private deriveFacts
                 { TypeFacts.shallow ty with
                     Origin = Grouping.classify ctx.PackageDir symbol
                     SymbolName = symbol |> ValueOption.map _.SymbolName |> ValueOption.toOption
-                    DeclFile = Grouping.declFile symbol |> Option.map String.tag<Measure.declFile>
+                    DeclFile = Grouping.declFile symbol |> Option.map (fun value -> value * uom<Measure.declFile>)
                 },
                 []
         elif has TypeFlags.Object then
@@ -853,8 +853,8 @@ let private deriveFacts
                 return
                     { TypeFacts.shallow ty with
                         Origin = origin
-                        SymbolName = shapeName |> Option.map String.tag<Measure.symbolName>
-                        DeclFile = Grouping.declFile symbol |> Option.map String.tag<Measure.declFile>
+                        SymbolName = shapeName |> Option.map (fun value -> value * uom<Measure.symbolName>)
+                        DeclFile = Grouping.declFile symbol |> Option.map (fun value -> value * uom<Measure.declFile>)
                         TypeArguments = typeArguments |> List.map _.TypeId
                         TupleElements = tupleElements
                         AliasTypeArguments = aliasTypeArguments |> List.map _.TypeId
@@ -926,7 +926,7 @@ let private deriveFacts
                         { TypeFacts.shallow ty with
                             Origin = origin
                             SymbolName = symbol |> ValueOption.map _.SymbolName |> ValueOption.toOption
-                            DeclFile = Grouping.declFile symbol |> Option.map String.tag<Measure.declFile>
+                            DeclFile = Grouping.declFile symbol |> Option.map (fun value -> value * uom<Measure.declFile>)
                             SymbolParent = symbol |> ValueOption.bind _.ParentSymbolId |> ValueOption.toOption
                             TypeArguments = typeArguments |> List.map _.TypeId
                             AliasTypeArguments = aliasTypeArguments |> List.map _.TypeId
@@ -958,7 +958,7 @@ let private deriveFacts
                             Response = ty
                             Origin = origin
                             SymbolName = symbol |> ValueOption.map _.SymbolName |> ValueOption.toOption
-                            DeclFile = Grouping.declFile symbol |> Option.map String.tag<Measure.declFile>
+                            DeclFile = Grouping.declFile symbol |> Option.map (fun value -> value * uom<Measure.declFile>)
                             SymbolParent = symbol |> ValueOption.bind _.ParentSymbolId |> ValueOption.toOption
                             Members = structure.Members
                             Declarations = []
@@ -993,7 +993,7 @@ let private deriveFacts
             return
                 { TypeFacts.shallow ty with
                     SymbolName = symbol |> ValueOption.map _.SymbolName |> ValueOption.toOption
-                    DeclFile = Grouping.declFile symbol |> Option.map String.tag<Measure.declFile>
+                    DeclFile = Grouping.declFile symbol |> Option.map (fun value -> value * uom<Measure.declFile>)
                     Constraint = bound |> ValueOption.map _.TypeId |> ValueOption.toOption
                     Default = fallback |> ValueOption.map _.TypeId |> ValueOption.toOption
                 },
@@ -1388,12 +1388,12 @@ let resolveDeclarationIdentities: Pass<ResolveModel> =
                             |> Map.toArray
                             |> Array.map (fun (typeId, facts) ->
                                 async {
-                                    let! actual = ctx.Session.getSymbolOfType (Measure.Int.untag typeId)
+                                    let! actual = ctx.Session.getSymbolOfType (typeId / uom<_>)
 
                                     let! symbol =
                                         match actual with
                                         | ValueSome _ -> async.Return actual
-                                        | ValueNone -> ctx.Session.getAliasSymbolOfType (Measure.Int.untag typeId)
+                                        | ValueNone -> ctx.Session.getAliasSymbolOfType (typeId / uom<_>)
 
                                     let declarations =
                                         symbol
@@ -1401,8 +1401,8 @@ let resolveDeclarationIdentities: Pass<ResolveModel> =
                                         |> ValueOption.defaultValue [||]
                                         |> Array.toList
 
-                                    let! arguments = ctx.Session.getAliasTypeArgumentsOfType (Measure.Int.untag typeId)
-                                    let! alias = ctx.Session.getAliasSymbolOfType (Measure.Int.untag typeId)
+                                    let! arguments = ctx.Session.getAliasTypeArgumentsOfType (typeId / uom<_>)
+                                    let! alias = ctx.Session.getAliasSymbolOfType (typeId / uom<_>)
 
                                     return
                                         typeId,

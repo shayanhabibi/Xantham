@@ -4,6 +4,7 @@ module Xantham.Generator.Tests.RenderTests
 
 open Expecto
 open Xantham.Generator
+open Xantham.Generator.Measure
 
 let private renderAll (model: RenderModel) =
     let rendered, findings = Async.RunSynchronously(Pipeline.runTier Build.context Render.passes model)
@@ -12,9 +13,9 @@ let private renderAll (model: RenderModel) =
 
 let private baseModel =
     { ModuleName = "TestPkg"
-      PackageName = "test-pkg"
-      RuntimePackage = "test-pkg"
-      PackageDir = "/pkg/test-pkg"
+      PackageName = "test-pkg" * uom<npmDependency>
+      RuntimePackage = "test-pkg" * uom<importSpecifier>
+      PackageDir = "/pkg/test-pkg" * uom<dirPath>
       Decls = []
       Findings = []
       Files = []
@@ -78,22 +79,22 @@ let renderTests =
                       Statics = [] }
 
             let es: Render.GroupModule =
-                { Group = "typescript/lib"
+                { Group = "typescript/lib" * uom<npmDependency>
                   IsEntry = false
                   Module = "Fable.Core.TS.Es"
                   Namespace = Some "Fable.Core.TS"
-                  RuntimePackage = "typescript/lib"
+                  RuntimePackage = "typescript/lib" * uom<importSpecifier>
                   CompilerLib = Some Render.Es
                   Decls =
                     [ interface' "EsName"
                         [ FsProperty { Name = "dom"; Docs = ""; Tags = []; ReadOnly = true; Type = FsNamed "DomName" } ] ] }
 
             let dom: Render.GroupModule =
-                { Group = "typescript/lib"
+                { Group = "typescript/lib" * uom<npmDependency>
                   IsEntry = false
                   Module = "Fable.Core.TS.Dom"
                   Namespace = Some "Fable.Core.TS"
-                  RuntimePackage = "typescript/lib"
+                  RuntimePackage = "typescript/lib" * uom<importSpecifier>
                   CompilerLib = Some Render.Dom
                   Decls =
                     [ interface' "DomName"
@@ -125,7 +126,7 @@ let renderTests =
         testTheory "canonical class aliases keep their independently imported constructor value" [
             ImportNamed "Client" =!> "[<Import(\"Client\", \"adapter-runtime\")>]"
             ImportDefault =!> "[<Import(\"default\", \"adapter-runtime\")>]"
-            ImportFrom("Client", "adapter/subpath") =!> "[<Import(\"Client\", \"adapter/subpath\")>]"
+            ImportFrom("Client", "adapter/subpath" * uom<importSpecifier>) =!> "[<Import(\"Client\", \"adapter/subpath\")>]"
             GlobalName "Outer.Client" =!> "[<Global(\"Outer.Client\")>]"
         ] <| fun (binding, attribute) ->
             let alias =
@@ -142,7 +143,7 @@ let renderTests =
                     { Name = name; Docs = ""; Tags = []; Order = None; TypeParameters = []
                       Target = FsString; Value = None }
             let model =
-                { baseModel with RuntimePackage = "adapter-runtime"
+                { baseModel with RuntimePackage = "adapter-runtime" * uom<importSpecifier>
                                  Decls = [ constructor "Constructor"; constructor "Wrapper.Constructor"; alias ] }
             let source = renderAll model |> Map.find "TestPkg.fs"
             Expect.stringContains source "type Client = Root.Client" "the instance retains canonical type identity"
@@ -691,7 +692,7 @@ let renderTests =
                               { Name = "Options"
                                 Docs = ""
                                 Tags = []
-                                Order = Some { File = (Measure.String.tag<Measure.declFile> "/pkg/test-pkg/index.d.ts"); NodeIndex = 3<Measure.nodeId> }
+                                Order = Some { File = "/pkg/test-pkg/index.d.ts" * uom<declFile>; NodeIndex = 3<nodeId> }
                                 TypeParameters = []
                                 Inherits = []
                                 Members = []
