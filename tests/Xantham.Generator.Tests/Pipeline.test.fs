@@ -4311,8 +4311,13 @@ let pipelineTests =
                             "| [<CompiledName(\"ok\")>] Ok of value: string"
                             "the generic arm's members were read after it was met as a reference" ])
         yield!
-            fixtureTests "layout-lab" (handFixture "layout-lab") GeneratorConfig.Default <| fun package ->
-                []
+            fixtureTests "layout-lab" (handFixture "layout-lab") GeneratorConfig.Default <| fun package -> [
+                testCase "Nested modules are created for exported values" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+                    Expect.stringContains source "module Strict" "the nested module Strict for `(layout-lab/strict).mode` is created"
+                    Expect.stringContains source "module Aliases" "the nested module Aliases for `(layout-lab/aliases).renamedCheck` is created"
+            ]
     ]
 
 [<Tests>]
