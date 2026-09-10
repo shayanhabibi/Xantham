@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "package": "@types/node",
+  "module": "Node",
+  "counts": {
+    "exact": 815,
+    "ergonomic": 1545,
+    "widened": 914,
+    "escape": 332
+  },
+  "passes": [
+    {
+      "pass": "HG - harvest-globals",
+      "total": 171,
+      "exact": 167,
+      "escape": 4
+    },
+    {
+      "pass": "SY - synthesize-anonymous",
+      "total": 1928,
+      "exact": 1928
+    },
+    {
+      "pass": "LU - classify-literal-unions",
+      "total": 8,
+      "exact": 8
+    },
+    {
+      "pass": "DT - detect-tagged-unions",
+      "total": 12,
+      "exact": 4,
+      "ergonomic": 8
+    },
+    {
+      "pass": "shape-callbacks",
+      "total": 2292,
+      "ergonomic": 2006,
+      "widened": 211,
+      "escape": 75
+    },
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 27871,
+      "exact": 899,
+      "ergonomic": 15973,
+      "widened": 9025,
+      "escape": 1974
+    },
+    {
+      "pass": "SA - shape-aliases",
+      "total": 245,
+      "ergonomic": 87,
+      "widened": 155,
+      "escape": 3
+    },
+    {
+      "pass": "SC - shape-classes",
+      "total": 6852,
+      "exact": 1584,
+      "ergonomic": 2122,
+      "widened": 2192,
+      "escape": 954
+    },
+    {
+      "pass": "SE - shape-exports",
+      "total": 4054,
+      "ergonomic": 2740,
+      "widened": 1218,
+      "escape": 96
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 2108,
+      "ergonomic": 2108
+    },
+    {
+      "pass": "DO - dedupe-overloads",
+      "total": 3212,
+      "exact": 86,
+      "widened": 3126
+    },
+    {
+      "pass": "RA - repair-arity",
+      "total": 4,
+      "ergonomic": 1,
+      "widened": 3
+    },
+    {
+      "pass": "AC - audit-coverage",
+      "total": 41,
+      "escape": 41
+    }
+  ]
+}
