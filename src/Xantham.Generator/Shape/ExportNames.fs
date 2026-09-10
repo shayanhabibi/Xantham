@@ -13,7 +13,7 @@ let declarationExports (ctx: Context) (model: ShapeModel) =
         if not (hasAny SymbolFlags.Type export.Symbol.Flags) then
             None
         else
-            Map.tryFind export.Symbol.Id model.ExportTypes
+            Map.tryFind export.Symbol.SymbolId model.ExportTypes
             |> Option.bind _.Declared
             |> Option.map (fun typeId -> typeId, export))
     |> List.groupBy fst
@@ -65,10 +65,10 @@ let nameExports: Pass<ShapeModel> =
                     /// The module name an export nests under, where its symbol is written inside
                     /// a namespace this run names.
                     let namespaceOf (export: HarvestedExport) =
-                        export.Symbol.Parent
+                        export.Symbol.ParentSymbolId
                         |> ValueOption.toOption
                         |> Option.bind (fun parent -> Map.tryFind parent model.Harvest.Namespaces)
-                        |> Option.map Naming.pascalSegment
+                        |> Option.map (Measure.String.untag >> Naming.pascalSegment)
 
                     // The claim every export makes, in harvest order, read before any of them is
                     // granted. A contested name is visible only from the whole list, and the

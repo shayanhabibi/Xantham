@@ -1822,7 +1822,7 @@ let private sourceFile (packageDir: string) (order: DeclOrder option) : string =
     match order with
     | None -> null
     | Some order ->
-        let path = order.File.Replace('\\', '/')
+        let path = (Measure.String.untag order.File).Replace('\\', '/')
         let root = packageDir.Replace('\\', '/').TrimEnd '/' + "/"
 
         if path.StartsWith(root, StringComparison.OrdinalIgnoreCase) then

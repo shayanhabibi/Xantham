@@ -71,7 +71,7 @@ let resolvedMember (sym: SymbolResponse) (typeId: int) : ResolvedMember =
         Tags = []
         Optional = false
         ReadOnly = false
-        TypeId = typeId
+        TypeId = Measure.Int.tag<Measure.typeId> typeId
     }
 
 let export (name: string) (sym: SymbolResponse) : HarvestedExport =
@@ -90,7 +90,7 @@ let shapeModel (table: TypeFacts list) : ShapeModel =
     {
         Harvest = HarvestModel.Empty
         ExportTypes = Map.empty
-        Types = table |> List.map (fun facts -> facts.Response.Id, facts) |> Map.ofList
+        Types = table |> List.map (fun facts -> Measure.Int.tag<Measure.typeId> facts.Response.Id, facts) |> Map.ofList
         NotFollowed = Map.empty
         DeclNames = Map.empty
         DeclOrders = Map.empty
@@ -109,7 +109,7 @@ let signature (parameters: ResolvedMember list) (returnTypeId: int) : ResolvedSi
         HasRest = false
         TypeParameters = []
         IsAbstract = false
-        ReturnTypeId = returnTypeId
+        ReturnTypeId = Measure.Int.tag<Measure.typeId> returnTypeId
     }
 
 /// Runs one pass to completion under the wire-less context and splits the outcome.

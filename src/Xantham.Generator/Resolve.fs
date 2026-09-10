@@ -5,6 +5,7 @@
 module Xantham.Generator.Resolve
 
 open System.Collections.Concurrent
+open Measure
 
 open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
@@ -34,8 +35,8 @@ let private resolveCountersEnabled =
 /// walk's.
 type private Trace =
     {
-        Channels: ConcurrentDictionary<int, ConcurrentDictionary<string, int>>
-        Generations: ConcurrentDictionary<int, int>
+        Channels: ConcurrentDictionary<int<typeId>, ConcurrentDictionary<string, int>>
+        Generations: ConcurrentDictionary<int<typeId>, int>
         Tag: string
     }
 
@@ -57,7 +58,7 @@ let private channel (trace: Trace option) (name: string) (types: TypeResponse li
     | None -> ()
     | Some trace ->
         for ty in types do
-            let counts = trace.Channels.GetOrAdd(ty.Id, (fun _ -> ConcurrentDictionary()))
+            let counts = trace.Channels.GetOrAdd(ty.TypeId, (fun _ -> ConcurrentDictionary()))
             counts.AddOrUpdate(name, 1, (fun _ count -> count + 1)) |> ignore
 
     types
@@ -89,13 +90,13 @@ type private Registers =
         /// Type parameters a signature declared. A signature's parameter is cloned afresh every
         /// time the checker instantiates the signature, so an instantiation written over one is
         /// never the same type twice.
-        SignatureParameters: ConcurrentDictionary<int, bool>
+        SignatureParameters: ConcurrentDictionary<int<typeId>, bool>
         /// Types the shape tier reads for their structure: the seeds, and every operand of a
         /// union or an intersection.
-        Structural: ConcurrentDictionary<int, bool>
+        Structural: ConcurrentDictionary<int<typeId>, bool>
         /// Instantiations derived as identity alone. One a later generation reads as an
         /// operand is re-derived in full.
-        IdentityOnly: ConcurrentDictionary<int, bool>
+        IdentityOnly: ConcurrentDictionary<int<typeId>, bool>
     }
 
 module private Registers =
@@ -108,7 +109,7 @@ module private Registers =
 
     let structural (registers: Registers) (types: TypeResponse list) =
         for ty in types do
-            registers.Structural.TryAdd(ty.Id, true) |> ignore
+            registers.Structural.TryAdd(ty.TypeId, true) |> ignore
 
         types
 
@@ -154,7 +155,7 @@ let private dumpFrontier (ctx: Context) (trace: Trace option) (frontier: TypeRes
         | None, _
         | _, None -> ()
         | Some path, Some trace ->
-            let stuck = frontier |> List.map _.Id |> Set.ofList
+            let stuck = frontier |> List.map _.TypeId |> Set.ofList
 
             let idLines =
                 [
@@ -276,10 +277,10 @@ let resolveExportTypes: Pass<ResolveModel> =
                         |> Array.fold
                             (fun map (export, declared, value) ->
                                 Map.add
-                                    export.Symbol.Id
+                                    export.Symbol.SymbolId
                                     {
-                                        Declared = answered declared |> Option.map _.Id
-                                        Value = answered value |> Option.map _.Id
+                                        Declared = answered declared |> Option.map _.TypeId
+                                        Value = answered value |> Option.map _.TypeId
                                     }
                                     map)
                             model.ExportTypes
@@ -291,7 +292,7 @@ let resolveExportTypes: Pass<ResolveModel> =
                                 yield! Option.toArray (answered declared)
                                 yield! Option.toArray (answered value)
                             |])
-                        |> Array.fold (fun map ty -> Map.add ty.Id (TypeFacts.shallow ty) map) model.Types
+                        |> Array.fold (fun map ty -> Map.add ty.TypeId (TypeFacts.shallow ty) map) model.Types
 
                     // An export whose type the compiler would not hand over has nothing to shape.
                     // It drops here, loudly: the finding is what tells `audit-coverage` that the
@@ -417,7 +418,7 @@ let private deriveStructure (ctx: Context) (trace: Trace option) (registers: Reg
                             || property.CheckFlags.HasFlag CheckFlags.OptionalParameter
                             || questionToken
                         ReadOnly = readOnly
-                        TypeId = propertyType.Id
+                        TypeId = propertyType.TypeId
                     },
                     propertyType
             }
@@ -450,15 +451,15 @@ let private deriveStructure (ctx: Context) (trace: Trace option) (registers: Reg
                             let typeParameters = typeParameters |> ValueOption.defaultValue [||]
 
                             for parameter in typeParameters do
-                                registers.SignatureParameters.TryAdd(parameter.Id, true) |> ignore
+                                registers.SignatureParameters.TryAdd(parameter.TypeId, true) |> ignore
 
                             return
                                 {
                                     Parameters = parameterFacts |> Array.map fst |> Array.toList
                                     HasRest = signature.Flags.HasFlag SignatureFlags.HasRestParameter
-                                    TypeParameters = typeParameters |> Array.map _.Id |> Array.toList
+                                    TypeParameters = typeParameters |> Array.map _.TypeId |> Array.toList
                                     IsAbstract = signature.Flags.HasFlag SignatureFlags.Abstract
-                                    ReturnTypeId = returnType.Id
+                                    ReturnTypeId = returnType.TypeId
                                 },
                                 [
                                     yield!
@@ -507,8 +508,8 @@ let private deriveStructure (ctx: Context) (trace: Trace option) (registers: Reg
                     indexInfos
                     |> List.map (fun info ->
                         {
-                            KeyTypeId = info.KeyType.Id
-                            ValueTypeId = info.ValueType.Id
+                            KeyTypeId = info.KeyType.TypeId
+                            ValueTypeId = info.ValueType.TypeId
                             IsReadonly = info.IsReadonly = ValueSome true
                         })
                 CallSignatures = callSignatures |> Array.map fst |> Array.toList
@@ -543,7 +544,7 @@ let rec private appliesSignatureParameter
             }
 
         if has TypeFlags.TypeParameter then
-            return registers.SignatureParameters.ContainsKey argument.Id
+            return registers.SignatureParameters.ContainsKey argument.TypeId
         elif depth = 0 then
             return false
         elif has TypeFlags.Union || has TypeFlags.Intersection then
@@ -635,13 +636,13 @@ let private deriveFacts
 
             return
                 { TypeFacts.shallow ty with
-                    UnionMembers = members |> List.map _.Id
-                    NonNullableAlias = nonNullable |> Option.map _.Id
-                    AliasTypeArguments = aliasTypeArguments |> List.map _.Id
-                    SymbolName = alias |> ValueOption.map _.Name |> ValueOption.toOption
-                    SymbolParent = alias |> ValueOption.bind _.Parent |> ValueOption.toOption
+                    UnionMembers = members |> List.map _.TypeId
+                    NonNullableAlias = nonNullable |> Option.map _.TypeId
+                    AliasTypeArguments = aliasTypeArguments |> List.map _.TypeId
+                    SymbolName = alias |> ValueOption.map _.SymbolName |> ValueOption.toOption
+                    SymbolParent = alias |> ValueOption.bind _.ParentSymbolId |> ValueOption.toOption
                     Origin = Grouping.classify ctx.PackageDir alias
-                    DeclFile = Grouping.declFile alias
+                    DeclFile = Grouping.declFile alias |> Option.map String.tag<Measure.declFile>
                 },
                 channel trace "union-members" members
                 @ channel trace "alias-type-arguments" aliasTypeArguments
@@ -694,8 +695,8 @@ let private deriveFacts
                     IndexInfos = structure |> Option.map _.IndexInfos |> Option.defaultValue []
                     CallSignatures = structure |> Option.map _.CallSignatures |> Option.defaultValue []
                     ConstructSignatures = structure |> Option.map _.ConstructSignatures |> Option.defaultValue []
-                    IntersectionMembers = members |> List.map _.Id
-                    AliasTypeArguments = aliasTypeArguments |> List.map _.Id
+                    IntersectionMembers = members |> List.map _.TypeId
+                    AliasTypeArguments = aliasTypeArguments |> List.map _.TypeId
                 },
                 channel trace "intersection-members" members
                 @ channel trace "alias-type-arguments" aliasTypeArguments
@@ -708,8 +709,8 @@ let private deriveFacts
             return
                 { TypeFacts.shallow ty with
                     Origin = Grouping.classify ctx.PackageDir symbol
-                    SymbolName = symbol |> ValueOption.map _.Name |> ValueOption.toOption
-                    DeclFile = Grouping.declFile symbol
+                    SymbolName = symbol |> ValueOption.map _.SymbolName |> ValueOption.toOption
+                    DeclFile = Grouping.declFile symbol |> Option.map String.tag<Measure.declFile>
                 },
                 []
         elif has TypeFlags.Object then
@@ -852,12 +853,12 @@ let private deriveFacts
                 return
                     { TypeFacts.shallow ty with
                         Origin = origin
-                        SymbolName = shapeName
-                        DeclFile = Grouping.declFile symbol
-                        TypeArguments = typeArguments |> List.map _.Id
+                        SymbolName = shapeName |> Option.map String.tag<Measure.symbolName>
+                        DeclFile = Grouping.declFile symbol |> Option.map String.tag<Measure.declFile>
+                        TypeArguments = typeArguments |> List.map _.TypeId
                         TupleElements = tupleElements
-                        AliasTypeArguments = aliasTypeArguments |> List.map _.Id
-                        BaseTypes = bases |> List.map _.Id
+                        AliasTypeArguments = aliasTypeArguments |> List.map _.TypeId
+                        BaseTypes = bases |> List.map _.TypeId
                     },
                     channel trace "type-arguments" typeArguments
                     @ channel trace "alias-type-arguments" aliasTypeArguments
@@ -915,20 +916,20 @@ let private deriveFacts
 
                 let asIdentity =
                     isInstantiation
-                    && (isOpenOverSignature || not (registers.Structural.ContainsKey ty.Id))
+                    && (isOpenOverSignature || not (registers.Structural.ContainsKey ty.TypeId))
 
                 if asIdentity then
                     if not isOpenOverSignature then
-                        registers.IdentityOnly.TryAdd(ty.Id, true) |> ignore
+                        registers.IdentityOnly.TryAdd(ty.TypeId, true) |> ignore
 
                     return
                         { TypeFacts.shallow ty with
                             Origin = origin
-                            SymbolName = symbol |> ValueOption.map _.Name |> ValueOption.toOption
-                            DeclFile = Grouping.declFile symbol
-                            SymbolParent = symbol |> ValueOption.bind _.Parent |> ValueOption.toOption
-                            TypeArguments = typeArguments |> List.map _.Id
-                            AliasTypeArguments = aliasTypeArguments |> List.map _.Id
+                            SymbolName = symbol |> ValueOption.map _.SymbolName |> ValueOption.toOption
+                            DeclFile = Grouping.declFile symbol |> Option.map String.tag<Measure.declFile>
+                            SymbolParent = symbol |> ValueOption.bind _.ParentSymbolId |> ValueOption.toOption
+                            TypeArguments = typeArguments |> List.map _.TypeId
+                            AliasTypeArguments = aliasTypeArguments |> List.map _.TypeId
                         },
                         [
                             yield! channel trace "type-arguments" typeArguments
@@ -956,9 +957,9 @@ let private deriveFacts
                         {
                             Response = ty
                             Origin = origin
-                            SymbolName = symbol |> ValueOption.map _.Name |> ValueOption.toOption
-                            DeclFile = Grouping.declFile symbol
-                            SymbolParent = symbol |> ValueOption.bind _.Parent |> ValueOption.toOption
+                            SymbolName = symbol |> ValueOption.map _.SymbolName |> ValueOption.toOption
+                            DeclFile = Grouping.declFile symbol |> Option.map String.tag<Measure.declFile>
+                            SymbolParent = symbol |> ValueOption.bind _.ParentSymbolId |> ValueOption.toOption
                             Members = structure.Members
                             Declarations = []
                             DeclarationArguments = []
@@ -966,10 +967,10 @@ let private deriveFacts
                             IndexInfos = structure.IndexInfos
                             CallSignatures = structure.CallSignatures
                             ConstructSignatures = structure.ConstructSignatures
-                            BaseTypes = baseTypes |> List.map _.Id
-                            TypeArguments = typeArguments |> List.map _.Id
+                            BaseTypes = baseTypes |> List.map _.TypeId
+                            TypeArguments = typeArguments |> List.map _.TypeId
                             TupleElements = tupleElements
-                            AliasTypeArguments = aliasTypeArguments |> List.map _.Id
+                            AliasTypeArguments = aliasTypeArguments |> List.map _.TypeId
                             IntersectionMembers = []
                             Constraint = None
                             Default = None
@@ -991,10 +992,10 @@ let private deriveFacts
 
             return
                 { TypeFacts.shallow ty with
-                    SymbolName = symbol |> ValueOption.map _.Name |> ValueOption.toOption
-                    DeclFile = Grouping.declFile symbol
-                    Constraint = bound |> ValueOption.map _.Id |> ValueOption.toOption
-                    Default = fallback |> ValueOption.map _.Id |> ValueOption.toOption
+                    SymbolName = symbol |> ValueOption.map _.SymbolName |> ValueOption.toOption
+                    DeclFile = Grouping.declFile symbol |> Option.map String.tag<Measure.declFile>
+                    Constraint = bound |> ValueOption.map _.TypeId |> ValueOption.toOption
+                    Default = fallback |> ValueOption.map _.TypeId |> ValueOption.toOption
                 },
                 [
                     yield! channel trace "constraint" (ValueOption.toList bound)
@@ -1022,7 +1023,7 @@ let private deriveFacts
 
             let identity =
                 match alias, aliasArguments with
-                | ValueSome symbol, [| argument |] -> Some(symbol.Name, argument.Id)
+                | ValueSome symbol, [| argument |] -> Some(symbol.SymbolName, argument.TypeId)
                 | _ -> None
 
             return
@@ -1137,7 +1138,7 @@ let private deriveFacts
                             Some
                                 {
                                     Name = alias |> ValueOption.map _.Name |> ValueOption.toOption
-                                    Branch = taken |> Option.map (fun (side, bare) -> side, bare.Id)
+                                    Branch = taken |> Option.map (fun (side, bare) -> side, bare.TypeId)
                                 },
                             channel trace "conditional-branch" (taken |> Option.map snd |> Option.toList)
                     }
@@ -1146,7 +1147,7 @@ let private deriveFacts
 
             return
                 { TypeFacts.shallow ty with
-                    AliasTypeArguments = bound |> List.map _.Id
+                    AliasTypeArguments = bound |> List.map _.TypeId
                     Conditional = fst conditional
                 },
                 bound @ snd conditional
@@ -1182,18 +1183,18 @@ let resolveTypeTable: Pass<ResolveModel> =
                             let promoted =
                                 frontier
                                 |> List.filter (fun (ty: TypeResponse) ->
-                                    registers.IdentityOnly.ContainsKey ty.Id
-                                    && registers.Structural.ContainsKey ty.Id)
+                                    registers.IdentityOnly.ContainsKey ty.TypeId
+                                    && registers.Structural.ContainsKey ty.TypeId)
 
                             for ty in promoted do
-                                registers.IdentityOnly.TryRemove ty.Id |> ignore
+                                registers.IdentityOnly.TryRemove ty.TypeId |> ignore
 
-                            let derived = promoted |> List.fold (fun set ty -> Set.remove ty.Id set) derived
+                            let derived = promoted |> List.fold (fun set ty -> Set.remove ty.TypeId set) derived
 
                             let fresh =
                                 frontier
                                 |> List.distinctBy (fun (ty: TypeResponse) -> ty.Id)
-                                |> List.filter (fun ty -> not (Set.contains ty.Id derived))
+                                |> List.filter (fun ty -> not (Set.contains ty.TypeId derived))
                                 |> List.sortBy _.Id
 
                             if resolveCountersEnabled.Value then
@@ -1205,7 +1206,7 @@ let resolveTypeTable: Pass<ResolveModel> =
                             | None -> ()
                             | Some trace ->
                                 for ty in fresh do
-                                    trace.Generations.TryAdd(ty.Id, depth) |> ignore
+                                    trace.Generations.TryAdd(ty.TypeId, depth) |> ignore
 
                             match fresh with
                             | [] -> return table, notFollowed, findings
@@ -1215,7 +1216,7 @@ let resolveTypeTable: Pass<ResolveModel> =
                                 let notFollowed =
                                     fresh
                                     |> List.fold
-                                        (fun map ty -> Map.add ty.Id $"beyond the depth cutoff ({FollowDepth})" map)
+                                        (fun map ty -> Map.add ty.TypeId $"beyond the depth cutoff ({FollowDepth})" map)
                                         notFollowed
 
                                 // One finding for the frontier, not one per type: a type here has
@@ -1247,7 +1248,7 @@ let resolveTypeTable: Pass<ResolveModel> =
                                     fresh
                                     |> List.fold
                                         (fun map ty ->
-                                            Map.add ty.Id $"beyond the frontier width cutoff ({FollowWidth})" map)
+                                            Map.add ty.TypeId $"beyond the frontier width cutoff ({FollowWidth})" map)
                                         notFollowed
 
                                 let findings =
@@ -1302,7 +1303,7 @@ let resolveTypeTable: Pass<ResolveModel> =
                                     |> Array.fold
                                         (fun map (_, result) ->
                                             match result with
-                                            | Ok(facts, _) -> Map.add facts.Response.Id facts map
+                                            | Ok(facts, _) -> Map.add facts.Response.TypeId facts map
                                             | Error _ -> map)
                                         table
 
@@ -1311,7 +1312,7 @@ let resolveTypeTable: Pass<ResolveModel> =
                                     |> Array.fold
                                         (fun map (ty, result) ->
                                             match result with
-                                            | Error reason -> Map.add ty.Id reason map
+                                            | Error reason -> Map.add ty.TypeId reason map
                                             | Ok _ -> map)
                                         notFollowed
 
@@ -1325,7 +1326,7 @@ let resolveTypeTable: Pass<ResolveModel> =
                                             | Ok _ -> ()
                                     ]
 
-                                let derived = fresh |> List.fold (fun set ty -> Set.add ty.Id set) derived
+                                let derived = fresh |> List.fold (fun set ty -> Set.add ty.TypeId set) derived
 
                                 let discovered =
                                     [
@@ -1387,21 +1388,21 @@ let resolveDeclarationIdentities: Pass<ResolveModel> =
                             |> Map.toArray
                             |> Array.map (fun (typeId, facts) ->
                                 async {
-                                    let! actual = ctx.Session.getSymbolOfType typeId
+                                    let! actual = ctx.Session.getSymbolOfType (Measure.Int.untag typeId)
 
                                     let! symbol =
                                         match actual with
                                         | ValueSome _ -> async.Return actual
-                                        | ValueNone -> ctx.Session.getAliasSymbolOfType typeId
+                                        | ValueNone -> ctx.Session.getAliasSymbolOfType (Measure.Int.untag typeId)
 
                                     let declarations =
                                         symbol
-                                        |> ValueOption.bind _.Declarations
+                                        |> ValueOption.bind _.DeclarationHandles
                                         |> ValueOption.defaultValue [||]
                                         |> Array.toList
 
-                                    let! arguments = ctx.Session.getAliasTypeArgumentsOfType typeId
-                                    let! alias = ctx.Session.getAliasSymbolOfType typeId
+                                    let! arguments = ctx.Session.getAliasTypeArgumentsOfType (Measure.Int.untag typeId)
+                                    let! alias = ctx.Session.getAliasSymbolOfType (Measure.Int.untag typeId)
 
                                     return
                                         typeId,
@@ -1411,7 +1412,7 @@ let resolveDeclarationIdentities: Pass<ResolveModel> =
                                                 arguments |> ValueOption.defaultValue [||] |> Array.toList
                                             AliasDeclarations =
                                                 alias
-                                                |> ValueOption.bind _.Declarations
+                                                |> ValueOption.bind _.DeclarationHandles
                                                 |> ValueOption.defaultValue [||]
                                                 |> Array.toList
                                         }

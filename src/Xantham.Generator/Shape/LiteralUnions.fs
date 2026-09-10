@@ -81,7 +81,7 @@ let classifyLiteralUnions: Pass<ShapeModel> =
                                             literals
                                             |> List.map (fun (m, literal) ->
                                                 let caseName =
-                                                    match m.SymbolName with
+                                                    match (m.SymbolName |> Option.map Measure.String.untag) with
                                                     | Some symbolName when not (isSyntheticName symbolName) ->
                                                         let sanitised, finding = sanitisedCaseName name symbolName
                                                         finding |> Option.iter (fun f -> findings <- findings @ [ f ])
@@ -108,7 +108,7 @@ let classifyLiteralUnions: Pass<ShapeModel> =
                                             literals
                                             |> List.map (fun (m, literal) ->
                                                 let caseName =
-                                                    match m.SymbolName with
+                                                    match (m.SymbolName |> Option.map Measure.String.untag) with
                                                     | Some symbolName when not (isSyntheticName symbolName) ->
                                                         let sanitised, finding = sanitisedCaseName name symbolName
                                                         finding |> Option.iter (fun f -> findings <- findings @ [ f ])

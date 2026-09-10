@@ -21,7 +21,7 @@ let private typeRefIgnoringSelf
             model.DeclNames
             |> Map.toList
             |> List.choose (fun (typeId, _) ->
-                if typeId <= facts.Response.Id then
+                if typeId <= facts.Response.TypeId then
                     None
                 else
                     match Map.tryFind typeId model.Types with
@@ -38,10 +38,10 @@ let private typeRefIgnoringSelf
         { model with
             DeclNames =
                 largerTwins
-                |> List.fold (fun names id -> Map.remove id names) (Map.remove facts.Response.Id model.DeclNames)
+                |> List.fold (fun names id -> Map.remove id names) (Map.remove facts.Response.TypeId model.DeclNames)
         }
 
-    typeRef ctx unnamed None name facts.Response.Id
+    typeRef ctx unnamed None name facts.Response.TypeId
 
 /// Abbreviations for the named types no earlier pass declared: aliases to primitives, arrays,
 /// other named types, or whatever `typeRef` widens them to. Also covers a second export of an
@@ -76,7 +76,7 @@ let shapeAliases: Pass<ShapeModel> =
                     let exportDocs =
                         model.Harvest.Exports
                         |> List.choose (fun export ->
-                            Map.tryFind export.Symbol.Id model.ExportTypes
+                            Map.tryFind export.Symbol.SymbolId model.ExportTypes
                             |> Option.bind _.Declared
                             |> Option.map (fun typeId -> typeId, (export.Docs, export.Tags)))
                         |> Map.ofList
@@ -109,7 +109,7 @@ let shapeAliases: Pass<ShapeModel> =
                             else
                                 let name = fsName fallback export
 
-                                match Map.tryFind export.Symbol.Id model.ExportTypes |> Option.bind _.Declared with
+                                match Map.tryFind export.Symbol.SymbolId model.ExportTypes |> Option.bind _.Declared with
                                 | Some typeId ->
                                     match Map.tryFind typeId model.DeclNames with
                                     | Some primary when primary = name -> None
@@ -197,7 +197,7 @@ let shapeAliases: Pass<ShapeModel> =
                                             match arrayElement scoped facts with
                                             | Some element -> arrayRef ctx scoped None name facts element
                                             | None ->
-                                                match Map.tryFind facts.Response.Id model.DeclNames with
+                                                match Map.tryFind facts.Response.TypeId model.DeclNames with
                                                 | Some primary when primary <> name -> FsNamed primary, []
                                                 | _ -> typeRefIgnoringSelf ctx scoped name facts
 

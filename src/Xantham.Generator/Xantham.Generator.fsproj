@@ -7,6 +7,7 @@
     <ItemGroup>
         <!-- The order is the pipeline's order: the model first, then one file per tier in the
              order the tiers run, then the fold that sequences them. -->
+        <Compile Include="Measures.fs" />
         <Compile Include="Findings.fs" />
         <Compile Include="Model.fs" />
         <Compile Include="Bootstrap.fs" />

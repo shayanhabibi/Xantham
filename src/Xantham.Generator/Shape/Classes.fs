@@ -52,7 +52,7 @@ module private Refusal =
 /// The TypeScript base a class derives that F# reaches as `exn`, if it has one. `Error` is the
 /// only lib name bound to F#'s exception type, and only through the compiler-lib table, so a
 /// class whose base is shipped by this run or by a mapped group is not one of these.
-let private exnBase (ctx: Context) (model: ShapeModel) (bases: int list) =
+let private exnBase (ctx: Context) (model: ShapeModel) (bases: int<Measure.typeId> list) =
     if GeneratorConfig.disposition ctx.Config CompilerLib = Ship then
         None
     else
@@ -60,7 +60,7 @@ let private exnBase (ctx: Context) (model: ShapeModel) (bases: int list) =
         |> List.tryPick (fun baseId ->
             match Map.tryFind baseId model.Types with
             | Some facts ->
-                match facts.Origin, facts.SymbolName with
+                match facts.Origin, (facts.SymbolName |> Option.map Measure.String.untag) with
                 | CompilerLib, Some baseName ->
                     match Naming.LibBindings.tryFind baseName with
                     | Some("exn", _, _) -> Some baseName
@@ -196,7 +196,7 @@ let shapeClasses: Pass<ShapeModel> =
                     /// parameters of its first construct signature, and the import that binds the
                     /// JavaScript constructor. Refused where F# would not admit the result, and
                     /// the declaration then keeps the interface form it already has.
-                    let admitEntrypoint (export: HarvestedExport) (facts: TypeFacts) (bases: int list) (name: string) =
+                    let admitEntrypoint (export: HarvestedExport) (facts: TypeFacts) (bases: int<Measure.typeId> list) (name: string) =
                         let declaration =
                             model.Decls
                             |> List.tryPick (function
@@ -268,7 +268,7 @@ let shapeClasses: Pass<ShapeModel> =
                                 let name = fsName fallback export
 
                                 let valueFacts =
-                                    Map.tryFind export.Symbol.Id model.ExportTypes
+                                    Map.tryFind export.Symbol.SymbolId model.ExportTypes
                                     |> Option.bind _.Value
                                     |> Option.bind (fun typeId -> Map.tryFind typeId model.Types)
 
@@ -279,7 +279,7 @@ let shapeClasses: Pass<ShapeModel> =
                                     []
                                 | Some facts ->
                                     let declaredId =
-                                        Map.tryFind export.Symbol.Id model.ExportTypes |> Option.bind _.Declared
+                                        Map.tryFind export.Symbol.SymbolId model.ExportTypes |> Option.bind _.Declared
 
                                     // The name the *instance* side is declared under, which a clash
                                     // renames: `cloudflare:workers`'s `DurableObject` class is

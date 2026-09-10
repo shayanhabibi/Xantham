@@ -120,7 +120,7 @@ let private declOrigins compilerOnly (ctx: Context) (shape: ShapeModel) : Map<st
         shape.Harvest.Exports
         |> List.fold
             (fun map export ->
-                match Map.tryFind export.Symbol.Id shape.ExportTypes with
+                match Map.tryFind export.Symbol.SymbolId shape.ExportTypes with
                 | Some ids ->
                     let origin = Grouping.classify ctx.PackageDir (ValueSome export.Symbol)
 
@@ -143,7 +143,7 @@ let private declOrigins compilerOnly (ctx: Context) (shape: ShapeModel) : Map<st
             match Map.tryFind name origins, Map.tryFind typeId shape.Types with
             | None, Some facts ->
                 let origin =
-                    match Map.tryFind name declared, facts.SymbolName, facts.DeclFile, facts.Origin with
+                    match Map.tryFind name declared, (facts.SymbolName |> Option.map Measure.String.untag), (facts.DeclFile |> Option.map Measure.String.untag), facts.Origin with
                     // A global object belongs to reusable core only when the complete source
                     // inventory certifies that this program adds no declarations to it.
                     | _, Some "globalThis", None, _ when compilerOnly -> CompilerLib
@@ -168,7 +168,7 @@ let private declFamilies (shape: ShapeModel) : Map<string, string> =
               Some {
                        Origin = CompilerLib
                        DeclFile = Some file
-                   } -> Map.add name (Grouping.libFamily file) families
+                   } -> Map.add name (Grouping.libFamily (Measure.String.untag file)) families
             | _ -> families)
         Map.empty
 
@@ -224,7 +224,7 @@ let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel)
             | Some name when Map.containsKey name origins -> originOf name
             | name ->
                 secondaryAliasOrder decl
-                |> Option.map (fun order -> Grouping.classifyFile ctx.PackageDir order.File)
+                |> Option.map (fun order -> Grouping.classifyFile ctx.PackageDir (Measure.String.untag order.File))
                 |> Option.defaultWith (fun () -> name |> Option.map originOf |> Option.defaultValue Unclassified)
 
         emittingGroup ctx origin
@@ -250,11 +250,11 @@ let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel)
                 | Some name when Map.containsKey name origins ->
                     Map.tryFind name declared
                     |> Option.bind _.Order
-                    |> Option.map (fun order -> Grouping.libFamily order.File)
+                    |> Option.map (fun order -> Grouping.libFamily (Measure.String.untag order.File))
                     |> Option.defaultWith (fun () -> familyOf name)
                 | name ->
                     secondaryAliasOrder decl
-                    |> Option.map (fun order -> Grouping.libFamily order.File)
+                    |> Option.map (fun order -> Grouping.libFamily (Measure.String.untag order.File))
                     |> Option.defaultWith (fun () -> name |> Option.map familyOf |> Option.defaultValue "Es")
 
             CompilerLib, family

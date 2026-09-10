@@ -41,7 +41,7 @@ let internal underPackage (packageDir: string) (path: string) =
 let private namespacesAmong (symbols: SymbolResponse seq) =
     symbols
     |> Seq.filter (fun symbol -> hasAny SymbolFlags.Module symbol.Flags && Naming.isWritableTypeName symbol.Name)
-    |> Seq.map (fun symbol -> symbol.Id, symbol.Name)
+    |> Seq.map (fun symbol -> symbol.SymbolId, symbol.SymbolName)
     |> Map.ofSeq
 
 /// The entry module's exports, each followed through `getAliasedSymbol` to its origin so that
@@ -402,8 +402,8 @@ let orderExports: Pass<HarvestModel> =
                 model.Exports
                 |> List.sortBy (fun export ->
                     (match export.Order with
-                     | Some order -> Grouping.sourceOrderKey ctx.PackageDir order.File, order.NodeIndex
-                     | None -> (2, "", ""), System.Int32.MaxValue),
+                     | Some order -> Grouping.sourceOrderKey ctx.PackageDir (Measure.String.untag order.File), order.NodeIndex
+                     | None -> (2, "", ""), Measure.Int.tag<Measure.nodeId> System.Int32.MaxValue),
                     export.ExportName)
         })
 

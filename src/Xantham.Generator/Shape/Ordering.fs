@@ -11,8 +11,8 @@ let orderDeclarations: Pass<ShapeModel> =
     Pass.pure' "order-declarations" (fun ctx model ->
         let orderKey (order: DeclOrder option) (name: string) =
             (match order with
-             | Some order -> Grouping.sourceOrderKey ctx.PackageDir order.File, order.NodeIndex
-             | None -> (2, "", ""), System.Int32.MaxValue),
+             | Some order -> Grouping.sourceOrderKey ctx.PackageDir (Measure.String.untag order.File), order.NodeIndex
+             | None -> (2, "", ""), Measure.Int.tag<Measure.nodeId> System.Int32.MaxValue),
             name
 
         let decls =
@@ -26,7 +26,7 @@ let orderDeclarations: Pass<ShapeModel> =
                 | FsDelegateType decl -> orderKey decl.Order decl.Name
                 | FsPhantom decl -> orderKey decl.Order decl.Name
                 | FsMeasure decl -> orderKey decl.Order decl.Name
-                | FsExports _ -> ((2, "", ""), System.Int32.MaxValue), "￿")
+                | FsExports _ -> ((2, "", ""), Measure.Int.tag<Measure.nodeId> System.Int32.MaxValue), "￿")
 
         let exports =
             model.ExportMembers

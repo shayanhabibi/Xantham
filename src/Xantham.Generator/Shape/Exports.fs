@@ -47,7 +47,7 @@ let shapeExports: Pass<ShapeModel> =
                                 let binding = bindingOf export
 
                                 let valueFacts =
-                                    Map.tryFind export.Symbol.Id model.ExportTypes
+                                    Map.tryFind export.Symbol.SymbolId model.ExportTypes
                                     |> Option.bind _.Value
                                     |> Option.bind (fun typeId -> Map.tryFind typeId model.Types)
 
@@ -74,7 +74,7 @@ let shapeExports: Pass<ShapeModel> =
                                             Settable = false
                                         })
                                 | Some facts ->
-                                    let reference, refFindings = typeRef ctx model None name facts.Response.Id
+                                    let reference, refFindings = typeRef ctx model None name facts.Response.TypeId
                                     findings <- findings @ refFindings
 
                                     // A `var` on the global object is the one binding an

@@ -691,7 +691,7 @@ let renderTests =
                               { Name = "Options"
                                 Docs = ""
                                 Tags = []
-                                Order = Some { File = "/pkg/test-pkg/index.d.ts"; NodeIndex = 3 }
+                                Order = Some { File = (Measure.String.tag<Measure.declFile> "/pkg/test-pkg/index.d.ts"); NodeIndex = 3<Measure.nodeId> }
                                 TypeParameters = []
                                 Inherits = []
                                 Members = []

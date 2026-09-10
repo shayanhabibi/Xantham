@@ -19,7 +19,7 @@ let nameConstructorObjects: Pass<ShapeModel> =
                     if hasAny SymbolFlags.Class export.Symbol.Flags then
                         found
                     else
-                        match Map.tryFind export.Symbol.Id model.ExportTypes |> Option.bind _.Value with
+                        match Map.tryFind export.Symbol.SymbolId model.ExportTypes |> Option.bind _.Value with
                         | Some typeId when not (Map.containsKey typeId found) ->
                             Map.add typeId (fsName fallback export) found
                         | _ -> found)
@@ -55,7 +55,7 @@ let nameConstructorObjects: Pass<ShapeModel> =
                     |> Option.orElseWith (fun () ->
                         match Map.tryFind signature.ReturnTypeId model.Types with
                         | Some returns ->
-                            match returns.Response.Target with
+                            match returns.Response.TargetTypeId with
                             | ValueSome target -> Map.tryFind target names
                             | ValueNone -> None
                         | None -> None))
@@ -64,8 +64,8 @@ let nameConstructorObjects: Pass<ShapeModel> =
             // instance side's name and the path are F# names already, and dotted where the
             // shape nests under its owner.
             let stem =
-                Map.tryFind facts.Response.Id exportNames
-                |> Option.orElseWith (fun () -> facts.SymbolName |> Option.filter (isSyntheticName >> not))
+                Map.tryFind facts.Response.TypeId exportNames
+                |> Option.orElseWith (fun () -> (facts.SymbolName |> Option.map Measure.String.untag) |> Option.filter (isSyntheticName >> not))
                 |> Option.map Naming.pascalSegment
                 |> Option.orElseWith instanceName
                 |> Option.defaultValue path
@@ -82,7 +82,7 @@ let nameConstructorObjects: Pass<ShapeModel> =
         /// group's to declare; an identity-only one carries no signatures.
         let declarable (facts: TypeFacts) =
             GeneratorConfig.disposition ctx.Config facts.Origin = Ship
-            || facts.SymbolName |> Option.forall isSyntheticName
+            || (facts.SymbolName |> Option.map Measure.String.untag) |> Option.forall isSyntheticName
 
         /// The reference positions a declaration reads.
         let positions (facts: TypeFacts) =
@@ -109,7 +109,7 @@ let nameConstructorObjects: Pass<ShapeModel> =
         // An unnamed shape is expanded into whatever reads it, so its positions are the reading
         // declaration's too and the descent continues through it. A named one stops the descent:
         // it is a root of its own.
-        let rec descend (path: string) order (typeId: int) =
+        let rec descend (path: string) order (typeId: int<Measure.typeId>) =
             if not (Set.contains typeId visited) then
                 visited <- Set.add typeId visited
 
@@ -131,7 +131,7 @@ let nameConstructorObjects: Pass<ShapeModel> =
         // (): P }` is referenced from nowhere else, and `Exports.Pair` is exactly the position
         // that wants the name.
         for export in model.Harvest.Exports do
-            match Map.tryFind export.Symbol.Id model.ExportTypes |> Option.bind _.Value with
+            match Map.tryFind export.Symbol.SymbolId model.ExportTypes |> Option.bind _.Value with
             | None -> ()
             | Some typeId ->
                 let path = Naming.pascalSegment (fsName fallback export)

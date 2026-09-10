@@ -7,6 +7,7 @@ open System.Text.Json
 open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 open System.ComponentModel
+open Measure
 
 
 /// The package boundary a symbol or type originates from, classified from its declaration's
@@ -112,7 +113,7 @@ module CompilerLibLayout =
         failwith $"xantham.json: compilerLib.{field} {expectation}"
 
     let private validateRoot (name: string) =
-        if System.String.IsNullOrWhiteSpace name then
+        if String.IsNullOrWhiteSpace name then
             invalid "module" "must be a nonempty dotted F# module name"
 
         name.Split('.')
@@ -121,7 +122,7 @@ module CompilerLibLayout =
                 invalid "module" "must be a nonempty dotted F# module name")
 
     let private validateChild field (name: string) =
-        if System.String.IsNullOrWhiteSpace name || not (Identifier.isPlain name) then
+        if String.IsNullOrWhiteSpace name || not (Identifier.isPlain name) then
             invalid field "must be one nonempty F# identifier"
 
     /// Applies defaults and verifies the names can become the compiler-library's nested modules.
@@ -326,7 +327,7 @@ module GeneratorConfig =
                 | true, value when value.ValueKind = JsonValueKind.String ->
                     let name = value.GetString()
 
-                    if System.String.IsNullOrWhiteSpace name then
+                    if String.IsNullOrWhiteSpace name then
                         failwith "xantham.json: runtime must be a nonempty string"
 
                     Some name
@@ -365,7 +366,7 @@ module GeneratorConfig =
 
                         let name = item.GetString()
 
-                        if System.String.IsNullOrWhiteSpace name then
+                        if String.IsNullOrWhiteSpace name then
                             failwith "xantham.json: types must be an array of nonempty strings"
 
                         name)
@@ -381,7 +382,7 @@ module GeneratorConfig =
                     |> Seq.map (fun item ->
                         if
                             item.ValueKind <> JsonValueKind.String
-                            || System.String.IsNullOrWhiteSpace(item.GetString())
+                            || String.IsNullOrWhiteSpace(item.GetString())
                         then
                             failwith "xantham.json: declarationReferences must be an array of nonempty paths"
 
@@ -458,12 +459,12 @@ module GeneratorConfig =
     let derivedRuntimePackage (packageName: string) =
         let prefix = "@types/"
 
-        if not (packageName.StartsWith(prefix, System.StringComparison.Ordinal)) then
+        if not (packageName.StartsWith(prefix, StringComparison.Ordinal)) then
             packageName
         else
             let mangled = packageName.Substring prefix.Length
 
-            match mangled.IndexOf("__", System.StringComparison.Ordinal) with
+            match mangled.IndexOf("__", StringComparison.Ordinal) with
             | -1 -> if mangled = "" then packageName else mangled
             | at -> $"@{mangled.Substring(0, at)}/{mangled.Substring(at + 2)}"
 
@@ -495,10 +496,10 @@ module GeneratorConfig =
 /// here. Renaming anything below is a breaking change to every shipped binding.
 module Naming =
     let private capitalize (part: string) =
-        string (System.Char.ToUpperInvariant part[0]) + part.Substring 1
+        string (Char.ToUpperInvariant part[0]) + part.Substring 1
 
     let private segments (text: string) =
-        text.Split([| '-'; '_'; '.' |], System.StringSplitOptions.RemoveEmptyEntries)
+        text.Split([| '-'; '_'; '.' |], StringSplitOptions.RemoveEmptyEntries)
 
     /// One path segment of a package name, PascalCased: `workers-types` -> `WorkersTypes`.
     let pascalSegment (text: string) =
@@ -519,12 +520,12 @@ module Naming =
         else
             let separated =
                 name
-                |> Seq.map (fun c -> if System.Char.IsLetterOrDigit c then c else '-')
-                |> System.String.Concat
+                |> Seq.map (fun c -> if Char.IsLetterOrDigit c then c else '-')
+                |> String.Concat
 
             match pascalSegment separated with
             | "" -> "Item"
-            | text when System.Char.IsLetter text[0] -> text
+            | text when Char.IsLetter text[0] -> text
             | text -> "N" + text
 
     /// A package's module name: `@scope/pkg-name` -> `Scope.PkgName`.
@@ -706,9 +707,9 @@ module Naming =
     /// starting with a digit - because the failure it prevents is a whole file that will not
     /// compile, and the cost of a false negative is one finding.
     let isWritableTypeName (name: string) =
-        not (System.String.IsNullOrEmpty name)
-        && (System.Char.IsLetter name[0] || name[0] = '_')
-        && name |> Seq.forall (fun c -> System.Char.IsLetterOrDigit c || c = '_')
+        not (String.IsNullOrEmpty name)
+        && (Char.IsLetter name[0] || name[0] = '_')
+        && name |> Seq.forall (fun c -> Char.IsLetterOrDigit c || c = '_')
 
     /// The DU case name for a string-literal union member: PascalCased over separator
     /// segments (`"utf-8"` -> `Utf8`), prefixed when the result cannot start an F# case.
@@ -716,12 +717,12 @@ module Naming =
     let enumCaseOfString (text: string) =
         let cleaned =
             text
-            |> Seq.map (fun c -> if System.Char.IsLetterOrDigit c then c else '-')
-            |> System.String.Concat
+            |> Seq.map (fun c -> if Char.IsLetterOrDigit c then c else '-')
+            |> String.Concat
 
         match pascalSegment cleaned with
         | "" -> "Empty"
-        | name when System.Char.IsLetter name[0] -> name
+        | name when Char.IsLetter name[0] -> name
         | name -> "N" + name
 
     /// The DU case name for a numeric-literal union member (D12): `1` -> `N1`,
@@ -794,7 +795,7 @@ module Pass =
 /// A deterministic source-order key parsed from a declaration node handle (`index.kind.path`).
 /// The handle is otherwise opaque; only the file path and node index are read, and only for
 /// ordering output the way the author ordered source.
-type DeclOrder = { File: string; NodeIndex: int }
+type DeclOrder = { File: string<declFile>; NodeIndex: int<nodeId> }
 
 /// Where a harvested name came from, which is what decides how a *value* binds in JavaScript.
 /// Types are unaffected: an interface is the same F# declaration either way.
@@ -836,7 +837,7 @@ type HarvestModel =
         /// The namespaces the entry package declares, by symbol id, under names an F# module
         /// can be spelled with. A declaration written inside one nests under it where a second
         /// declaration claims the same name.
-        Namespaces: Map<int, string>
+        Namespaces: Map<int<symbolId>, string<symbolName>>
         /// Count of the entry package's own declared names that a `lib.*.d.ts` declaration of
         /// the same name precedes: `harvest-globals` groups such a name as the compiler lib
         /// (`Grouping.classify`) and it does not reach `Exports` - unless the compiler-lib
@@ -867,7 +868,7 @@ type ResolvedMember =
         Tags: JSDocTagInfo list
         Optional: bool
         ReadOnly: bool
-        TypeId: int
+        TypeId: int<typeId>
     }
 
 /// One index signature (`[key: string]: V`) as the resolve tier records it. These are
@@ -876,8 +877,8 @@ type ResolvedMember =
 /// the shape tier has to consult both before deciding a type has no shape worth declaring.
 type ResolvedIndex =
     {
-        KeyTypeId: int
-        ValueTypeId: int
+        KeyTypeId: int<typeId>
+        ValueTypeId: int<typeId>
         IsReadonly: bool
     }
 
@@ -888,11 +889,11 @@ type ResolvedSignature =
         HasRest: bool
         /// The signature's own type parameters (§4.9). A generic *function* carries them here
         /// rather than on its type, which is where a callback alias's `T` lives.
-        TypeParameters: int list
+        TypeParameters: int<typeId> list
         /// A construct signature of an `abstract class`, which TypeScript refuses `new` on. It
         /// marks the class as one written to be derived from (§4.4).
         IsAbstract: bool
-        ReturnTypeId: int
+        ReturnTypeId: int<typeId>
     }
 
 /// A conditional type's mapping facts (§4.11).
@@ -902,7 +903,7 @@ type ConditionalFacts =
         Name: string option
         /// The branch the mapping takes, named for the manifest and carried by id. Absent where
         /// both branches are reachable and inhabited.
-        Branch: (string * int) option
+        Branch: (string * int<typeId>) option
     }
 
 /// A `TypeResponse` plus the derived facts of the kinds the skeleton resolves: object members,
@@ -915,18 +916,18 @@ type TypeFacts =
         Origin: PackageId
         /// Name of the type's own symbol where it has one - what a `reference` emission
         /// templates with, and what a widening finding names.
-        SymbolName: string option
+        SymbolName: string<symbolName> option
         /// File of the type's own symbol's first declaration, as the wire reports it.
-        DeclFile: string option
+        DeclFile: string<declFile> option
         /// Complete declaration handles of the actual type symbol, retained for catalog identity.
-        Declarations: string list
+        Declarations: string<declHandle> list
         /// Alias arguments retain concrete substitutions for declaration catalog specialization keys.
         DeclarationArguments: TypeResponse list
         /// Declaration handles of the alias applied at this type occurrence.
-        AliasDeclarations: string list
+        AliasDeclarations: string<declHandle> list
         /// Symbol id of the declaration the type's own symbol is written inside - a namespace,
         /// where `HarvestModel.Namespaces` has a name for it.
-        SymbolParent: int option
+        SymbolParent: int<symbolId> option
         Members: ResolvedMember list
         /// Index signatures (§4.10). Kept apart from `Members` because they are not properties:
         /// they have no name, and a type may carry one with no members at all.
@@ -934,10 +935,10 @@ type TypeFacts =
         CallSignatures: ResolvedSignature list
         ConstructSignatures: ResolvedSignature list
         /// `extends` bases of an interface or class instance type, by id.
-        BaseTypes: int list
+        BaseTypes: int<typeId> list
         /// Type arguments of a generic reference, resolved for *every* group - an external
         /// `Array<T>` carries entry-package types that must still be reached (O7 note).
-        TypeArguments: int list
+        TypeArguments: int<typeId> list
         /// A tuple's per-element flags, in element order, copied off its *target* - the wire
         /// carries them there, not on the reference. The target itself is deliberately left out
         /// of the table: deriving it drags all of `Array.prototype` in again for every distinct
@@ -946,25 +947,25 @@ type TypeFacts =
         /// The arguments the type's *alias* was written with, by id (§4.9). On the declaration
         /// form of a generic alias these are its own parameters - `type Mapper<T> = (t: T) => T`
         /// leaves the function type itself parameterless, so this is the only place `T` appears.
-        AliasTypeArguments: int list
+        AliasTypeArguments: int<typeId> list
         /// The constituents of an intersection, in the checker's order. Separate from
         /// `UnionMembers` because the two mean opposite things and the passes that read one
         /// must never see the other.
-        IntersectionMembers: int list
+        IntersectionMembers: int<typeId> list
         /// A type parameter's `extends` bound, by id (§4.9). Only type parameters carry one.
-        Constraint: int option
+        Constraint: int<typeId> option
         /// A type parameter's default type argument, by id (§4.9).
-        Default: int option
+        Default: int<typeId> option
         /// `T extends U ? X : Y` (§4.11), where the type is one.
         Conditional: ConditionalFacts option
-        UnionMembers: int list
+        UnionMembers: int<typeId> list
         /// Compiler-returned literal-union alias after removing nullish members; populated only for catalog generation or reuse.
-        NonNullableAlias: int option
+        NonNullableAlias: int<typeId> option
         /// The alias name and single argument an indexed-access reference was written through,
         /// where the checker has already expanded past it before the flags reach the shaper
         /// (§4.11's `NoInfer`). Populated only at an indexed-access reference site, never on a
         /// declaration - unrelated to `AliasTypeArguments`, which serves the declaration form.
-        AliasIdentity: (string * int) option
+        AliasIdentity: (string<symbolName> * int<typeId>) option
     }
 
 module TypeFacts =
@@ -1000,22 +1001,22 @@ module TypeFacts =
 /// the two are separate fields rather than one.
 type ExportTypeIds =
     {
-        Declared: int option
-        Value: int option
+        Declared: int<typeId> option
+        Value: int<typeId> option
     }
 
 type ResolveModel =
     {
         Harvest: HarvestModel
         /// Export symbol id -> the type ids the checker gave for it.
-        ExportTypes: Map<int, ExportTypeIds>
+        ExportTypes: Map<int<symbolId>, ExportTypeIds>
         /// The type table. Closed: every id referenced by a `TypeFacts` is a key here or in
         /// `NotFollowed` - that closure is the tier's invariant.
-        Types: Map<int, TypeFacts>
+        Types: Map<int<typeId>, TypeFacts>
         /// Ids deliberately not resolved, with the reason - the depth cutoff, or a response the
         /// compiler could not encode - so a reader of the table can tell "not followed" from
         /// "missing".
-        NotFollowed: Map<int, string>
+        NotFollowed: Map<int<typeId>, string>
     }
 
 // ---------------------------------------------------------------------------------------------
@@ -1405,23 +1406,23 @@ type KeyBinding =
 type ShapeModel =
     {
         Harvest: HarvestModel
-        ExportTypes: Map<int, ExportTypeIds>
-        Types: Map<int, TypeFacts>
-        NotFollowed: Map<int, string>
+        ExportTypes: Map<int<symbolId>, ExportTypeIds>
+        Types: Map<int<typeId>, TypeFacts>
+        NotFollowed: Map<int<typeId>, string>
         /// Type id -> the F# type name this run declares for it - exports named first, then
         /// synthesized names for reachable anonymous shapes (hash-consing by id, §4.4). What
         /// lets a reference come out as `FsNamed` rather than an expansion.
-        DeclNames: Map<int, string>
+        DeclNames: Map<int<typeId>, string>
         /// Type id -> the source order its declaration sorts under: the export's own order, or
         /// for a synthesized declaration the order of the export that first reached it.
-        DeclOrders: Map<int, DeclOrder option>
+        DeclOrders: Map<int<typeId>, DeclOrder option>
         /// Type id -> the type-parameter ids a declaration reads without binding, in first-use
         /// order (§4.9). An anonymous object type hoisted out of a generic scope - the `props`
         /// of `each<T, U>(props: { items: T[]; render: (item: T) => U })` - binds nothing of
         /// its own, so it is declared over these and every reference applies them back.
-        DeclParams: Map<int, int list>
+        DeclParams: Map<int<typeId>, int<typeId> list>
         /// Recognized generic application id -> the declaration id whose name it references.
-        AliasApplications: Map<int, int>
+        AliasApplications: Map<int<typeId>, int<typeId>>
         /// `Exports` members accumulated by the class/function/value passes, keyed by harvest
         /// position so `order-declarations` can assemble them in source order.
         ExportMembers: (int * FsExportMember) list
@@ -1429,11 +1430,11 @@ type ShapeModel =
         /// being shaped. Scope lives on the model rather than in `typeRef`'s arguments because
         /// it is a property of *where* the reference is written, not of the reference: a pass
         /// binds it once around a declaration and every nested `typeRef` inherits it.
-        TypeVars: Map<int, string>
+        TypeVars: Map<int<typeId>, string>
         /// Type-parameter id -> the support-package idiom its uses are written as, for the
         /// signature currently being shaped (§4.10). Scoped like `TypeVars`, and for the same
         /// reason: `K extends keyof T` binds nothing outside the signature that declared it.
-        KeyVars: Map<int, KeyBinding>
+        KeyVars: Map<int<typeId>, KeyBinding>
         Decls: FsDecl list
     }
 
@@ -1499,8 +1500,8 @@ module Grouping =
         | ValueSome handles when handles.Length > 0 ->
             match handles[0].Split([| '.' |], 3) with
             | [| index; _kind; path |] ->
-                match System.Int32.TryParse index with
-                | true, index -> Some { File = path; NodeIndex = index }
+                match Int32.TryParse index with
+                | true, index -> Some { File = Measure.String.tag<Measure.declFile> path; NodeIndex = Measure.Int.tag<Measure.nodeId> index }
                 | _ -> None
             | _ -> None
         | _ -> None
@@ -1509,7 +1510,7 @@ module Grouping =
     let declFile (symbol: SymbolResponse voption) : string option =
         symbol
         |> ValueOption.bind (fun s -> declOrder s.Declarations |> ValueOption.ofOption)
-        |> ValueOption.map (fun order -> order.File.Replace('\\', '/'))
+        |> ValueOption.map (fun order -> (Measure.String.untag order.File).Replace('\\', '/'))
         |> ValueOption.toOption
 
     /// The compiler-lib family a declaration file belongs to: `Dom` for the browser and worker
@@ -1552,7 +1553,7 @@ module Grouping =
         // separates a dependency from its host, one at or above it is the entry package's
         // own installation.
         if
-            path.StartsWith(root, System.StringComparison.OrdinalIgnoreCase)
+            path.StartsWith(root, StringComparison.OrdinalIgnoreCase)
             && installedAt < root.Length - 1
         then
             EntryPackage
@@ -1573,13 +1574,13 @@ module Grouping =
         let path = filePath.Replace('\\', '/')
 
         let relative () =
-            System.IO.Path.GetRelativePath(packageDir, path).Replace('\\', '/')
+            Path.GetRelativePath(packageDir, path).Replace('\\', '/')
 
         match classifyFile packageDir path with
         | EntryPackage -> 0, "", relative ()
         | CompilerLib -> 1, "typescript/lib", path.Substring(path.LastIndexOf '/' + 1)
         | Dependency package ->
-            let at = path.LastIndexOf("/node_modules/", System.StringComparison.Ordinal)
+            let at = path.LastIndexOf("/node_modules/", StringComparison.Ordinal)
             1, package, path.Substring(at + "/node_modules/".Length + package.Length + 1)
         | Unclassified -> 1, "", relative ()
 
@@ -1597,7 +1598,7 @@ module Grouping =
         // so it groups with the compiler lib and widens with a name, identity only.
         | ValueNone when symbol |> ValueOption.exists (fun s -> s.Name = "globalThis") -> CompilerLib
         | ValueNone -> Unclassified
-        | ValueSome order -> classifyFile packageDir order.File
+        | ValueSome order -> classifyFile packageDir (Measure.String.untag order.File)
 
     /// Whether any of `symbol`'s declarations sits under `packageDir`, by the same root test
     /// `classify` applies to only the first. Declaration merging can carry a symbol's list past
@@ -1611,7 +1612,7 @@ module Grouping =
             let path = path.Replace('\\', '/')
             let installedAt = path.LastIndexOf "/node_modules/"
 
-            path.StartsWith(root, System.StringComparison.OrdinalIgnoreCase)
+            path.StartsWith(root, StringComparison.OrdinalIgnoreCase)
             && installedAt < root.Length - 1
 
         symbol.Declarations

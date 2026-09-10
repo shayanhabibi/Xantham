@@ -120,12 +120,12 @@ let private packageOf (ctx: Context) (file: string) =
     else
         find (Path.GetDirectoryName file)
 
-let private sources (ctx: Context) (handles: string list) =
+let private sources (ctx: Context) (handles: string<Measure.declHandle> list) =
     async {
         let paths =
             handles
             |> List.map (fun handle ->
-                match handle.Split([| '.' |], 3) with
+                match (Measure.String.untag handle).Split([| '.' |], 3) with
                 | [| index; kind; file |] when not (String.IsNullOrWhiteSpace index || String.IsNullOrWhiteSpace kind) ->
                     file
                 | _ -> fail $"invalid declaration handle {handle}")
@@ -173,8 +173,8 @@ let private sources (ctx: Context) (handles: string list) =
         return Map.ofArray sourceFiles
     }
 
-let private normalizeHandle (sources: Map<string, Source>) (handle: string) =
-    match handle.Split([| '.' |], 3) with
+let private normalizeHandle (sources: Map<string, Source>) (handle: string<Measure.declHandle>) =
+    match (Measure.String.untag handle).Split([| '.' |], 3) with
     | [| index; kind; file |] -> $"{sourceKey sources[file]}#{index}.{kind}"
     | _ -> fail $"invalid declaration handle {handle}"
 
@@ -216,7 +216,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
 
         let sources =
             rawHandles
-            |> List.map (fun handle -> sourceFiles[handle.Split([| '.' |], 3)[2]])
+            |> List.map (fun handle -> sourceFiles[(Measure.String.untag handle).Split([| '.' |], 3)[2]])
             |> List.distinct
             |> List.sortBy sourceKey
 
@@ -230,10 +230,10 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
     let exportHandles =
         shape.Harvest.Exports
         |> List.collect (fun export ->
-            match Map.tryFind export.Symbol.Id shape.ExportTypes with
+            match Map.tryFind export.Symbol.SymbolId shape.ExportTypes with
             | Some ids ->
                 let handles =
-                    export.Symbol.Declarations |> ValueOption.defaultValue [||] |> Array.toList
+                    export.Symbol.DeclarationHandles |> ValueOption.defaultValue [||] |> Array.toList
 
                 [ yield! ids.Declared |> Option.toList; yield! ids.Value |> Option.toList ]
                 |> List.map (fun id -> id, handles)
@@ -337,7 +337,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
 
                                     match Map.tryFind argument shape.Types with
                                     | Some argument when argument.Response.Flags.HasFlag TypeFlags.TypeParameter ->
-                                        "parameter:" + Option.defaultValue "" argument.SymbolName
+                                        "parameter:" + Option.defaultValue "" (argument.SymbolName |> Option.map Measure.String.untag)
                                     | Some argument when
                                         uint32 (
                                             argument.Response.Flags
@@ -380,7 +380,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                     let argumentKey = argumentKeyWith (id :: visited) bindings
 
                     let arguments =
-                        match facts.Response.Target with
+                        match facts.Response.TargetTypeId with
                         | ValueSome target when target <> id -> facts.TypeArguments |> List.map argumentKey
                         | _ -> []
 
@@ -401,7 +401,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                             |> List.fold (fun bindings (parameter, key) -> Map.add parameter key bindings) bindings
 
                         let signatureKey id =
-                            let key = argumentKeyWith (facts.Response.Id :: visited) signatureBindings id
+                            let key = argumentKeyWith (facts.Response.TypeId :: visited) signatureBindings id
 
                             if key = "" then
                                 complete <- false
@@ -455,8 +455,8 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                             let declarationArguments =
                                 facts.DeclarationArguments
                                 |> List.map (fun argument ->
-                                    if Map.containsKey argument.Id shape.Types then
-                                        partKey argument.Id
+                                    if Map.containsKey argument.TypeId shape.Types then
+                                        partKey argument.TypeId
                                     elif argument.Flags.HasFlag TypeFlags.Object then
                                         ""
                                     else
@@ -486,8 +486,8 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                         let aliasArguments =
                             facts.DeclarationArguments
                             |> List.map (fun argument ->
-                                if Map.containsKey argument.Id shape.Types then
-                                    argumentKey argument.Id
+                                if Map.containsKey argument.TypeId shape.Types then
+                                    argumentKey argument.TypeId
                                 elif argument.Flags.HasFlag TypeFlags.Object then
                                     ""
                                 else
@@ -522,13 +522,13 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
             yield! facts.BaseTypes
             yield! facts.TypeArguments
             yield! facts.AliasTypeArguments
-            yield! facts.DeclarationArguments |> List.map _.Id
+            yield! facts.DeclarationArguments |> List.map _.TypeId
             yield! facts.UnionMembers
             yield! Option.toList facts.NonNullableAlias
             yield! facts.IntersectionMembers
             yield! Option.toList facts.Constraint
             yield! Option.toList facts.Default
-            yield! facts.Response.Target |> ValueOption.toList
+            yield! facts.Response.TargetTypeId |> ValueOption.toList
             yield! facts.Conditional |> Option.bind _.Branch |> Option.map snd |> Option.toList
         ]
 
@@ -537,9 +537,9 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
             Shape.Spec.declParamIds shape.Types[id] @ Shape.Spec.freeParamsOf shape id
             |> Set.ofList
 
-        let visited = Collections.Generic.HashSet<int>()
+        let visited = Collections.Generic.HashSet<int<Measure.typeId>>()
         let files = Collections.Generic.HashSet<string>()
-        let pending = Collections.Generic.Stack<int>()
+        let pending = Collections.Generic.Stack<int<Measure.typeId>>()
         pending.Push id
 
         while pending.Count > 0 do
@@ -551,7 +551,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                 | Some facts ->
                     if not (facts.Response.Flags.HasFlag TypeFlags.TypeParameter) then
                         for handle in facts.Declarations @ facts.AliasDeclarations do
-                            files.Add(handle.Split([| '.' |], 3)[2]) |> ignore
+                            files.Add((Measure.String.untag handle).Split([| '.' |], 3)[2]) |> ignore
 
                     for dependency in dependencies facts do
                         pending.Push dependency
@@ -659,7 +659,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
 
             match exported with
             | Some export ->
-                identity "alias" (export.Symbol.Declarations |> ValueOption.defaultValue [||] |> Array.toList) []
+                identity "alias" (export.Symbol.DeclarationHandles |> ValueOption.defaultValue [||] |> Array.toList) []
             | None ->
                 match name.LastIndexOf '.' with
                 | -1 -> fail $"{name} has no stable declaration or parent role"
@@ -783,7 +783,7 @@ let private classValues (ctx: Context) (shape: ShapeModel) (groups: Render.Group
             match
                 export
                 |> Option.bind (fun export ->
-                    Map.tryFind export.Symbol.Id shape.ExportTypes
+                    Map.tryFind export.Symbol.SymbolId shape.ExportTypes
                     |> Option.bind (fun types -> types.Value |> Option.map (fun id -> export, id)))
             with
             | Some(export, valueId) ->
@@ -927,7 +927,7 @@ let apply (ctx: Context) (shape: ShapeModel) (groups: Render.GroupModule list) =
                 [
                     yield! shape.Types |> Map.toList |> List.collect (snd >> _.Declarations)
                     for export in shape.Harvest.Exports do
-                        yield! export.Symbol.Declarations |> ValueOption.defaultValue [||]
+                        yield! export.Symbol.DeclarationHandles |> ValueOption.defaultValue [||]
                 ]
                 |> List.distinct
 
@@ -937,7 +937,7 @@ let apply (ctx: Context) (shape: ShapeModel) (groups: Render.GroupModule list) =
                 sources
                     ctx
                     (rawHandles
-                     @ (inputFiles |> Array.map (fun file -> "0.SourceFile." + file) |> Array.toList))
+                     @ (inputFiles |> Array.map (fun file -> Measure.String.tag<Measure.declHandle> ("0.SourceFile." + file)) |> Array.toList))
 
             let inputSources =
                 sourceFiles

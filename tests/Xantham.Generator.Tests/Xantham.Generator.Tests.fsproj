@@ -8,6 +8,7 @@
 
     <ItemGroup>
         <Compile Include="Build.fs" />
+        <Compile Include="Measures.test.fs" />
         <Compile Include="ExportProvenance.test.fs" />
         <Compile Include="Resolve.test.fs" />
         <Compile Include="Shape.test.fs" />
