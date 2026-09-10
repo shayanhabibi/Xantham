@@ -1209,6 +1209,23 @@ type FsExportMember =
         Settable: bool
     }
 
+type OwnedExportMember =
+    {
+        Owner: ExportOrigin
+        HarvestIndex: int
+        ExportName: string
+        SourceSymbolId: int<symbolId>
+        SignatureOrdinal: int option
+        Member: FsExportMember
+    }
+
+type FsExportContainer =
+    {
+        Name: string
+        Owner: ExportOrigin
+        Members: OwnedExportMember list
+    }
+
 /// What makes a declaration an F# *class* rather than an interface (§4.4): the import that binds
 /// the JavaScript constructor and the parameters a derived class passes to it. An F# interface
 /// admits no `inherit`, so a TypeScript class written to be derived from - an entrypoint an
@@ -1395,7 +1412,7 @@ type FsDecl =
     | FsAbbrev of FsAbbrevDecl
     | FsDelegateType of FsDelegateDecl
     /// The one `Exports` type gathering the module's value exports.
-    | FsExports of FsExportMember list
+    | FsExports of FsExportContainer
 
 /// How a `K extends keyof T` variable is written in F# (§4.10, the open keyof regime).
 /// TypeScript's key variable has no F# counterpart of its own: a bare `'K` would be an
@@ -1431,7 +1448,7 @@ type ShapeModel =
         AliasApplications: Map<int<typeId>, int<typeId>>
         /// `Exports` members accumulated by the class/function/value passes, keyed by harvest
         /// position so `order-declarations` can assemble them in source order.
-        ExportMembers: (int * FsExportMember) list
+        ExportMembers: OwnedExportMember list
         /// Type-parameter id -> the name it is in scope under, for the declaration currently
         /// being shaped. Scope lives on the model rather than in `typeRef`'s arguments because
         /// it is a property of *where* the reference is written, not of the reference: a pass

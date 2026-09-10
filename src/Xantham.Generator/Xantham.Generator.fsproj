@@ -36,6 +36,7 @@
         <Compile Include="Shape\Arity.fs" />
         <Compile Include="Shape\Ordering.fs" />
         <Compile Include="Shape\Coverage.fs" />
+        <Compile Include="Shape\ExportLayout.fs" />
         <Compile Include="Shape\Passes.fs" />
         <Compile Include="Render.fs" />
         <Compile Include="DeclarationCatalog.fs" />
