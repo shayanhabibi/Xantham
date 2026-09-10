@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "package": "layout-lab",
+  "module": "LayoutLab",
+  "counts": {
+    "exact": 7,
+    "ergonomic": 1,
+    "widened": 3,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "HG - harvest-globals",
+      "total": 3,
+      "exact": 3
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 1,
+      "ergonomic": 1
+    },
+    {
+      "pass": "DO - dedupe-overloads",
+      "total": 3,
+      "widened": 3
+    }
+  ]
+}

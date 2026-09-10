@@ -721,6 +721,7 @@ let pipelineTests =
 
                     Expect.contains harvest ("HG005", "\"ambient-lab:*\"") "a wildcard names no importable module"
                     Expect.contains harvest ("HG001", "\"ambient-lab:empty\"") "a module exporting nothing is still dropped" ])
+                
 
         yield!
             fixtureTests "error-class-lab" (handFixture "error-class-lab") GeneratorConfig.Default (fun package ->
@@ -4309,7 +4310,9 @@ let pipelineTests =
                             source
                             "| [<CompiledName(\"ok\")>] Ok of value: string"
                             "the generic arm's members were read after it was met as a reference" ])
-
+        yield!
+            fixtureTests "layout-lab" (handFixture "layout-lab") GeneratorConfig.Default <| fun package ->
+                []
     ]
 
 [<Tests>]
