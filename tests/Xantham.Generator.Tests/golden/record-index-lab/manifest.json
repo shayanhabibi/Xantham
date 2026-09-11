@@ -3,7 +3,7 @@
   "package": "record-index-lab",
   "module": "RecordIndexLab",
   "counts": {
-    "exact": 0,
+    "exact": 1,
     "ergonomic": 8,
     "widened": 0,
     "escape": 0

@@ -3,7 +3,7 @@
   "package": "parse-lab",
   "module": "ParseLab",
   "counts": {
-    "exact": 0,
+    "exact": 1,
     "ergonomic": 6,
     "widened": 0,
     "escape": 0

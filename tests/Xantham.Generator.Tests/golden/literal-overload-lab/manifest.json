@@ -3,7 +3,7 @@
   "package": "literal-overload-lab",
   "module": "LiteralOverloadLab",
   "counts": {
-    "exact": 5,
+    "exact": 6,
     "ergonomic": 3,
     "widened": 6,
     "escape": 1
@@ -34,9 +34,9 @@
     },
     {
       "pass": "DO - dedupe-overloads",
-      "total": 4,
+      "total": 3,
       "exact": 1,
-      "widened": 3
+      "widened": 2
     }
   ]
 }

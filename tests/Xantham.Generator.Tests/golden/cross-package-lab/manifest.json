@@ -3,7 +3,7 @@
   "package": "cross-package-lab",
   "module": "CrossPackageLab",
   "counts": {
-    "exact": 0,
+    "exact": 1,
     "ergonomic": 0,
     "widened": 0,
     "escape": 2

@@ -1739,44 +1739,214 @@
 {"name":"WorkflowInstanceTerminateOptions","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"MB.OptionalMemberAsOption","key":"MB003","pass":"shape-interfaces","tier":"ergonomic","symbol":"WorkflowInstanceTerminateOptions.rollback","message":"optional member reads as option"},{"name":"TR.NullableHoistedToOption","key":"TR032","pass":"shape-interfaces","tier":"ergonomic","symbol":"WorkflowInstanceTerminateOptions.rollback","fields":{"fromNull":false,"fromUndefined":true,"fromVoid":false},"message":"undefined union members hoisted to option"},{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"WorkflowInstanceTerminateOptions","message":"ParamObject Create synthesized (D3)"}]}
 {"name":"WorkflowInstanceRestartOptions","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"MB.OptionalMemberAsOption","key":"MB003","pass":"shape-interfaces","tier":"ergonomic","symbol":"WorkflowInstanceRestartOptions.from","message":"optional member reads as option"},{"name":"TR.NullableHoistedToOption","key":"TR032","pass":"shape-interfaces","tier":"ergonomic","symbol":"WorkflowInstanceRestartOptions.from","fields":{"fromNull":false,"fromUndefined":true,"fromVoid":false},"message":"undefined union members hoisted to option"},{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"WorkflowInstanceRestartOptions","message":"ParamObject Create synthesized (D3)"}]}
 {"name":"WorkflowInstance","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"MB.OptionalParameterAsOption","key":"MB001","pass":"shape-interfaces","tier":"ergonomic","symbol":"WorkflowInstance.restart(options)","message":"optional parameter reads as option"},{"name":"TR.NullableHoistedToOption","key":"TR032","pass":"shape-interfaces","tier":"ergonomic","symbol":"WorkflowInstance.restart(options)","fields":{"fromNull":false,"fromUndefined":true,"fromVoid":false},"message":"undefined union members hoisted to option"},{"name":"MB.OptionalParameterAsOption","key":"MB001","pass":"shape-interfaces","tier":"ergonomic","symbol":"WorkflowInstance.terminate(options)","message":"optional parameter reads as option"},{"name":"TR.NullableHoistedToOption","key":"TR032","pass":"shape-interfaces","tier":"ergonomic","symbol":"WorkflowInstance.terminate(options)","fields":{"fromNull":false,"fromUndefined":true,"fromVoid":false},"message":"undefined union members hoisted to option"},{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"WorkflowInstance","message":"ParamObject Create synthesized (D3)"},{"name":"SP.MethodMemberAsCreateParameter","key":"SP002","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"WorkflowInstance.delete","message":"method member reads as a function-typed Create parameter; the delegate receives no this"},{"name":"SP.MethodMemberAsCreateParameter","key":"SP002","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"WorkflowInstance.pause","message":"method member reads as a function-typed Create parameter; the delegate receives no this"},{"name":"SP.MethodMemberAsCreateParameter","key":"SP002","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"WorkflowInstance.restart","message":"method member reads as a function-typed Create parameter; the delegate receives no this"},{"name":"SP.MethodMemberAsCreateParameter","key":"SP002","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"WorkflowInstance.resume","message":"method member reads as a function-typed Create parameter; the delegate receives no this"},{"name":"SP.MethodMemberAsCreateParameter","key":"SP002","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"WorkflowInstance.sendEvent","message":"method member reads as a function-typed Create parameter; the delegate receives no this"},{"name":"SP.MethodMemberAsCreateParameter","key":"SP002","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"WorkflowInstance.status","message":"method member reads as a function-typed Create parameter; the delegate receives no this"},{"name":"SP.MethodMemberAsCreateParameter","key":"SP002","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"WorkflowInstance.terminate","message":"method member reads as a function-typed Create parameter; the delegate receives no this"}]}
-{"name":"onmessage","tier":"exact","findings":[]}
-{"name":"console","tier":"exact","findings":[]}
-{"name":"addEventListener","tier":"widened","findings":[{"name":"TP.ConstraintDropped","key":"TP002","pass":"shape-exports","tier":"ergonomic","symbol":"addEventListener","fields":{"name":"Type"},"message":"constraint on \u0027Type\u0027 has no F# form and is dropped (\u00A74.9)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"addEventListener(handler)","message":"unknown maps to obj (D8)"},{"name":"TR.ArgumentNotASubtypeOfConstraint","key":"TR044","pass":"shape-exports","tier":"widened","symbol":"addEventListener(handler)","fields":{"argument":"U4\u003CFetchEvent, QueueEvent\u003Cobj\u003E, PromiseRejectionEvent, ScheduledEvent\u003E","name":"EventListenerObject","bound":"Event"},"message":"U4\u003CFetchEvent, QueueEvent\u003Cobj\u003E, PromiseRejectionEvent, ScheduledEvent\u003E does not inherit EventListenerObject\u0027s constraint Event; the argument is written as the constraint"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"addEventListener(handler)(event)","message":"unknown maps to obj (D8)"},{"name":"MB.OptionalParameterAsOption","key":"MB001","pass":"shape-exports","tier":"ergonomic","symbol":"addEventListener(options)","message":"optional parameter reads as option"},{"name":"TR.NullableHoistedToOption","key":"TR032","pass":"shape-exports","tier":"ergonomic","symbol":"addEventListener(options)","fields":{"fromNull":false,"fromUndefined":true,"fromVoid":false},"message":"undefined union members hoisted to option"}]}
-{"name":"removeEventListener","tier":"widened","findings":[{"name":"TP.ConstraintDropped","key":"TP002","pass":"shape-exports","tier":"ergonomic","symbol":"removeEventListener","fields":{"name":"Type"},"message":"constraint on \u0027Type\u0027 has no F# form and is dropped (\u00A74.9)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"removeEventListener(handler)","message":"unknown maps to obj (D8)"},{"name":"TR.ArgumentNotASubtypeOfConstraint","key":"TR044","pass":"shape-exports","tier":"widened","symbol":"removeEventListener(handler)","fields":{"argument":"U4\u003CFetchEvent, QueueEvent\u003Cobj\u003E, PromiseRejectionEvent, ScheduledEvent\u003E","name":"EventListenerObject","bound":"Event"},"message":"U4\u003CFetchEvent, QueueEvent\u003Cobj\u003E, PromiseRejectionEvent, ScheduledEvent\u003E does not inherit EventListenerObject\u0027s constraint Event; the argument is written as the constraint"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"removeEventListener(handler)(event)","message":"unknown maps to obj (D8)"},{"name":"MB.OptionalParameterAsOption","key":"MB001","pass":"shape-exports","tier":"ergonomic","symbol":"removeEventListener(options)","message":"optional parameter reads as option"},{"name":"TR.NullableHoistedToOption","key":"TR032","pass":"shape-exports","tier":"ergonomic","symbol":"removeEventListener(options)","fields":{"fromNull":false,"fromUndefined":true,"fromVoid":false},"message":"undefined union members hoisted to option"}]}
-{"name":"dispatchEvent","tier":"widened","findings":[{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"dispatchEvent(event)","message":"unknown maps to obj (D8)"}]}
-{"name":"btoa","tier":"exact","findings":[]}
-{"name":"atob","tier":"exact","findings":[]}
-{"name":"setTimeout","tier":"escape","findings":[{"name":"TP.ConstraintDropped","key":"TP002","pass":"shape-exports","tier":"ergonomic","symbol":"setTimeout","fields":{"name":"Args"},"message":"constraint on \u0027Args\u0027 has no F# form and is dropped (\u00A74.9)"},{"name":"TR.AnyToObj","key":"TR008","pass":"shape-exports","tier":"escape","symbol":"setTimeout(callback)(args)","message":"any maps to obj"},{"name":"MB.OptionalParameterAsOption","key":"MB001","pass":"shape-exports","tier":"ergonomic","symbol":"setTimeout(msDelay)","message":"optional parameter reads as option"},{"name":"MB.OptionalParameterAsOption","key":"MB001","pass":"shape-exports","tier":"ergonomic","symbol":"setTimeout(msDelay)","message":"optional parameter reads as option"},{"name":"TR.NullableHoistedToOption","key":"TR032","pass":"shape-exports","tier":"ergonomic","symbol":"setTimeout(msDelay)","fields":{"fromNull":false,"fromUndefined":true,"fromVoid":false},"message":"undefined union members hoisted to option"},{"name":"TR.NullableHoistedToOption","key":"TR032","pass":"shape-exports","tier":"ergonomic","symbol":"setTimeout(msDelay)","fields":{"fromNull":false,"fromUndefined":true,"fromVoid":false},"message":"undefined union members hoisted to option"}]}
-{"name":"clearTimeout","tier":"ergonomic","findings":[{"name":"MB.OptionalParameterFromUnion","key":"MB006","pass":"shape-exports","tier":"ergonomic","symbol":"clearTimeout(timeoutId)","message":"parameter admits undefined through its type; reads as option"},{"name":"TR.NullableHoistedToOption","key":"TR032","pass":"shape-exports","tier":"ergonomic","symbol":"clearTimeout(timeoutId)","fields":{"fromNull":true,"fromUndefined":false,"fromVoid":false},"message":"null union members hoisted to option"}]}
-{"name":"setInterval","tier":"escape","findings":[{"name":"TP.ConstraintDropped","key":"TP002","pass":"shape-exports","tier":"ergonomic","symbol":"setInterval","fields":{"name":"Args"},"message":"constraint on \u0027Args\u0027 has no F# form and is dropped (\u00A74.9)"},{"name":"TR.AnyToObj","key":"TR008","pass":"shape-exports","tier":"escape","symbol":"setInterval(callback)(args)","message":"any maps to obj"},{"name":"MB.OptionalParameterAsOption","key":"MB001","pass":"shape-exports","tier":"ergonomic","symbol":"setInterval(msDelay)","message":"optional parameter reads as option"},{"name":"MB.OptionalParameterAsOption","key":"MB001","pass":"shape-exports","tier":"ergonomic","symbol":"setInterval(msDelay)","message":"optional parameter reads as option"},{"name":"TR.NullableHoistedToOption","key":"TR032","pass":"shape-exports","tier":"ergonomic","symbol":"setInterval(msDelay)","fields":{"fromNull":false,"fromUndefined":true,"fromVoid":false},"message":"undefined union members hoisted to option"},{"name":"TR.NullableHoistedToOption","key":"TR032","pass":"shape-exports","tier":"ergonomic","symbol":"setInterval(msDelay)","fields":{"fromNull":false,"fromUndefined":true,"fromVoid":false},"message":"undefined union members hoisted to option"}]}
-{"name":"clearInterval","tier":"ergonomic","findings":[{"name":"MB.OptionalParameterFromUnion","key":"MB006","pass":"shape-exports","tier":"ergonomic","symbol":"clearInterval(timeoutId)","message":"parameter admits undefined through its type; reads as option"},{"name":"TR.NullableHoistedToOption","key":"TR032","pass":"shape-exports","tier":"ergonomic","symbol":"clearInterval(timeoutId)","fields":{"fromNull":true,"fromUndefined":false,"fromVoid":false},"message":"null union members hoisted to option"}]}
-{"name":"queueMicrotask","tier":"exact","findings":[]}
-{"name":"structuredClone","tier":"ergonomic","findings":[{"name":"MB.OptionalParameterAsOption","key":"MB001","pass":"shape-exports","tier":"ergonomic","symbol":"structuredClone(options)","message":"optional parameter reads as option"},{"name":"TR.NullableHoistedToOption","key":"TR032","pass":"shape-exports","tier":"ergonomic","symbol":"structuredClone(options)","fields":{"fromNull":false,"fromUndefined":true,"fromVoid":false},"message":"undefined union members hoisted to option"}]}
-{"name":"reportError","tier":"escape","findings":[{"name":"TR.AnyToObj","key":"TR008","pass":"shape-exports","tier":"escape","symbol":"reportError(error)","message":"any maps to obj"}]}
-{"name":"fetch","tier":"widened","findings":[{"name":"MB.OptionalParameterAsOption","key":"MB001","pass":"shape-exports","tier":"ergonomic","symbol":"fetch(init)","message":"optional parameter reads as option"},{"name":"TR.NullableHoistedToOption","key":"TR032","pass":"shape-exports","tier":"ergonomic","symbol":"fetch(init)","fields":{"fromNull":false,"fromUndefined":true,"fromVoid":false},"message":"undefined union members hoisted to option"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"fetch(input)","message":"unknown maps to obj (D8)"}]}
-{"name":"self","tier":"exact","findings":[]}
-{"name":"crypto","tier":"exact","findings":[]}
-{"name":"caches","tier":"exact","findings":[]}
-{"name":"scheduler","tier":"exact","findings":[]}
-{"name":"performance","tier":"exact","findings":[]}
-{"name":"origin","tier":"exact","findings":[]}
-{"name":"Buffer","tier":"escape","findings":[{"name":"TR.AnyToObj","key":"TR008","pass":"shape-exports","tier":"escape","symbol":"Buffer","message":"any maps to obj"}]}
-{"name":"process","tier":"escape","findings":[{"name":"TR.AnyToObj","key":"TR008","pass":"shape-exports","tier":"escape","symbol":"process","message":"any maps to obj"}]}
-{"name":"global","tier":"exact","findings":[]}
-{"name":"setImmediate","tier":"escape","findings":[{"name":"TR.AnyToObj","key":"TR008","pass":"shape-exports","tier":"escape","symbol":"setImmediate($function)(param0)","message":"any maps to obj"},{"name":"TR.AnyToObj","key":"TR008","pass":"shape-exports","tier":"escape","symbol":"setImmediate(args)","message":"any maps to obj"}]}
-{"name":"clearImmediate","tier":"ergonomic","findings":[{"name":"MB.OptionalParameterFromUnion","key":"MB006","pass":"shape-exports","tier":"ergonomic","symbol":"clearImmediate(immediate)","message":"parameter admits undefined through its type; reads as option"},{"name":"TR.NullableHoistedToOption","key":"TR032","pass":"shape-exports","tier":"ergonomic","symbol":"clearImmediate(immediate)","fields":{"fromNull":true,"fromUndefined":false,"fromVoid":false},"message":"null union members hoisted to option"}]}
-{"name":"navigator","tier":"exact","findings":[]}
-{"name":"WebSocketPair","tier":"exact","findings":[]}
-{"name":"httpServerHandler","tier":"widened","findings":[{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"httpServerHandler()","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"httpServerHandler()","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"httpServerHandler()","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"httpServerHandler()","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"httpServerHandler()","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"httpServerHandler()","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"httpServerHandler()","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"httpServerHandler()","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"httpServerHandler()","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"httpServerHandler()","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"httpServerHandler()","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"httpServerHandler()","message":"unknown maps to obj (D8)"}]}
-{"name":"waitUntil","tier":"widened","findings":[{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"waitUntil(promise)","message":"unknown maps to obj (D8)"}]}
-{"name":"withEnv","tier":"widened","findings":[{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"withEnv()","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"withEnv(fn)()","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"withEnv(newEnv)","message":"unknown maps to obj (D8)"}]}
-{"name":"withExports","tier":"widened","findings":[{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"withExports()","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"withExports(fn)()","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"withExports(newExports)","message":"unknown maps to obj (D8)"}]}
-{"name":"withEnvAndExports","tier":"widened","findings":[{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"withEnvAndExports()","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"withEnvAndExports(fn)()","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"withEnvAndExports(newEnv)","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"withEnvAndExports(newExports)","message":"unknown maps to obj (D8)"}]}
-{"name":"env","tier":"widened","findings":[{"name":"TR.NotAmongGeneratedDeclarations","key":"TR023","pass":"shape-exports","tier":"widened","symbol":"env","fields":{"shown":"Env"},"message":"Env is not among the generated declarations; widened to obj"}]}
-{"name":"exports","tier":"widened","findings":[{"name":"TR.ObjectWithoutMembers","key":"TR047","pass":"shape-exports","tier":"widened","symbol":"exports","message":"object type declares no members; obj admits the same values"}]}
-{"name":"cache","tier":"exact","findings":[]}
-{"name":"tracing","tier":"exact","findings":[]}
-{"name":"connect","tier":"ergonomic","findings":[{"name":"MB.OptionalParameterAsOption","key":"MB001","pass":"shape-exports","tier":"ergonomic","symbol":"connect(options)","message":"optional parameter reads as option"},{"name":"TR.NullableHoistedToOption","key":"TR032","pass":"shape-exports","tier":"ergonomic","symbol":"connect(options)","fields":{"fromNull":false,"fromUndefined":true,"fromVoid":false},"message":"undefined union members hoisted to option"}]}
+{"name":"Cloudflare.Email.Exports.EmailMessage","tier":"exact","findings":[]}
+{"name":"Cloudflare.Node.Exports.httpServerHandler","tier":"exact","findings":[]}
+{"name":"Cloudflare.Pipelines.Exports.PipelineTransformationEntrypoint","tier":"exact","findings":[]}
+{"name":"Cloudflare.Sockets.Exports.connect","tier":"exact","findings":[]}
+{"name":"Cloudflare.Workers.Exports.RpcStub","tier":"exact","findings":[]}
+{"name":"Cloudflare.Workers.Exports.RpcTarget","tier":"exact","findings":[]}
+{"name":"Cloudflare.Workers.Exports.WorkerEntrypoint","tier":"exact","findings":[]}
+{"name":"Cloudflare.Workers.Exports.DurableObject","tier":"exact","findings":[]}
+{"name":"Cloudflare.Workers.Exports.WorkflowStep","tier":"exact","findings":[]}
+{"name":"Cloudflare.Workers.Exports.WorkflowEntrypoint","tier":"exact","findings":[]}
+{"name":"Cloudflare.Workers.Exports.waitUntil","tier":"exact","findings":[]}
+{"name":"Cloudflare.Workers.Exports.withEnv","tier":"exact","findings":[]}
+{"name":"Cloudflare.Workers.Exports.withExports","tier":"exact","findings":[]}
+{"name":"Cloudflare.Workers.Exports.withEnvAndExports","tier":"exact","findings":[]}
+{"name":"Cloudflare.Workers.Exports.env","tier":"exact","findings":[]}
+{"name":"Cloudflare.Workers.Exports.exports","tier":"exact","findings":[]}
+{"name":"Cloudflare.Workers.Exports.cache","tier":"exact","findings":[]}
+{"name":"Cloudflare.Workers.Exports.tracing","tier":"exact","findings":[]}
+{"name":"Cloudflare.Workflows.Exports.NonRetryableError","tier":"exact","findings":[]}
+{"name":"Exports.onmessage","tier":"exact","findings":[]}
+{"name":"Exports.DOMException","tier":"exact","findings":[]}
+{"name":"Exports.WorkerGlobalScope","tier":"exact","findings":[]}
+{"name":"Exports.console","tier":"exact","findings":[]}
+{"name":"Exports.WebAssembly","tier":"exact","findings":[]}
+{"name":"Exports.addEventListener","tier":"exact","findings":[]}
+{"name":"Exports.removeEventListener","tier":"exact","findings":[]}
+{"name":"Exports.dispatchEvent","tier":"exact","findings":[]}
+{"name":"Exports.btoa","tier":"exact","findings":[]}
+{"name":"Exports.atob","tier":"exact","findings":[]}
+{"name":"Exports.setTimeout","tier":"exact","findings":[]}
+{"name":"Exports.clearTimeout","tier":"exact","findings":[]}
+{"name":"Exports.setInterval","tier":"exact","findings":[]}
+{"name":"Exports.clearInterval","tier":"exact","findings":[]}
+{"name":"Exports.queueMicrotask","tier":"exact","findings":[]}
+{"name":"Exports.structuredClone","tier":"exact","findings":[]}
+{"name":"Exports.reportError","tier":"exact","findings":[]}
+{"name":"Exports.fetch","tier":"exact","findings":[]}
+{"name":"Exports.self","tier":"exact","findings":[]}
+{"name":"Exports.crypto","tier":"exact","findings":[]}
+{"name":"Exports.caches","tier":"exact","findings":[]}
+{"name":"Exports.scheduler","tier":"exact","findings":[]}
+{"name":"Exports.performance","tier":"exact","findings":[]}
+{"name":"Exports.Cloudflare","tier":"exact","findings":[]}
+{"name":"Exports.origin","tier":"exact","findings":[]}
+{"name":"Exports.Buffer","tier":"exact","findings":[]}
+{"name":"Exports.process","tier":"exact","findings":[]}
+{"name":"Exports.global","tier":"exact","findings":[]}
+{"name":"Exports.setImmediate","tier":"exact","findings":[]}
+{"name":"Exports.clearImmediate","tier":"exact","findings":[]}
+{"name":"Exports.navigator","tier":"exact","findings":[]}
+{"name":"Exports.Navigator","tier":"exact","findings":[]}
+{"name":"Exports.ColoLocalActorNamespace","tier":"exact","findings":[]}
+{"name":"Exports.DurableObjectNamespace","tier":"exact","findings":[]}
+{"name":"Exports.WebSocketRequestResponsePair","tier":"exact","findings":[]}
+{"name":"Exports.Event","tier":"exact","findings":[]}
+{"name":"Exports.EventTarget","tier":"exact","findings":[]}
+{"name":"Exports.AbortController","tier":"exact","findings":[]}
+{"name":"Exports.AbortSignal","tier":"exact","findings":[]}
+{"name":"Exports.ExtendableEvent","tier":"exact","findings":[]}
+{"name":"Exports.CustomEvent","tier":"exact","findings":[]}
+{"name":"Exports.Blob","tier":"exact","findings":[]}
+{"name":"Exports.File","tier":"exact","findings":[]}
+{"name":"Exports.CacheStorage","tier":"exact","findings":[]}
+{"name":"Exports.Cache","tier":"exact","findings":[]}
+{"name":"Exports.Crypto","tier":"exact","findings":[]}
+{"name":"Exports.SubtleCrypto","tier":"exact","findings":[]}
+{"name":"Exports.CryptoKey","tier":"exact","findings":[]}
+{"name":"Exports.DigestStream","tier":"exact","findings":[]}
+{"name":"Exports.TextDecoder","tier":"exact","findings":[]}
+{"name":"Exports.TextEncoder","tier":"exact","findings":[]}
+{"name":"Exports.ErrorEvent","tier":"exact","findings":[]}
+{"name":"Exports.MessageEvent","tier":"exact","findings":[]}
+{"name":"Exports.PromiseRejectionEvent","tier":"exact","findings":[]}
+{"name":"Exports.FormData","tier":"exact","findings":[]}
+{"name":"Exports.HTMLRewriter","tier":"exact","findings":[]}
+{"name":"Exports.FetchEvent","tier":"exact","findings":[]}
+{"name":"Exports.Headers","tier":"exact","findings":[]}
+{"name":"Exports.Body","tier":"exact","findings":[]}
+{"name":"Exports.Response","tier":"exact","findings":[]}
+{"name":"Exports.Request","tier":"exact","findings":[]}
+{"name":"Exports.R2Object","tier":"exact","findings":[]}
+{"name":"Exports.ScheduledEvent","tier":"exact","findings":[]}
+{"name":"Exports.ReadableStream","tier":"exact","findings":[]}
+{"name":"Exports.ReadableStreamDefaultReader","tier":"exact","findings":[]}
+{"name":"Exports.ReadableStreamBYOBReader","tier":"exact","findings":[]}
+{"name":"Exports.ReadableStreamBYOBRequest","tier":"exact","findings":[]}
+{"name":"Exports.ReadableStreamDefaultController","tier":"exact","findings":[]}
+{"name":"Exports.ReadableByteStreamController","tier":"exact","findings":[]}
+{"name":"Exports.WritableStreamDefaultController","tier":"exact","findings":[]}
+{"name":"Exports.TransformStreamDefaultController","tier":"exact","findings":[]}
+{"name":"Exports.WritableStream","tier":"exact","findings":[]}
+{"name":"Exports.WritableStreamDefaultWriter","tier":"exact","findings":[]}
+{"name":"Exports.TransformStream","tier":"exact","findings":[]}
+{"name":"Exports.FixedLengthStream","tier":"exact","findings":[]}
+{"name":"Exports.IdentityTransformStream","tier":"exact","findings":[]}
+{"name":"Exports.CompressionStream","tier":"exact","findings":[]}
+{"name":"Exports.DecompressionStream","tier":"exact","findings":[]}
+{"name":"Exports.TextEncoderStream","tier":"exact","findings":[]}
+{"name":"Exports.TextDecoderStream","tier":"exact","findings":[]}
+{"name":"Exports.ByteLengthQueuingStrategy","tier":"exact","findings":[]}
+{"name":"Exports.CountQueuingStrategy","tier":"exact","findings":[]}
+{"name":"Exports.TailEvent","tier":"exact","findings":[]}
+{"name":"Exports.URL","tier":"exact","findings":[]}
+{"name":"Exports.URLSearchParams","tier":"exact","findings":[]}
+{"name":"Exports.URLPattern","tier":"exact","findings":[]}
+{"name":"Exports.CloseEvent","tier":"exact","findings":[]}
+{"name":"Exports.WebSocket","tier":"exact","findings":[]}
+{"name":"Exports.WebSocketPair","tier":"exact","findings":[]}
+{"name":"Exports.SqlStorageStatement","tier":"exact","findings":[]}
+{"name":"Exports.SqlStorageCursor","tier":"exact","findings":[]}
+{"name":"Exports.EventSource","tier":"exact","findings":[]}
+{"name":"Exports.MessagePort","tier":"exact","findings":[]}
+{"name":"Exports.MessageChannel","tier":"exact","findings":[]}
+{"name":"Exports.Performance","tier":"exact","findings":[]}
+{"name":"Exports.PerformanceMark","tier":"exact","findings":[]}
+{"name":"Exports.PerformanceMeasure","tier":"exact","findings":[]}
+{"name":"Exports.PerformanceObserverEntryList","tier":"exact","findings":[]}
+{"name":"Exports.PerformanceEntry","tier":"exact","findings":[]}
+{"name":"Exports.PerformanceResourceTiming","tier":"exact","findings":[]}
+{"name":"Exports.PerformanceObserver","tier":"exact","findings":[]}
+{"name":"Exports.Span","tier":"exact","findings":[]}
+{"name":"Exports.AgentMemoryProfile","tier":"exact","findings":[]}
+{"name":"Exports.AgentMemoryNamespace","tier":"exact","findings":[]}
+{"name":"Exports.AiSearchItem","tier":"exact","findings":[]}
+{"name":"Exports.AiSearchItems","tier":"exact","findings":[]}
+{"name":"Exports.AiSearchJob","tier":"exact","findings":[]}
+{"name":"Exports.AiSearchJobs","tier":"exact","findings":[]}
+{"name":"Exports.AiSearchInstance","tier":"exact","findings":[]}
+{"name":"Exports.AiSearchNamespace","tier":"exact","findings":[]}
+{"name":"Exports.BaseAiImageClassification","tier":"exact","findings":[]}
+{"name":"Exports.BaseAiImageToText","tier":"exact","findings":[]}
+{"name":"Exports.BaseAiImageTextToText","tier":"exact","findings":[]}
+{"name":"Exports.BaseAiMultimodalEmbeddings","tier":"exact","findings":[]}
+{"name":"Exports.BaseAiObjectDetection","tier":"exact","findings":[]}
+{"name":"Exports.BaseAiSentenceSimilarity","tier":"exact","findings":[]}
+{"name":"Exports.BaseAiAutomaticSpeechRecognition","tier":"exact","findings":[]}
+{"name":"Exports.BaseAiSummarization","tier":"exact","findings":[]}
+{"name":"Exports.BaseAiTextClassification","tier":"exact","findings":[]}
+{"name":"Exports.BaseAiTextEmbeddings","tier":"exact","findings":[]}
+{"name":"Exports.BaseAiTextGeneration","tier":"exact","findings":[]}
+{"name":"Exports.BaseAiTextToSpeech","tier":"exact","findings":[]}
+{"name":"Exports.BaseAiTextToImage","tier":"exact","findings":[]}
+{"name":"Exports.BaseAiTranslation","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Baai_Bge_Base_En_V1_5","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Openai_Whisper","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Meta_M2M100_1_2B","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Baai_Bge_Small_En_V1_5","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Baai_Bge_Large_En_V1_5","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Unum_Uform_Gen2_Qwen_500M","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Openai_Whisper_Tiny_En","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Openai_Whisper_Large_V3_Turbo","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Baai_Bge_M3","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Black_Forest_Labs_Flux_1_Schnell","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Meta_Llama_Guard_3_8B","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Baai_Bge_Reranker_Base","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Qwen_Qwq_32B","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Google_Gemma_3_12B_It","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Deepgram_Nova_3","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Qwen_Qwen3_Embedding_0_6B","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Pipecat_Ai_Smart_Turn_V2","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Openai_Gpt_Oss_120B","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Openai_Gpt_Oss_20B","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Leonardo_Phoenix_1_0","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Leonardo_Lucid_Origin","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Deepgram_Aura_1","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Ai4Bharat_Indictrans2_En_Indic_1B","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Pfnet_Plamo_Embedding_1B","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Deepgram_Flux","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Deepgram_Aura_2_En","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Deepgram_Aura_2_Es","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Black_Forest_Labs_Flux_2_Dev","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Black_Forest_Labs_Flux_2_Klein_4B","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Black_Forest_Labs_Flux_2_Klein_9B","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Zai_Org_Glm_4_7_Flash","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Moonshotai_Kimi_K2_5","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Moonshotai_Kimi_K2_6","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Nvidia_Nemotron_3_120B_A12B","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Google_Gemma_4_26B_A4B_IT","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Moonshotai_Kimi_K2_7_Code","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Zai_Org_Glm_5_2","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Moondream_Moondream3_1_9B_A2B","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Deepseek_Ai_Deepseek_V4_Flash_0731","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Deepseek_Ai_Deepseek_V4_Pro_0813","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Qwen_Qwen3_8_27B","tier":"exact","findings":[]}
+{"name":"Exports.Base_Ai_Cf_Zai_Org_Glm_5_3_Flash","tier":"exact","findings":[]}
+{"name":"Exports.Ai","tier":"exact","findings":[]}
+{"name":"Exports.AiGateway","tier":"exact","findings":[]}
+{"name":"Exports.AutoRAG","tier":"exact","findings":[]}
+{"name":"Exports.BrowserRun","tier":"exact","findings":[]}
+{"name":"Exports.D1Database","tier":"exact","findings":[]}
+{"name":"Exports.D1DatabaseSession","tier":"exact","findings":[]}
+{"name":"Exports.D1PreparedStatement","tier":"exact","findings":[]}
+{"name":"Exports.EmailEvent","tier":"exact","findings":[]}
+{"name":"Exports.Flagship","tier":"exact","findings":[]}
+{"name":"Exports.Rpc","tier":"exact","findings":[]}
+{"name":"Exports.ToMarkdownService","tier":"exact","findings":[]}
+{"name":"Exports.VectorizeIndex","tier":"exact","findings":[]}
+{"name":"Exports.Vectorize","tier":"exact","findings":[]}
+{"name":"Exports.WebSearch","tier":"exact","findings":[]}
+{"name":"Exports.Workflow","tier":"exact","findings":[]}
+{"name":"Exports.WorkflowInstance","tier":"exact","findings":[]}
 {"name":"\u0022assets:*\u0022","tier":"escape","findings":[{"name":"HG.AmbientModuleWildcard","key":"HG005","pass":"harvest-globals","tier":"escape","symbol":"\u0022assets:*\u0022","fields":{"specifier":"assets:*"},"message":"ambient module \u0022assets:*\u0022 dropped - a wildcard specifier names no module an import can resolve"}]}
 {"name":"\u0022cloudflare:email\u0022","tier":"exact","findings":[{"name":"HG.AmbientModuleHarvested","key":"HG004","pass":"harvest-globals","tier":"exact","symbol":"\u0022cloudflare:email\u0022","fields":{"specifier":"cloudflare:email","exports":1},"message":"1 exports harvested from ambient module \u0022cloudflare:email\u0022; each binds with [\u003CImport(name, \u0022cloudflare:email\u0022)\u003E]"}]}
 {"name":"\u0022cloudflare:node\u0022","tier":"exact","findings":[{"name":"HG.AmbientModuleHarvested","key":"HG004","pass":"harvest-globals","tier":"exact","symbol":"\u0022cloudflare:node\u0022","fields":{"specifier":"cloudflare:node","exports":2},"message":"2 exports harvested from ambient module \u0022cloudflare:node\u0022; each binds with [\u003CImport(name, \u0022cloudflare:node\u0022)\u003E]"}]}
@@ -1785,3 +1955,7 @@
 {"name":"\u0022cloudflare:workers\u0022","tier":"exact","findings":[{"name":"HG.AmbientModuleHarvested","key":"HG004","pass":"harvest-globals","tier":"exact","symbol":"\u0022cloudflare:workers\u0022","fields":{"specifier":"cloudflare:workers","exports":35},"message":"35 exports harvested from ambient module \u0022cloudflare:workers\u0022; each binds with [\u003CImport(name, \u0022cloudflare:workers\u0022)\u003E]"}]}
 {"name":"\u0022cloudflare:workflows\u0022","tier":"exact","findings":[{"name":"HG.AmbientModuleHarvested","key":"HG004","pass":"harvest-globals","tier":"exact","symbol":"\u0022cloudflare:workflows\u0022","fields":{"specifier":"cloudflare:workflows","exports":1},"message":"1 exports harvested from ambient module \u0022cloudflare:workflows\u0022; each binds with [\u003CImport(name, \u0022cloudflare:workflows\u0022)\u003E]"}]}
 {"name":"CloudflareWorkersModule","tier":"exact","findings":[{"name":"HG.NamespaceIsModuleBody","key":"HG006","pass":"harvest-globals","tier":"exact","symbol":"CloudflareWorkersModule","fields":{"ns":"CloudflareWorkersModule","specifier":"cloudflare:workers"},"message":"CloudflareWorkersModule is the body of ambient module \u0022cloudflare:workers\u0022 (export =) rather than a global"}]}
+{"name":"ambient:cloudflare:node","tier":"widened","findings":[{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"ambient:cloudflare:node.httpServerHandler()","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"ambient:cloudflare:node.httpServerHandler()","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"ambient:cloudflare:node.httpServerHandler()","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"ambient:cloudflare:node.httpServerHandler()","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"ambient:cloudflare:node.httpServerHandler()","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"ambient:cloudflare:node.httpServerHandler()","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"ambient:cloudflare:node.httpServerHandler()","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"ambient:cloudflare:node.httpServerHandler()","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"ambient:cloudflare:node.httpServerHandler()","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"ambient:cloudflare:node.httpServerHandler()","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"ambient:cloudflare:node.httpServerHandler()","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"ambient:cloudflare:node.httpServerHandler()","message":"unknown maps to obj (D8)"}]}
+{"name":"ambient:cloudflare:sockets","tier":"ergonomic","findings":[{"name":"MB.OptionalParameterAsOption","key":"MB001","pass":"shape-exports","tier":"ergonomic","symbol":"ambient:cloudflare:sockets.connect(options)","message":"optional parameter reads as option"},{"name":"TR.NullableHoistedToOption","key":"TR032","pass":"shape-exports","tier":"ergonomic","symbol":"ambient:cloudflare:sockets.connect(options)","fields":{"fromNull":false,"fromUndefined":true,"fromVoid":false},"message":"undefined union members hoisted to option"}]}
+{"name":"ambient:cloudflare:workers","tier":"widened","findings":[{"name":"TR.NotAmongGeneratedDeclarations","key":"TR023","pass":"shape-exports","tier":"widened","symbol":"ambient:cloudflare:workers.env","fields":{"shown":"Env"},"message":"Env is not among the generated declarations; widened to obj"},{"name":"TR.ObjectWithoutMembers","key":"TR047","pass":"shape-exports","tier":"widened","symbol":"ambient:cloudflare:workers.exports","message":"object type declares no members; obj admits the same values"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"ambient:cloudflare:workers.waitUntil(promise)","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"ambient:cloudflare:workers.withEnv()","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"ambient:cloudflare:workers.withEnv(fn)()","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"ambient:cloudflare:workers.withEnv(newEnv)","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"ambient:cloudflare:workers.withEnvAndExports()","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"ambient:cloudflare:workers.withEnvAndExports(fn)()","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"ambient:cloudflare:workers.withEnvAndExports(newEnv)","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"ambient:cloudflare:workers.withEnvAndExports(newExports)","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"ambient:cloudflare:workers.withExports()","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"ambient:cloudflare:workers.withExports(fn)()","message":"unknown maps to obj (D8)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"ambient:cloudflare:workers.withExports(newExports)","message":"unknown maps to obj (D8)"}]}
+{"name":"global","tier":"escape","findings":[{"name":"TR.AnyToObj","key":"TR008","pass":"shape-exports","tier":"escape","symbol":"global.Buffer","message":"any maps to obj"},{"name":"TP.ConstraintDropped","key":"TP002","pass":"shape-exports","tier":"ergonomic","symbol":"global.addEventListener","fields":{"name":"Type"},"message":"constraint on \u0027Type\u0027 has no F# form and is dropped (\u00A74.9)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"global.addEventListener(handler)","message":"unknown maps to obj (D8)"},{"name":"TR.ArgumentNotASubtypeOfConstraint","key":"TR044","pass":"shape-exports","tier":"widened","symbol":"global.addEventListener(handler)","fields":{"argument":"U4\u003CFetchEvent, QueueEvent\u003Cobj\u003E, PromiseRejectionEvent, ScheduledEvent\u003E","name":"EventListenerObject","bound":"Event"},"message":"U4\u003CFetchEvent, QueueEvent\u003Cobj\u003E, PromiseRejectionEvent, ScheduledEvent\u003E does not inherit EventListenerObject\u0027s constraint Event; the argument is written as the constraint"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"global.addEventListener(handler)(event)","message":"unknown maps to obj (D8)"},{"name":"MB.OptionalParameterAsOption","key":"MB001","pass":"shape-exports","tier":"ergonomic","symbol":"global.addEventListener(options)","message":"optional parameter reads as option"},{"name":"TR.NullableHoistedToOption","key":"TR032","pass":"shape-exports","tier":"ergonomic","symbol":"global.addEventListener(options)","fields":{"fromNull":false,"fromUndefined":true,"fromVoid":false},"message":"undefined union members hoisted to option"},{"name":"MB.OptionalParameterFromUnion","key":"MB006","pass":"shape-exports","tier":"ergonomic","symbol":"global.clearImmediate(immediate)","message":"parameter admits undefined through its type; reads as option"},{"name":"TR.NullableHoistedToOption","key":"TR032","pass":"shape-exports","tier":"ergonomic","symbol":"global.clearImmediate(immediate)","fields":{"fromNull":true,"fromUndefined":false,"fromVoid":false},"message":"null union members hoisted to option"},{"name":"MB.OptionalParameterFromUnion","key":"MB006","pass":"shape-exports","tier":"ergonomic","symbol":"global.clearInterval(timeoutId)","message":"parameter admits undefined through its type; reads as option"},{"name":"TR.NullableHoistedToOption","key":"TR032","pass":"shape-exports","tier":"ergonomic","symbol":"global.clearInterval(timeoutId)","fields":{"fromNull":true,"fromUndefined":false,"fromVoid":false},"message":"null union members hoisted to option"},{"name":"MB.OptionalParameterFromUnion","key":"MB006","pass":"shape-exports","tier":"ergonomic","symbol":"global.clearTimeout(timeoutId)","message":"parameter admits undefined through its type; reads as option"},{"name":"TR.NullableHoistedToOption","key":"TR032","pass":"shape-exports","tier":"ergonomic","symbol":"global.clearTimeout(timeoutId)","fields":{"fromNull":true,"fromUndefined":false,"fromVoid":false},"message":"null union members hoisted to option"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"global.dispatchEvent(event)","message":"unknown maps to obj (D8)"},{"name":"MB.OptionalParameterAsOption","key":"MB001","pass":"shape-exports","tier":"ergonomic","symbol":"global.fetch(init)","message":"optional parameter reads as option"},{"name":"TR.NullableHoistedToOption","key":"TR032","pass":"shape-exports","tier":"ergonomic","symbol":"global.fetch(init)","fields":{"fromNull":false,"fromUndefined":true,"fromVoid":false},"message":"undefined union members hoisted to option"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"global.fetch(input)","message":"unknown maps to obj (D8)"},{"name":"TR.AnyToObj","key":"TR008","pass":"shape-exports","tier":"escape","symbol":"global.process","message":"any maps to obj"},{"name":"TP.ConstraintDropped","key":"TP002","pass":"shape-exports","tier":"ergonomic","symbol":"global.removeEventListener","fields":{"name":"Type"},"message":"constraint on \u0027Type\u0027 has no F# form and is dropped (\u00A74.9)"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"global.removeEventListener(handler)","message":"unknown maps to obj (D8)"},{"name":"TR.ArgumentNotASubtypeOfConstraint","key":"TR044","pass":"shape-exports","tier":"widened","symbol":"global.removeEventListener(handler)","fields":{"argument":"U4\u003CFetchEvent, QueueEvent\u003Cobj\u003E, PromiseRejectionEvent, ScheduledEvent\u003E","name":"EventListenerObject","bound":"Event"},"message":"U4\u003CFetchEvent, QueueEvent\u003Cobj\u003E, PromiseRejectionEvent, ScheduledEvent\u003E does not inherit EventListenerObject\u0027s constraint Event; the argument is written as the constraint"},{"name":"TR.UnknownToObj","key":"TR009","pass":"shape-exports","tier":"widened","symbol":"global.removeEventListener(handler)(event)","message":"unknown maps to obj (D8)"},{"name":"MB.OptionalParameterAsOption","key":"MB001","pass":"shape-exports","tier":"ergonomic","symbol":"global.removeEventListener(options)","message":"optional parameter reads as option"},{"name":"TR.NullableHoistedToOption","key":"TR032","pass":"shape-exports","tier":"ergonomic","symbol":"global.removeEventListener(options)","fields":{"fromNull":false,"fromUndefined":true,"fromVoid":false},"message":"undefined union members hoisted to option"},{"name":"TR.AnyToObj","key":"TR008","pass":"shape-exports","tier":"escape","symbol":"global.reportError(error)","message":"any maps to obj"},{"name":"TR.AnyToObj","key":"TR008","pass":"shape-exports","tier":"escape","symbol":"global.setImmediate($function)(param0)","message":"any maps to obj"},{"name":"TR.AnyToObj","key":"TR008","pass":"shape-exports","tier":"escape","symbol":"global.setImmediate(args)","message":"any maps to obj"},{"name":"TP.ConstraintDropped","key":"TP002","pass":"shape-exports","tier":"ergonomic","symbol":"global.setInterval","fields":{"name":"Args"},"message":"constraint on \u0027Args\u0027 has no F# form and is dropped (\u00A74.9)"},{"name":"TR.AnyToObj","key":"TR008","pass":"shape-exports","tier":"escape","symbol":"global.setInterval(callback)(args)","message":"any maps to obj"},{"name":"MB.OptionalParameterAsOption","key":"MB001","pass":"shape-exports","tier":"ergonomic","symbol":"global.setInterval(msDelay)","message":"optional parameter reads as option"},{"name":"MB.OptionalParameterAsOption","key":"MB001","pass":"shape-exports","tier":"ergonomic","symbol":"global.setInterval(msDelay)","message":"optional parameter reads as option"},{"name":"TR.NullableHoistedToOption","key":"TR032","pass":"shape-exports","tier":"ergonomic","symbol":"global.setInterval(msDelay)","fields":{"fromNull":false,"fromUndefined":true,"fromVoid":false},"message":"undefined union members hoisted to option"},{"name":"TR.NullableHoistedToOption","key":"TR032","pass":"shape-exports","tier":"ergonomic","symbol":"global.setInterval(msDelay)","fields":{"fromNull":false,"fromUndefined":true,"fromVoid":false},"message":"undefined union members hoisted to option"},{"name":"TP.ConstraintDropped","key":"TP002","pass":"shape-exports","tier":"ergonomic","symbol":"global.setTimeout","fields":{"name":"Args"},"message":"constraint on \u0027Args\u0027 has no F# form and is dropped (\u00A74.9)"},{"name":"TR.AnyToObj","key":"TR008","pass":"shape-exports","tier":"escape","symbol":"global.setTimeout(callback)(args)","message":"any maps to obj"},{"name":"MB.OptionalParameterAsOption","key":"MB001","pass":"shape-exports","tier":"ergonomic","symbol":"global.setTimeout(msDelay)","message":"optional parameter reads as option"},{"name":"MB.OptionalParameterAsOption","key":"MB001","pass":"shape-exports","tier":"ergonomic","symbol":"global.setTimeout(msDelay)","message":"optional parameter reads as option"},{"name":"TR.NullableHoistedToOption","key":"TR032","pass":"shape-exports","tier":"ergonomic","symbol":"global.setTimeout(msDelay)","fields":{"fromNull":false,"fromUndefined":true,"fromVoid":false},"message":"undefined union members hoisted to option"},{"name":"TR.NullableHoistedToOption","key":"TR032","pass":"shape-exports","tier":"ergonomic","symbol":"global.setTimeout(msDelay)","fields":{"fromNull":false,"fromUndefined":true,"fromVoid":false},"message":"undefined union members hoisted to option"},{"name":"MB.OptionalParameterAsOption","key":"MB001","pass":"shape-exports","tier":"ergonomic","symbol":"global.structuredClone(options)","message":"optional parameter reads as option"},{"name":"TR.NullableHoistedToOption","key":"TR032","pass":"shape-exports","tier":"ergonomic","symbol":"global.structuredClone(options)","fields":{"fromNull":false,"fromUndefined":true,"fromVoid":false},"message":"undefined union members hoisted to option"}]}

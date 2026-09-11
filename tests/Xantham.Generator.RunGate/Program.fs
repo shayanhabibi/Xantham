@@ -494,11 +494,11 @@ type private Bench(label: string) =
 /// An ambient module declaration binds to the specifier it quotes rather than to the package the
 /// rest of the file imports from, and a renamed re-export binds under the exported name.
 let private ambientModules () =
-    let payload = AmbientModuleLab.Exports.connect "socket"
+    let payload = AmbientModuleLab.AmbientLab.Sockets.Exports.connect "socket"
     equal "a renamed re-export reaches the export, not the module-local name" "socket" payload.label
-    equal "a function imported from a specifier reaches that module" 6.0 (AmbientModuleLab.Exports.measure payload)
+    equal "a function imported from a specifier reaches that module" 6.0 (AmbientModuleLab.AmbientLab.Tools.Exports.measure payload)
 
-    let hammer = AmbientModuleLab.Exports.Hammer 4.0
+    let hammer = AmbientModuleLab.AmbientLab.Tools.Exports.Hammer 4.0
     let hammerClass: obj = import "Hammer" "ambient-lab:tools"
 
     check
@@ -510,7 +510,7 @@ let private ambientModules () =
 
     // `declare module "ambient-lab:runtime" { export = AmbientLabRuntime }`. Nothing puts the
     // namespace on `globalThis`, so a `[<Global>]` binding to it would read `undefined`.
-    equal "an `export =` namespace's members read through the specifier" "1.4.0" AmbientModuleLab.Exports.version
+    equal "an `export =` namespace's members read through the specifier" "1.4.0" AmbientModuleLab.AmbientLab.Runtime.Exports.version
     check "and the namespace itself is no global" (emitJsExpr () "globalThis.AmbientLabRuntime === undefined")
 
 /// The entrypoint form: an `[<AbstractClass>]` under the specifier's import, which a consumer
@@ -525,7 +525,7 @@ let private entrypointClasses () =
     equal "the base constructor's assignment reads back off the instance" "vice" bench.label
     equal "and the JavaScript prototype carries the same value" "vice" (emitJsExpr bench "$0.label")
 
-    let payload = AmbientModuleLab.Exports.connect "socket"
+    let payload = AmbientModuleLab.AmbientLab.Sockets.Exports.connect "socket"
     equal "the override is what F# calls" "derived:vice:socket" (bench.run payload)
 
     equal
@@ -536,7 +536,7 @@ let private entrypointClasses () =
     // `class Snag extends Error`: the base is the compiler library's, and `Error` binds to `exn`,
     // so the class form carries `inherit exn` and F# sees an exception. `errorClasses` below is
     // where that is exercised; here it is the JavaScript object that is under test.
-    let snag = AmbientModuleLab.Exports.Snag "torn"
+    let snag = AmbientModuleLab.AmbientLab.Tools.Exports.Snag "torn"
     check "a class over a lib base is still the module's class" (emitJsExpr snag "$0 instanceof Error")
     equal "and its base constructor ran" "torn" snag.message
 
@@ -713,7 +713,7 @@ let private renamedStatics () =
 /// onto `hook-interface-lab` and `nested-name-lab` once lanes AA and AD landed; see `optionalHooks`
 /// and `nestedNames` above.
 let private probes () =
-    let payload = AmbientModuleLab.Exports.connect "socket"
+    let payload = AmbientModuleLab.AmbientLab.Sockets.Exports.connect "socket"
 
     // Two forms `nested-name-lab` (lane AD) does not carry: a nested inline shape holding a field
     // of its own owner's type, and an import bound from inside the nested module rather than at
@@ -789,7 +789,7 @@ let private errorClasses () =
 
     // The imported constructor's own instance, raised and caught by the type it was declared
     // under. `raise` typechecks because the binding derives `exn`, and the catch is a type test.
-    let imported = ErrorClassLab.Exports.Fault "torn"
+    let imported = ErrorClassLab.ErrorLab.Faults.Exports.Fault "torn"
 
     let caught =
         try
@@ -839,13 +839,13 @@ let private errorClasses () =
     // The negative: an entrypoint with no base inherits nothing, so it is a plain class. A
     // `raise` of it would not typecheck, which is the claim; what runs here is that the class
     // form still reaches its member.
-    let runner = ErrorClassLab.Exports.Runner "plain"
+    let runner = ErrorClassLab.ErrorLab.Faults.Exports.Runner "plain"
     equal "an entrypoint with no base is still the module's class" "base:plain:once" (runner.run "once")
     check "and is no exception" (emitJsExpr runner "!($0 instanceof Error)")
 
     // `Error` in a reference position now reads as `exn` rather than `obj`, so what comes back is
     // catchable without a cast.
-    let reason = ErrorClassLab.Exports.reason imported
+    let reason = ErrorClassLab.ErrorLab.Faults.Exports.reason imported
 
     equal
         "a returned Error is an exn the consumer can raise"

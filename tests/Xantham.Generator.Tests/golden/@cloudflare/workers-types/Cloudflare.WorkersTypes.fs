@@ -25011,6 +25011,83 @@ type WorkflowInstance =
     [<ParamObject; Emit("$0")>]
     static member Create (id: string, pause: (unit -> JS.Promise<unit>), resume: (unit -> JS.Promise<unit>), terminate: (WorkflowInstanceTerminateOptions option -> JS.Promise<unit>), restart: (WorkflowInstanceRestartOptions option -> JS.Promise<unit>), delete: (unit -> JS.Promise<unit>), status: (unit -> JS.Promise<InstanceStatus>), sendEvent: (WorkflowInstance.SendEvent0 -> JS.Promise<unit>)) : WorkflowInstance = jsNative
 
+module Cloudflare =
+    module Email =
+        /// <summary>The package's value exports, each bound to its import.</summary>
+        [<Erase>]
+        type Exports =
+            [<Import("EmailMessage", "cloudflare:email")>]
+            static member EmailMessage: EmailMessageConstructor = jsNative
+
+    module Node =
+        /// <summary>The package's value exports, each bound to its import.</summary>
+        [<Erase>]
+        type Exports =
+            [<Import("httpServerHandler", "cloudflare:node")>]
+            static member httpServerHandler (port: float) : ExportedHandler<obj, obj, obj, obj> = jsNative
+            [<Import("httpServerHandler", "cloudflare:node")>]
+            static member httpServerHandler (options: HttpServerHandler.Options) : ExportedHandler<obj, obj, obj, obj> = jsNative
+            [<Import("httpServerHandler", "cloudflare:node")>]
+            static member httpServerHandler (server: NodeStyleServer) : ExportedHandler<obj, obj, obj, obj> = jsNative
+
+    module Pipelines =
+        /// <summary>The package's value exports, each bound to its import.</summary>
+        [<Erase>]
+        type Exports =
+            [<Import("PipelineTransformationEntrypoint", "cloudflare:pipelines"); EmitConstructor>]
+            static member PipelineTransformationEntrypoint<'Env, 'I, 'O> (ctx: ExecutionContext<obj>, env: 'Env) : PipelineTransformationEntrypoint<'Env, 'I, 'O> = jsNative
+
+    module Sockets =
+        /// <summary>The package's value exports, each bound to its import.</summary>
+        [<Erase>]
+        type Exports =
+            [<Import("connect", "cloudflare:sockets")>]
+            static member connect (address: U2<string, SocketAddress>, ?options: SocketOptions) : Socket = jsNative
+
+    module Workers =
+        /// <summary>The package's value exports, each bound to its import.</summary>
+        [<Erase>]
+        type Exports =
+            [<Import("RpcStub", "cloudflare:workers")>]
+            static member RpcStub: RpcStubConstructor = jsNative
+            [<Import("RpcTarget", "cloudflare:workers"); EmitConstructor>]
+            static member RpcTarget () : RpcTarget = jsNative
+            [<Import("WorkerEntrypoint", "cloudflare:workers"); EmitConstructor>]
+            static member WorkerEntrypoint<'Env, 'Props> (ctx: ExecutionContext<obj>, env: 'Env) : WorkerEntrypoint<'Env, 'Props> = jsNative
+            [<Import("DurableObject", "cloudflare:workers"); EmitConstructor>]
+            static member DurableObject<'Env, 'Props> (ctx: DurableObjectState<obj>, env: 'Env) : CloudflareWorkersModule.DurableObject<'Env, 'Props> = jsNative
+            [<Import("WorkflowStep", "cloudflare:workers"); EmitConstructor>]
+            static member WorkflowStep () : WorkflowStep = jsNative
+            [<Import("WorkflowEntrypoint", "cloudflare:workers"); EmitConstructor>]
+            static member WorkflowEntrypoint<'Env, 'T> (ctx: ExecutionContext<obj>, env: 'Env) : WorkflowEntrypoint<'Env, 'T> = jsNative
+            [<Import("waitUntil", "cloudflare:workers")>]
+            static member waitUntil (promise: JS.Promise<obj>) : unit = jsNative
+            [<Import("withEnv", "cloudflare:workers")>]
+            static member withEnv (newEnv: obj, fn: (unit -> obj)) : obj = jsNative
+            [<Import("withExports", "cloudflare:workers")>]
+            static member withExports (newExports: obj, fn: (unit -> obj)) : obj = jsNative
+            [<Import("withEnvAndExports", "cloudflare:workers")>]
+            static member withEnvAndExports (newEnv: obj, newExports: obj, fn: (unit -> obj)) : obj = jsNative
+            [<Import("env", "cloudflare:workers")>]
+            static member env: obj = jsNative
+            [<Import("exports", "cloudflare:workers")>]
+            static member exports: obj = jsNative
+            [<Import("cache", "cloudflare:workers")>]
+            static member cache: CacheContext = jsNative
+            [<Import("tracing", "cloudflare:workers")>]
+            static member tracing: Tracing = jsNative
+
+    module Workflows =
+        /// <summary>The package's value exports, each bound to its import.</summary>
+        [<Erase>]
+        type Exports =
+            /// <summary>
+            /// NonRetryableError allows for a user to throw a fatal error
+            /// that makes a Workflow instance fail immediately without triggering a retry
+            /// </summary>
+            [<Import("NonRetryableError", "cloudflare:workflows"); EmitConstructor>]
+            static member NonRetryableError (message: string, ?name: string) : NonRetryableError = jsNative
+
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 [<Global("globalThis")>]
@@ -25885,88 +25962,6 @@ type Exports =
     static member Workflow<'PARAMS> () : Workflow<'PARAMS> = jsNative
     [<Global("WorkflowInstance"); EmitConstructor>]
     static member WorkflowInstance () : WorkflowInstance = jsNative
-
-module Cloudflare_a4be69d9806a =
-    module Email =
-        /// <summary>The package's value exports, each bound to its import.</summary>
-        [<Erase>]
-        type Exports =
-            [<Import("EmailMessage", "cloudflare:email")>]
-            static member EmailMessage: EmailMessageConstructor = jsNative
-
-module Cloudflare_5e4f266ed1c8 =
-    module Node =
-        /// <summary>The package's value exports, each bound to its import.</summary>
-        [<Erase>]
-        type Exports =
-            [<Import("httpServerHandler", "cloudflare:node")>]
-            static member httpServerHandler (port: float) : ExportedHandler<obj, obj, obj, obj> = jsNative
-            [<Import("httpServerHandler", "cloudflare:node")>]
-            static member httpServerHandler (options: HttpServerHandler.Options) : ExportedHandler<obj, obj, obj, obj> = jsNative
-            [<Import("httpServerHandler", "cloudflare:node")>]
-            static member httpServerHandler (server: NodeStyleServer) : ExportedHandler<obj, obj, obj, obj> = jsNative
-
-module Cloudflare_333b79fd6bdb =
-    module Pipelines =
-        /// <summary>The package's value exports, each bound to its import.</summary>
-        [<Erase>]
-        type Exports =
-            [<Import("PipelineTransformationEntrypoint", "cloudflare:pipelines"); EmitConstructor>]
-            static member PipelineTransformationEntrypoint<'Env, 'I, 'O> (ctx: ExecutionContext<obj>, env: 'Env) : PipelineTransformationEntrypoint<'Env, 'I, 'O> = jsNative
-
-module Cloudflare_5738a2485c63 =
-    module Workers =
-        /// <summary>The package's value exports, each bound to its import.</summary>
-        [<Erase>]
-        type Exports =
-            [<Import("RpcStub", "cloudflare:workers")>]
-            static member RpcStub: RpcStubConstructor = jsNative
-            [<Import("RpcTarget", "cloudflare:workers"); EmitConstructor>]
-            static member RpcTarget () : RpcTarget = jsNative
-            [<Import("WorkerEntrypoint", "cloudflare:workers"); EmitConstructor>]
-            static member WorkerEntrypoint<'Env, 'Props> (ctx: ExecutionContext<obj>, env: 'Env) : WorkerEntrypoint<'Env, 'Props> = jsNative
-            [<Import("DurableObject", "cloudflare:workers"); EmitConstructor>]
-            static member DurableObject<'Env, 'Props> (ctx: DurableObjectState<obj>, env: 'Env) : CloudflareWorkersModule.DurableObject<'Env, 'Props> = jsNative
-            [<Import("WorkflowStep", "cloudflare:workers"); EmitConstructor>]
-            static member WorkflowStep () : WorkflowStep = jsNative
-            [<Import("WorkflowEntrypoint", "cloudflare:workers"); EmitConstructor>]
-            static member WorkflowEntrypoint<'Env, 'T> (ctx: ExecutionContext<obj>, env: 'Env) : WorkflowEntrypoint<'Env, 'T> = jsNative
-            [<Import("waitUntil", "cloudflare:workers")>]
-            static member waitUntil (promise: JS.Promise<obj>) : unit = jsNative
-            [<Import("withEnv", "cloudflare:workers")>]
-            static member withEnv (newEnv: obj, fn: (unit -> obj)) : obj = jsNative
-            [<Import("withExports", "cloudflare:workers")>]
-            static member withExports (newExports: obj, fn: (unit -> obj)) : obj = jsNative
-            [<Import("withEnvAndExports", "cloudflare:workers")>]
-            static member withEnvAndExports (newEnv: obj, newExports: obj, fn: (unit -> obj)) : obj = jsNative
-            [<Import("env", "cloudflare:workers")>]
-            static member env: obj = jsNative
-            [<Import("exports", "cloudflare:workers")>]
-            static member exports: obj = jsNative
-            [<Import("cache", "cloudflare:workers")>]
-            static member cache: CacheContext = jsNative
-            [<Import("tracing", "cloudflare:workers")>]
-            static member tracing: Tracing = jsNative
-
-module Cloudflare_9c9e8cb0e393 =
-    module Sockets =
-        /// <summary>The package's value exports, each bound to its import.</summary>
-        [<Erase>]
-        type Exports =
-            [<Import("connect", "cloudflare:sockets")>]
-            static member connect (address: U2<string, SocketAddress>, ?options: SocketOptions) : Socket = jsNative
-
-module Cloudflare_e68c0bd6fd72 =
-    module Workflows =
-        /// <summary>The package's value exports, each bound to its import.</summary>
-        [<Erase>]
-        type Exports =
-            /// <summary>
-            /// NonRetryableError allows for a user to throw a fatal error
-            /// that makes a Workflow instance fail immediately without triggering a retry
-            /// </summary>
-            [<Import("NonRetryableError", "cloudflare:workflows"); EmitConstructor>]
-            static member NonRetryableError (message: string, ?name: string) : NonRetryableError = jsNative
 
 [<Erase>]
 type U10<'t1, 't2, 't3, 't4, 't5, 't6, 't7, 't8, 't9, 't10> =

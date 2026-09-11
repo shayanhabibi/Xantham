@@ -204,6 +204,7 @@ module FindingCodes =
             "SE.NoValueType", "SE001"
             "SE.RuntimeSpecifierDerived", "SE002"
             "SE.MutableValueReadOnly", "SE003"
+            "SE.ExportPathAllocated", "SE004"
             "SP.ParamObjectSynthesized", "SP001"
             "SP.MethodMemberAsCreateParameter", "SP002"
             "SP.CreateNotSynthesized", "SP003"

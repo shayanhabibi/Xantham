@@ -3,10 +3,10 @@
   "package": "animejs",
   "module": "Animejs",
   "counts": {
-    "exact": 80,
-    "ergonomic": 102,
-    "widened": 15,
-    "escape": 54
+    "exact": 121,
+    "ergonomic": 80,
+    "widened": 14,
+    "escape": 48
   },
   "passes": [
     {
@@ -61,9 +61,9 @@
     },
     {
       "pass": "DO - dedupe-overloads",
-      "total": 17,
+      "total": 16,
       "exact": 1,
-      "widened": 16
+      "widened": 15
     }
   ]
 }

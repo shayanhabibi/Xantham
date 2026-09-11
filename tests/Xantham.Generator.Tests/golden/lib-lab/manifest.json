@@ -3,9 +3,9 @@
   "package": "lib-lab",
   "module": "LibLab",
   "counts": {
-    "exact": 12,
-    "ergonomic": 7,
-    "widened": 2,
+    "exact": 19,
+    "ergonomic": 2,
+    "widened": 1,
     "escape": 0
   },
   "passes": [

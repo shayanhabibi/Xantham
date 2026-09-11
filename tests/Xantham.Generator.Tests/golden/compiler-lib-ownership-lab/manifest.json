@@ -3,10 +3,10 @@
   "package": "compiler-lib-ownership-lab",
   "module": "CompilerLibOwnershipLab",
   "counts": {
-    "exact": 39,
-    "ergonomic": 70,
-    "widened": 152,
-    "escape": 58
+    "exact": 71,
+    "ergonomic": 78,
+    "widened": 146,
+    "escape": 54
   },
   "passes": [
     {
@@ -54,8 +54,8 @@
     },
     {
       "pass": "DO - dedupe-overloads",
-      "total": 8,
-      "widened": 8
+      "total": 2,
+      "widened": 2
     },
     {
       "pass": "RA - repair-arity",

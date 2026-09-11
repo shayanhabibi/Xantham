@@ -16,14 +16,12 @@ type LayoutPayload =
     [<ParamObject; Emit("$0")>]
     static member Create (value: string) : LayoutPayload = jsNative
 
-module Globals =
+module Aliases =
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
-    [<Global("globalThis")>]
     type Exports =
-        static member sharedFlag
-            with get (): bool = jsNative
-            and set (_: bool): unit = jsNative
+        [<Import("renamedCheck", "layout-lab/aliases")>]
+        static member renamedCheck (value: string) : string = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
@@ -40,17 +38,25 @@ type Exports =
     static member convert (value: float) : float = jsNative
     [<Import("pick", "layout-lab")>]
     static member pick (value: string) : string = jsNative
+    [<Import("pick", "layout-lab")>]
+    static member pick (value: string) : float = jsNative
 
-module Aliases =
+module Globals =
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
+    [<Global("globalThis")>]
     type Exports =
-        [<Import("renamedCheck", "layout-lab/aliases")>]
-        static member renamedCheck (value: string) : string = jsNative
+        static member sharedFlag
+            with get (): bool = jsNative
+            and set (_: bool): unit = jsNative
 
 module Strict =
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
     type Exports =
+        [<Import("check", "layout-lab/strict")>]
+        static member check (value: string) : string = jsNative
         [<Import("mode", "layout-lab/strict")>]
         static member mode: string = jsNative
+        [<Import("echo", "layout-lab/strict")>]
+        static member echo (value: LayoutPayload) : LayoutPayload = jsNative

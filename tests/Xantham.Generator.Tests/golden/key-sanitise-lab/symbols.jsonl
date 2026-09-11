@@ -6,4 +6,4 @@
 {"name":"Settings","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Settings","message":"ParamObject Create synthesized (D3)"}]}
 {"name":"Settings.Timeouts","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"SY.NameNestedUnderOwner","key":"SY004","pass":"synthesize-anonymous","tier":"exact","symbol":"Settings.Timeouts","fields":{"nestedAs":"Settings.Timeouts"},"message":"anonymous shape named Settings.Timeouts under the declaration that owns it"},{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Settings.Timeouts","message":"ParamObject Create synthesized (D3)"}]}
 {"name":"Settings2fa","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Settings2fa","message":"ParamObject Create synthesized (D3)"}]}
-{"name":"modelOf","tier":"exact","findings":[]}
+{"name":"Exports.modelOf","tier":"exact","findings":[]}

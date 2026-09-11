@@ -11,3 +11,5 @@
 {"name":"Left","file":"shared.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Left","message":"ParamObject Create synthesized (D3)"}]}
 {"name":"Right","file":"shared.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Right","message":"ParamObject Create synthesized (D3)"}]}
 {"name":"LeftCallback","file":"shared.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"LeftCallback","message":"ParamObject Create synthesized (D3)"},{"name":"SP.MethodMemberAsCreateParameter","key":"SP002","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"LeftCallback.run","message":"method member reads as a function-typed Create parameter; the delegate receives no this"}]}
+{"name":"Exports.PublicClient","tier":"exact","findings":[]}
+{"name":"Exports.GenericClient","tier":"exact","findings":[]}

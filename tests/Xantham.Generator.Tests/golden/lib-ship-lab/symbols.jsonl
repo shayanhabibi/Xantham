@@ -15,6 +15,12 @@
 {"name":"DateConstructor","file":"node_modules/@typescript/typescript-win32-x64/lib/lib.scripthost.d.ts","tier":"ergonomic","findings":[{"name":"SI.ConstructorObjectDeclared","key":"SI004","pass":"shape-interfaces","tier":"ergonomic","symbol":"DateConstructor","fields":{"signatures":1},"message":"constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"}]}
 {"name":"Date","file":"node_modules/@typescript/typescript-win32-x64/lib/lib.scripthost.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Date","message":"ParamObject Create synthesized (D3)"}]}
 {"name":"GlobalThis","tier":"ergonomic","findings":[{"name":"RA.ReadWithoutWrite","key":"RA005","pass":"repair-arity","tier":"ergonomic","symbol":"GlobalThis","fields":{"name":"undefined"},"message":"undefined reads but does not write: its type holds no value, and F# has no setter of type unit"},{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"GlobalThis","message":"ParamObject Create synthesized (D3)"}]}
-{"name":"WSH","tier":"exact","findings":[]}
-{"name":"globalThis","tier":"exact","findings":[]}
+{"name":"Exports.ActiveXObject","tier":"exact","findings":[]}
+{"name":"Exports.WScript","tier":"exact","findings":[]}
+{"name":"Exports.WSH","tier":"exact","findings":[]}
+{"name":"Exports.SafeArray","tier":"exact","findings":[]}
+{"name":"Exports.Enumerator","tier":"exact","findings":[]}
+{"name":"Exports.VBArray","tier":"exact","findings":[]}
+{"name":"Exports.VarDate","tier":"exact","findings":[]}
+{"name":"Exports.globalThis","tier":"exact","findings":[]}
 {"name":"typescript/lib","tier":"exact","findings":[{"name":"GE.GroupShipped","key":"GE001","pass":"render-source","tier":"exact","symbol":"typescript/lib","fields":{"group":"typescript/lib","declarations":1},"message":"typescript/lib is shipped as its own module, carrying 1 declarations"},{"name":"GE.GroupShipped","key":"GE001","pass":"render-source","tier":"exact","symbol":"typescript/lib","fields":{"group":"typescript/lib","declarations":16},"message":"typescript/lib is shipped as its own module, carrying 16 declarations"}]}

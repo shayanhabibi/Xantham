@@ -4010,7 +4010,7 @@ let shapePassTests =
 
             Expect.equal
                 (containers |> List.map fst)
-                [ "Exports"; "Strict.Exports" ]
+                [ "Exports"; "Pkg.Strict.Exports" ]
                 "containers follow ordinal allocated-path order"
 
             Expect.equal

@@ -14,7 +14,7 @@
 {"name":"Choice.Either2","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"SY.NameNestedUnderOwner","key":"SY004","pass":"synthesize-anonymous","tier":"exact","symbol":"Choice.Either2","fields":{"nestedAs":"Choice.Either2"},"message":"anonymous shape named Choice.Either2 under the declaration that owns it"},{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Choice.Either2","message":"ParamObject Create synthesized (D3)"}]}
 {"name":"Node","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Node","message":"ParamObject Create synthesized (D3)"}]}
 {"name":"Cluster.Node","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"SY.NameNestedUnderOwner","key":"SY004","pass":"synthesize-anonymous","tier":"exact","symbol":"Cluster.Node","fields":{"nestedAs":"Cluster.Node"},"message":"anonymous shape named Cluster.Node under the declaration that owns it"},{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Cluster.Node","message":"ParamObject Create synthesized (D3)"}]}
-{"name":"backoffOf","tier":"exact","findings":[]}
-{"name":"defaultRetry","tier":"exact","findings":[]}
-{"name":"configure","tier":"exact","findings":[]}
-{"name":"joinCluster","tier":"exact","findings":[]}
+{"name":"Exports.backoffOf","tier":"exact","findings":[]}
+{"name":"Exports.defaultRetry","tier":"exact","findings":[]}
+{"name":"Exports.configure","tier":"exact","findings":[]}
+{"name":"Exports.joinCluster","tier":"exact","findings":[]}

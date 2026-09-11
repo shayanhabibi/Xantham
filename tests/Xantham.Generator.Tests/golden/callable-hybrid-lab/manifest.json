@@ -3,9 +3,9 @@
   "package": "callable-hybrid-lab",
   "module": "CallableHybridLab",
   "counts": {
-    "exact": 6,
+    "exact": 7,
     "ergonomic": 6,
-    "widened": 3,
+    "widened": 2,
     "escape": 0
   },
   "passes": [
@@ -27,8 +27,8 @@
     },
     {
       "pass": "DO - dedupe-overloads",
-      "total": 2,
-      "widened": 2
+      "total": 1,
+      "widened": 1
     }
   ]
 }

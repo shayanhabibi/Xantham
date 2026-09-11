@@ -7,6 +7,9 @@
 {"name":"Parcel","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Parcel","message":"ParamObject Create synthesized (D3)"}]}
 {"name":"Solo","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Solo","message":"ParamObject Create synthesized (D3)"},{"name":"SP.MethodMemberAsCreateParameter","key":"SP002","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Solo.tag","message":"method member reads as a function-typed Create parameter; the delegate receives no this"}]}
 {"name":"Meta","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Meta","message":"ParamObject Create synthesized (D3)"}]}
-{"name":"scope","tier":"exact","findings":[]}
-{"name":"parcels","tier":"exact","findings":[]}
-{"name":"VERSION","tier":"exact","findings":[]}
+{"name":"Exports.Widget","tier":"exact","findings":[]}
+{"name":"Exports.Gauge","tier":"exact","findings":[]}
+{"name":"Exports.scope","tier":"exact","findings":[]}
+{"name":"Exports.parcels","tier":"exact","findings":[]}
+{"name":"Exports.Solo","tier":"exact","findings":[]}
+{"name":"Exports.VERSION","tier":"exact","findings":[]}

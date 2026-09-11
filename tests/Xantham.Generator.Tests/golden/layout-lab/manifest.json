@@ -3,9 +3,9 @@
   "package": "layout-lab",
   "module": "LayoutLab",
   "counts": {
-    "exact": 7,
+    "exact": 13,
     "ergonomic": 1,
-    "widened": 3,
+    "widened": 0,
     "escape": 0
   },
   "passes": [
@@ -18,11 +18,6 @@
       "pass": "SP - synthesize-paramobjects",
       "total": 1,
       "ergonomic": 1
-    },
-    {
-      "pass": "DO - dedupe-overloads",
-      "total": 3,
-      "widened": 3
     }
   ]
 }

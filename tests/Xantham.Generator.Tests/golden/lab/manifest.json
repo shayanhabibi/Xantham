@@ -3,7 +3,7 @@
   "package": "phase-b-lab",
   "module": "PhaseBLab",
   "counts": {
-    "exact": 18,
+    "exact": 20,
     "ergonomic": 11,
     "widened": 3,
     "escape": 0

@@ -3,7 +3,7 @@
   "package": "ambient-module-lab",
   "module": "AmbientModuleLab",
   "counts": {
-    "exact": 7,
+    "exact": 15,
     "ergonomic": 8,
     "widened": 3,
     "escape": 2

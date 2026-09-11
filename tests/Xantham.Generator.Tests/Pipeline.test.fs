@@ -1161,7 +1161,7 @@ let pipelineTests =
                               "'then' collides across the intersection's operands and TypeScript reduces the whole type to never; the operand that does not mark 'then' nullable is the type"
                               "Timer.then(callback)(self)",
                               "'then' collides across the intersection's operands and TypeScript reduces the whole type to never; the operand that does not mark 'then' nullable is the type"
-                              "reduced",
+                              "entry.reduced",
                               "'then' collides across the intersection's operands and TypeScript reduces the whole type to never; the operand that does not mark 'then' nullable is the type" ]
                             "the alias, its use and the member position are each owned once"
 
@@ -2282,7 +2282,7 @@ let pipelineTests =
                       // land in - `never` is the only branch this drops.
                       Expect.equal
                           deferred
-                          [ "Divergent"; "OrUndefined"; "divergent(value)" ]
+                          [ "Divergent"; "OrUndefined"; "entry.divergent(value)" ]
                           "both divergent pairs and the use site of one"
 
                       Expect.isEmpty
@@ -3131,12 +3131,12 @@ let pipelineTests =
 
                           Expect.equal
                               (symbolsOf "MB001")
-                              [ "Station.marked(b)"; "marked(b)"; "markedAny(b)" ]
+                              [ "Station.marked(b)"; "entry.marked(b)"; "entry.markedAny(b)" ]
                               "every ? in the fixture, at a bare function and at a method"
 
                           Expect.equal
                               (symbolsOf "MB006")
-                              [ "Station.unioned(b)"; "unioned(b)" ]
+                              [ "Station.unioned(b)"; "entry.unioned(b)" ]
                               "and the parameters whose type admits undefined without one"
 
                       testCase "a required parameter carries neither finding" <| fun _ ->
@@ -3656,7 +3656,7 @@ let pipelineTests =
                               (rendered.Findings
                                |> List.filter (fun finding -> finding.Message.Contains "not among the generated")
                                |> List.map _.Symbol)
-                              [ "Panel.widget"; "Panel.boxed"; "Panel.pair"; "mount(widget)"; "mount()" ]
+                              [ "Panel.widget"; "Panel.boxed"; "Panel.pair"; "entry.mount(widget)"; "entry.mount()" ]
                               "every reference into the dependency is a widening with a name" ])
 
         // Wave five lane S (O7's `ship` disposition). Two dependencies are installed beside the
@@ -4057,7 +4057,7 @@ let pipelineTests =
                            |> List.filter (fun f -> f.Key = "TR020")
                            |> List.map _.Symbol
                            |> List.sort)
-                          [ "Feed.take(event)"; "runModel()"; "runModel(input)" ]
+                          [ "Feed.take(event)"; "entry.runModel()"; "entry.runModel(input)" ]
                           "and these three are the only accesses left widened" ])
 
         // Wave thirteen lane CH. A pure index signature reached anonymously resolves
