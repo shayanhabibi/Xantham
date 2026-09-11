@@ -2,4 +2,4 @@
 {"name":"Message","file":"provider.d.ts","tier":"exact","findings":[]}
 {"name":"Client","file":"provider.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Client","message":"ParamObject Create synthesized (D3)"},{"name":"SP.MethodMemberAsCreateParameter","key":"SP002","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Client.send","message":"method member reads as a function-typed Create parameter; the delegate receives no this"}]}
 {"name":"HiddenFunction","file":"provider.d.ts","tier":"exact","findings":[]}
-{"name":"visible","tier":"exact","findings":[]}
+{"name":"Exports.visible","tier":"exact","findings":[]}

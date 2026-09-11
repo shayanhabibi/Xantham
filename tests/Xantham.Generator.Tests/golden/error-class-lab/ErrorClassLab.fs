@@ -90,6 +90,35 @@ type Warned =
     [<ParamObject; Emit("$0")>]
     static member Create (note: string, name: string, message: string, ?stack: string, ?cause: obj) : Warned = jsNative
 
+module ErrorLab =
+    module Faults =
+        /// <summary>The package's value exports, each bound to its import.</summary>
+        [<Erase>]
+        type Exports =
+            /// <summary>
+            /// The positive. A class an ambient module exports whose base is the compiler library's
+            /// <c>Error</c>: the class form, and <c>inherit exn</c>, so a consumer raises it and catches it by type.
+            /// </summary>
+            [<Import("Fault", "error-lab:faults"); EmitConstructor>]
+            static member Fault (message: string) : Fault = jsNative
+            /// <summary>
+            /// A second entrypoint over the same base, declared <c>abstract</c>. Both halves of the entrypoint
+            /// rule hold at once, and the <c>inherit</c> is the same one.
+            /// </summary>
+            [<Import("Halt", "error-lab:faults"); EmitConstructor>]
+            static member Halt (message: string, code: float) : Halt = jsNative
+            /// <summary>
+            /// The negative for the class form: an entrypoint with no base at all, which carries no
+            /// <c>inherit</c> line.
+            /// </summary>
+            [<Import("Runner", "error-lab:faults"); EmitConstructor>]
+            static member Runner (label: string) : Runner = jsNative
+            /// <summary>
+            /// <c>Error</c> in a reference position, which the compiler-lib table now answers.
+            /// </summary>
+            [<Import("reason", "error-lab:faults")>]
+            static member reason (fault: Fault) : exn = jsNative
+
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
@@ -105,26 +134,3 @@ type Exports =
     /// </summary>
     [<Global("Mishap"); EmitConstructor>]
     static member Mishap (?message: string, ?options: obj) : Mishap = jsNative
-    /// <summary>
-    /// The positive. A class an ambient module exports whose base is the compiler library's
-    /// <c>Error</c>: the class form, and <c>inherit exn</c>, so a consumer raises it and catches it by type.
-    /// </summary>
-    [<Import("Fault", "error-lab:faults"); EmitConstructor>]
-    static member Fault (message: string) : Fault = jsNative
-    /// <summary>
-    /// A second entrypoint over the same base, declared <c>abstract</c>. Both halves of the entrypoint
-    /// rule hold at once, and the <c>inherit</c> is the same one.
-    /// </summary>
-    [<Import("Halt", "error-lab:faults"); EmitConstructor>]
-    static member Halt (message: string, code: float) : Halt = jsNative
-    /// <summary>
-    /// The negative for the class form: an entrypoint with no base at all, which carries no
-    /// <c>inherit</c> line.
-    /// </summary>
-    [<Import("Runner", "error-lab:faults"); EmitConstructor>]
-    static member Runner (label: string) : Runner = jsNative
-    /// <summary>
-    /// <c>Error</c> in a reference position, which the compiler-lib table now answers.
-    /// </summary>
-    [<Import("reason", "error-lab:faults")>]
-    static member reason (fault: Fault) : exn = jsNative

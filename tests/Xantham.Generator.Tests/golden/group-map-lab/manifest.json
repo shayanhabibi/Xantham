@@ -3,7 +3,7 @@
   "package": "group-map-lab",
   "module": "GroupMapLab",
   "counts": {
-    "exact": 5,
+    "exact": 6,
     "ergonomic": 3,
     "widened": 1,
     "escape": 0

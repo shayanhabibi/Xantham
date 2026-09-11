@@ -34,11 +34,13 @@ type Depot2 =
     [<Import("Depot.open", "statics-lab:depot")>]
     static member ``open`` (slot: string) : Depot2 = jsNative
 
-/// <summary>The package's value exports, each bound to its import.</summary>
-[<Erase>]
-type Exports =
-    /// <summary>
-    /// An exported class sharing its name with the global interface above.
-    /// </summary>
-    [<Import("Depot", "statics-lab:depot"); EmitConstructor>]
-    static member Depot (slot: string) : Depot2 = jsNative
+module StaticsLab =
+    module Depot =
+        /// <summary>The package's value exports, each bound to its import.</summary>
+        [<Erase>]
+        type Exports =
+            /// <summary>
+            /// An exported class sharing its name with the global interface above.
+            /// </summary>
+            [<Import("Depot", "statics-lab:depot"); EmitConstructor>]
+            static member Depot (slot: string) : Depot2 = jsNative

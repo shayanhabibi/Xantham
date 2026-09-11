@@ -1,6 +1,7 @@
 ﻿module Xantham.Generator.Shape.Ordering
 
 open Xantham.Generator
+open Xantham.Generator.Measure
 open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator.Shape.Spec
@@ -11,11 +12,11 @@ let orderDeclarations: Pass<ShapeModel> =
     Pass.pure' "order-declarations" (fun ctx model ->
         let orderKey (order: DeclOrder option) (name: string) =
             (match order with
-             | Some order -> Grouping.sourceOrderKey ctx.PackageDir (Measure.String.untag order.File), order.NodeIndex
-             | None -> (2, "", ""), Measure.Int.tag<Measure.nodeId> System.Int32.MaxValue),
+             | Some order -> Grouping.sourceOrderKey ctx.PackageDir (order.File / uom<node>), order.NodeIndex
+             | None -> (2, "", ""), (System.Int32.MaxValue * uom<nodeId>)),
             name
 
-        let decls =
+        let declarationNames, decls =
             model.Decls
             |> List.sortBy (function
                 | FsInterface decl -> orderKey decl.Order decl.Name
@@ -26,17 +27,58 @@ let orderDeclarations: Pass<ShapeModel> =
                 | FsDelegateType decl -> orderKey decl.Order decl.Name
                 | FsPhantom decl -> orderKey decl.Order decl.Name
                 | FsMeasure decl -> orderKey decl.Order decl.Name
-                | FsExports _ -> ((2, "", ""), Measure.Int.tag<Measure.nodeId> System.Int32.MaxValue), "￿")
+                | FsExports _ -> ((2, "", ""), (System.Int32.MaxValue * uom<nodeId>)), "￿")
+            |> List.map (function
+                | FsInterface decl as declWrap -> decl.Name, declWrap
+                | FsStringEnum decl as declWrap -> decl.Name, declWrap
+                | FsTaggedUnion decl as declWrap -> decl.Name, declWrap
+                | FsEnum decl as declWrap -> decl.Name, declWrap
+                | FsAbbrev decl as declWrap -> decl.Name, declWrap
+                | FsDelegateType decl as declWrap -> decl.Name, declWrap
+                | FsPhantom decl as declWrap -> decl.Name, declWrap
+                | FsMeasure decl as declWrap -> decl.Name, declWrap
+                | FsExports decl as declWrap -> "", declWrap)
+            |> List.unzip
 
         let exports =
             model.ExportMembers
-            |> List.sortBy (fun (index, m) -> index, m.Name)
-            |> List.map snd
+            |> List.sortBy (fun owned -> owned.HarvestIndex, owned.Member.Name)
+
+        let allocatedExports =
+            exports
+            |> List.map _.Owner
+            // These declarations are types, which may share a name with a companion
+            // module in the same generated file. Reserving them as module paths would
+            // split cloudflare:email and cloudflare:workers into hashed parents merely
+            // because the package also declares a type Cloudflare. Actual container
+            // leaves still reserve all declaration names below.
+            |> ExportLayout.allocate (GeneratorConfig.runtimePackage ctx.Config ctx.PackageName) []
+
+        let exportDecls =
+            exports
+            |> List.groupBy _.Owner
+            |> List.choose (function
+                | _, [] -> None
+                | owner, exports ->
+                    Some
+                    <| FsExports
+                        {
+                            Name =
+                                allocatedExports
+                                |> Map.tryFind owner
+                                |> Option.defaultValue []
+                                |> ExportLayout.containerName declarationNames owner
+                            FsExportContainer.Owner = owner
+                            Members = exports
+                        })
+            |> List.sortBy (function
+                | FsExports container -> container.Name
+                | _ -> "")
 
         { model with
             Decls =
-                match exports with
+                match exportDecls with
                 | [] -> decls
-                | exports -> decls @ [ FsExports exports ]
+                | exportDecls -> decls @ exportDecls
             ExportMembers = []
         })

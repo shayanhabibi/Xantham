@@ -3,7 +3,7 @@
   "package": "hook-interface-lab",
   "module": "HookInterfaceLab",
   "counts": {
-    "exact": 1,
+    "exact": 5,
     "ergonomic": 8,
     "widened": 1,
     "escape": 0

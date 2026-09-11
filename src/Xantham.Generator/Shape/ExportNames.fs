@@ -1,6 +1,7 @@
 module Xantham.Generator.Shape.ExportNames
 
 open Xantham.Generator
+open Xantham.Generator.Measure
 open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator.Shape.Spec
@@ -68,7 +69,7 @@ let nameExports: Pass<ShapeModel> =
                         export.Symbol.ParentSymbolId
                         |> ValueOption.toOption
                         |> Option.bind (fun parent -> Map.tryFind parent model.Harvest.Namespaces)
-                        |> Option.map (Measure.String.untag >> Naming.pascalSegment)
+                        |> Option.map (fun value -> Naming.pascalSegment (value / uom<symbolName>))
 
                     // The claim every export makes, in harvest order, read before any of them is
                     // granted. A contested name is visible only from the whole list, and the

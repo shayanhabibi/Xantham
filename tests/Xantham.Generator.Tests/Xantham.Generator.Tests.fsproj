@@ -18,6 +18,8 @@
         <Compile Include="Ownership.test.fs" />
         <Compile Include="DeclarationCatalog.test.fs" />
         <Compile Include="Pipeline.test.fs" />
+        <Compile Include="ExportLayout.test.fs" />
+        <Compile Include="ExportLayoutPaths.test.fs" />
         <Compile Include="Bootstrap.test.fs" />
         <Compile Include="Cli.test.fs" />
         <Compile Include="Main.fs" />

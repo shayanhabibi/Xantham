@@ -1,6 +1,8 @@
 ﻿module Xantham.Generator.Shape.FreeTypeParams
 
 open Xantham.Generator
+open Xantham.Generator.Measure
+open Xantham.Generator.Measure
 open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator.Shape.Spec
@@ -31,7 +33,7 @@ let private freeTypeParams (model: ShapeModel) (root: int<Measure.typeId>) : int
                 elif
                     typeId <> root
                     && Map.containsKey typeId model.DeclNames
-                    && ((facts.SymbolName |> Option.map Measure.String.untag) |> Option.exists (isSyntheticName >> not))
+                    && (facts.SymbolName |> Option.exists (isSyntheticName >> not))
                 then
                     // A declaration of its own: it binds what it declares. Only an
                     // instantiation carries arguments worth reading; the declared form's

@@ -3,7 +3,7 @@
   "package": "ctor-lab",
   "module": "CtorLab",
   "counts": {
-    "exact": 3,
+    "exact": 6,
     "ergonomic": 9,
     "widened": 0,
     "escape": 0

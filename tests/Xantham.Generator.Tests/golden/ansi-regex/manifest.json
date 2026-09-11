@@ -3,7 +3,7 @@
   "package": "ansi-regex",
   "module": "AnsiRegex",
   "counts": {
-    "exact": 0,
+    "exact": 1,
     "ergonomic": 1,
     "widened": 1,
     "escape": 0

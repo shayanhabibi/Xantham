@@ -1,6 +1,7 @@
 ﻿module Xantham.Generator.Shape.Anonymous
 
 open Xantham.Generator
+open Xantham.Generator.Measure
 open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator.Shape.Spec
@@ -63,7 +64,12 @@ let private aliasDeclarationForms (model: ShapeModel) : Map<int<Measure.symbolId
 
 /// The consistent parameter bindings recoverable from two compiler-identified forms of one
 /// alias. Transformed fragments contribute no bindings; conflicting bindings reject the result.
-let private unifyAlias (model: ShapeModel) (parameters: Set<int<Measure.typeId>>) (declared: int<Measure.typeId>) (instance: int<Measure.typeId>) =
+let private unifyAlias
+    (model: ShapeModel)
+    (parameters: Set<int<Measure.typeId>>)
+    (declared: int<Measure.typeId>)
+    (instance: int<Measure.typeId>)
+    =
     let mutable subst = Map.empty
     let mutable ok = true
     let mutable seen = Set.empty
@@ -243,7 +249,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
     let namespaceOf (facts: TypeFacts) =
         facts.SymbolParent
         |> Option.bind (fun parent -> Map.tryFind parent model.Harvest.Namespaces)
-        |> Option.map (Measure.String.untag >> Naming.pascalSegment)
+        |> Option.map (fun value -> Naming.pascalSegment (value / uom<symbolName>))
 
     let claim (owner: string option) (preferred: string) typeId order =
         // A member key reaches here verbatim, and a declaration name admits less than a member
@@ -353,7 +359,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
             // own (D5), so the consumer reads `x: float * y: float` where `Func<float, float,
             // string>` said only how many arguments there are.
             (GeneratorConfig.disposition ctx.Config facts.Origin = Ship
-             || (facts.SymbolName |> Option.map Measure.String.untag) |> Option.forall isSyntheticName)
+             || facts.SymbolName |> Option.forall isSyntheticName)
             && not (Set.contains facts.Response.TypeId signatureShaped)
             // F# has no rank-2 form, so a generic signature can only be approximated by
             // hoisting its variables onto the declaration - and a reference has nothing to
@@ -372,7 +378,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
             // tuples F# tuples (D7). An anonymous shape belongs to the entry package whatever
             // file its node sits in (D6).
             (GeneratorConfig.disposition ctx.Config facts.Origin = Ship
-             || (facts.SymbolName |> Option.map Measure.String.untag) |> Option.forall isSyntheticName)
+             || facts.SymbolName |> Option.forall isSyntheticName)
             && (arrayElement model facts).IsNone
             && not (isTuple facts)
             && facts.ConstructSignatures.IsEmpty
@@ -433,8 +439,9 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                     // A path-derived name already carries its owner, so only a name taken from
                     // the type's own symbol has a namespace left to fall back on.
                     let preferred, owner =
-                        match (facts.SymbolName |> Option.map Measure.String.untag) with
-                        | Some name when not (isSyntheticName name) -> Naming.pascalSegment name, namespaceOf facts
+                        match facts.SymbolName with
+                        | Some name when not (isSyntheticName name) ->
+                            Naming.pascalSegment (name / uom<symbolName>), namespaceOf facts
                         | _ -> path, None
 
                     let claimed = claim owner preferred typeId order
@@ -532,7 +539,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                     then
                         for operand in facts.IntersectionMembers do
                             match Map.tryFind operand model.Types with
-                            | Some operandFacts when (operandFacts.SymbolName |> Option.map Measure.String.untag) |> Option.exists (isSyntheticName >> not) ->
+                            | Some operandFacts when operandFacts.SymbolName |> Option.exists (isSyntheticName >> not) ->
                                 walk (into "Base") order operand
                             | _ -> ()
 

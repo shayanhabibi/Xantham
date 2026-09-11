@@ -1,6 +1,7 @@
 ﻿module Xantham.Generator.Shape.LiteralUnions
 
 open Xantham.Generator
+open Xantham.Generator.Measure
 open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator.Shape.Spec
@@ -18,7 +19,8 @@ let private dedupeEnumCases (cases: (string * int) list) =
 /// same way a synthesized declaration name is (SY005), reported only where that sanitisation
 /// changes the name `Naming.pascalSegment` alone would have produced - a plain dash/underscore/dot
 /// name capitalises identically either way and carries no finding.
-let private sanitisedCaseName (owner: string) (symbolName: string) =
+let private sanitisedCaseName (owner: string) (symbolName: string<symbolName>) =
+    let symbolName = symbolName / uom<symbolName>
     let legacy = Naming.pascalSegment symbolName
     let sanitised = Naming.enumCaseOfString symbolName
 
@@ -81,7 +83,7 @@ let classifyLiteralUnions: Pass<ShapeModel> =
                                             literals
                                             |> List.map (fun (m, literal) ->
                                                 let caseName =
-                                                    match (m.SymbolName |> Option.map Measure.String.untag) with
+                                                    match m.SymbolName with
                                                     | Some symbolName when not (isSyntheticName symbolName) ->
                                                         let sanitised, finding = sanitisedCaseName name symbolName
                                                         finding |> Option.iter (fun f -> findings <- findings @ [ f ])
@@ -108,7 +110,7 @@ let classifyLiteralUnions: Pass<ShapeModel> =
                                             literals
                                             |> List.map (fun (m, literal) ->
                                                 let caseName =
-                                                    match (m.SymbolName |> Option.map Measure.String.untag) with
+                                                    match m.SymbolName with
                                                     | Some symbolName when not (isSyntheticName symbolName) ->
                                                         let sanitised, finding = sanitisedCaseName name symbolName
                                                         finding |> Option.iter (fun f -> findings <- findings @ [ f ])

@@ -6,7 +6,7 @@ open Expecto
 open Xantham.TypeScript.Wire
 open Xantham.Generator
 
-let private packageDir = "C:/repo/tests/fixtures/ansi-regex/node_modules/ansi-regex"
+let private packageDir = "C:/repo/tests/fixtures/ansi-regex/node_modules/ansi-regex" * Measure.uom<Measure.dirPath>
 
 /// A symbol whose first declaration handle points at `path`.
 let private declaredAt (path: string) =
@@ -34,12 +34,12 @@ let classifyTests =
         testCase "a node_modules entry is that dependency, scoped names kept whole" <| fun _ ->
             Expect.equal
                 (Grouping.classify packageDir (declaredAt "C:/repo/node_modules/left-pad/index.d.ts"))
-                (Dependency "left-pad")
+                (Dependency ("left-pad" * Measure.uom<Measure.npmDependency>))
                 "plain"
 
             Expect.equal
                 (Grouping.classify packageDir (declaredAt "C:/repo/node_modules/@types/node/fs.d.ts"))
-                (Dependency "@types/node")
+                (Dependency ("@types/node" * Measure.uom<Measure.npmDependency>))
                 "scoped"
 
         // Wave five lane W. npm's own layout: a package's dependencies are installed under its
@@ -49,14 +49,14 @@ let classifyTests =
         testCase "a dependency installed under the entry package is that dependency" <| fun _ ->
             Expect.equal
                 (Grouping.classify packageDir (declaredAt $"{packageDir}/node_modules/left-pad/index.d.ts"))
-                (Dependency "left-pad")
+                (Dependency ("left-pad" * Measure.uom<Measure.npmDependency>))
                 "one level below the entry directory"
 
             Expect.equal
                 (Grouping.classify
                     packageDir
                     (declaredAt $"{packageDir}/node_modules/left-pad/node_modules/@types/node/fs.d.ts"))
-                (Dependency "@types/node")
+                (Dependency ("@types/node" * Measure.uom<Measure.npmDependency>))
                 "and nested under that dependency in turn"
 
         testCase "no declaration path is unclassified, which dispositions as the entry" <| fun _ ->
@@ -72,30 +72,30 @@ let classifyTests =
 
             let config =
                 { GeneratorConfig.Default with
-                    Groups = Map.ofList [ "typescript/lib", Reference ] }
+                    Groups = Map.ofList [ "typescript/lib" * Measure.uom<Measure.npmDependency>, Reference ] }
 
             Expect.equal (GeneratorConfig.disposition config CompilerLib) Reference "configured"
 
         testCase "the naming contract: package names to module names" <| fun _ ->
-            Expect.equal (Naming.packageModule "ansi-regex") "AnsiRegex" "plain"
-            Expect.equal (Naming.packageModule "@cloudflare/workers-types") "Cloudflare.WorkersTypes" "scoped"
+            Expect.equal (Naming.packageModule ("ansi-regex" * Measure.uom<Measure.npmDependency>)) "AnsiRegex" "plain"
+            Expect.equal (Naming.packageModule ("@cloudflare/workers-types" * Measure.uom<Measure.npmDependency>)) "Cloudflare.WorkersTypes" "scoped"
             let plain = GeneratorConfig.Default
 
-            Expect.equal (Naming.groupModule plain "ansi-regex" CompilerLib) "TypeScript.Lib" "the lib module"
+            Expect.equal (Naming.groupModule plain ("ansi-regex" * Measure.uom<Measure.npmDependency>) CompilerLib) "TypeScript.Lib" "the lib module"
 
-            Expect.equal (Naming.groupModule plain "ansi-regex" (Dependency "left-pad")) "LeftPad" "a dependency"
+            Expect.equal (Naming.groupModule plain ("ansi-regex" * Measure.uom<Measure.npmDependency>) (Dependency ("left-pad" * Measure.uom<Measure.npmDependency>))) "LeftPad" "a dependency"
 
-            Expect.equal (Naming.groupModule plain "ansi-regex" EntryPackage) "AnsiRegex" "the entry"
+            Expect.equal (Naming.groupModule plain ("ansi-regex" * Measure.uom<Measure.npmDependency>) EntryPackage) "AnsiRegex" "the entry"
 
             // A DefinitelyTyped package is named for the library it describes, so the module an
             // F# consumer opens is the library's.
-            Expect.equal (Naming.packageModule "@types/three") "Three" "a types package"
-            Expect.equal (Naming.packageModule "@types/babel__core") "Babel.Core" "and one whose scope DT mangled"
+            Expect.equal (Naming.packageModule ("@types/three" * Measure.uom<Measure.npmDependency>)) "Three" "a types package"
+            Expect.equal (Naming.packageModule ("@types/babel__core" * Measure.uom<Measure.npmDependency>)) "Babel.Core" "and one whose scope DT mangled"
 
             // The reference side derives it too, or a dependency would be opened under a name no
             // `ship` run of it ever writes.
             Expect.equal
-                (Naming.groupModule GeneratorConfig.Default "ansi-regex" (Dependency "@types/three"))
+                (Naming.groupModule GeneratorConfig.Default ("ansi-regex" * Measure.uom<Measure.npmDependency>) (Dependency ("@types/three" * Measure.uom<Measure.npmDependency>)))
                 "Three"
                 "a types dependency"
 
@@ -105,11 +105,11 @@ let classifyTests =
                     Namespace = Some "FSharp.CloudEdge"
                     Groups =
                         Map.ofList
-                            [ "@cloudedge/agents", Reference
-                              "@cloudedge/kv-store", Reference
-                              "cloudedge-legacy", Reference ] }
+                            [ "@cloudedge/agents" * Measure.uom<Measure.npmDependency>, Reference
+                              "@cloudedge/kv-store" * Measure.uom<Measure.npmDependency>, Reference
+                              "cloudedge-legacy" * Measure.uom<Measure.npmDependency>, Reference ] }
 
-            let entry = "@cloudedge/sdk"
+            let entry = "@cloudedge/sdk" * Measure.uom<Measure.npmDependency>
 
             Expect.equal
                 (Naming.groupModule sdk entry EntryPackage)
@@ -117,24 +117,24 @@ let classifyTests =
                 "the entry is named under the namespace like any member"
 
             Expect.equal
-                (Naming.groupModule sdk entry (Dependency "@cloudedge/agents"))
+                (Naming.groupModule sdk entry (Dependency ("@cloudedge/agents" * Measure.uom<Measure.npmDependency>)))
                 "FSharp.CloudEdge.Agents"
                 "a listed group takes a leaf under it"
 
             Expect.equal
-                (Naming.groupModule sdk entry (Dependency "@cloudedge/kv-store"))
+                (Naming.groupModule sdk entry (Dependency ("@cloudedge/kv-store" * Measure.uom<Measure.npmDependency>)))
                 "FSharp.CloudEdge.KvStore"
                 "whose leaf is PascalCased like any other segment"
 
             // Membership is what `groups` says, so a family spanning scopes stays one family.
             Expect.equal
-                (Naming.groupModule sdk entry (Dependency "cloudedge-legacy"))
+                (Naming.groupModule sdk entry (Dependency ("cloudedge-legacy" * Measure.uom<Measure.npmDependency>)))
                 "FSharp.CloudEdge.CloudedgeLegacy"
                 "including an unscoped member"
 
             // A dependency the configuration leaves unnamed keeps the name an independently
             // generated binding gives it.
-            Expect.equal (Naming.groupModule sdk entry (Dependency "left-pad")) "LeftPad" "an unlisted dependency"
+            Expect.equal (Naming.groupModule sdk entry (Dependency ("left-pad" * Measure.uom<Measure.npmDependency>))) "LeftPad" "an unlisted dependency"
 
             Expect.equal (Naming.groupModule sdk entry CompilerLib) "TypeScript.Lib" "and the compiler lib"
 
@@ -150,8 +150,8 @@ let classifyTests =
                     Namespace = Some "FSharp.CloudEdge" }
 
             Expect.equal
-                (Naming.groupModule member' "@cloudedge/agents" EntryPackage)
-                (Naming.groupModule sdk entry (Dependency "@cloudedge/agents"))
+                (Naming.groupModule member' ("@cloudedge/agents" * Measure.uom<Measure.npmDependency>) EntryPackage)
+                (Naming.groupModule sdk entry (Dependency ("@cloudedge/agents" * Measure.uom<Measure.npmDependency>)))
                 "a member generated as the entry takes the name the root templates"
 
         testCase "a namespace reaches no group the configuration leaves unnamed" <| fun _ ->
@@ -160,7 +160,7 @@ let classifyTests =
                     Namespace = Some "FSharp.CloudEdge" }
 
             Expect.equal
-                (Naming.groupModule config "@cloudedge/sdk" (Dependency "@cloudedge/agents"))
+                (Naming.groupModule config ("@cloudedge/sdk" * Measure.uom<Measure.npmDependency>) (Dependency ("@cloudedge/agents" * Measure.uom<Measure.npmDependency>)))
                 "Cloudedge.Agents"
                 "an unlisted sibling"
 

@@ -6,6 +6,7 @@ module Xantham.Generator.Pipeline
 
 open System
 open System.IO
+open Xantham.Generator.Measure
 open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 
@@ -143,7 +144,12 @@ let private declOrigins compilerOnly (ctx: Context) (shape: ShapeModel) : Map<st
             match Map.tryFind name origins, Map.tryFind typeId shape.Types with
             | None, Some facts ->
                 let origin =
-                    match Map.tryFind name declared, (facts.SymbolName |> Option.map Measure.String.untag), (facts.DeclFile |> Option.map Measure.String.untag), facts.Origin with
+                    match
+                        Map.tryFind name declared,
+                        (facts.SymbolName |> Option.map (fun value -> value / uom<_>)),
+                        (facts.DeclFile |> Option.map (fun value -> value / uom<_>)),
+                        facts.Origin
+                    with
                     // A global object belongs to reusable core only when the complete source
                     // inventory certifies that this program adds no declarations to it.
                     | _, Some "globalThis", None, _ when compilerOnly -> CompilerLib
@@ -168,7 +174,7 @@ let private declFamilies (shape: ShapeModel) : Map<string, string> =
               Some {
                        Origin = CompilerLib
                        DeclFile = Some file
-                   } -> Map.add name (Grouping.libFamily (Measure.String.untag file)) families
+                   } -> Map.add name (Grouping.libFamily (file / uom<_>)) families
             | _ -> families)
         Map.empty
 
@@ -221,11 +227,11 @@ let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel)
     let groupOf decl =
         let origin =
             match Render.declName decl with
-            | Some name when Map.containsKey name origins -> originOf name
+            | name when Map.containsKey name origins -> originOf name
             | name ->
                 secondaryAliasOrder decl
-                |> Option.map (fun order -> Grouping.classifyFile ctx.PackageDir (Measure.String.untag order.File))
-                |> Option.defaultWith (fun () -> name |> Option.map originOf |> Option.defaultValue Unclassified)
+                |> Option.map (fun order -> Grouping.classifyFile ctx.PackageDir (order.File / uom<node>))
+                |> Option.defaultWith (fun () -> name |> originOf)
 
         emittingGroup ctx origin
 
@@ -247,15 +253,15 @@ let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel)
         | CompilerLib ->
             let family =
                 match Render.declName decl with
-                | Some name when Map.containsKey name origins ->
+                | name when Map.containsKey name origins ->
                     Map.tryFind name declared
                     |> Option.bind _.Order
-                    |> Option.map (fun order -> Grouping.libFamily (Measure.String.untag order.File))
+                    |> Option.map (fun order -> Grouping.libFamily (order.File / uom<_>))
                     |> Option.defaultWith (fun () -> familyOf name)
                 | name ->
                     secondaryAliasOrder decl
-                    |> Option.map (fun order -> Grouping.libFamily (Measure.String.untag order.File))
-                    |> Option.defaultWith (fun () -> name |> Option.map familyOf |> Option.defaultValue "Es")
+                    |> Option.map (fun order -> Grouping.libFamily (order.File / uom<_>))
+                    |> Option.defaultWith (fun () -> name |> familyOf)
 
             CompilerLib, family
         | origin -> origin, ""
@@ -335,7 +341,10 @@ let private namespaceFindings (ctx: Context) (shape: ShapeModel) =
                     Some(key, named)
             | _ -> None)
         |> List.sortBy fst
-        |> List.map (fun (key, named) -> Finding.make key (EmitGroups.GroupModuleFromNamespace(key, named)))
+        |> List.map (fun (key, named) ->
+            Finding.make
+                (key / uom<npmDependency>)
+                (EmitGroups.GroupModuleFromNamespace(key / uom<npmDependency>, named)))
 
 /// Shape -> Render: declarations plus every finding of every earlier tier.
 let toRender (ctx: Context) (shape: ShapeModel) (findings: Finding list) : RenderModel =

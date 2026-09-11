@@ -3,7 +3,7 @@
   "package": "declaration-identity-lab",
   "module": "DeclarationIdentityLab",
   "counts": {
-    "exact": 0,
+    "exact": 2,
     "ergonomic": 13,
     "widened": 0,
     "escape": 0

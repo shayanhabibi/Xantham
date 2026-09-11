@@ -185,37 +185,9 @@ let dedupeOverloads: Pass<ShapeModel> =
                                     }
                             | decl -> decl)
 
-                    let mutable seenExports = Set.empty
-
-                    let exportMembers =
-                        model.ExportMembers
-                        |> List.filter (fun (_, m) ->
-                            let key, dropped =
-                                match m.Body with
-                                | ExportFunction(parameters, _) ->
-                                    Some("fn", signatureKey [] parameters),
-                                    DedupeOverloads.ExportFunctionOverloadDropped
-                                | ExportConstructor(parameters, _) ->
-                                    Some("new", signatureKey [] parameters), DedupeOverloads.OverloadDropped
-                                | ExportValue _ -> None, DedupeOverloads.OverloadDropped
-
-                            match key with
-                            | None -> true
-                            | Some key ->
-                                let key = (m.Name, key).ToString()
-
-                                if Set.contains key seenExports then
-                                    findings <- findings @ [ Finding.make m.Name dropped ]
-
-                                    false
-                                else
-                                    seenExports <- Set.add key seenExports
-                                    true)
-
                     let model =
                         { model with
                             Decls = decls @ literalDecls
-                            ExportMembers = exportMembers
                         }
 
                     return

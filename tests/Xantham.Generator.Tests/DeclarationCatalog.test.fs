@@ -7,6 +7,7 @@ open System.Text.Json
 open System.Text.Json.Nodes
 open Expecto
 open Xantham.Generator
+open Xantham.Generator.Measure
 
 let private fixture = Path.GetFullPath(Path.Combine(__SOURCE_DIRECTORY__, "..", "fixtures", "declaration-identity-lab"))
 
@@ -269,7 +270,7 @@ let share (agent: Identity.Adapter.Agent) : Identity.Root.Agent = agent
                 writePackageFile directory "node_modules/owner/index.d.ts" """export { Two } from "dep";"""
                 writePackageFile directory "node_modules/owner/node_modules/dep/package.json" """{"name":"dep","version":"2.0.0","types":"index.d.ts"}"""
                 writePackageFile directory "node_modules/owner/node_modules/dep/index.d.ts" "export interface Two { two: number; }"
-                let groups = Map.ofList [ "dep", Ship; "owner", Ship ]
+                let groups = Map.ofList [ "dep" * uom<npmDependency>, Ship; "owner" * uom<npmDependency>, Ship ]
                 let root = { configured directory "Root" "index.d.ts" [||] with Groups = groups }
                 Pipeline.run root directory (Path.Combine(directory, "root")) |> Async.RunSynchronously |> ignore
                 let reference = Path.Combine(directory, "root", "declarations.json")

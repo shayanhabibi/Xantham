@@ -3,7 +3,7 @@
   "package": "statics-collision-lab",
   "module": "StaticsCollisionLab",
   "counts": {
-    "exact": 1,
+    "exact": 2,
     "ergonomic": 1,
     "widened": 1,
     "escape": 0

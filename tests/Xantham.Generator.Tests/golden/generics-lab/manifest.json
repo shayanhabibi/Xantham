@@ -3,7 +3,7 @@
   "package": "generics-lab",
   "module": "GenericsLab",
   "counts": {
-    "exact": 5,
+    "exact": 6,
     "ergonomic": 10,
     "widened": 1,
     "escape": 0

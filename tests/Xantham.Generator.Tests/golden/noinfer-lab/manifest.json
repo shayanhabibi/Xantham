@@ -3,7 +3,7 @@
   "package": "noinfer-lab",
   "module": "NoinferLab",
   "counts": {
-    "exact": 1,
+    "exact": 2,
     "ergonomic": 1,
     "widened": 3,
     "escape": 0

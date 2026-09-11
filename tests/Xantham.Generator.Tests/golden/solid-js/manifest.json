@@ -3,9 +3,9 @@
   "package": "solid-js",
   "module": "SolidJs",
   "counts": {
-    "exact": 22,
-    "ergonomic": 96,
-    "widened": 55,
+    "exact": 64,
+    "ergonomic": 66,
+    "widened": 45,
     "escape": 18
   },
   "passes": [

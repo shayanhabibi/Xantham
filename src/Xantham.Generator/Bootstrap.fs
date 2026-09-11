@@ -5,6 +5,7 @@ module Xantham.Generator.Bootstrap
 open System
 open System.IO
 open System.Text.Json
+open Xantham.Generator.Measure
 open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 
@@ -201,11 +202,11 @@ let start (config: GeneratorConfig) (packageDir: string) : Async<TscMailbox * Co
                 {
                     Session = session
                     Config = config
-                    PackageDir = packageDir
-                    PackageName = packageName packageDir
-                    EntryFile = entry
+                    PackageDir = packageDir * uom<dirPath>
+                    PackageName = packageName packageDir * uom<npmDependency>
+                    EntryFile = entry * uom<declFile>
                 }
         with e ->
-            (mailbox :> System.IDisposable).Dispose()
+            (mailbox :> IDisposable).Dispose()
             return raise e
     }

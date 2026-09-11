@@ -168,6 +168,7 @@ let findingsTests =
                     "SE.NoValueType SE001 escape"
                     "SE.RuntimeSpecifierDerived SE002 ergonomic"
                     "SE.MutableValueReadOnly SE003 widened"
+                    "SE.ExportPathAllocated SE004 ergonomic"
                     "SP.ParamObjectSynthesized SP001 ergonomic"
                     "SP.MethodMemberAsCreateParameter SP002 ergonomic"
                     "SP.CreateNotSynthesized SP003 ergonomic"

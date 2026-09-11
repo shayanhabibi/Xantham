@@ -204,6 +204,7 @@ module FindingCodes =
             "SE.NoValueType", "SE001"
             "SE.RuntimeSpecifierDerived", "SE002"
             "SE.MutableValueReadOnly", "SE003"
+            "SE.ExportPathAllocated", "SE004"
             "SP.ParamObjectSynthesized", "SP001"
             "SP.MethodMemberAsCreateParameter", "SP002"
             "SP.CreateNotSynthesized", "SP003"
@@ -936,6 +937,9 @@ type ShapeExports =
     /// Wave four, lane N. A `var` or `let` binding - a global or a module export - emitted
     /// get-only, so an assignment a consumer is entitled to write has no F# form.
     | [<Widened>] MutableValueReadOnly
+    /// An export owner whose normalized F# container path collided with another owner or an
+    /// existing declaration and therefore received a deterministic hash suffix.
+    | [<Ergonomic>] ExportPathAllocated of owner: string * allocatedPath: string
 
     interface IFindingKind with
         member this.Message =
@@ -944,6 +948,8 @@ type ShapeExports =
             | RuntimeSpecifierDerived specifier ->
                 $"types-only package has no runtime; imports bind to {specifier}, derived rather than configured"
             | MutableValueReadOnly -> "mutable binding emitted read-only"
+            | ExportPathAllocated(owner, allocatedPath) ->
+                $"export owner {owner} allocated as {allocatedPath} to avoid an F# name collision"
 
 /// `synthesize-paramobjects`.
 [<Prefix("SP", "synthesize-paramobjects")>]

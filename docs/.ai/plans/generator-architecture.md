@@ -1287,6 +1287,44 @@ nominal `JS.Function` constraints: generic interfaces and abstract methods fail 
 an annotated inline function specializes to an F# function. The generator retains its existing
 function constraints. Reproduction details are in `../probes/constrain-function/README.md`.
 
+## Generator identity measures (2026-09-11)
+
+The generator keeps distinct measures for compiler symbol, type and node IDs, and for
+opaque strings carried through its records: source symbol names, declaration handles,
+declaration files, package names, directory paths and JavaScript import specifiers.
+Import specifiers are distinct from npm package identities because they also include
+ambient modules and public subpaths. Wire protocol records and JSON text remain boundary
+representations; the generator raises values when constructing its internal model.
+
+Raise with `value * uom<role>` and lower with `value / uom<role>`. Composite measures
+can lose only the relevant dimension: a declaration file becomes a file path through
+`file / uom<node>`. The operators support both strings and integer IDs and preserve the
+underlying value. The former tag/untag/retag helpers are removed.
+
+Measures describe a value's role, not a prohibition on transforming it. Lower once
+inside a naming, path-normalization or rendering boundary. Generated F# names, source
+fragments, diagnostic messages and joined header text remain ordinary strings; do not
+raise prose merely to satisfy an identity-bearing parameter. This changes internal F#
+signatures, not the generated binding or manifest format.
+
+## Export companion modules (2026-09-11)
+
+Ordering allows public export containers to nest under companion modules of existing
+types. In workers-types, `type Cloudflare` therefore coexists with one `module Cloudflare`
+containing `Email.Exports`, `Workers.Exports`, and `Workflows.Exports`. Reserving every
+type name as a module path had unnecessarily allocated a separate hashed parent for
+each ambient owner. Type names and identities stay unchanged; normalized owner-path
+collisions and `Exports` type-leaf reservations still use the existing allocator.
+
+Verification: the installed workers-types regression failed before the change and
+passes afterward; all nine path-allocation tests pass. FCS probes accept companion
+modules for interfaces, aliases, measures, unions, and delegates inside a recursive
+root module. Regenerated workers-types with `lib: ["esnext"]` compiles against Core
+and Core.TS with zero errors and 98 identifier warnings; the committed CompileGate
+also builds with zero errors (one FSharp.Core version warning). This is a focused
+layout correction; the remaining export-collision and
+runtime acceptance tasks in the export-module plan are still pending.
+
 # Easy Nits 
 
 To include in scope when a phases implementation/attempt ends up being small/quick.

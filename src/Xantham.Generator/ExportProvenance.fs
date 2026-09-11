@@ -72,11 +72,11 @@ let reader (ctx: Context) =
             | ValueSome handle ->
                 let! source =
                     async {
-                        match files.TryGetValue (String.tag<declFile> handle.Path) with
+                        match files.TryGetValue(handle.Path * uom<declFile>) with
                         | true, source -> return source
                         | _ ->
                             let! source = ctx.Session.getSourceFile (DocumentIdentifier.FileName handle.Path)
-                            files[String.tag<declFile> handle.Path] <- source
+                            files[(handle.Path * uom<declFile>)] <- source
                             return source
                     }
 
@@ -106,8 +106,8 @@ let reader (ctx: Context) =
             match modules.TryGetValue moduleId with
             | true, exports -> return exports
             | _ ->
-                let! direct = ctx.Session.getExportsOfSymbol (Measure.Int.untag moduleId)
-                let! all = ctx.Session.getExportsOfModule (Measure.Int.untag moduleId)
+                let! direct = ctx.Session.getExportsOfSymbol (moduleId / uom<_>)
+                let! all = ctx.Session.getExportsOfModule (moduleId / uom<_>)
 
                 let inventory (values: SymbolResponse[] voption) =
                     values
@@ -153,7 +153,7 @@ let reader (ctx: Context) =
 
             return
                 match target with
-                | ValueSome target -> Through [ Symbol(Measure.Int.tag<symbolId> (remember target).Id) ]
+                | ValueSome target -> Through [ Symbol((remember target).SymbolId) ]
                 | ValueNone -> Absent
         }
 
@@ -192,7 +192,7 @@ let reader (ctx: Context) =
                         let! target = ctx.Session.getExportSpecifierLocalTargetSymbol (location declaration)
 
                         match target with
-                        | ValueSome target -> return Through [ Symbol(Measure.Int.tag<symbolId> (remember target).Id) ]
+                        | ValueSome target -> return Through [ Symbol((remember target).SymbolId) ]
                         | ValueNone -> return! immediate symbol
                 | SyntaxKind.ImportSpecifier
                 | SyntaxKind.ImportClause ->

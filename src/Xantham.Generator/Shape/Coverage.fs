@@ -25,7 +25,7 @@ let auditCoverage: Pass<ShapeModel> =
                             | FsDelegateType decl -> [ decl.Name ]
                             | FsPhantom decl -> [ decl.Name ]
                             | FsMeasure decl -> [ decl.Name ]
-                            | FsExports members -> members |> List.map _.Name)
+                            | FsExports container -> container.Members |> List.map (fun owned -> owned.Member.Name))
                         |> Set.ofList
 
                     let name = fsName (defaultExportName ctx)

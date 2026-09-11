@@ -1,6 +1,7 @@
 ﻿module Xantham.Generator.Shape.ConstructorObjects
 
 open Xantham.Generator
+open Xantham.Generator.Measure
 open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator.Shape.Spec
@@ -65,7 +66,10 @@ let nameConstructorObjects: Pass<ShapeModel> =
             // shape nests under its owner.
             let stem =
                 Map.tryFind facts.Response.TypeId exportNames
-                |> Option.orElseWith (fun () -> (facts.SymbolName |> Option.map Measure.String.untag) |> Option.filter (isSyntheticName >> not))
+                |> Option.orElseWith (fun () ->
+                    facts.SymbolName
+                    |> Option.filter (isSyntheticName >> not)
+                    |> Option.map (fun value -> value / uom<symbolName>))
                 |> Option.map Naming.pascalSegment
                 |> Option.orElseWith instanceName
                 |> Option.defaultValue path
@@ -82,7 +86,7 @@ let nameConstructorObjects: Pass<ShapeModel> =
         /// group's to declare; an identity-only one carries no signatures.
         let declarable (facts: TypeFacts) =
             GeneratorConfig.disposition ctx.Config facts.Origin = Ship
-            || (facts.SymbolName |> Option.map Measure.String.untag) |> Option.forall isSyntheticName
+            || facts.SymbolName |> Option.forall isSyntheticName
 
         /// The reference positions a declaration reads.
         let positions (facts: TypeFacts) =

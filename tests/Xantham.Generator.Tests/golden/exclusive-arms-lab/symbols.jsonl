@@ -3,9 +3,9 @@
 {"name":"WidgetArm","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"MB.OptionalMemberAsOption","key":"MB003","pass":"shape-interfaces","tier":"ergonomic","symbol":"WidgetArm.count","message":"optional member reads as option"},{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"WidgetArm","message":"ParamObject Create synthesized (D3)"}]}
 {"name":"GadgetArm","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"MB.OptionalMemberAsOption","key":"MB003","pass":"shape-interfaces","tier":"ergonomic","symbol":"GadgetArm.label","message":"optional member reads as option"},{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"GadgetArm","message":"ParamObject Create synthesized (D3)"}]}
 {"name":"DisagreeingOptions","file":"index.d.ts","tier":"exact","findings":[]}
-{"name":"search","tier":"exact","findings":[]}
-{"name":"start","tier":"exact","findings":[]}
-{"name":"build","tier":"exact","findings":[]}
+{"name":"Exports.search","tier":"exact","findings":[]}
+{"name":"Exports.start","tier":"exact","findings":[]}
+{"name":"Exports.build","tier":"exact","findings":[]}
 {"name":"ImageArm","tier":"escape","findings":[{"name":"AC.ExportNotRepresented","key":"AC001","pass":"audit-coverage","tier":"escape","symbol":"ImageArm","message":"export not represented in the generated output"}]}
 {"name":"MessagesArm","tier":"escape","findings":[{"name":"AC.ExportNotRepresented","key":"AC001","pass":"audit-coverage","tier":"escape","symbol":"MessagesArm","message":"export not represented in the generated output"}]}
 {"name":"QueryArm","tier":"escape","findings":[{"name":"AC.ExportNotRepresented","key":"AC001","pass":"audit-coverage","tier":"escape","symbol":"QueryArm","message":"export not represented in the generated output"}]}

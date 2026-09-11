@@ -127,6 +127,56 @@ module AmbientLabRuntime =
         [<ParamObject; Emit("$0")>]
         static member Create (label: string) : Session = jsNative
 
+module AmbientLab =
+    module Runtime =
+        /// <summary>The package's value exports, each bound to its import.</summary>
+        [<Erase>]
+        type Exports =
+            [<Import("version", "ambient-lab:runtime")>]
+            static member version: string = jsNative
+            [<Import("Session", "ambient-lab:runtime"); EmitConstructor>]
+            static member Session (label: string) : AmbientLabRuntime.Session = jsNative
+
+    module Sockets =
+        /// <summary>The package's value exports, each bound to its import.</summary>
+        [<Erase>]
+        type Exports =
+            [<Import("connect", "ambient-lab:sockets")>]
+            static member connect (label: string) : Payload = jsNative
+
+    module Tools =
+        /// <summary>The package's value exports, each bound to its import.</summary>
+        [<Erase>]
+        type Exports =
+            /// <summary>
+            /// A class exported from a specifier rather than from <c>globalThis</c>.
+            /// </summary>
+            [<Import("Hammer", "ambient-lab:tools"); EmitConstructor>]
+            static member Hammer (weight: float) : Hammer = jsNative
+            /// <summary>
+            /// A function exported from a specifier.
+            /// </summary>
+            [<Import("measure", "ambient-lab:tools")>]
+            static member measure (payload: Payload) : float = jsNative
+            /// <summary>
+            /// A class written to be derived from: <c>abstract</c>, and exported from a specifier. F# reaches
+            /// this one as a class, because an interface admits no <c>inherit</c>.
+            /// </summary>
+            [<Import("Workbench", "ambient-lab:tools"); EmitConstructor>]
+            static member Workbench (label: string) : Workbench = jsNative
+            /// <summary>
+            /// A class with a base the compiler library owns. Not abstract, and still the class form:
+            /// <c>extends</c> is what says a consumer derives from it.
+            /// </summary>
+            [<Import("Snag", "ambient-lab:tools"); EmitConstructor>]
+            static member Snag (message: string) : Snag = jsNative
+            /// <summary>
+            /// A class whose base this run declares. An F# class reaches its base through a constructor
+            /// call, and an interface has none, so this keeps the interface form.
+            /// </summary>
+            [<Import("Vise", "ambient-lab:tools"); EmitConstructor>]
+            static member Vise (weight: float, jaw: float) : Vise = jsNative
+
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
@@ -146,37 +196,3 @@ type Exports =
     /// </summary>
     [<Global("Anvil"); EmitConstructor>]
     static member Anvil () : Anvil = jsNative
-    /// <summary>
-    /// A class exported from a specifier rather than from <c>globalThis</c>.
-    /// </summary>
-    [<Import("Hammer", "ambient-lab:tools"); EmitConstructor>]
-    static member Hammer (weight: float) : Hammer = jsNative
-    /// <summary>
-    /// A function exported from a specifier.
-    /// </summary>
-    [<Import("measure", "ambient-lab:tools")>]
-    static member measure (payload: Payload) : float = jsNative
-    /// <summary>
-    /// A class written to be derived from: <c>abstract</c>, and exported from a specifier. F# reaches
-    /// this one as a class, because an interface admits no <c>inherit</c>.
-    /// </summary>
-    [<Import("Workbench", "ambient-lab:tools"); EmitConstructor>]
-    static member Workbench (label: string) : Workbench = jsNative
-    /// <summary>
-    /// A class with a base the compiler library owns. Not abstract, and still the class form:
-    /// <c>extends</c> is what says a consumer derives from it.
-    /// </summary>
-    [<Import("Snag", "ambient-lab:tools"); EmitConstructor>]
-    static member Snag (message: string) : Snag = jsNative
-    /// <summary>
-    /// A class whose base this run declares. An F# class reaches its base through a constructor
-    /// call, and an interface has none, so this keeps the interface form.
-    /// </summary>
-    [<Import("Vise", "ambient-lab:tools"); EmitConstructor>]
-    static member Vise (weight: float, jaw: float) : Vise = jsNative
-    [<Import("connect", "ambient-lab:sockets")>]
-    static member connect (label: string) : Payload = jsNative
-    [<Import("version", "ambient-lab:runtime")>]
-    static member version: string = jsNative
-    [<Import("Session", "ambient-lab:runtime"); EmitConstructor>]
-    static member Session (label: string) : AmbientLabRuntime.Session = jsNative

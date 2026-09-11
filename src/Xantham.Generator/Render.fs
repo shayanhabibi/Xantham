@@ -9,6 +9,7 @@ open System
 open System.Text.Json
 open System.Text.Json.Nodes
 open System.Text.Json.Serialization
+open Xantham.Generator.Measure
 open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator.Shape.Spec
 
@@ -190,7 +191,9 @@ let rec private printTypeIn (atomic: bool) =
 let printType = printTypeIn false
 
 /// An F# string literal with the escapes source text needs.
-let stringLit (text: string) =
+let stringLit (text: string<_>) =
+    let text: string = text / uom<_>
+
     let escaped =
         text.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\n", "\\n").Replace("\r", "\\r").Replace("\t", "\\t")
 
@@ -638,7 +641,12 @@ let private renderMember (m: FsMember) =
 /// One binding attribute at `indent`, optionally carrying a second attribute inside the same
 /// brackets. A global names its own path off `globalThis`; an import names its specifier - the
 /// run's runtime package, or an ambient module's own quoted specifier.
-let private bindingAttribute (runtimePackage: string) (indent: string) (also: string) (binding: ImportBinding) =
+let private bindingAttribute
+    (runtimePackage: string<importSpecifier>)
+    (indent: string)
+    (also: string)
+    (binding: ImportBinding)
+    =
     let package = stringLit runtimePackage
 
     match binding with
@@ -655,7 +663,7 @@ let private hoistedBinding (members: FsExportMember list) =
 
 /// One bound member - an `Exports` member or a class static - as its attribute line and its
 /// signature. Both hold an `ImportBinding` and neither has an F# body, so they render the same.
-let private renderBound (runtimePackage: string) (m: FsExportMember) =
+let private renderBound (runtimePackage: string<importSpecifier>) (publicName: string option) (m: FsExportMember) =
     [
         yield! docLines "    " m.Docs m.Tags
 
@@ -672,6 +680,11 @@ let private renderBound (runtimePackage: string) (m: FsExportMember) =
             // The declaring type carries the attribute, and the member name is the JavaScript key
             // read off whatever that names.
             let reference = printType reference
+
+            match publicName with
+            | Some name when name <> m.Name -> yield $"    [<CompiledName({stringLit name})>]"
+            | _ -> ()
+
             yield $"    static member {ident m.Name}"
             yield $"        with get (): {reference} = jsNative"
             yield $"        and set (_: {reference}): unit = jsNative"
@@ -710,7 +723,11 @@ let private renderClassMember (m: FsMember) =
 ///
 /// The declaration is erased at its import, so an `inherit exn()` line carries the is-a relation
 /// to F# and nothing to JavaScript: the imported constructor is what runs.
-let private renderEntrypointClass (runtimePackage: string) (decl: FsInterfaceDecl) (entrypoint: FsEntrypoint) =
+let private renderEntrypointClass
+    (runtimePackage: string<importSpecifier>)
+    (decl: FsInterfaceDecl)
+    (entrypoint: FsEntrypoint)
+    =
     [
         yield! docLines "" decl.Docs decl.Tags
         yield bindingAttribute runtimePackage "" "; AbstractClass" entrypoint.Binding
@@ -733,10 +750,10 @@ let private renderEntrypointClass (runtimePackage: string) (decl: FsInterfaceDec
                 yield! renderClassMember m
 
             for m in statics do
-                yield! renderBound runtimePackage m
+                yield! renderBound runtimePackage None m
     ]
 
-let private renderInterface (runtimePackage: string) (decl: FsInterfaceDecl) =
+let private renderInterface (runtimePackage: string<importSpecifier>) (decl: FsInterfaceDecl) =
     [
         yield! docLines "" decl.Docs decl.Tags
 
@@ -773,7 +790,7 @@ let private renderInterface (runtimePackage: string) (decl: FsInterfaceDecl) =
             // Class statics (§4.4), last so that the instance surface reads first and a
             // generated Create keeps the place it has held since phase B.
             for m in statics do
-                yield! renderBound runtimePackage m
+                yield! renderBound runtimePackage None m
     ]
 
 let private renderStringEnum (decl: FsStringEnumDecl) =
@@ -888,7 +905,9 @@ let private renderPhantom (decl: FsPhantomDecl) =
         yield $"type {declHead decl.Name decl.TypeParameters} = private {case} of {printType decl.Carrier}"
     ]
 
-let private renderExports (runtimePackage: string) (members: FsExportMember list) =
+let private renderExports (runtimePackage: string<importSpecifier>) (container: FsExportContainer) =
+    let members = container.Members |> List.map _.Member
+
     [
         yield "/// <summary>The package's value exports, each bound to its import.</summary>"
         yield "[<Erase>]"
@@ -897,10 +916,10 @@ let private renderExports (runtimePackage: string) (members: FsExportMember list
         | Some binding -> yield bindingAttribute runtimePackage "" "" binding
         | None -> ()
 
-        yield "type Exports ="
+        yield $"type {ident container.Name} ="
 
-        for m in members do
-            yield! renderBound runtimePackage m
+        for owned in container.Members do
+            yield! renderBound runtimePackage (Some owned.ExportName) owned.Member
     ]
 
 // ---------------------------------------------------------------------------------------------
@@ -920,7 +939,7 @@ type GroupModule =
     {
         /// The npm name the group is addressed by under `xantham.json`'s `groups`; the entry
         /// package's own name for the entry group.
-        Group: string
+        Group: string<npmDependency>
         /// The group the run was asked to generate. Its module is written at the output root;
         /// every other shipped group is written under `groups/`.
         IsEntry: bool
@@ -930,7 +949,7 @@ type GroupModule =
         /// reference each other in both directions.
         Namespace: string option
         /// The npm package this module's `[<Import(…)>]` attributes name.
-        RuntimePackage: string
+        RuntimePackage: string<importSpecifier>
         /// Present only for one of the compiler library's two child modules.
         CompilerLib: CompilerLibFamily option
         Decls: FsDecl list
@@ -940,15 +959,15 @@ type GroupModule =
 /// carries no name of its own.
 let declName =
     function
-    | FsInterface decl -> Some decl.Name
-    | FsStringEnum decl -> Some decl.Name
-    | FsTaggedUnion decl -> Some decl.Name
-    | FsEnum decl -> Some decl.Name
-    | FsAbbrev decl -> Some decl.Name
-    | FsDelegateType decl -> Some decl.Name
-    | FsMeasure decl -> Some decl.Name
-    | FsPhantom decl -> Some decl.Name
-    | FsExports _ -> None
+    | FsInterface decl -> decl.Name
+    | FsStringEnum decl -> decl.Name
+    | FsTaggedUnion decl -> decl.Name
+    | FsEnum decl -> decl.Name
+    | FsAbbrev decl -> decl.Name
+    | FsDelegateType decl -> decl.Name
+    | FsMeasure decl -> decl.Name
+    | FsPhantom decl -> decl.Name
+    | FsExports decl -> decl.Name
 
 /// The modules a declaration is written inside, and the name it takes there. A path-derived
 /// name is dotted (`Widget.Options`), so the declaration goes in `module Widget` under the leaf.
@@ -967,7 +986,7 @@ let private underLeaf (name: string) =
     | FsDelegateType decl -> FsDelegateType { decl with Name = name }
     | FsMeasure decl -> FsMeasure { decl with Name = name }
     | FsPhantom decl -> FsPhantom { decl with Name = name }
-    | FsExports members -> FsExports members
+    | FsExports decl -> FsExports { decl with Name = name }
 
 let private indented (indent: string) (line: string) = if line = "" then "" else indent + line
 
@@ -1151,7 +1170,16 @@ let internal qualifyDecl foreign =
                 TypeParameters = qualifyTypeParams foreign decl.TypeParameters
                 Carrier = qualifyRef foreign decl.Carrier
             }
-    | FsExports members -> FsExports(members |> List.map (qualifyBound foreign))
+    | FsExports container ->
+        FsExports
+            { container with
+                Members =
+                    container.Members
+                    |> List.map (fun owned ->
+                        { owned with
+                            Member = qualifyBound foreign owned.Member
+                        })
+            }
     // A string enum and an F# enum are closed over literals.
     | cases -> cases
 
@@ -1228,7 +1256,7 @@ let private declErasedArities (decl: FsDecl) : int list =
     | FsTaggedUnion d ->
         d.Cases
         |> List.collect (fun case -> case.Fields |> List.collect (fun f -> erasedArities f.Type))
-    | FsExports members -> members |> List.collect ofExportMember
+    | FsExports container -> container.Members |> List.collect (fun owned -> ofExportMember owned.Member)
     | FsStringEnum _
     | FsEnum _ -> []
 
@@ -1275,7 +1303,8 @@ let private fileHeader (openDom: bool) (source: string) (declaration: string) =
         "open Fable.Core"
         "open Fable.Core.JsInterop"
         "open Fable.Core.JS"
-        if openDom then "open Fable.Core.TS.Dom"
+        if openDom then
+            "open Fable.Core.TS.Dom"
         ""
     ]
 
@@ -1287,8 +1316,11 @@ let private renderBody (group: GroupModule) (foreign: Map<string, string>) (inde
             group.Decls
         else
             group.Decls |> List.map (qualifyDecl foreign)
+        |> List.filter (function
+            | FsExports container -> not container.Members.IsEmpty
+            | _ -> true)
 
-    let names = group.Decls |> List.choose declName
+    let names = group.Decls |> List.map declName
 
     let namesByHead =
         names |> List.groupBy (fun name -> name.Split('.')[0]) |> Map.ofList
@@ -1343,17 +1375,19 @@ let private renderBody (group: GroupModule) (foreign: Map<string, string>) (inde
         | FsDelegateType decl -> renderDelegate decl
         | FsMeasure decl -> renderMeasure decl
         | FsPhantom decl -> renderPhantom decl
-        | FsExports members -> renderExports group.RuntimePackage members
+        | FsExports container -> renderExports group.RuntimePackage container
 
     let body =
         decls
         |> List.map (fun decl ->
             match declName decl with
-            | Some name ->
+            | ""
+            | null
+            | "global" -> [], decl
+            | name ->
                 let modules, leaf = nestingOf name
                 let scoped = qualifyDecl (Map.find modules scopedReferences) decl
-                modules, underLeaf leaf scoped
-            | None -> [], decl)
+                modules, underLeaf leaf scoped)
         |> nestedBlocks render indent
         |> List.map (String.concat "\n")
         |> String.concat "\n\n"
@@ -1379,7 +1413,7 @@ let private renderModule (group: GroupModule) (foreign: Map<string, string>) =
 
     String.concat
         "\n"
-        (fileHeader true group.Group $"module rec {group.Module}"
+        (fileHeader true (group.Group / uom<npmDependency>) $"module rec {group.Module}"
          @ [ body; renderFooter decls ])
 
 let private compilerLibModule (layout: CompilerLibLayout) =
@@ -1427,7 +1461,12 @@ let private renderCompilerLib
         |> String.concat "\n\n"
 
     let footer = rendered |> List.collect (fun (_, _, decls) -> decls) |> renderFooter
-    let sources = groups |> List.map _.Group |> List.distinct |> String.concat ", "
+
+    let sources =
+        groups
+        |> List.map (_.Group >> (fun x -> x / uom<npmDependency>))
+        |> List.distinct
+        |> String.concat ", "
     // The producer must compile without referencing the assembly it generates.
     String.concat "\n" (fileHeader false sources $"module rec {layout.RootModule}" @ [ modules; footer ])
 
@@ -1446,7 +1485,12 @@ let private renderNamespace (ns: string) (groups: GroupModule list) (foreignTo: 
         |> String.concat "\n\n"
 
     let footer = rendered |> List.collect (snd >> snd) |> renderFooter
-    let sources = groups |> List.map _.Group |> List.distinct |> String.concat ", "
+
+    let sources =
+        groups
+        |> List.map (_.Group >> (fun x -> x / uom<npmDependency>))
+        |> List.distinct
+        |> String.concat ", "
 
     String.concat "\n" (fileHeader true sources $"namespace rec {ns}" @ [ modules; footer ])
 
@@ -1517,7 +1561,7 @@ let renderSources (modules: GroupModule list) : Pass<RenderModel> =
                         written
                         |> List.collect (fun group ->
                             group.Decls
-                            |> List.choose declName
+                            |> List.map declName
                             |> List.map (fun name -> name, effectiveModule group))
                         |> Map.ofList
 
@@ -1602,19 +1646,26 @@ let renderSources (modules: GroupModule list) : Pass<RenderModel> =
                                             yield! bound interface_.Name entrypoint.Parameters
 
                                         yield! exports (interface_.Name + ".") interface_.Statics
-                                    | FsExports members -> yield! exports "" members
+                                    | FsExports container ->
+                                        yield! exports (container.Name + ".") (container.Members |> List.map _.Member)
                                     | _ -> ()
 
                             for group in written do
                                 if not group.IsEntry then
-                                    Finding.make group.Group (EmitGroups.GroupShipped(group.Group, group.Decls.Length))
+                                    Finding.make
+                                        (group.Group / uom<npmDependency>)
+                                        (EmitGroups.GroupShipped(group.Group / uom<npmDependency>, group.Decls.Length))
 
                             for group in collided do
-                                Finding.make group.Group (EmitGroups.GroupModuleCollision(group.Group, group.Module))
+                                Finding.make
+                                    (group.Group / uom<npmDependency>)
+                                    (EmitGroups.GroupModuleCollision(group.Group / uom<npmDependency>, group.Module))
 
                             for key, disposition in Map.toList ctx.Config.Groups do
                                 if disposition = Ship && not (Set.contains key reached) then
-                                    Finding.make key (EmitGroups.ShippedGroupWithoutDeclarations key)
+                                    Finding.make
+                                        (key / uom<npmDependency>)
+                                        (EmitGroups.ShippedGroupWithoutDeclarations(key / uom<npmDependency>))
                         ]
 
                     let model =
@@ -1666,7 +1717,9 @@ let symbolTiers (model: RenderModel) : (string * Tier * Finding list) list =
             | FsDelegateType decl -> [ decl.Name ]
             | FsMeasure decl -> [ decl.Name ]
             | FsPhantom decl -> [ decl.Name ]
-            | FsExports members -> members |> List.map _.Name)
+            | FsExports container ->
+                container.Members
+                |> List.map (fun owned -> container.Name + "." + owned.Member.Name))
         |> List.distinct
 
     let declaredSet = Set.ofList declared
@@ -1822,7 +1875,7 @@ let private sourceFile (packageDir: string) (order: DeclOrder option) : string =
     match order with
     | None -> null
     | Some order ->
-        let path = (Measure.String.untag order.File).Replace('\\', '/')
+        let path = (order.File / uom<declFile>).Replace('\\', '/')
         let root = packageDir.Replace('\\', '/').TrimEnd '/' + "/"
 
         if path.StartsWith(root, StringComparison.OrdinalIgnoreCase) then
@@ -1846,7 +1899,7 @@ let private declFiles (model: RenderModel) : Map<string, string> =
         | FsPhantom decl -> Some(decl.Name, decl.Order)
         | FsExports _ -> None)
     |> List.choose (fun (name, order) ->
-        match sourceFile model.PackageDir order with
+        match sourceFile (model.PackageDir / uom<dirPath>) order with
         | null -> None
         | file -> Some(name, file))
     |> Map.ofList
@@ -1886,7 +1939,7 @@ let renderManifest: Pass<RenderModel> =
         let manifest =
             {
                 schemaVersion = 1
-                package = model.PackageName
+                package = model.PackageName / uom<npmDependency>
                 ``module`` = model.ModuleName
                 counts =
                     {

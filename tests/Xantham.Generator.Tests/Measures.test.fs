@@ -35,20 +35,32 @@ let private compile source =
 [<Tests>]
 let tests =
     testList "generator identifier measures" [
-        testCase "tagging preserves integer values and string identity" <| fun _ ->
-            let identifier = Measure.Int.tag<Measure.typeId> 42
-            Expect.equal (Measure.Int.untag identifier) 42 "compiler ID survives the boundary"
+        testCase "raising and lowering preserves integer values and string identity" <| fun _ ->
+            let identifier = 42 * Measure.uom<Measure.typeId>
+            Expect.equal (identifier / Measure.uom<Measure.typeId>) 42 "compiler ID survives the boundary"
             let original = String([| 'n'; 'o'; 'd'; 'e' |])
-            let name = Measure.String.tag<Measure.symbolName> original
-            Expect.isTrue (Object.ReferenceEquals(original, Measure.String.untag name)) "tagging allocates no replacement string"
+            let name = original * Measure.uom<Measure.symbolName>
+            Expect.isTrue (Object.ReferenceEquals(original, name / Measure.uom<Measure.symbolName>)) "raising allocates no replacement string"
+
+        testCase "lowering and raising can compose string measures" <| fun _ ->
+            let dependency = "@scope/package" * Measure.uom<Measure.npmDependency>
+            let importPath = dependency / Measure.uom<Measure.npmDependency> * Measure.uom<Measure.importSpecifier>
+            let roundTrip = importPath / Measure.uom<Measure.importSpecifier> * Measure.uom<Measure.npmDependency>
+            Expect.equal (roundTrip / Measure.uom<Measure.npmDependency>) "@scope/package" "composed measures preserve the payload"
+
+        testCase "lowering one component preserves the remaining measure" <| fun _ ->
+            let declaration = "/pkg/index.d.ts" * Measure.uom<Measure.declFile>
+            let path = declaration / Measure.uom<Measure.node>
+            let restored = path * Measure.uom<Measure.node>
+            Expect.equal (restored / Measure.uom<Measure.declFile>) "/pkg/index.d.ts" "component cancellation restores the original value"
 
         testCase "consumer compiler separates ID and string domains" <| fun _ ->
             let positive = """
 let takesType (id: int<Measure.typeId>) = id
 let takesName (name: string<Measure.symbolName>) = name
-let id = takesType (Measure.Int.tag<Measure.typeId> 42)
-let name = takesName (Measure.String.tag<Measure.symbolName> "node")
-if Measure.Int.untag id <> 42 || Measure.String.untag name <> "node" then failwith "representation changed"
+let id = takesType (42 * Measure.uom<Measure.typeId>)
+let name = takesName ("node" * Measure.uom<Measure.symbolName>)
+if id / Measure.uom<Measure.typeId> <> 42 || name / Measure.uom<Measure.symbolName> <> "node" then failwith "representation changed"
 """
             let code, output = compile positive
             Expect.equal code 0 ("correctly tagged consumer must compile and run: " + output)
@@ -59,6 +71,8 @@ if Measure.Int.untag id <> 42 || Measure.String.untag name <> "node" then failwi
                 "string", "symbolName", "declFile"
                 "string", "declFile", "declHandle"
                 "string", "declHandle", "symbolName"
+                "string", "npmDependency", "importSpecifier"
+                "string", "dirPath", "filePath"
             ] do
                 let source = $"let incompatible (value: {kind}<Measure.{sourceMeasure}>) : {kind}<Measure.{targetMeasure}> = value"
                 let code, output = compile source

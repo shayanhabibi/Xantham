@@ -109,7 +109,9 @@ let shapeAliases: Pass<ShapeModel> =
                             else
                                 let name = fsName fallback export
 
-                                match Map.tryFind export.Symbol.SymbolId model.ExportTypes |> Option.bind _.Declared with
+                                match
+                                    Map.tryFind export.Symbol.SymbolId model.ExportTypes |> Option.bind _.Declared
+                                with
                                 | Some typeId ->
                                     match Map.tryFind typeId model.DeclNames with
                                     | Some primary when primary = name -> None

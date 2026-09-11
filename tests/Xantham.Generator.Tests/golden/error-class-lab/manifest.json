@@ -3,7 +3,7 @@
   "package": "error-class-lab",
   "module": "ErrorClassLab",
   "counts": {
-    "exact": 1,
+    "exact": 6,
     "ergonomic": 2,
     "widened": 4,
     "escape": 0

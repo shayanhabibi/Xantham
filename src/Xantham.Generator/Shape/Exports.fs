@@ -1,13 +1,21 @@
 ﻿module Xantham.Generator.Shape.Exports
 
 open Xantham.Generator
+open Xantham.Generator.Measure
 open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator.Shape.Spec
+open Xantham.Generator.Shape.ExportLayout
 
 /// The object every ambient global is a property of, and the selector a settable global binds
 /// through.
 let private globalObject = "globalThis"
+
+let private findingSymbol owner exportName =
+    match owner with
+    | EntryModule -> $"entry.{exportName}"
+    | GlobalScope -> $"global.{exportName}"
+    | AmbientModule specifier -> $"ambient:{specifier / uom<importSpecifier>}.{exportName}"
 
 /// `Exports` members from the value exports that are not classes: functions (every overload
 /// emitted), and values - `const`/`let`/`var` and namespace objects - as properties, settable
@@ -30,8 +38,15 @@ let shapeExports: Pass<ShapeModel> =
                     // convention this run had to guess from a name.
                     let runtimePackage = GeneratorConfig.runtimePackage ctx.Config ctx.PackageName
 
-                    if ctx.Config.RuntimePackage.IsNone && runtimePackage <> ctx.PackageName then
-                        emit (Finding.make "<module>" (ShapeExports.RuntimeSpecifierDerived runtimePackage))
+                    if
+                        ctx.Config.RuntimePackage.IsNone
+                        && runtimePackage / uom<importSpecifier> <> ctx.PackageName / uom<npmDependency>
+                    then
+                        emit (
+                            Finding.make
+                                "<module>"
+                                (ShapeExports.RuntimeSpecifierDerived(runtimePackage / uom<importSpecifier>))
+                        )
 
                     let fallback = defaultExportName ctx
 
@@ -43,6 +58,8 @@ let shapeExports: Pass<ShapeModel> =
                                 []
                             else
                                 let name = fsName fallback export
+                                let owner = ownerOf runtimePackage export.Origin
+                                let findingName = findingSymbol owner export.ExportName
 
                                 let binding = bindingOf export
 
@@ -53,28 +70,37 @@ let shapeExports: Pass<ShapeModel> =
 
                                 match valueFacts with
                                 | None ->
-                                    emit (Finding.make name ShapeExports.NoValueType)
+                                    emit (Finding.make findingName ShapeExports.NoValueType)
                                     []
                                 | Some facts when not facts.CallSignatures.IsEmpty ->
                                     facts.CallSignatures
-                                    |> List.map (fun signature ->
+                                    |> List.mapi (fun ordinal signature ->
                                         let typeParameters, parameters, returns, signatureFindings =
-                                            shapeSignature ctx model None name signature
+                                            shapeSignature ctx model None findingName signature
 
                                         findings <- findings @ signatureFindings
 
-                                        index,
                                         {
-                                            Name = name
-                                            Docs = export.Docs
-                                            Tags = export.Tags
-                                            TypeParameters = typeParameters
-                                            Binding = binding
-                                            Body = ExportFunction(parameters, returns)
-                                            Settable = false
+                                            OwnedExportMember.Owner = owner
+                                            HarvestIndex = index
+                                            ExportName = export.ExportName
+                                            SourceSymbolId = export.Symbol.Id * uom<symbolId>
+                                            SignatureOrdinal = Some ordinal
+                                            Member =
+                                                {
+                                                    Name = name
+                                                    Docs = export.Docs
+                                                    Tags = export.Tags
+                                                    TypeParameters = typeParameters
+                                                    Binding = binding
+                                                    Body = ExportFunction(parameters, returns)
+                                                    Settable = false
+                                                }
                                         })
                                 | Some facts ->
-                                    let reference, refFindings = typeRef ctx model None name facts.Response.TypeId
+                                    let reference, refFindings =
+                                        typeRef ctx model None findingName facts.Response.TypeId
+
                                     findings <- findings @ refFindings
 
                                     // A `var` on the global object is the one binding an
@@ -91,18 +117,25 @@ let shapeExports: Pass<ShapeModel> =
                                         | ImportNamed _ -> false
 
                                     if mutableValue && not settable then
-                                        emit (Finding.make name ShapeExports.MutableValueReadOnly)
+                                        emit (Finding.make findingName ShapeExports.MutableValueReadOnly)
 
                                     [
-                                        index,
                                         {
-                                            Name = name
-                                            Docs = export.Docs
-                                            Tags = export.Tags
-                                            TypeParameters = []
-                                            Binding = (if settable then GlobalName globalObject else binding)
-                                            Body = ExportValue reference
-                                            Settable = settable
+                                            OwnedExportMember.Owner = owner
+                                            HarvestIndex = index
+                                            ExportName = export.ExportName
+                                            SourceSymbolId = export.Symbol.SymbolId
+                                            SignatureOrdinal = None
+                                            Member =
+                                                {
+                                                    Name = name
+                                                    Docs = export.Docs
+                                                    Tags = export.Tags
+                                                    TypeParameters = []
+                                                    Binding = (if settable then GlobalName globalObject else binding)
+                                                    Body = ExportValue reference
+                                                    Settable = settable
+                                                }
                                         }
                                     ])
 

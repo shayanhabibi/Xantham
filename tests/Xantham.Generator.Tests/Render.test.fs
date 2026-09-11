@@ -4,6 +4,7 @@ module Xantham.Generator.Tests.RenderTests
 
 open Expecto
 open Xantham.Generator
+open Xantham.Generator.Measure
 
 let private renderAll (model: RenderModel) =
     let rendered, findings = Async.RunSynchronously(Pipeline.runTier Build.context Render.passes model)
@@ -12,20 +13,55 @@ let private renderAll (model: RenderModel) =
 
 let private baseModel =
     { ModuleName = "TestPkg"
-      PackageName = "test-pkg"
-      RuntimePackage = "test-pkg"
-      PackageDir = "/pkg/test-pkg"
+      PackageName = "test-pkg" * uom<npmDependency>
+      RuntimePackage = "test-pkg" * uom<importSpecifier>
+      PackageDir = "/pkg/test-pkg" * uom<dirPath>
       Decls = []
       Findings = []
       Files = []
       ShadowedByLib = 0 }
+
+let private owned index (member_: FsExportMember) =
+    { Owner = EntryModule
+      HarvestIndex = index
+      ExportName = member_.Name
+      SourceSymbolId = index * uom<symbolId>
+      SignatureOrdinal = None
+      Member = member_ }
+
+let private exports members =
+    FsExports { Name = "Exports"; Owner = EntryModule; Members = members |> List.mapi owned }
+
+let private exportContainer name owner members =
+    FsExports
+        { Name = name
+          Owner = owner
+          Members = members |> List.mapi (fun index member_ -> { owned index member_ with Owner = owner }) }
+
+let private exportFunction name binding parameters returns =
+    { Name = name
+      Docs = ""
+      Tags = []
+      TypeParameters = []
+      Binding = binding
+      Settable = false
+      Body = ExportFunction(parameters, returns) }
+
+let private exportValue name binding settable reference =
+    { Name = name
+      Docs = ""
+      Tags = []
+      TypeParameters = []
+      Binding = binding
+      Settable = settable
+      Body = ExportValue reference }
 
 let private boundSource names =
     let parameters = names |> List.map (fun name -> { Name = name; Type = FsString; Optional = false; Rest = false })
     let model =
         { baseModel with
             Decls =
-                [ FsExports
+                [ exports
                     [ { Name = "invoke"; Docs = ""; Tags = []; TypeParameters = []
                         Binding = ImportNamed "invoke"; Settable = false
                         Body = ExportFunction(parameters, FsUnit) } ] ] }
@@ -78,22 +114,22 @@ let renderTests =
                       Statics = [] }
 
             let es: Render.GroupModule =
-                { Group = "typescript/lib"
+                { Group = "typescript/lib" * uom<npmDependency>
                   IsEntry = false
                   Module = "Fable.Core.TS.Es"
                   Namespace = Some "Fable.Core.TS"
-                  RuntimePackage = "typescript/lib"
+                  RuntimePackage = "typescript/lib" * uom<importSpecifier>
                   CompilerLib = Some Render.Es
                   Decls =
                     [ interface' "EsName"
                         [ FsProperty { Name = "dom"; Docs = ""; Tags = []; ReadOnly = true; Type = FsNamed "DomName" } ] ] }
 
             let dom: Render.GroupModule =
-                { Group = "typescript/lib"
+                { Group = "typescript/lib" * uom<npmDependency>
                   IsEntry = false
                   Module = "Fable.Core.TS.Dom"
                   Namespace = Some "Fable.Core.TS"
-                  RuntimePackage = "typescript/lib"
+                  RuntimePackage = "typescript/lib" * uom<importSpecifier>
                   CompilerLib = Some Render.Dom
                   Decls =
                     [ interface' "DomName"
@@ -125,7 +161,7 @@ let renderTests =
         testTheory "canonical class aliases keep their independently imported constructor value" [
             ImportNamed "Client" =!> "[<Import(\"Client\", \"adapter-runtime\")>]"
             ImportDefault =!> "[<Import(\"default\", \"adapter-runtime\")>]"
-            ImportFrom("Client", "adapter/subpath") =!> "[<Import(\"Client\", \"adapter/subpath\")>]"
+            ImportFrom("Client", "adapter/subpath" * uom<importSpecifier>) =!> "[<Import(\"Client\", \"adapter/subpath\")>]"
             GlobalName "Outer.Client" =!> "[<Global(\"Outer.Client\")>]"
         ] <| fun (binding, attribute) ->
             let alias =
@@ -142,7 +178,7 @@ let renderTests =
                     { Name = name; Docs = ""; Tags = []; Order = None; TypeParameters = []
                       Target = FsString; Value = None }
             let model =
-                { baseModel with RuntimePackage = "adapter-runtime"
+                { baseModel with RuntimePackage = "adapter-runtime" * uom<importSpecifier>
                                  Decls = [ constructor "Constructor"; constructor "Wrapper.Constructor"; alias ] }
             let source = renderAll model |> Map.find "TestPkg.fs"
             Expect.stringContains source "type Client = Root.Client" "the instance retains canonical type identity"
@@ -441,7 +477,7 @@ let renderTests =
                                 Order = None
                                 TypeParameters = []
                                 Target = FsDelegate([ FsNamed "Options" ], FsUnit) }
-                          FsExports
+                          exports
                               [ { Name = "make"
                                   Docs = ""
                                   Tags = []
@@ -691,7 +727,7 @@ let renderTests =
                               { Name = "Options"
                                 Docs = ""
                                 Tags = []
-                                Order = Some { File = (Measure.String.tag<Measure.declFile> "/pkg/test-pkg/index.d.ts"); NodeIndex = 3<Measure.nodeId> }
+                                Order = Some { File = "/pkg/test-pkg/index.d.ts" * uom<declFile>; NodeIndex = 3<nodeId> }
                                 TypeParameters = []
                                 Inherits = []
                                 Members = []
@@ -752,4 +788,97 @@ let renderTests =
             let rendered = renderAll model
             Expect.equal (rendered |> Map.find "manifest.json") expected "the aggregate golden"
             Expect.equal (rendered |> Map.find "symbols.jsonl") expectedSymbols "the per-symbol golden"
+
+        testCase "owned export containers render their allocated leaves and nested siblings" <| fun _ ->
+            let member_ = exportFunction "check" (ImportNamed "check") [] FsString
+            let model =
+                { baseModel with
+                    Decls =
+                        [ exportContainer "Exports_abc" EntryModule [ member_ ]
+                          exportContainer "Strict.Exports" (AmbientModule ("test-pkg/strict" * uom<importSpecifier>)) [ member_ ]
+                          exportContainer "Loose.Exports" (AmbientModule ("test-pkg/loose" * uom<importSpecifier>)) [ member_ ] ] }
+
+            let source = renderAll model |> Map.find "TestPkg.fs"
+            Expect.stringContains source "type Exports_abc =" "the allocated root leaf is retained"
+            Expect.stringContains source "module Strict =\n    /// <summary>" "the child container uses existing nesting"
+            Expect.stringContains source "    type Exports =" "the child leaf is rendered inside its module"
+            Expect.stringContains source "module Loose =" "sibling owners remain separate"
+            Expect.equal (source.Split("module Strict =").Length - 1) 1 "a nested module is opened once"
+
+        testCase "an empty owned container emits no type or module" <| fun _ ->
+            let model =
+                { baseModel with
+                    Decls =
+                        [ exportContainer "Empty.Exports" (AmbientModule ("test-pkg/empty" * uom<importSpecifier>)) []
+                          exportContainer "Exports" EntryModule [ exportValue "ready" (ImportNamed "ready") false FsBool ] ] }
+
+            let source = renderAll model |> Map.find "TestPkg.fs"
+            Expect.isFalse (source.Contains "module Empty") "empty hierarchy is omitted"
+            Expect.isFalse (source.Contains "type Empty") "empty leaf is omitted"
+            Expect.stringContains source "type Exports =" "nonempty containers remain"
+
+        testCase "renamed export members retain every runtime target spelling" <| fun _ ->
+            let parameter = { Name = "value"; Type = FsString; Optional = false; Rest = false }
+            let members =
+                [ exportFunction "named_Overload2" (ImportNamed "named") [ parameter ] FsString
+                  exportFunction "default_Overload2" ImportDefault [ parameter ] FsString
+                  { exportFunction "Widget_Overload2" (ImportFrom("Widget", "test-pkg/widgets" * uom<importSpecifier>)) [] (FsNamed "Widget") with
+                      Body = ExportConstructor([], FsNamed "Widget") }
+                  exportFunction "globalFn_Overload2" (GlobalName "legacy.call") [ parameter ] FsString
+                  exportValue "flag_Overload2" (GlobalName "legacy") true FsBool ]
+            let publicNames = [ "named"; "default"; "Widget"; "globalFn"; "flag" ]
+            let container =
+                match exportContainer "Exports" EntryModule members with
+                | FsExports container ->
+                    FsExports { container with Members = List.map2 (fun publicName owned -> { owned with ExportName = publicName }) publicNames container.Members }
+                | _ -> failwith "expected exports"
+            let source = renderAll { baseModel with Decls = [ container ] } |> Map.find "TestPkg.fs"
+
+            for expected in
+                [ "[<Import(\"named\", \"test-pkg\")>]"
+                  "[<Import(\"default\", \"test-pkg\")>]"
+                  "[<Import(\"Widget\", \"test-pkg/widgets\"); EmitConstructor>]"
+                  "[<Global(\"legacy.call\")>]"
+                  "[<Global(\"legacy\")>]" ] do
+                Expect.stringContains source expected "binding metadata supplies the JavaScript target"
+
+            Expect.stringContains source "static member named_Overload2" "the allocated F# function name is independent"
+            Expect.stringContains source "[<CompiledName(\"flag\")>]\n    static member flag_Overload2" "the mutable property's JavaScript key remains public"
+            Expect.stringContains source "static member flag_Overload2" "the allocated F# mutable name is independent"
+
+        testCase "nested exports qualify local shadows and foreign group results" <| fun _ ->
+            let interface_ name =
+                FsInterface
+                    { Name = name; Docs = ""; Tags = []; Order = None; TypeParameters = []; Inherits = []
+                      Members = []; Entrypoint = None; CreateOverloads = []; Statics = [] }
+            let entry: Render.GroupModule =
+                { Group = "test-pkg" * uom<npmDependency>; Module = "TestPkg"; IsEntry = true; Namespace = None
+                  CompilerLib = None
+                  RuntimePackage = "test-pkg" * uom<importSpecifier>
+                  Decls =
+                    [ interface_ "Message"
+                      interface_ "Strict.Message"
+                      exportContainer "Strict.Exports" (AmbientModule ("test-pkg/strict" * uom<importSpecifier>))
+                          [ exportFunction "local" (ImportFrom("local", "test-pkg/strict" * uom<importSpecifier>)) [] (FsNamed "Message")
+                            exportFunction "foreign" (ImportFrom("foreign", "test-pkg/strict" * uom<importSpecifier>)) [] (FsNamed "Remote") ] ] }
+            let remote: Render.GroupModule =
+                { Group = "remote" * uom<npmDependency>; Module = "RemotePkg"; IsEntry = false; Namespace = None
+                  CompilerLib = None
+                  RuntimePackage = "remote" * uom<importSpecifier>; Decls = [ interface_ "Remote" ] }
+            let ctx =
+                { Build.context with
+                    Config = { Build.context.Config with Groups = Map.ofList [ ("remote" * uom<npmDependency>, Ship) ] } }
+            let source = renderGroups ctx [ entry; remote ] baseModel |> Map.find "TestPkg.fs"
+            Expect.stringContains source "static member local () : TestPkg.Message" "the root type escapes the nested shadow"
+            Expect.stringContains source "static member foreign () : RemotePkg.Remote" "foreign ownership stays qualified"
+
+        testCase "footer arity traversal includes nested export signatures" <| fun _ ->
+            let arms = [ 1..10 ] |> List.map (fun _ -> FsString)
+            let model =
+                { baseModel with
+                    Decls =
+                        [ exportContainer "Strict.Exports" (AmbientModule ("test-pkg/strict" * uom<importSpecifier>))
+                              [ exportValue "choice" (ImportFrom("choice", "test-pkg/strict" * uom<importSpecifier>)) false (FsErasedUnion arms) ] ] }
+            let source = renderAll model |> Map.find "TestPkg.fs"
+            Expect.stringContains source "type U10<" "nested members participate in footer analysis"
     ]

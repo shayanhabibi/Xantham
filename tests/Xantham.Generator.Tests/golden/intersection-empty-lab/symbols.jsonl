@@ -5,4 +5,4 @@
 {"name":"Counted","file":"index.d.ts","tier":"widened","findings":[{"name":"TR.IntersectionOverNonObject","key":"TR018","pass":"shape-aliases","tier":"widened","symbol":"Counted","message":"intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"}]}
 {"name":"UserId","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"SA.BrandAsMeasure","key":"SA001","pass":"shape-aliases","tier":"ergonomic","symbol":"UserId","message":"branding intersection emitted as a unit of measure; uses read as the branded primitive (\u00A74.6, D11)"}]}
 {"name":"Padded","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Padded","message":"ParamObject Create synthesized (D3)"}]}
-{"name":"ease","tier":"exact","findings":[]}
+{"name":"Exports.ease","tier":"exact","findings":[]}
