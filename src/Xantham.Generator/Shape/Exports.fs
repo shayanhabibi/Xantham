@@ -63,16 +63,21 @@ let shapeExports: Pass<ShapeModel> =
                                             shapeSignature ctx model None name signature
 
                                         findings <- findings @ signatureFindings
-
-                                        index,
                                         {
-                                            Name = name
-                                            Docs = export.Docs
-                                            Tags = export.Tags
-                                            TypeParameters = typeParameters
-                                            Binding = binding
-                                            Body = ExportFunction(parameters, returns)
-                                            Settable = false
+                                            OwnedExportMember.Owner = export.Origin
+                                            HarvestIndex = index
+                                            ExportName = export.ExportName
+                                            SourceSymbolId = export.Symbol.Id * uom<symbolId>
+                                            SignatureOrdinal = None
+                                            Member = {
+                                                Name = name
+                                                Docs = export.Docs
+                                                Tags = export.Tags
+                                                TypeParameters = typeParameters
+                                                Binding = binding
+                                                Body = ExportFunction(parameters, returns)
+                                                Settable = false
+                                            }
                                         })
                                 | Some facts ->
                                     let reference, refFindings = typeRef ctx model None name facts.Response.TypeId
@@ -95,15 +100,22 @@ let shapeExports: Pass<ShapeModel> =
                                         emit (Finding.make name ShapeExports.MutableValueReadOnly)
 
                                     [
-                                        index,
                                         {
-                                            Name = name
-                                            Docs = export.Docs
-                                            Tags = export.Tags
-                                            TypeParameters = []
-                                            Binding = (if settable then GlobalName globalObject else binding)
-                                            Body = ExportValue reference
-                                            Settable = settable
+                                            OwnedExportMember.Owner = export.Origin
+                                            HarvestIndex = index
+                                            ExportName = export.ExportName
+                                            SourceSymbolId = export.Symbol.SymbolId
+                                            SignatureOrdinal = None
+                                            Member =
+                                                {
+                                                    Name = name
+                                                    Docs = export.Docs
+                                                    Tags = export.Tags
+                                                    TypeParameters = []
+                                                    Binding = (if settable then GlobalName globalObject else binding)
+                                                    Body = ExportValue reference
+                                                    Settable = settable
+                                                }
                                         }
                                     ])
 

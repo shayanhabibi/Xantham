@@ -189,7 +189,7 @@ let dedupeOverloads: Pass<ShapeModel> =
 
                     let exportMembers =
                         model.ExportMembers
-                        |> List.filter (fun (_, m) ->
+                        |> List.filter (fun { OwnedExportMember.Member = m } ->
                             let key, dropped =
                                 match m.Body with
                                 | ExportFunction(parameters, _) ->
