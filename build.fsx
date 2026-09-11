@@ -107,7 +107,7 @@ module Options =
 
     let skipTests =
         Input.option<bool> "--skip-tests" |> Input.description "Skip running tests"
-    
+
     type Generate =
         | Ast
         | Proto
@@ -118,14 +118,15 @@ module Options =
 
     let generateOnly =
         Input.optionMaybe<Generate> "--only"
-        |> Input.mapFromAmong [
-            "ast", Some Ast
-            "proto", Some Proto
-            "session", Some Session
-            "schema", Some Schema
-            "compiler-lib", Some CompilerLib
-            "node-lib", Some NodeLib
-        ]
+        |> Input.mapFromAmong
+            [
+                "ast", Some Ast
+                "proto", Some Proto
+                "session", Some Session
+                "schema", Some Schema
+                "compiler-lib", Some CompilerLib
+                "node-lib", Some NodeLib
+            ]
         |> Input.description
             "Limit generation to one layer: ast | proto | session | schema | compiler-lib | node-lib. The first four by default."
 
@@ -238,6 +239,7 @@ module Stages =
     let docs =
         input {
             let! watch = Options.watch
+
             and! buildStage =
                 build (
                     Spec.srcProjects
@@ -313,7 +315,8 @@ module Stages =
                     }
                     // Named rather than excluded, so a third layer does not turn `--only` into a list of
                     // everything it is not.
-                    let wanted layer = only.IsNone || only |> Option.contains layer
+                    let wanted layer =
+                        only.IsNone || only |> Option.contains layer
 
                     stage "generate ast" {
                         when' (wanted Options.Ast)
@@ -360,7 +363,9 @@ module Stages =
                     // opt in explicitly so ordinary generated-layer runs do not rewrite it.
                     stage "generate node-lib" {
                         when' (only |> Option.contains Options.NodeLib)
-                        run "dotnet run --project src/Xantham.Cli -- generate node_modules/@types/node -o src/Xantham.Fable.Node --config src/Xantham.Fable.Node/xantham.json"
+
+                        run
+                            "dotnet run --project src/Xantham.Cli -- generate node_modules/@types/node -o src/Xantham.Fable.Node --config src/Xantham.Fable.Node/xantham.json"
                     }
                 }
         }
@@ -567,6 +572,7 @@ exit (
                 hidden
                 PackageVersion.writeCliPackageVersion
             }
+
             Stages.deps
             Stages.generate
         }

@@ -245,7 +245,11 @@ let internal declParamIds (facts: TypeFacts) =
 
 /// Whether `typeId` reads `paramId` anywhere in its own type arguments or union/intersection
 /// operands - `T[]`, `T | U`, `T & U` all carry a type parameter this way.
-let rec private mentionsTypeParam (model: ShapeModel) (paramId: int<Measure.typeId>) (typeId: int<Measure.typeId>) : bool =
+let rec private mentionsTypeParam
+    (model: ShapeModel)
+    (paramId: int<Measure.typeId>)
+    (typeId: int<Measure.typeId>)
+    : bool =
     typeId = paramId
     || (match Map.tryFind typeId model.Types with
         | None -> false
@@ -274,7 +278,9 @@ let private reachesTypeId (model: ShapeModel) (target: int<Measure.typeId>) (roo
                 facts.TypeArguments |> List.exists go
                 || facts.UnionMembers |> List.exists go
                 || facts.IntersectionMembers |> List.exists go
-                || (facts.Response.TargetTypeId |> ValueOption.map go |> ValueOption.defaultValue false)
+                || (facts.Response.TargetTypeId
+                    |> ValueOption.map go
+                    |> ValueOption.defaultValue false)
 
     go root
 
@@ -854,7 +860,11 @@ let internal satisfiesNominally (model: ShapeModel) (boundId: int<Measure.typeId
 /// (`TP008`) *and* the reference stops rewriting arguments to it (`TR044` falls silent), so
 /// the argument TypeScript resolved survives. Where it is true the head keeps `:>` and
 /// `TR044` still widens whatever cannot satisfy it.
-let internal constraintProvenNominal (model: ShapeModel) (parameterId: int<Measure.typeId>) (boundId: int<Measure.typeId>) =
+let internal constraintProvenNominal
+    (model: ShapeModel)
+    (parameterId: int<Measure.typeId>)
+    (boundId: int<Measure.typeId>)
+    =
     match Map.tryFind parameterId model.Types |> Option.bind _.Default with
     | Some fallback when fallback <> parameterId -> satisfiesNominally model boundId fallback
     | _ -> true
@@ -927,7 +937,11 @@ let rec private functionShapedCallback
 /// Whether `callbackRef` will retain this callback as a delegate rather than write it as an F#
 /// function type. Read before shaping, so `synthesize-anonymous` can declare a name for the ones
 /// that will need it.
-let internal callbackRetainedAsDelegate (model: ShapeModel) (names: Map<int<Measure.typeId>, string>) (facts: TypeFacts) =
+let internal callbackRetainedAsDelegate
+    (model: ShapeModel)
+    (names: Map<int<Measure.typeId>, string>)
+    (facts: TypeFacts)
+    =
     isPureCallback facts && not (functionShapedCallback model names Set.empty facts)
 
 /// A call signature's parameter types, in order, ahead of any type resolution: the identity an
@@ -955,7 +969,11 @@ let private LiteralReach = 4
 
 /// The string literals a parameter type carries at the positions widening erases: the type
 /// itself, the members of a union, and the arguments of an instantiation.
-let rec internal literalsCarried (model: ShapeModel) (depth: int) (typeId: int<Measure.typeId>) : (int<Measure.typeId> * string) list =
+let rec internal literalsCarried
+    (model: ShapeModel)
+    (depth: int)
+    (typeId: int<Measure.typeId>)
+    : (int<Measure.typeId> * string) list =
     if depth >= LiteralReach then
         []
     else
@@ -1000,7 +1018,9 @@ let rec internal literalErasedKey (model: ShapeModel) (depth: int) (typeId: int<
         | Some facts when flag TypeFlags.StringLiteral facts -> "literal"
         | Some facts ->
             let target =
-                facts.Response.TargetTypeId |> ValueOption.map string |> ValueOption.defaultValue ""
+                facts.Response.TargetTypeId
+                |> ValueOption.map string
+                |> ValueOption.defaultValue ""
 
             let parts =
                 facts.UnionMembers @ facts.TypeArguments
@@ -1373,7 +1393,11 @@ and internal typeRefOnPath
     | None ->
         match Map.tryFind typeId model.NotFollowed with
         | Some reason -> FsObj, [ Finding.make owner (TypeReference.TypeNotResolved reason) ]
-        | None -> FsObj, [ Finding.make owner (TypeReference.MissingFromTypeTable (typeId / uom<typeId>)) ]
+        | None ->
+            FsObj,
+            [
+                Finding.make owner (TypeReference.MissingFromTypeTable(typeId / uom<typeId>))
+            ]
     | Some facts ->
         let has f = flag f facts
 
@@ -1678,7 +1702,9 @@ and internal objectRef
                 if Map.containsKey facts.Response.TypeId model.AliasApplications then
                     freeParamsOf model facts.Response.TypeId
                 else
-                    (ownArguments facts @ declParamIds facts @ freeParamsOf model facts.Response.TypeId)
+                    (ownArguments facts
+                     @ declParamIds facts
+                     @ freeParamsOf model facts.Response.TypeId)
                     |> List.distinct
 
             match arguments with
@@ -1711,7 +1737,10 @@ and internal objectRef
                     | Some result -> result
                     | None ->
 
-                        match GeneratorConfig.disposition ctx.Config facts.Origin, (facts.SymbolName |> Option.map (fun value -> value / uom<symbolName>)) with
+                        match
+                            GeneratorConfig.disposition ctx.Config facts.Origin,
+                            (facts.SymbolName |> Option.map (fun value -> value / uom<symbolName>))
+                        with
                         | Reference, Some typeName -> referencedRef ctx model self owner facts typeName
                         | Reference, None -> FsObj, [ Finding.make owner TypeReference.AnonymousInReferencedGroup ]
                         | Map _, None -> FsObj, [ Finding.make owner TypeReference.AnonymousInMappedGroup ]
@@ -1724,7 +1753,11 @@ and internal objectRef
                             let constructs =
                                 facts.ConstructSignatures
                                 |> List.tryPick (fun signature -> Map.tryFind signature.ReturnTypeId model.DeclNames)
-                                |> Option.orElse (facts.SymbolName |> Option.filter (isSyntheticName >> not) |> Option.map (fun value -> value / uom<symbolName>))
+                                |> Option.orElse (
+                                    facts.SymbolName
+                                    |> Option.filter (isSyntheticName >> not)
+                                    |> Option.map (fun value -> value / uom<symbolName>)
+                                )
                                 |> Option.defaultValue "an anonymous class"
 
                             FsObj, [ Finding.make owner (TypeReference.ConstructorObjectNotDeclared constructs) ]
@@ -1735,10 +1768,18 @@ and internal objectRef
                             // this run owes the reader.
                             match facts.SymbolName with
                             | Some shown when shown / uom<symbolName> <> owner && not (isSyntheticName shown) ->
-                                FsObj, [ Finding.make owner (TypeReference.NotAmongGeneratedDeclarations <| shown / uom<symbolName>) ]
+                                FsObj,
+                                [
+                                    Finding.make
+                                        owner
+                                        (TypeReference.NotAmongGeneratedDeclarations <| shown / uom<symbolName>)
+                                ]
                             | _ -> FsObj, [ Finding.make owner TypeReference.ObjectWithoutMembers ]
                         | (Ship | Widen | Map _), _ ->
-                            let shown = (facts.SymbolName |> Option.map (fun value -> value / uom<symbolName>)) |> Option.defaultValue "an anonymous object type"
+                            let shown =
+                                (facts.SymbolName |> Option.map (fun value -> value / uom<symbolName>))
+                                |> Option.defaultValue "an anonymous object type"
+
                             FsObj, [ Finding.make owner (TypeReference.NotAmongGeneratedDeclarations shown) ]
 
 /// A compiler-lib type a shipped Fable package already binds - `Promise` -> `JS.Promise<'T>`,
@@ -1758,7 +1799,10 @@ and internal libBinding (ctx: Context) (model: ShapeModel) (self: string option)
                     None
                 else
                     Some(fsharpName, arity, Option.toList loss)
-            | None when (facts.DeclFile |> Option.map (fun value -> value / uom<declFile>)) |> Option.exists (fun file -> Grouping.libFamily file = "Dom") ->
+            | None when
+                (facts.DeclFile |> Option.map (fun value -> value / uom<declFile>))
+                |> Option.exists (fun file -> Grouping.libFamily file = "Dom")
+                ->
                 Some($"Fable.Core.TS.Dom.{name}", arguments.Length, [])
             | None -> None
 
@@ -1807,7 +1851,10 @@ and internal mappedBinding
     (owner: string)
     (facts: TypeFacts)
     : (FsTypeRef * Finding list) option =
-    match GeneratorConfig.disposition ctx.Config facts.Origin, (facts.SymbolName |> Option.map (fun value -> value / uom<symbolName>)) with
+    match
+        GeneratorConfig.disposition ctx.Config facts.Origin,
+        (facts.SymbolName |> Option.map (fun value -> value / uom<symbolName>))
+    with
     | Map names, Some name ->
         Map.tryFind name names
         |> Option.map (fun destination ->
@@ -2199,10 +2246,15 @@ let typeParamsOf
     let named =
         ids
         |> List.choose (fun id ->
-            match Map.tryFind id model.Types |> Option.bind (_.SymbolName >> Option.map (fun value -> value / uom<symbolName>)) with
+            match
+                Map.tryFind id model.Types
+                |> Option.bind (_.SymbolName >> Option.map (fun value -> value / uom<symbolName>))
+            with
             | Some name -> Some(id, name)
             | None ->
-                findings <- findings @ [ Finding.make owner (TypeParameters.UnnamedTypeParameter (id / uom<typeId>)) ]
+                findings <-
+                    findings
+                    @ [ Finding.make owner (TypeParameters.UnnamedTypeParameter(id / uom<typeId>)) ]
 
                 None)
 
@@ -2261,7 +2313,10 @@ let typeParamsOf
 
             match bound with
             | Some(FsNamed "JS.Function", _) ->
-                findings <- findings @ [ Finding.make owner (TypeParameters.FunctionConstraintDropped name) ]
+                findings <-
+                    findings
+                    @ [ Finding.make owner (TypeParameters.FunctionConstraintDropped name) ]
+
                 { Name = name; Constraint = None }
             | Some((FsNamed shown | FsApp(shown, _)), _) when not provable ->
                 findings <-
@@ -2309,7 +2364,10 @@ let internal aliasTypeParams (ctx: Context) (model: ShapeModel) (owner: string) 
     let identity id =
         let facts = Map.tryFind id model.Types
 
-        match facts |> Option.bind (_.SymbolName >> Option.map (fun value -> value / uom<symbolName>)) with
+        match
+            facts
+            |> Option.bind (_.SymbolName >> Option.map (fun value -> value / uom<symbolName>))
+        with
         | Some name -> Ok(name, facts |> Option.bind _.Constraint)
         | None -> Error id
 
@@ -2362,7 +2420,10 @@ let rec internal typeVarsOf (reference: FsTypeRef) : Set<string> =
 
 /// The key variables a signature binds (§4.10): each type parameter whose bound is a `keyof`,
 /// paired with the id of the operand that `keyof` was taken over.
-let internal keyCandidates (model: ShapeModel) (ids: int<Measure.typeId> list) : (int<Measure.typeId> * int<Measure.typeId>) list =
+let internal keyCandidates
+    (model: ShapeModel)
+    (ids: int<Measure.typeId> list)
+    : (int<Measure.typeId> * int<Measure.typeId>) list =
     ids
     |> List.choose (fun id ->
         match Map.tryFind id model.Types |> Option.bind _.Constraint with
@@ -2378,7 +2439,12 @@ let internal keyCandidates (model: ShapeModel) (ids: int<Measure.typeId> list) :
 /// Whether any of `roots` reaches the indexed access `object[key]` - what tells `key: K` apart
 /// from `key: K` *plus* the value it selects. Carriers are followed, members are not: the point
 /// is to find `T[K]` where a signature returns it, bare or wrapped, not to walk object graphs.
-let internal mentionsAccess (model: ShapeModel) (objectId: int<Measure.typeId>) (keyId: int<Measure.typeId>) (roots: int<Measure.typeId> list) : bool =
+let internal mentionsAccess
+    (model: ShapeModel)
+    (objectId: int<Measure.typeId>)
+    (keyId: int<Measure.typeId>)
+    (roots: int<Measure.typeId> list)
+    : bool =
     let rec go visited pending =
         match pending with
         | [] -> false
@@ -2637,7 +2703,11 @@ let internal agreedMemberType (model: ShapeModel) (facts: TypeFacts) (m: Resolve
 /// that reaches a consumer's `type Actor(ctx, env) = inherit DurableObject(ctx, env)`. Every
 /// other class keeps the interface form, where the `[<ParamObject>]` Create is the construction
 /// a consumer wants.
-let internal isEntrypoint (export: HarvestedExport) (constructSignatures: ResolvedSignature list) (bases: int<Measure.typeId> list) =
+let internal isEntrypoint
+    (export: HarvestedExport)
+    (constructSignatures: ResolvedSignature list)
+    (bases: int<Measure.typeId> list)
+    =
     match export.Origin with
     | FromAmbientModule _ -> (constructSignatures |> List.exists _.IsAbstract) || not bases.IsEmpty
     | FromGlobal

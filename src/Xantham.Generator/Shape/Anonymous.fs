@@ -64,7 +64,12 @@ let private aliasDeclarationForms (model: ShapeModel) : Map<int<Measure.symbolId
 
 /// The consistent parameter bindings recoverable from two compiler-identified forms of one
 /// alias. Transformed fragments contribute no bindings; conflicting bindings reject the result.
-let private unifyAlias (model: ShapeModel) (parameters: Set<int<Measure.typeId>>) (declared: int<Measure.typeId>) (instance: int<Measure.typeId>) =
+let private unifyAlias
+    (model: ShapeModel)
+    (parameters: Set<int<Measure.typeId>>)
+    (declared: int<Measure.typeId>)
+    (instance: int<Measure.typeId>)
+    =
     let mutable subst = Map.empty
     let mutable ok = true
     let mutable seen = Set.empty
@@ -435,7 +440,8 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                     // the type's own symbol has a namespace left to fall back on.
                     let preferred, owner =
                         match facts.SymbolName with
-                        | Some name when not (isSyntheticName name) -> Naming.pascalSegment (name / uom<symbolName>), namespaceOf facts
+                        | Some name when not (isSyntheticName name) ->
+                            Naming.pascalSegment (name / uom<symbolName>), namespaceOf facts
                         | _ -> path, None
 
                     let claimed = claim owner preferred typeId order

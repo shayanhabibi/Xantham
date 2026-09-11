@@ -59,7 +59,7 @@ let harvestExports: Pass<HarvestModel> =
             fun ctx model ->
                 async {
                     let! moduleSymbol =
-                        ctx.Session.getSymbolOfSourceFile (DocumentIdentifier.FileName (ctx.EntryFile / uom<_>))
+                        ctx.Session.getSymbolOfSourceFile (DocumentIdentifier.FileName(ctx.EntryFile / uom<_>))
 
                     match moduleSymbol with
                     | ValueNone -> return Advanced model
@@ -109,7 +109,7 @@ let harvestExports: Pass<HarvestModel> =
                         let! inScope =
                             ctx.Session.getSymbolsInScope (
                                 SymbolFlags.Module,
-                                file = DocumentIdentifier.FileName (ctx.EntryFile / uom<_>),
+                                file = DocumentIdentifier.FileName(ctx.EntryFile / uom<_>),
                                 position = 0
                             )
 
@@ -191,7 +191,7 @@ let private harvestAmbientModule (ctx: Context) (moduleSymbol: SymbolResponse) =
                                     HasValueExport = hasValueExport
                                     Docs = ""
                                     Tags = []
-                                    Origin = FromAmbientModule (specifier * uom<importSpecifier>)
+                                    Origin = FromAmbientModule(specifier * uom<importSpecifier>)
                                     Order = Grouping.declOrder origin.Declarations
                                 }
                         })
@@ -239,7 +239,7 @@ let harvestGlobals: Pass<HarvestModel> =
                         let! symbols =
                             ctx.Session.getSymbolsInScope (
                                 SymbolFlags.Type ||| SymbolFlags.Value,
-                                file = DocumentIdentifier.FileName (ctx.EntryFile / uom<declFile>),
+                                file = DocumentIdentifier.FileName(ctx.EntryFile / uom<declFile>),
                                 position = 0
                             )
 
@@ -278,7 +278,7 @@ let harvestGlobals: Pass<HarvestModel> =
                         let! declared =
                             ctx.Session.getSymbolsInScope (
                                 SymbolFlags.Module,
-                                file = DocumentIdentifier.FileName (ctx.EntryFile / uom<declFile>),
+                                file = DocumentIdentifier.FileName(ctx.EntryFile / uom<declFile>),
                                 position = 0
                             )
 
@@ -342,7 +342,9 @@ let harvestGlobals: Pass<HarvestModel> =
                                         Finding.make
                                             "<module>"
                                             (HarvestGlobals.NothingHarvested(
-                                                underPackage (ctx.PackageDir / uom<dirPath>) (ctx.EntryFile / uom<declFile>),
+                                                underPackage
+                                                    (ctx.PackageDir / uom<dirPath>)
+                                                    (ctx.EntryFile / uom<declFile>),
                                                 symbols.Length,
                                                 elsewhere ctx.PackageDir symbols
                                             ))

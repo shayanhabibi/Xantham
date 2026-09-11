@@ -144,7 +144,12 @@ let private declOrigins compilerOnly (ctx: Context) (shape: ShapeModel) : Map<st
             match Map.tryFind name origins, Map.tryFind typeId shape.Types with
             | None, Some facts ->
                 let origin =
-                    match Map.tryFind name declared, (facts.SymbolName |> Option.map (fun value -> value / uom<_>)), (facts.DeclFile |> Option.map (fun value -> value / uom<_>)), facts.Origin with
+                    match
+                        Map.tryFind name declared,
+                        (facts.SymbolName |> Option.map (fun value -> value / uom<_>)),
+                        (facts.DeclFile |> Option.map (fun value -> value / uom<_>)),
+                        facts.Origin
+                    with
                     // A global object belongs to reusable core only when the complete source
                     // inventory certifies that this program adds no declarations to it.
                     | _, Some "globalThis", None, _ when compilerOnly -> CompilerLib
@@ -336,7 +341,10 @@ let private namespaceFindings (ctx: Context) (shape: ShapeModel) =
                     Some(key, named)
             | _ -> None)
         |> List.sortBy fst
-        |> List.map (fun (key, named) -> Finding.make (key / uom<npmDependency>) (EmitGroups.GroupModuleFromNamespace(key / uom<npmDependency>, named)))
+        |> List.map (fun (key, named) ->
+            Finding.make
+                (key / uom<npmDependency>)
+                (EmitGroups.GroupModuleFromNamespace(key / uom<npmDependency>, named)))
 
 /// Shape -> Render: declarations plus every finding of every earlier tier.
 let toRender (ctx: Context) (shape: ShapeModel) (findings: Finding list) : RenderModel =

@@ -72,7 +72,7 @@ let reader (ctx: Context) =
             | ValueSome handle ->
                 let! source =
                     async {
-                        match files.TryGetValue (handle.Path * uom<declFile>) with
+                        match files.TryGetValue(handle.Path * uom<declFile>) with
                         | true, source -> return source
                         | _ ->
                             let! source = ctx.Session.getSourceFile (DocumentIdentifier.FileName handle.Path)

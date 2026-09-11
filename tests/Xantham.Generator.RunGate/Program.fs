@@ -496,7 +496,11 @@ type private Bench(label: string) =
 let private ambientModules () =
     let payload = AmbientModuleLab.AmbientLab.Sockets.Exports.connect "socket"
     equal "a renamed re-export reaches the export, not the module-local name" "socket" payload.label
-    equal "a function imported from a specifier reaches that module" 6.0 (AmbientModuleLab.AmbientLab.Tools.Exports.measure payload)
+
+    equal
+        "a function imported from a specifier reaches that module"
+        6.0
+        (AmbientModuleLab.AmbientLab.Tools.Exports.measure payload)
 
     let hammer = AmbientModuleLab.AmbientLab.Tools.Exports.Hammer 4.0
     let hammerClass: obj = import "Hammer" "ambient-lab:tools"
@@ -510,7 +514,11 @@ let private ambientModules () =
 
     // `declare module "ambient-lab:runtime" { export = AmbientLabRuntime }`. Nothing puts the
     // namespace on `globalThis`, so a `[<Global>]` binding to it would read `undefined`.
-    equal "an `export =` namespace's members read through the specifier" "1.4.0" AmbientModuleLab.AmbientLab.Runtime.Exports.version
+    equal
+        "an `export =` namespace's members read through the specifier"
+        "1.4.0"
+        AmbientModuleLab.AmbientLab.Runtime.Exports.version
+
     check "and the namespace itself is no global" (emitJsExpr () "globalThis.AmbientLabRuntime === undefined")
 
 /// The entrypoint form: an `[<AbstractClass>]` under the specifier's import, which a consumer

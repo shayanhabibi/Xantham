@@ -90,7 +90,10 @@ let shapeModel (table: TypeFacts list) : ShapeModel =
     {
         Harvest = HarvestModel.Empty
         ExportTypes = Map.empty
-        Types = table |> List.map (fun facts -> facts.Response.Id * Measure.uom<Measure.typeId>, facts) |> Map.ofList
+        Types =
+            table
+            |> List.map (fun facts -> facts.Response.Id * Measure.uom<Measure.typeId>, facts)
+            |> Map.ofList
         NotFollowed = Map.empty
         DeclNames = Map.empty
         DeclOrders = Map.empty

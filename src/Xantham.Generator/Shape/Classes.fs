@@ -178,7 +178,12 @@ let shapeClasses: Pass<ShapeModel> =
                                         |> Option.bind (fun facts -> GeneratorConfig.groupKey facts.Origin)
                                         |> Option.defaultValue ("another group" * uom<npmDependency>)
 
-                                    emit (Finding.make owner (ShapeClasses.StaticMethodWithoutSignatures <| declaredIn / uom<npmDependency>))
+                                    emit (
+                                        Finding.make
+                                            owner
+                                            (ShapeClasses.StaticMethodWithoutSignatures
+                                             <| declaredIn / uom<npmDependency>)
+                                    )
                                 elif settable then
                                     emit (Finding.make owner ShapeClasses.StaticSettable)
 
@@ -198,7 +203,12 @@ let shapeClasses: Pass<ShapeModel> =
                     /// parameters of its first construct signature, and the import that binds the
                     /// JavaScript constructor. Refused where F# would not admit the result, and
                     /// the declaration then keeps the interface form it already has.
-                    let admitEntrypoint (export: HarvestedExport) (facts: TypeFacts) (bases: int<Measure.typeId> list) (name: string) =
+                    let admitEntrypoint
+                        (export: HarvestedExport)
+                        (facts: TypeFacts)
+                        (bases: int<Measure.typeId> list)
+                        (name: string)
+                        =
                         let declaration =
                             model.Decls
                             |> List.tryPick (function
@@ -253,7 +263,11 @@ let shapeClasses: Pass<ShapeModel> =
                                         }
                                         entrypoints
 
-                                emit (Finding.make name (ShapeClasses.EntrypointClassEmitted (specifier / uom<importSpecifier>)))
+                                emit (
+                                    Finding.make
+                                        name
+                                        (ShapeClasses.EntrypointClassEmitted(specifier / uom<importSpecifier>))
+                                )
 
                                 match inheritsExn with
                                 | Some baseName ->

@@ -3,10 +3,10 @@
   "package": "@types/node",
   "module": "Node",
   "counts": {
-    "exact": 815,
-    "ergonomic": 1545,
-    "widened": 914,
-    "escape": 332
+    "exact": 2531,
+    "ergonomic": 1568,
+    "widened": 469,
+    "escape": 325
   },
   "passes": [
     {
@@ -75,15 +75,20 @@
     },
     {
       "pass": "DO - dedupe-overloads",
-      "total": 3212,
+      "total": 2006,
       "exact": 86,
-      "widened": 3126
+      "widened": 1920
     },
     {
       "pass": "RA - repair-arity",
       "total": 4,
       "ergonomic": 1,
       "widened": 3
+    },
+    {
+      "pass": "resolve-export-collisions",
+      "total": 100,
+      "widened": 100
     },
     {
       "pass": "AC - audit-coverage",

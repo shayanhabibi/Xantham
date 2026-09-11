@@ -43,7 +43,7 @@ let orderDeclarations: Pass<ShapeModel> =
         let exports =
             model.ExportMembers
             |> List.sortBy (fun owned -> owned.HarvestIndex, owned.Member.Name)
-        
+
         let allocatedExports =
             exports
             |> List.map _.Owner
@@ -53,22 +53,24 @@ let orderDeclarations: Pass<ShapeModel> =
             // because the package also declares a type Cloudflare. Actual container
             // leaves still reserve all declaration names below.
             |> ExportLayout.allocate (GeneratorConfig.runtimePackage ctx.Config ctx.PackageName) []
-        
+
         let exportDecls =
             exports
             |> List.groupBy _.Owner
             |> List.choose (function
                 | _, [] -> None
                 | owner, exports ->
-                    Some <| FsExports {
-                        Name =
-                            allocatedExports
-                            |> Map.tryFind owner
-                            |> Option.defaultValue []
-                            |> ExportLayout.containerName declarationNames owner
-                        FsExportContainer.Owner = owner
-                        Members = exports
-                    })
+                    Some
+                    <| FsExports
+                        {
+                            Name =
+                                allocatedExports
+                                |> Map.tryFind owner
+                                |> Option.defaultValue []
+                                |> ExportLayout.containerName declarationNames owner
+                            FsExportContainer.Owner = owner
+                            Members = exports
+                        })
             |> List.sortBy (function
                 | FsExports container -> container.Name
                 | _ -> "")

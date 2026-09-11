@@ -66,7 +66,10 @@ let nameConstructorObjects: Pass<ShapeModel> =
             // shape nests under its owner.
             let stem =
                 Map.tryFind facts.Response.TypeId exportNames
-                |> Option.orElseWith (fun () -> facts.SymbolName |> Option.filter (isSyntheticName >> not) |> Option.map (fun value -> value / uom<symbolName>))
+                |> Option.orElseWith (fun () ->
+                    facts.SymbolName
+                    |> Option.filter (isSyntheticName >> not)
+                    |> Option.map (fun value -> value / uom<symbolName>))
                 |> Option.map Naming.pascalSegment
                 |> Option.orElseWith instanceName
                 |> Option.defaultValue path

@@ -193,6 +193,7 @@ let printType = printTypeIn false
 /// An F# string literal with the escapes source text needs.
 let stringLit (text: string<_>) =
     let text: string = text / uom<_>
+
     let escaped =
         text.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\n", "\\n").Replace("\r", "\\r").Replace("\t", "\\t")
 
@@ -640,7 +641,12 @@ let private renderMember (m: FsMember) =
 /// One binding attribute at `indent`, optionally carrying a second attribute inside the same
 /// brackets. A global names its own path off `globalThis`; an import names its specifier - the
 /// run's runtime package, or an ambient module's own quoted specifier.
-let private bindingAttribute (runtimePackage: string<importSpecifier>) (indent: string) (also: string) (binding: ImportBinding) =
+let private bindingAttribute
+    (runtimePackage: string<importSpecifier>)
+    (indent: string)
+    (also: string)
+    (binding: ImportBinding)
+    =
     let package = stringLit runtimePackage
 
     match binding with
@@ -717,7 +723,11 @@ let private renderClassMember (m: FsMember) =
 ///
 /// The declaration is erased at its import, so an `inherit exn()` line carries the is-a relation
 /// to F# and nothing to JavaScript: the imported constructor is what runs.
-let private renderEntrypointClass (runtimePackage: string<importSpecifier>) (decl: FsInterfaceDecl) (entrypoint: FsEntrypoint) =
+let private renderEntrypointClass
+    (runtimePackage: string<importSpecifier>)
+    (decl: FsInterfaceDecl)
+    (entrypoint: FsEntrypoint)
+    =
     [
         yield! docLines "" decl.Docs decl.Tags
         yield bindingAttribute runtimePackage "" "; AbstractClass" entrypoint.Binding
@@ -1165,7 +1175,10 @@ let internal qualifyDecl foreign =
             { container with
                 Members =
                     container.Members
-                    |> List.map (fun owned -> { owned with Member = qualifyBound foreign owned.Member })
+                    |> List.map (fun owned ->
+                        { owned with
+                            Member = qualifyBound foreign owned.Member
+                        })
             }
     // A string enum and an F# enum are closed over literals.
     | cases -> cases
@@ -1290,7 +1303,8 @@ let private fileHeader (openDom: bool) (source: string) (declaration: string) =
         "open Fable.Core"
         "open Fable.Core.JsInterop"
         "open Fable.Core.JS"
-        if openDom then "open Fable.Core.TS.Dom"
+        if openDom then
+            "open Fable.Core.TS.Dom"
         ""
     ]
 
@@ -1367,7 +1381,9 @@ let private renderBody (group: GroupModule) (foreign: Map<string, string>) (inde
         decls
         |> List.map (fun decl ->
             match declName decl with
-            | "" | null | "global" -> [], decl
+            | ""
+            | null
+            | "global" -> [], decl
             | name ->
                 let modules, leaf = nestingOf name
                 let scoped = qualifyDecl (Map.find modules scopedReferences) decl
@@ -1445,7 +1461,12 @@ let private renderCompilerLib
         |> String.concat "\n\n"
 
     let footer = rendered |> List.collect (fun (_, _, decls) -> decls) |> renderFooter
-    let sources = groups |> List.map (_.Group >> (fun x -> x / uom<npmDependency>)) |> List.distinct |> String.concat ", "
+
+    let sources =
+        groups
+        |> List.map (_.Group >> (fun x -> x / uom<npmDependency>))
+        |> List.distinct
+        |> String.concat ", "
     // The producer must compile without referencing the assembly it generates.
     String.concat "\n" (fileHeader false sources $"module rec {layout.RootModule}" @ [ modules; footer ])
 
@@ -1464,7 +1485,12 @@ let private renderNamespace (ns: string) (groups: GroupModule list) (foreignTo: 
         |> String.concat "\n\n"
 
     let footer = rendered |> List.collect (snd >> snd) |> renderFooter
-    let sources = groups |> List.map (_.Group >> (fun x -> x / uom<npmDependency>)) |> List.distinct |> String.concat ", "
+
+    let sources =
+        groups
+        |> List.map (_.Group >> (fun x -> x / uom<npmDependency>))
+        |> List.distinct
+        |> String.concat ", "
 
     String.concat "\n" (fileHeader true sources $"namespace rec {ns}" @ [ modules; footer ])
 
@@ -1620,19 +1646,26 @@ let renderSources (modules: GroupModule list) : Pass<RenderModel> =
                                             yield! bound interface_.Name entrypoint.Parameters
 
                                         yield! exports (interface_.Name + ".") interface_.Statics
-                                    | FsExports container -> yield! exports (container.Name + ".") (container.Members |> List.map _.Member)
+                                    | FsExports container ->
+                                        yield! exports (container.Name + ".") (container.Members |> List.map _.Member)
                                     | _ -> ()
 
                             for group in written do
                                 if not group.IsEntry then
-                                    Finding.make (group.Group / uom<npmDependency>) (EmitGroups.GroupShipped(group.Group / uom<npmDependency>, group.Decls.Length))
+                                    Finding.make
+                                        (group.Group / uom<npmDependency>)
+                                        (EmitGroups.GroupShipped(group.Group / uom<npmDependency>, group.Decls.Length))
 
                             for group in collided do
-                                Finding.make (group.Group / uom<npmDependency>) (EmitGroups.GroupModuleCollision(group.Group / uom<npmDependency>, group.Module))
+                                Finding.make
+                                    (group.Group / uom<npmDependency>)
+                                    (EmitGroups.GroupModuleCollision(group.Group / uom<npmDependency>, group.Module))
 
                             for key, disposition in Map.toList ctx.Config.Groups do
                                 if disposition = Ship && not (Set.contains key reached) then
-                                    Finding.make (key / uom<npmDependency>) (EmitGroups.ShippedGroupWithoutDeclarations(key / uom<npmDependency>))
+                                    Finding.make
+                                        (key / uom<npmDependency>)
+                                        (EmitGroups.ShippedGroupWithoutDeclarations(key / uom<npmDependency>))
                         ]
 
                     let model =
@@ -1684,7 +1717,9 @@ let symbolTiers (model: RenderModel) : (string * Tier * Finding list) list =
             | FsDelegateType decl -> [ decl.Name ]
             | FsMeasure decl -> [ decl.Name ]
             | FsPhantom decl -> [ decl.Name ]
-            | FsExports container -> container.Members |> List.map (fun owned -> container.Name + "." + owned.Member.Name))
+            | FsExports container ->
+                container.Members
+                |> List.map (fun owned -> container.Name + "." + owned.Member.Name))
         |> List.distinct
 
     let declaredSet = Set.ofList declared

@@ -22,7 +22,8 @@ type PackageId =
     /// No declaration path to classify by - anonymous and synthetic shapes. Treated as part
     /// of the entry package, which is what they are in practice.
     | Unclassified
-    static member inline StringDependency (dep: string) = dep * uom<npmDependency> |> Dependency
+
+    static member inline StringDependency(dep: string) = dep * uom<npmDependency> |> Dependency
 
 /// The F# destination of one mapped name (O7's `map`).
 [<Description("The destination of each redirected name, keyed by the TypeScript name the group declares. A name outside the table widens.")>]
@@ -476,7 +477,9 @@ module GeneratorConfig =
     /// The configured runtime package, or the derived one. What every `[<Import(…)>]` the run
     /// renders names.
     let runtimePackage (config: GeneratorConfig) (packageName: string<npmDependency>) =
-        config.RuntimePackage |> Option.map (fun value -> value * uom<importSpecifier>) |> Option.defaultValue (derivedRuntimePackage packageName)
+        config.RuntimePackage
+        |> Option.map (fun value -> value * uom<importSpecifier>)
+        |> Option.defaultValue (derivedRuntimePackage packageName)
 
     /// The key a group is addressed by under `xantham.json`'s `groups`; `None` for the groups
     /// that are not configurable (the entry package always ships).
@@ -484,7 +487,7 @@ module GeneratorConfig =
         function
         | EntryPackage
         | Unclassified -> None
-        | CompilerLib -> Some ("typescript/lib" * uom<npmDependency>)
+        | CompilerLib -> Some("typescript/lib" * uom<npmDependency>)
         | Dependency name -> Some name
 
     /// A group's effective disposition: the entry always ships, everything else is `widen`
@@ -569,7 +572,9 @@ module Naming =
     /// A package's module under a namespace: `FSharp.CloudEdge` over `@cloudedge/agents` is
     /// `FSharp.CloudEdge.Agents`.
     let private underNamespace (ns: string) (packageName: string<npmDependency>) =
-        let derived = GeneratorConfig.derivedRuntimePackage packageName / uom<importSpecifier>
+        let derived =
+            GeneratorConfig.derivedRuntimePackage packageName / uom<importSpecifier>
+
         $"{ns}.{pascalSegment (derived.Split('/') |> Array.last)}"
 
     /// A dependency's module under the entry package's configured namespace, or its derived
@@ -745,7 +750,8 @@ module Naming =
     /// The name a default export falls back to when its symbol is itself named `default`:
     /// the package name's last segment, camelCased (`ansi-regex` -> `ansiRegex`).
     let defaultExport (packageName: string<npmDependency>) =
-        let last = (packageName / uom<npmDependency>).TrimStart('@').Split('/') |> Array.last
+        let last =
+            (packageName / uom<npmDependency>).TrimStart('@').Split('/') |> Array.last
 
         segments last
         |> Array.mapi (fun i part ->
@@ -800,7 +806,11 @@ module Pass =
 /// A deterministic source-order key parsed from a declaration node handle (`index.kind.path`).
 /// The handle is otherwise opaque; only the file path and node index are read, and only for
 /// ordering output the way the author ordered source.
-type DeclOrder = { File: string<declFile>; NodeIndex: int<nodeId> }
+type DeclOrder =
+    {
+        File: string<declFile>
+        NodeIndex: int<nodeId>
+    }
 
 /// Where a harvested name came from, which is what decides how a *value* binds in JavaScript.
 /// Types are unaffected: an interface is the same F# declaration either way.
@@ -815,7 +825,9 @@ type ExportOrigin =
     /// carrying the specifier that declaration quotes. Values bind with
     /// `[<Import(name, specifier)>]`.
     | FromAmbientModule of specifier: string<importSpecifier>
-    static member inline StringFromAmbientModule specifier = (specifier : string) * uom<importSpecifier> |> FromAmbientModule
+
+    static member inline StringFromAmbientModule specifier =
+        (specifier: string) * uom<importSpecifier> |> FromAmbientModule
 
 /// The public JavaScript surface which owns an exported value occurrence.
 type ExportOwner =
@@ -1530,7 +1542,12 @@ module Grouping =
             match handles[0].Split([| '.' |], 3) with
             | [| index; _kind; path |] ->
                 match Int32.TryParse index with
-                | true, index -> Some { File = (path * uom<declFile>); NodeIndex = (index * uom<nodeId>) }
+                | true, index ->
+                    Some
+                        {
+                            File = (path * uom<declFile>)
+                            NodeIndex = (index * uom<nodeId>)
+                        }
                 | _ -> None
             | _ -> None
         | _ -> None
@@ -1593,8 +1610,9 @@ module Grouping =
                 match path.Substring(at + "/node_modules/".Length).Split '/' with
                 | parts when parts.Length > 0 && (parts[0] = "typescript" || parts[0] = "@typescript") -> CompilerLib
                 | _ when isLibFile -> CompilerLib
-                | parts when parts.Length > 1 && parts[0].StartsWith "@" -> Dependency ($"{parts[0]}/{parts[1]}" * uom<npmDependency>)
-                | parts when parts.Length > 0 -> Dependency (parts[0] * uom<npmDependency>)
+                | parts when parts.Length > 1 && parts[0].StartsWith "@" ->
+                    Dependency($"{parts[0]}/{parts[1]}" * uom<npmDependency>)
+                | parts when parts.Length > 0 -> Dependency(parts[0] * uom<npmDependency>)
                 | _ -> Unclassified
 
     /// Entry sources first, then package-relative dependency and compiler sources.

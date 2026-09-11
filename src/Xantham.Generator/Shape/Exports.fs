@@ -38,8 +38,15 @@ let shapeExports: Pass<ShapeModel> =
                     // convention this run had to guess from a name.
                     let runtimePackage = GeneratorConfig.runtimePackage ctx.Config ctx.PackageName
 
-                    if ctx.Config.RuntimePackage.IsNone && runtimePackage / uom<importSpecifier> <> ctx.PackageName / uom<npmDependency> then
-                        emit (Finding.make "<module>" (ShapeExports.RuntimeSpecifierDerived (runtimePackage / uom<importSpecifier>)))
+                    if
+                        ctx.Config.RuntimePackage.IsNone
+                        && runtimePackage / uom<importSpecifier> <> ctx.PackageName / uom<npmDependency>
+                    then
+                        emit (
+                            Finding.make
+                                "<module>"
+                                (ShapeExports.RuntimeSpecifierDerived(runtimePackage / uom<importSpecifier>))
+                        )
 
                     let fallback = defaultExportName ctx
 
@@ -72,24 +79,28 @@ let shapeExports: Pass<ShapeModel> =
                                             shapeSignature ctx model None findingName signature
 
                                         findings <- findings @ signatureFindings
+
                                         {
                                             OwnedExportMember.Owner = owner
                                             HarvestIndex = index
                                             ExportName = export.ExportName
                                             SourceSymbolId = export.Symbol.Id * uom<symbolId>
                                             SignatureOrdinal = Some ordinal
-                                            Member = {
-                                                Name = name
-                                                Docs = export.Docs
-                                                Tags = export.Tags
-                                                TypeParameters = typeParameters
-                                                Binding = binding
-                                                Body = ExportFunction(parameters, returns)
-                                                Settable = false
-                                            }
+                                            Member =
+                                                {
+                                                    Name = name
+                                                    Docs = export.Docs
+                                                    Tags = export.Tags
+                                                    TypeParameters = typeParameters
+                                                    Binding = binding
+                                                    Body = ExportFunction(parameters, returns)
+                                                    Settable = false
+                                                }
                                         })
                                 | Some facts ->
-                                    let reference, refFindings = typeRef ctx model None findingName facts.Response.TypeId
+                                    let reference, refFindings =
+                                        typeRef ctx model None findingName facts.Response.TypeId
+
                                     findings <- findings @ refFindings
 
                                     // A `var` on the global object is the one binding an
