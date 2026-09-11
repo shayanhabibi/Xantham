@@ -5,6 +5,7 @@ open Xantham.Generator.Measure
 open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator.Shape.Spec
+open Xantham.Generator.Shape.ExportLayout
 
 /// The object every ambient global is a property of, and the selector a settable global binds
 /// through.
@@ -58,17 +59,17 @@ let shapeExports: Pass<ShapeModel> =
                                     []
                                 | Some facts when not facts.CallSignatures.IsEmpty ->
                                     facts.CallSignatures
-                                    |> List.map (fun signature ->
+                                    |> List.mapi (fun ordinal signature ->
                                         let typeParameters, parameters, returns, signatureFindings =
                                             shapeSignature ctx model None name signature
 
                                         findings <- findings @ signatureFindings
                                         {
-                                            OwnedExportMember.Owner = export.Origin
+                                            OwnedExportMember.Owner = ownerOf runtimePackage export.Origin
                                             HarvestIndex = index
                                             ExportName = export.ExportName
                                             SourceSymbolId = export.Symbol.Id * uom<symbolId>
-                                            SignatureOrdinal = None
+                                            SignatureOrdinal = Some ordinal
                                             Member = {
                                                 Name = name
                                                 Docs = export.Docs
@@ -101,7 +102,7 @@ let shapeExports: Pass<ShapeModel> =
 
                                     [
                                         {
-                                            OwnedExportMember.Owner = export.Origin
+                                            OwnedExportMember.Owner = ownerOf runtimePackage export.Origin
                                             HarvestIndex = index
                                             ExportName = export.ExportName
                                             SourceSymbolId = export.Symbol.SymbolId

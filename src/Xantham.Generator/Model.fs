@@ -817,6 +817,12 @@ type ExportOrigin =
     | FromAmbientModule of specifier: string<importSpecifier>
     static member inline StringFromAmbientModule specifier = (specifier : string) * uom<importSpecifier> |> FromAmbientModule
 
+/// The public JavaScript surface which owns an exported value occurrence.
+type ExportOwner =
+    | EntryModule
+    | AmbientModule of specifier: string<importSpecifier>
+    | GlobalScope
+
 /// One export of the entry module, aliases already followed to their origin so re-exports
 /// appear once under the name they are exported as. A global type library has no module to
 /// export from, and its ambient declarations arrive here too - see `ExportOrigin`.
@@ -1211,7 +1217,7 @@ type FsExportMember =
 
 type OwnedExportMember =
     {
-        Owner: ExportOrigin
+        Owner: ExportOwner
         HarvestIndex: int
         ExportName: string
         SourceSymbolId: int<symbolId>
@@ -1222,7 +1228,7 @@ type OwnedExportMember =
 type FsExportContainer =
     {
         Name: string
-        Owner: ExportOrigin
+        Owner: ExportOwner
         Members: OwnedExportMember list
     }
 

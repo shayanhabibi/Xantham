@@ -21,12 +21,23 @@ let private baseModel =
       Files = []
       ShadowedByLib = 0 }
 
+let private owned index (member_: FsExportMember) =
+    { Owner = EntryModule
+      HarvestIndex = index
+      ExportName = member_.Name
+      SourceSymbolId = index * uom<symbolId>
+      SignatureOrdinal = None
+      Member = member_ }
+
+let private exports members =
+    FsExports { Name = "Exports"; Owner = EntryModule; Members = members |> List.mapi owned }
+
 let private boundSource names =
     let parameters = names |> List.map (fun name -> { Name = name; Type = FsString; Optional = false; Rest = false })
     let model =
         { baseModel with
             Decls =
-                [ FsExports
+                [ exports
                     [ { Name = "invoke"; Docs = ""; Tags = []; TypeParameters = []
                         Binding = ImportNamed "invoke"; Settable = false
                         Body = ExportFunction(parameters, FsUnit) } ] ] }
@@ -442,7 +453,7 @@ let renderTests =
                                 Order = None
                                 TypeParameters = []
                                 Target = FsDelegate([ FsNamed "Options" ], FsUnit) }
-                          FsExports
+                          exports
                               [ { Name = "make"
                                   Docs = ""
                                   Tags = []

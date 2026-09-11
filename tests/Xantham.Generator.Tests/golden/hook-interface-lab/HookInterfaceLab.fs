@@ -93,29 +93,31 @@ type Listener =
     [<ParamObject; Emit("$0")>]
     static member Create (?ping: (Signal -> string)) : Listener = jsNative
 
-/// <summary>The package's value exports, each bound to its import.</summary>
-[<Erase>]
-type Exports =
-    /// <summary>
-    /// An entrypoint a consumer derives from. <c>run</c> is the mandatory slot; <c>fetch</c> and <c>alarm</c> are
-    /// the platform's lifecycle hooks, called where the object provides them.
-    /// </summary>
-    [<Import("Station", "hook-lab:runtime"); EmitConstructor>]
-    static member Station (label: string) : Station = jsNative
-    /// <summary>
-    /// An entrypoint whose hook mentions the class's own type parameter.
-    /// </summary>
-    [<Import("Relay", "hook-lab:runtime"); EmitConstructor>]
-    static member Relay<'T> (seed: 'T) : Relay<'T> = jsNative
-    /// <summary>
-    /// An exported class that is neither abstract nor derived: the interface form, where an
-    /// optional method is an option property because there is no class to hang a hook off.
-    /// </summary>
-    [<Import("Hub", "hook-lab:runtime"); EmitConstructor>]
-    static member Hub (depth: float) : Hub = jsNative
-    /// <summary>
-    /// A class whose base this run declares. An F# interface admits no <c>inherit</c> of a class, so
-    /// this keeps the interface form and its inherited optional method stays an option.
-    /// </summary>
-    [<Import("Annex", "hook-lab:runtime"); EmitConstructor>]
-    static member Annex (depth: float, tag: string) : Annex = jsNative
+module HookLab =
+    module Runtime =
+        /// <summary>The package's value exports, each bound to its import.</summary>
+        [<Erase>]
+        type Exports =
+            /// <summary>
+            /// An entrypoint a consumer derives from. <c>run</c> is the mandatory slot; <c>fetch</c> and <c>alarm</c> are
+            /// the platform's lifecycle hooks, called where the object provides them.
+            /// </summary>
+            [<Import("Station", "hook-lab:runtime"); EmitConstructor>]
+            static member Station (label: string) : Station = jsNative
+            /// <summary>
+            /// An entrypoint whose hook mentions the class's own type parameter.
+            /// </summary>
+            [<Import("Relay", "hook-lab:runtime"); EmitConstructor>]
+            static member Relay<'T> (seed: 'T) : Relay<'T> = jsNative
+            /// <summary>
+            /// An exported class that is neither abstract nor derived: the interface form, where an
+            /// optional method is an option property because there is no class to hang a hook off.
+            /// </summary>
+            [<Import("Hub", "hook-lab:runtime"); EmitConstructor>]
+            static member Hub (depth: float) : Hub = jsNative
+            /// <summary>
+            /// A class whose base this run declares. An F# interface admits no <c>inherit</c> of a class, so
+            /// this keeps the interface form and its inherited optional method stays an option.
+            /// </summary>
+            [<Import("Annex", "hook-lab:runtime"); EmitConstructor>]
+            static member Annex (depth: float, tag: string) : Annex = jsNative

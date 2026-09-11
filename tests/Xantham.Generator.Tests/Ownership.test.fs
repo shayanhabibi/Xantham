@@ -50,7 +50,7 @@ let private placement expected exportedNames names declarations facts =
         Pipeline.groupModules ctx model
         |> List.collect (fun group ->
             group.Decls
-            |> List.choose (fun decl -> Render.declName decl |> Option.map (fun name -> name, group.IsEntry)))
+            |> List.map (fun decl -> Render.declName decl |> (fun name -> name, group.IsEntry)))
         |> Map.ofList
 
     Map.ofList expected, actual
@@ -115,7 +115,7 @@ let private hookPlacement expected origin file compilerLib =
         Pipeline.groupModules ctx model
         |> List.collect (fun group ->
             group.Decls
-            |> List.choose (fun decl -> Render.declName decl |> Option.map (fun name -> name, group.Module)))
+            |> List.map (fun decl -> Render.declName decl |> (fun name -> name, group.Module)))
         |> Map.ofList
 
     Map.ofList [ "Station", expected; "Station.IFetchHandler", expected; "Station.LocalAlias", "TestPkg" ], actual
@@ -239,6 +239,6 @@ let exportOrderTests =
                     Decls = model.Exports |> List.map (fun export -> abbreviation export.ExportName export.Order FsString) }
             let shaped, _ =
                 Pipeline.runTier ctx [ Shape.Ordering.orderDeclarations ] declarations |> Async.RunSynchronously
-            shaped.Decls |> List.choose Render.declName
+            shaped.Decls |> List.map Render.declName
             |> Flip.Expect.equal "emitted declarations retain the same logical source order" expected
     ]

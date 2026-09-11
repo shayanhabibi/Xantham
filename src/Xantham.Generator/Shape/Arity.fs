@@ -117,20 +117,25 @@ let private mapDeclRefs (f: FsTypeRef -> FsTypeRef) (decl: FsDecl) : FsDecl =
                                     })
                         })
             }
-    | FsExports members ->
-        FsExports(
-            members
-            |> List.map (fun m ->
-                { m with
-                    Body =
-                        match m.Body with
-                        | ExportFunction(parameters, returns) ->
-                            ExportFunction(parameters |> List.map parameter, reference returns)
-                        | ExportValue returns -> ExportValue(reference returns)
-                        | ExportConstructor(parameters, returns) ->
-                            ExportConstructor(parameters |> List.map parameter, reference returns)
-                })
-        )
+    | FsExports container ->
+        FsExports
+            { container with
+                Members =
+                    container.Members
+                    |> List.map (fun owned ->
+                        { owned with
+                            Member =
+                                { owned.Member with
+                                    Body =
+                                        match owned.Member.Body with
+                                        | ExportFunction(parameters, returns) ->
+                                            ExportFunction(parameters |> List.map parameter, reference returns)
+                                        | ExportValue returns -> ExportValue(reference returns)
+                                        | ExportConstructor(parameters, returns) ->
+                                            ExportConstructor(parameters |> List.map parameter, reference returns)
+                                }
+                        })
+            }
     | FsStringEnum _
     | FsEnum _ -> decl
 

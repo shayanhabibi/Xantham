@@ -1279,7 +1279,7 @@ let shapePassTests =
             let model, _ = Build.runPass Ordering.orderDeclarations shaped
 
             match model.Decls with
-            | [ FsExports [ m ] ] ->
+            | [ FsExports { Members = [ { Member = m } ] } ] ->
                 Expect.equal m.Name "ansiRegex" "named after the declaring symbol, not 'default'"
                 Expect.equal m.Binding ImportDefault "bound as the default import"
 
@@ -2691,7 +2691,7 @@ let shapePassTests =
             Expect.isEmpty (findings |> List.filter (fun f -> f.Tier = Escape)) "no drops"
 
             match shaped.ExportMembers with
-            | [ (0, m) ] ->
+            | [ { HarvestIndex = 0; Member = m } ] ->
                 Expect.equal m.Name "Timer" "constructor member name"
 
                 match m.Body with
@@ -3524,15 +3524,20 @@ let shapePassTests =
         // function's overloads arrive widened and `DO004` prices the drop as its own loss.
         testCase "dedupe-overloads reports an exported function's dropped overload as DO004" <| fun _ ->
             let export name body =
-                0,
                 {
-                    Name = name
-                    Docs = ""
-                    Tags = []
-                    TypeParameters = []
-                    Binding = ImportNamed name
-                    Body = body
-                    Settable = false
+                    Owner = EntryModule
+                    HarvestIndex = 0
+                    ExportName = name
+                    SourceSymbolId = 0<symbolId>
+                    SignatureOrdinal = None
+                    Member =
+                        { Name = name
+                          Docs = ""
+                          Tags = []
+                          TypeParameters = []
+                          Binding = ImportNamed name
+                          Body = body
+                          Settable = false }
                 }
 
             let parameter name =
@@ -3562,7 +3567,7 @@ let shapePassTests =
                 "the function drop is an export-function loss; a constructor drop stays DO001"
 
             Expect.equal
-                (shaped.ExportMembers |> List.map (fun (_, m) -> m.Name))
+                (shaped.ExportMembers |> List.map (fun owned -> owned.Member.Name))
                 [ "emit"; "make" ]
                 "one of each survives"
 
@@ -3951,14 +3956,19 @@ let shapePassTests =
                         [ interface' "B" { File = ((fun value -> value * uom<declFile>) "b.ts"); NodeIndex = 5<nodeId> }
                           interface' "A" { File = ((fun value -> value * uom<declFile>) "a.ts"); NodeIndex = 9<nodeId> } ]
                     ExportMembers =
-                        [ 0,
-                          { Name = "make"
-                            Docs = ""
-                            Tags = []
-                            TypeParameters = []
-                            Binding = ImportNamed "make"
-                            Body = ExportValue FsFloat
-                            Settable = false } ] }
+                        [ { Owner = EntryModule
+                            HarvestIndex = 0
+                            ExportName = "make"
+                            SourceSymbolId = 0<symbolId>
+                            SignatureOrdinal = None
+                            Member =
+                                { Name = "make"
+                                  Docs = ""
+                                  Tags = []
+                                  TypeParameters = []
+                                  Binding = ImportNamed "make"
+                                  Body = ExportValue FsFloat
+                                  Settable = false } } ] }
 
             let ordered, _ = Build.runPass Ordering.orderDeclarations model
 
@@ -4263,7 +4273,7 @@ let private constraintParameters expected used =
             ExportTypes = Map.ofList [ 400<symbolId>, { Declared = None; Value = Some 40<typeId> } ] }
 
     let shaped, findings = Build.runPass Exports.shapeExports model
-    let parameters = shaped.ExportMembers |> List.exactlyOne |> snd |> _.TypeParameters
+    let parameters = shaped.ExportMembers |> List.exactlyOne |> _.Member.TypeParameters
 
     (parameters |> List.map _.Name,
      findings |> List.filter (fun finding -> finding.Key = "TP006") |> List.map _.Message), expected

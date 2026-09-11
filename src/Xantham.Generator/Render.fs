@@ -942,15 +942,15 @@ type GroupModule =
 /// carries no name of its own.
 let declName =
     function
-    | FsInterface decl -> Some decl.Name
-    | FsStringEnum decl -> Some decl.Name
-    | FsTaggedUnion decl -> Some decl.Name
-    | FsEnum decl -> Some decl.Name
-    | FsAbbrev decl -> Some decl.Name
-    | FsDelegateType decl -> Some decl.Name
-    | FsMeasure decl -> Some decl.Name
-    | FsPhantom decl -> Some decl.Name
-    | FsExports _ -> None
+    | FsInterface decl -> decl.Name
+    | FsStringEnum decl -> decl.Name
+    | FsTaggedUnion decl -> decl.Name
+    | FsEnum decl -> decl.Name
+    | FsAbbrev decl -> decl.Name
+    | FsDelegateType decl -> decl.Name
+    | FsMeasure decl -> decl.Name
+    | FsPhantom decl -> decl.Name
+    | FsExports decl -> decl.Name
 
 /// The modules a declaration is written inside, and the name it takes there. A path-derived
 /// name is dotted (`Widget.Options`), so the declaration goes in `module Widget` under the leaf.
@@ -969,7 +969,7 @@ let private underLeaf (name: string) =
     | FsDelegateType decl -> FsDelegateType { decl with Name = name }
     | FsMeasure decl -> FsMeasure { decl with Name = name }
     | FsPhantom decl -> FsPhantom { decl with Name = name }
-    | FsExports members -> FsExports members
+    | FsExports decl -> FsExports { decl with Name = name }
 
 let private indented (indent: string) (line: string) = if line = "" then "" else indent + line
 
@@ -1153,7 +1153,13 @@ let internal qualifyDecl foreign =
                 TypeParameters = qualifyTypeParams foreign decl.TypeParameters
                 Carrier = qualifyRef foreign decl.Carrier
             }
-    | FsExports members -> FsExports(members |> List.map (qualifyBound foreign))
+    | FsExports container ->
+        FsExports
+            { container with
+                Members =
+                    container.Members
+                    |> List.map (fun owned -> { owned with Member = qualifyBound foreign owned.Member })
+            }
     // A string enum and an F# enum are closed over literals.
     | cases -> cases
 
@@ -1230,7 +1236,7 @@ let private declErasedArities (decl: FsDecl) : int list =
     | FsTaggedUnion d ->
         d.Cases
         |> List.collect (fun case -> case.Fields |> List.collect (fun f -> erasedArities f.Type))
-    | FsExports members -> members |> List.collect ofExportMember
+    | FsExports container -> container.Members |> List.collect (fun owned -> ofExportMember owned.Member)
     | FsStringEnum _
     | FsEnum _ -> []
 
@@ -1290,7 +1296,7 @@ let private renderBody (group: GroupModule) (foreign: Map<string, string>) (inde
         else
             group.Decls |> List.map (qualifyDecl foreign)
 
-    let names = group.Decls |> List.choose declName
+    let names = group.Decls |> List.map declName
 
     let namesByHead =
         names |> List.groupBy (fun name -> name.Split('.')[0]) |> Map.ofList
@@ -1345,17 +1351,17 @@ let private renderBody (group: GroupModule) (foreign: Map<string, string>) (inde
         | FsDelegateType decl -> renderDelegate decl
         | FsMeasure decl -> renderMeasure decl
         | FsPhantom decl -> renderPhantom decl
-        | FsExports members -> renderExports group.RuntimePackage members
+        | FsExports container -> renderExports group.RuntimePackage (container.Members |> List.map _.Member)
 
     let body =
         decls
         |> List.map (fun decl ->
             match declName decl with
-            | Some name ->
+            | "" | null | "global" -> [], decl
+            | name ->
                 let modules, leaf = nestingOf name
                 let scoped = qualifyDecl (Map.find modules scopedReferences) decl
-                modules, underLeaf leaf scoped
-            | None -> [], decl)
+                modules, underLeaf leaf scoped)
         |> nestedBlocks render indent
         |> List.map (String.concat "\n")
         |> String.concat "\n\n"
@@ -1519,7 +1525,7 @@ let renderSources (modules: GroupModule list) : Pass<RenderModel> =
                         written
                         |> List.collect (fun group ->
                             group.Decls
-                            |> List.choose declName
+                            |> List.map declName
                             |> List.map (fun name -> name, effectiveModule group))
                         |> Map.ofList
 
@@ -1604,7 +1610,7 @@ let renderSources (modules: GroupModule list) : Pass<RenderModel> =
                                             yield! bound interface_.Name entrypoint.Parameters
 
                                         yield! exports (interface_.Name + ".") interface_.Statics
-                                    | FsExports members -> yield! exports "" members
+                                    | FsExports container -> yield! exports "" (container.Members |> List.map _.Member)
                                     | _ -> ()
 
                             for group in written do
@@ -1668,7 +1674,7 @@ let symbolTiers (model: RenderModel) : (string * Tier * Finding list) list =
             | FsDelegateType decl -> [ decl.Name ]
             | FsMeasure decl -> [ decl.Name ]
             | FsPhantom decl -> [ decl.Name ]
-            | FsExports members -> members |> List.map _.Name)
+            | FsExports container -> container.Members |> List.map _.Member.Name)
         |> List.distinct
 
     let declaredSet = Set.ofList declared

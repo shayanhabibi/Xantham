@@ -1,11 +1,11 @@
 {"name":"LayoutPayload","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"LayoutPayload","message":"ParamObject Create synthesized (D3)"}]}
 {"name":"sharedFlag","tier":"exact","findings":[]}
 {"name":"check","tier":"widened","findings":[{"name":"DO.ExportFunctionOverloadDropped","key":"DO004","pass":"dedupe-overloads","tier":"widened","symbol":"check","message":"exported function overload dropped: no parameter separates from earlier one"}]}
-{"name":"renamedCheck","tier":"exact","findings":[]}
 {"name":"mode","tier":"exact","findings":[]}
 {"name":"echo","tier":"widened","findings":[{"name":"DO.ExportFunctionOverloadDropped","key":"DO004","pass":"dedupe-overloads","tier":"widened","symbol":"echo","message":"exported function overload dropped: no parameter separates from earlier one"}]}
 {"name":"convert","tier":"exact","findings":[]}
 {"name":"pick","tier":"widened","findings":[{"name":"DO.ExportFunctionOverloadDropped","key":"DO004","pass":"dedupe-overloads","tier":"widened","symbol":"pick","message":"exported function overload dropped: no parameter separates from earlier one"}]}
+{"name":"renamedCheck","tier":"exact","findings":[]}
 {"name":"\u0022layout-lab\u0022","tier":"exact","findings":[{"name":"HG.AmbientModuleHarvested","key":"HG004","pass":"harvest-globals","tier":"exact","symbol":"\u0022layout-lab\u0022","fields":{"specifier":"layout-lab","exports":5},"message":"5 exports harvested from ambient module \u0022layout-lab\u0022; each binds with [\u003CImport(name, \u0022layout-lab\u0022)\u003E]"}]}
 {"name":"\u0022layout-lab/aliases\u0022","tier":"exact","findings":[{"name":"HG.AmbientModuleHarvested","key":"HG004","pass":"harvest-globals","tier":"exact","symbol":"\u0022layout-lab/aliases\u0022","fields":{"specifier":"layout-lab/aliases","exports":2},"message":"2 exports harvested from ambient module \u0022layout-lab/aliases\u0022; each binds with [\u003CImport(name, \u0022layout-lab/aliases\u0022)\u003E]"}]}
 {"name":"\u0022layout-lab/strict\u0022","tier":"exact","findings":[{"name":"HG.AmbientModuleHarvested","key":"HG004","pass":"harvest-globals","tier":"exact","symbol":"\u0022layout-lab/strict\u0022","fields":{"specifier":"layout-lab/strict","exports":3},"message":"3 exports harvested from ambient module \u0022layout-lab/strict\u0022; each binds with [\u003CImport(name, \u0022layout-lab/strict\u0022)\u003E]"}]}

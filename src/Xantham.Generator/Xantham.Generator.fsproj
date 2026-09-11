@@ -19,6 +19,7 @@
              refer to one another in, and `Passes.fs` closes the folder with the list the
              pipeline runs. -->
         <Compile Include="Shape\Spec.fs" />
+        <Compile Include="Shape\ExportLayout.fs" />
         <Compile Include="Shape\ExportNames.fs" />
         <Compile Include="Shape\Anonymous.fs" />
         <Compile Include="Shape\ConstructorObjects.fs" />
@@ -36,7 +37,6 @@
         <Compile Include="Shape\Arity.fs" />
         <Compile Include="Shape\Ordering.fs" />
         <Compile Include="Shape\Coverage.fs" />
-        <Compile Include="Shape\ExportLayout.fs" />
         <Compile Include="Shape\Passes.fs" />
         <Compile Include="Render.fs" />
         <Compile Include="DeclarationCatalog.fs" />

@@ -222,11 +222,11 @@ let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel)
     let groupOf decl =
         let origin =
             match Render.declName decl with
-            | Some name when Map.containsKey name origins -> originOf name
+            | name when Map.containsKey name origins -> originOf name
             | name ->
                 secondaryAliasOrder decl
                 |> Option.map (fun order -> Grouping.classifyFile ctx.PackageDir (order.File / uom<node>))
-                |> Option.defaultWith (fun () -> name |> Option.map originOf |> Option.defaultValue Unclassified)
+                |> Option.defaultWith (fun () -> name |> originOf)
 
         emittingGroup ctx origin
 
@@ -248,7 +248,7 @@ let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel)
         | CompilerLib ->
             let family =
                 match Render.declName decl with
-                | Some name when Map.containsKey name origins ->
+                | name when Map.containsKey name origins ->
                     Map.tryFind name declared
                     |> Option.bind _.Order
                     |> Option.map (fun order -> Grouping.libFamily (order.File / uom<_>))
@@ -256,7 +256,7 @@ let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel)
                 | name ->
                     secondaryAliasOrder decl
                     |> Option.map (fun order -> Grouping.libFamily (order.File / uom<_>))
-                    |> Option.defaultWith (fun () -> name |> Option.map familyOf |> Option.defaultValue "Es")
+                    |> Option.defaultWith (fun () -> name |> familyOf)
 
             CompilerLib, family
         | origin -> origin, ""

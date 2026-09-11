@@ -675,7 +675,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                     }
 
     shape.Decls
-    |> List.choose (fun decl -> Render.declName decl |> Option.map (fun name -> name, forDecl name decl))
+    |> List.map (fun decl -> Render.declName decl |> (fun name -> name, forDecl name decl))
     |> Map.ofList
 
 let private load profile compiler generator (path: string) =
@@ -771,7 +771,7 @@ let private classValues (ctx: Context) (shape: ShapeModel) (groups: Render.Group
     let mutable values = Map.empty
 
     let claimed =
-        Collections.Generic.HashSet<string>(shape.Decls |> List.choose Render.declName)
+        Collections.Generic.HashSet<string>(shape.Decls |> List.map Render.declName)
 
     for declaration in shape.Decls do
         match declaration with
@@ -803,7 +803,7 @@ let private classValues (ctx: Context) (shape: ShapeModel) (groups: Render.Group
                         let constructors =
                             shape.Decls
                             |> List.collect (function
-                                | FsExports members -> members
+                                | FsExports container -> container.Members |> List.map _.Member
                                 | _ -> [])
                             |> List.choose (fun member_ ->
                                 match member_.Body with
@@ -875,7 +875,7 @@ let private classValues (ctx: Context) (shape: ShapeModel) (groups: Render.Group
                             groups
                             |> List.map (fun group ->
                                 if
-                                    group.Decls |> List.exists (fun decl -> Render.declName decl = Some class_.Name)
+                                    group.Decls |> List.exists (fun decl -> Render.declName decl = class_.Name)
                                 then
                                     { group with
                                         Decls = group.Decls @ [ helper ]
@@ -967,7 +967,7 @@ let apply (ctx: Context) (shape: ShapeModel) (groups: Render.GroupModule list) =
                 groups
                 |> List.collect (fun group ->
                     group.Decls
-                    |> List.choose (fun decl -> Render.declName decl |> Option.map (fun name -> name, group.Module)))
+                    |> List.map (fun decl -> Render.declName decl |> (fun name -> name, group.Module)))
                 |> Map.ofList
 
             let reused =
@@ -1144,7 +1144,7 @@ let apply (ctx: Context) (shape: ShapeModel) (groups: Render.GroupModule list) =
                 shape.Decls
                 |> List.choose (fun decl ->
                     Render.declName decl
-                    |> Option.bind (fun name ->
+                    |> (fun name ->
                         let constraints = constraints decl
 
                         match Map.tryFind name reused with
@@ -1229,7 +1229,7 @@ let apply (ctx: Context) (shape: ShapeModel) (groups: Render.GroupModule list) =
                 |> List.choose (fun decl ->
                     match
                         Render.declName decl
-                        |> Option.bind (fun name ->
+                        |> (fun name ->
                             Map.tryFind name reused |> Option.map (fun producer -> name, producer))
                     with
                     | None -> Some(Render.qualifyDecl redirects decl)

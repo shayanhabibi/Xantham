@@ -13,10 +13,10 @@ let orderDeclarations: Pass<ShapeModel> =
         let orderKey (order: DeclOrder option) (name: string) =
             (match order with
              | Some order -> Grouping.sourceOrderKey ctx.PackageDir (order.File / uom<node>), order.NodeIndex
-             | None -> (2, "", ""), (System.Int32.MaxValue * uom<Measure.nodeId>)),
+             | None -> (2, "", ""), (System.Int32.MaxValue * uom<nodeId>)),
             name
 
-        let decls =
+        let declarationNames, decls =
             model.Decls
             |> List.sortBy (function
                 | FsInterface decl -> orderKey decl.Order decl.Name
@@ -27,17 +27,53 @@ let orderDeclarations: Pass<ShapeModel> =
                 | FsDelegateType decl -> orderKey decl.Order decl.Name
                 | FsPhantom decl -> orderKey decl.Order decl.Name
                 | FsMeasure decl -> orderKey decl.Order decl.Name
-                | FsExports _ -> ((2, "", ""), (System.Int32.MaxValue * uom<Measure.nodeId>)), "￿")
+                | FsExports _ -> ((2, "", ""), (System.Int32.MaxValue * uom<nodeId>)), "￿")
+            |> List.map (function
+                | FsInterface decl as declWrap -> decl.Name, declWrap
+                | FsStringEnum decl as declWrap -> decl.Name, declWrap
+                | FsTaggedUnion decl as declWrap -> decl.Name, declWrap
+                | FsEnum decl as declWrap -> decl.Name, declWrap
+                | FsAbbrev decl as declWrap -> decl.Name, declWrap
+                | FsDelegateType decl as declWrap -> decl.Name, declWrap
+                | FsPhantom decl as declWrap -> decl.Name, declWrap
+                | FsMeasure decl as declWrap -> decl.Name, declWrap
+                | FsExports decl as declWrap -> "", declWrap)
+            |> List.unzip
 
         let exports =
             model.ExportMembers
-            |> List.sortBy (fun (index, m) -> index, m.Name)
-            |> List.map snd
+            |> List.sortBy (fun owned -> owned.HarvestIndex, owned.Member.Name)
+        
+        let allocatedExports =
+            exports
+            |> List.map _.Owner
+            |> ExportLayout.allocate (GeneratorConfig.runtimePackage ctx.Config ctx.PackageName) declarationNames
+        
+        let exportDecls =
+            exports
+            |> List.groupBy _.Owner
+            |> List.choose (function
+                | _, [] -> None
+                | owner, exports ->
+                    Some <| FsExports {
+                        Name =
+                            allocatedExports
+                            |> Map.tryFind owner
+                            |> Option.defaultValue []
+                            |> ExportLayout.containerName declarationNames owner
+                        FsExportContainer.Owner = owner
+                        Members = exports
+                    }
+                )
 
         { model with
             Decls =
-                match exports with
+                match exportDecls with
                 | [] -> decls
-                | exports -> decls @ [ FsExports exports ]
+                | exportDecls -> decls @ exportDecls
+                // match exports with
+                // | [] -> decls
+                // | exports ->
+                //     decls @ [ FsExports { Name = "Exports"; Owner = EntryModule; Members = exports } ]
             ExportMembers = []
         })
