@@ -92,7 +92,7 @@ This example describes layout only; it does not assert that these are actual Nod
 
 Path normalization is presentation, never identity. `foo-bar`, `foo_bar`, `foo/bar`, different case spellings, and colon-prefixed aliases must not silently merge. Preserve each exact specifier in its import attributes. Alias equivalence is not inferred from equal signatures or equal origin symbols.
 
-Allocate paths against existing declarations and modules before rendering. Existing declaration names win. A module may be shared as a parent, but its leaf `Exports` must not conflict with a declaration already there. Reserve `Exports` in every export-container scope and `Globals` when needed.
+Allocate paths against existing modules before rendering. Existing type declarations can share their name with a companion module in the same generated file; do not reserve type names as module paths. This was compiler-checked on 2026-09-11 after the Cloudflare regression exposed unnecessary per-owner hashes. A module may be shared as a parent, but its leaf `Exports` must not conflict with a declaration already there. Reserve `Exports` in every export-container scope and `Globals` when needed.
 
 For conflicting requested module paths, append `_` plus the first 12 lowercase hex characters of SHA-256 of the exact UTF-8 owner key to the conflicting segment. Extend the digest until unique if necessary. Use tagged owner keys (`ambient:` plus specifier, `entry`, `global`) rather than session IDs or process hashes. Sort conflicting owners ordinally. Root `Exports` conflicting with an existing declaration uses `Exports_<digest>` as the container leaf. Test the unusual fallback explicitly.
 

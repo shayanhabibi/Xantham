@@ -47,7 +47,12 @@ let orderDeclarations: Pass<ShapeModel> =
         let allocatedExports =
             exports
             |> List.map _.Owner
-            |> ExportLayout.allocate (GeneratorConfig.runtimePackage ctx.Config ctx.PackageName) declarationNames
+            // These declarations are types, which may share a name with a companion
+            // module in the same generated file. Reserving them as module paths would
+            // split cloudflare:email and cloudflare:workers into hashed parents merely
+            // because the package also declares a type Cloudflare. Actual container
+            // leaves still reserve all declaration names below.
+            |> ExportLayout.allocate (GeneratorConfig.runtimePackage ctx.Config ctx.PackageName) []
         
         let exportDecls =
             exports

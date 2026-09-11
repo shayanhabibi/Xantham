@@ -40,7 +40,26 @@ let private occurrences (needle: string) (source: string) =
 let tests =
     testList
         "export module layout regression"
-        [ testCase "values are nested under their public module owners" <| fun _ ->
+        [ testCase "Cloudflare ambient owners share the existing type's companion module" <| fun _ ->
+              let config = { GeneratorConfig.Default with Lib = Some [ "esnext" ] }
+              let packageDir =
+                  Path.Combine(root, "tests", "fixtures", "@cloudflare", "workers-types", "node_modules", "@cloudflare", "workers-types")
+              let rendered =
+                  Pipeline.generate config packageDir
+                  |> Async.RunSynchronously
+              let containers = containersOf rendered
+              for child in [ "Email"; "Workers"; "Workflows" ] do
+                  Expect.isTrue (Map.containsKey $"Cloudflare.{child}.Exports" containers) $"{child} shares Cloudflare"
+                  Expect.equal
+                      containers[$"Cloudflare.{child}.Exports"].Owner
+                      (AmbientModule($"cloudflare:{child.ToLowerInvariant()}" * uom<importSpecifier>))
+                      "the shared parent preserves each exact public owner"
+              let source = rendered.Files |> List.map snd |> String.concat "\n"
+              Expect.equal (occurrences "module Cloudflare =" source) 1 "one companion module"
+              Expect.stringContains source "type Cloudflare =" "the original type keeps its identity"
+              Expect.isFalse (source.Contains "module Cloudflare_") "no owner-specific parent hashes"
+
+          testCase "values are nested under their public module owners" <| fun _ ->
               let rendered = generate ()
               let source = sourceOf rendered
               let containers = containersOf rendered

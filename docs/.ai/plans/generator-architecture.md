@@ -1307,6 +1307,24 @@ fragments, diagnostic messages and joined header text remain ordinary strings; d
 raise prose merely to satisfy an identity-bearing parameter. This changes internal F#
 signatures, not the generated binding or manifest format.
 
+## Export companion modules (2026-09-11)
+
+Ordering allows public export containers to nest under companion modules of existing
+types. In workers-types, `type Cloudflare` therefore coexists with one `module Cloudflare`
+containing `Email.Exports`, `Workers.Exports`, and `Workflows.Exports`. Reserving every
+type name as a module path had unnecessarily allocated a separate hashed parent for
+each ambient owner. Type names and identities stay unchanged; normalized owner-path
+collisions and `Exports` type-leaf reservations still use the existing allocator.
+
+Verification: the installed workers-types regression failed before the change and
+passes afterward; all nine path-allocation tests pass. FCS probes accept companion
+modules for interfaces, aliases, measures, unions, and delegates inside a recursive
+root module. Regenerated workers-types with `lib: ["esnext"]` compiles against Core
+and Core.TS with zero errors and 98 identifier warnings; the committed CompileGate
+also builds with zero errors (one FSharp.Core version warning). This is a focused
+layout correction; the remaining export-collision and
+runtime acceptance tasks in the export-module plan are still pending.
+
 # Easy Nits 
 
 To include in scope when a phases implementation/attempt ends up being small/quick.
