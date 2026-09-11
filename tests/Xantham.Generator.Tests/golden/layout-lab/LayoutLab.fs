@@ -38,8 +38,6 @@ type Exports =
     static member convert (value: float) : float = jsNative
     [<Import("pick", "layout-lab")>]
     static member pick (value: string) : string = jsNative
-    [<Import("pick", "layout-lab")>]
-    static member pick (value: string) : float = jsNative
 
 module Globals =
     /// <summary>The package's value exports, each bound to its import.</summary>

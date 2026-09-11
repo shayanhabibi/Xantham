@@ -34,6 +34,9 @@ let private literalDecl (name: string, text: string, order: DeclOrder option) =
 /// an overload set (`Spec.literalOverloads`), so those signatures arrive here distinct. The types
 /// they read are declared beside them.
 ///
+/// Retention reads the members of a declaration, so an exported function's overloads arrive
+/// widened and its drops report `DO004` apart from `DO001`.
+///
 /// A set separated in TypeScript by a `keyof` bound alone reaches F# as one signature, since
 /// .NET keeps constraints out of a method signature (`Spec.keyBoundedOverloads`). Those drops
 /// report `DO005`.

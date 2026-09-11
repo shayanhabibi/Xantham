@@ -13,3 +13,4 @@
 {"name":"Exports.identity","tier":"exact","findings":[]}
 {"name":"Exports.boxedNumber","tier":"exact","findings":[]}
 {"name":"Exports.collides","tier":"exact","findings":[]}
+{"name":"ambiguous","tier":"widened","findings":[{"name":"DO.ExportFunctionOverloadDropped","key":"DO004","pass":"resolve-export-collisions","tier":"widened","symbol":"ambiguous","message":"exported function overload dropped: no parameter separates from earlier one"}]}

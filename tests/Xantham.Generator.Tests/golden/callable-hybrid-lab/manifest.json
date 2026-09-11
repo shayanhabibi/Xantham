@@ -5,7 +5,7 @@
   "counts": {
     "exact": 7,
     "ergonomic": 6,
-    "widened": 2,
+    "widened": 3,
     "escape": 0
   },
   "passes": [
@@ -27,6 +27,11 @@
     },
     {
       "pass": "DO - dedupe-overloads",
+      "total": 1,
+      "widened": 1
+    },
+    {
+      "pass": "resolve-export-collisions",
       "total": 1,
       "widened": 1
     }

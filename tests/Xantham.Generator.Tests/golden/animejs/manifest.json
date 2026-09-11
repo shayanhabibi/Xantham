@@ -5,7 +5,7 @@
   "counts": {
     "exact": 121,
     "ergonomic": 80,
-    "widened": 14,
+    "widened": 15,
     "escape": 48
   },
   "passes": [
@@ -64,6 +64,11 @@
       "total": 16,
       "exact": 1,
       "widened": 15
+    },
+    {
+      "pass": "resolve-export-collisions",
+      "total": 1,
+      "widened": 1
     }
   ]
 }

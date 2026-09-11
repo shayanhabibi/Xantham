@@ -5,7 +5,7 @@
   "counts": {
     "exact": 13,
     "ergonomic": 1,
-    "widened": 0,
+    "widened": 1,
     "escape": 0
   },
   "passes": [
@@ -18,6 +18,11 @@
       "pass": "SP - synthesize-paramobjects",
       "total": 1,
       "ergonomic": 1
+    },
+    {
+      "pass": "resolve-export-collisions",
+      "total": 1,
+      "widened": 1
     }
   ]
 }

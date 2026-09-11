@@ -4,8 +4,8 @@
   "module": "CompilerLibOwnershipLab",
   "counts": {
     "exact": 71,
-    "ergonomic": 78,
-    "widened": 146,
+    "ergonomic": 72,
+    "widened": 152,
     "escape": 54
   },
   "passes": [
@@ -62,6 +62,11 @@
       "total": 3,
       "ergonomic": 1,
       "widened": 2
+    },
+    {
+      "pass": "resolve-export-collisions",
+      "total": 6,
+      "widened": 6
     },
     {
       "pass": "render-source",
