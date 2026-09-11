@@ -657,7 +657,7 @@ let private hoistedBinding (members: FsExportMember list) =
 
 /// One bound member - an `Exports` member or a class static - as its attribute line and its
 /// signature. Both hold an `ImportBinding` and neither has an F# body, so they render the same.
-let private renderBound (runtimePackage: string<importSpecifier>) (m: FsExportMember) =
+let private renderBound (runtimePackage: string<importSpecifier>) (publicName: string option) (m: FsExportMember) =
     [
         yield! docLines "    " m.Docs m.Tags
 
@@ -674,6 +674,11 @@ let private renderBound (runtimePackage: string<importSpecifier>) (m: FsExportMe
             // The declaring type carries the attribute, and the member name is the JavaScript key
             // read off whatever that names.
             let reference = printType reference
+
+            match publicName with
+            | Some name when name <> m.Name -> yield $"    [<CompiledName({stringLit name})>]"
+            | _ -> ()
+
             yield $"    static member {ident m.Name}"
             yield $"        with get (): {reference} = jsNative"
             yield $"        and set (_: {reference}): unit = jsNative"
@@ -735,7 +740,7 @@ let private renderEntrypointClass (runtimePackage: string<importSpecifier>) (dec
                 yield! renderClassMember m
 
             for m in statics do
-                yield! renderBound runtimePackage m
+                yield! renderBound runtimePackage None m
     ]
 
 let private renderInterface (runtimePackage: string<importSpecifier>) (decl: FsInterfaceDecl) =
@@ -775,7 +780,7 @@ let private renderInterface (runtimePackage: string<importSpecifier>) (decl: FsI
             // Class statics (§4.4), last so that the instance surface reads first and a
             // generated Create keeps the place it has held since phase B.
             for m in statics do
-                yield! renderBound runtimePackage m
+                yield! renderBound runtimePackage None m
     ]
 
 let private renderStringEnum (decl: FsStringEnumDecl) =
@@ -890,7 +895,9 @@ let private renderPhantom (decl: FsPhantomDecl) =
         yield $"type {declHead decl.Name decl.TypeParameters} = private {case} of {printType decl.Carrier}"
     ]
 
-let private renderExports (runtimePackage: string<importSpecifier>) (members: FsExportMember list) =
+let private renderExports (runtimePackage: string<importSpecifier>) (container: FsExportContainer) =
+    let members = container.Members |> List.map _.Member
+
     [
         yield "/// <summary>The package's value exports, each bound to its import.</summary>"
         yield "[<Erase>]"
@@ -899,10 +906,10 @@ let private renderExports (runtimePackage: string<importSpecifier>) (members: Fs
         | Some binding -> yield bindingAttribute runtimePackage "" "" binding
         | None -> ()
 
-        yield "type Exports ="
+        yield $"type {ident container.Name} ="
 
-        for m in members do
-            yield! renderBound runtimePackage m
+        for owned in container.Members do
+            yield! renderBound runtimePackage (Some owned.ExportName) owned.Member
     ]
 
 // ---------------------------------------------------------------------------------------------
@@ -1295,6 +1302,9 @@ let private renderBody (group: GroupModule) (foreign: Map<string, string>) (inde
             group.Decls
         else
             group.Decls |> List.map (qualifyDecl foreign)
+        |> List.filter (function
+            | FsExports container -> not container.Members.IsEmpty
+            | _ -> true)
 
     let names = group.Decls |> List.map declName
 
@@ -1351,7 +1361,7 @@ let private renderBody (group: GroupModule) (foreign: Map<string, string>) (inde
         | FsDelegateType decl -> renderDelegate decl
         | FsMeasure decl -> renderMeasure decl
         | FsPhantom decl -> renderPhantom decl
-        | FsExports container -> renderExports group.RuntimePackage (container.Members |> List.map _.Member)
+        | FsExports container -> renderExports group.RuntimePackage container
 
     let body =
         decls
@@ -1610,7 +1620,7 @@ let renderSources (modules: GroupModule list) : Pass<RenderModel> =
                                             yield! bound interface_.Name entrypoint.Parameters
 
                                         yield! exports (interface_.Name + ".") interface_.Statics
-                                    | FsExports container -> yield! exports "" (container.Members |> List.map _.Member)
+                                    | FsExports container -> yield! exports (container.Name + ".") (container.Members |> List.map _.Member)
                                     | _ -> ()
 
                             for group in written do
@@ -1674,7 +1684,7 @@ let symbolTiers (model: RenderModel) : (string * Tier * Finding list) list =
             | FsDelegateType decl -> [ decl.Name ]
             | FsMeasure decl -> [ decl.Name ]
             | FsPhantom decl -> [ decl.Name ]
-            | FsExports container -> container.Members |> List.map _.Member.Name)
+            | FsExports container -> container.Members |> List.map (fun owned -> container.Name + "." + owned.Member.Name))
         |> List.distinct
 
     let declaredSet = Set.ofList declared

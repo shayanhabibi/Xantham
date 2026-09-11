@@ -1291,7 +1291,7 @@ let shapePassTests =
 
                 Expect.equal
                     (findings |> List.map (fun f -> f.Tier, f.Symbol))
-                    [ Ergonomic, "ansiRegex(options)"; Widened, "ansiRegex()" ]
+                    [ Ergonomic, "entry.default(options)"; Widened, "entry.default()" ]
                     "the hoist and the widening are both findings"
             | decls -> failtest $"expected the Exports group, got %A{decls}"
 
@@ -3520,9 +3520,7 @@ let shapePassTests =
                 [ "Store.Json", [ "Json", Some "json" ]; "Store.Text", [ "Text", Some "text" ] ]
                 "one declaration per literal, each compiled to the literal it stands for"
 
-        // Wave eight, item 3. Retention reads the members of a declaration, so an exported
-        // function's overloads arrive widened and `DO004` prices the drop as its own loss.
-        testCase "dedupe-overloads reports an exported function's dropped overload as DO004" <| fun _ ->
+        testCase "dedupe-overloads preserves export candidates for the final collision pass" <| fun _ ->
             let export name body =
                 {
                     Owner = EntryModule
@@ -3561,15 +3559,12 @@ let shapePassTests =
 
             let shaped, findings = Build.runPass Overloads.dedupeOverloads model
 
-            Expect.equal
-                (findings |> List.map (fun f -> f.Tier, f.Key, f.Symbol))
-                [ Widened, "DO004", "emit"; Widened, "DO001", "make" ]
-                "the function drop is an export-function loss; a constructor drop stays DO001"
+            Expect.isEmpty findings "the early overload pass does not price or drop export collisions"
 
             Expect.equal
                 (shaped.ExportMembers |> List.map (fun owned -> owned.Member.Name))
-                [ "emit"; "make" ]
-                "one of each survives"
+                [ "emit"; "emit"; "make"; "make" ]
+                "every candidate survives unchanged"
 
         testCase "detect-tagged-unions reads the arms' fields, not the arm types" <| fun _ ->
             // The arm properties become the case fields, because that is what Fable's erasure
@@ -3981,6 +3976,47 @@ let shapePassTests =
 
             Expect.equal names [ "A"; "B"; "<exports>" ] "file order first, Exports last"
             Expect.isEmpty ordered.ExportMembers "consumed into the Exports decl"
+
+        testCase "order-declarations groups public owners without deduplicating shared exports" <| fun _ ->
+            let member' owner index ordinal =
+                { Owner = owner
+                  HarvestIndex = index
+                  ExportName = "check"
+                  SourceSymbolId = 41<symbolId>
+                  SignatureOrdinal = Some ordinal
+                  Member =
+                    { Name = "check"
+                      Docs = ""
+                      Tags = []
+                      TypeParameters = []
+                      Binding = ImportNamed "check"
+                      Body = ExportFunction([], FsString)
+                      Settable = false } }
+
+            let model =
+                { Build.shapeModel [] with
+                    ExportMembers =
+                        [ member' (AmbientModule ((fun value -> value * uom<importSpecifier>) "pkg/strict")) 2 1
+                          member' EntryModule 0 0
+                          member' (AmbientModule ((fun value -> value * uom<importSpecifier>) "pkg/strict")) 1 0 ] }
+
+            let ordered, _ = Build.runPass Ordering.orderDeclarations model
+
+            let containers =
+                ordered.Decls
+                |> List.choose (function
+                    | FsExports container -> Some(container.Name, container.Members)
+                    | _ -> None)
+
+            Expect.equal
+                (containers |> List.map fst)
+                [ "Exports"; "Strict.Exports" ]
+                "containers follow ordinal allocated-path order"
+
+            Expect.equal
+                (containers |> List.map (fun (_, members) -> members |> List.map _.SignatureOrdinal))
+                [ [ Some 0 ]; [ Some 0; Some 1 ] ]
+                "owners remain distinct while overloads retain harvest order"
 
         testCase "repair-arity keeps an alias whose target lost its parameters, as a phantom" <| fun _ ->
             // `type Params<'P> = obj` is FS0035. The erased phantom `shape-aliases` writes for a

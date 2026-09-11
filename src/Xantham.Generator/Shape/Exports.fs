@@ -11,6 +11,12 @@ open Xantham.Generator.Shape.ExportLayout
 /// through.
 let private globalObject = "globalThis"
 
+let private findingSymbol owner exportName =
+    match owner with
+    | EntryModule -> $"entry.{exportName}"
+    | GlobalScope -> $"global.{exportName}"
+    | AmbientModule specifier -> $"ambient:{specifier / uom<importSpecifier>}.{exportName}"
+
 /// `Exports` members from the value exports that are not classes: functions (every overload
 /// emitted), and values - `const`/`let`/`var` and namespace objects - as properties, settable
 /// where the value is a mutable global.
@@ -45,6 +51,8 @@ let shapeExports: Pass<ShapeModel> =
                                 []
                             else
                                 let name = fsName fallback export
+                                let owner = ownerOf runtimePackage export.Origin
+                                let findingName = findingSymbol owner export.ExportName
 
                                 let binding = bindingOf export
 
@@ -55,17 +63,17 @@ let shapeExports: Pass<ShapeModel> =
 
                                 match valueFacts with
                                 | None ->
-                                    emit (Finding.make name ShapeExports.NoValueType)
+                                    emit (Finding.make findingName ShapeExports.NoValueType)
                                     []
                                 | Some facts when not facts.CallSignatures.IsEmpty ->
                                     facts.CallSignatures
                                     |> List.mapi (fun ordinal signature ->
                                         let typeParameters, parameters, returns, signatureFindings =
-                                            shapeSignature ctx model None name signature
+                                            shapeSignature ctx model None findingName signature
 
                                         findings <- findings @ signatureFindings
                                         {
-                                            OwnedExportMember.Owner = ownerOf runtimePackage export.Origin
+                                            OwnedExportMember.Owner = owner
                                             HarvestIndex = index
                                             ExportName = export.ExportName
                                             SourceSymbolId = export.Symbol.Id * uom<symbolId>
@@ -81,7 +89,7 @@ let shapeExports: Pass<ShapeModel> =
                                             }
                                         })
                                 | Some facts ->
-                                    let reference, refFindings = typeRef ctx model None name facts.Response.TypeId
+                                    let reference, refFindings = typeRef ctx model None findingName facts.Response.TypeId
                                     findings <- findings @ refFindings
 
                                     // A `var` on the global object is the one binding an
@@ -98,11 +106,11 @@ let shapeExports: Pass<ShapeModel> =
                                         | ImportNamed _ -> false
 
                                     if mutableValue && not settable then
-                                        emit (Finding.make name ShapeExports.MutableValueReadOnly)
+                                        emit (Finding.make findingName ShapeExports.MutableValueReadOnly)
 
                                     [
                                         {
-                                            OwnedExportMember.Owner = ownerOf runtimePackage export.Origin
+                                            OwnedExportMember.Owner = owner
                                             HarvestIndex = index
                                             ExportName = export.ExportName
                                             SourceSymbolId = export.Symbol.SymbolId

@@ -68,17 +68,15 @@ let orderDeclarations: Pass<ShapeModel> =
                             |> ExportLayout.containerName declarationNames owner
                         FsExportContainer.Owner = owner
                         Members = exports
-                    }
-                )
+                    })
+            |> List.sortBy (function
+                | FsExports container -> container.Name
+                | _ -> "")
 
         { model with
             Decls =
                 match exportDecls with
                 | [] -> decls
                 | exportDecls -> decls @ exportDecls
-                // match exports with
-                // | [] -> decls
-                // | exports ->
-                //     decls @ [ FsExports { Name = "Exports"; Owner = EntryModule; Members = exports } ]
             ExportMembers = []
         })

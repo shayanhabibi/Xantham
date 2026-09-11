@@ -1,0 +1,186 @@
+[
+  {
+    "case": "legal-parameters",
+    "expected": "compiles",
+    "passed": true,
+    "exit": 0,
+    "diagnostics": []
+  },
+  {
+    "case": "return-only",
+    "expected": "FS0438",
+    "passed": true,
+    "exit": 1,
+    "diagnostics": [
+      "return-only.fsx(10,19): error FS0438: Duplicate method. The method 'f' has the same name and signature as another method in type 'E'."
+    ]
+  },
+  {
+    "case": "generic-alias",
+    "expected": "FS0438",
+    "passed": true,
+    "exit": 1,
+    "diagnostics": [
+      "generic-alias.fsx(12,19): error FS0438: Duplicate method. The method 'f' has the same name and signature as another method in type 'E'."
+    ]
+  },
+  {
+    "case": "alpha-generics",
+    "expected": "FS0438",
+    "passed": true,
+    "exit": 1,
+    "diagnostics": [
+      "alpha-generics.fsx(10,19): error FS0438: Duplicate method. The method 'f' has the same name and signature as another method in type 'E'."
+    ]
+  },
+  {
+    "case": "generic-arity",
+    "expected": "compiles",
+    "passed": true,
+    "exit": 0,
+    "diagnostics": []
+  },
+  {
+    "case": "constraints-only",
+    "expected": "FS0438",
+    "passed": true,
+    "exit": 1,
+    "diagnostics": [
+      "constraints-only.fsx(10,19): error FS0438: Duplicate method. The method 'f' has the same name and signature as another method in type 'E'."
+    ]
+  },
+  {
+    "case": "optional-option",
+    "expected": "FS0438",
+    "passed": true,
+    "exit": 1,
+    "diagnostics": [
+      "optional-option.fsx(10,19): error FS0438: Duplicate method. The method 'f' has the same name and signature as another method in type 'E'."
+    ]
+  },
+  {
+    "case": "rest-array",
+    "expected": "FS0438",
+    "passed": true,
+    "exit": 1,
+    "diagnostics": [
+      "rest-array.fsx(10,19): error FS0438: Duplicate method. The method 'f' has the same name and signature as another method in type 'E'."
+    ]
+  },
+  {
+    "case": "nullary-unit",
+    "expected": "compiles",
+    "passed": true,
+    "exit": 0,
+    "diagnostics": []
+  },
+  {
+    "case": "nullary-explicit-unit",
+    "expected": "compiles",
+    "passed": true,
+    "exit": 0,
+    "diagnostics": []
+  },
+  {
+    "case": "optional-omission",
+    "expected": "FS0041",
+    "passed": true,
+    "exit": 1,
+    "diagnostics": [
+      "optional-omission.fsx(11,11): error FS0041: A unique overload for method 'f' could not be determined based on type information prior to this program point. A type annotation may be needed."
+    ]
+  },
+  {
+    "case": "empty-rest",
+    "expected": "FS0041",
+    "passed": true,
+    "exit": 1,
+    "diagnostics": [
+      "empty-rest.fsx(11,11): error FS0041: A unique overload for method 'f' could not be determined based on type information prior to this program point. A type annotation may be needed."
+    ]
+  },
+  {
+    "case": "named-optional",
+    "expected": "compiles",
+    "passed": true,
+    "exit": 0,
+    "diagnostics": []
+  },
+  {
+    "case": "property-method",
+    "expected": "FS0434",
+    "passed": true,
+    "exit": 1,
+    "diagnostics": [
+      "property-method.fsx(9,19): error FS0434: The property 'f' has the same name as a method in type 'E'."
+    ]
+  },
+  {
+    "case": "getter-method",
+    "expected": "FS0438",
+    "passed": true,
+    "exit": 1,
+    "diagnostics": [
+      "getter-method.fsx(10,19): error FS0438: Duplicate method. The method 'get_f' has the same name and signature as another method in type 'E'."
+    ]
+  },
+  {
+    "case": "setter-method",
+    "expected": "FS0438",
+    "passed": true,
+    "exit": 1,
+    "diagnostics": [
+      "setter-method.fsx(10,19): error FS0438: Duplicate method. The method 'set_f' has the same name and signature as another method in type 'E'."
+    ]
+  },
+  {
+    "case": "measure-erasure",
+    "expected": "FS0438",
+    "passed": true,
+    "exit": 1,
+    "diagnostics": [
+      "measure-erasure.fsx(12,19): error FS0438: Duplicate method. The method 'f' has the same name and signature as another method in type 'E' once tuples, functions, units of measure and/or provided types are erased."
+    ]
+  },
+  {
+    "case": "string-measure-erasure",
+    "expected": "FS0438",
+    "passed": true,
+    "exit": 1,
+    "diagnostics": [
+      "string-measure-erasure.fsx(12,19): error FS0438: Duplicate method. The method 'f' has the same name and signature as another method in type 'E' once tuples, functions, units of measure and/or provided types are erased."
+    ]
+  },
+  {
+    "case": "option-function-alias",
+    "expected": "FS0438",
+    "passed": true,
+    "exit": 1,
+    "diagnostics": [
+      "option-function-alias.fsx(11,19): error FS0438: Duplicate method. The method 'f' has the same name and signature as another method in type 'E'."
+    ]
+  },
+  {
+    "case": "delegate-abbreviation",
+    "expected": "FS0438",
+    "passed": true,
+    "exit": 1,
+    "diagnostics": [
+      "delegate-abbreviation.fsx(11,19): error FS0438: Duplicate method. The method 'f' has the same name and signature as another method in type 'E'."
+    ]
+  },
+  {
+    "case": "delegate-nominal",
+    "expected": "compiles",
+    "passed": true,
+    "exit": 0,
+    "diagnostics": []
+  },
+  {
+    "case": "tuple-parameter",
+    "expected": "compiles",
+    "passed": true,
+    "exit": 0,
+    "diagnostics": []
+  }
+]
