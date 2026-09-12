@@ -26,16 +26,38 @@ let private ownerKey =
     | AmbientModule specifier -> $"ambient:{specifier / uom<importSpecifier>}"
 
 /// Split a specifier into segments; apply pascal casing; remove empty segments
-let private segments (specifier: string) =
-    specifier.TrimStart('@').Split([| '/'; ':' |], StringSplitOptions.RemoveEmptyEntries)
-    |> Array.map Naming.pascalSegment
-    |> Array.filter (String.IsNullOrWhiteSpace >> not)
-    |> Array.toList
+let private extensions = [ ".d.ts"; ".mjs"; ".js" ]
+
+/// Strips one of `.d.ts`/`.mjs`/`.js` off a segment's tail, where present.
+let private stripExtension (segment: string) =
+    extensions
+    |> List.tryFind segment.EndsWith
+    |> Option.map (fun ext -> segment.Substring(0, segment.Length - ext.Length))
+    |> Option.defaultValue segment
+
+/// Strips a `node:` prefix; the bare specifier names the same builtin.
+let private stripNodePrefix (specifier: string) =
+    if specifier.StartsWith("node:", StringComparison.Ordinal) then
+        specifier.Substring 5
+    else
+        specifier
+
+let private dropTrailingIndex segments =
+    match List.rev segments with
+    | "index" :: rest -> List.rev rest
+    | _ -> segments
 
 /// Split a specifier into segments; remove empty segments; no casing applied
 let private rawSegments (specifier: string) =
-    specifier.TrimStart('@').Split([| '/'; ':' |], StringSplitOptions.RemoveEmptyEntries)
+    (stripNodePrefix specifier).TrimStart('@').Split([| '/'; ':' |], StringSplitOptions.RemoveEmptyEntries)
+    |> Array.map stripExtension
     |> Array.toList
+    |> dropTrailingIndex
+
+let private segments (specifier: string) =
+    rawSegments specifier
+    |> List.map Naming.pascalSegment
+    |> List.filter (String.IsNullOrWhiteSpace >> not)
 
 /// Normalize an export owner; converts ambient modules from the runtime package to entry module owners
 let private normalizeOwner runtimePackage =

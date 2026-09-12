@@ -222,6 +222,55 @@ let private harvestAmbientModule (ctx: Context) (moduleSymbol: SymbolResponse) =
 /// `FromAmbientModule`: the types are declared beside the package's globals, and the values
 /// carry the specifier's own import.
 ///
+/// For `@types/node`, collapses `node:X` and bare `X` ambient-module specifiers onto one
+/// module, spelled `node:X`: every builtin's exports bind `[<Import(name, "node:X")>]`,
+/// and a builtin split across both spellings nests under one F# module. Members from both
+/// spellings are carried under the collapsed specifier; a divergence between the two
+/// spellings' export sets additionally raises a finding.
+let private collapseNodeAliases (ctx: Context) (exports: HarvestedExport list) =
+    if ctx.PackageName / uom<npmDependency> <> "@types/node" then
+        exports, []
+    else
+        let bare (specifier: string) =
+            if specifier.StartsWith "node:" then
+                specifier.Substring 5
+            else
+                specifier
+
+        let findings =
+            exports
+            |> List.choose (fun export ->
+                match export.Origin with
+                | FromAmbientModule specifier -> Some(specifier / uom<importSpecifier>, export.ExportName)
+                | _ -> None)
+            |> List.groupBy (fst >> bare)
+            |> List.choose (fun (name, occurrences) ->
+                let spellings = occurrences |> List.map fst |> List.distinct
+
+                let exportsOf spelling =
+                    occurrences
+                    |> List.filter (fun (specifier, _) -> specifier = spelling)
+                    |> List.map snd
+                    |> Set.ofList
+
+                match spellings with
+                | [ _ ] -> None
+                | _ when spellings |> List.map exportsOf |> List.distinct |> List.length = 1 -> None
+                | _ -> Some(Finding.make name (HarvestGlobals.AmbientModuleAliasDivergent(name, spellings))))
+
+        let collapsed =
+            exports
+            |> List.map (fun export ->
+                match export.Origin with
+                | FromAmbientModule specifier ->
+                    { export with
+                        Origin =
+                            FromAmbientModule($"node:{bare (specifier / uom<importSpecifier>)}" * uom<importSpecifier>)
+                    }
+                | _ -> export)
+
+        collapsed, findings
+
 /// Runs only when `harvest-exports` found nothing: a package with a module symbol may also
 /// augment the global scope, and folding those globals into its exports would emit names the
 /// package does not export.
@@ -331,6 +380,9 @@ let harvestGlobals: Pass<HarvestModel> =
                                 for exports, _, _ in fromModules do
                                     yield! exports
                             ]
+
+                        let harvested, aliasFindings = collapseNodeAliases ctx harvested
+                        let findings = findings @ aliasFindings
 
                         if List.isEmpty harvested && List.isEmpty findings then
                             return

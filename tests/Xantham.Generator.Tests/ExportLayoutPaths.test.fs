@@ -29,6 +29,22 @@ let tests =
               Expect.equal (preferred false GlobalScope) [] "global only"
               Expect.equal (preferred true GlobalScope) [ "Globals" ] "mixed global and module"
 
+          testCase "preferred paths strip node prefixes, extensions and trailing index segments" <| fun _ ->
+              let preferred = ExportLayout.preferredPath (runtime "pkg")
+              Expect.equal (preferred true (ambient "node:inspector/promises")) [ "Inspector"; "Promises" ] "node prefix"
+              Expect.equal (preferred true (ambient "worker_threads")) [ "WorkerThreads" ] "underscore segment"
+              Expect.equal (preferred true (ambient "react-dom/client")) [ "ReactDom"; "Client" ] "unrelated hyphenated root"
+              Expect.equal (preferred true (ambient "fs")) [ "Fs" ] "bare builtin"
+              Expect.equal (preferred true (ambient "node:stream/web")) [ "Stream"; "Web" ] "node prefix multi-segment"
+              Expect.equal (preferred true (ambient "node:timers/promises")) [ "Timers"; "Promises" ] "node prefix promises"
+              Expect.equal (preferred true (ambient "pkg/types/index.js")) [ "Types" ] "trailing index and js extension under runtime"
+              Expect.equal (preferred true (ambient "other/types.d.ts")) [ "Other"; "Types" ] "d.ts extension"
+
+              Expect.equal
+                  (ExportLayout.preferredPath (runtime "react-dom") true (ambient "react-dom/client"))
+                  [ "Client" ]
+                  "hyphenated root package"
+
           testCase "allocation is deterministic and separates normalized collisions" <| fun _ ->
               let owners = [ ambient "foo-bar"; ambient "foo_bar" ]
               let allocated = ExportLayout.allocate (runtime "pkg") [] owners
