@@ -793,10 +793,23 @@ let private renderInterface (runtimePackage: string<importSpecifier>) (decl: FsI
                 yield! renderBound runtimePackage None m
     ]
 
+/// F# identifiers a bare single-case `[<StringEnum>]` case collides with if written without
+/// `RequireQualifiedAccess`: the core library's own single-case union members.
+let reservedCaseNames = Xantham.Generator.Shape.Spec.reservedCaseNames
+
 let private renderStringEnum (decl: FsStringEnumDecl) =
+    let qualified =
+        match decl.Cases with
+        | [ case ] -> Set.contains case.Name reservedCaseNames
+        | _ -> true
+
     [
         yield! docLines "" decl.Docs decl.Tags
-        yield "[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]"
+        yield
+            if qualified then
+                "[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]"
+            else
+                "[<StringEnum(CaseRules.None)>]"
         yield $"type {ident decl.Name} ="
 
         for case in decl.Cases do

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "package": "single-case-enum-lab",
+  "module": "SingleCaseEnumLab",
+  "counts": {
+    "exact": 6,
+    "ergonomic": 2,
+    "widened": 0,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SE - shape-exports",
+      "total": 4,
+      "exact": 4
+    },
+    {
+      "pass": "DO - dedupe-overloads",
+      "total": 4,
+      "exact": 2,
+      "ergonomic": 2
+    }
+  ]
+}

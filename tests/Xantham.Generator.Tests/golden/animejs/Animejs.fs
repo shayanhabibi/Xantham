@@ -938,15 +938,15 @@ module DrawableSVGGeometry =
             | [<CompiledName("beforebegin")>] Beforebegin
             | [<CompiledName("beforeend")>] Beforeend
 
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    [<StringEnum(CaseRules.None)>]
     type HttpWwwW3Org1998MathMathML =
         | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
 
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    [<StringEnum(CaseRules.None)>]
     type HttpWwwW3Org1999Xhtml =
         | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
 
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    [<StringEnum(CaseRules.None)>]
     type HttpWwwW3Org2000Svg =
         | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
 

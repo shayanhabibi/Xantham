@@ -17,11 +17,11 @@ type LayoutPayload =
     static member Create (value: string) : LayoutPayload = jsNative
 
 module Exports =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    [<StringEnum(CaseRules.None)>]
     type Left =
         | [<CompiledName("left")>] Left
 
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    [<StringEnum(CaseRules.None)>]
     type Right =
         | [<CompiledName("right")>] Right
 

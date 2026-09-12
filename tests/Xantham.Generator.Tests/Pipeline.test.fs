@@ -4330,6 +4330,19 @@ let pipelineTests =
                     Expect.stringContains source "module Strict" "the nested module Strict for `(layout-lab/strict).mode` is created"
                     Expect.stringContains source "module Aliases" "the nested module Aliases for `(layout-lab/aliases).renamedCheck` is created"
             ]
+        yield!
+            fixtureTests "single-case-enum-lab" (handFixture "single-case-enum-lab") GeneratorConfig.Default (fun package -> [
+                testCase "a single-case string enum is not RequireQualifiedAccess" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+                    Expect.stringContains source "    [<StringEnum(CaseRules.None)>]\n    type Fast =" "single case drops RQA"
+                    Expect.stringContains source "[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]\ntype Level =" "multi case keeps RQA"
+                    Expect.stringContains source "    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]\n    type Ok =" "reserved case keeps RQA"
+                    Expect.stringContains source "    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]\n    type Error =" "reserved case keeps RQA"
+                testCase "a reserved single case records LU002" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let symbols = rendered.Files |> List.find (fst >> (=) "symbols.jsonl") |> snd
+                    Expect.stringContains symbols "\"key\":\"LU002\"" "finding recorded" ])
     ]
 
 [<Tests>]

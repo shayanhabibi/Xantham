@@ -3383,7 +3383,7 @@ type KVNamespace<'Key> =
     abstract delete: key: 'Key -> JS.Promise<unit>
 
 module KVNamespace =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    [<StringEnum(CaseRules.None)>]
     type ArrayBuffer =
         | [<CompiledName("arrayBuffer")>] ArrayBuffer
 
@@ -3395,7 +3395,7 @@ module KVNamespace =
             [<ParamObject; Emit("$0")>]
             static member Create (?``type``: unit, ?cacheTtl: float) : Options = jsNative
 
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    [<StringEnum(CaseRules.None)>]
     type Json =
         | [<CompiledName("json")>] Json
 
@@ -3418,11 +3418,11 @@ module KVNamespace =
                 [<ParamObject; Emit("$0")>]
                 static member Create (list_complete: bool, keys: KVNamespaceListKey<'Metadata, 'Key>[], ?cacheStatus: string) : Item2<'Metadata, 'Key> = jsNative
 
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    [<StringEnum(CaseRules.None)>]
     type Stream =
         | [<CompiledName("stream")>] Stream
 
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    [<StringEnum(CaseRules.None)>]
     type Text =
         | [<CompiledName("text")>] Text
 
@@ -19904,11 +19904,11 @@ type BrowserRun =
     abstract quickAction: action: string * options: BrowserRunAccessibilityTreeOptions -> JS.Promise<Response>
 
 module BrowserRun =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    [<StringEnum(CaseRules.None)>]
     type Content =
         | [<CompiledName("content")>] Content
 
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    [<StringEnum(CaseRules.None)>]
     type Markdown =
         | [<CompiledName("markdown")>] Markdown
 

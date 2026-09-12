@@ -40,15 +40,15 @@ type Store =
     abstract read: key: string * ?options: ReadOptions<Store.Bytes> -> JS.Promise<Chunk option>
 
 module Store =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    [<StringEnum(CaseRules.None)>]
     type Bytes =
         | [<CompiledName("bytes")>] Bytes
 
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    [<StringEnum(CaseRules.None)>]
     type Json =
         | [<CompiledName("json")>] Json
 
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    [<StringEnum(CaseRules.None)>]
     type Text =
         | [<CompiledName("text")>] Text
 
@@ -113,11 +113,11 @@ type Blend =
     abstract pick: kind: string -> unit
 
 module Exports =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    [<StringEnum(CaseRules.None)>]
     type Start =
         | [<CompiledName("start")>] Start
 
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    [<StringEnum(CaseRules.None)>]
     type Stop =
         | [<CompiledName("stop")>] Stop
 
