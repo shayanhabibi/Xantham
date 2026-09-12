@@ -38,6 +38,23 @@ let private staticBinding (binding: ImportBinding) (key: string) =
     | GlobalName name -> GlobalName $"{name}.{key}"
     | ImportFrom(name, specifier) -> ImportFrom($"{name}.{key}", specifier)
 
+/// The ambient module specifier an `ImportFrom` binding carries; `None` for every other binding
+/// form.
+let private specifierOfBinding (binding: ImportBinding) =
+    match binding with
+    | ImportFrom(_, specifier) -> Some specifier
+    | ImportDefault
+    | ImportNamed _
+    | GlobalName _ -> None
+
+/// The ambient module specifier an export path carries; `None` for the entry module and the
+/// global scope, which bind through the runtime package rather than a specifier of their own.
+let private specifierOfOrigin (origin: ExportOrigin) =
+    match origin with
+    | FromAmbientModule specifier -> Some specifier
+    | FromModule
+    | FromGlobal -> None
+
 /// The closed vocabulary `SC008` reports, so a corpus aggregates by reason.
 module private Refusal =
     [<Literal>]
@@ -94,7 +111,10 @@ let shapeClasses: Pass<ShapeModel> =
                             | _ -> None)
                         |> Map.ofList
 
-                    let mutable statics: Map<string, FsExportMember list> = Map.empty
+                    // One entry per export path that reaches the declaration, so a class
+                    // reachable through `export * from` collapses to a single specifier below.
+                    let mutable statics: Map<string, (ExportOrigin * FsExportMember list) list> =
+                        Map.empty
 
                     // The declarations that convert to the class form, by name.
                     let mutable entrypoints: Map<string, FsEntrypoint> = Map.empty
@@ -343,7 +363,8 @@ let shapeClasses: Pass<ShapeModel> =
                                         statics <-
                                             Map.add
                                                 declaredName
-                                                ((Map.tryFind declaredName statics |> Option.defaultValue []) @ shaped)
+                                                ((Map.tryFind declaredName statics |> Option.defaultValue [])
+                                                 @ [ export.Origin, shaped ])
                                                 statics
 
                                     let bases =
@@ -379,6 +400,43 @@ let shapeClasses: Pass<ShapeModel> =
                                                     Settable = false
                                                 }
                                         }))
+
+                    // A class reachable through several export paths (`export * from`) contributes
+                    // one occurrence of its statics per path; collapse to the path the class's own
+                    // entrypoint binding already carries, or the first path in harvest order when
+                    // it carries none, and raise SC010 for every path dropped.
+                    let statics =
+                        statics
+                        |> Map.map (fun declaredName occurrences ->
+                            match occurrences with
+                            | [ (_, members) ] -> members
+                            | occurrences ->
+                                let canonicalSpecifier =
+                                    Map.tryFind declaredName entrypoints
+                                    |> Option.bind (fun entrypoint -> specifierOfBinding entrypoint.Binding)
+
+                                let winningOrigin, winningMembers =
+                                    canonicalSpecifier
+                                    |> Option.bind (fun specifier ->
+                                        occurrences
+                                        |> List.tryFind (fun (origin, _) -> specifierOfOrigin origin = Some specifier))
+                                    |> Option.defaultValue (List.head occurrences)
+
+                                for origin, dropped in occurrences do
+                                    if origin <> winningOrigin then
+                                        let specifierText =
+                                            specifierOfOrigin origin
+                                            |> Option.map (fun specifier -> specifier / uom<importSpecifier>)
+                                            |> Option.defaultValue ""
+
+                                        for droppedMember in dropped do
+                                            emit (
+                                                Finding.make
+                                                    $"{declaredName}.{droppedMember.Name}"
+                                                    (ShapeClasses.StaticAliasPathCollapsed specifierText)
+                                            )
+
+                                winningMembers)
 
                     let decls =
                         model.Decls

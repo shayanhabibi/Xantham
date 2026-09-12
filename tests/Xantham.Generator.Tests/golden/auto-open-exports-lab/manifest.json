@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "package": "auto-open-exports-lab",
+  "module": "AutoOpenExportsLab",
+  "counts": {
+    "exact": 2,
+    "ergonomic": 0,
+    "widened": 0,
+    "escape": 0
+  },
+  "passes": []
+}

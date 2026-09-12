@@ -4339,6 +4339,39 @@ let pipelineTests =
                     Expect.stringContains source "module Strict" "the nested module Strict for `(layout-lab/strict).mode` is created"
                     Expect.stringContains source "module Aliases" "the nested module Aliases for `(layout-lab/aliases).renamedCheck` is created"
             ]
+        yield!
+            fixtureTests "single-case-enum-lab" (handFixture "single-case-enum-lab") GeneratorConfig.Default (fun package -> [
+                testCase "a single-case string enum is not RequireQualifiedAccess" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+                    Expect.stringContains source "    [<StringEnum(CaseRules.None)>]\n    type Fast =" "single case drops RQA"
+                    Expect.stringContains source "[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]\ntype Level =" "multi case keeps RQA"
+                    Expect.stringContains source "    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]\n    type Ok =" "reserved case keeps RQA"
+                    Expect.stringContains source "    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]\n    type Error =" "reserved case keeps RQA"
+                testCase "a reserved single case records LU002" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let symbols = rendered.Files |> List.find (fst >> (=) "symbols.jsonl") |> snd
+                    Expect.stringContains symbols "\"key\":\"LU002\"" "finding recorded" ])
+        yield!
+            fixtureTests "auto-open-exports-lab" (handFixture "auto-open-exports-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "autoOpenExports marks the generated Exports type AutoOpen" <| fun _ ->
+                    let config =
+                        { GeneratorConfig.Default with
+                            AutoOpenExports = true }
+
+                    let rendered = Async.RunSynchronously(Pipeline.generate config package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.stringContains
+                        source
+                        "[<AutoOpen>]\n[<Erase>]\ntype"
+                        "the flag prepends [<AutoOpen>] on the Exports type, before [<Erase>]"
+
+                  testCase "autoOpenExports defaults to false, leaving Exports unmarked" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.isFalse (source.Contains "[<AutoOpen>]") "the default config emits no [<AutoOpen>]" ])
     ]
 
 [<Tests>]
@@ -4346,4 +4379,44 @@ let typeOnlyExportTests =
     testList "type-only export fixture" [
         yield! fixtureTests "type-only-export-lab" (handFixture "type-only-export-lab")
             (handConfig (handFixture "type-only-export-lab")) (fun _ -> [])
+    ]
+
+[<Tests>]
+let staticReexportTests =
+    testList "static re-export fixture" [
+        yield!
+            fixtureTests "static-reexport-lab" (handFixture "static-reexport-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a re-exported class emits each static once" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    // `Certificate` carries no type-level `[<Import>]`, so the collapse keeps the
+                    // first export path in harvest order: "node:static-reexport-lab".
+                    let hits =
+                        System.Text.RegularExpressions.Regex.Matches(
+                            source,
+                            "static member exportChallenge \\(spkac: string\\)"
+                        )
+                            .Count
+
+                    Expect.equal hits 1 "one static for the string overload"
+
+                    Expect.stringContains
+                        source
+                        "[<Import(\"Certificate.exportChallenge\", \"node:static-reexport-lab\")>]"
+                        "the first export path in harvest order wins"
+
+                    Expect.isFalse
+                        (source.Contains "[<Import(\"Certificate.exportChallenge\", \"static-reexport-lab\")>]")
+                        "the alias path collapsed"
+
+                  testCase "the collapsed path records SC010 exactly once" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let symbols = rendered.Files |> List.find (fst >> (=) "symbols.jsonl") |> snd
+
+                      let hits =
+                          System.Text.RegularExpressions.Regex.Matches(symbols, "\"key\":\"SC010\"").Count
+
+                      Expect.equal hits 1 "one collapsed path"
+                      Expect.stringContains symbols "\"static-reexport-lab\"" "names the collapsed specifier" ])
     ]

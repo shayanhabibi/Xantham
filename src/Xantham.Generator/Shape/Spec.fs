@@ -10,6 +10,11 @@ open Measure
 
 let internal hasAny (mask: SymbolFlags) (flags: SymbolFlags) = uint32 (flags &&& mask) <> 0u
 
+/// F# identifiers a bare single-case `[<StringEnum>]` case collides with if written without
+/// `RequireQualifiedAccess`: the core library's own single-case union members.
+let reservedCaseNames =
+    set [ "Ok"; "Error"; "Some"; "None"; "ValueSome"; "ValueNone" ]
+
 /// The fallback name for a default export - `Naming.defaultExport` over the entry package.
 let defaultExportName (ctx: Context) = Naming.defaultExport ctx.PackageName
 
