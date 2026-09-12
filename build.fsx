@@ -1,4 +1,4 @@
-#r "nuget: Partas.Build, 0.4.0-alpha.3"
+﻿#r "nuget: Partas.Build, 0.4.0-alpha.3"
 #r "nuget: Partas.TypeProvider.BuildHelper, 0.2.5"
 #r "nuget: Str"
 #r "nuget: Fake.IO.FileSystem"
@@ -130,10 +130,10 @@ module Options =
         |> Input.description
             "Limit generation to one layer: ast | proto | session | schema | compiler-lib | node-lib. The first four by default."
 
-    /// The generator's inner loop, in three flags. An agent iterating on a pass runs
-    /// `test --quick --update --no-run-gate` until the Expecto suite is green, then drops all
-    /// three for the full gate before it commits. Each flag removes a step that is real safety
-    /// on the way out and pure latency on the way in.
+    /// The generator's inner loop. An agent iterating on a pass runs `test --quick --update`
+    /// until the Expecto suite is green, then runs `test --run-gate` for the full gate before it
+    /// commits. The run gate is opt-in because it is much the slowest step and proves runtime
+    /// behaviour the compile gate and the suites already bound.
     let updateGoldens =
         Input.option<bool> "--update"
         |> Input.alias "-u"
@@ -147,10 +147,10 @@ module Options =
             "Run only tests whose name matches, e.g. --filter \"generator e2e\". Every test by default."
         |> Input.def ""
 
-    let skipRunGate =
-        Input.option<bool> "--no-run-gate"
+    let runGate =
+        Input.option<bool> "--run-gate"
         |> Input.description
-            "Skip the Fable run gate, much the slowest step. The compile gate and the Expecto suites still run."
+            "Also run the Fable run gate, much the slowest step. Required before a commit that touches a golden."
         |> Input.def false
 
     /// `findings` reads the manifests, which is the only part of a large fixture worth reading:
@@ -385,7 +385,7 @@ module Stages =
             and! config = Options.config
             and! update = Options.updateGoldens
             and! filter = Options.testFilter
-            and! skipRunGate = Options.skipRunGate
+            and! runGate = Options.runGate
 
             // `cmd` quotes each interpolation hole as one argument, so the flag and its value
             // have to be part of the format string rather than a pre-baked `" --filter ..."`
@@ -417,7 +417,7 @@ module Stages =
                     // `--noCache` because Fable's up-to-date check missed a changed linked golden once,
                     // and a gate that skips its compile is not a gate.
                     stage "run gate" {
-                        when' (not skipRunGate)
+                        when' runGate
                         workingDir "tests/Xantham.Generator.RunGate"
 
                         run
