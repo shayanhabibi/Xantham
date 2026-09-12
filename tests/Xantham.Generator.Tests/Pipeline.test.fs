@@ -4381,12 +4381,8 @@ let staticReexportTests =
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                     let source = rendered.Files |> List.head |> snd
 
-                    // `Certificate` declares no base and no abstract constructor, so it never
-                    // qualifies for the entrypoint (`AbstractClass`) form and carries no
-                    // type-level `[<Import>]` of its own to read a canonical specifier off. With
-                    // no canonical specifier, the collapse rule keeps the first export path in
-                    // harvest order - ambient modules harvest sorted by specifier text, so
-                    // "node:static-reexport-lab" precedes "static-reexport-lab".
+                    // `Certificate` carries no type-level `[<Import>]`, so the collapse keeps the
+                    // first export path in harvest order: "node:static-reexport-lab".
                     let hits =
                         System.Text.RegularExpressions.Regex.Matches(
                             source,
