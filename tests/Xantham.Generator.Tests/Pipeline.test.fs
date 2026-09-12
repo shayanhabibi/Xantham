@@ -4371,3 +4371,47 @@ let typeOnlyExportTests =
         yield! fixtureTests "type-only-export-lab" (handFixture "type-only-export-lab")
             (handConfig (handFixture "type-only-export-lab")) (fun _ -> [])
     ]
+
+[<Tests>]
+let staticReexportTests =
+    testList "static re-export fixture" [
+        yield!
+            fixtureTests "static-reexport-lab" (handFixture "static-reexport-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a re-exported class emits each static once" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    // `Certificate` declares no base and no abstract constructor, so it never
+                    // qualifies for the entrypoint (`AbstractClass`) form and carries no
+                    // type-level `[<Import>]` of its own to read a canonical specifier off. With
+                    // no canonical specifier, the collapse rule keeps the first export path in
+                    // harvest order - ambient modules harvest sorted by specifier text, so
+                    // "node:static-reexport-lab" precedes "static-reexport-lab".
+                    let hits =
+                        System.Text.RegularExpressions.Regex.Matches(
+                            source,
+                            "static member exportChallenge \\(spkac: string\\)"
+                        )
+                            .Count
+
+                    Expect.equal hits 1 "one static for the string overload"
+
+                    Expect.stringContains
+                        source
+                        "[<Import(\"Certificate.exportChallenge\", \"node:static-reexport-lab\")>]"
+                        "the first export path in harvest order wins"
+
+                    Expect.isFalse
+                        (source.Contains "[<Import(\"Certificate.exportChallenge\", \"static-reexport-lab\")>]")
+                        "the alias path collapsed"
+
+                  testCase "the collapsed path records SC010 exactly once" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let symbols = rendered.Files |> List.find (fst >> (=) "symbols.jsonl") |> snd
+
+                      let hits =
+                          System.Text.RegularExpressions.Regex.Matches(symbols, "\"key\":\"SC010\"").Count
+
+                      Expect.equal hits 1 "one collapsed path"
+                      Expect.stringContains symbols "\"static-reexport-lab\"" "names the collapsed specifier" ])
+    ]
