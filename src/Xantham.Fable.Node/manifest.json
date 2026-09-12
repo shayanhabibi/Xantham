@@ -3,10 +3,10 @@
   "package": "@types/node",
   "module": "Node",
   "counts": {
-    "exact": 2531,
-    "ergonomic": 1568,
-    "widened": 469,
-    "escape": 325
+    "exact": 1677,
+    "ergonomic": 1924,
+    "widened": 867,
+    "escape": 356
   },
   "passes": [
     {
@@ -55,8 +55,8 @@
     },
     {
       "pass": "SC - shape-classes",
-      "total": 6852,
-      "exact": 1584,
+      "total": 8347,
+      "exact": 3079,
       "ergonomic": 2122,
       "widened": 2192,
       "escape": 954
@@ -64,8 +64,9 @@
     {
       "pass": "SE - shape-exports",
       "total": 4054,
+      "exact": 16,
       "ergonomic": 2740,
-      "widened": 1218,
+      "widened": 1202,
       "escape": 96
     },
     {
@@ -75,8 +76,9 @@
     },
     {
       "pass": "DO - dedupe-overloads",
-      "total": 2006,
-      "exact": 86,
+      "total": 2009,
+      "exact": 88,
+      "ergonomic": 1,
       "widened": 1920
     },
     {
@@ -87,8 +89,9 @@
     },
     {
       "pass": "resolve-export-collisions",
-      "total": 100,
-      "widened": 100
+      "total": 78,
+      "ergonomic": 18,
+      "widened": 60
     },
     {
       "pass": "AC - audit-coverage",
