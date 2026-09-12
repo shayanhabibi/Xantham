@@ -1,0 +1,21 @@
+{"name":"AliasShape","file":"alias.d.ts","tier":"exact","findings":[]}
+{"name":"ClientOptions","file":"client.d.ts","tier":"widened","findings":[{"name":"SA.AbbreviationNameTaken","key":"SA003","pass":"shape-aliases","tier":"widened","symbol":"ClientOptions","fields":{"declared":"Client.ClientOptions"},"message":"abbreviation dropped - Client.ClientOptions already declares the name; the type reads under that declaration"}]}
+{"name":"Payload","file":"shared.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Payload","message":"ParamObject Create synthesized (D3)"}]}
+{"name":"RootSession","file":"shared.d.ts","tier":"widened","findings":[{"name":"TR.StringLiteralToString","key":"TR006","pass":"shape-interfaces","tier":"widened","symbol":"RootSession.kind","message":"string literal type widened to string (doc-noted, \u00A74.2)"},{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"RootSession","message":"ParamObject Create synthesized (D3)"}]}
+{"name":"Session","file":"shared.d.ts","tier":"widened","findings":[{"name":"SA.AbbreviationNameTaken","key":"SA003","pass":"shape-aliases","tier":"widened","symbol":"Session","fields":{"declared":"RootSession"},"message":"abbreviation dropped - RootSession already declares the name; the type reads under that declaration"}]}
+{"name":"Exports.describe","tier":"escape","findings":[{"name":"TR.AnyToObj","key":"TR008","pass":"shape-exports","tier":"escape","symbol":"Exports.describe(payload)","message":"any maps to obj"}]}
+{"name":"Exports.RootSession","tier":"exact","findings":[]}
+{"name":"Alias.AliasShape","file":"alias.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Alias.AliasShape","message":"ParamObject Create synthesized (D3)"}]}
+{"name":"Alias.Exports.whoami","tier":"exact","findings":[]}
+{"name":"Client.ClientOptions","file":"client.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Client.ClientOptions","message":"ParamObject Create synthesized (D3)"}]}
+{"name":"Client.Internal","file":"client.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Client.Internal","message":"ParamObject Create synthesized (D3)"}]}
+{"name":"Client.Exports.connect","tier":"exact","findings":[]}
+{"name":"Client.Exports.describe","tier":"escape","findings":[{"name":"TR.AnyToObj","key":"TR008","pass":"shape-exports","tier":"escape","symbol":"Client.Exports.describe(payload)","message":"any maps to obj"}]}
+{"name":"Client.Exports.Session","tier":"exact","findings":[]}
+{"name":"Client.Deep.DeepOnly","file":"deep.d.ts","tier":"widened","findings":[{"name":"TR.NumericLiteralToFloat","key":"TR007","pass":"shape-interfaces","tier":"widened","symbol":"Client.Deep.DeepOnly.level","message":"numeric literal type widened to float (doc-noted, \u00A74.2)"},{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Client.Deep.DeepOnly","message":"ParamObject Create synthesized (D3)"}]}
+{"name":"Client.Deep.Exports.depth","tier":"exact","findings":[]}
+{"name":"Legacy.Exports.connect","tier":"exact","findings":[]}
+{"name":"Legacy.Exports.describe","tier":"escape","findings":[{"name":"TR.AnyToObj","key":"TR008","pass":"shape-exports","tier":"escape","symbol":"Legacy.Exports.describe(payload)","message":"any maps to obj"}]}
+{"name":"Legacy.Exports.Session","tier":"exact","findings":[]}
+{"name":"Mirror.Exports.whoami","tier":"exact","findings":[]}
+{"name":"","tier":"escape","findings":[{"name":"HG.SubpathWildcardSkipped","key":"HG008","pass":"harvest-exports","tier":"escape","symbol":"./features/*","fields":{"key":"./features/*"},"message":"exports key \u0022./features/*\u0022 skipped - a wildcard names no subpath an import can resolve"},{"name":"HG.SubpathWithoutDeclarations","key":"HG009","pass":"harvest-exports","tier":"escape","symbol":"./untyped","fields":{"key":"./untyped"},"message":"exports key \u0022./untyped\u0022 skipped - its conditions supply no declaration file"}]}

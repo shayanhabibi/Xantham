@@ -1,0 +1,15 @@
+{
+  "name": "subpath-lab",
+  "version": "1.0.0",
+  "type": "module",
+  "exports": {
+    ".": { "types": "./index.d.ts", "default": "./index.js" },
+    "./client": { "types": "./client.d.ts", "default": "./client.js" },
+    "./client/deep": { "types": "./deep.d.ts", "default": "./deep.js" },
+    "./alias": { "types": "./alias.d.ts", "default": "./alias.js" },
+    "./mirror": { "types": "./alias.d.ts", "default": "./alias.js" },
+    "./features/*": { "types": "./features/*.d.ts" },
+    "./untyped": { "default": "./index.js" },
+    "./legacy/index.js": { "types": "./client.d.ts", "default": "./client.js" }
+  }
+}

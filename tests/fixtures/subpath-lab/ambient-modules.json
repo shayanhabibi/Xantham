@@ -1,0 +1,7 @@
+{
+  "subpath-lab/client": "client.js",
+  "subpath-lab/client/deep": "deep.js",
+  "subpath-lab/alias": "alias.js",
+  "subpath-lab/mirror": "alias.js",
+  "subpath-lab/legacy/index.js": "client.js"
+}

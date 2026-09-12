@@ -46,91 +46,8 @@ let private namespacesAmong (symbols: SymbolResponse seq) =
     |> Seq.map (fun symbol -> symbol.SymbolId, symbol.SymbolName)
     |> Map.ofSeq
 
-/// The entry module's exports, each followed through `getAliasedSymbol` to its origin so that
-/// re-exports and default-export aliases land on the declaring symbol.
-///
-/// A global type library (`@cloudflare/workers-types`, `@types/*` that declare no module) has
-/// no module symbol at all. That is not an error and not an escape: the pass advances with
-/// nothing, and `harvest-globals` picks the file's ambient declarations up instead.
-let harvestExports: Pass<HarvestModel> =
-    {
-        Name = "harvest-exports"
-        Run =
-            fun ctx model ->
-                async {
-                    let! moduleSymbol =
-                        ctx.Session.getSymbolOfSourceFile (DocumentIdentifier.FileName(ctx.EntryFile / uom<_>))
-
-                    match moduleSymbol with
-                    | ValueNone -> return Advanced model
-                    | ValueSome moduleSymbol ->
-                        let! exports = ctx.Session.getExportsOfModule moduleSymbol.Id
-                        let exports = exports |> ValueOption.defaultValue [||]
-
-                        // Fan out the alias-following freely - the mailbox coalesces it - but
-                        // Async.Parallel's result order is input order, so the fold is deterministic.
-                        let! resolved =
-                            exports
-                            |> Array.map (fun export ->
-                                async {
-                                    if export.Flags.HasFlag SymbolFlags.Alias then
-                                        let! origin = ctx.Session.getAliasedSymbol export.Id
-                                        return export.Name, origin
-                                    else
-                                        return export.Name, export
-                                })
-                            |> Async.Parallel
-
-                        let valueExport = ExportProvenance.reader ctx
-
-                        let! harvested =
-                            resolved
-                            |> Array.sortBy fst
-                            |> Array.map (fun (name, origin) ->
-                                async {
-                                    let! hasValueExport = valueExport moduleSymbol name
-
-                                    return
-                                        {
-                                            ExportName = name
-                                            Symbol = origin
-                                            HasValueExport = hasValueExport
-                                            Docs = ""
-                                            Tags = []
-                                            Origin = FromModule
-                                            Order = Grouping.declOrder origin.Declarations
-                                        }
-                                })
-                            |> Async.Sequential
-
-                        // A namespace the entry file declares without exporting is still the
-                        // owner of the types an exported signature reaches through it, so the
-                        // scope at the top of the file is asked for rather than the export list.
-                        let! inScope =
-                            ctx.Session.getSymbolsInScope (
-                                SymbolFlags.Module,
-                                file = DocumentIdentifier.FileName(ctx.EntryFile / uom<_>),
-                                position = 0
-                            )
-
-                        let namespaces =
-                            inScope
-                            |> Array.filter (fun symbol ->
-                                Grouping.classify ctx.PackageDir (ValueSome symbol) = EntryPackage)
-                            |> Array.append (resolved |> Array.map snd)
-                            |> namespacesAmong
-
-                        return
-                            Advanced
-                                { model with
-                                    Exports = harvested |> Array.toList
-                                    Namespaces = namespaces
-                                }
-                }
-    }
-
-/// One export of an ambient module, followed through `getAliasedSymbol` so that
-/// `export { _connect as connect }` lands on the declaring symbol under the exported name.
+/// One export, followed through `getAliasedSymbol` so that `export { _connect as connect }`
+/// lands on the declaring symbol under the exported name.
 let private followAlias (ctx: Context) (export: SymbolResponse) =
     async {
         if export.Flags.HasFlag SymbolFlags.Alias then
@@ -138,6 +55,125 @@ let private followAlias (ctx: Context) (export: SymbolResponse) =
             return export.Name, origin
         else
             return export.Name, export
+    }
+
+/// One public path's exports, harvested under `origin`, with the resolved origin symbols
+/// (for `namespacesAmong`). A path whose file has no module symbol contributes nothing - a
+/// global-script subpath, or a global type library (`@cloudflare/workers-types`, `@types/*`
+/// that declare no module) that `harvest-globals` picks the file's ambient declarations up
+/// instead when the whole model ends up empty.
+let private harvestPublicPath
+    (ctx: Context)
+    (origin: ExportOrigin)
+    (file: string<declFile>)
+    : Async<HarvestedExport list * SymbolResponse list> =
+    async {
+        let! moduleSymbol =
+            ctx.Session.getSymbolOfSourceFile (DocumentIdentifier.FileName(file / uom<_>))
+
+        match moduleSymbol with
+        | ValueNone -> return [], []
+        | ValueSome moduleSymbol ->
+            let! exports = ctx.Session.getExportsOfModule moduleSymbol.Id
+            let exports = exports |> ValueOption.defaultValue [||]
+
+            // Fan out the alias-following freely - the mailbox coalesces it - but
+            // Async.Parallel's result order is input order, so the fold is deterministic.
+            let! resolved = exports |> Array.map (followAlias ctx) |> Async.Parallel
+
+            let valueExport = ExportProvenance.reader ctx
+
+            let! harvested =
+                resolved
+                |> Array.sortBy fst
+                |> Array.map (fun (name, symbol) ->
+                    async {
+                        let! hasValueExport = valueExport moduleSymbol name
+
+                        return
+                            {
+                                ExportName = name
+                                Symbol = symbol
+                                HasValueExport = hasValueExport
+                                Docs = ""
+                                Tags = []
+                                Origin = origin
+                                Order = Grouping.declOrder symbol.Declarations
+                            }
+                    })
+                |> Async.Sequential
+
+            return harvested |> Array.toList, resolved |> Array.map snd |> Array.toList
+    }
+
+/// Every public path's exports, root first then each subpath in `PublicPaths` order, each
+/// followed through `getAliasedSymbol` to its origin so that re-exports and default-export
+/// aliases land on the declaring symbol. The root binds `[<Import(name, package)>]`; a
+/// subpath binds under its own specifier, `"<runtime>/<key without the leading ./>"`.
+///
+/// A skipped `exports` key (a wildcard, or a key without declarations) raises the finding
+/// `Context.SkippedPaths` already carries for it, and degrades the model rather than failing
+/// the run.
+let harvestExports: Pass<HarvestModel> =
+    {
+        Name = "harvest-exports"
+        Run =
+            fun ctx model ->
+                async {
+                    let runtime =
+                        GeneratorConfig.runtimePackage ctx.Config ctx.PackageName / uom<importSpecifier>
+
+                    let originOf (path: PublicPath) =
+                        if path.Key = "." then
+                            FromModule
+                        else
+                            FromAmbientModule($"{runtime}/{path.Key.Substring 2}" * uom<importSpecifier>)
+
+                    let! perPath =
+                        ctx.PublicPaths
+                        |> List.map (fun path -> harvestPublicPath ctx (originOf path) path.File)
+                        |> Async.Sequential
+
+                    let harvested = perPath |> Array.toList |> List.collect fst
+                    let resolvedSymbols = perPath |> Array.toList |> List.collect snd
+
+                    let skipped =
+                        ctx.SkippedPaths |> List.map (fun (key, finding) -> Finding.make key finding)
+
+                    // A namespace a public path's file declares without exporting is still the
+                    // owner of the types an exported signature reaches through it, so the scope
+                    // at the top of every path's file is asked for rather than the export list.
+                    let! inScope =
+                        ctx.PublicPaths
+                        |> List.map (fun path ->
+                            ctx.Session.getSymbolsInScope (
+                                SymbolFlags.Module,
+                                file = DocumentIdentifier.FileName(path.File / uom<_>),
+                                position = 0
+                            ))
+                        |> Async.Sequential
+
+                    let namespaces =
+                        inScope
+                        |> Array.toList
+                        |> List.collect Array.toList
+                        |> List.filter (fun symbol ->
+                            Grouping.classify ctx.PackageDir (ValueSome symbol) = EntryPackage)
+                        |> List.append resolvedSymbols
+                        |> namespacesAmong
+
+                    let model =
+                        { model with
+                            Exports = harvested
+                            Namespaces = namespaces
+                        }
+
+                    return
+                        if List.isEmpty skipped then
+                            Advanced model
+                        else
+                            Degraded(model, skipped)
+                }
     }
 
 /// One ambient module declaration, harvested: its exports under the specifier they import

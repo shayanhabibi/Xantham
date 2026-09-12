@@ -4444,6 +4444,32 @@ let pipelineTests =
                     Expect.stringContains source "module Aliases" "the nested module Aliases for `(layout-lab/aliases).renamedCheck` is created"
             ]
         yield!
+            fixtureTests "subpath-lab" (handFixture "subpath-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "each public subpath is a nested module with its own Exports" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+                      Expect.stringContains source "[<Import(\"describe\", \"subpath-lab\")>]" "root value imports the root"
+                      Expect.stringContains source "[<Import(\"describe\", \"subpath-lab/client\")>]" "client value imports the subpath"
+                      Expect.stringContains source "[<Import(\"depth\", \"subpath-lab/client/deep\")>]" "deep value imports its subpath"
+                      Expect.stringContains source "module Client =" "client module"
+                      Expect.stringContains source "module Deep =" "deep module nests under client"
+                      Expect.stringContains source "module Legacy =" "trailing index.js key strips to Legacy"
+
+                  testCase "two keys over one file both carry the value surface" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+                      Expect.stringContains source "[<Import(\"whoami\", \"subpath-lab/alias\")>]" "alias key"
+                      Expect.stringContains source "[<Import(\"whoami\", \"subpath-lab/mirror\")>]" "mirror key"
+
+                  testCase "wildcard and untyped keys are skipped with findings" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let symbols = rendered.Files |> List.find (fst >> (=) "symbols.jsonl") |> snd
+                      Expect.stringContains symbols "\"key\":\"HG008\"" "wildcard skipped"
+                      Expect.stringContains symbols "\"key\":\"HG009\"" "untyped skipped"
+                      let source = rendered.Files |> List.head |> snd
+                      Expect.isFalse (source.Contains "module Features") "no wildcard module"
+                      Expect.isFalse (source.Contains "module Untyped") "no untyped module" ])
+        yield!
             fixtureTests "single-case-enum-lab" (handFixture "single-case-enum-lab") GeneratorConfig.Default (fun package -> [
                 testCase "a single-case string enum is not RequireQualifiedAccess" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
