@@ -227,6 +227,11 @@ type GeneratorConfig =
         ResolveNoInfer: bool
         /// Names and opening policy for the compiler's combined library binding.
         CompilerLib: CompilerLibConfig
+        /// Marks every generated `Exports` type `[<AutoOpen>]`, so a package's value exports
+        /// resolve unqualified.
+        [<Description("Mark every generated `Exports` type [<AutoOpen>], so package's value exports resolve unqualified. \
+        Defaults to false.")>]
+        AutoOpenExports: bool
     }
 
     static member Default =
@@ -242,6 +247,7 @@ type GeneratorConfig =
             RuntimePackage = None
             ResolveNoInfer = false
             CompilerLib = CompilerLibConfig.Default
+            AutoOpenExports = false
         }
 
 module GeneratorConfig =
@@ -434,6 +440,7 @@ module GeneratorConfig =
                 RuntimePackage = runtime
                 ResolveNoInfer = boolField "resolveNoInfer" GeneratorConfig.Default.ResolveNoInfer
                 CompilerLib = compilerLib
+                AutoOpenExports = boolField "autoOpenExports" GeneratorConfig.Default.AutoOpenExports
             }
 
     /// Loads `<packageDir>/xantham.json`.

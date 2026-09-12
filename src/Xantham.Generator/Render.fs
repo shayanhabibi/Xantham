@@ -918,11 +918,19 @@ let private renderPhantom (decl: FsPhantomDecl) =
         yield $"type {declHead decl.Name decl.TypeParameters} = private {case} of {printType decl.Carrier}"
     ]
 
-let private renderExports (runtimePackage: string<importSpecifier>) (container: FsExportContainer) =
+let private renderExports
+    (autoOpenExports: bool)
+    (runtimePackage: string<importSpecifier>)
+    (container: FsExportContainer)
+    =
     let members = container.Members |> List.map _.Member
 
     [
         yield "/// <summary>The package's value exports, each bound to its import.</summary>"
+
+        if autoOpenExports then
+            yield "[<AutoOpen>]"
+
         yield "[<Erase>]"
 
         match hoistedBinding members with
@@ -1323,7 +1331,7 @@ let private fileHeader (openDom: bool) (source: string) (declaration: string) =
 
 /// A group's declarations, each reference to another module's name qualified, rendered at
 /// `indent` in the order the shape tier fixed.
-let private renderBody (group: GroupModule) (foreign: Map<string, string>) (indent: string) =
+let private renderBody (autoOpenExports: bool) (group: GroupModule) (foreign: Map<string, string>) (indent: string) =
     let decls =
         if Map.isEmpty foreign then
             group.Decls
@@ -1388,7 +1396,7 @@ let private renderBody (group: GroupModule) (foreign: Map<string, string>) (inde
         | FsDelegateType decl -> renderDelegate decl
         | FsMeasure decl -> renderMeasure decl
         | FsPhantom decl -> renderPhantom decl
-        | FsExports container -> renderExports group.RuntimePackage container
+        | FsExports container -> renderExports autoOpenExports group.RuntimePackage container
 
     let body =
         decls
@@ -1421,8 +1429,8 @@ let private renderFooter (decls: FsDecl list) =
 
 /// One `.fs` file: header, opens, declarations in the order the shape tier fixed. `module rec`
 /// so declaration order never fights reference order.
-let private renderModule (group: GroupModule) (foreign: Map<string, string>) =
-    let body, decls = renderBody group foreign ""
+let private renderModule (autoOpenExports: bool) (group: GroupModule) (foreign: Map<string, string>) =
+    let body, decls = renderBody autoOpenExports group foreign ""
 
     String.concat
         "\n"
@@ -1442,6 +1450,7 @@ let private compilerLibChild (layout: CompilerLibLayout) =
 /// The compiler library's two families live under one recursive root module. References still
 /// use each child's canonical module name, regardless of whether that child is auto-opened.
 let private renderCompilerLib
+    (autoOpenExports: bool)
     (layout: CompilerLibLayout)
     (groups: GroupModule list)
     (foreignTo: GroupModule -> Map<string, string>)
@@ -1454,7 +1463,7 @@ let private renderCompilerLib
                 let moduleName = compilerLibModule layout family
 
                 let body, decls =
-                    renderBody { group with Module = moduleName } (foreignTo group) "    "
+                    renderBody autoOpenExports { group with Module = moduleName } (foreignTo group) "    "
 
                 family, body, decls))
         |> List.sortBy (fun (family, _, _) -> family)
@@ -1485,10 +1494,15 @@ let private renderCompilerLib
 
 /// One `.fs` file holding every group of a namespace, each as a nested module under
 /// `namespace rec`, so the modules reference each other's types in both directions.
-let private renderNamespace (ns: string) (groups: GroupModule list) (foreignTo: GroupModule -> Map<string, string>) =
+let private renderNamespace
+    (autoOpenExports: bool)
+    (ns: string)
+    (groups: GroupModule list)
+    (foreignTo: GroupModule -> Map<string, string>)
+    =
     let rendered =
         groups
-        |> List.map (fun group -> group, renderBody group (foreignTo group) "    ")
+        |> List.map (fun group -> group, renderBody autoOpenExports group (foreignTo group) "    ")
 
     let modules =
         rendered
@@ -1597,6 +1611,7 @@ let renderSources (modules: GroupModule list) : Pass<RenderModel> =
 
                             file,
                             renderModule
+                                ctx.Config.AutoOpenExports
                                 { group with
                                     Module = effectiveModule group
                                 }
@@ -1608,7 +1623,8 @@ let renderSources (modules: GroupModule list) : Pass<RenderModel> =
                         |> List.choose (fun group -> group.Namespace |> Option.map (fun ns -> ns, group))
                         |> List.groupBy fst
                         |> List.map (fun (ns, groups) ->
-                            $"groups/{ns}.fs", renderNamespace ns (List.map snd groups) foreignTo)
+                            $"groups/{ns}.fs",
+                            renderNamespace ctx.Config.AutoOpenExports ns (List.map snd groups) foreignTo)
 
                     let compilerLib = ordered |> List.filter (fun group -> group.CompilerLib.IsSome)
 
@@ -1618,7 +1634,7 @@ let renderSources (modules: GroupModule list) : Pass<RenderModel> =
                         | groups ->
                             [
                                 $"groups/{compilerLibLayout.RootModule}.fs",
-                                renderCompilerLib compilerLibLayout groups foreignTo
+                                renderCompilerLib ctx.Config.AutoOpenExports compilerLibLayout groups foreignTo
                             ]
 
                     let files = files @ namespaced @ compilerLibFile

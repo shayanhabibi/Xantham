@@ -4343,6 +4343,26 @@ let pipelineTests =
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                     let symbols = rendered.Files |> List.find (fst >> (=) "symbols.jsonl") |> snd
                     Expect.stringContains symbols "\"key\":\"LU002\"" "finding recorded" ])
+        yield!
+            fixtureTests "auto-open-exports-lab" (handFixture "auto-open-exports-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "autoOpenExports marks the generated Exports type AutoOpen" <| fun _ ->
+                    let config =
+                        { GeneratorConfig.Default with
+                            AutoOpenExports = true }
+
+                    let rendered = Async.RunSynchronously(Pipeline.generate config package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.stringContains
+                        source
+                        "[<AutoOpen>]\n[<Erase>]\ntype"
+                        "the flag prepends [<AutoOpen>] on the Exports type, before [<Erase>]"
+
+                  testCase "autoOpenExports defaults to false, leaving Exports unmarked" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.isFalse (source.Contains "[<AutoOpen>]") "the default config emits no [<AutoOpen>]" ])
     ]
 
 [<Tests>]

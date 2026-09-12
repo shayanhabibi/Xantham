@@ -83,6 +83,11 @@ let private configKeys =
 
             "CompilerLib",
             ("compilerLib", "The module layout and opening policy for the combined TypeScript compiler-library binding.")
+
+            "AutoOpenExports",
+            ("autoOpenExports",
+             "Mark every generated `Exports` type [<AutoOpen>], so a package's value exports resolve unqualified. \
+          Defaults false.")
         ]
 
 /// The JSON key and description of one `CompilerLibConfig` field.
