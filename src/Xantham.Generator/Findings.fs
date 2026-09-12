@@ -229,6 +229,7 @@ module FindingCodes =
             "RA.ArityMismatch", "RA004"
             "RA.ReadWithoutWrite", "RA005"
             "RA.AliasKeptAsPhantom", "RA006"
+            "RA.DuplicateTypeParameterUnwritable", "RA007"
             "AC.ExportNotRepresented", "AC001"
             "GE.GroupShipped", "GE001"
             "GE.ShippedGroupWithoutDeclarations", "GE002"
@@ -1080,6 +1081,9 @@ type RepairArity =
     /// head declares. The alias is written with the surplus parameters erased as phantoms, so
     /// references keep their arity; the erased parameters carry no value.
     | [<Widened>] AliasKeptAsPhantom of name: string
+    /// A declaration whose head repeats one type parameter's name under two different bounds.
+    /// The declaration is dropped, and every reference to it widens.
+    | [<Widened>] DuplicateTypeParameterUnwritable of name: string
 
     interface IFindingKind with
         member this.Message =
@@ -1095,6 +1099,8 @@ type RepairArity =
                 $"{name} reads but does not write: its type holds no value, and F# has no setter of type unit"
             | AliasKeptAsPhantom name ->
                 $"{name} resolves to a target using fewer type parameters than its head; the surplus are erased phantoms"
+            | DuplicateTypeParameterUnwritable name ->
+                $"{name} dropped: two of its type parameters share a name under different bounds"
 
 /// `audit-coverage`.
 [<Prefix("AC", "audit-coverage")>]

@@ -193,6 +193,7 @@ let findingsTests =
                     "RA.ArityMismatch RA004 widened"
                     "RA.ReadWithoutWrite RA005 ergonomic"
                     "RA.AliasKeptAsPhantom RA006 widened"
+                    "RA.DuplicateTypeParameterUnwritable RA007 widened"
                     "AC.ExportNotRepresented AC001 escape"
                     "GE.GroupShipped GE001 exact"
                     "GE.ShippedGroupWithoutDeclarations GE002 widened"
