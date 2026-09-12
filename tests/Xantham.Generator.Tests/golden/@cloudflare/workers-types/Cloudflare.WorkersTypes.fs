@@ -94,201 +94,6 @@ type DOMException =
     [<Global("DOMException.isError")>]
     static member isError (error: obj) : bool = jsNative
 
-module BasicImageTransformationsGravityCoordinates =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Mode =
-        | [<CompiledName("box-center")>] BoxCenter
-        | [<CompiledName("remainder")>] Remainder
-
-module FormData =
-    module ForEach =
-        type Callback = delegate of value: U2<string, File> * key: string * parent: FormData -> unit
-
-module Headers =
-    module ForEach =
-        type Callback = delegate of value: string * key: string * parent: Headers -> unit
-
-module ReadableStreamBYOBReader =
-    module Read =
-        module Result =
-            [<Interface>]
-            type Item<'T when 'T :> JS.ArrayBufferView> =
-                abstract ``done``: bool with get, set
-                abstract value: 'T with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``done``: bool, value: 'T) : Item<'T> = jsNative
-
-    module ReadAtLeast =
-        module Result =
-            [<Interface>]
-            type Item<'T when 'T :> JS.ArrayBufferView> =
-                abstract ``done``: bool with get, set
-                abstract value: 'T with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``done``: bool, value: 'T) : Item<'T> = jsNative
-
-module ReadableStreamDefaultReader =
-    module Read =
-        module Result =
-            [<Interface>]
-            type Item<'R> =
-                abstract ``done``: bool with get, set
-                abstract value: 'R with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``done``: bool, value: 'R) : Item<'R> = jsNative
-
-            [<Interface>]
-            type Item2 =
-                abstract ``done``: bool with get, set
-                abstract value: unit option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``done``: bool, ?value: unit) : Item2 = jsNative
-
-module Request =
-    [<Interface>]
-    type Fetcher =
-        abstract fetch: input: U3<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, URL> * ?init: RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> -> JS.Promise<Response>
-        abstract connect: address: U2<string, SocketAddress> * ?options: SocketOptions -> Socket
-        [<ParamObject; Emit("$0")>]
-        static member Create (fetch: Func<U3<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, URL>, RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option, JS.Promise<Response>>, connect: Func<U2<string, SocketAddress>, SocketOptions option, Socket>) : Fetcher = jsNative
-
-module RequestInit =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Cache =
-        | [<CompiledName("no-cache")>] NoCache
-        | [<CompiledName("no-store")>] NoStore
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type EncodeResponseBody =
-        | [<CompiledName("automatic")>] Automatic
-        | [<CompiledName("manual")>] Manual
-
-module RequestInitCfProperties =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type GrpcWeb =
-        | [<CompiledName("convert")>] Convert
-        | [<CompiledName("passthrough")>] Passthrough
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Polish =
-        | [<CompiledName("lossless")>] Lossless
-        | [<CompiledName("lossy")>] Lossy
-        | [<CompiledName("off")>] Off
-
-module RequestInitCfPropertiesImage =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Format =
-        | [<CompiledName("avif")>] Avif
-        | [<CompiledName("baseline-jpeg")>] BaselineJpeg
-        | [<CompiledName("jpeg")>] Jpeg
-        | [<CompiledName("json")>] Json
-        | [<CompiledName("png")>] Png
-        | [<CompiledName("png-force")>] PngForce
-        | [<CompiledName("svg")>] Svg
-        | [<CompiledName("webp")>] Webp
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Metadata =
-        | [<CompiledName("copyright")>] Copyright
-        | [<CompiledName("keep")>] Keep
-        | [<CompiledName("none")>] None
-
-module RequestInitCfPropertiesImageDraw =
-    [<Interface>]
-    type Border =
-        abstract color: string with get, set
-        abstract width: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (color: string, width: float) : Border = jsNative
-
-    [<Interface>]
-    type Border2 =
-        abstract color: string with get, set
-        abstract top: float with get, set
-        abstract right: float with get, set
-        abstract bottom: float with get, set
-        abstract left: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (color: string, top: float, right: float, bottom: float, left: float) : Border2 = jsNative
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Fit =
-        | [<CompiledName("contain")>] Contain
-        | [<CompiledName("cover")>] Cover
-        | [<CompiledName("crop")>] Crop
-        | [<CompiledName("pad")>] Pad
-        | [<CompiledName("scale-down")>] ScaleDown
-        | [<CompiledName("scale-up")>] ScaleUp
-        | [<CompiledName("squeeze")>] Squeeze
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Flip =
-        | [<CompiledName("h")>] H
-        | [<CompiledName("hv")>] Hv
-        | [<CompiledName("v")>] V
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Repeat =
-        | [<CompiledName("x")>] X
-        | [<CompiledName("y")>] Y
-        | [<CompiledValue(true)>] True
-
-    type Rotate =
-        | N0 = 0
-        | N90 = 90
-        | N180 = 180
-        | N270 = 270
-        | N360 = 360
-
-    [<Interface>]
-    type Trim =
-        abstract top: float option with get, set
-        abstract bottom: float option with get, set
-        abstract left: float option with get, set
-        abstract right: float option with get, set
-        abstract width: float option with get, set
-        abstract height: float option with get, set
-        abstract border: U2<bool, RequestInitCfPropertiesImageDraw.Trim.Border> option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?top: float, ?bottom: float, ?left: float, ?right: float, ?width: float, ?height: float, ?border: U2<bool, RequestInitCfPropertiesImageDraw.Trim.Border>) : Trim = jsNative
-
-    module Trim =
-        [<Interface>]
-        type Border =
-            abstract color: string option with get, set
-            abstract tolerance: float option with get, set
-            abstract keep: float option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?color: string, ?tolerance: float, ?keep: float) : Border = jsNative
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Upscale =
-        | [<CompiledName("generate")>] Generate
-        | [<CompiledName("interpolate")>] Interpolate
-
-module Response =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Type =
-        | [<CompiledName("default")>] Default
-        | [<CompiledName("error")>] Error
-
-module Socket =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type SecureTransport =
-        | [<CompiledName("off")>] Off
-        | [<CompiledName("on")>] On
-        | [<CompiledName("starttls")>] Starttls
-
-module URLSearchParams =
-    module ForEach =
-        type Callback = delegate of value: string * key: string * parent: URLSearchParams -> unit
-
-module WebSocket =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type BinaryType =
-        | [<CompiledName("arraybuffer")>] Arraybuffer
-        | [<CompiledName("blob")>] Blob
-
 [<Interface>]
 type WorkerGlobalScopeEventMap =
     abstract fetch: FetchEvent with get, set
@@ -482,17 +287,6 @@ type GlobalDescriptor =
     [<ParamObject; Emit("$0")>]
     static member Create (value: GlobalDescriptor.Value, ?``mutable``: bool) : GlobalDescriptor = jsNative
 
-module GlobalDescriptor =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Value =
-        | [<CompiledName("anyfunc")>] Anyfunc
-        | [<CompiledName("externref")>] Externref
-        | [<CompiledName("f32")>] F32
-        | [<CompiledName("f64")>] F64
-        | [<CompiledName("i32")>] I32
-        | [<CompiledName("i64")>] I64
-        | [<CompiledName("v128")>] V128
-
 [<Interface>]
 type Instance =
     abstract exports: Record<string, U4<JS.Function, Global, Memory, Table>>
@@ -537,14 +331,6 @@ type ModuleExportDescriptor =
     abstract name: string with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (kind: ModuleExportDescriptor.Kind, name: string) : ModuleExportDescriptor = jsNative
-
-module ModuleExportDescriptor =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Kind =
-        | [<CompiledName("function")>] Function
-        | [<CompiledName("global")>] Global
-        | [<CompiledName("memory")>] Memory
-        | [<CompiledName("table")>] Table
 
 [<Interface>]
 type ModuleImportDescriptor =
@@ -591,12 +377,6 @@ type TableDescriptor =
     abstract maximum: float option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (element: TableDescriptor.Element, initial: float, ?maximum: float) : TableDescriptor = jsNative
-
-module TableDescriptor =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Element =
-        | [<CompiledName("anyfunc")>] Anyfunc
-        | [<CompiledName("externref")>] Externref
 
 [<Interface>]
 type WebAssembly =
@@ -742,10 +522,6 @@ type EventConstructor =
     abstract BUBBLING_PHASE: float
     [<EmitConstructor>]
     abstract Create: ``type``: string * ?init: EventInit -> Event
-
-module EventCounts =
-    module ForEach =
-        type Param1 = delegate of param0: float * param1: string * param2: EventCounts -> unit
 
 type EventSourceConstructor =
     abstract CONNECTING: float
@@ -979,22 +755,6 @@ type ServiceWorkerGlobalScope =
     abstract PerformanceObserver: PerformanceObserverConstructor with get, set
     abstract PerformanceObserverEntryList: PerformanceObserverEntryListConstructor with get, set
 
-module ServiceWorkerGlobalScope =
-    module CompressionStream =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Format =
-            | [<CompiledName("deflate")>] Deflate
-            | [<CompiledName("deflate-raw")>] DeflateRaw
-            | [<CompiledName("gzip")>] Gzip
-
-    module WebSocketPair =
-        [<Interface>]
-        type Result =
-            abstract ``0``: WebSocket with get, set
-            abstract ``1``: WebSocket with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``0``: WebSocket, ``1``: WebSocket) : Result = jsNative
-
 type SubtleCryptoConstructor =
     [<EmitConstructor>]
     abstract Create: unit -> SubtleCrypto
@@ -1030,9 +790,6 @@ type TransformStreamConstructor =
 type TransformStreamDefaultControllerConstructor =
     [<EmitConstructor>]
     abstract Create<'O>: unit -> TransformStreamDefaultController<'O>
-
-module Transformer =
-    type Transform<'I, 'O> = delegate of chunk: 'I * controller: TransformStreamDefaultController<'O> -> JS.Promise<unit> option
 
 type URLConstructor =
     /// <summary>
@@ -1070,9 +827,6 @@ type URLSearchParamsConstructor =
     [<EmitConstructor>]
     abstract Create: ?init: obj -> URLSearchParams
 
-module UnderlyingSink =
-    type Write<'W> = delegate of chunk: 'W * controller: WritableStreamDefaultController -> JS.Promise<unit> option
-
 type WebSocketRequestResponsePairConstructor =
     [<EmitConstructor>]
     abstract Create: request: string * response: string -> WebSocketRequestResponsePair
@@ -1101,29 +855,6 @@ type Cloudflare =
 
 type TestController = obj
 
-module CloudflareAccessIdentity =
-    [<Interface>]
-    type Geo =
-        abstract country: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (country: string) : Geo = jsNative
-
-    module Groups =
-        [<Interface>]
-        type Item =
-            abstract id: string with get, set
-            abstract name: string with get, set
-            abstract email: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (id: string, name: string, ?email: string) : Item = jsNative
-
-    [<Interface>]
-    type Idp =
-        abstract id: string with get, set
-        abstract ``type``: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (id: string, ``type``: string) : Idp = jsNative
-
 [<Interface>]
 type ExecutionContext<'Props> =
     abstract waitUntil: promise: JS.Promise<obj> -> unit
@@ -1136,13 +867,6 @@ type ExecutionContext<'Props> =
     abstract abort: ?reason: obj -> unit
     [<ParamObject; Emit("$0")>]
     static member Create (waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), exports: obj, props: 'Props, tracing: Tracing, abort: (obj option -> unit), ?cache: CacheContext, ?access: CloudflareAccessContext) : ExecutionContext<'Props> = jsNative
-
-module Tracing =
-    module EnterSpan =
-        type Callback<'A, 'T> = delegate of span: Span * args: 'A -> 'T
-
-    module StartActiveSpan =
-        type Callback<'A, 'T> = delegate of span: Span * args: 'A -> 'T
 
 type ExportedHandlerFetchHandler<'Env, 'CfHostMetadata, 'Props> = delegate of request: Request<'CfHostMetadata, IncomingRequestCfProperties<'CfHostMetadata>> * env: 'Env * ctx: ExecutionContext<'Props> -> U2<JS.Promise<Response>, Response>
 
@@ -1220,65 +944,6 @@ type Exception =
 
 type ExportedHandlerTailStreamHandler<'Env, 'Props> = delegate of ``event``: TailStream.TailEvent<Onset> * env: 'Env * ctx: ExecutionContext<'Props> -> U3<JS.Promise<U2<(TailStream.TailEvent<ExportedHandlerTailStreamHandler.Result.Item.Event.Item> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>>, (TailStream.TailEvent<ExportedHandlerTailStreamHandler.Result.Item.Event.Item> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>
 
-module ExportedHandlerTailStreamHandler =
-    module Result =
-        [<Interface>]
-        type Item =
-            abstract outcome: (TailStream.TailEvent<Outcome> -> JS.Promise<unit> option) option with get, set
-            abstract spanOpen: (TailStream.TailEvent<SpanOpen> -> JS.Promise<unit> option) option with get, set
-            abstract spanClose: (TailStream.TailEvent<SpanClose> -> JS.Promise<unit> option) option with get, set
-            abstract diagnosticChannel: (TailStream.TailEvent<DiagnosticChannelEvent> -> JS.Promise<unit> option) option with get, set
-            abstract ``exception``: (TailStream.TailEvent<Exception> -> JS.Promise<unit> option) option with get, set
-            abstract log: (TailStream.TailEvent<U2<ExportedHandlerTailStreamHandler.Result.Item.Event.Item2, ExportedHandlerTailStreamHandler.Result.Item.Event.Item3>> -> JS.Promise<unit> option) option with get, set
-            abstract ``return``: (TailStream.TailEvent<Return> -> JS.Promise<unit> option) option with get, set
-            abstract attributes: (TailStream.TailEvent<Attributes> -> JS.Promise<unit> option) option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?outcome: (TailStream.TailEvent<Outcome> -> JS.Promise<unit> option), ?spanOpen: (TailStream.TailEvent<SpanOpen> -> JS.Promise<unit> option), ?spanClose: (TailStream.TailEvent<SpanClose> -> JS.Promise<unit> option), ?diagnosticChannel: (TailStream.TailEvent<DiagnosticChannelEvent> -> JS.Promise<unit> option), ?``exception``: (TailStream.TailEvent<Exception> -> JS.Promise<unit> option), ?log: (TailStream.TailEvent<U2<ExportedHandlerTailStreamHandler.Result.Item.Event.Item2, ExportedHandlerTailStreamHandler.Result.Item.Event.Item3>> -> JS.Promise<unit> option), ?``return``: (TailStream.TailEvent<Return> -> JS.Promise<unit> option), ?attributes: (TailStream.TailEvent<Attributes> -> JS.Promise<unit> option)) : Item = jsNative
-
-        module Item =
-            module Event =
-                [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-                type Item =
-                    | [<CompiledName("attributes")>] Attributes of info: Attribute[]
-                    | [<CompiledName("diagnosticChannel")>] DiagnosticChannel of channel: string * message: obj
-                    | [<CompiledName("exception")>] Exception of name: string * message: string * stack: string option
-                    | [<CompiledName("onset")>] Onset of attributes: Attribute[] * spanId: string * dispatchNamespace: string option * entrypoint: string option * executionModel: string * durableObjectId: string option * scriptName: string option * scriptTags: string[] option * scriptVersion: TailStream.ScriptVersion option * preview: TailStream.TracePreviewInfo option * info: Onset.Info
-                    | [<CompiledName("outcome")>] Outcome of outcome: Outcome.Outcome * cpuTime: float * wallTime: float
-                    | [<CompiledName("return")>] Return of info: FetchResponseInfo option
-                    | [<CompiledName("spanClose")>] SpanClose of outcome: Outcome.Outcome
-                    | [<CompiledName("spanOpen")>] SpanOpen of name: string * spanId: string * info: U3<Attributes, FetchEventInfo, JsRpcEventInfo> option
-                    | [<CompiledName("streamDiagnostic")>] StreamDiagnostic of diagnostic: DroppedEventsDiagnostic
-                    | [<CompiledName("log")>] Log of level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item2.Level * errorInfo: TailStreamErrorInfo option[] option
-
-                [<Interface>]
-                type Item2 =
-                    abstract ``type``: string
-                    abstract level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item2.Level
-                    abstract errorInfo: TailStreamErrorInfo option[] option
-                    abstract message: obj
-                    abstract truncated: bool option
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (``type``: string, level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item2.Level, message: obj, ?errorInfo: TailStreamErrorInfo option[], ?truncated: bool) : Item2 = jsNative
-
-                module Item2 =
-                    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                    type Level =
-                        | [<CompiledName("debug")>] Debug
-                        | [<CompiledName("error")>] Error
-                        | [<CompiledName("info")>] Info
-                        | [<CompiledName("log")>] Log
-                        | [<CompiledName("warn")>] Warn
-
-                [<Interface>]
-                type Item3 =
-                    abstract ``type``: string
-                    abstract level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item2.Level
-                    abstract errorInfo: TailStreamErrorInfo option[] option
-                    abstract message: string
-                    abstract truncated: bool
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (``type``: string, level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item2.Level, message: string, truncated: bool, ?errorInfo: TailStreamErrorInfo option[]) : Item3 = jsNative
-
 [<Interface>]
 type FetchEventInfo =
     abstract ``type``: string
@@ -1309,13 +974,6 @@ type HibernatableWebSocketEventInfo =
     abstract info: HibernatableWebSocketEventInfo.Info
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, info: HibernatableWebSocketEventInfo.Info) : HibernatableWebSocketEventInfo = jsNative
-
-module HibernatableWebSocketEventInfo =
-    [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-    type Info =
-        | [<CompiledName("close")>] Close of code: float * wasClean: bool
-        | [<CompiledName("error")>] Error
-        | [<CompiledName("message")>] Message
 
 [<Interface>]
 type HibernatableWebSocketEventInfoClose =
@@ -1360,20 +1018,6 @@ type Onset =
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, attributes: Attribute[], spanId: string, executionModel: string, info: Onset.Info, ?dispatchNamespace: string, ?entrypoint: string, ?durableObjectId: string, ?scriptName: string, ?scriptTags: string[], ?scriptVersion: TailStream.ScriptVersion, ?preview: TailStream.TracePreviewInfo) : Onset = jsNative
 
-module Onset =
-    [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-    type Info =
-        | [<CompiledName("alarm")>] Alarm of scheduledTime: JS.Date
-        | [<CompiledName("connect")>] Connect
-        | [<CompiledName("custom")>] Custom
-        | [<CompiledName("email")>] Email of mailFrom: string * rcptTo: string * rawSize: float
-        | [<CompiledName("fetch")>] Fetch of ``method``: string * url: string * cfJson: obj option * headers: Header[]
-        | [<CompiledName("hibernatableWebSocket")>] HibernatableWebSocket of info: HibernatableWebSocketEventInfo.Info
-        | [<CompiledName("jsrpc")>] Jsrpc
-        | [<CompiledName("queue")>] Queue of queueName: string * batchSize: float
-        | [<CompiledName("scheduled")>] Scheduled of scheduledTime: JS.Date * cron: string
-        | [<CompiledName("trace")>] Trace of traces: string option[]
-
 [<Interface>]
 type Outcome =
     abstract ``type``: string
@@ -1382,24 +1026,6 @@ type Outcome =
     abstract wallTime: float
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, outcome: Outcome.Outcome, cpuTime: float, wallTime: float) : Outcome = jsNative
-
-module Outcome =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Outcome =
-        | [<CompiledName("aborted")>] Aborted
-        | [<CompiledName("canceled")>] Canceled
-        | [<CompiledName("daemonDown")>] DaemonDown
-        | [<CompiledName("exceededCpu")>] ExceededCpu
-        | [<CompiledName("exceededMemory")>] ExceededMemory
-        | [<CompiledName("exceededWallTime")>] ExceededWallTime
-        | [<CompiledName("exception")>] Exception
-        | [<CompiledName("internalError")>] InternalError
-        | [<CompiledName("killSwitch")>] KillSwitch
-        | [<CompiledName("loadShed")>] LoadShed
-        | [<CompiledName("ok")>] Ok
-        | [<CompiledName("responseStreamDisconnected")>] ResponseStreamDisconnected
-        | [<CompiledName("scriptNotFound")>] ScriptNotFound
-        | [<CompiledName("unknown")>] Unknown
 
 [<Interface>]
 type QueueEventInfo =
@@ -1454,33 +1080,6 @@ type StreamDiagnostic =
     abstract diagnostic: DroppedEventsDiagnostic
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, diagnostic: DroppedEventsDiagnostic) : StreamDiagnostic = jsNative
-
-module TailStream =
-    [<Interface>]
-    type ScriptVersion =
-        abstract id: string
-        abstract tag: string option
-        abstract message: string option
-        [<ParamObject; Emit("$0")>]
-        static member Create (id: string, ?tag: string, ?message: string) : ScriptVersion = jsNative
-
-    [<Interface>]
-    type TailEvent<'Event> =
-        abstract invocationId: string
-        abstract spanContext: SpanContext
-        abstract timestamp: JS.Date
-        abstract sequence: float
-        abstract ``event``: 'Event
-        [<ParamObject; Emit("$0")>]
-        static member Create (invocationId: string, spanContext: SpanContext, timestamp: JS.Date, sequence: float, ``event``: 'Event) : TailEvent<'Event> = jsNative
-
-    [<Interface>]
-    type TracePreviewInfo =
-        abstract id: string
-        abstract slug: string
-        abstract name: string
-        [<ParamObject; Emit("$0")>]
-        static member Create (id: string, slug: string, name: string) : TracePreviewInfo = jsNative
 
 [<Interface>]
 type TailStreamErrorInfo =
@@ -1704,18 +1303,6 @@ type ContainerDirectorySnapshotRestoreParams3 =
     [<ParamObject; Emit("$0")>]
     static member Create (mountPoint: string, ?snapshot: unit) : ContainerDirectorySnapshotRestoreParams3 = jsNative
 
-module ContainerExecOptions =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Stderr =
-        | [<CompiledName("combined")>] Combined
-        | [<CompiledName("ignore")>] Ignore
-        | [<CompiledName("pipe")>] Pipe
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Stdout =
-        | [<CompiledName("ignore")>] Ignore
-        | [<CompiledName("pipe")>] Pipe
-
 [<Interface>]
 type DurableObjectState<'Props> =
     abstract waitUntil: promise: JS.Promise<obj> -> unit
@@ -1737,22 +1324,6 @@ type DurableObjectState<'Props> =
     abstract abort: ?reason: string * ?options: DurableObjectAbortOptions -> unit
     [<ParamObject; Emit("$0")>]
     static member Create (waitUntil: (JS.Promise<obj> -> unit), exports: obj, props: 'Props, id: DurableObjectId, storage: DurableObjectStorage, facets: DurableObjectFacets, blockConcurrencyWhile: ((unit -> JS.Promise<'T>) -> JS.Promise<'T>), acceptWebSocket: Action<WebSocket, string[] option>, getWebSockets: (string option -> WebSocket[]), setWebSocketAutoResponse: (WebSocketRequestResponsePair option -> unit), getWebSocketAutoResponse: (unit -> WebSocketRequestResponsePair option), getWebSocketAutoResponseTimestamp: (WebSocket -> JS.Date option), setHibernatableWebSocketEventTimeout: (float option -> unit), getHibernatableWebSocketEventTimeout: (unit -> float option), getTags: (WebSocket -> string[]), abort: Action<string option, DurableObjectAbortOptions option>, ?container: Container) : DurableObjectState<'Props> = jsNative
-
-module SqlStorageCursor =
-    module Next =
-        [<Interface>]
-        type Result<'T> =
-            abstract ``done``: bool option with get, set
-            abstract value: 'T with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (value: 'T, ?``done``: bool) : Result<'T> = jsNative
-
-        [<Interface>]
-        type Result2 =
-            abstract ``done``: bool with get, set
-            abstract value: unit option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``done``: bool, ?value: unit) : Result2 = jsNative
 
 type DurableObjectTransaction =
     abstract get<'T>: key: string * ?options: DurableObjectGetOptions -> JS.Promise<'T option>
@@ -3382,50 +2953,6 @@ type KVNamespace<'Key> =
     abstract getWithMetadata<'ExpectedValue, 'Metadata>: key: 'Key[] * ?options: KVNamespaceGetOptions<KVNamespace.Json> -> JS.Promise<JS.Map<string, KVNamespaceGetWithMetadataResult<'ExpectedValue, 'Metadata>>>
     abstract delete: key: 'Key -> JS.Promise<unit>
 
-module KVNamespace =
-    [<StringEnum(CaseRules.None)>]
-    type ArrayBuffer =
-        | [<CompiledName("arrayBuffer")>] ArrayBuffer
-
-    module Get =
-        [<Interface>]
-        type Options =
-            abstract ``type``: unit option with get, set
-            abstract cacheTtl: float option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?``type``: unit, ?cacheTtl: float) : Options = jsNative
-
-    [<StringEnum(CaseRules.None)>]
-    type Json =
-        | [<CompiledName("json")>] Json
-
-    module List =
-        module Result =
-            [<Interface>]
-            type Item<'Metadata, 'Key> =
-                abstract list_complete: bool with get, set
-                abstract keys: KVNamespaceListKey<'Metadata, 'Key>[] with get, set
-                abstract cursor: string with get, set
-                abstract cacheStatus: string option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (list_complete: bool, keys: KVNamespaceListKey<'Metadata, 'Key>[], cursor: string, ?cacheStatus: string) : Item<'Metadata, 'Key> = jsNative
-
-            [<Interface>]
-            type Item2<'Metadata, 'Key> =
-                abstract list_complete: bool with get, set
-                abstract keys: KVNamespaceListKey<'Metadata, 'Key>[] with get, set
-                abstract cacheStatus: string option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (list_complete: bool, keys: KVNamespaceListKey<'Metadata, 'Key>[], ?cacheStatus: string) : Item2<'Metadata, 'Key> = jsNative
-
-    [<StringEnum(CaseRules.None)>]
-    type Stream =
-        | [<CompiledName("stream")>] Stream
-
-    [<StringEnum(CaseRules.None)>]
-    type Text =
-        | [<CompiledName("text")>] Text
-
 [<Interface>]
 type KVNamespaceListOptions =
     abstract limit: float option with get, set
@@ -3615,13 +3142,6 @@ type R2ListOptions =
     [<ParamObject; Emit("$0")>]
     static member Create (?limit: float, ?prefix: string, ?cursor: string, ?delimiter: string, ?startAfter: string, ?``include``: R2ListOptions.Include.Item[]) : R2ListOptions = jsNative
 
-module R2ListOptions =
-    module Include =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Item =
-            | [<CompiledName("customMetadata")>] CustomMetadata
-            | [<CompiledName("httpMetadata")>] HttpMetadata
-
 type R2Bucket =
     abstract head: key: string -> JS.Promise<R2Object option>
     abstract get: key: string * options: R2Bucket.Get.Options -> JS.Promise<U2<R2Object, R2ObjectBody> option>
@@ -3632,59 +3152,6 @@ type R2Bucket =
     abstract resumeMultipartUpload: key: string * uploadId: string -> R2MultipartUpload
     abstract delete: keys: U2<string, string[]> -> JS.Promise<unit>
     abstract list: ?options: R2ListOptions -> JS.Promise<R2Objects>
-
-module R2Bucket =
-    module Get =
-        [<Interface>]
-        type Options =
-            inherit R2GetOptions
-            abstract onlyIf: U2<Headers, R2Conditional> with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (onlyIf: U2<Headers, R2Conditional>, ?range: U4<Headers, R2Object.Range, R2Object.Range2, R2Object.Range3>, ?ssecKey: U2<string, JS.ArrayBuffer>) : Options = jsNative
-
-        module Options =
-            [<Interface>]
-            type OnlyIf =
-                inherit Headers
-                inherit R2Conditional
-                [<ParamObject; Emit("$0")>]
-                static member Create (get: (string -> string option), getAll: (string -> string[]), getSetCookie: (unit -> string[]), has: (string -> bool), set: Action<string, string>, append: Action<string, string>, delete: (string -> unit), forEach: Action<Headers.ForEach.Callback, 'This option>, entries: (unit -> obj), keys: (unit -> obj), values: (unit -> obj), ?etagMatches: string, ?etagDoesNotMatch: string, ?uploadedBefore: JS.Date, ?uploadedAfter: JS.Date, ?secondsGranularity: bool) : OnlyIf = jsNative
-
-            [<Interface>]
-            type OnlyIf2 =
-                inherit R2Conditional
-                inherit Headers
-                [<ParamObject; Emit("$0")>]
-                static member Create (get: (string -> string option), getAll: (string -> string[]), getSetCookie: (unit -> string[]), has: (string -> bool), set: Action<string, string>, append: Action<string, string>, delete: (string -> unit), forEach: Action<Headers.ForEach.Callback, 'This option>, entries: (unit -> obj), keys: (unit -> obj), values: (unit -> obj), ?etagMatches: string, ?etagDoesNotMatch: string, ?uploadedBefore: JS.Date, ?uploadedAfter: JS.Date, ?secondsGranularity: bool) : OnlyIf2 = jsNative
-
-    module Put =
-        [<Interface>]
-        type Options =
-            inherit R2PutOptions
-            abstract onlyIf: U2<Headers, R2Conditional> with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (onlyIf: U2<Headers, R2Conditional>, ?httpMetadata: U2<Headers, R2HTTPMetadata>, ?customMetadata: Record<string, string>, ?md5: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha1: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha256: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha384: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha512: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?storageClass: string, ?ssecKey: U2<string, JS.ArrayBuffer>) : Options = jsNative
-
-module R2Object =
-    [<Interface>]
-    type Range =
-        abstract offset: float with get, set
-        abstract length: float option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (offset: float, ?length: float) : Range = jsNative
-
-    [<Interface>]
-    type Range2 =
-        abstract offset: float option with get, set
-        abstract length: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (length: float, ?offset: float) : Range2 = jsNative
-
-    [<Interface>]
-    type Range3 =
-        abstract suffix: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (suffix: float) : Range3 = jsNative
 
 [<Interface>]
 type R2Objects2 =
@@ -6143,13 +5610,6 @@ type AgentMemoryMessage =
     [<ParamObject; Emit("$0")>]
     static member Create (role: AgentMemoryMessage.Role, content: string, ?timestamp: JS.Date) : AgentMemoryMessage = jsNative
 
-module AgentMemoryMessage =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Role =
-        | [<CompiledName("assistant")>] Assistant
-        | [<CompiledName("system")>] System
-        | [<CompiledName("user")>] User
-
 /// <summary>
 /// Raw memory content passed to remember().
 /// </summary>
@@ -6512,15 +5972,6 @@ type AiSearchMessage =
     [<ParamObject; Emit("$0")>]
     static member Create (role: AiSearchMessage.Role, ?content: string) : AiSearchMessage = jsNative
 
-module AiSearchMessage =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Role =
-        | [<CompiledName("assistant")>] Assistant
-        | [<CompiledName("developer")>] Developer
-        | [<CompiledName("system")>] System
-        | [<CompiledName("tool")>] Tool
-        | [<CompiledName("user")>] User
-
 /// <summary>
 /// Common shape for <c>ai_search_options</c> used by both single-instance and multi-instance requests.
 /// Contains retrieval, query rewrite, reranking, and cache sub-options.
@@ -6532,135 +5983,6 @@ type AiSearchOptions =
     abstract cache: AiSearchOptions.Cache option with get, set
     [<EmitIndexer>]
     abstract Item: string -> obj with get, set
-
-module AiSearchOptions =
-    [<Interface>]
-    type Cache =
-        abstract enabled: bool option with get, set
-        abstract cache_threshold: AiSearchOptions.Cache.CacheThreshold option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?enabled: bool, ?cache_threshold: AiSearchOptions.Cache.CacheThreshold) : Cache = jsNative
-
-    module Cache =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type CacheThreshold =
-            | [<CompiledName("anything_goes")>] AnythingGoes
-            | [<CompiledName("close_enough")>] CloseEnough
-            | [<CompiledName("flexible_friend")>] FlexibleFriend
-            | [<CompiledName("super_strict_match")>] SuperStrictMatch
-
-    type QueryRewrite =
-        abstract enabled: bool option with get, set
-        abstract model: string option with get, set
-        abstract rewrite_prompt: string option with get, set
-        [<EmitIndexer>]
-        abstract Item: string -> obj with get, set
-
-    type Reranking =
-        abstract enabled: bool option with get, set
-        abstract model: string option with get, set
-        /// <summary>
-        /// Match threshold (0-1, default 0.4)
-        /// </summary>
-        abstract match_threshold: float option with get, set
-        [<EmitIndexer>]
-        abstract Item: string -> obj with get, set
-
-    type Retrieval =
-        /// <summary>
-        /// Which retrieval backend to use. Defaults to the instance's configured index_method.
-        /// </summary>
-        abstract retrieval_type: AiSearchOptions.Retrieval.RetrievalType option with get, set
-        /// <summary>
-        /// Fusion method for combining vector + keyword results.
-        /// </summary>
-        abstract fusion_method: AiSearchOptions.Retrieval.FusionMethod option with get, set
-        /// <summary>
-        /// How keyword terms are combined: "and" = all terms must match, "or" = any term matches.
-        /// </summary>
-        abstract keyword_match_mode: AiSearchOptions.Retrieval.KeywordMatchMode option with get, set
-        /// <summary>
-        /// Minimum similarity score (0-1) for a result to be included. Default 0.4.
-        /// </summary>
-        abstract match_threshold: float option with get, set
-        /// <summary>
-        /// Maximum number of results to return (1-50). Default 10.
-        /// </summary>
-        abstract max_num_results: float option with get, set
-        /// <summary>
-        /// Vectorize metadata filters applied to the search.
-        /// </summary>
-        abstract filters: VectorizeVectorMetadataFilter option with get, set
-        /// <summary>
-        /// Number of surrounding chunks to include for context (0-3). Default 0.
-        /// </summary>
-        abstract context_expansion: float option with get, set
-        /// <summary>
-        /// If true, return only item metadata without chunk text.
-        /// </summary>
-        abstract metadata_only: bool option with get, set
-        /// <summary>
-        /// If true (default), return empty results on retrieval failure instead of throwing.
-        /// </summary>
-        abstract return_on_failure: bool option with get, set
-        /// <summary>
-        /// Boost results by metadata field values. Max 3 entries.
-        /// </summary>
-        abstract boost_by: AiSearchOptions.Retrieval.BoostBy.Item[] option with get, set
-        [<EmitIndexer>]
-        abstract Item: string -> obj with get, set
-
-    module Retrieval =
-        module BoostBy =
-            [<Interface>]
-            type Item =
-                abstract field: string with get, set
-                abstract direction: AiSearchOptions.Retrieval.BoostBy.Item.Direction option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (field: string, ?direction: AiSearchOptions.Retrieval.BoostBy.Item.Direction) : Item = jsNative
-
-            module Item =
-                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                type Direction =
-                    | [<CompiledName("asc")>] Asc
-                    | [<CompiledName("desc")>] Desc
-                    | [<CompiledName("exists")>] Exists
-                    | [<CompiledName("not_exists")>] NotExists
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type FusionMethod =
-            | [<CompiledName("max")>] Max
-            | [<CompiledName("rrf")>] Rrf
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type KeywordMatchMode =
-            | [<CompiledName("and")>] And
-            | [<CompiledName("or")>] Or
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type RetrievalType =
-            | [<CompiledName("hybrid")>] Hybrid
-            | [<CompiledName("keyword")>] Keyword
-            | [<CompiledName("vector")>] Vector
-
-module VectorizeVectorMetadataFilter =
-    [<Interface>]
-    type Item =
-        abstract ``$eq``: U3<string, float, bool> option with get, set
-        abstract ``$gt``: U3<string, float, bool> option with get, set
-        abstract ``$gte``: U3<string, float, bool> option with get, set
-        abstract ``$lt``: U3<string, float, bool> option with get, set
-        abstract ``$lte``: U3<string, float, bool> option with get, set
-        abstract ``$ne``: U3<string, float, bool> option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?``$eq``: U3<string, float, bool>, ?``$gt``: U3<string, float, bool>, ?``$gte``: U3<string, float, bool>, ?``$lt``: U3<string, float, bool>, ?``$lte``: U3<string, float, bool>, ?``$ne``: U3<string, float, bool>) : Item = jsNative
-
-    [<Interface>]
-    type Item2 =
-        abstract ``$in``: U3<string, float, bool>[] option with get, set
-        abstract ``$nin``: U3<string, float, bool>[] option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?``$in``: U3<string, float, bool>[], ?``$nin``: U3<string, float, bool>[]) : Item2 = jsNative
 
 /// <summary>
 /// Request body for single-instance search.
@@ -6731,43 +6053,6 @@ type AiSearchMultiSearchChunk =
     [<ParamObject; Emit("$0")>]
     static member Create (id: string, ``type``: string, score: float, text: string, item: AiSearchMultiSearchChunk.Item, instance_id: string, ?scoring_details: AiSearchMultiSearchChunk.ScoringDetails) : AiSearchMultiSearchChunk = jsNative
 
-module AiSearchMultiSearchChunk =
-    [<Interface>]
-    type Item =
-        abstract timestamp: float option with get, set
-        abstract key: string with get, set
-        abstract metadata: Record<string, obj> option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (key: string, ?timestamp: float, ?metadata: Record<string, obj>) : Item = jsNative
-
-    type ScoringDetails =
-        /// <summary>
-        /// Keyword match score (0-1)
-        /// </summary>
-        abstract keyword_score: float option with get, set
-        /// <summary>
-        /// Vector similarity score (0-1)
-        /// </summary>
-        abstract vector_score: float option with get, set
-        /// <summary>
-        /// Keyword rank position
-        /// </summary>
-        abstract keyword_rank: float option with get, set
-        /// <summary>
-        /// Vector rank position
-        /// </summary>
-        abstract vector_rank: float option with get, set
-        /// <summary>
-        /// Reranking model score
-        /// </summary>
-        abstract reranking_score: float option with get, set
-        /// <summary>
-        /// Fusion method used to combine results
-        /// </summary>
-        abstract fusion_method: AiSearchOptions.Retrieval.FusionMethod option with get, set
-        [<EmitIndexer>]
-        abstract Item: string -> obj with get, set
-
 /// <summary>
 /// Describes a per-instance error during a multi-instance operation.
 /// </summary>
@@ -6817,22 +6102,6 @@ type AiSearchSearchResponse =
     [<ParamObject; Emit("$0")>]
     static member Create (search_query: string, chunks: AiSearchSearchResponse.Chunks.Item[]) : AiSearchSearchResponse = jsNative
 
-module AiSearchSearchResponse =
-    module Chunks =
-        [<Interface>]
-        type Item =
-            abstract id: string with get, set
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Match score (0-1)
-            /// </summary>
-            abstract score: float with get, set
-            abstract text: string with get, set
-            abstract item: AiSearchMultiSearchChunk.Item with get, set
-            abstract scoring_details: AiSearchMultiSearchChunk.ScoringDetails option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (id: string, ``type``: string, score: float, text: string, item: AiSearchMultiSearchChunk.Item, ?scoring_details: AiSearchMultiSearchChunk.ScoringDetails) : Item = jsNative
-
 type AiSearchChatCompletionsResponse =
     abstract id: string option with get, set
     abstract ``object``: string option with get, set
@@ -6841,21 +6110,6 @@ type AiSearchChatCompletionsResponse =
     abstract chunks: AiSearchSearchResponse.Chunks.Item[] with get, set
     [<EmitIndexer>]
     abstract Item: string -> obj with get, set
-
-module AiSearchChatCompletionsResponse =
-    module Choices =
-        type Item =
-            abstract index: float option with get, set
-            abstract message: AiSearchChatCompletionsResponse.Choices.Item.Message with get, set
-            [<EmitIndexer>]
-            abstract Item: string -> obj with get, set
-
-        module Item =
-            type Message =
-                abstract role: AiSearchMessage.Role with get, set
-                abstract content: string option with get, set
-                [<EmitIndexer>]
-                abstract Item: string -> obj with get, set
 
 [<Interface>]
 type AiSearchStatsResponse =
@@ -6872,30 +6126,6 @@ type AiSearchStatsResponse =
     abstract engine: AiSearchStatsResponse.Engine option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?queued: float, ?running: float, ?completed: float, ?error: float, ?skipped: float, ?outdated: float, ?last_activity: string, ?engine: AiSearchStatsResponse.Engine) : AiSearchStatsResponse = jsNative
-
-module AiSearchStatsResponse =
-    [<Interface>]
-    type Engine =
-        abstract vectorize: AiSearchStatsResponse.Engine.Vectorize option with get, set
-        abstract r2: AiSearchStatsResponse.Engine.R2 option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?vectorize: AiSearchStatsResponse.Engine.Vectorize, ?r2: AiSearchStatsResponse.Engine.R2) : Engine = jsNative
-
-    module Engine =
-        [<Interface>]
-        type R2 =
-            abstract payloadSizeBytes: float with get, set
-            abstract metadataSizeBytes: float with get, set
-            abstract objectCount: float with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (payloadSizeBytes: float, metadataSizeBytes: float, objectCount: float) : R2 = jsNative
-
-        [<Interface>]
-        type Vectorize =
-            abstract vectorsCount: float with get, set
-            abstract dimensions: float with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (vectorsCount: float, dimensions: float) : Vectorize = jsNative
 
 type AiSearchInstanceInfo =
     abstract id: string with get, set
@@ -6943,66 +6173,6 @@ type AiSearchInstanceInfo =
     [<EmitIndexer>]
     abstract Item: string -> obj with get, set
 
-module AiSearchInstanceInfo =
-    module CustomMetadata =
-        [<Interface>]
-        type Item =
-            abstract field_name: string with get, set
-            abstract data_type: AiSearchInstanceInfo.CustomMetadata.Item.DataType with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (field_name: string, data_type: AiSearchInstanceInfo.CustomMetadata.Item.DataType) : Item = jsNative
-
-        module Item =
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type DataType =
-                | [<CompiledName("boolean")>] Boolean
-                | [<CompiledName("datetime")>] Datetime
-                | [<CompiledName("number")>] Number
-                | [<CompiledName("text")>] Text
-
-    [<Interface>]
-    type IndexMethod =
-        abstract vector: bool option with get, set
-        abstract keyword: bool option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?vector: bool, ?keyword: bool) : IndexMethod = jsNative
-
-    [<Interface>]
-    type IndexingOptions =
-        abstract keyword_tokenizer: AiSearchInstanceInfo.IndexingOptions.KeywordTokenizer option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?keyword_tokenizer: AiSearchInstanceInfo.IndexingOptions.KeywordTokenizer) : IndexingOptions = jsNative
-
-    module IndexingOptions =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type KeywordTokenizer =
-            | [<CompiledName("porter")>] Porter
-            | [<CompiledName("trigram")>] Trigram
-
-    [<Interface>]
-    type RetrievalOptions =
-        abstract keyword_match_mode: AiSearchOptions.Retrieval.KeywordMatchMode option with get, set
-        abstract boost_by: AiSearchInstanceInfo.RetrievalOptions.BoostBy.Item[] option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?keyword_match_mode: AiSearchOptions.Retrieval.KeywordMatchMode, ?boost_by: AiSearchInstanceInfo.RetrievalOptions.BoostBy.Item[]) : RetrievalOptions = jsNative
-
-    module RetrievalOptions =
-        module BoostBy =
-            [<Interface>]
-            type Item =
-                abstract field: string with get, set
-                abstract direction: AiSearchOptions.Retrieval.BoostBy.Item.Direction option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (field: string, ?direction: AiSearchOptions.Retrieval.BoostBy.Item.Direction) : Item = jsNative
-
-    type SyncInterval =
-        | N3600 = 3600
-        | N7200 = 7200
-        | N14400 = 14400
-        | N21600 = 21600
-        | N43200 = 43200
-        | N86400 = 86400
-
 /// <summary>
 /// Pagination, search, and ordering parameters for listing instances within a namespace.
 /// </summary>
@@ -7025,28 +6195,12 @@ type AiSearchListInstancesParams =
     [<ParamObject; Emit("$0")>]
     static member Create (?page: float, ?per_page: float, ?search: string, ?order_by: string, ?order_by_direction: AiSearchListInstancesParams.OrderByDirection) : AiSearchListInstancesParams = jsNative
 
-module AiSearchListInstancesParams =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type OrderByDirection =
-        | [<CompiledName("asc")>] Asc
-        | [<CompiledName("desc")>] Desc
-
 [<Interface>]
 type AiSearchListResponse =
     abstract result: AiSearchInstanceInfo[] with get, set
     abstract result_info: AiSearchListResponse.ResultInfo option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (result: AiSearchInstanceInfo[], ?result_info: AiSearchListResponse.ResultInfo) : AiSearchListResponse = jsNative
-
-module AiSearchListResponse =
-    [<Interface>]
-    type ResultInfo =
-        abstract count: float with get, set
-        abstract page: float with get, set
-        abstract per_page: float with get, set
-        abstract total_count: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (count: float, page: float, per_page: float, total_count: float) : ResultInfo = jsNative
 
 type AiSearchConfig =
     /// <summary>
@@ -7114,44 +6268,6 @@ type AiSearchConfig =
     [<EmitIndexer>]
     abstract Item: string -> obj with get, set
 
-module AiSearchConfig =
-    module CustomMetadata =
-        [<Interface>]
-        type Item =
-            abstract field_name: string with get, set
-            abstract data_type: AiSearchInstanceInfo.CustomMetadata.Item.DataType with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (field_name: string, data_type: AiSearchInstanceInfo.CustomMetadata.Item.DataType) : Item = jsNative
-
-    [<Interface>]
-    type IndexMethod =
-        abstract vector: bool option with get, set
-        abstract keyword: bool option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?vector: bool, ?keyword: bool) : IndexMethod = jsNative
-
-    [<Interface>]
-    type IndexingOptions =
-        abstract keyword_tokenizer: AiSearchInstanceInfo.IndexingOptions.KeywordTokenizer option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?keyword_tokenizer: AiSearchInstanceInfo.IndexingOptions.KeywordTokenizer) : IndexingOptions = jsNative
-
-    [<Interface>]
-    type RetrievalOptions =
-        abstract keyword_match_mode: AiSearchOptions.Retrieval.KeywordMatchMode option with get, set
-        abstract boost_by: AiSearchConfig.RetrievalOptions.BoostBy.Item[] option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?keyword_match_mode: AiSearchOptions.Retrieval.KeywordMatchMode, ?boost_by: AiSearchConfig.RetrievalOptions.BoostBy.Item[]) : RetrievalOptions = jsNative
-
-    module RetrievalOptions =
-        module BoostBy =
-            [<Interface>]
-            type Item =
-                abstract field: string with get, set
-                abstract direction: AiSearchOptions.Retrieval.BoostBy.Item.Direction option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (field: string, ?direction: AiSearchOptions.Retrieval.BoostBy.Item.Direction) : Item = jsNative
-
 type AiSearchItemInfo =
     abstract id: string with get, set
     abstract key: string with get, set
@@ -7168,21 +6284,6 @@ type AiSearchItemInfo =
     abstract metadata: Record<string, obj> option with get, set
     [<EmitIndexer>]
     abstract Item: string -> obj with get, set
-
-module AiSearchItemInfo =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type NextAction =
-        | DELETE
-        | INDEX
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Status =
-        | [<CompiledName("completed")>] Completed
-        | [<CompiledName("error")>] Error
-        | [<CompiledName("outdated")>] Outdated
-        | [<CompiledName("queued")>] Queued
-        | [<CompiledName("running")>] Running
-        | [<CompiledName("skipped")>] Skipped
 
 [<Interface>]
 type AiSearchItemContentResult =
@@ -7235,28 +6336,12 @@ type AiSearchListItemsParams =
     [<ParamObject; Emit("$0")>]
     static member Create (?page: float, ?per_page: float, ?search: string, ?sort_by: AiSearchListItemsParams.SortBy, ?status: AiSearchItemInfo.Status, ?source: string, ?metadata_filter: string, ?item_id: string, ?key: string) : AiSearchListItemsParams = jsNative
 
-module AiSearchListItemsParams =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type SortBy =
-        | [<CompiledName("modified_at")>] ModifiedAt
-        | [<CompiledName("status")>] Status
-
 [<Interface>]
 type AiSearchListItemsResponse =
     abstract result: AiSearchItemInfo[] with get, set
     abstract result_info: AiSearchListItemsResponse.ResultInfo option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (result: AiSearchItemInfo[], ?result_info: AiSearchListItemsResponse.ResultInfo) : AiSearchListItemsResponse = jsNative
-
-module AiSearchListItemsResponse =
-    [<Interface>]
-    type ResultInfo =
-        abstract count: float with get, set
-        abstract page: float with get, set
-        abstract per_page: float with get, set
-        abstract total_count: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (count: float, page: float, per_page: float, total_count: float) : ResultInfo = jsNative
 
 [<Interface>]
 type AiSearchItemLogsParams =
@@ -7293,16 +6378,6 @@ type AiSearchItemLogsResponse =
     [<ParamObject; Emit("$0")>]
     static member Create (result: AiSearchItemLog[], result_info: AiSearchItemLogsResponse.ResultInfo) : AiSearchItemLogsResponse = jsNative
 
-module AiSearchItemLogsResponse =
-    [<Interface>]
-    type ResultInfo =
-        abstract count: float with get, set
-        abstract per_page: float with get, set
-        abstract cursor: string option with get, set
-        abstract truncated: bool with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (count: float, per_page: float, truncated: bool, ?cursor: string) : ResultInfo = jsNative
-
 [<Interface>]
 type AiSearchItemChunksParams =
     /// <summary>
@@ -7329,15 +6404,6 @@ type AiSearchItemChunk =
     [<ParamObject; Emit("$0")>]
     static member Create (id: string, text: string, start_byte: float, end_byte: float, ?item: AiSearchItemChunk.Item) : AiSearchItemChunk = jsNative
 
-module AiSearchItemChunk =
-    [<Interface>]
-    type Item =
-        abstract timestamp: float option with get, set
-        abstract key: string with get, set
-        abstract metadata: Record<string, obj> option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (key: string, ?timestamp: float, ?metadata: Record<string, obj>) : Item = jsNative
-
 /// <summary>
 /// Paginated response for item chunks (offset-based).
 /// </summary>
@@ -7347,16 +6413,6 @@ type AiSearchItemChunksResponse =
     abstract result_info: AiSearchItemChunksResponse.ResultInfo with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (result: AiSearchItemChunk[], result_info: AiSearchItemChunksResponse.ResultInfo) : AiSearchItemChunksResponse = jsNative
-
-module AiSearchItemChunksResponse =
-    [<Interface>]
-    type ResultInfo =
-        abstract count: float with get, set
-        abstract total: float with get, set
-        abstract limit: float with get, set
-        abstract offset: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (count: float, total: float, limit: float, offset: float) : ResultInfo = jsNative
 
 [<Interface>]
 type AiSearchJobInfo =
@@ -7369,12 +6425,6 @@ type AiSearchJobInfo =
     abstract end_reason: string option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (id: string, source: AiSearchJobInfo.Source, ?description: string, ?last_seen_at: string, ?started_at: string, ?ended_at: string, ?end_reason: string) : AiSearchJobInfo = jsNative
-
-module AiSearchJobInfo =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Source =
-        | [<CompiledName("schedule")>] Schedule
-        | [<CompiledName("user")>] User
 
 [<Interface>]
 type AiSearchJobLog =
@@ -7405,16 +6455,6 @@ type AiSearchListJobsResponse =
     [<ParamObject; Emit("$0")>]
     static member Create (result: AiSearchJobInfo[], ?result_info: AiSearchListJobsResponse.ResultInfo) : AiSearchListJobsResponse = jsNative
 
-module AiSearchListJobsResponse =
-    [<Interface>]
-    type ResultInfo =
-        abstract count: float with get, set
-        abstract page: float with get, set
-        abstract per_page: float with get, set
-        abstract total_count: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (count: float, page: float, per_page: float, total_count: float) : ResultInfo = jsNative
-
 [<Interface>]
 type AiSearchJobLogsParams =
     abstract page: float option with get, set
@@ -7428,16 +6468,6 @@ type AiSearchJobLogsResponse =
     abstract result_info: AiSearchJobLogsResponse.ResultInfo option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (result: AiSearchJobLog[], ?result_info: AiSearchJobLogsResponse.ResultInfo) : AiSearchJobLogsResponse = jsNative
-
-module AiSearchJobLogsResponse =
-    [<Interface>]
-    type ResultInfo =
-        abstract count: float with get, set
-        abstract page: float with get, set
-        abstract per_page: float with get, set
-        abstract total_count: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (count: float, page: float, per_page: float, total_count: float) : ResultInfo = jsNative
 
 /// <summary>
 /// Single item service for an AI Search instance.
@@ -7516,22 +6546,6 @@ type AiSearchItems =
     abstract delete: itemId: string -> JS.Promise<unit>
     [<ParamObject; Emit("$0")>]
     static member Create (list: (AiSearchListItemsParams option -> JS.Promise<AiSearchListItemsResponse>), upload: Func<string, U3<string, Blob, ReadableStream<obj>>, AiSearchUploadItemOptions option, JS.Promise<AiSearchItemInfo>>, uploadAndPoll: Func<string, U3<string, Blob, ReadableStream<obj>>, AiSearchItems.UploadAndPoll.Options option, JS.Promise<AiSearchItemInfo>>, get: (string -> AiSearchItem), delete: (string -> JS.Promise<unit>)) : AiSearchItems = jsNative
-
-module AiSearchItems =
-    module UploadAndPoll =
-        [<Interface>]
-        type Options =
-            inherit AiSearchUploadItemOptions
-            /// <summary>
-            /// Polling interval in milliseconds (default 1000).
-            /// </summary>
-            abstract pollIntervalMs: float option with get, set
-            /// <summary>
-            /// Maximum time to wait in milliseconds (default 30000).
-            /// </summary>
-            abstract timeoutMs: float option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?metadata: Record<string, obj>, ?pollIntervalMs: float, ?timeoutMs: float) : Options = jsNative
 
 /// <summary>
 /// Single job service for an AI Search instance.
@@ -7656,79 +6670,6 @@ type AiSearchInstance =
     /// </summary>
     abstract jobs: AiSearchJobs
 
-module AiSearchInstance =
-    module ChatCompletions =
-        type Params =
-            inherit AiSearchChatCompletionsRequest
-            abstract stream: bool with get, set
-
-    module Update =
-        type Config =
-            /// <summary>
-            /// Instance ID (1-32 chars, pattern: ^[a-z0-9_]+(?:-[a-z0-9_]+)*$)
-            /// </summary>
-            abstract id: string option with get, set
-            /// <summary>
-            /// Instance type. Omit to create with built-in storage.
-            /// </summary>
-            abstract ``type``: string option with get, set
-            /// <summary>
-            /// Source URL (required for web-crawler type).
-            /// </summary>
-            abstract source: string option with get, set
-            abstract source_params: obj option with get, set
-            /// <summary>
-            /// Token ID (UUID format)
-            /// </summary>
-            abstract token_id: string option with get, set
-            abstract ai_gateway_id: string option with get, set
-            /// <summary>
-            /// Enable query rewriting (default false)
-            /// </summary>
-            abstract rewrite_query: bool option with get, set
-            /// <summary>
-            /// Enable reranking (default false)
-            /// </summary>
-            abstract reranking: bool option with get, set
-            abstract embedding_model: string option with get, set
-            abstract ai_search_model: string option with get, set
-            abstract rewrite_model: string option with get, set
-            abstract reranking_model: string option with get, set
-            /// <remarks>@deprecated Use index_method instead.</remarks>
-            abstract hybrid_search_enabled: bool option with get, set
-            /// <summary>
-            /// Controls which storage backends are used during indexing. Defaults to vector-only.
-            /// </summary>
-            abstract index_method: AiSearchConfig.IndexMethod option with get, set
-            /// <summary>
-            /// Fusion method for combining vector and keyword results. "rrf" = reciprocal rank fusion (default), "max" = maximum score.
-            /// </summary>
-            abstract fusion_method: AiSearchOptions.Retrieval.FusionMethod option with get, set
-            abstract indexing_options: AiSearchConfig.IndexingOptions option with get, set
-            abstract retrieval_options: AiSearchConfig.RetrievalOptions option with get, set
-            abstract chunk: bool option with get, set
-            abstract chunk_size: float option with get, set
-            abstract chunk_overlap: float option with get, set
-            /// <summary>
-            /// Minimum similarity score (0-1) for a result to be included.
-            /// </summary>
-            abstract score_threshold: float option with get, set
-            abstract max_num_results: float option with get, set
-            abstract cache: bool option with get, set
-            /// <summary>
-            /// Similarity threshold for cache hits. Stricter = fewer cache hits but higher relevance.
-            /// </summary>
-            abstract cache_threshold: AiSearchOptions.Cache.CacheThreshold option with get, set
-            abstract custom_metadata: AiSearchConfig.CustomMetadata.Item[] option with get, set
-            abstract ``namespace``: string option with get, set
-            /// <summary>
-            /// Sync interval in seconds. 3600=1h, 7200=2h, 14400=4h, 21600=6h, 43200=12h, 86400=24h.
-            /// </summary>
-            abstract sync_interval: AiSearchInstanceInfo.SyncInterval option with get, set
-            abstract metadata: Record<string, obj> option with get, set
-            [<EmitIndexer>]
-            abstract Item: string -> obj with get, set
-
 /// <summary>
 /// Namespace-level AI Search service.
 /// <br /><br />
@@ -7834,16 +6775,6 @@ type AiSearchNamespace =
     /// <returns>Chat completion response with choices, chunks tagged by instance_id, and optional partial-failure errors.</returns>
     abstract chatCompletions: ``params``: AiSearchMultiChatCompletionsRequest -> JS.Promise<AiSearchMultiChatCompletionsResponse>
 
-module AiSearchNamespace =
-    module ChatCompletions =
-        type Params =
-            abstract ai_search_options: AiSearchMultiSearchOptions with get, set
-            abstract stream: bool with get, set
-            [<EmitIndexer>]
-            abstract Item: string -> obj with get, set
-            [<EmitIndexer>]
-            abstract Item: float -> obj with get, set
-
 [<Interface>]
 type AiImageClassificationInput =
     abstract image: float[] with get, set
@@ -7851,14 +6782,6 @@ type AiImageClassificationInput =
     static member Create (image: float[]) : AiImageClassificationInput = jsNative
 
 type AiImageClassificationOutput = AiImageClassificationOutput.Item[]
-
-module AiImageClassificationOutput =
-    [<Interface>]
-    type Item =
-        abstract score: float option with get, set
-        abstract label: string option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?score: float, ?label: string) : Item = jsNative
 
 [<Interface>]
 type BaseAiImageClassification =
@@ -7957,14 +6880,6 @@ type AiObjectDetectionInput =
 
 type AiObjectDetectionOutput = AiObjectDetectionOutput.Item[]
 
-module AiObjectDetectionOutput =
-    [<Interface>]
-    type Item =
-        abstract score: float option with get, set
-        abstract label: string option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?score: float, ?label: string) : Item = jsNative
-
 [<Interface>]
 type BaseAiObjectDetection =
     abstract inputs: AiObjectDetectionInput with get, set
@@ -8002,16 +6917,6 @@ type AiAutomaticSpeechRecognitionOutput =
     [<ParamObject; Emit("$0")>]
     static member Create (?text: string, ?words: AiAutomaticSpeechRecognitionOutput.Words.Item[], ?vtt: string) : AiAutomaticSpeechRecognitionOutput = jsNative
 
-module AiAutomaticSpeechRecognitionOutput =
-    module Words =
-        [<Interface>]
-        type Item =
-            abstract word: string with get, set
-            abstract start: float with get, set
-            abstract ``end``: float with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (word: string, start: float, ``end``: float) : Item = jsNative
-
 [<Interface>]
 type BaseAiAutomaticSpeechRecognition =
     abstract inputs: AiAutomaticSpeechRecognitionInput with get, set
@@ -8046,14 +6951,6 @@ type AiTextClassificationInput =
     static member Create (text: string) : AiTextClassificationInput = jsNative
 
 type AiTextClassificationOutput = AiTextClassificationOutput.Item[]
-
-module AiTextClassificationOutput =
-    [<Interface>]
-    type Item =
-        abstract score: float option with get, set
-        abstract label: string option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?score: float, ?label: string) : Item = jsNative
 
 [<Interface>]
 type BaseAiTextClassification =
@@ -8098,57 +6995,12 @@ type AiTextGenerationToolLegacyInput =
     [<ParamObject; Emit("$0")>]
     static member Create (name: string, description: string, ?parameters: AiTextGenerationToolLegacyInput.Parameters) : AiTextGenerationToolLegacyInput = jsNative
 
-module AiTextGenerationToolLegacyInput =
-    [<Interface>]
-    type Parameters =
-        abstract ``type``: string with get, set
-        abstract properties: Record<string, AiTextGenerationToolLegacyInput.Parameters.Properties.Item> with get, set
-        abstract required: string[] with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, properties: Record<string, AiTextGenerationToolLegacyInput.Parameters.Properties.Item>, required: string[]) : Parameters = jsNative
-
-    module Parameters =
-        module Properties =
-            [<Interface>]
-            type Item =
-                abstract ``type``: string with get, set
-                abstract description: string option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, ?description: string) : Item = jsNative
-
 [<Interface>]
 type AiTextGenerationToolInput =
     abstract ``type``: string with get, set
     abstract ``function``: AiTextGenerationToolInput.Function with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, ``function``: AiTextGenerationToolInput.Function) : AiTextGenerationToolInput = jsNative
-
-module AiTextGenerationToolInput =
-    [<Interface>]
-    type Function =
-        abstract name: string with get, set
-        abstract description: string with get, set
-        abstract parameters: AiTextGenerationToolInput.Function.Parameters option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (name: string, description: string, ?parameters: AiTextGenerationToolInput.Function.Parameters) : Function = jsNative
-
-    module Function =
-        [<Interface>]
-        type Parameters =
-            abstract ``type``: string with get, set
-            abstract properties: Record<string, AiTextGenerationToolInput.Function.Parameters.Properties.Item> with get, set
-            abstract required: string[] with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, properties: Record<string, AiTextGenerationToolInput.Function.Parameters.Properties.Item>, required: string[]) : Parameters = jsNative
-
-        module Parameters =
-            module Properties =
-                [<Interface>]
-                type Item =
-                    abstract ``type``: string with get, set
-                    abstract description: string option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (``type``: string, ?description: string) : Item = jsNative
 
 [<Interface>]
 type AiTextGenerationFunctionsInput =
@@ -8199,14 +7051,6 @@ type AiTextGenerationToolOutput =
     [<ParamObject; Emit("$0")>]
     static member Create (id: string, ``type``: string, ``function``: AiTextGenerationToolOutput.Function) : AiTextGenerationToolOutput = jsNative
 
-module AiTextGenerationToolOutput =
-    [<Interface>]
-    type Function =
-        abstract name: string with get, set
-        abstract arguments: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (name: string, arguments: string) : Function = jsNative
-
 [<Interface>]
 type UsageTags =
     abstract prompt_tokens: float with get, set
@@ -8222,15 +7066,6 @@ type AiTextGenerationOutput =
     abstract usage: UsageTags option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?response: string, ?tool_calls: AiTextGenerationOutput.ToolCalls.Item[], ?usage: UsageTags) : AiTextGenerationOutput = jsNative
-
-module AiTextGenerationOutput =
-    module ToolCalls =
-        [<Interface>]
-        type Item =
-            inherit AiTextGenerationToolLegacyOutput
-            inherit AiTextGenerationToolOutput
-            [<ParamObject; Emit("$0")>]
-            static member Create (name: string, arguments: obj, id: string, ``type``: string, ``function``: AiTextGenerationToolOutput.Function) : Item = jsNative
 
 [<Interface>]
 type BaseAiTextGeneration =
@@ -8324,21 +7159,6 @@ type ChatCompletionContentPartImage =
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, image_url: ChatCompletionContentPartImage.ImageUrl) : ChatCompletionContentPartImage = jsNative
 
-module ChatCompletionContentPartImage =
-    [<Interface>]
-    type ImageUrl =
-        abstract url: string with get, set
-        abstract detail: ChatCompletionContentPartImage.ImageUrl.Detail option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (url: string, ?detail: ChatCompletionContentPartImage.ImageUrl.Detail) : ImageUrl = jsNative
-
-    module ImageUrl =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Detail =
-            | [<CompiledName("auto")>] Auto
-            | [<CompiledName("high")>] High
-            | [<CompiledName("low")>] Low
-
 [<Interface>]
 type ChatCompletionContentPartInputAudio =
     abstract ``type``: string with get, set
@@ -8346,44 +7166,12 @@ type ChatCompletionContentPartInputAudio =
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, input_audio: ChatCompletionContentPartInputAudio.InputAudio) : ChatCompletionContentPartInputAudio = jsNative
 
-module ChatCompletionContentPartInputAudio =
-    [<Interface>]
-    type InputAudio =
-        /// <summary>
-        /// Base64 encoded audio data.
-        /// </summary>
-        abstract data: string with get, set
-        abstract format: ChatCompletionContentPartInputAudio.InputAudio.Format with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (data: string, format: ChatCompletionContentPartInputAudio.InputAudio.Format) : InputAudio = jsNative
-
-    module InputAudio =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Format =
-            | [<CompiledName("mp3")>] Mp3
-            | [<CompiledName("wav")>] Wav
-
 [<Interface>]
 type ChatCompletionContentPartFile =
     abstract ``type``: string with get, set
     abstract file: ChatCompletionContentPartFile.File with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, file: ChatCompletionContentPartFile.File) : ChatCompletionContentPartFile = jsNative
-
-module ChatCompletionContentPartFile =
-    [<Interface>]
-    type File =
-        /// <summary>
-        /// Base64 encoded file data.
-        /// </summary>
-        abstract file_data: string option with get, set
-        /// <summary>
-        /// The ID of an uploaded file.
-        /// </summary>
-        abstract file_id: string option with get, set
-        abstract filename: string option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?file_data: string, ?file_id: string, ?filename: string) : File = jsNative
 
 [<Interface>]
 type ChatCompletionContentPartRefusal =
@@ -8422,20 +7210,6 @@ type ChatCompletionCustomToolGrammarFormat =
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, grammar: ChatCompletionCustomToolGrammarFormat.Grammar) : ChatCompletionCustomToolGrammarFormat = jsNative
 
-module ChatCompletionCustomToolGrammarFormat =
-    [<Interface>]
-    type Grammar =
-        abstract definition: string with get, set
-        abstract syntax: ChatCompletionCustomToolGrammarFormat.Grammar.Syntax with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (definition: string, syntax: ChatCompletionCustomToolGrammarFormat.Grammar.Syntax) : Grammar = jsNative
-
-    module Grammar =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Syntax =
-            | [<CompiledName("lark")>] Lark
-            | [<CompiledName("regex")>] Regex
-
 [<Interface>]
 type ChatCompletionCustomToolTextFormat =
     abstract ``type``: string with get, set
@@ -8454,15 +7228,6 @@ type ChatCompletionCustomTool =
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, custom: ChatCompletionCustomTool.Custom) : ChatCompletionCustomTool = jsNative
 
-module ChatCompletionCustomTool =
-    [<Interface>]
-    type Custom =
-        abstract name: string with get, set
-        abstract description: string option with get, set
-        abstract format: ChatCompletionCustomToolFormat option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (name: string, ?description: string, ?format: ChatCompletionCustomToolFormat) : Custom = jsNative
-
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ChatCompletionTool =
     | [<CompiledName("custom")>] Custom of custom: ChatCompletionCustomTool.Custom
@@ -8476,17 +7241,6 @@ type ChatCompletionMessageFunctionToolCall =
     [<ParamObject; Emit("$0")>]
     static member Create (id: string, ``type``: string, ``function``: ChatCompletionMessageFunctionToolCall.Function) : ChatCompletionMessageFunctionToolCall = jsNative
 
-module ChatCompletionMessageFunctionToolCall =
-    [<Interface>]
-    type Function =
-        abstract name: string with get, set
-        /// <summary>
-        /// JSON-encoded arguments string.
-        /// </summary>
-        abstract arguments: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (name: string, arguments: string) : Function = jsNative
-
 [<Interface>]
 type ChatCompletionMessageCustomToolCall =
     abstract id: string with get, set
@@ -8494,14 +7248,6 @@ type ChatCompletionMessageCustomToolCall =
     abstract custom: ChatCompletionMessageCustomToolCall.Custom with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (id: string, ``type``: string, custom: ChatCompletionMessageCustomToolCall.Custom) : ChatCompletionMessageCustomToolCall = jsNative
-
-module ChatCompletionMessageCustomToolCall =
-    [<Interface>]
-    type Custom =
-        abstract name: string with get, set
-        abstract input: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (name: string, input: string) : Custom = jsNative
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ChatCompletionMessageToolCall =
@@ -8515,13 +7261,6 @@ type ChatCompletionToolChoiceFunction =
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, ``function``: ChatCompletionToolChoiceFunction.Function) : ChatCompletionToolChoiceFunction = jsNative
 
-module ChatCompletionToolChoiceFunction =
-    [<Interface>]
-    type Function =
-        abstract name: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (name: string) : Function = jsNative
-
 [<Interface>]
 type ChatCompletionToolChoiceCustom =
     abstract ``type``: string with get, set
@@ -8529,33 +7268,12 @@ type ChatCompletionToolChoiceCustom =
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, custom: ChatCompletionToolChoiceCustom.Custom) : ChatCompletionToolChoiceCustom = jsNative
 
-module ChatCompletionToolChoiceCustom =
-    [<Interface>]
-    type Custom =
-        abstract name: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (name: string) : Custom = jsNative
-
 [<Interface>]
 type ChatCompletionToolChoiceAllowedTools =
     abstract ``type``: string with get, set
     abstract allowed_tools: ChatCompletionToolChoiceAllowedTools.AllowedTools with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, allowed_tools: ChatCompletionToolChoiceAllowedTools.AllowedTools) : ChatCompletionToolChoiceAllowedTools = jsNative
-
-module ChatCompletionToolChoiceAllowedTools =
-    [<Interface>]
-    type AllowedTools =
-        abstract mode: ChatCompletionToolChoiceAllowedTools.AllowedTools.Mode with get, set
-        abstract tools: Record<string, obj>[] with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (mode: ChatCompletionToolChoiceAllowedTools.AllowedTools.Mode, tools: Record<string, obj>[]) : AllowedTools = jsNative
-
-    module AllowedTools =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Mode =
-            | [<CompiledName("auto")>] Auto
-            | [<CompiledName("required")>] Required
 
 type ChatCompletionToolChoiceOption = U4<string, ChatCompletionToolChoiceAllowedTools, ChatCompletionToolChoiceCustom, ChatCompletionToolChoiceFunction>
 
@@ -8567,15 +7285,6 @@ type DeveloperMessage =
     [<ParamObject; Emit("$0")>]
     static member Create (role: string, content: U2<string, DeveloperMessage.Content.Item[]>, ?name: string) : DeveloperMessage = jsNative
 
-module DeveloperMessage =
-    module Content =
-        [<Interface>]
-        type Item =
-            abstract ``type``: string with get, set
-            abstract text: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, text: string) : Item = jsNative
-
 [<Interface>]
 type SystemMessage =
     abstract role: string with get, set
@@ -8583,15 +7292,6 @@ type SystemMessage =
     abstract name: string option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (role: string, content: U2<string, SystemMessage.Content.Item[]>, ?name: string) : SystemMessage = jsNative
-
-module SystemMessage =
-    module Content =
-        [<Interface>]
-        type Item =
-            abstract ``type``: string with get, set
-            abstract text: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, text: string) : Item = jsNative
 
 /// <summary>
 /// Permissive merged content part used inside UserMessage arrays.
@@ -8610,36 +7310,6 @@ type UserMessageContentPart =
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: UserMessageContentPart.Type, ?text: string, ?image_url: UserMessageContentPart.ImageUrl, ?input_audio: UserMessageContentPart.InputAudio, ?file: UserMessageContentPart.File) : UserMessageContentPart = jsNative
 
-module UserMessageContentPart =
-    [<Interface>]
-    type File =
-        abstract file_data: string option with get, set
-        abstract file_id: string option with get, set
-        abstract filename: string option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?file_data: string, ?file_id: string, ?filename: string) : File = jsNative
-
-    [<Interface>]
-    type ImageUrl =
-        abstract url: string option with get, set
-        abstract detail: ChatCompletionContentPartImage.ImageUrl.Detail option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?url: string, ?detail: ChatCompletionContentPartImage.ImageUrl.Detail) : ImageUrl = jsNative
-
-    [<Interface>]
-    type InputAudio =
-        abstract data: string option with get, set
-        abstract format: ChatCompletionContentPartInputAudio.InputAudio.Format option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?data: string, ?format: ChatCompletionContentPartInputAudio.InputAudio.Format) : InputAudio = jsNative
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Type =
-        | [<CompiledName("file")>] File
-        | [<CompiledName("image_url")>] ImageUrl
-        | [<CompiledName("input_audio")>] InputAudio
-        | [<CompiledName("text")>] Text
-
 [<Interface>]
 type UserMessage =
     abstract role: string with get, set
@@ -8656,12 +7326,6 @@ type AssistantMessageContentPart =
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: AssistantMessageContentPart.Type, ?text: string, ?refusal: string) : AssistantMessageContentPart = jsNative
 
-module AssistantMessageContentPart =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Type =
-        | [<CompiledName("refusal")>] Refusal
-        | [<CompiledName("text")>] Text
-
 [<Interface>]
 type AssistantMessage =
     abstract role: string with get, set
@@ -8674,20 +7338,6 @@ type AssistantMessage =
     [<ParamObject; Emit("$0")>]
     static member Create (role: string, ?content: U2<string, AssistantMessageContentPart[]>, ?refusal: string, ?name: string, ?audio: AssistantMessage.Audio, ?tool_calls: ChatCompletionMessageToolCall[], ?function_call: AssistantMessage.FunctionCall) : AssistantMessage = jsNative
 
-module AssistantMessage =
-    [<Interface>]
-    type Audio =
-        abstract id: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (id: string) : Audio = jsNative
-
-    [<Interface>]
-    type FunctionCall =
-        abstract name: string with get, set
-        abstract arguments: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (name: string, arguments: string) : FunctionCall = jsNative
-
 [<Interface>]
 type ToolMessage =
     abstract role: string with get, set
@@ -8695,15 +7345,6 @@ type ToolMessage =
     abstract tool_call_id: string with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (role: string, content: U2<string, ToolMessage.Content.Item[]>, tool_call_id: string) : ToolMessage = jsNative
-
-module ToolMessage =
-    module Content =
-        [<Interface>]
-        type Item =
-            abstract ``type``: string with get, set
-            abstract text: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, text: string) : Item = jsNative
 
 [<Interface>]
 type FunctionMessage =
@@ -8741,16 +7382,6 @@ type ResponseFormatJSONSchema =
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, json_schema: ResponseFormatJSONSchema.JsonSchema) : ResponseFormatJSONSchema = jsNative
 
-module ResponseFormatJSONSchema =
-    [<Interface>]
-    type JsonSchema =
-        abstract name: string with get, set
-        abstract description: string option with get, set
-        abstract schema: Record<string, obj> option with get, set
-        abstract strict: bool option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (name: string, ?description: string, ?schema: Record<string, obj>, ?strict: bool) : JsonSchema = jsNative
-
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ResponseFormat =
     | [<CompiledName("json_object")>] JsonObject
@@ -8771,15 +7402,6 @@ type PredictionContent =
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, content: U2<string, PredictionContent.Content.Item[]>) : PredictionContent = jsNative
 
-module PredictionContent =
-    module Content =
-        [<Interface>]
-        type Item =
-            abstract ``type``: string with get, set
-            abstract text: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, text: string) : Item = jsNative
-
 [<Interface>]
 type AudioParams =
     abstract voice: U2<string, AudioParams.Voice> with get, set
@@ -8787,38 +7409,12 @@ type AudioParams =
     [<ParamObject; Emit("$0")>]
     static member Create (voice: U2<string, AudioParams.Voice>, format: AudioParams.Format) : AudioParams = jsNative
 
-module AudioParams =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Format =
-        | [<CompiledName("aac")>] Aac
-        | [<CompiledName("flac")>] Flac
-        | [<CompiledName("mp3")>] Mp3
-        | [<CompiledName("opus")>] Opus
-        | [<CompiledName("pcm16")>] Pcm16
-        | [<CompiledName("wav")>] Wav
-
-    [<Interface>]
-    type Voice =
-        abstract id: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (id: string) : Voice = jsNative
-
 [<Interface>]
 type WebSearchUserLocation =
     abstract ``type``: string with get, set
     abstract approximate: WebSearchUserLocation.Approximate with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, approximate: WebSearchUserLocation.Approximate) : WebSearchUserLocation = jsNative
-
-module WebSearchUserLocation =
-    [<Interface>]
-    type Approximate =
-        abstract city: string option with get, set
-        abstract country: string option with get, set
-        abstract region: string option with get, set
-        abstract timezone: string option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?city: string, ?country: string, ?region: string, ?timezone: string) : Approximate = jsNative
 
 [<Interface>]
 type WebSearchOptions =
@@ -8875,27 +7471,6 @@ type ChatCompletionsCommonOptions =
     abstract web_search_options: WebSearchOptions option with get, set
     abstract function_call: U2<string, ChatCompletionsCommonOptions.FunctionCall> option with get, set
     abstract functions: FunctionDefinition[] option with get, set
-
-module ChatCompletionsCommonOptions =
-    [<Interface>]
-    type FunctionCall =
-        abstract name: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (name: string) : FunctionCall = jsNative
-
-    module Modalities =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Item =
-            | [<CompiledName("audio")>] Audio
-            | [<CompiledName("text")>] Text
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type ServiceTier =
-        | [<CompiledName("auto")>] Auto
-        | [<CompiledName("default")>] Default
-        | [<CompiledName("flex")>] Flex
-        | [<CompiledName("priority")>] Priority
-        | [<CompiledName("scale")>] Scale
 
 [<Interface>]
 type PromptTokensDetails =
@@ -8959,16 +7534,6 @@ type ChatCompletionUrlCitation =
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, url_citation: ChatCompletionUrlCitation.UrlCitation) : ChatCompletionUrlCitation = jsNative
 
-module ChatCompletionUrlCitation =
-    [<Interface>]
-    type UrlCitation =
-        abstract url: string with get, set
-        abstract title: string with get, set
-        abstract start_index: float with get, set
-        abstract end_index: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (url: string, title: string, start_index: float, end_index: float) : UrlCitation = jsNative
-
 [<Interface>]
 type ChatCompletionResponseMessage =
     abstract role: string with get, set
@@ -8980,14 +7545,6 @@ type ChatCompletionResponseMessage =
     abstract function_call: ChatCompletionResponseMessage.FunctionCall option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (role: string, ?content: string, ?refusal: string, ?annotations: ChatCompletionUrlCitation[], ?audio: ChatCompletionAudio, ?tool_calls: ChatCompletionMessageToolCall[], ?function_call: ChatCompletionResponseMessage.FunctionCall) : ChatCompletionResponseMessage = jsNative
-
-module ChatCompletionResponseMessage =
-    [<Interface>]
-    type FunctionCall =
-        abstract name: string with get, set
-        abstract arguments: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (name: string, arguments: string) : FunctionCall = jsNative
 
 [<Interface>]
 type ChatCompletionLogprobs =
@@ -9005,15 +7562,6 @@ type ChatCompletionChoice =
     [<ParamObject; Emit("$0")>]
     static member Create (index: float, message: ChatCompletionResponseMessage, finish_reason: ChatCompletionChoice.FinishReason, ?logprobs: ChatCompletionLogprobs) : ChatCompletionChoice = jsNative
 
-module ChatCompletionChoice =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type FinishReason =
-        | [<CompiledName("content_filter")>] ContentFilter
-        | [<CompiledName("function_call")>] FunctionCall
-        | [<CompiledName("length")>] Length
-        | [<CompiledName("stop")>] Stop
-        | [<CompiledName("tool_calls")>] ToolCalls
-
 type ChatCompletionsMessagesInput =
     inherit ChatCompletionsCommonOptions
     abstract messages: ChatCompletionMessageParam[] with get, set
@@ -9030,42 +7578,6 @@ type ChatCompletionsOutput =
     abstract service_tier: ChatCompletionsCommonOptions.ServiceTier option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (id: string, ``object``: string, created: float, model: string, choices: ChatCompletionChoice[], ?usage: CompletionUsage, ?system_fingerprint: string, ?service_tier: ChatCompletionsCommonOptions.ServiceTier) : ChatCompletionsOutput = jsNative
-
-module EasyInputMessage =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Role =
-        | [<CompiledName("assistant")>] Assistant
-        | [<CompiledName("developer")>] Developer
-        | [<CompiledName("system")>] System
-        | [<CompiledName("user")>] User
-
-module Reasoning =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type GenerateSummary =
-        | [<CompiledName("auto")>] Auto
-        | [<CompiledName("concise")>] Concise
-        | [<CompiledName("detailed")>] Detailed
-
-module ResponseFunctionToolCall =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Status =
-        | [<CompiledName("completed")>] Completed
-        | [<CompiledName("in_progress")>] InProgress
-        | [<CompiledName("incomplete")>] Incomplete
-
-module ResponseInputItemMessage =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Role =
-        | [<CompiledName("developer")>] Developer
-        | [<CompiledName("system")>] System
-        | [<CompiledName("user")>] User
-
-module ResponseOutputMessage =
-    module Content =
-        [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-        type Item =
-            | [<CompiledName("refusal")>] Refusal of refusal: string
-            | [<CompiledName("output_text")>] OutputText of text: string * logprobs: Logprob[] option
 
 /// <summary>
 /// Workers AI support for OpenAI's Responses API
@@ -9101,40 +7613,6 @@ type ResponsesInput =
     abstract truncation: ResponsesInput.Truncation option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?background: bool, ?conversation: U2<string, ResponseConversationParam>, ?``include``: ResponseIncludable[], ?input: U2<string, ResponseInputItem[]>, ?instructions: string, ?max_output_tokens: float, ?parallel_tool_calls: bool, ?previous_response_id: string, ?prompt_cache_key: string, ?reasoning: Reasoning, ?safety_identifier: string, ?service_tier: ChatCompletionsCommonOptions.ServiceTier, ?stream: bool, ?stream_options: StreamOptions, ?temperature: float, ?text: ResponseTextConfig, ?tool_choice: U2<string, ToolChoiceFunction>, ?tools: ResponsesFunctionTool[], ?top_p: float, ?truncation: ResponsesInput.Truncation) : ResponsesInput = jsNative
-
-module ResponsesInput =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Truncation =
-        | [<CompiledName("auto")>] Auto
-        | [<CompiledName("disabled")>] Disabled
-
-module ResponseError =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Code =
-        | [<CompiledName("empty_image_file")>] EmptyImageFile
-        | [<CompiledName("failed_to_download_image")>] FailedToDownloadImage
-        | [<CompiledName("image_content_policy_violation")>] ImageContentPolicyViolation
-        | [<CompiledName("image_file_not_found")>] ImageFileNotFound
-        | [<CompiledName("image_file_too_large")>] ImageFileTooLarge
-        | [<CompiledName("image_parse_error")>] ImageParseError
-        | [<CompiledName("image_too_large")>] ImageTooLarge
-        | [<CompiledName("image_too_small")>] ImageTooSmall
-        | [<CompiledName("invalid_base64_image")>] InvalidBase64Image
-        | [<CompiledName("invalid_image")>] InvalidImage
-        | [<CompiledName("invalid_image_format")>] InvalidImageFormat
-        | [<CompiledName("invalid_image_mode")>] InvalidImageMode
-        | [<CompiledName("invalid_image_url")>] InvalidImageUrl
-        | [<CompiledName("invalid_prompt")>] InvalidPrompt
-        | [<CompiledName("rate_limit_exceeded")>] RateLimitExceeded
-        | [<CompiledName("server_error")>] ServerError
-        | [<CompiledName("unsupported_image_media_type")>] UnsupportedImageMediaType
-        | [<CompiledName("vector_store_timeout")>] VectorStoreTimeout
-
-module ResponseIncompleteDetails =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Reason =
-        | [<CompiledName("content_filter")>] ContentFilter
-        | [<CompiledName("max_output_tokens")>] MaxOutputTokens
 
 [<Interface>]
 type ResponsesOutput =
@@ -9697,12 +8175,6 @@ type Ai_Cf_Baai_Bge_Base_En_V1_5_Input2 =
     [<ParamObject; Emit("$0")>]
     static member Create (text: U2<string, string[]>, ?pooling: Ai_Cf_Baai_Bge_Base_En_V1_5_Input2.Pooling) : Ai_Cf_Baai_Bge_Base_En_V1_5_Input2 = jsNative
 
-module Ai_Cf_Baai_Bge_Base_En_V1_5_Input2 =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Pooling =
-        | [<CompiledName("cls")>] Cls
-        | [<CompiledName("mean")>] Mean
-
 [<Interface>]
 type Ai_Cf_Baai_Bge_Base_En_V1_5_Input3 =
     /// <summary>
@@ -9711,18 +8183,6 @@ type Ai_Cf_Baai_Bge_Base_En_V1_5_Input3 =
     abstract requests: Ai_Cf_Baai_Bge_Base_En_V1_5_Input3.Requests.Item[] with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (requests: Ai_Cf_Baai_Bge_Base_En_V1_5_Input3.Requests.Item[]) : Ai_Cf_Baai_Bge_Base_En_V1_5_Input3 = jsNative
-
-module Ai_Cf_Baai_Bge_Base_En_V1_5_Input3 =
-    module Requests =
-        [<Interface>]
-        type Item =
-            abstract text: U2<string, string[]> with get, set
-            /// <summary>
-            /// The pooling method used in the embedding process. <c>cls</c> pooling will generate more accurate embeddings on larger inputs - however, embeddings created with cls pooling are not compatible with embeddings generated with mean pooling. The default pooling method is <c>mean</c> in order for this to not be a breaking change, but we highly suggest using the new <c>cls</c> pooling for better accuracy.
-            /// </summary>
-            abstract pooling: Ai_Cf_Baai_Bge_Base_En_V1_5_Input2.Pooling option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (text: U2<string, string[]>, ?pooling: Ai_Cf_Baai_Bge_Base_En_V1_5_Input2.Pooling) : Item = jsNative
 
 type Ai_Cf_Baai_Bge_Base_En_V1_5_Output = U2<Ai_Cf_Baai_Bge_Base_En_V1_5_AsyncResponse, Ai_Cf_Baai_Bge_Base_En_V1_5_Output2>
 
@@ -9779,22 +8239,6 @@ type Ai_Cf_Openai_Whisper_Output =
     [<ParamObject; Emit("$0")>]
     static member Create (text: string, ?word_count: float, ?words: Ai_Cf_Openai_Whisper_Output.Words.Item[], ?vtt: string) : Ai_Cf_Openai_Whisper_Output = jsNative
 
-module Ai_Cf_Openai_Whisper_Output =
-    module Words =
-        [<Interface>]
-        type Item =
-            abstract word: string option with get, set
-            /// <summary>
-            /// The second this word begins in the recording
-            /// </summary>
-            abstract start: float option with get, set
-            /// <summary>
-            /// The ending second when the word completes
-            /// </summary>
-            abstract ``end``: float option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?word: string, ?start: float, ?``end``: float) : Item = jsNative
-
 [<Interface>]
 type Base_Ai_Cf_Openai_Whisper =
     abstract inputs: Ai_Cf_Openai_Whisper_Input with get, set
@@ -9829,25 +8273,6 @@ type Ai_Cf_Meta_M2M100_1_2B_Input3 =
     abstract requests: Ai_Cf_Meta_M2M100_1_2B_Input3.Requests.Item[] with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (requests: Ai_Cf_Meta_M2M100_1_2B_Input3.Requests.Item[]) : Ai_Cf_Meta_M2M100_1_2B_Input3 = jsNative
-
-module Ai_Cf_Meta_M2M100_1_2B_Input3 =
-    module Requests =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The text to be translated
-            /// </summary>
-            abstract text: string with get, set
-            /// <summary>
-            /// The language code of the source text (e.g., 'en' for English). Defaults to 'en' if not specified
-            /// </summary>
-            abstract source_lang: string option with get, set
-            /// <summary>
-            /// The language code to translate the text into (e.g., 'es' for Spanish)
-            /// </summary>
-            abstract target_lang: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (text: string, target_lang: string, ?source_lang: string) : Item = jsNative
 
 type Ai_Cf_Meta_M2M100_1_2B_Output = U2<Ai_Cf_Meta_M2M100_1_2B_AsyncResponse, Ai_Cf_Meta_M2M100_1_2B_Output2>
 
@@ -9896,18 +8321,6 @@ type Ai_Cf_Baai_Bge_Small_En_V1_5_Input3 =
     abstract requests: Ai_Cf_Baai_Bge_Small_En_V1_5_Input3.Requests.Item[] with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (requests: Ai_Cf_Baai_Bge_Small_En_V1_5_Input3.Requests.Item[]) : Ai_Cf_Baai_Bge_Small_En_V1_5_Input3 = jsNative
-
-module Ai_Cf_Baai_Bge_Small_En_V1_5_Input3 =
-    module Requests =
-        [<Interface>]
-        type Item =
-            abstract text: U2<string, string[]> with get, set
-            /// <summary>
-            /// The pooling method used in the embedding process. <c>cls</c> pooling will generate more accurate embeddings on larger inputs - however, embeddings created with cls pooling are not compatible with embeddings generated with mean pooling. The default pooling method is <c>mean</c> in order for this to not be a breaking change, but we highly suggest using the new <c>cls</c> pooling for better accuracy.
-            /// </summary>
-            abstract pooling: Ai_Cf_Baai_Bge_Base_En_V1_5_Input2.Pooling option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (text: U2<string, string[]>, ?pooling: Ai_Cf_Baai_Bge_Base_En_V1_5_Input2.Pooling) : Item = jsNative
 
 type Ai_Cf_Baai_Bge_Small_En_V1_5_Output = U2<Ai_Cf_Baai_Bge_Small_En_V1_5_AsyncResponse, Ai_Cf_Baai_Bge_Small_En_V1_5_Output2>
 
@@ -9961,18 +8374,6 @@ type Ai_Cf_Baai_Bge_Large_En_V1_5_Input3 =
     abstract requests: Ai_Cf_Baai_Bge_Large_En_V1_5_Input3.Requests.Item[] with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (requests: Ai_Cf_Baai_Bge_Large_En_V1_5_Input3.Requests.Item[]) : Ai_Cf_Baai_Bge_Large_En_V1_5_Input3 = jsNative
-
-module Ai_Cf_Baai_Bge_Large_En_V1_5_Input3 =
-    module Requests =
-        [<Interface>]
-        type Item =
-            abstract text: U2<string, string[]> with get, set
-            /// <summary>
-            /// The pooling method used in the embedding process. <c>cls</c> pooling will generate more accurate embeddings on larger inputs - however, embeddings created with cls pooling are not compatible with embeddings generated with mean pooling. The default pooling method is <c>mean</c> in order for this to not be a breaking change, but we highly suggest using the new <c>cls</c> pooling for better accuracy.
-            /// </summary>
-            abstract pooling: Ai_Cf_Baai_Bge_Base_En_V1_5_Input2.Pooling option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (text: U2<string, string[]>, ?pooling: Ai_Cf_Baai_Bge_Base_En_V1_5_Input2.Pooling) : Item = jsNative
 
 type Ai_Cf_Baai_Bge_Large_En_V1_5_Output = U2<Ai_Cf_Baai_Bge_Large_En_V1_5_AsyncResponse, Ai_Cf_Baai_Bge_Large_En_V1_5_Output2>
 
@@ -10086,22 +8487,6 @@ type Ai_Cf_Openai_Whisper_Tiny_En_Output =
     [<ParamObject; Emit("$0")>]
     static member Create (text: string, ?word_count: float, ?words: Ai_Cf_Openai_Whisper_Tiny_En_Output.Words.Item[], ?vtt: string) : Ai_Cf_Openai_Whisper_Tiny_En_Output = jsNative
 
-module Ai_Cf_Openai_Whisper_Tiny_En_Output =
-    module Words =
-        [<Interface>]
-        type Item =
-            abstract word: string option with get, set
-            /// <summary>
-            /// The second this word begins in the recording
-            /// </summary>
-            abstract start: float option with get, set
-            /// <summary>
-            /// The ending second when the word completes
-            /// </summary>
-            abstract ``end``: float option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?word: string, ?start: float, ?``end``: float) : Item = jsNative
-
 [<Interface>]
 type Base_Ai_Cf_Openai_Whisper_Tiny_En =
     abstract inputs: Ai_Cf_Openai_Whisper_Tiny_En_Input with get, set
@@ -10159,14 +8544,6 @@ type Ai_Cf_Openai_Whisper_Large_V3_Turbo_Input =
     [<ParamObject; Emit("$0")>]
     static member Create (audio: U2<string, Ai_Cf_Openai_Whisper_Large_V3_Turbo_Input.Audio>, ?task: string, ?language: string, ?vad_filter: bool, ?initial_prompt: string, ?prefix: string, ?beam_size: float, ?condition_on_previous_text: bool, ?no_speech_threshold: float, ?compression_ratio_threshold: float, ?log_prob_threshold: float, ?hallucination_silence_threshold: float) : Ai_Cf_Openai_Whisper_Large_V3_Turbo_Input = jsNative
 
-module Ai_Cf_Openai_Whisper_Large_V3_Turbo_Input =
-    [<Interface>]
-    type Audio =
-        abstract body: obj option with get, set
-        abstract contentType: string option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?body: obj, ?contentType: string) : Audio = jsNative
-
 [<Interface>]
 type Ai_Cf_Openai_Whisper_Large_V3_Turbo_Output =
     abstract transcription_info: Ai_Cf_Openai_Whisper_Large_V3_Turbo_Output.TranscriptionInfo option with get, set
@@ -10186,82 +8563,6 @@ type Ai_Cf_Openai_Whisper_Large_V3_Turbo_Output =
     [<ParamObject; Emit("$0")>]
     static member Create (text: string, ?transcription_info: Ai_Cf_Openai_Whisper_Large_V3_Turbo_Output.TranscriptionInfo, ?word_count: float, ?segments: Ai_Cf_Openai_Whisper_Large_V3_Turbo_Output.Segments.Item[], ?vtt: string) : Ai_Cf_Openai_Whisper_Large_V3_Turbo_Output = jsNative
 
-module Ai_Cf_Openai_Whisper_Large_V3_Turbo_Output =
-    module Segments =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The starting time of the segment within the audio, in seconds.
-            /// </summary>
-            abstract start: float option with get, set
-            /// <summary>
-            /// The ending time of the segment within the audio, in seconds.
-            /// </summary>
-            abstract ``end``: float option with get, set
-            /// <summary>
-            /// The transcription of the segment.
-            /// </summary>
-            abstract text: string option with get, set
-            /// <summary>
-            /// The temperature used in the decoding process, controlling randomness in predictions. Lower values result in more deterministic outputs.
-            /// </summary>
-            abstract temperature: float option with get, set
-            /// <summary>
-            /// The average log probability of the predictions for the words in this segment, indicating overall confidence.
-            /// </summary>
-            abstract avg_logprob: float option with get, set
-            /// <summary>
-            /// The compression ratio of the input to the output, measuring how much the text was compressed during the transcription process.
-            /// </summary>
-            abstract compression_ratio: float option with get, set
-            /// <summary>
-            /// The probability that the segment contains no speech, represented as a decimal between 0 and 1.
-            /// </summary>
-            abstract no_speech_prob: float option with get, set
-            abstract words: Ai_Cf_Openai_Whisper_Large_V3_Turbo_Output.Segments.Item.Words.Item[] option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?start: float, ?``end``: float, ?text: string, ?temperature: float, ?avg_logprob: float, ?compression_ratio: float, ?no_speech_prob: float, ?words: Ai_Cf_Openai_Whisper_Large_V3_Turbo_Output.Segments.Item.Words.Item[]) : Item = jsNative
-
-        module Item =
-            module Words =
-                [<Interface>]
-                type Item =
-                    /// <summary>
-                    /// The individual word transcribed from the audio.
-                    /// </summary>
-                    abstract word: string option with get, set
-                    /// <summary>
-                    /// The starting time of the word within the audio, in seconds.
-                    /// </summary>
-                    abstract start: float option with get, set
-                    /// <summary>
-                    /// The ending time of the word within the audio, in seconds.
-                    /// </summary>
-                    abstract ``end``: float option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (?word: string, ?start: float, ?``end``: float) : Item = jsNative
-
-    [<Interface>]
-    type TranscriptionInfo =
-        /// <summary>
-        /// The language of the audio being transcribed or translated.
-        /// </summary>
-        abstract language: string option with get, set
-        /// <summary>
-        /// The confidence level or probability of the detected language being accurate, represented as a decimal between 0 and 1.
-        /// </summary>
-        abstract language_probability: float option with get, set
-        /// <summary>
-        /// The total duration of the original audio file, in seconds.
-        /// </summary>
-        abstract duration: float option with get, set
-        /// <summary>
-        /// The duration of the audio after applying Voice Activity Detection (VAD) to remove silent or irrelevant sections, in seconds.
-        /// </summary>
-        abstract duration_after_vad: float option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?language: string, ?language_probability: float, ?duration: float, ?duration_after_vad: float) : TranscriptionInfo = jsNative
-
 [<Interface>]
 type Base_Ai_Cf_Openai_Whisper_Large_V3_Turbo =
     abstract inputs: Ai_Cf_Openai_Whisper_Large_V3_Turbo_Input with get, set
@@ -10279,28 +8580,6 @@ type Ai_Cf_Baai_Bge_M3_Input2 =
     abstract requests: U2<Ai_Cf_Baai_Bge_M3_Input_Embedding_1, Ai_Cf_Baai_Bge_M3_Input_QueryAnd_Contexts_1>[] with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (requests: U2<Ai_Cf_Baai_Bge_M3_Input_Embedding_1, Ai_Cf_Baai_Bge_M3_Input_QueryAnd_Contexts_1>[]) : Ai_Cf_Baai_Bge_M3_Input2 = jsNative
-
-module Ai_Cf_Baai_Bge_M3_Input_QueryAnd_Contexts =
-    module Contexts =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// One of the provided context content
-            /// </summary>
-            abstract text: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?text: string) : Item = jsNative
-
-module Ai_Cf_Baai_Bge_M3_Input_QueryAnd_Contexts_1 =
-    module Contexts =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// One of the provided context content
-            /// </summary>
-            abstract text: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?text: string) : Item = jsNative
 
 [<Interface>]
 type Ai_Cf_Baai_Bge_M3_Input_QueryAnd_Contexts =
@@ -10357,21 +8636,6 @@ type Ai_Cf_Baai_Bge_M3_Input_Embedding_1 =
     static member Create (text: U2<string, string[]>, ?truncate_inputs: bool) : Ai_Cf_Baai_Bge_M3_Input_Embedding_1 = jsNative
 
 type Ai_Cf_Baai_Bge_M3_Output = U4<Ai_Cf_Baai_Bge_M3_AsyncResponse, Ai_Cf_Baai_Bge_M3_Output_Embedding, Ai_Cf_Baai_Bge_M3_Output_EmbeddingFor_Contexts, Ai_Cf_Baai_Bge_M3_Output_Query>
-
-module Ai_Cf_Baai_Bge_M3_Output_Query =
-    module Response =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// Index of the context in the request
-            /// </summary>
-            abstract id: float option with get, set
-            /// <summary>
-            /// Score of the context under the index.
-            /// </summary>
-            abstract score: float option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?id: float, ?score: float) : Item = jsNative
 
 [<Interface>]
 type Ai_Cf_Baai_Bge_M3_Output_Query =
@@ -10450,188 +8714,6 @@ type Base_Ai_Cf_Black_Forest_Labs_Flux_1_Schnell =
     static member Create (inputs: Ai_Cf_Black_Forest_Labs_Flux_1_Schnell_Input, postProcessedOutputs: Ai_Cf_Black_Forest_Labs_Flux_1_Schnell_Output) : Base_Ai_Cf_Black_Forest_Labs_Flux_1_Schnell = jsNative
 
 type Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Input = U2<Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages, Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Prompt>
-
-module Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages =
-    module Functions =
-        [<Interface>]
-        type Item =
-            abstract name: string with get, set
-            abstract code: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (name: string, code: string) : Item = jsNative
-
-    module Messages =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The role of the message sender (e.g., 'user', 'assistant', 'system', 'tool').
-            /// </summary>
-            abstract role: string option with get, set
-            /// <summary>
-            /// The tool call id. If you don't know what to put here you can fall back to 000000001
-            /// </summary>
-            abstract tool_call_id: string option with get, set
-            abstract content: U3<string, Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Messages.Item.Content.Item[], Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Messages.Item.Content> option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?role: string, ?tool_call_id: string, ?content: U3<string, Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Messages.Item.Content.Item[], Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Messages.Item.Content>) : Item = jsNative
-
-        module Item =
-            [<Interface>]
-            type Content =
-                /// <summary>
-                /// Type of the content provided
-                /// </summary>
-                abstract ``type``: string option with get, set
-                abstract text: string option with get, set
-                abstract image_url: Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Messages.Item.Content.ImageUrl option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (?``type``: string, ?text: string, ?image_url: Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Messages.Item.Content.ImageUrl) : Content = jsNative
-
-            module Content =
-                [<Interface>]
-                type ImageUrl =
-                    /// <summary>
-                    /// image uri with data (e.g. data:image/jpeg;base64,/9j/...). HTTP URL will not be accepted
-                    /// </summary>
-                    abstract url: string option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (?url: string) : ImageUrl = jsNative
-
-                [<Interface>]
-                type Item =
-                    /// <summary>
-                    /// Type of the content provided
-                    /// </summary>
-                    abstract ``type``: string option with get, set
-                    abstract text: string option with get, set
-                    abstract image_url: Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Messages.Item.Content.Item.ImageUrl option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (?``type``: string, ?text: string, ?image_url: Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Messages.Item.Content.Item.ImageUrl) : Item = jsNative
-
-                module Item =
-                    [<Interface>]
-                    type ImageUrl =
-                        /// <summary>
-                        /// image uri with data (e.g. data:image/jpeg;base64,/9j/...). HTTP URL will not be accepted
-                        /// </summary>
-                        abstract url: string option with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (?url: string) : ImageUrl = jsNative
-
-    module Tools =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The name of the tool. More descriptive the better.
-            /// </summary>
-            abstract name: string with get, set
-            /// <summary>
-            /// A brief description of what the tool does.
-            /// </summary>
-            abstract description: string with get, set
-            /// <summary>
-            /// Schema defining the parameters accepted by the tool.
-            /// </summary>
-            abstract parameters: Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Tools.Item.Parameters with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (name: string, description: string, parameters: Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Tools.Item.Parameters) : Item = jsNative
-
-        module Item =
-            [<Interface>]
-            type Parameters =
-                /// <summary>
-                /// The type of the parameters object (usually 'object').
-                /// </summary>
-                abstract ``type``: string with get, set
-                /// <summary>
-                /// List of required parameter names.
-                /// </summary>
-                abstract required: string[] option with get, set
-                /// <summary>
-                /// Definitions of each parameter.
-                /// </summary>
-                abstract properties: Record<string, Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Tools.Item.Parameters.Properties.Item> with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, properties: Record<string, Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
-
-            module Parameters =
-                module Properties =
-                    [<Interface>]
-                    type Item =
-                        /// <summary>
-                        /// The data type of the parameter.
-                        /// </summary>
-                        abstract ``type``: string with get, set
-                        /// <summary>
-                        /// A description of the expected parameter.
-                        /// </summary>
-                        abstract description: string with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (``type``: string, description: string) : Item = jsNative
-
-        [<Interface>]
-        type Item2 =
-            /// <summary>
-            /// Specifies the type of tool (e.g., 'function').
-            /// </summary>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Details of the function tool.
-            /// </summary>
-            abstract ``function``: Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Tools.Item2.Function with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, ``function``: Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Tools.Item2.Function) : Item2 = jsNative
-
-        module Item2 =
-            [<Interface>]
-            type Function =
-                /// <summary>
-                /// The name of the function.
-                /// </summary>
-                abstract name: string with get, set
-                /// <summary>
-                /// A brief description of what the function does.
-                /// </summary>
-                abstract description: string with get, set
-                /// <summary>
-                /// Schema defining the parameters accepted by the function.
-                /// </summary>
-                abstract parameters: Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Tools.Item2.Function.Parameters with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (name: string, description: string, parameters: Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Tools.Item2.Function.Parameters) : Function = jsNative
-
-            module Function =
-                [<Interface>]
-                type Parameters =
-                    /// <summary>
-                    /// The type of the parameters object (usually 'object').
-                    /// </summary>
-                    abstract ``type``: string with get, set
-                    /// <summary>
-                    /// List of required parameter names.
-                    /// </summary>
-                    abstract required: string[] option with get, set
-                    /// <summary>
-                    /// Definitions of each parameter.
-                    /// </summary>
-                    abstract properties: Record<string, Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (``type``: string, properties: Record<string, Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
-
-                module Parameters =
-                    module Properties =
-                        [<Interface>]
-                        type Item =
-                            /// <summary>
-                            /// The data type of the parameter.
-                            /// </summary>
-                            abstract ``type``: string with get, set
-                            /// <summary>
-                            /// A description of the expected parameter.
-                            /// </summary>
-                            abstract description: string with get, set
-                            [<ParamObject; Emit("$0")>]
-                            static member Create (``type``: string, description: string) : Item = jsNative
 
 [<Interface>]
 type Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Prompt =
@@ -10751,21 +8833,6 @@ type Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Output =
     [<ParamObject; Emit("$0")>]
     static member Create (?response: string, ?tool_calls: Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Output.ToolCalls.Item[]) : Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Output = jsNative
 
-module Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Output =
-    module ToolCalls =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The arguments passed to be passed to the tool call request
-            /// </summary>
-            abstract arguments: obj option with get, set
-            /// <summary>
-            /// The name of the tool to be called
-            /// </summary>
-            abstract name: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?arguments: obj, ?name: string) : Item = jsNative
-
 [<Interface>]
 type Base_Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct =
     abstract inputs: Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Input with get, set
@@ -10773,211 +8840,7 @@ type Base_Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct =
     [<ParamObject; Emit("$0")>]
     static member Create (inputs: Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Input, postProcessedOutputs: Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Output) : Base_Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct = jsNative
 
-module Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Async_Batch =
-    module Requests =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// User-supplied reference. This field will be present in the response as well it can be used to reference the request and response. It's NOT validated to be unique.
-            /// </summary>
-            abstract external_reference: string option with get, set
-            /// <summary>
-            /// Prompt for the text generation model
-            /// </summary>
-            abstract prompt: string option with get, set
-            /// <summary>
-            /// If true, the response will be streamed back incrementally using SSE, Server Sent Events.
-            /// </summary>
-            abstract stream: bool option with get, set
-            /// <summary>
-            /// The maximum number of tokens to generate in the response.
-            /// </summary>
-            abstract max_tokens: float option with get, set
-            /// <summary>
-            /// Controls the randomness of the output; higher values produce more random results.
-            /// </summary>
-            abstract temperature: float option with get, set
-            /// <summary>
-            /// Adjusts the creativity of the AI's responses by controlling how many possible words it considers. Lower values make outputs more predictable; higher values allow for more varied and creative responses.
-            /// </summary>
-            abstract top_p: float option with get, set
-            /// <summary>
-            /// Random seed for reproducibility of the generation.
-            /// </summary>
-            abstract seed: float option with get, set
-            /// <summary>
-            /// Penalty for repeated tokens; higher values discourage repetition.
-            /// </summary>
-            abstract repetition_penalty: float option with get, set
-            /// <summary>
-            /// Decreases the likelihood of the model repeating the same lines verbatim.
-            /// </summary>
-            abstract frequency_penalty: float option with get, set
-            /// <summary>
-            /// Increases the likelihood of the model introducing new topics.
-            /// </summary>
-            abstract presence_penalty: float option with get, set
-            abstract response_format: Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_JSON_Mode_2 option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?external_reference: string, ?prompt: string, ?stream: bool, ?max_tokens: float, ?temperature: float, ?top_p: float, ?seed: float, ?repetition_penalty: float, ?frequency_penalty: float, ?presence_penalty: float, ?response_format: Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_JSON_Mode_2) : Item = jsNative
-
 type Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Input = U3<Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Async_Batch, Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages, Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Prompt>
-
-module Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_JSON_Mode_2 =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Type =
-        | [<CompiledName("json_object")>] JsonObject
-        | [<CompiledName("json_schema")>] JsonSchema
-
-module Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages =
-    module Functions =
-        [<Interface>]
-        type Item =
-            abstract name: string with get, set
-            abstract code: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (name: string, code: string) : Item = jsNative
-
-    module Messages =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The role of the message sender (e.g., 'user', 'assistant', 'system', 'tool').
-            /// </summary>
-            abstract role: string with get, set
-            abstract content: U2<string, Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages.Messages.Item.Content.Item[]> with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (role: string, content: U2<string, Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages.Messages.Item.Content.Item[]>) : Item = jsNative
-
-        module Item =
-            module Content =
-                [<Interface>]
-                type Item =
-                    /// <summary>
-                    /// Type of the content (text)
-                    /// </summary>
-                    abstract ``type``: string option with get, set
-                    /// <summary>
-                    /// Text content
-                    /// </summary>
-                    abstract text: string option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (?``type``: string, ?text: string) : Item = jsNative
-
-    module Tools =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The name of the tool. More descriptive the better.
-            /// </summary>
-            abstract name: string with get, set
-            /// <summary>
-            /// A brief description of what the tool does.
-            /// </summary>
-            abstract description: string with get, set
-            /// <summary>
-            /// Schema defining the parameters accepted by the tool.
-            /// </summary>
-            abstract parameters: Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages.Tools.Item.Parameters with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (name: string, description: string, parameters: Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages.Tools.Item.Parameters) : Item = jsNative
-
-        module Item =
-            [<Interface>]
-            type Parameters =
-                /// <summary>
-                /// The type of the parameters object (usually 'object').
-                /// </summary>
-                abstract ``type``: string with get, set
-                /// <summary>
-                /// List of required parameter names.
-                /// </summary>
-                abstract required: string[] option with get, set
-                /// <summary>
-                /// Definitions of each parameter.
-                /// </summary>
-                abstract properties: Record<string, Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages.Tools.Item.Parameters.Properties.Item> with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, properties: Record<string, Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
-
-            module Parameters =
-                module Properties =
-                    [<Interface>]
-                    type Item =
-                        /// <summary>
-                        /// The data type of the parameter.
-                        /// </summary>
-                        abstract ``type``: string with get, set
-                        /// <summary>
-                        /// A description of the expected parameter.
-                        /// </summary>
-                        abstract description: string with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (``type``: string, description: string) : Item = jsNative
-
-        [<Interface>]
-        type Item2 =
-            /// <summary>
-            /// Specifies the type of tool (e.g., 'function').
-            /// </summary>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Details of the function tool.
-            /// </summary>
-            abstract ``function``: Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages.Tools.Item2.Function with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, ``function``: Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages.Tools.Item2.Function) : Item2 = jsNative
-
-        module Item2 =
-            [<Interface>]
-            type Function =
-                /// <summary>
-                /// The name of the function.
-                /// </summary>
-                abstract name: string with get, set
-                /// <summary>
-                /// A brief description of what the function does.
-                /// </summary>
-                abstract description: string with get, set
-                /// <summary>
-                /// Schema defining the parameters accepted by the function.
-                /// </summary>
-                abstract parameters: Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages.Tools.Item2.Function.Parameters with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (name: string, description: string, parameters: Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages.Tools.Item2.Function.Parameters) : Function = jsNative
-
-            module Function =
-                [<Interface>]
-                type Parameters =
-                    /// <summary>
-                    /// The type of the parameters object (usually 'object').
-                    /// </summary>
-                    abstract ``type``: string with get, set
-                    /// <summary>
-                    /// List of required parameter names.
-                    /// </summary>
-                    abstract required: string[] option with get, set
-                    /// <summary>
-                    /// Definitions of each parameter.
-                    /// </summary>
-                    abstract properties: Record<string, Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (``type``: string, properties: Record<string, Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
-
-                module Parameters =
-                    module Properties =
-                        [<Interface>]
-                        type Item =
-                            /// <summary>
-                            /// The data type of the parameter.
-                            /// </summary>
-                            abstract ``type``: string with get, set
-                            /// <summary>
-                            /// A description of the expected parameter.
-                            /// </summary>
-                            abstract description: string with get, set
-                            [<ParamObject; Emit("$0")>]
-                            static member Create (``type``: string, description: string) : Item = jsNative
 
 [<Interface>]
 type Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Prompt =
@@ -11134,38 +8997,6 @@ type Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Output2 =
     [<ParamObject; Emit("$0")>]
     static member Create (response: string, ?usage: Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Output2.Usage, ?tool_calls: Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Output2.ToolCalls.Item[]) : Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Output2 = jsNative
 
-module Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Output2 =
-    module ToolCalls =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The arguments passed to be passed to the tool call request
-            /// </summary>
-            abstract arguments: obj option with get, set
-            /// <summary>
-            /// The name of the tool to be called
-            /// </summary>
-            abstract name: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?arguments: obj, ?name: string) : Item = jsNative
-
-    [<Interface>]
-    type Usage =
-        /// <summary>
-        /// Total number of tokens in input
-        /// </summary>
-        abstract prompt_tokens: float option with get, set
-        /// <summary>
-        /// Total number of tokens in output
-        /// </summary>
-        abstract completion_tokens: float option with get, set
-        /// <summary>
-        /// Total number of input and output tokens
-        /// </summary>
-        abstract total_tokens: float option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?prompt_tokens: float, ?completion_tokens: float, ?total_tokens: float) : Usage = jsNative
-
 [<Interface>]
 type Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_AsyncResponse =
     /// <summary>
@@ -11203,36 +9034,6 @@ type Ai_Cf_Meta_Llama_Guard_3_8B_Input =
     [<ParamObject; Emit("$0")>]
     static member Create (messages: Ai_Cf_Meta_Llama_Guard_3_8B_Input.Messages.Item[], ?max_tokens: float, ?temperature: float, ?response_format: Ai_Cf_Meta_Llama_Guard_3_8B_Input.ResponseFormat) : Ai_Cf_Meta_Llama_Guard_3_8B_Input = jsNative
 
-module Ai_Cf_Meta_Llama_Guard_3_8B_Input =
-    module Messages =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The role of the message sender must alternate between 'user' and 'assistant'.
-            /// </summary>
-            abstract role: Ai_Cf_Meta_Llama_Guard_3_8B_Input.Messages.Item.Role with get, set
-            /// <summary>
-            /// The content of the message as a string.
-            /// </summary>
-            abstract content: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (role: Ai_Cf_Meta_Llama_Guard_3_8B_Input.Messages.Item.Role, content: string) : Item = jsNative
-
-        module Item =
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type Role =
-                | [<CompiledName("assistant")>] Assistant
-                | [<CompiledName("user")>] User
-
-    [<Interface>]
-    type ResponseFormat =
-        /// <summary>
-        /// Set to json_object to process and output generated text as JSON.
-        /// </summary>
-        abstract ``type``: string option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?``type``: string) : ResponseFormat = jsNative
-
 [<Interface>]
 type Ai_Cf_Meta_Llama_Guard_3_8B_Output =
     abstract response: U2<string, Ai_Cf_Meta_Llama_Guard_3_8B_Output.Response> option with get, set
@@ -11242,37 +9043,6 @@ type Ai_Cf_Meta_Llama_Guard_3_8B_Output =
     abstract usage: Ai_Cf_Meta_Llama_Guard_3_8B_Output.Usage option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?response: U2<string, Ai_Cf_Meta_Llama_Guard_3_8B_Output.Response>, ?usage: Ai_Cf_Meta_Llama_Guard_3_8B_Output.Usage) : Ai_Cf_Meta_Llama_Guard_3_8B_Output = jsNative
-
-module Ai_Cf_Meta_Llama_Guard_3_8B_Output =
-    [<Interface>]
-    type Response =
-        /// <summary>
-        /// Whether the conversation is safe or not.
-        /// </summary>
-        abstract safe: bool option with get, set
-        /// <summary>
-        /// A list of what hazard categories predicted for the conversation, if the conversation is deemed unsafe.
-        /// </summary>
-        abstract categories: string[] option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?safe: bool, ?categories: string[]) : Response = jsNative
-
-    [<Interface>]
-    type Usage =
-        /// <summary>
-        /// Total number of tokens in input
-        /// </summary>
-        abstract prompt_tokens: float option with get, set
-        /// <summary>
-        /// Total number of tokens in output
-        /// </summary>
-        abstract completion_tokens: float option with get, set
-        /// <summary>
-        /// Total number of input and output tokens
-        /// </summary>
-        abstract total_tokens: float option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?prompt_tokens: float, ?completion_tokens: float, ?total_tokens: float) : Usage = jsNative
 
 [<Interface>]
 type Base_Ai_Cf_Meta_Llama_Guard_3_8B =
@@ -11294,37 +9064,11 @@ type Ai_Cf_Baai_Bge_Reranker_Base_Input =
     [<ParamObject; Emit("$0")>]
     static member Create (contexts: Ai_Cf_Baai_Bge_Reranker_Base_Input.Contexts.Item[], ?top_k: float) : Ai_Cf_Baai_Bge_Reranker_Base_Input = jsNative
 
-module Ai_Cf_Baai_Bge_Reranker_Base_Input =
-    module Contexts =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// One of the provided context content
-            /// </summary>
-            abstract text: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?text: string) : Item = jsNative
-
 [<Interface>]
 type Ai_Cf_Baai_Bge_Reranker_Base_Output =
     abstract response: Ai_Cf_Baai_Bge_Reranker_Base_Output.Response.Item[] option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?response: Ai_Cf_Baai_Bge_Reranker_Base_Output.Response.Item[]) : Ai_Cf_Baai_Bge_Reranker_Base_Output = jsNative
-
-module Ai_Cf_Baai_Bge_Reranker_Base_Output =
-    module Response =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// Index of the context in the request
-            /// </summary>
-            abstract id: float option with get, set
-            /// <summary>
-            /// Score of the context under the index.
-            /// </summary>
-            abstract score: float option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?id: float, ?score: float) : Item = jsNative
 
 [<Interface>]
 type Base_Ai_Cf_Baai_Bge_Reranker_Base =
@@ -11334,144 +9078,6 @@ type Base_Ai_Cf_Baai_Bge_Reranker_Base =
     static member Create (inputs: Ai_Cf_Baai_Bge_Reranker_Base_Input, postProcessedOutputs: Ai_Cf_Baai_Bge_Reranker_Base_Output) : Base_Ai_Cf_Baai_Bge_Reranker_Base = jsNative
 
 type Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Input = U2<Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Messages, Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Prompt>
-
-module Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Messages =
-    module Functions =
-        [<Interface>]
-        type Item =
-            abstract name: string with get, set
-            abstract code: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (name: string, code: string) : Item = jsNative
-
-    module Messages =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The role of the message sender (e.g., 'user', 'assistant', 'system', 'tool').
-            /// </summary>
-            abstract role: string with get, set
-            /// <summary>
-            /// The content of the message as a string.
-            /// </summary>
-            abstract content: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (role: string, content: string) : Item = jsNative
-
-    module Tools =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The name of the tool. More descriptive the better.
-            /// </summary>
-            abstract name: string with get, set
-            /// <summary>
-            /// A brief description of what the tool does.
-            /// </summary>
-            abstract description: string with get, set
-            /// <summary>
-            /// Schema defining the parameters accepted by the tool.
-            /// </summary>
-            abstract parameters: Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Messages.Tools.Item.Parameters with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (name: string, description: string, parameters: Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Messages.Tools.Item.Parameters) : Item = jsNative
-
-        module Item =
-            [<Interface>]
-            type Parameters =
-                /// <summary>
-                /// The type of the parameters object (usually 'object').
-                /// </summary>
-                abstract ``type``: string with get, set
-                /// <summary>
-                /// List of required parameter names.
-                /// </summary>
-                abstract required: string[] option with get, set
-                /// <summary>
-                /// Definitions of each parameter.
-                /// </summary>
-                abstract properties: Record<string, Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Messages.Tools.Item.Parameters.Properties.Item> with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, properties: Record<string, Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
-
-            module Parameters =
-                module Properties =
-                    [<Interface>]
-                    type Item =
-                        /// <summary>
-                        /// The data type of the parameter.
-                        /// </summary>
-                        abstract ``type``: string with get, set
-                        /// <summary>
-                        /// A description of the expected parameter.
-                        /// </summary>
-                        abstract description: string with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (``type``: string, description: string) : Item = jsNative
-
-        [<Interface>]
-        type Item2 =
-            /// <summary>
-            /// Specifies the type of tool (e.g., 'function').
-            /// </summary>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Details of the function tool.
-            /// </summary>
-            abstract ``function``: Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Messages.Tools.Item2.Function with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, ``function``: Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Messages.Tools.Item2.Function) : Item2 = jsNative
-
-        module Item2 =
-            [<Interface>]
-            type Function =
-                /// <summary>
-                /// The name of the function.
-                /// </summary>
-                abstract name: string with get, set
-                /// <summary>
-                /// A brief description of what the function does.
-                /// </summary>
-                abstract description: string with get, set
-                /// <summary>
-                /// Schema defining the parameters accepted by the function.
-                /// </summary>
-                abstract parameters: Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Messages.Tools.Item2.Function.Parameters with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (name: string, description: string, parameters: Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Messages.Tools.Item2.Function.Parameters) : Function = jsNative
-
-            module Function =
-                [<Interface>]
-                type Parameters =
-                    /// <summary>
-                    /// The type of the parameters object (usually 'object').
-                    /// </summary>
-                    abstract ``type``: string with get, set
-                    /// <summary>
-                    /// List of required parameter names.
-                    /// </summary>
-                    abstract required: string[] option with get, set
-                    /// <summary>
-                    /// Definitions of each parameter.
-                    /// </summary>
-                    abstract properties: Record<string, Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (``type``: string, properties: Record<string, Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
-
-                module Parameters =
-                    module Properties =
-                        [<Interface>]
-                        type Item =
-                            /// <summary>
-                            /// The data type of the parameter.
-                            /// </summary>
-                            abstract ``type``: string with get, set
-                            /// <summary>
-                            /// A description of the expected parameter.
-                            /// </summary>
-                            abstract description: string with get, set
-                            [<ParamObject; Emit("$0")>]
-                            static member Create (``type``: string, description: string) : Item = jsNative
 
 [<Interface>]
 type Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Prompt =
@@ -11613,38 +9219,6 @@ type Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Output =
     [<ParamObject; Emit("$0")>]
     static member Create (response: string, ?usage: Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Output.Usage, ?tool_calls: Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Output.ToolCalls.Item[]) : Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Output = jsNative
 
-module Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Output =
-    module ToolCalls =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The arguments passed to be passed to the tool call request
-            /// </summary>
-            abstract arguments: obj option with get, set
-            /// <summary>
-            /// The name of the tool to be called
-            /// </summary>
-            abstract name: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?arguments: obj, ?name: string) : Item = jsNative
-
-    [<Interface>]
-    type Usage =
-        /// <summary>
-        /// Total number of tokens in input
-        /// </summary>
-        abstract prompt_tokens: float option with get, set
-        /// <summary>
-        /// Total number of tokens in output
-        /// </summary>
-        abstract completion_tokens: float option with get, set
-        /// <summary>
-        /// Total number of input and output tokens
-        /// </summary>
-        abstract total_tokens: float option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?prompt_tokens: float, ?completion_tokens: float, ?total_tokens: float) : Usage = jsNative
-
 [<Interface>]
 type Base_Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct =
     abstract inputs: Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Input with get, set
@@ -11653,188 +9227,6 @@ type Base_Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct =
     static member Create (inputs: Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Input, postProcessedOutputs: Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Output) : Base_Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct = jsNative
 
 type Ai_Cf_Qwen_Qwq_32B_Input = U2<Ai_Cf_Qwen_Qwq_32B_Messages, Ai_Cf_Qwen_Qwq_32B_Prompt>
-
-module Ai_Cf_Qwen_Qwq_32B_Messages =
-    module Functions =
-        [<Interface>]
-        type Item =
-            abstract name: string with get, set
-            abstract code: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (name: string, code: string) : Item = jsNative
-
-    module Messages =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The role of the message sender (e.g., 'user', 'assistant', 'system', 'tool').
-            /// </summary>
-            abstract role: string option with get, set
-            /// <summary>
-            /// The tool call id. If you don't know what to put here you can fall back to 000000001
-            /// </summary>
-            abstract tool_call_id: string option with get, set
-            abstract content: U3<string, Ai_Cf_Qwen_Qwq_32B_Messages.Messages.Item.Content.Item[], Ai_Cf_Qwen_Qwq_32B_Messages.Messages.Item.Content> option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?role: string, ?tool_call_id: string, ?content: U3<string, Ai_Cf_Qwen_Qwq_32B_Messages.Messages.Item.Content.Item[], Ai_Cf_Qwen_Qwq_32B_Messages.Messages.Item.Content>) : Item = jsNative
-
-        module Item =
-            [<Interface>]
-            type Content =
-                /// <summary>
-                /// Type of the content provided
-                /// </summary>
-                abstract ``type``: string option with get, set
-                abstract text: string option with get, set
-                abstract image_url: Ai_Cf_Qwen_Qwq_32B_Messages.Messages.Item.Content.ImageUrl option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (?``type``: string, ?text: string, ?image_url: Ai_Cf_Qwen_Qwq_32B_Messages.Messages.Item.Content.ImageUrl) : Content = jsNative
-
-            module Content =
-                [<Interface>]
-                type ImageUrl =
-                    /// <summary>
-                    /// image uri with data (e.g. data:image/jpeg;base64,/9j/...). HTTP URL will not be accepted
-                    /// </summary>
-                    abstract url: string option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (?url: string) : ImageUrl = jsNative
-
-                [<Interface>]
-                type Item =
-                    /// <summary>
-                    /// Type of the content provided
-                    /// </summary>
-                    abstract ``type``: string option with get, set
-                    abstract text: string option with get, set
-                    abstract image_url: Ai_Cf_Qwen_Qwq_32B_Messages.Messages.Item.Content.Item.ImageUrl option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (?``type``: string, ?text: string, ?image_url: Ai_Cf_Qwen_Qwq_32B_Messages.Messages.Item.Content.Item.ImageUrl) : Item = jsNative
-
-                module Item =
-                    [<Interface>]
-                    type ImageUrl =
-                        /// <summary>
-                        /// image uri with data (e.g. data:image/jpeg;base64,/9j/...). HTTP URL will not be accepted
-                        /// </summary>
-                        abstract url: string option with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (?url: string) : ImageUrl = jsNative
-
-    module Tools =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The name of the tool. More descriptive the better.
-            /// </summary>
-            abstract name: string with get, set
-            /// <summary>
-            /// A brief description of what the tool does.
-            /// </summary>
-            abstract description: string with get, set
-            /// <summary>
-            /// Schema defining the parameters accepted by the tool.
-            /// </summary>
-            abstract parameters: Ai_Cf_Qwen_Qwq_32B_Messages.Tools.Item.Parameters with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (name: string, description: string, parameters: Ai_Cf_Qwen_Qwq_32B_Messages.Tools.Item.Parameters) : Item = jsNative
-
-        module Item =
-            [<Interface>]
-            type Parameters =
-                /// <summary>
-                /// The type of the parameters object (usually 'object').
-                /// </summary>
-                abstract ``type``: string with get, set
-                /// <summary>
-                /// List of required parameter names.
-                /// </summary>
-                abstract required: string[] option with get, set
-                /// <summary>
-                /// Definitions of each parameter.
-                /// </summary>
-                abstract properties: Record<string, Ai_Cf_Qwen_Qwq_32B_Messages.Tools.Item.Parameters.Properties.Item> with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, properties: Record<string, Ai_Cf_Qwen_Qwq_32B_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
-
-            module Parameters =
-                module Properties =
-                    [<Interface>]
-                    type Item =
-                        /// <summary>
-                        /// The data type of the parameter.
-                        /// </summary>
-                        abstract ``type``: string with get, set
-                        /// <summary>
-                        /// A description of the expected parameter.
-                        /// </summary>
-                        abstract description: string with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (``type``: string, description: string) : Item = jsNative
-
-        [<Interface>]
-        type Item2 =
-            /// <summary>
-            /// Specifies the type of tool (e.g., 'function').
-            /// </summary>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Details of the function tool.
-            /// </summary>
-            abstract ``function``: Ai_Cf_Qwen_Qwq_32B_Messages.Tools.Item2.Function with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, ``function``: Ai_Cf_Qwen_Qwq_32B_Messages.Tools.Item2.Function) : Item2 = jsNative
-
-        module Item2 =
-            [<Interface>]
-            type Function =
-                /// <summary>
-                /// The name of the function.
-                /// </summary>
-                abstract name: string with get, set
-                /// <summary>
-                /// A brief description of what the function does.
-                /// </summary>
-                abstract description: string with get, set
-                /// <summary>
-                /// Schema defining the parameters accepted by the function.
-                /// </summary>
-                abstract parameters: Ai_Cf_Qwen_Qwq_32B_Messages.Tools.Item2.Function.Parameters with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (name: string, description: string, parameters: Ai_Cf_Qwen_Qwq_32B_Messages.Tools.Item2.Function.Parameters) : Function = jsNative
-
-            module Function =
-                [<Interface>]
-                type Parameters =
-                    /// <summary>
-                    /// The type of the parameters object (usually 'object').
-                    /// </summary>
-                    abstract ``type``: string with get, set
-                    /// <summary>
-                    /// List of required parameter names.
-                    /// </summary>
-                    abstract required: string[] option with get, set
-                    /// <summary>
-                    /// Definitions of each parameter.
-                    /// </summary>
-                    abstract properties: Record<string, Ai_Cf_Qwen_Qwq_32B_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (``type``: string, properties: Record<string, Ai_Cf_Qwen_Qwq_32B_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
-
-                module Parameters =
-                    module Properties =
-                        [<Interface>]
-                        type Item =
-                            /// <summary>
-                            /// The data type of the parameter.
-                            /// </summary>
-                            abstract ``type``: string with get, set
-                            /// <summary>
-                            /// A description of the expected parameter.
-                            /// </summary>
-                            abstract description: string with get, set
-                            [<ParamObject; Emit("$0")>]
-                            static member Create (``type``: string, description: string) : Item = jsNative
 
 [<Interface>]
 type Ai_Cf_Qwen_Qwq_32B_Prompt =
@@ -11964,38 +9356,6 @@ type Ai_Cf_Qwen_Qwq_32B_Output =
     [<ParamObject; Emit("$0")>]
     static member Create (response: string, ?usage: Ai_Cf_Qwen_Qwq_32B_Output.Usage, ?tool_calls: Ai_Cf_Qwen_Qwq_32B_Output.ToolCalls.Item[]) : Ai_Cf_Qwen_Qwq_32B_Output = jsNative
 
-module Ai_Cf_Qwen_Qwq_32B_Output =
-    module ToolCalls =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The arguments passed to be passed to the tool call request
-            /// </summary>
-            abstract arguments: obj option with get, set
-            /// <summary>
-            /// The name of the tool to be called
-            /// </summary>
-            abstract name: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?arguments: obj, ?name: string) : Item = jsNative
-
-    [<Interface>]
-    type Usage =
-        /// <summary>
-        /// Total number of tokens in input
-        /// </summary>
-        abstract prompt_tokens: float option with get, set
-        /// <summary>
-        /// Total number of tokens in output
-        /// </summary>
-        abstract completion_tokens: float option with get, set
-        /// <summary>
-        /// Total number of input and output tokens
-        /// </summary>
-        abstract total_tokens: float option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?prompt_tokens: float, ?completion_tokens: float, ?total_tokens: float) : Usage = jsNative
-
 [<Interface>]
 type Base_Ai_Cf_Qwen_Qwq_32B =
     abstract inputs: Ai_Cf_Qwen_Qwq_32B_Input with get, set
@@ -12004,188 +9364,6 @@ type Base_Ai_Cf_Qwen_Qwq_32B =
     static member Create (inputs: Ai_Cf_Qwen_Qwq_32B_Input, postProcessedOutputs: Ai_Cf_Qwen_Qwq_32B_Output) : Base_Ai_Cf_Qwen_Qwq_32B = jsNative
 
 type Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Input = U2<Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages, Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Prompt>
-
-module Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages =
-    module Functions =
-        [<Interface>]
-        type Item =
-            abstract name: string with get, set
-            abstract code: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (name: string, code: string) : Item = jsNative
-
-    module Messages =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The role of the message sender (e.g., 'user', 'assistant', 'system', 'tool').
-            /// </summary>
-            abstract role: string option with get, set
-            /// <summary>
-            /// The tool call id. Must be supplied for tool calls for Mistral-3. If you don't know what to put here you can fall back to 000000001
-            /// </summary>
-            abstract tool_call_id: string option with get, set
-            abstract content: U3<string, Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Messages.Item.Content.Item[], Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Messages.Item.Content> option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?role: string, ?tool_call_id: string, ?content: U3<string, Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Messages.Item.Content.Item[], Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Messages.Item.Content>) : Item = jsNative
-
-        module Item =
-            [<Interface>]
-            type Content =
-                /// <summary>
-                /// Type of the content provided
-                /// </summary>
-                abstract ``type``: string option with get, set
-                abstract text: string option with get, set
-                abstract image_url: Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Messages.Item.Content.ImageUrl option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (?``type``: string, ?text: string, ?image_url: Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Messages.Item.Content.ImageUrl) : Content = jsNative
-
-            module Content =
-                [<Interface>]
-                type ImageUrl =
-                    /// <summary>
-                    /// image uri with data (e.g. data:image/jpeg;base64,/9j/...). HTTP URL will not be accepted
-                    /// </summary>
-                    abstract url: string option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (?url: string) : ImageUrl = jsNative
-
-                [<Interface>]
-                type Item =
-                    /// <summary>
-                    /// Type of the content provided
-                    /// </summary>
-                    abstract ``type``: string option with get, set
-                    abstract text: string option with get, set
-                    abstract image_url: Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Messages.Item.Content.Item.ImageUrl option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (?``type``: string, ?text: string, ?image_url: Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Messages.Item.Content.Item.ImageUrl) : Item = jsNative
-
-                module Item =
-                    [<Interface>]
-                    type ImageUrl =
-                        /// <summary>
-                        /// image uri with data (e.g. data:image/jpeg;base64,/9j/...). HTTP URL will not be accepted
-                        /// </summary>
-                        abstract url: string option with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (?url: string) : ImageUrl = jsNative
-
-    module Tools =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The name of the tool. More descriptive the better.
-            /// </summary>
-            abstract name: string with get, set
-            /// <summary>
-            /// A brief description of what the tool does.
-            /// </summary>
-            abstract description: string with get, set
-            /// <summary>
-            /// Schema defining the parameters accepted by the tool.
-            /// </summary>
-            abstract parameters: Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Tools.Item.Parameters with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (name: string, description: string, parameters: Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Tools.Item.Parameters) : Item = jsNative
-
-        module Item =
-            [<Interface>]
-            type Parameters =
-                /// <summary>
-                /// The type of the parameters object (usually 'object').
-                /// </summary>
-                abstract ``type``: string with get, set
-                /// <summary>
-                /// List of required parameter names.
-                /// </summary>
-                abstract required: string[] option with get, set
-                /// <summary>
-                /// Definitions of each parameter.
-                /// </summary>
-                abstract properties: Record<string, Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Tools.Item.Parameters.Properties.Item> with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, properties: Record<string, Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
-
-            module Parameters =
-                module Properties =
-                    [<Interface>]
-                    type Item =
-                        /// <summary>
-                        /// The data type of the parameter.
-                        /// </summary>
-                        abstract ``type``: string with get, set
-                        /// <summary>
-                        /// A description of the expected parameter.
-                        /// </summary>
-                        abstract description: string with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (``type``: string, description: string) : Item = jsNative
-
-        [<Interface>]
-        type Item2 =
-            /// <summary>
-            /// Specifies the type of tool (e.g., 'function').
-            /// </summary>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Details of the function tool.
-            /// </summary>
-            abstract ``function``: Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Tools.Item2.Function with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, ``function``: Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Tools.Item2.Function) : Item2 = jsNative
-
-        module Item2 =
-            [<Interface>]
-            type Function =
-                /// <summary>
-                /// The name of the function.
-                /// </summary>
-                abstract name: string with get, set
-                /// <summary>
-                /// A brief description of what the function does.
-                /// </summary>
-                abstract description: string with get, set
-                /// <summary>
-                /// Schema defining the parameters accepted by the function.
-                /// </summary>
-                abstract parameters: Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Tools.Item2.Function.Parameters with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (name: string, description: string, parameters: Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Tools.Item2.Function.Parameters) : Function = jsNative
-
-            module Function =
-                [<Interface>]
-                type Parameters =
-                    /// <summary>
-                    /// The type of the parameters object (usually 'object').
-                    /// </summary>
-                    abstract ``type``: string with get, set
-                    /// <summary>
-                    /// List of required parameter names.
-                    /// </summary>
-                    abstract required: string[] option with get, set
-                    /// <summary>
-                    /// Definitions of each parameter.
-                    /// </summary>
-                    abstract properties: Record<string, Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (``type``: string, properties: Record<string, Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
-
-                module Parameters =
-                    module Properties =
-                        [<Interface>]
-                        type Item =
-                            /// <summary>
-                            /// The data type of the parameter.
-                            /// </summary>
-                            abstract ``type``: string with get, set
-                            /// <summary>
-                            /// A description of the expected parameter.
-                            /// </summary>
-                            abstract description: string with get, set
-                            [<ParamObject; Emit("$0")>]
-                            static member Create (``type``: string, description: string) : Item = jsNative
 
 [<Interface>]
 type Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Prompt =
@@ -12315,38 +9493,6 @@ type Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Output =
     [<ParamObject; Emit("$0")>]
     static member Create (response: string, ?usage: Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Output.Usage, ?tool_calls: Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Output.ToolCalls.Item[]) : Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Output = jsNative
 
-module Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Output =
-    module ToolCalls =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The arguments passed to be passed to the tool call request
-            /// </summary>
-            abstract arguments: obj option with get, set
-            /// <summary>
-            /// The name of the tool to be called
-            /// </summary>
-            abstract name: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?arguments: obj, ?name: string) : Item = jsNative
-
-    [<Interface>]
-    type Usage =
-        /// <summary>
-        /// Total number of tokens in input
-        /// </summary>
-        abstract prompt_tokens: float option with get, set
-        /// <summary>
-        /// Total number of tokens in output
-        /// </summary>
-        abstract completion_tokens: float option with get, set
-        /// <summary>
-        /// Total number of input and output tokens
-        /// </summary>
-        abstract total_tokens: float option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?prompt_tokens: float, ?completion_tokens: float, ?total_tokens: float) : Usage = jsNative
-
 [<Interface>]
 type Base_Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct =
     abstract inputs: Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Input with get, set
@@ -12355,164 +9501,6 @@ type Base_Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct =
     static member Create (inputs: Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Input, postProcessedOutputs: Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Output) : Base_Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct = jsNative
 
 type Ai_Cf_Google_Gemma_3_12B_It_Input = U2<Ai_Cf_Google_Gemma_3_12B_It_Messages, Ai_Cf_Google_Gemma_3_12B_It_Prompt>
-
-module Ai_Cf_Google_Gemma_3_12B_It_Messages =
-    module Functions =
-        [<Interface>]
-        type Item =
-            abstract name: string with get, set
-            abstract code: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (name: string, code: string) : Item = jsNative
-
-    module Messages =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The role of the message sender (e.g., 'user', 'assistant', 'system', 'tool').
-            /// </summary>
-            abstract role: string option with get, set
-            abstract content: U2<string, Ai_Cf_Google_Gemma_3_12B_It_Messages.Messages.Item.Content.Item[]> option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?role: string, ?content: U2<string, Ai_Cf_Google_Gemma_3_12B_It_Messages.Messages.Item.Content.Item[]>) : Item = jsNative
-
-        module Item =
-            module Content =
-                [<Interface>]
-                type Item =
-                    /// <summary>
-                    /// Type of the content provided
-                    /// </summary>
-                    abstract ``type``: string option with get, set
-                    abstract text: string option with get, set
-                    abstract image_url: Ai_Cf_Google_Gemma_3_12B_It_Messages.Messages.Item.Content.Item.ImageUrl option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (?``type``: string, ?text: string, ?image_url: Ai_Cf_Google_Gemma_3_12B_It_Messages.Messages.Item.Content.Item.ImageUrl) : Item = jsNative
-
-                module Item =
-                    [<Interface>]
-                    type ImageUrl =
-                        /// <summary>
-                        /// image uri with data (e.g. data:image/jpeg;base64,/9j/...). HTTP URL will not be accepted
-                        /// </summary>
-                        abstract url: string option with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (?url: string) : ImageUrl = jsNative
-
-    module Tools =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The name of the tool. More descriptive the better.
-            /// </summary>
-            abstract name: string with get, set
-            /// <summary>
-            /// A brief description of what the tool does.
-            /// </summary>
-            abstract description: string with get, set
-            /// <summary>
-            /// Schema defining the parameters accepted by the tool.
-            /// </summary>
-            abstract parameters: Ai_Cf_Google_Gemma_3_12B_It_Messages.Tools.Item.Parameters with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (name: string, description: string, parameters: Ai_Cf_Google_Gemma_3_12B_It_Messages.Tools.Item.Parameters) : Item = jsNative
-
-        module Item =
-            [<Interface>]
-            type Parameters =
-                /// <summary>
-                /// The type of the parameters object (usually 'object').
-                /// </summary>
-                abstract ``type``: string with get, set
-                /// <summary>
-                /// List of required parameter names.
-                /// </summary>
-                abstract required: string[] option with get, set
-                /// <summary>
-                /// Definitions of each parameter.
-                /// </summary>
-                abstract properties: Record<string, Ai_Cf_Google_Gemma_3_12B_It_Messages.Tools.Item.Parameters.Properties.Item> with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, properties: Record<string, Ai_Cf_Google_Gemma_3_12B_It_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
-
-            module Parameters =
-                module Properties =
-                    [<Interface>]
-                    type Item =
-                        /// <summary>
-                        /// The data type of the parameter.
-                        /// </summary>
-                        abstract ``type``: string with get, set
-                        /// <summary>
-                        /// A description of the expected parameter.
-                        /// </summary>
-                        abstract description: string with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (``type``: string, description: string) : Item = jsNative
-
-        [<Interface>]
-        type Item2 =
-            /// <summary>
-            /// Specifies the type of tool (e.g., 'function').
-            /// </summary>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Details of the function tool.
-            /// </summary>
-            abstract ``function``: Ai_Cf_Google_Gemma_3_12B_It_Messages.Tools.Item2.Function with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, ``function``: Ai_Cf_Google_Gemma_3_12B_It_Messages.Tools.Item2.Function) : Item2 = jsNative
-
-        module Item2 =
-            [<Interface>]
-            type Function =
-                /// <summary>
-                /// The name of the function.
-                /// </summary>
-                abstract name: string with get, set
-                /// <summary>
-                /// A brief description of what the function does.
-                /// </summary>
-                abstract description: string with get, set
-                /// <summary>
-                /// Schema defining the parameters accepted by the function.
-                /// </summary>
-                abstract parameters: Ai_Cf_Google_Gemma_3_12B_It_Messages.Tools.Item2.Function.Parameters with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (name: string, description: string, parameters: Ai_Cf_Google_Gemma_3_12B_It_Messages.Tools.Item2.Function.Parameters) : Function = jsNative
-
-            module Function =
-                [<Interface>]
-                type Parameters =
-                    /// <summary>
-                    /// The type of the parameters object (usually 'object').
-                    /// </summary>
-                    abstract ``type``: string with get, set
-                    /// <summary>
-                    /// List of required parameter names.
-                    /// </summary>
-                    abstract required: string[] option with get, set
-                    /// <summary>
-                    /// Definitions of each parameter.
-                    /// </summary>
-                    abstract properties: Record<string, Ai_Cf_Google_Gemma_3_12B_It_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (``type``: string, properties: Record<string, Ai_Cf_Google_Gemma_3_12B_It_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
-
-                module Parameters =
-                    module Properties =
-                        [<Interface>]
-                        type Item =
-                            /// <summary>
-                            /// The data type of the parameter.
-                            /// </summary>
-                            abstract ``type``: string with get, set
-                            /// <summary>
-                            /// A description of the expected parameter.
-                            /// </summary>
-                            abstract description: string with get, set
-                            [<ParamObject; Emit("$0")>]
-                            static member Create (``type``: string, description: string) : Item = jsNative
 
 [<Interface>]
 type Ai_Cf_Google_Gemma_3_12B_It_Prompt =
@@ -12642,38 +9630,6 @@ type Ai_Cf_Google_Gemma_3_12B_It_Output =
     [<ParamObject; Emit("$0")>]
     static member Create (response: string, ?usage: Ai_Cf_Google_Gemma_3_12B_It_Output.Usage, ?tool_calls: Ai_Cf_Google_Gemma_3_12B_It_Output.ToolCalls.Item[]) : Ai_Cf_Google_Gemma_3_12B_It_Output = jsNative
 
-module Ai_Cf_Google_Gemma_3_12B_It_Output =
-    module ToolCalls =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The arguments passed to be passed to the tool call request
-            /// </summary>
-            abstract arguments: obj option with get, set
-            /// <summary>
-            /// The name of the tool to be called
-            /// </summary>
-            abstract name: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?arguments: obj, ?name: string) : Item = jsNative
-
-    [<Interface>]
-    type Usage =
-        /// <summary>
-        /// Total number of tokens in input
-        /// </summary>
-        abstract prompt_tokens: float option with get, set
-        /// <summary>
-        /// Total number of tokens in output
-        /// </summary>
-        abstract completion_tokens: float option with get, set
-        /// <summary>
-        /// Total number of input and output tokens
-        /// </summary>
-        abstract total_tokens: float option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?prompt_tokens: float, ?completion_tokens: float, ?total_tokens: float) : Usage = jsNative
-
 [<Interface>]
 type Base_Ai_Cf_Google_Gemma_3_12B_It =
     abstract inputs: Ai_Cf_Google_Gemma_3_12B_It_Input with get, set
@@ -12682,370 +9638,6 @@ type Base_Ai_Cf_Google_Gemma_3_12B_It =
     static member Create (inputs: Ai_Cf_Google_Gemma_3_12B_It_Input, postProcessedOutputs: Ai_Cf_Google_Gemma_3_12B_It_Output) : Base_Ai_Cf_Google_Gemma_3_12B_It = jsNative
 
 type Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Input = U3<Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Async_Batch, Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages, Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Prompt>
-
-module Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages =
-    module Functions =
-        [<Interface>]
-        type Item =
-            abstract name: string with get, set
-            abstract code: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (name: string, code: string) : Item = jsNative
-
-    module Messages =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The role of the message sender (e.g., 'user', 'assistant', 'system', 'tool').
-            /// </summary>
-            abstract role: string option with get, set
-            /// <summary>
-            /// The tool call id. If you don't know what to put here you can fall back to 000000001
-            /// </summary>
-            abstract tool_call_id: string option with get, set
-            abstract content: U3<string, Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Messages.Item.Content.Item[], Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Messages.Item.Content> option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?role: string, ?tool_call_id: string, ?content: U3<string, Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Messages.Item.Content.Item[], Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Messages.Item.Content>) : Item = jsNative
-
-        module Item =
-            [<Interface>]
-            type Content =
-                /// <summary>
-                /// Type of the content provided
-                /// </summary>
-                abstract ``type``: string option with get, set
-                abstract text: string option with get, set
-                abstract image_url: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Messages.Item.Content.ImageUrl option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (?``type``: string, ?text: string, ?image_url: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Messages.Item.Content.ImageUrl) : Content = jsNative
-
-            module Content =
-                [<Interface>]
-                type ImageUrl =
-                    /// <summary>
-                    /// image uri with data (e.g. data:image/jpeg;base64,/9j/...). HTTP URL will not be accepted
-                    /// </summary>
-                    abstract url: string option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (?url: string) : ImageUrl = jsNative
-
-                [<Interface>]
-                type Item =
-                    /// <summary>
-                    /// Type of the content provided
-                    /// </summary>
-                    abstract ``type``: string option with get, set
-                    abstract text: string option with get, set
-                    abstract image_url: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Messages.Item.Content.Item.ImageUrl option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (?``type``: string, ?text: string, ?image_url: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Messages.Item.Content.Item.ImageUrl) : Item = jsNative
-
-                module Item =
-                    [<Interface>]
-                    type ImageUrl =
-                        /// <summary>
-                        /// image uri with data (e.g. data:image/jpeg;base64,/9j/...). HTTP URL will not be accepted
-                        /// </summary>
-                        abstract url: string option with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (?url: string) : ImageUrl = jsNative
-
-    module Tools =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The name of the tool. More descriptive the better.
-            /// </summary>
-            abstract name: string with get, set
-            /// <summary>
-            /// A brief description of what the tool does.
-            /// </summary>
-            abstract description: string with get, set
-            /// <summary>
-            /// Schema defining the parameters accepted by the tool.
-            /// </summary>
-            abstract parameters: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Tools.Item.Parameters with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (name: string, description: string, parameters: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Tools.Item.Parameters) : Item = jsNative
-
-        module Item =
-            [<Interface>]
-            type Parameters =
-                /// <summary>
-                /// The type of the parameters object (usually 'object').
-                /// </summary>
-                abstract ``type``: string with get, set
-                /// <summary>
-                /// List of required parameter names.
-                /// </summary>
-                abstract required: string[] option with get, set
-                /// <summary>
-                /// Definitions of each parameter.
-                /// </summary>
-                abstract properties: Record<string, Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Tools.Item.Parameters.Properties.Item> with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, properties: Record<string, Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
-
-            module Parameters =
-                module Properties =
-                    [<Interface>]
-                    type Item =
-                        /// <summary>
-                        /// The data type of the parameter.
-                        /// </summary>
-                        abstract ``type``: string with get, set
-                        /// <summary>
-                        /// A description of the expected parameter.
-                        /// </summary>
-                        abstract description: string with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (``type``: string, description: string) : Item = jsNative
-
-        [<Interface>]
-        type Item2 =
-            /// <summary>
-            /// Specifies the type of tool (e.g., 'function').
-            /// </summary>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Details of the function tool.
-            /// </summary>
-            abstract ``function``: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Tools.Item2.Function with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, ``function``: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Tools.Item2.Function) : Item2 = jsNative
-
-        module Item2 =
-            [<Interface>]
-            type Function =
-                /// <summary>
-                /// The name of the function.
-                /// </summary>
-                abstract name: string with get, set
-                /// <summary>
-                /// A brief description of what the function does.
-                /// </summary>
-                abstract description: string with get, set
-                /// <summary>
-                /// Schema defining the parameters accepted by the function.
-                /// </summary>
-                abstract parameters: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Tools.Item2.Function.Parameters with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (name: string, description: string, parameters: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Tools.Item2.Function.Parameters) : Function = jsNative
-
-            module Function =
-                [<Interface>]
-                type Parameters =
-                    /// <summary>
-                    /// The type of the parameters object (usually 'object').
-                    /// </summary>
-                    abstract ``type``: string with get, set
-                    /// <summary>
-                    /// List of required parameter names.
-                    /// </summary>
-                    abstract required: string[] option with get, set
-                    /// <summary>
-                    /// Definitions of each parameter.
-                    /// </summary>
-                    abstract properties: Record<string, Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (``type``: string, properties: Record<string, Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
-
-                module Parameters =
-                    module Properties =
-                        [<Interface>]
-                        type Item =
-                            /// <summary>
-                            /// The data type of the parameter.
-                            /// </summary>
-                            abstract ``type``: string with get, set
-                            /// <summary>
-                            /// A description of the expected parameter.
-                            /// </summary>
-                            abstract description: string with get, set
-                            [<ParamObject; Emit("$0")>]
-                            static member Create (``type``: string, description: string) : Item = jsNative
-
-module Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner =
-    module Functions =
-        [<Interface>]
-        type Item =
-            abstract name: string with get, set
-            abstract code: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (name: string, code: string) : Item = jsNative
-
-    module Messages =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The role of the message sender (e.g., 'user', 'assistant', 'system', 'tool').
-            /// </summary>
-            abstract role: string option with get, set
-            /// <summary>
-            /// The tool call id. If you don't know what to put here you can fall back to 000000001
-            /// </summary>
-            abstract tool_call_id: string option with get, set
-            abstract content: U3<string, Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Messages.Item.Content.Item[], Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Messages.Item.Content> option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?role: string, ?tool_call_id: string, ?content: U3<string, Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Messages.Item.Content.Item[], Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Messages.Item.Content>) : Item = jsNative
-
-        module Item =
-            [<Interface>]
-            type Content =
-                /// <summary>
-                /// Type of the content provided
-                /// </summary>
-                abstract ``type``: string option with get, set
-                abstract text: string option with get, set
-                abstract image_url: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Messages.Item.Content.ImageUrl option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (?``type``: string, ?text: string, ?image_url: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Messages.Item.Content.ImageUrl) : Content = jsNative
-
-            module Content =
-                [<Interface>]
-                type ImageUrl =
-                    /// <summary>
-                    /// image uri with data (e.g. data:image/jpeg;base64,/9j/...). HTTP URL will not be accepted
-                    /// </summary>
-                    abstract url: string option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (?url: string) : ImageUrl = jsNative
-
-                [<Interface>]
-                type Item =
-                    /// <summary>
-                    /// Type of the content provided
-                    /// </summary>
-                    abstract ``type``: string option with get, set
-                    abstract text: string option with get, set
-                    abstract image_url: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Messages.Item.Content.Item.ImageUrl option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (?``type``: string, ?text: string, ?image_url: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Messages.Item.Content.Item.ImageUrl) : Item = jsNative
-
-                module Item =
-                    [<Interface>]
-                    type ImageUrl =
-                        /// <summary>
-                        /// image uri with data (e.g. data:image/jpeg;base64,/9j/...). HTTP URL will not be accepted
-                        /// </summary>
-                        abstract url: string option with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (?url: string) : ImageUrl = jsNative
-
-    module Tools =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The name of the tool. More descriptive the better.
-            /// </summary>
-            abstract name: string with get, set
-            /// <summary>
-            /// A brief description of what the tool does.
-            /// </summary>
-            abstract description: string with get, set
-            /// <summary>
-            /// Schema defining the parameters accepted by the tool.
-            /// </summary>
-            abstract parameters: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Tools.Item.Parameters with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (name: string, description: string, parameters: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Tools.Item.Parameters) : Item = jsNative
-
-        module Item =
-            [<Interface>]
-            type Parameters =
-                /// <summary>
-                /// The type of the parameters object (usually 'object').
-                /// </summary>
-                abstract ``type``: string with get, set
-                /// <summary>
-                /// List of required parameter names.
-                /// </summary>
-                abstract required: string[] option with get, set
-                /// <summary>
-                /// Definitions of each parameter.
-                /// </summary>
-                abstract properties: Record<string, Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Tools.Item.Parameters.Properties.Item> with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, properties: Record<string, Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
-
-            module Parameters =
-                module Properties =
-                    [<Interface>]
-                    type Item =
-                        /// <summary>
-                        /// The data type of the parameter.
-                        /// </summary>
-                        abstract ``type``: string with get, set
-                        /// <summary>
-                        /// A description of the expected parameter.
-                        /// </summary>
-                        abstract description: string with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (``type``: string, description: string) : Item = jsNative
-
-        [<Interface>]
-        type Item2 =
-            /// <summary>
-            /// Specifies the type of tool (e.g., 'function').
-            /// </summary>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Details of the function tool.
-            /// </summary>
-            abstract ``function``: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Tools.Item2.Function with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, ``function``: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Tools.Item2.Function) : Item2 = jsNative
-
-        module Item2 =
-            [<Interface>]
-            type Function =
-                /// <summary>
-                /// The name of the function.
-                /// </summary>
-                abstract name: string with get, set
-                /// <summary>
-                /// A brief description of what the function does.
-                /// </summary>
-                abstract description: string with get, set
-                /// <summary>
-                /// Schema defining the parameters accepted by the function.
-                /// </summary>
-                abstract parameters: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Tools.Item2.Function.Parameters with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (name: string, description: string, parameters: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Tools.Item2.Function.Parameters) : Function = jsNative
-
-            module Function =
-                [<Interface>]
-                type Parameters =
-                    /// <summary>
-                    /// The type of the parameters object (usually 'object').
-                    /// </summary>
-                    abstract ``type``: string with get, set
-                    /// <summary>
-                    /// List of required parameter names.
-                    /// </summary>
-                    abstract required: string[] option with get, set
-                    /// <summary>
-                    /// Definitions of each parameter.
-                    /// </summary>
-                    abstract properties: Record<string, Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Tools.Item2.Function.Parameters.Properties.Item> with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (``type``: string, properties: Record<string, Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
-
-                module Parameters =
-                    module Properties =
-                        [<Interface>]
-                        type Item =
-                            /// <summary>
-                            /// The data type of the parameter.
-                            /// </summary>
-                            abstract ``type``: string with get, set
-                            /// <summary>
-                            /// A description of the expected parameter.
-                            /// </summary>
-                            abstract description: string with get, set
-                            [<ParamObject; Emit("$0")>]
-                            static member Create (``type``: string, description: string) : Item = jsNative
 
 [<Interface>]
 type Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Prompt =
@@ -13303,56 +9895,6 @@ type Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Output =
     [<ParamObject; Emit("$0")>]
     static member Create (response: string, ?usage: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Output.Usage, ?tool_calls: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Output.ToolCalls.Item[]) : Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Output = jsNative
 
-module Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Output =
-    module ToolCalls =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The tool call id.
-            /// </summary>
-            abstract id: string option with get, set
-            /// <summary>
-            /// Specifies the type of tool (e.g., 'function').
-            /// </summary>
-            abstract ``type``: string option with get, set
-            /// <summary>
-            /// Details of the function tool.
-            /// </summary>
-            abstract ``function``: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Output.ToolCalls.Item.Function option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?id: string, ?``type``: string, ?``function``: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Output.ToolCalls.Item.Function) : Item = jsNative
-
-        module Item =
-            [<Interface>]
-            type Function =
-                /// <summary>
-                /// The name of the tool to be called
-                /// </summary>
-                abstract name: string option with get, set
-                /// <summary>
-                /// The arguments passed to be passed to the tool call request
-                /// </summary>
-                abstract arguments: obj option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (?name: string, ?arguments: obj) : Function = jsNative
-
-    [<Interface>]
-    type Usage =
-        /// <summary>
-        /// Total number of tokens in input
-        /// </summary>
-        abstract prompt_tokens: float option with get, set
-        /// <summary>
-        /// Total number of tokens in output
-        /// </summary>
-        abstract completion_tokens: float option with get, set
-        /// <summary>
-        /// Total number of input and output tokens
-        /// </summary>
-        abstract total_tokens: float option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?prompt_tokens: float, ?completion_tokens: float, ?total_tokens: float) : Usage = jsNative
-
 [<Interface>]
 type Base_Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct =
     abstract inputs: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Input with get, set
@@ -13361,306 +9903,6 @@ type Base_Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct =
     static member Create (inputs: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Input, postProcessedOutputs: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Output) : Base_Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct = jsNative
 
 type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Input = U3<Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Async_Batch, Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages, Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Prompt>
-
-module Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages =
-    module Functions =
-        [<Interface>]
-        type Item =
-            abstract name: string with get, set
-            abstract code: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (name: string, code: string) : Item = jsNative
-
-    module Messages =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The role of the message sender (e.g., 'user', 'assistant', 'system', 'tool').
-            /// </summary>
-            abstract role: string with get, set
-            abstract content: U2<string, Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages.Messages.Item.Content.Item[]> with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (role: string, content: U2<string, Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages.Messages.Item.Content.Item[]>) : Item = jsNative
-
-        module Item =
-            module Content =
-                [<Interface>]
-                type Item =
-                    /// <summary>
-                    /// Type of the content (text)
-                    /// </summary>
-                    abstract ``type``: string option with get, set
-                    /// <summary>
-                    /// Text content
-                    /// </summary>
-                    abstract text: string option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (?``type``: string, ?text: string) : Item = jsNative
-
-    module Tools =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The name of the tool. More descriptive the better.
-            /// </summary>
-            abstract name: string with get, set
-            /// <summary>
-            /// A brief description of what the tool does.
-            /// </summary>
-            abstract description: string with get, set
-            /// <summary>
-            /// Schema defining the parameters accepted by the tool.
-            /// </summary>
-            abstract parameters: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages.Tools.Item.Parameters with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (name: string, description: string, parameters: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages.Tools.Item.Parameters) : Item = jsNative
-
-        module Item =
-            [<Interface>]
-            type Parameters =
-                /// <summary>
-                /// The type of the parameters object (usually 'object').
-                /// </summary>
-                abstract ``type``: string with get, set
-                /// <summary>
-                /// List of required parameter names.
-                /// </summary>
-                abstract required: string[] option with get, set
-                /// <summary>
-                /// Definitions of each parameter.
-                /// </summary>
-                abstract properties: Record<string, Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages.Tools.Item.Parameters.Properties.Item> with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, properties: Record<string, Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
-
-            module Parameters =
-                module Properties =
-                    [<Interface>]
-                    type Item =
-                        /// <summary>
-                        /// The data type of the parameter.
-                        /// </summary>
-                        abstract ``type``: string with get, set
-                        /// <summary>
-                        /// A description of the expected parameter.
-                        /// </summary>
-                        abstract description: string with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (``type``: string, description: string) : Item = jsNative
-
-        [<Interface>]
-        type Item2 =
-            /// <summary>
-            /// Specifies the type of tool (e.g., 'function').
-            /// </summary>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Details of the function tool.
-            /// </summary>
-            abstract ``function``: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages.Tools.Item2.Function with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, ``function``: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages.Tools.Item2.Function) : Item2 = jsNative
-
-        module Item2 =
-            [<Interface>]
-            type Function =
-                /// <summary>
-                /// The name of the function.
-                /// </summary>
-                abstract name: string with get, set
-                /// <summary>
-                /// A brief description of what the function does.
-                /// </summary>
-                abstract description: string with get, set
-                /// <summary>
-                /// Schema defining the parameters accepted by the function.
-                /// </summary>
-                abstract parameters: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages.Tools.Item2.Function.Parameters with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (name: string, description: string, parameters: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages.Tools.Item2.Function.Parameters) : Function = jsNative
-
-            module Function =
-                [<Interface>]
-                type Parameters =
-                    /// <summary>
-                    /// The type of the parameters object (usually 'object').
-                    /// </summary>
-                    abstract ``type``: string with get, set
-                    /// <summary>
-                    /// List of required parameter names.
-                    /// </summary>
-                    abstract required: string[] option with get, set
-                    /// <summary>
-                    /// Definitions of each parameter.
-                    /// </summary>
-                    abstract properties: Record<string, Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (``type``: string, properties: Record<string, Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
-
-                module Parameters =
-                    module Properties =
-                        [<Interface>]
-                        type Item =
-                            /// <summary>
-                            /// The data type of the parameter.
-                            /// </summary>
-                            abstract ``type``: string with get, set
-                            /// <summary>
-                            /// A description of the expected parameter.
-                            /// </summary>
-                            abstract description: string with get, set
-                            [<ParamObject; Emit("$0")>]
-                            static member Create (``type``: string, description: string) : Item = jsNative
-
-module Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1 =
-    module Functions =
-        [<Interface>]
-        type Item =
-            abstract name: string with get, set
-            abstract code: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (name: string, code: string) : Item = jsNative
-
-    module Messages =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The role of the message sender (e.g., 'user', 'assistant', 'system', 'tool').
-            /// </summary>
-            abstract role: string with get, set
-            abstract content: U2<string, Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1.Messages.Item.Content.Item[]> with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (role: string, content: U2<string, Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1.Messages.Item.Content.Item[]>) : Item = jsNative
-
-        module Item =
-            module Content =
-                [<Interface>]
-                type Item =
-                    /// <summary>
-                    /// Type of the content (text)
-                    /// </summary>
-                    abstract ``type``: string option with get, set
-                    /// <summary>
-                    /// Text content
-                    /// </summary>
-                    abstract text: string option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (?``type``: string, ?text: string) : Item = jsNative
-
-    module Tools =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The name of the tool. More descriptive the better.
-            /// </summary>
-            abstract name: string with get, set
-            /// <summary>
-            /// A brief description of what the tool does.
-            /// </summary>
-            abstract description: string with get, set
-            /// <summary>
-            /// Schema defining the parameters accepted by the tool.
-            /// </summary>
-            abstract parameters: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1.Tools.Item.Parameters with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (name: string, description: string, parameters: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1.Tools.Item.Parameters) : Item = jsNative
-
-        module Item =
-            [<Interface>]
-            type Parameters =
-                /// <summary>
-                /// The type of the parameters object (usually 'object').
-                /// </summary>
-                abstract ``type``: string with get, set
-                /// <summary>
-                /// List of required parameter names.
-                /// </summary>
-                abstract required: string[] option with get, set
-                /// <summary>
-                /// Definitions of each parameter.
-                /// </summary>
-                abstract properties: Record<string, Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1.Tools.Item.Parameters.Properties.Item> with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, properties: Record<string, Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
-
-            module Parameters =
-                module Properties =
-                    [<Interface>]
-                    type Item =
-                        /// <summary>
-                        /// The data type of the parameter.
-                        /// </summary>
-                        abstract ``type``: string with get, set
-                        /// <summary>
-                        /// A description of the expected parameter.
-                        /// </summary>
-                        abstract description: string with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (``type``: string, description: string) : Item = jsNative
-
-        [<Interface>]
-        type Item2 =
-            /// <summary>
-            /// Specifies the type of tool (e.g., 'function').
-            /// </summary>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Details of the function tool.
-            /// </summary>
-            abstract ``function``: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1.Tools.Item2.Function with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, ``function``: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1.Tools.Item2.Function) : Item2 = jsNative
-
-        module Item2 =
-            [<Interface>]
-            type Function =
-                /// <summary>
-                /// The name of the function.
-                /// </summary>
-                abstract name: string with get, set
-                /// <summary>
-                /// A brief description of what the function does.
-                /// </summary>
-                abstract description: string with get, set
-                /// <summary>
-                /// Schema defining the parameters accepted by the function.
-                /// </summary>
-                abstract parameters: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1.Tools.Item2.Function.Parameters with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (name: string, description: string, parameters: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1.Tools.Item2.Function.Parameters) : Function = jsNative
-
-            module Function =
-                [<Interface>]
-                type Parameters =
-                    /// <summary>
-                    /// The type of the parameters object (usually 'object').
-                    /// </summary>
-                    abstract ``type``: string with get, set
-                    /// <summary>
-                    /// List of required parameter names.
-                    /// </summary>
-                    abstract required: string[] option with get, set
-                    /// <summary>
-                    /// Definitions of each parameter.
-                    /// </summary>
-                    abstract properties: Record<string, Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1.Tools.Item2.Function.Parameters.Properties.Item> with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (``type``: string, properties: Record<string, Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
-
-                module Parameters =
-                    module Properties =
-                        [<Interface>]
-                        type Item =
-                            /// <summary>
-                            /// The data type of the parameter.
-                            /// </summary>
-                            abstract ``type``: string with get, set
-                            /// <summary>
-                            /// A description of the expected parameter.
-                            /// </summary>
-                            abstract description: string with get, set
-                            [<ParamObject; Emit("$0")>]
-                            static member Create (``type``: string, description: string) : Item = jsNative
 
 [<Interface>]
 type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Prompt =
@@ -13914,151 +10156,7 @@ type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_JSON_Mode_3 =
     [<ParamObject; Emit("$0")>]
     static member Create (?``type``: Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_JSON_Mode_2.Type, ?json_schema: obj) : Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_JSON_Mode_3 = jsNative
 
-module Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response =
-    module Choices =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// Index of the choice in the list
-            /// </summary>
-            abstract index: float option with get, set
-            /// <summary>
-            /// The message generated by the model
-            /// </summary>
-            abstract message: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.Choices.Item.Message option with get, set
-            /// <summary>
-            /// Reason why the model stopped generating
-            /// </summary>
-            abstract finish_reason: string option with get, set
-            /// <summary>
-            /// Stop reason (may be null)
-            /// </summary>
-            abstract stop_reason: string option with get, set
-            /// <summary>
-            /// Log probabilities (if requested)
-            /// </summary>
-            abstract logprobs: obj option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?index: float, ?message: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.Choices.Item.Message, ?finish_reason: string, ?stop_reason: string, ?logprobs: obj) : Item = jsNative
-
-        module Item =
-            [<Interface>]
-            type Message =
-                /// <summary>
-                /// Role of the message author
-                /// </summary>
-                abstract role: string with get, set
-                /// <summary>
-                /// The content of the message
-                /// </summary>
-                abstract content: string with get, set
-                /// <summary>
-                /// Internal reasoning content (if available)
-                /// </summary>
-                abstract reasoning_content: string option with get, set
-                /// <summary>
-                /// Tool calls made by the assistant
-                /// </summary>
-                abstract tool_calls: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.Choices.Item.Message.ToolCalls.Item[] option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (role: string, content: string, ?reasoning_content: string, ?tool_calls: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.Choices.Item.Message.ToolCalls.Item[]) : Message = jsNative
-
-            module Message =
-                module ToolCalls =
-                    [<Interface>]
-                    type Item =
-                        /// <summary>
-                        /// Unique identifier for the tool call
-                        /// </summary>
-                        abstract id: string with get, set
-                        /// <summary>
-                        /// Type of tool call
-                        /// </summary>
-                        abstract ``type``: string with get, set
-                        abstract ``function``: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.Choices.Item.Message.ToolCalls.Item.Function with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (id: string, ``type``: string, ``function``: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.Choices.Item.Message.ToolCalls.Item.Function) : Item = jsNative
-
-                    module Item =
-                        [<Interface>]
-                        type Function =
-                            /// <summary>
-                            /// Name of the function to call
-                            /// </summary>
-                            abstract name: string with get, set
-                            /// <summary>
-                            /// JSON string of arguments for the function
-                            /// </summary>
-                            abstract arguments: string with get, set
-                            [<ParamObject; Emit("$0")>]
-                            static member Create (name: string, arguments: string) : Function = jsNative
-
-    [<Interface>]
-    type Usage =
-        /// <summary>
-        /// Total number of tokens in input
-        /// </summary>
-        abstract prompt_tokens: float option with get, set
-        /// <summary>
-        /// Total number of tokens in output
-        /// </summary>
-        abstract completion_tokens: float option with get, set
-        /// <summary>
-        /// Total number of input and output tokens
-        /// </summary>
-        abstract total_tokens: float option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?prompt_tokens: float, ?completion_tokens: float, ?total_tokens: float) : Usage = jsNative
-
 type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Output = U4<string, Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_AsyncResponse, Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response, Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Text_Completion_Response>
-
-module Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Text_Completion_Response =
-    module Choices =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// Index of the choice in the list
-            /// </summary>
-            abstract index: float with get, set
-            /// <summary>
-            /// The generated text completion
-            /// </summary>
-            abstract text: string with get, set
-            /// <summary>
-            /// Reason why the model stopped generating
-            /// </summary>
-            abstract finish_reason: string with get, set
-            /// <summary>
-            /// Stop reason (may be null)
-            /// </summary>
-            abstract stop_reason: string option with get, set
-            /// <summary>
-            /// Log probabilities (if requested)
-            /// </summary>
-            abstract logprobs: obj option with get, set
-            /// <summary>
-            /// Log probabilities for the prompt (if requested)
-            /// </summary>
-            abstract prompt_logprobs: obj option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (index: float, text: string, finish_reason: string, ?stop_reason: string, ?logprobs: obj, ?prompt_logprobs: obj) : Item = jsNative
-
-    [<Interface>]
-    type Usage =
-        /// <summary>
-        /// Total number of tokens in input
-        /// </summary>
-        abstract prompt_tokens: float option with get, set
-        /// <summary>
-        /// Total number of tokens in output
-        /// </summary>
-        abstract completion_tokens: float option with get, set
-        /// <summary>
-        /// Total number of input and output tokens
-        /// </summary>
-        abstract total_tokens: float option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?prompt_tokens: float, ?completion_tokens: float, ?total_tokens: float) : Usage = jsNative
 
 [<Interface>]
 type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response =
@@ -14281,112 +10379,11 @@ type Ai_Cf_Deepgram_Nova_3_Input =
     /// </summary>
     abstract utterance_end_ms: bool option with get, set
 
-module Ai_Cf_Deepgram_Nova_3_Input =
-    [<Interface>]
-    type Audio =
-        abstract body: obj with get, set
-        abstract contentType: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (body: obj, contentType: string) : Audio = jsNative
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type CustomTopicMode =
-        | [<CompiledName("extended")>] Extended
-        | [<CompiledName("strict")>] Strict
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Encoding =
-        | [<CompiledName("amr-nb")>] AmrNb
-        | [<CompiledName("amr-wb")>] AmrWb
-        | [<CompiledName("flac")>] Flac
-        | [<CompiledName("g729")>] G729
-        | [<CompiledName("linear16")>] Linear16
-        | [<CompiledName("mulaw")>] Mulaw
-        | [<CompiledName("opus")>] Opus
-        | [<CompiledName("speex")>] Speex
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Mode =
-        | [<CompiledName("finance")>] Finance
-        | [<CompiledName("general")>] General
-        | [<CompiledName("medical")>] Medical
-
 [<Interface>]
 type Ai_Cf_Deepgram_Nova_3_Output =
     abstract results: Ai_Cf_Deepgram_Nova_3_Output.Results option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?results: Ai_Cf_Deepgram_Nova_3_Output.Results) : Ai_Cf_Deepgram_Nova_3_Output = jsNative
-
-module Ai_Cf_Deepgram_Nova_3_Output =
-    [<Interface>]
-    type Results =
-        abstract channels: Ai_Cf_Deepgram_Nova_3_Output.Results.Channels.Item[] option with get, set
-        abstract summary: Ai_Cf_Deepgram_Nova_3_Output.Results.Summary option with get, set
-        abstract sentiments: Ai_Cf_Deepgram_Nova_3_Output.Results.Sentiments option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?channels: Ai_Cf_Deepgram_Nova_3_Output.Results.Channels.Item[], ?summary: Ai_Cf_Deepgram_Nova_3_Output.Results.Summary, ?sentiments: Ai_Cf_Deepgram_Nova_3_Output.Results.Sentiments) : Results = jsNative
-
-    module Results =
-        module Channels =
-            [<Interface>]
-            type Item =
-                abstract alternatives: Ai_Cf_Deepgram_Nova_3_Output.Results.Channels.Item.Alternatives.Item[] option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (?alternatives: Ai_Cf_Deepgram_Nova_3_Output.Results.Channels.Item.Alternatives.Item[]) : Item = jsNative
-
-            module Item =
-                module Alternatives =
-                    [<Interface>]
-                    type Item =
-                        abstract confidence: float option with get, set
-                        abstract transcript: string option with get, set
-                        abstract words: Ai_Cf_Deepgram_Nova_3_Output.Results.Channels.Item.Alternatives.Item.Words.Item[] option with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (?confidence: float, ?transcript: string, ?words: Ai_Cf_Deepgram_Nova_3_Output.Results.Channels.Item.Alternatives.Item.Words.Item[]) : Item = jsNative
-
-                    module Item =
-                        module Words =
-                            [<Interface>]
-                            type Item =
-                                abstract confidence: float option with get, set
-                                abstract ``end``: float option with get, set
-                                abstract start: float option with get, set
-                                abstract word: string option with get, set
-                                [<ParamObject; Emit("$0")>]
-                                static member Create (?confidence: float, ?``end``: float, ?start: float, ?word: string) : Item = jsNative
-
-        [<Interface>]
-        type Sentiments =
-            abstract segments: Ai_Cf_Deepgram_Nova_3_Output.Results.Sentiments.Segments.Item[] option with get, set
-            abstract average: Ai_Cf_Deepgram_Nova_3_Output.Results.Sentiments.Average option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?segments: Ai_Cf_Deepgram_Nova_3_Output.Results.Sentiments.Segments.Item[], ?average: Ai_Cf_Deepgram_Nova_3_Output.Results.Sentiments.Average) : Sentiments = jsNative
-
-        module Sentiments =
-            [<Interface>]
-            type Average =
-                abstract sentiment: string option with get, set
-                abstract sentiment_score: float option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (?sentiment: string, ?sentiment_score: float) : Average = jsNative
-
-            module Segments =
-                [<Interface>]
-                type Item =
-                    abstract text: string option with get, set
-                    abstract start_word: float option with get, set
-                    abstract end_word: float option with get, set
-                    abstract sentiment: string option with get, set
-                    abstract sentiment_score: float option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (?text: string, ?start_word: float, ?end_word: float, ?sentiment: string, ?sentiment_score: float) : Item = jsNative
-
-        [<Interface>]
-        type Summary =
-            abstract result: string option with get, set
-            abstract short: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?result: string, ?short: string) : Summary = jsNative
 
 [<Interface>]
 type Base_Ai_Cf_Deepgram_Nova_3 =
@@ -14436,20 +10433,6 @@ type Ai_Cf_Pipecat_Ai_Smart_Turn_V2_Input2 =
     [<ParamObject; Emit("$0")>]
     static member Create (audio: Ai_Cf_Pipecat_Ai_Smart_Turn_V2_Input2.Audio, ?dtype: Ai_Cf_Pipecat_Ai_Smart_Turn_V2_Input2.Dtype) : Ai_Cf_Pipecat_Ai_Smart_Turn_V2_Input2 = jsNative
 
-module Ai_Cf_Pipecat_Ai_Smart_Turn_V2_Input2 =
-    [<Interface>]
-    type Audio =
-        abstract body: obj with get, set
-        abstract contentType: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (body: obj, contentType: string) : Audio = jsNative
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Dtype =
-        | [<CompiledName("float32")>] Float32
-        | [<CompiledName("float64")>] Float64
-        | [<CompiledName("uint8")>] Uint8
-
 [<Interface>]
 type Ai_Cf_Pipecat_Ai_Smart_Turn_V2_Input3 =
     /// <summary>
@@ -14489,79 +10472,6 @@ type Base_Ai_Cf_Openai_Gpt_Oss_120B =
     abstract postProcessedOutputs: U2<Base_Ai_Cf_Openai_Gpt_Oss_120B.PostProcessedOutputs, Base_Ai_Cf_Openai_Gpt_Oss_120B.PostProcessedOutputs2> with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (inputs: U2<Base_Ai_Cf_Openai_Gpt_Oss_120B.Inputs, Base_Ai_Cf_Openai_Gpt_Oss_120B.Inputs2>, postProcessedOutputs: U2<Base_Ai_Cf_Openai_Gpt_Oss_120B.PostProcessedOutputs, Base_Ai_Cf_Openai_Gpt_Oss_120B.PostProcessedOutputs2>) : Base_Ai_Cf_Openai_Gpt_Oss_120B = jsNative
-
-module Base_Ai_Cf_Openai_Gpt_Oss_120B =
-    type Inputs =
-        inherit ResponsesInput
-        abstract audio: unit option with get, set
-        abstract chat_template_kwargs: unit option with get, set
-        abstract frequency_penalty: unit option with get, set
-        abstract function_call: unit option with get, set
-        abstract functions: unit option with get, set
-        abstract logit_bias: unit option with get, set
-        abstract logprobs: unit option with get, set
-        abstract max_completion_tokens: unit option with get, set
-        abstract max_tokens: unit option with get, set
-        abstract messages: unit option with get, set
-        abstract metadata: unit option with get, set
-        abstract modalities: unit option with get, set
-        abstract model: unit option with get, set
-        abstract n: unit option with get, set
-        abstract prediction: unit option with get, set
-        abstract presence_penalty: unit option with get, set
-        abstract reasoning_effort: unit option with get, set
-        abstract response_format: unit option with get, set
-        abstract seed: unit option with get, set
-        abstract stop: unit option with get, set
-        abstract store: unit option with get, set
-        abstract top_logprobs: unit option with get, set
-        abstract user: unit option with get, set
-        abstract web_search_options: unit option with get, set
-
-    type Inputs2 =
-        inherit ChatCompletionsCommonOptions
-        abstract messages: ChatCompletionMessageParam[] with get, set
-        abstract background: unit option with get, set
-        abstract conversation: unit option with get, set
-        abstract ``include``: unit option with get, set
-        abstract input: unit option with get, set
-        abstract instructions: unit option with get, set
-        abstract max_output_tokens: unit option with get, set
-        abstract previous_response_id: unit option with get, set
-        abstract prompt_cache_key: unit option with get, set
-        abstract reasoning: unit option with get, set
-        abstract safety_identifier: unit option with get, set
-        abstract text: unit option with get, set
-        abstract truncation: unit option with get, set
-
-    type PostProcessedOutputs =
-        inherit ChatCompletionsOutput
-        abstract created_at: unit option with get, set
-        abstract error: unit option with get, set
-        abstract incomplete_details: unit option with get, set
-        abstract instructions: unit option with get, set
-        abstract max_output_tokens: unit option with get, set
-        abstract output: unit option with get, set
-        abstract output_text: unit option with get, set
-        abstract parallel_tool_calls: unit option with get, set
-        abstract previous_response_id: unit option with get, set
-        abstract prompt: unit option with get, set
-        abstract reasoning: unit option with get, set
-        abstract safety_identifier: unit option with get, set
-        abstract status: unit option with get, set
-        abstract temperature: unit option with get, set
-        abstract text: unit option with get, set
-        abstract tool_choice: unit option with get, set
-        abstract tools: unit option with get, set
-        abstract top_p: unit option with get, set
-        abstract truncation: unit option with get, set
-
-    type PostProcessedOutputs2 =
-        inherit ResponsesOutput
-        abstract choices: unit option with get, set
-        abstract created: unit option with get, set
-        abstract model: unit option with get, set
-        abstract system_fingerprint: unit option with get, set
 
 [<Interface>]
 type Base_Ai_Cf_Openai_Gpt_Oss_20B =
@@ -14690,38 +10600,6 @@ type Ai_Cf_Deepgram_Aura_1_Input =
     [<ParamObject; Emit("$0")>]
     static member Create (text: string, ?speaker: Ai_Cf_Deepgram_Aura_1_Input.Speaker, ?encoding: Ai_Cf_Deepgram_Aura_1_Input.Encoding, ?container: Ai_Cf_Deepgram_Aura_1_Input.Container, ?sample_rate: float, ?bit_rate: float) : Ai_Cf_Deepgram_Aura_1_Input = jsNative
 
-module Ai_Cf_Deepgram_Aura_1_Input =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Container =
-        | [<CompiledName("none")>] None
-        | [<CompiledName("ogg")>] Ogg
-        | [<CompiledName("wav")>] Wav
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Encoding =
-        | [<CompiledName("aac")>] Aac
-        | [<CompiledName("alaw")>] Alaw
-        | [<CompiledName("flac")>] Flac
-        | [<CompiledName("linear16")>] Linear16
-        | [<CompiledName("mp3")>] Mp3
-        | [<CompiledName("mulaw")>] Mulaw
-        | [<CompiledName("opus")>] Opus
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Speaker =
-        | [<CompiledName("angus")>] Angus
-        | [<CompiledName("arcas")>] Arcas
-        | [<CompiledName("asteria")>] Asteria
-        | [<CompiledName("athena")>] Athena
-        | [<CompiledName("helios")>] Helios
-        | [<CompiledName("hera")>] Hera
-        | [<CompiledName("luna")>] Luna
-        | [<CompiledName("orion")>] Orion
-        | [<CompiledName("orpheus")>] Orpheus
-        | [<CompiledName("perseus")>] Perseus
-        | [<CompiledName("stella")>] Stella
-        | [<CompiledName("zeus")>] Zeus
-
 /// <summary>
 /// The generated audio in MP3 format
 /// </summary>
@@ -14747,44 +10625,6 @@ type Ai_Cf_Ai4Bharat_Indictrans2_En_Indic_1B_Input =
     [<ParamObject; Emit("$0")>]
     static member Create (text: U2<string, string[]>, target_language: Ai_Cf_Ai4Bharat_Indictrans2_En_Indic_1B_Input.TargetLanguage) : Ai_Cf_Ai4Bharat_Indictrans2_En_Indic_1B_Input = jsNative
 
-module Ai_Cf_Ai4Bharat_Indictrans2_En_Indic_1B_Input =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type TargetLanguage =
-        | [<CompiledName("asm_Beng")>] AsmBeng
-        | [<CompiledName("awa_Deva")>] AwaDeva
-        | [<CompiledName("ben_Beng")>] BenBeng
-        | [<CompiledName("bho_Deva")>] BhoDeva
-        | [<CompiledName("brx_Deva")>] BrxDeva
-        | [<CompiledName("doi_Deva")>] DoiDeva
-        | [<CompiledName("eng_Latn")>] EngLatn
-        | [<CompiledName("gom_Deva")>] GomDeva
-        | [<CompiledName("gon_Deva")>] GonDeva
-        | [<CompiledName("guj_Gujr")>] GujGujr
-        | [<CompiledName("hin_Deva")>] HinDeva
-        | [<CompiledName("hne_Deva")>] HneDeva
-        | [<CompiledName("kan_Knda")>] KanKnda
-        | [<CompiledName("kas_Arab")>] KasArab
-        | [<CompiledName("kas_Deva")>] KasDeva
-        | [<CompiledName("kha_Latn")>] KhaLatn
-        | [<CompiledName("lus_Latn")>] LusLatn
-        | [<CompiledName("mag_Deva")>] MagDeva
-        | [<CompiledName("mai_Deva")>] MaiDeva
-        | [<CompiledName("mal_Mlym")>] MalMlym
-        | [<CompiledName("mar_Deva")>] MarDeva
-        | [<CompiledName("mni_Beng")>] MniBeng
-        | [<CompiledName("mni_Mtei")>] MniMtei
-        | [<CompiledName("npi_Deva")>] NpiDeva
-        | [<CompiledName("ory_Orya")>] OryOrya
-        | [<CompiledName("pan_Guru")>] PanGuru
-        | [<CompiledName("san_Deva")>] SanDeva
-        | [<CompiledName("sat_Olck")>] SatOlck
-        | [<CompiledName("snd_Arab")>] SndArab
-        | [<CompiledName("snd_Deva")>] SndDeva
-        | [<CompiledName("tam_Taml")>] TamTaml
-        | [<CompiledName("tel_Telu")>] TelTelu
-        | [<CompiledName("unr_Deva")>] UnrDeva
-        | [<CompiledName("urd_Arab")>] UrdArab
-
 [<Interface>]
 type Ai_Cf_Ai4Bharat_Indictrans2_En_Indic_1B_Output =
     /// <summary>
@@ -14802,306 +10642,6 @@ type Base_Ai_Cf_Ai4Bharat_Indictrans2_En_Indic_1B =
     static member Create (inputs: Ai_Cf_Ai4Bharat_Indictrans2_En_Indic_1B_Input, postProcessedOutputs: Ai_Cf_Ai4Bharat_Indictrans2_En_Indic_1B_Output) : Base_Ai_Cf_Ai4Bharat_Indictrans2_En_Indic_1B = jsNative
 
 type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Input = U3<Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Async_Batch, Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages, Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Prompt>
-
-module Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages =
-    module Functions =
-        [<Interface>]
-        type Item =
-            abstract name: string with get, set
-            abstract code: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (name: string, code: string) : Item = jsNative
-
-    module Messages =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The role of the message sender (e.g., 'user', 'assistant', 'system', 'tool').
-            /// </summary>
-            abstract role: string with get, set
-            abstract content: U2<string, Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages.Messages.Item.Content.Item[]> with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (role: string, content: U2<string, Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages.Messages.Item.Content.Item[]>) : Item = jsNative
-
-        module Item =
-            module Content =
-                [<Interface>]
-                type Item =
-                    /// <summary>
-                    /// Type of the content (text)
-                    /// </summary>
-                    abstract ``type``: string option with get, set
-                    /// <summary>
-                    /// Text content
-                    /// </summary>
-                    abstract text: string option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (?``type``: string, ?text: string) : Item = jsNative
-
-    module Tools =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The name of the tool. More descriptive the better.
-            /// </summary>
-            abstract name: string with get, set
-            /// <summary>
-            /// A brief description of what the tool does.
-            /// </summary>
-            abstract description: string with get, set
-            /// <summary>
-            /// Schema defining the parameters accepted by the tool.
-            /// </summary>
-            abstract parameters: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages.Tools.Item.Parameters with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (name: string, description: string, parameters: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages.Tools.Item.Parameters) : Item = jsNative
-
-        module Item =
-            [<Interface>]
-            type Parameters =
-                /// <summary>
-                /// The type of the parameters object (usually 'object').
-                /// </summary>
-                abstract ``type``: string with get, set
-                /// <summary>
-                /// List of required parameter names.
-                /// </summary>
-                abstract required: string[] option with get, set
-                /// <summary>
-                /// Definitions of each parameter.
-                /// </summary>
-                abstract properties: Record<string, Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages.Tools.Item.Parameters.Properties.Item> with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, properties: Record<string, Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
-
-            module Parameters =
-                module Properties =
-                    [<Interface>]
-                    type Item =
-                        /// <summary>
-                        /// The data type of the parameter.
-                        /// </summary>
-                        abstract ``type``: string with get, set
-                        /// <summary>
-                        /// A description of the expected parameter.
-                        /// </summary>
-                        abstract description: string with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (``type``: string, description: string) : Item = jsNative
-
-        [<Interface>]
-        type Item2 =
-            /// <summary>
-            /// Specifies the type of tool (e.g., 'function').
-            /// </summary>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Details of the function tool.
-            /// </summary>
-            abstract ``function``: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages.Tools.Item2.Function with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, ``function``: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages.Tools.Item2.Function) : Item2 = jsNative
-
-        module Item2 =
-            [<Interface>]
-            type Function =
-                /// <summary>
-                /// The name of the function.
-                /// </summary>
-                abstract name: string with get, set
-                /// <summary>
-                /// A brief description of what the function does.
-                /// </summary>
-                abstract description: string with get, set
-                /// <summary>
-                /// Schema defining the parameters accepted by the function.
-                /// </summary>
-                abstract parameters: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages.Tools.Item2.Function.Parameters with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (name: string, description: string, parameters: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages.Tools.Item2.Function.Parameters) : Function = jsNative
-
-            module Function =
-                [<Interface>]
-                type Parameters =
-                    /// <summary>
-                    /// The type of the parameters object (usually 'object').
-                    /// </summary>
-                    abstract ``type``: string with get, set
-                    /// <summary>
-                    /// List of required parameter names.
-                    /// </summary>
-                    abstract required: string[] option with get, set
-                    /// <summary>
-                    /// Definitions of each parameter.
-                    /// </summary>
-                    abstract properties: Record<string, Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (``type``: string, properties: Record<string, Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
-
-                module Parameters =
-                    module Properties =
-                        [<Interface>]
-                        type Item =
-                            /// <summary>
-                            /// The data type of the parameter.
-                            /// </summary>
-                            abstract ``type``: string with get, set
-                            /// <summary>
-                            /// A description of the expected parameter.
-                            /// </summary>
-                            abstract description: string with get, set
-                            [<ParamObject; Emit("$0")>]
-                            static member Create (``type``: string, description: string) : Item = jsNative
-
-module Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1 =
-    module Functions =
-        [<Interface>]
-        type Item =
-            abstract name: string with get, set
-            abstract code: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (name: string, code: string) : Item = jsNative
-
-    module Messages =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The role of the message sender (e.g., 'user', 'assistant', 'system', 'tool').
-            /// </summary>
-            abstract role: string with get, set
-            abstract content: U2<string, Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1.Messages.Item.Content.Item[]> with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (role: string, content: U2<string, Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1.Messages.Item.Content.Item[]>) : Item = jsNative
-
-        module Item =
-            module Content =
-                [<Interface>]
-                type Item =
-                    /// <summary>
-                    /// Type of the content (text)
-                    /// </summary>
-                    abstract ``type``: string option with get, set
-                    /// <summary>
-                    /// Text content
-                    /// </summary>
-                    abstract text: string option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (?``type``: string, ?text: string) : Item = jsNative
-
-    module Tools =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The name of the tool. More descriptive the better.
-            /// </summary>
-            abstract name: string with get, set
-            /// <summary>
-            /// A brief description of what the tool does.
-            /// </summary>
-            abstract description: string with get, set
-            /// <summary>
-            /// Schema defining the parameters accepted by the tool.
-            /// </summary>
-            abstract parameters: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1.Tools.Item.Parameters with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (name: string, description: string, parameters: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1.Tools.Item.Parameters) : Item = jsNative
-
-        module Item =
-            [<Interface>]
-            type Parameters =
-                /// <summary>
-                /// The type of the parameters object (usually 'object').
-                /// </summary>
-                abstract ``type``: string with get, set
-                /// <summary>
-                /// List of required parameter names.
-                /// </summary>
-                abstract required: string[] option with get, set
-                /// <summary>
-                /// Definitions of each parameter.
-                /// </summary>
-                abstract properties: Record<string, Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1.Tools.Item.Parameters.Properties.Item> with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, properties: Record<string, Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
-
-            module Parameters =
-                module Properties =
-                    [<Interface>]
-                    type Item =
-                        /// <summary>
-                        /// The data type of the parameter.
-                        /// </summary>
-                        abstract ``type``: string with get, set
-                        /// <summary>
-                        /// A description of the expected parameter.
-                        /// </summary>
-                        abstract description: string with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (``type``: string, description: string) : Item = jsNative
-
-        [<Interface>]
-        type Item2 =
-            /// <summary>
-            /// Specifies the type of tool (e.g., 'function').
-            /// </summary>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Details of the function tool.
-            /// </summary>
-            abstract ``function``: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1.Tools.Item2.Function with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, ``function``: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1.Tools.Item2.Function) : Item2 = jsNative
-
-        module Item2 =
-            [<Interface>]
-            type Function =
-                /// <summary>
-                /// The name of the function.
-                /// </summary>
-                abstract name: string with get, set
-                /// <summary>
-                /// A brief description of what the function does.
-                /// </summary>
-                abstract description: string with get, set
-                /// <summary>
-                /// Schema defining the parameters accepted by the function.
-                /// </summary>
-                abstract parameters: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1.Tools.Item2.Function.Parameters with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (name: string, description: string, parameters: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1.Tools.Item2.Function.Parameters) : Function = jsNative
-
-            module Function =
-                [<Interface>]
-                type Parameters =
-                    /// <summary>
-                    /// The type of the parameters object (usually 'object').
-                    /// </summary>
-                    abstract ``type``: string with get, set
-                    /// <summary>
-                    /// List of required parameter names.
-                    /// </summary>
-                    abstract required: string[] option with get, set
-                    /// <summary>
-                    /// Definitions of each parameter.
-                    /// </summary>
-                    abstract properties: Record<string, Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1.Tools.Item2.Function.Parameters.Properties.Item> with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (``type``: string, properties: Record<string, Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
-
-                module Parameters =
-                    module Properties =
-                        [<Interface>]
-                        type Item =
-                            /// <summary>
-                            /// The data type of the parameter.
-                            /// </summary>
-                            abstract ``type``: string with get, set
-                            /// <summary>
-                            /// A description of the expected parameter.
-                            /// </summary>
-                            abstract description: string with get, set
-                            [<ParamObject; Emit("$0")>]
-                            static member Create (``type``: string, description: string) : Item = jsNative
 
 [<Interface>]
 type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Prompt =
@@ -15355,151 +10895,7 @@ type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_JSON_Mode_3 =
     [<ParamObject; Emit("$0")>]
     static member Create (?``type``: Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_JSON_Mode_2.Type, ?json_schema: obj) : Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_JSON_Mode_3 = jsNative
 
-module Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response =
-    module Choices =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// Index of the choice in the list
-            /// </summary>
-            abstract index: float option with get, set
-            /// <summary>
-            /// The message generated by the model
-            /// </summary>
-            abstract message: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.Choices.Item.Message option with get, set
-            /// <summary>
-            /// Reason why the model stopped generating
-            /// </summary>
-            abstract finish_reason: string option with get, set
-            /// <summary>
-            /// Stop reason (may be null)
-            /// </summary>
-            abstract stop_reason: string option with get, set
-            /// <summary>
-            /// Log probabilities (if requested)
-            /// </summary>
-            abstract logprobs: obj option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?index: float, ?message: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.Choices.Item.Message, ?finish_reason: string, ?stop_reason: string, ?logprobs: obj) : Item = jsNative
-
-        module Item =
-            [<Interface>]
-            type Message =
-                /// <summary>
-                /// Role of the message author
-                /// </summary>
-                abstract role: string with get, set
-                /// <summary>
-                /// The content of the message
-                /// </summary>
-                abstract content: string with get, set
-                /// <summary>
-                /// Internal reasoning content (if available)
-                /// </summary>
-                abstract reasoning_content: string option with get, set
-                /// <summary>
-                /// Tool calls made by the assistant
-                /// </summary>
-                abstract tool_calls: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.Choices.Item.Message.ToolCalls.Item[] option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (role: string, content: string, ?reasoning_content: string, ?tool_calls: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.Choices.Item.Message.ToolCalls.Item[]) : Message = jsNative
-
-            module Message =
-                module ToolCalls =
-                    [<Interface>]
-                    type Item =
-                        /// <summary>
-                        /// Unique identifier for the tool call
-                        /// </summary>
-                        abstract id: string with get, set
-                        /// <summary>
-                        /// Type of tool call
-                        /// </summary>
-                        abstract ``type``: string with get, set
-                        abstract ``function``: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.Choices.Item.Message.ToolCalls.Item.Function with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (id: string, ``type``: string, ``function``: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.Choices.Item.Message.ToolCalls.Item.Function) : Item = jsNative
-
-                    module Item =
-                        [<Interface>]
-                        type Function =
-                            /// <summary>
-                            /// Name of the function to call
-                            /// </summary>
-                            abstract name: string with get, set
-                            /// <summary>
-                            /// JSON string of arguments for the function
-                            /// </summary>
-                            abstract arguments: string with get, set
-                            [<ParamObject; Emit("$0")>]
-                            static member Create (name: string, arguments: string) : Function = jsNative
-
-    [<Interface>]
-    type Usage =
-        /// <summary>
-        /// Total number of tokens in input
-        /// </summary>
-        abstract prompt_tokens: float option with get, set
-        /// <summary>
-        /// Total number of tokens in output
-        /// </summary>
-        abstract completion_tokens: float option with get, set
-        /// <summary>
-        /// Total number of input and output tokens
-        /// </summary>
-        abstract total_tokens: float option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?prompt_tokens: float, ?completion_tokens: float, ?total_tokens: float) : Usage = jsNative
-
 type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Output = U4<string, Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_AsyncResponse, Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response, Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Text_Completion_Response>
-
-module Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Text_Completion_Response =
-    module Choices =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// Index of the choice in the list
-            /// </summary>
-            abstract index: float with get, set
-            /// <summary>
-            /// The generated text completion
-            /// </summary>
-            abstract text: string with get, set
-            /// <summary>
-            /// Reason why the model stopped generating
-            /// </summary>
-            abstract finish_reason: string with get, set
-            /// <summary>
-            /// Stop reason (may be null)
-            /// </summary>
-            abstract stop_reason: string option with get, set
-            /// <summary>
-            /// Log probabilities (if requested)
-            /// </summary>
-            abstract logprobs: obj option with get, set
-            /// <summary>
-            /// Log probabilities for the prompt (if requested)
-            /// </summary>
-            abstract prompt_logprobs: obj option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (index: float, text: string, finish_reason: string, ?stop_reason: string, ?logprobs: obj, ?prompt_logprobs: obj) : Item = jsNative
-
-    [<Interface>]
-    type Usage =
-        /// <summary>
-        /// Total number of tokens in input
-        /// </summary>
-        abstract prompt_tokens: float option with get, set
-        /// <summary>
-        /// Total number of tokens in output
-        /// </summary>
-        abstract completion_tokens: float option with get, set
-        /// <summary>
-        /// Total number of input and output tokens
-        /// </summary>
-        abstract total_tokens: float option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?prompt_tokens: float, ?completion_tokens: float, ?total_tokens: float) : Usage = jsNative
 
 [<Interface>]
 type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response =
@@ -15647,12 +11043,6 @@ type Ai_Cf_Deepgram_Flux_Input =
     [<ParamObject; Emit("$0")>]
     static member Create (encoding: string, sample_rate: string, ?eager_eot_threshold: string, ?eot_threshold: string, ?eot_timeout_ms: string, ?keyterm: string, ?mip_opt_out: Ai_Cf_Deepgram_Flux_Input.MipOptOut, ?tag: string) : Ai_Cf_Deepgram_Flux_Input = jsNative
 
-module Ai_Cf_Deepgram_Flux_Input =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type MipOptOut =
-        | [<CompiledName("false")>] False
-        | [<CompiledName("true")>] True
-
 /// <summary>
 /// Output will be returned as websocket messages.
 /// </summary>
@@ -15697,29 +11087,6 @@ type Ai_Cf_Deepgram_Flux_Output =
     [<ParamObject; Emit("$0")>]
     static member Create (?request_id: string, ?sequence_id: float, ?``event``: Ai_Cf_Deepgram_Flux_Output.Event, ?turn_index: float, ?audio_window_start: float, ?audio_window_end: float, ?transcript: string, ?words: Ai_Cf_Deepgram_Flux_Output.Words.Item[], ?end_of_turn_confidence: float) : Ai_Cf_Deepgram_Flux_Output = jsNative
 
-module Ai_Cf_Deepgram_Flux_Output =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Event =
-        | EagerEndOfTurn
-        | EndOfTurn
-        | StartOfTurn
-        | TurnResumed
-        | Update
-
-    module Words =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The individual punctuated, properly-cased word from the transcript
-            /// </summary>
-            abstract word: string with get, set
-            /// <summary>
-            /// Confidence that this word was transcribed correctly
-            /// </summary>
-            abstract confidence: float with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (word: string, confidence: float) : Item = jsNative
-
 [<Interface>]
 type Base_Ai_Cf_Deepgram_Flux =
     abstract inputs: Ai_Cf_Deepgram_Flux_Input with get, set
@@ -15755,50 +11122,6 @@ type Ai_Cf_Deepgram_Aura_2_En_Input =
     abstract bit_rate: float option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (text: string, ?speaker: Ai_Cf_Deepgram_Aura_2_En_Input.Speaker, ?encoding: Ai_Cf_Deepgram_Aura_1_Input.Encoding, ?container: Ai_Cf_Deepgram_Aura_1_Input.Container, ?sample_rate: float, ?bit_rate: float) : Ai_Cf_Deepgram_Aura_2_En_Input = jsNative
-
-module Ai_Cf_Deepgram_Aura_2_En_Input =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Speaker =
-        | [<CompiledName("amalthea")>] Amalthea
-        | [<CompiledName("andromeda")>] Andromeda
-        | [<CompiledName("apollo")>] Apollo
-        | [<CompiledName("arcas")>] Arcas
-        | [<CompiledName("aries")>] Aries
-        | [<CompiledName("asteria")>] Asteria
-        | [<CompiledName("athena")>] Athena
-        | [<CompiledName("atlas")>] Atlas
-        | [<CompiledName("aurora")>] Aurora
-        | [<CompiledName("callista")>] Callista
-        | [<CompiledName("cora")>] Cora
-        | [<CompiledName("cordelia")>] Cordelia
-        | [<CompiledName("delia")>] Delia
-        | [<CompiledName("draco")>] Draco
-        | [<CompiledName("electra")>] Electra
-        | [<CompiledName("harmonia")>] Harmonia
-        | [<CompiledName("helena")>] Helena
-        | [<CompiledName("hera")>] Hera
-        | [<CompiledName("hermes")>] Hermes
-        | [<CompiledName("hyperion")>] Hyperion
-        | [<CompiledName("iris")>] Iris
-        | [<CompiledName("janus")>] Janus
-        | [<CompiledName("juno")>] Juno
-        | [<CompiledName("jupiter")>] Jupiter
-        | [<CompiledName("luna")>] Luna
-        | [<CompiledName("mars")>] Mars
-        | [<CompiledName("minerva")>] Minerva
-        | [<CompiledName("neptune")>] Neptune
-        | [<CompiledName("odysseus")>] Odysseus
-        | [<CompiledName("ophelia")>] Ophelia
-        | [<CompiledName("orion")>] Orion
-        | [<CompiledName("orpheus")>] Orpheus
-        | [<CompiledName("pandora")>] Pandora
-        | [<CompiledName("phoebe")>] Phoebe
-        | [<CompiledName("pluto")>] Pluto
-        | [<CompiledName("saturn")>] Saturn
-        | [<CompiledName("thalia")>] Thalia
-        | [<CompiledName("theia")>] Theia
-        | [<CompiledName("vesta")>] Vesta
-        | [<CompiledName("zeus")>] Zeus
 
 /// <summary>
 /// The generated audio in MP3 format
@@ -15841,20 +11164,6 @@ type Ai_Cf_Deepgram_Aura_2_Es_Input =
     [<ParamObject; Emit("$0")>]
     static member Create (text: string, ?speaker: Ai_Cf_Deepgram_Aura_2_Es_Input.Speaker, ?encoding: Ai_Cf_Deepgram_Aura_1_Input.Encoding, ?container: Ai_Cf_Deepgram_Aura_1_Input.Container, ?sample_rate: float, ?bit_rate: float) : Ai_Cf_Deepgram_Aura_2_Es_Input = jsNative
 
-module Ai_Cf_Deepgram_Aura_2_Es_Input =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Speaker =
-        | [<CompiledName("alvaro")>] Alvaro
-        | [<CompiledName("aquila")>] Aquila
-        | [<CompiledName("carina")>] Carina
-        | [<CompiledName("celeste")>] Celeste
-        | [<CompiledName("diana")>] Diana
-        | [<CompiledName("estrella")>] Estrella
-        | [<CompiledName("javier")>] Javier
-        | [<CompiledName("nestor")>] Nestor
-        | [<CompiledName("selena")>] Selena
-        | [<CompiledName("sirio")>] Sirio
-
 /// <summary>
 /// The generated audio in MP3 format
 /// </summary>
@@ -15872,14 +11181,6 @@ type Ai_Cf_Black_Forest_Labs_Flux_2_Dev_Input =
     abstract multipart: Ai_Cf_Black_Forest_Labs_Flux_2_Dev_Input.Multipart with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (multipart: Ai_Cf_Black_Forest_Labs_Flux_2_Dev_Input.Multipart) : Ai_Cf_Black_Forest_Labs_Flux_2_Dev_Input = jsNative
-
-module Ai_Cf_Black_Forest_Labs_Flux_2_Dev_Input =
-    [<Interface>]
-    type Multipart =
-        abstract body: obj option with get, set
-        abstract contentType: string option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?body: obj, ?contentType: string) : Multipart = jsNative
 
 [<Interface>]
 type Ai_Cf_Black_Forest_Labs_Flux_2_Dev_Output =
@@ -15903,14 +11204,6 @@ type Ai_Cf_Black_Forest_Labs_Flux_2_Klein_4B_Input =
     [<ParamObject; Emit("$0")>]
     static member Create (multipart: Ai_Cf_Black_Forest_Labs_Flux_2_Klein_4B_Input.Multipart) : Ai_Cf_Black_Forest_Labs_Flux_2_Klein_4B_Input = jsNative
 
-module Ai_Cf_Black_Forest_Labs_Flux_2_Klein_4B_Input =
-    [<Interface>]
-    type Multipart =
-        abstract body: obj option with get, set
-        abstract contentType: string option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?body: obj, ?contentType: string) : Multipart = jsNative
-
 [<Interface>]
 type Ai_Cf_Black_Forest_Labs_Flux_2_Klein_4B_Output =
     /// <summary>
@@ -15932,14 +11225,6 @@ type Ai_Cf_Black_Forest_Labs_Flux_2_Klein_9B_Input =
     abstract multipart: Ai_Cf_Black_Forest_Labs_Flux_2_Klein_9B_Input.Multipart with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (multipart: Ai_Cf_Black_Forest_Labs_Flux_2_Klein_9B_Input.Multipart) : Ai_Cf_Black_Forest_Labs_Flux_2_Klein_9B_Input = jsNative
-
-module Ai_Cf_Black_Forest_Labs_Flux_2_Klein_9B_Input =
-    [<Interface>]
-    type Multipart =
-        abstract body: obj option with get, set
-        abstract contentType: string option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?body: obj, ?contentType: string) : Multipart = jsNative
 
 [<Interface>]
 type Ai_Cf_Black_Forest_Labs_Flux_2_Klein_9B_Output =
@@ -16055,20 +11340,6 @@ type Ai_Cf_Moondream_Moondream3_1_9B_A2B_Input =
     [<ParamObject; Emit("$0")>]
     static member Create (?task: Ai_Cf_Moondream_Moondream3_1_9B_A2B_Input.Task, ?image: string, ?question: string, ?caption_length: Ai_Cf_Moondream_Moondream3_1_9B_A2B_Input.CaptionLength, ?target: string, ?reasoning: bool, ?temperature: float, ?top_p: float, ?max_tokens: float, ?max_objects: float, ?stream: bool) : Ai_Cf_Moondream_Moondream3_1_9B_A2B_Input = jsNative
 
-module Ai_Cf_Moondream_Moondream3_1_9B_A2B_Input =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type CaptionLength =
-        | [<CompiledName("long")>] Long
-        | [<CompiledName("normal")>] Normal
-        | [<CompiledName("short")>] Short
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Task =
-        | [<CompiledName("caption")>] Caption
-        | [<CompiledName("detect")>] Detect
-        | [<CompiledName("point")>] Point
-        | [<CompiledName("query")>] Query
-
 [<Interface>]
 type Ai_Cf_Moondream_Moondream3_1_9B_A2B_Output =
     /// <summary>
@@ -16098,81 +11369,6 @@ type Ai_Cf_Moondream_Moondream3_1_9B_A2B_Output =
     abstract reasoning: Ai_Cf_Moondream_Moondream3_1_9B_A2B_Output.Reasoning option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (finish_reason: string, metrics: Ai_Cf_Moondream_Moondream3_1_9B_A2B_Output.Metrics, ?answer: string, ?caption: string, ?points: Ai_Cf_Moondream_Moondream3_1_9B_A2B_Output.Points.Item[], ?objects: Ai_Cf_Moondream_Moondream3_1_9B_A2B_Output.Objects.Item[], ?reasoning: Ai_Cf_Moondream_Moondream3_1_9B_A2B_Output.Reasoning) : Ai_Cf_Moondream_Moondream3_1_9B_A2B_Output = jsNative
-
-module Ai_Cf_Moondream_Moondream3_1_9B_A2B_Output =
-    [<Interface>]
-    type Metrics =
-        /// <summary>
-        /// Number of input tokens consumed.
-        /// </summary>
-        abstract input_tokens: float with get, set
-        /// <summary>
-        /// Number of output tokens generated.
-        /// </summary>
-        abstract output_tokens: float with get, set
-        /// <summary>
-        /// Prefill time in milliseconds.
-        /// </summary>
-        abstract prefill_time_ms: float with get, set
-        /// <summary>
-        /// Decode time in milliseconds.
-        /// </summary>
-        abstract decode_time_ms: float with get, set
-        /// <summary>
-        /// Time to first token in milliseconds.
-        /// </summary>
-        abstract ttft_ms: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (input_tokens: float, output_tokens: float, prefill_time_ms: float, decode_time_ms: float, ttft_ms: float) : Metrics = jsNative
-
-    module Objects =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// Minimum X coordinate.
-            /// </summary>
-            abstract x_min: float with get, set
-            /// <summary>
-            /// Minimum Y coordinate.
-            /// </summary>
-            abstract y_min: float with get, set
-            /// <summary>
-            /// Maximum X coordinate.
-            /// </summary>
-            abstract x_max: float with get, set
-            /// <summary>
-            /// Maximum Y coordinate.
-            /// </summary>
-            abstract y_max: float with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (x_min: float, y_min: float, x_max: float, y_max: float) : Item = jsNative
-
-    module Points =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// X coordinate.
-            /// </summary>
-            abstract x: float with get, set
-            /// <summary>
-            /// Y coordinate.
-            /// </summary>
-            abstract y: float with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (x: float, y: float) : Item = jsNative
-
-    [<Interface>]
-    type Reasoning =
-        /// <summary>
-        /// Reasoning text.
-        /// </summary>
-        abstract text: string with get, set
-        /// <summary>
-        /// Grounding information.
-        /// </summary>
-        abstract grounding: obj[] option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (text: string, ?grounding: obj[]) : Reasoning = jsNative
 
 [<Interface>]
 type Base_Ai_Cf_Moondream_Moondream3_1_9B_A2B =
@@ -16338,14 +11534,6 @@ type AiOptions =
     [<ParamObject; Emit("$0")>]
     static member Create (?queueRequest: bool, ?websocket: bool, ?tags: string[], ?gateway: GatewayOptions, ?returnRawResponse: bool, ?prefix: string, ?extraHeaders: obj, ?signal: AbortSignal) : AiOptions = jsNative
 
-module GatewayRetries =
-    type MaxAttempts =
-        | N1 = 1
-        | N2 = 2
-        | N3 = 3
-        | N4 = 4
-        | N5 = 5
-
 [<Interface>]
 type AiModelsSearchParams =
     abstract author: string option with get, set
@@ -16369,23 +11557,6 @@ type AiModelsSearchObject =
     abstract properties: AiModelsSearchObject.Properties.Item[] with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (id: string, source: float, name: string, description: string, task: AiModelsSearchObject.Task, tags: string[], properties: AiModelsSearchObject.Properties.Item[]) : AiModelsSearchObject = jsNative
-
-module AiModelsSearchObject =
-    module Properties =
-        [<Interface>]
-        type Item =
-            abstract property_id: string with get, set
-            abstract value: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (property_id: string, value: string) : Item = jsNative
-
-    [<Interface>]
-    type Task =
-        abstract id: string with get, set
-        abstract name: string with get, set
-        abstract description: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (id: string, name: string, description: string) : Task = jsNative
 
 type ChatCompletionsBase = ChatCompletionsMessagesInput
 
@@ -16417,38 +11588,6 @@ type AiAsyncBatchResponse =
     [<ParamObject; Emit("$0")>]
     static member Create (request_id: string) : AiAsyncBatchResponse = jsNative
 
-module AIGatewayUniversalRequest =
-    type Headers =
-        abstract ``cf-aig-metadata``: U2<string, Record<string, U4<string, float, bigint, bool> option>> option with get, set
-        abstract ``cf-aig-custom-cost``: U3<string, AIGatewayUniversalRequest.Headers.CfAigCustomCost, AIGatewayUniversalRequest.Headers.CfAigCustomCost2> option with get, set
-        abstract ``cf-aig-cache-ttl``: U2<string, float> option with get, set
-        abstract ``cf-aig-skip-cache``: U2<string, bool> option with get, set
-        abstract ``cf-aig-cache-key``: string option with get, set
-        abstract ``cf-aig-event-id``: string option with get, set
-        abstract ``cf-aig-request-timeout``: U2<string, float> option with get, set
-        abstract ``cf-aig-max-attempts``: U2<string, float> option with get, set
-        abstract ``cf-aig-retry-delay``: U2<string, float> option with get, set
-        abstract ``cf-aig-backoff``: string option with get, set
-        abstract ``cf-aig-collect-log``: U2<string, bool> option with get, set
-        abstract Authorization: string option with get, set
-        abstract ``Content-Type``: string option with get, set
-        [<EmitIndexer>]
-        abstract Item: string -> obj option with get, set
-
-    module Headers =
-        [<Interface>]
-        type CfAigCustomCost =
-            abstract per_token_in: float option with get, set
-            abstract per_token_out: float option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?per_token_in: float, ?per_token_out: float) : CfAigCustomCost = jsNative
-
-        [<Interface>]
-        type CfAigCustomCost2 =
-            abstract total_cost: float option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?total_cost: float) : CfAigCustomCost2 = jsNative
-
 type Ai<'AiModelList> =
     abstract aiGatewayLogId: string option with get, set
     abstract gateway: gatewayId: string -> AiGateway
@@ -16475,158 +11614,6 @@ type Ai<'AiModelList> =
     abstract toMarkdown: unit -> ToMarkdownService
     abstract toMarkdown: files: MarkdownDocument[] * ?options: ConversionRequestOptions -> JS.Promise<ConversionResponse[]>
     abstract toMarkdown: files: MarkdownDocument * ?options: ConversionRequestOptions -> JS.Promise<ConversionResponse>
-
-module Ai =
-    module Run =
-        [<Interface>]
-        type Inputs =
-            abstract requests: obj[] with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (requests: obj[]) : Inputs = jsNative
-
-        [<Interface>]
-        type Options =
-            inherit AiOptions
-            /// <summary>
-            /// Send requests as an asynchronous batch job, only works for supported models
-            /// https://developers.cloudflare.com/workers-ai/features/batch-api
-            /// </summary>
-            abstract queueRequest: bool with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (queueRequest: bool, ?websocket: bool, ?tags: string[], ?gateway: GatewayOptions, ?returnRawResponse: bool, ?prefix: string, ?extraHeaders: obj, ?signal: AbortSignal) : Options = jsNative
-
-        [<Interface>]
-        type Options2 =
-            inherit AiOptions
-            abstract returnRawResponse: bool with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (returnRawResponse: bool, ?queueRequest: bool, ?websocket: bool, ?tags: string[], ?gateway: GatewayOptions, ?prefix: string, ?extraHeaders: obj, ?signal: AbortSignal) : Options2 = jsNative
-
-        [<Interface>]
-        type Options3 =
-            inherit AiOptions
-            /// <summary>
-            /// Establish websocket connections, only works for supported models
-            /// </summary>
-            abstract websocket: bool with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (websocket: bool, ?queueRequest: bool, ?tags: string[], ?gateway: GatewayOptions, ?returnRawResponse: bool, ?prefix: string, ?extraHeaders: obj, ?signal: AbortSignal) : Options3 = jsNative
-
-module AiGateway =
-    module Run =
-        [<Interface>]
-        type Options =
-            abstract gateway: UniversalGatewayOptions option with get, set
-            abstract extraHeaders: obj option with get, set
-            abstract signal: AbortSignal option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?gateway: UniversalGatewayOptions, ?extraHeaders: obj, ?signal: AbortSignal) : Options = jsNative
-
-module AiGatewayPatchLog =
-    type Feedback =
-        | NMinus1 = -1
-        | N1 = 1
-
-module AutoRagListResponse =
-    [<Interface>]
-    type Item =
-        abstract id: string with get, set
-        abstract enable: bool with get, set
-        abstract ``type``: string with get, set
-        abstract source: string with get, set
-        abstract vectorize_name: string with get, set
-        abstract paused: bool with get, set
-        abstract status: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (id: string, enable: bool, ``type``: string, source: string, vectorize_name: string, paused: bool, status: string) : Item = jsNative
-
-module AutoRagSearchRequest =
-    [<Interface>]
-    type RankingOptions =
-        abstract ranker: string option with get, set
-        abstract score_threshold: float option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?ranker: string, ?score_threshold: float) : RankingOptions = jsNative
-
-    [<Interface>]
-    type Reranking =
-        abstract enabled: bool option with get, set
-        abstract model: string option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?enabled: bool, ?model: string) : Reranking = jsNative
-
-module AutoRagSearchResponse =
-    module Data =
-        [<Interface>]
-        type Item =
-            abstract file_id: string with get, set
-            abstract filename: string with get, set
-            abstract score: float with get, set
-            abstract attributes: Record<string, U3<string, float, bool> option> with get, set
-            abstract content: AutoRagSearchResponse.Data.Item.Content.Item[] with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (file_id: string, filename: string, score: float, attributes: Record<string, U3<string, float, bool> option>, content: AutoRagSearchResponse.Data.Item.Content.Item[]) : Item = jsNative
-
-        module Item =
-            module Content =
-                [<Interface>]
-                type Item =
-                    abstract ``type``: string with get, set
-                    abstract text: string with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (``type``: string, text: string) : Item = jsNative
-
-module ComparisonFilter =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Type =
-        | [<CompiledName("eq")>] Eq
-        | [<CompiledName("gt")>] Gt
-        | [<CompiledName("gte")>] Gte
-        | [<CompiledName("lt")>] Lt
-        | [<CompiledName("lte")>] Lte
-        | [<CompiledName("ne")>] Ne
-
-module ConversionOptions =
-    [<Interface>]
-    type Docx =
-        abstract images: EmbeddedImageConversionOptions option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?images: EmbeddedImageConversionOptions) : Docx = jsNative
-
-    [<Interface>]
-    type Html =
-        abstract images: ConversionOptions.Html.Images option with get, set
-        abstract hostname: string option with get, set
-        abstract cssSelector: string option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?images: ConversionOptions.Html.Images, ?hostname: string, ?cssSelector: string) : Html = jsNative
-
-    module Html =
-        [<Interface>]
-        type Images =
-            inherit ImageConversionOptions
-            abstract convert: bool option with get, set
-            abstract maxConvertedImages: float option with get, set
-            abstract convertOGImage: bool option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?descriptionLanguage: ConversionOptions.Html.Images.DescriptionLanguage, ?convert: bool, ?maxConvertedImages: float, ?convertOGImage: bool) : Images = jsNative
-
-        module Images =
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type DescriptionLanguage =
-                | [<CompiledName("de")>] De
-                | [<CompiledName("en")>] En
-                | [<CompiledName("es")>] Es
-                | [<CompiledName("fr")>] Fr
-                | [<CompiledName("it")>] It
-                | [<CompiledName("pt")>] Pt
-
-    [<Interface>]
-    type Pdf =
-        abstract images: EmbeddedImageConversionOptions option with get, set
-        abstract metadata: bool option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?images: EmbeddedImageConversionOptions, ?metadata: bool) : Pdf = jsNative
 
 [<Interface>]
 type ConversionResponse2 =
@@ -16892,49 +11879,6 @@ type ArtifactsRepoListResult =
     [<ParamObject; Emit("$0")>]
     static member Create (repos: ArtifactsRepoListResult.Repos.Item[], total: float, ?cursor: string) : ArtifactsRepoListResult = jsNative
 
-module ArtifactsRepoListResult =
-    module Repos =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// Unique repository ID.
-            /// </summary>
-            abstract id: string with get, set
-            /// <summary>
-            /// Repository name.
-            /// </summary>
-            abstract name: string with get, set
-            /// <summary>
-            /// Repository description, or null if not set.
-            /// </summary>
-            abstract description: string option with get, set
-            /// <summary>
-            /// Default branch name (e.g. "main").
-            /// </summary>
-            abstract defaultBranch: string with get, set
-            /// <summary>
-            /// ISO 8601 creation timestamp.
-            /// </summary>
-            abstract createdAt: string with get, set
-            /// <summary>
-            /// ISO 8601 last-updated timestamp.
-            /// </summary>
-            abstract updatedAt: string with get, set
-            /// <summary>
-            /// ISO 8601 timestamp of the last push, or null if never pushed.
-            /// </summary>
-            abstract lastPushAt: string option with get, set
-            /// <summary>
-            /// Fork source (e.g. "github:owner/repo", "artifacts:namespace/repo"), or null if not a fork.
-            /// </summary>
-            abstract source: string option with get, set
-            /// <summary>
-            /// Whether the repository is read-only.
-            /// </summary>
-            abstract readOnly: bool with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (id: string, name: string, defaultBranch: string, createdAt: string, updatedAt: string, readOnly: bool, ?description: string, ?lastPushAt: string, ?source: string) : Item = jsNative
-
 /// <summary>
 /// Result of creating an access token.
 /// </summary>
@@ -16958,12 +11902,6 @@ type ArtifactsCreateTokenResult =
     abstract expiresAt: string with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (id: string, plaintext: string, scope: ArtifactsCreateTokenResult.Scope, expiresAt: string) : ArtifactsCreateTokenResult = jsNative
-
-module ArtifactsCreateTokenResult =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Scope =
-        | [<CompiledName("read")>] Read
-        | [<CompiledName("write")>] Write
 
 /// <summary>
 /// Token metadata (no plaintext).
@@ -16992,13 +11930,6 @@ type ArtifactsTokenInfo =
     abstract expiresAt: string with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (id: string, scope: ArtifactsCreateTokenResult.Scope, state: ArtifactsTokenInfo.State, createdAt: string, expiresAt: string) : ArtifactsTokenInfo = jsNative
-
-module ArtifactsTokenInfo =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type State =
-        | [<CompiledName("active")>] Active
-        | [<CompiledName("expired")>] Expired
-        | [<CompiledName("revoked")>] Revoked
 
 /// <summary>
 /// Paginated list of tokens for a repository.
@@ -17053,16 +11984,6 @@ type ArtifactsRepo =
     abstract fork: name: string * ?opts: ArtifactsRepo.Fork.Opts -> JS.Promise<ArtifactsCreateRepoResult>
     [<ParamObject; Emit("$0")>]
     static member Create (createToken: Func<ArtifactsCreateTokenResult.Scope option, float option, JS.Promise<ArtifactsCreateTokenResult>>, listTokens: (unit -> JS.Promise<ArtifactsTokenListResult>), revokeToken: (string -> JS.Promise<bool>), fork: Func<string, ArtifactsRepo.Fork.Opts option, JS.Promise<ArtifactsCreateRepoResult>>, id: string, name: string, defaultBranch: string, createdAt: string, updatedAt: string, readOnly: bool, remote: string, ?description: string, ?lastPushAt: string, ?source: string) : ArtifactsRepo = jsNative
-
-module ArtifactsRepo =
-    module Fork =
-        [<Interface>]
-        type Opts =
-            abstract description: string option with get, set
-            abstract readOnly: bool option with get, set
-            abstract defaultBranchOnly: bool option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?description: string, ?readOnly: bool, ?defaultBranchOnly: bool) : Opts = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type ArtifactsErrorCode =
@@ -17156,56 +12077,6 @@ type Artifacts =
     abstract delete: name: string -> JS.Promise<bool>
     [<ParamObject; Emit("$0")>]
     static member Create (create: Func<string, Artifacts.Create.Opts option, JS.Promise<ArtifactsCreateRepoResult>>, get: (string -> JS.Promise<ArtifactsRepo>), import: (Artifacts.Import.Params -> JS.Promise<ArtifactsCreateRepoResult>), list: (Artifacts.List.Opts option -> JS.Promise<ArtifactsRepoListResult>), delete: (string -> JS.Promise<bool>)) : Artifacts = jsNative
-
-module Artifacts =
-    module Create =
-        [<Interface>]
-        type Opts =
-            abstract readOnly: bool option with get, set
-            abstract description: string option with get, set
-            abstract setDefaultBranch: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?readOnly: bool, ?description: string, ?setDefaultBranch: string) : Opts = jsNative
-
-    module Import =
-        [<Interface>]
-        type Params =
-            abstract source: Artifacts.Import.Params.Source with get, set
-            abstract target: Artifacts.Import.Params.Target with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (source: Artifacts.Import.Params.Source, target: Artifacts.Import.Params.Target) : Params = jsNative
-
-        module Params =
-            [<Interface>]
-            type Source =
-                abstract url: string with get, set
-                abstract branch: string option with get, set
-                abstract depth: float option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (url: string, ?branch: string, ?depth: float) : Source = jsNative
-
-            [<Interface>]
-            type Target =
-                abstract name: string with get, set
-                abstract opts: Artifacts.Import.Params.Target.Opts option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (name: string, ?opts: Artifacts.Import.Params.Target.Opts) : Target = jsNative
-
-            module Target =
-                [<Interface>]
-                type Opts =
-                    abstract description: string option with get, set
-                    abstract readOnly: bool option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (?description: string, ?readOnly: bool) : Opts = jsNative
-
-    module List =
-        [<Interface>]
-        type Opts =
-            abstract limit: float option with get, set
-            abstract cursor: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?limit: float, ?cursor: string) : Opts = jsNative
 
 /// <remarks>
 /// @deprecated
@@ -17532,111 +12403,6 @@ type BrowserRunBaseOptions =
     [<ParamObject; Emit("$0")>]
     static member Create (?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float) : BrowserRunBaseOptions = jsNative
 
-module BrowserRunBaseOptions =
-    module AddScriptTag =
-        [<Interface>]
-        type Item =
-            abstract content: string option with get, set
-            abstract url: string option with get, set
-            abstract ``type``: string option with get, set
-            abstract id: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?content: string, ?url: string, ?``type``: string, ?id: string) : Item = jsNative
-
-    module AddStyleTag =
-        [<Interface>]
-        type Item =
-            abstract content: string option with get, set
-            abstract url: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?content: string, ?url: string) : Item = jsNative
-
-    [<Interface>]
-    type Authenticate =
-        abstract username: string with get, set
-        abstract password: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (username: string, password: string) : Authenticate = jsNative
-
-    module Cookies =
-        [<Interface>]
-        type Item =
-            abstract name: string with get, set
-            abstract value: string with get, set
-            abstract url: string option with get, set
-            abstract domain: string option with get, set
-            abstract path: string option with get, set
-            abstract secure: bool option with get, set
-            abstract httpOnly: bool option with get, set
-            abstract sameSite: BrowserRunBaseOptions.Cookies.Item.SameSite option with get, set
-            abstract expires: float option with get, set
-            abstract priority: BrowserRunBaseOptions.Cookies.Item.Priority option with get, set
-            abstract sameParty: bool option with get, set
-            abstract sourceScheme: BrowserRunBaseOptions.Cookies.Item.SourceScheme option with get, set
-            abstract sourcePort: float option with get, set
-            abstract partitionKey: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (name: string, value: string, ?url: string, ?domain: string, ?path: string, ?secure: bool, ?httpOnly: bool, ?sameSite: BrowserRunBaseOptions.Cookies.Item.SameSite, ?expires: float, ?priority: BrowserRunBaseOptions.Cookies.Item.Priority, ?sameParty: bool, ?sourceScheme: BrowserRunBaseOptions.Cookies.Item.SourceScheme, ?sourcePort: float, ?partitionKey: string) : Item = jsNative
-
-        module Item =
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type Priority =
-                | High
-                | Low
-                | Medium
-
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type SameSite =
-                | Lax
-                | None
-                | Strict
-
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type SourceScheme =
-                | NonSecure
-                | Secure
-                | Unset
-
-    [<Interface>]
-    type GotoOptions =
-        /// <summary>
-        /// Navigation timeout in milliseconds (max 60 000).
-        /// </summary>
-        /// <defaultValue>30000</defaultValue>
-        abstract timeout: float option with get, set
-        /// <summary>
-        /// When to consider navigation complete.
-        /// </summary>
-        /// <defaultValue>"domcontentloaded"</defaultValue>
-        abstract waitUntil: U2<string, BrowserRunLifecycleEvent[]> option with get, set
-        abstract referer: string option with get, set
-        abstract referrerPolicy: string option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?timeout: float, ?waitUntil: U2<string, BrowserRunLifecycleEvent[]>, ?referer: string, ?referrerPolicy: string) : GotoOptions = jsNative
-
-    [<Interface>]
-    type Viewport =
-        abstract width: float with get, set
-        abstract height: float with get, set
-        abstract deviceScaleFactor: float option with get, set
-        abstract isMobile: bool option with get, set
-        abstract isLandscape: bool option with get, set
-        abstract hasTouch: bool option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (width: float, height: float, ?deviceScaleFactor: float, ?isMobile: bool, ?isLandscape: bool, ?hasTouch: bool) : Viewport = jsNative
-
-    [<Interface>]
-    type WaitForSelector =
-        abstract selector: string with get, set
-        abstract hidden: bool option with get, set
-        abstract visible: bool option with get, set
-        /// <summary>
-        /// Timeout in milliseconds. Max 120000
-        /// </summary>
-        abstract timeout: float option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (selector: string, ?hidden: bool, ?visible: bool, ?timeout: float) : WaitForSelector = jsNative
-
 /// <summary>
 /// Backend selection, mixed into the options of the quick actions that support it.
 /// Deliberately not part of <c>BrowserRunBaseOptions</c>: <c>scrape</c>, <c>links</c> and <c>snapshot</c>
@@ -17691,28 +12457,6 @@ type BrowserRunPuppeteerScreenshotOptions =
     abstract fromSurface: bool option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?``type``: BrowserRunPuppeteerScreenshotOptions.Type, ?encoding: BrowserRunPuppeteerScreenshotOptions.Encoding, ?quality: float, ?fullPage: bool, ?clip: BrowserRunPuppeteerScreenshotOptions.Clip, ?omitBackground: bool, ?optimizeForSpeed: bool, ?captureBeyondViewport: bool, ?fromSurface: bool) : BrowserRunPuppeteerScreenshotOptions = jsNative
-
-module BrowserRunPuppeteerScreenshotOptions =
-    [<Interface>]
-    type Clip =
-        abstract x: float with get, set
-        abstract y: float with get, set
-        abstract width: float with get, set
-        abstract height: float with get, set
-        abstract scale: float option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (x: float, y: float, width: float, height: float, ?scale: float) : Clip = jsNative
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Encoding =
-        | [<CompiledName("base64")>] Base64
-        | [<CompiledName("binary")>] Binary
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Type =
-        | [<CompiledName("jpeg")>] Jpeg
-        | [<CompiledName("png")>] Png
-        | [<CompiledName("webp")>] Webp
 
 type BrowserRunScreenshotOptions = U2<BrowserRunScreenshotOptions2, BrowserRunScreenshotOptions3>
 
@@ -17773,62 +12517,6 @@ type BrowserRunPDFOptions2 =
     [<ParamObject; Emit("$0")>]
     static member Create (url: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?pdfOptions: BrowserRunPDFOptions2.PdfOptions, ?browser: string) : BrowserRunPDFOptions2 = jsNative
 
-module BrowserRunPDFOptions2 =
-    [<Interface>]
-    type PdfOptions =
-        /// <defaultValue>1</defaultValue>
-        abstract scale: float option with get, set
-        /// <defaultValue>false</defaultValue>
-        abstract displayHeaderFooter: bool option with get, set
-        abstract headerTemplate: string option with get, set
-        abstract footerTemplate: string option with get, set
-        /// <defaultValue>false</defaultValue>
-        abstract printBackground: bool option with get, set
-        /// <defaultValue>false</defaultValue>
-        abstract landscape: bool option with get, set
-        abstract pageRanges: string option with get, set
-        /// <defaultValue>"letter"</defaultValue>
-        abstract format: BrowserRunPDFOptions2.PdfOptions.Format option with get, set
-        abstract width: U2<string, float> option with get, set
-        abstract height: U2<string, float> option with get, set
-        /// <defaultValue>false</defaultValue>
-        abstract preferCSSPageSize: bool option with get, set
-        abstract margin: BrowserRunPDFOptions2.PdfOptions.Margin option with get, set
-        /// <defaultValue>false</defaultValue>
-        abstract omitBackground: bool option with get, set
-        /// <defaultValue>true</defaultValue>
-        abstract tagged: bool option with get, set
-        /// <defaultValue>false</defaultValue>
-        abstract outline: bool option with get, set
-        /// <defaultValue>30000</defaultValue>
-        abstract timeout: float option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?scale: float, ?displayHeaderFooter: bool, ?headerTemplate: string, ?footerTemplate: string, ?printBackground: bool, ?landscape: bool, ?pageRanges: string, ?format: BrowserRunPDFOptions2.PdfOptions.Format, ?width: U2<string, float>, ?height: U2<string, float>, ?preferCSSPageSize: bool, ?margin: BrowserRunPDFOptions2.PdfOptions.Margin, ?omitBackground: bool, ?tagged: bool, ?outline: bool, ?timeout: float) : PdfOptions = jsNative
-
-    module PdfOptions =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Format =
-            | [<CompiledName("a0")>] A0
-            | [<CompiledName("a1")>] A1
-            | [<CompiledName("a2")>] A2
-            | [<CompiledName("a3")>] A3
-            | [<CompiledName("a4")>] A4
-            | [<CompiledName("a5")>] A5
-            | [<CompiledName("a6")>] A6
-            | [<CompiledName("ledger")>] Ledger
-            | [<CompiledName("legal")>] Legal
-            | [<CompiledName("letter")>] Letter
-            | [<CompiledName("tabloid")>] Tabloid
-
-        [<Interface>]
-        type Margin =
-            abstract top: U2<string, float> option with get, set
-            abstract right: U2<string, float> option with get, set
-            abstract bottom: U2<string, float> option with get, set
-            abstract left: U2<string, float> option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?top: U2<string, float>, ?right: U2<string, float>, ?bottom: U2<string, float>, ?left: U2<string, float>) : Margin = jsNative
-
 [<Interface>]
 type BrowserRunPDFOptions3 =
     inherit BrowserRunBaseOptions
@@ -17857,14 +12545,6 @@ type BrowserRunScrapeOptions2 =
     abstract elements: BrowserRunScrapeOptions2.Elements.Item[] with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (url: string, elements: BrowserRunScrapeOptions2.Elements.Item[], ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float) : BrowserRunScrapeOptions2 = jsNative
-
-module BrowserRunScrapeOptions2 =
-    module Elements =
-        [<Interface>]
-        type Item =
-            abstract selector: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (selector: string) : Item = jsNative
 
 [<Interface>]
 type BrowserRunScrapeOptions3 =
@@ -17949,21 +12629,6 @@ type BrowserRunSnapshotOptions2 =
     [<ParamObject; Emit("$0")>]
     static member Create (url: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?formats: BrowserRunSnapshotFormat[], ?screenshotOptions: BrowserRunSnapshotOptions2.ScreenshotOptions) : BrowserRunSnapshotOptions2 = jsNative
 
-module BrowserRunSnapshotOptions2 =
-    [<Interface>]
-    type ScreenshotOptions =
-        /// <defaultValue>"png"</defaultValue>
-        abstract ``type``: BrowserRunPuppeteerScreenshotOptions.Type option with get, set
-        abstract quality: float option with get, set
-        abstract fullPage: bool option with get, set
-        abstract clip: BrowserRunPuppeteerScreenshotOptions.Clip option with get, set
-        abstract omitBackground: bool option with get, set
-        abstract optimizeForSpeed: bool option with get, set
-        abstract captureBeyondViewport: bool option with get, set
-        abstract fromSurface: bool option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?``type``: BrowserRunPuppeteerScreenshotOptions.Type, ?quality: float, ?fullPage: bool, ?clip: BrowserRunPuppeteerScreenshotOptions.Clip, ?omitBackground: bool, ?optimizeForSpeed: bool, ?captureBeyondViewport: bool, ?fromSurface: bool) : ScreenshotOptions = jsNative
-
 [<Interface>]
 type BrowserRunSnapshotOptions3 =
     inherit BrowserRunBaseOptions
@@ -18041,21 +12706,6 @@ type BrowserRunJsonBaseOptions =
     abstract custom_ai: BrowserRunJsonBaseOptions.CustomAi.Item[] option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?custom_ai: BrowserRunJsonBaseOptions.CustomAi.Item[]) : BrowserRunJsonBaseOptions = jsNative
-
-module BrowserRunJsonBaseOptions =
-    module CustomAi =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// Model ID in <c>&lt;provider&gt;/&lt;model_name&gt;</c> format, e.g. <c>"workers-ai/@cf/meta/llama-3.3-70b-instruct-fp8-fast"</c>.
-            /// </summary>
-            abstract model: string with get, set
-            /// <summary>
-            /// Bearer token. Not needed for workers-ai models.
-            /// </summary>
-            abstract authorization: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (model: string, ?authorization: string) : Item = jsNative
 
 /// <summary>
 /// Options for the <c>json</c> quick action.
@@ -18303,13 +12953,6 @@ type BrowserRunSerializedAXNode =
     /// </summary>
     abstract children: BrowserRunSerializedAXNode[] option with get, set
 
-module BrowserRunSerializedAXNode =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Checked =
-        | [<CompiledName("mixed")>] Mixed
-        | [<CompiledValue(false)>] False
-        | [<CompiledValue(true)>] True
-
 /// <summary>
 /// Success response for <c>content</c> action.
 /// </summary>
@@ -18349,71 +12992,6 @@ type BrowserRunScrapeSuccessResponse =
     [<ParamObject; Emit("$0")>]
     static member Create (success: bool, result: BrowserRunScrapeSuccessResponse.Result.Item[], meta: BrowserRunResponseMeta) : BrowserRunScrapeSuccessResponse = jsNative
 
-module BrowserRunScrapeSuccessResponse =
-    module Result =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// The CSS selector used to find elements.
-            /// </summary>
-            abstract selector: string with get, set
-            /// <summary>
-            /// Array of elements matching the selector.
-            /// </summary>
-            abstract results: BrowserRunScrapeSuccessResponse.Result.Item.Results.Item[] with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (selector: string, results: BrowserRunScrapeSuccessResponse.Result.Item.Results.Item[]) : Item = jsNative
-
-        module Item =
-            module Results =
-                [<Interface>]
-                type Item =
-                    /// <summary>
-                    /// Outer HTML of the element.
-                    /// </summary>
-                    abstract html: string with get, set
-                    /// <summary>
-                    /// Text content of the element.
-                    /// </summary>
-                    abstract text: string with get, set
-                    /// <summary>
-                    /// Width of the element in pixels.
-                    /// </summary>
-                    abstract width: float with get, set
-                    /// <summary>
-                    /// Height of the element in pixels.
-                    /// </summary>
-                    abstract height: float with get, set
-                    /// <summary>
-                    /// Top position of the element relative to the viewport in pixels.
-                    /// </summary>
-                    abstract top: float with get, set
-                    /// <summary>
-                    /// Left position of the element relative to the viewport in pixels.
-                    /// </summary>
-                    abstract left: float with get, set
-                    /// <summary>
-                    /// Array of HTML attributes on the element.
-                    /// </summary>
-                    abstract attributes: BrowserRunScrapeSuccessResponse.Result.Item.Results.Item.Attributes.Item[] with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (html: string, text: string, width: float, height: float, top: float, left: float, attributes: BrowserRunScrapeSuccessResponse.Result.Item.Results.Item.Attributes.Item[]) : Item = jsNative
-
-                module Item =
-                    module Attributes =
-                        [<Interface>]
-                        type Item =
-                            /// <summary>
-                            /// Attribute name.
-                            /// </summary>
-                            abstract name: string with get, set
-                            /// <summary>
-                            /// Attribute value.
-                            /// </summary>
-                            abstract value: string with get, set
-                            [<ParamObject; Emit("$0")>]
-                            static member Create (name: string, value: string) : Item = jsNative
-
 /// <summary>
 /// Success response for <c>snapshot</c> action. Each field is present only when the
 /// corresponding entry was requested in <c>formats</c>.
@@ -18426,29 +13004,6 @@ type BrowserRunSnapshotSuccessResponse =
     [<ParamObject; Emit("$0")>]
     static member Create (success: bool, result: BrowserRunSnapshotSuccessResponse.Result, meta: BrowserRunResponseMeta) : BrowserRunSnapshotSuccessResponse = jsNative
 
-module BrowserRunSnapshotSuccessResponse =
-    [<Interface>]
-    type Result =
-        /// <summary>
-        /// HTML content of the page.
-        /// </summary>
-        abstract content: string option with get, set
-        /// <summary>
-        /// Base64-encoded screenshot image.
-        /// </summary>
-        abstract screenshot: string option with get, set
-        /// <summary>
-        /// Markdown content. Prefixed with YAML frontmatter (e.g. <c>title</c>) when the
-        /// page provides that metadata.
-        /// </summary>
-        abstract markdown: string option with get, set
-        /// <summary>
-        /// Root of the page's accessibility tree.
-        /// </summary>
-        abstract accessibilityTree: BrowserRunSerializedAXNode option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?content: string, ?screenshot: string, ?markdown: string, ?accessibilityTree: BrowserRunSerializedAXNode) : Result = jsNative
-
 /// <summary>
 /// Success response for <c>accessibilityTree</c> action.
 /// </summary>
@@ -18459,16 +13014,6 @@ type BrowserRunAccessibilityTreeSuccessResponse =
     abstract meta: BrowserRunResponseMeta with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (success: bool, result: BrowserRunAccessibilityTreeSuccessResponse.Result, meta: BrowserRunResponseMeta) : BrowserRunAccessibilityTreeSuccessResponse = jsNative
-
-module BrowserRunAccessibilityTreeSuccessResponse =
-    [<Interface>]
-    type Result =
-        /// <summary>
-        /// Root of the accessibility tree, or <c>null</c> when <c>root</c> matched no element.
-        /// </summary>
-        abstract accessibilityTree: BrowserRunSerializedAXNode option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?accessibilityTree: BrowserRunSerializedAXNode) : Result = jsNative
 
 /// <summary>
 /// Success response for <c>json</c> action.
@@ -18507,17 +13052,6 @@ type BrowserRunErrorResponse =
     abstract errors: BrowserRunErrorResponse.Errors.Item[] with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (success: bool, errors: BrowserRunErrorResponse.Errors.Item[]) : BrowserRunErrorResponse = jsNative
-
-module BrowserRunErrorResponse =
-    module Errors =
-        [<Interface>]
-        type Item =
-            abstract message: string with get, set
-            abstract code: float option with get, set
-            abstract detail: string option with get, set
-            abstract path: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (message: string, ?code: float, ?detail: string, ?path: string) : Item = jsNative
 
 /// <summary>
 /// Error response for BrowserRun <c>json</c> action.
@@ -19903,15 +14437,6 @@ type BrowserRun =
     /// </returns>
     abstract quickAction: action: string * options: BrowserRunAccessibilityTreeOptions -> JS.Promise<Response>
 
-module BrowserRun =
-    [<StringEnum(CaseRules.None)>]
-    type Content =
-        | [<CompiledName("content")>] Content
-
-    [<StringEnum(CaseRules.None)>]
-    type Markdown =
-        | [<CompiledName("markdown")>] Markdown
-
 /// <summary>
 /// In addition to the properties you can set in the RequestInit dict
 /// that you pass as an argument to the Request constructor, you can
@@ -20400,286 +14925,6 @@ type IncomingRequestCfProperties<'HostMetadata> =
     inherit IncomingRequestCfPropertiesCloudflareForSaaSEnterprise<'HostMetadata>
     inherit IncomingRequestCfPropertiesGeographicInformation
     inherit IncomingRequestCfPropertiesCloudflareAccessOrApiShield
-
-module IncomingRequestCfProperties =
-    [<Interface>]
-    type BotManagement =
-        inherit IncomingRequestCfPropertiesBotManagementBase
-        /// <summary>
-        /// A <a href="https://developers.cloudflare.com/bots/concepts/ja3-fingerprint/">JA3 Fingerprint</a> to help profile specific SSL/TLS clients
-        /// across different destination IPs, Ports, and X509 certificates.
-        /// </summary>
-        abstract ja3Hash: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (score: float, verifiedBot: bool, corporateProxy: bool, staticResource: bool, detectionIds: float[], ja3Hash: string) : BotManagement = jsNative
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Country =
-        | AD
-        | AE
-        | AF
-        | AG
-        | AI
-        | AL
-        | AM
-        | AO
-        | AQ
-        | AR
-        | AS
-        | AT
-        | AU
-        | AW
-        | AX
-        | AZ
-        | BA
-        | BB
-        | BD
-        | BE
-        | BF
-        | BG
-        | BH
-        | BI
-        | BJ
-        | BL
-        | BM
-        | BN
-        | BO
-        | BQ
-        | BR
-        | BS
-        | BT
-        | BV
-        | BW
-        | BY
-        | BZ
-        | CA
-        | CC
-        | CD
-        | CF
-        | CG
-        | CH
-        | CI
-        | CK
-        | CL
-        | CM
-        | CN
-        | CO
-        | CR
-        | CU
-        | CV
-        | CW
-        | CX
-        | CY
-        | CZ
-        | DE
-        | DJ
-        | DK
-        | DM
-        | DO
-        | DZ
-        | EC
-        | EE
-        | EG
-        | EH
-        | ER
-        | ES
-        | ET
-        | FI
-        | FJ
-        | FK
-        | FM
-        | FO
-        | FR
-        | GA
-        | GB
-        | GD
-        | GE
-        | GF
-        | GG
-        | GH
-        | GI
-        | GL
-        | GM
-        | GN
-        | GP
-        | GQ
-        | GR
-        | GS
-        | GT
-        | GU
-        | GW
-        | GY
-        | HK
-        | HM
-        | HN
-        | HR
-        | HT
-        | HU
-        | ID
-        | IE
-        | IL
-        | IM
-        | IN
-        | IO
-        | IQ
-        | IR
-        | IS
-        | IT
-        | JE
-        | JM
-        | JO
-        | JP
-        | KE
-        | KG
-        | KH
-        | KI
-        | KM
-        | KN
-        | KP
-        | KR
-        | KW
-        | KY
-        | KZ
-        | LA
-        | LB
-        | LC
-        | LI
-        | LK
-        | LR
-        | LS
-        | LT
-        | LU
-        | LV
-        | LY
-        | MA
-        | MC
-        | MD
-        | ME
-        | MF
-        | MG
-        | MH
-        | MK
-        | ML
-        | MM
-        | MN
-        | MO
-        | MP
-        | MQ
-        | MR
-        | MS
-        | MT
-        | MU
-        | MV
-        | MW
-        | MX
-        | MY
-        | MZ
-        | NA
-        | NC
-        | NE
-        | NF
-        | NG
-        | NI
-        | NL
-        | NO
-        | NP
-        | NR
-        | NU
-        | NZ
-        | OM
-        | PA
-        | PE
-        | PF
-        | PG
-        | PH
-        | PK
-        | PL
-        | PM
-        | PN
-        | PR
-        | PS
-        | PT
-        | PW
-        | PY
-        | QA
-        | RE
-        | RO
-        | RS
-        | RU
-        | RW
-        | SA
-        | SB
-        | SC
-        | SD
-        | SE
-        | SG
-        | SH
-        | SI
-        | SJ
-        | SK
-        | SL
-        | SM
-        | SN
-        | SO
-        | SR
-        | SS
-        | ST
-        | SV
-        | SX
-        | SY
-        | SZ
-        | T1
-        | TC
-        | TD
-        | TF
-        | TG
-        | TH
-        | TJ
-        | TK
-        | TL
-        | TM
-        | TN
-        | TO
-        | TR
-        | TT
-        | TV
-        | TW
-        | TZ
-        | UA
-        | UG
-        | UM
-        | US
-        | UY
-        | UZ
-        | VA
-        | VC
-        | VE
-        | VG
-        | VI
-        | VN
-        | VU
-        | WF
-        | WS
-        | YE
-        | YT
-        | ZA
-        | ZM
-        | ZW
-
-module IncomingRequestCfPropertiesTLSClientAuth =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type CertRevoked =
-        | [<CompiledName("0")>] N0
-        | [<CompiledName("1")>] N1
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type CertVerified =
-        | FAILED
-        | [<CompiledName("FAILED:certificate has expired")>] FAILEDCertificateHasExpired
-        | [<CompiledName("FAILED:certificate is not yet valid")>] FAILEDCertificateIsNotYetValid
-        | [<CompiledName("FAILED:self signed certificate")>] FAILEDSelfSignedCertificate
-        | [<CompiledName("FAILED:unable to verify the first certificate")>] FAILEDUnableToVerifyTheFirstCertificate
-        | SUCCESS
 
 type IncomingRequestCfPropertiesBase =
     /// <summary>
@@ -21394,16 +15639,6 @@ type D1Meta =
     [<ParamObject; Emit("$0")>]
     static member Create (duration: float, size_after: float, rows_read: float, rows_written: float, last_row_id: float, changed_db: bool, changes: float, ?served_by_region: string, ?served_by_colo: string, ?served_by_primary: bool, ?timings: D1Meta.Timings, ?total_attempts: float) : D1Meta = jsNative
 
-module D1Meta =
-    [<Interface>]
-    type Timings =
-        /// <summary>
-        /// The duration of the SQL query execution by the database instance. It doesn't include any network time.
-        /// </summary>
-        abstract sql_duration_ms: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (sql_duration_ms: float) : Timings = jsNative
-
 [<Interface>]
 type D1Response =
     abstract success: bool with get, set
@@ -21411,12 +15646,6 @@ type D1Response =
     abstract error: unit option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (success: bool, meta: D1Response.Meta, ?error: unit) : D1Response = jsNative
-
-module D1Response =
-    type Meta =
-        inherit D1Meta
-        [<EmitIndexer>]
-        abstract Item: string -> obj with get, set
 
 [<Interface>]
 type D1Result<'T> =
@@ -21455,20 +15684,6 @@ type D1Database =
     abstract dump: unit -> JS.Promise<JS.ArrayBuffer>
     [<ParamObject; Emit("$0")>]
     static member Create (prepare: (string -> D1PreparedStatement), batch: (D1PreparedStatement[] -> JS.Promise<D1Result<'T>[]>), exec: (string -> JS.Promise<D1ExecResult>), withSession: (string option -> D1DatabaseSession), dump: (unit -> JS.Promise<JS.ArrayBuffer>)) : D1Database = jsNative
-
-module D1PreparedStatement =
-    module Raw =
-        [<Interface>]
-        type Options =
-            abstract columnNames: bool with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (columnNames: bool) : Options = jsNative
-
-        [<Interface>]
-        type Options2 =
-            abstract columnNames: bool option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?columnNames: bool) : Options2 = jsNative
 
 [<Interface>]
 type D1DatabaseSession =
@@ -21825,16 +16040,6 @@ type HelloWorldBinding =
     [<ParamObject; Emit("$0")>]
     static member Create (get: (unit -> JS.Promise<HelloWorldBinding.Get.Result.Item>), set: (string -> JS.Promise<unit>)) : HelloWorldBinding = jsNative
 
-module HelloWorldBinding =
-    module Get =
-        module Result =
-            [<Interface>]
-            type Item =
-                abstract value: string with get, set
-                abstract ms: float option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (value: string, ?ms: float) : Item = jsNative
-
 [<Interface>]
 type Hyperdrive =
     /// <summary>
@@ -21951,16 +16156,6 @@ type ImageInfoResponse3 =
     [<ParamObject; Emit("$0")>]
     static member Create (format: string, fileSize: float, width: float, height: float) : ImageInfoResponse3 = jsNative
 
-module TextOptions =
-    [<Interface>]
-    type Font =
-        /// <summary>
-        /// URL to a font file in TrueType (.ttf), OpenType (.otf), WOFF (.woff), or WOFF2 (.woff2) format
-        /// </summary>
-        abstract url: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (url: string) : Font = jsNative
-
 /// <summary>
 /// Parameters for rasterizing text into an image.
 /// </summary>
@@ -22017,67 +16212,6 @@ type ImageTransform =
     [<ParamObject; Emit("$0")>]
     static member Create (?width: float, ?height: float, ?background: string, ?blur: float, ?border: U2<ImageTransform.Border, ImageTransform.Border2>, ?brightness: float, ?contrast: float, ?fit: ImageTransform.Fit, ?flip: RequestInitCfPropertiesImageDraw.Flip, ?gamma: float, ?segment: string, ?gravity: U2<string, ImageTransform.Gravity>, ?rotate: ImageTransform.Rotate, ?saturation: float, ?sharpen: float, ?trim: U2<string, ImageTransform.Trim>) : ImageTransform = jsNative
 
-module ImageTransform =
-    [<Interface>]
-    type Border =
-        abstract color: string option with get, set
-        abstract width: float option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?color: string, ?width: float) : Border = jsNative
-
-    [<Interface>]
-    type Border2 =
-        abstract top: float option with get, set
-        abstract bottom: float option with get, set
-        abstract left: float option with get, set
-        abstract right: float option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?top: float, ?bottom: float, ?left: float, ?right: float) : Border2 = jsNative
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Fit =
-        | [<CompiledName("contain")>] Contain
-        | [<CompiledName("cover")>] Cover
-        | [<CompiledName("crop")>] Crop
-        | [<CompiledName("pad")>] Pad
-        | [<CompiledName("scale-down")>] ScaleDown
-        | [<CompiledName("squeeze")>] Squeeze
-
-    [<Interface>]
-    type Gravity =
-        abstract x: float option with get, set
-        abstract y: float option with get, set
-        abstract mode: BasicImageTransformationsGravityCoordinates.Mode with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (mode: BasicImageTransformationsGravityCoordinates.Mode, ?x: float, ?y: float) : Gravity = jsNative
-
-    type Rotate =
-        | N0 = 0
-        | N90 = 90
-        | N180 = 180
-        | N270 = 270
-
-    [<Interface>]
-    type Trim =
-        abstract top: float option with get, set
-        abstract bottom: float option with get, set
-        abstract left: float option with get, set
-        abstract right: float option with get, set
-        abstract width: float option with get, set
-        abstract height: float option with get, set
-        abstract border: U2<bool, ImageTransform.Trim.Border> option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?top: float, ?bottom: float, ?left: float, ?right: float, ?width: float, ?height: float, ?border: U2<bool, ImageTransform.Trim.Border>) : Trim = jsNative
-
-    module Trim =
-        [<Interface>]
-        type Border =
-            abstract color: string option with get, set
-            abstract tolerance: float option with get, set
-            abstract keep: float option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?color: string, ?tolerance: float, ?keep: float) : Border = jsNative
-
 [<Interface>]
 type ImageDrawOptions =
     abstract opacity: float option with get, set
@@ -22113,17 +16247,6 @@ type ImageOutputOptions =
     abstract anim: bool option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (format: ImageOutputOptions.Format, ?quality: float, ?background: string, ?anim: bool) : ImageOutputOptions = jsNative
-
-module ImageOutputOptions =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Format =
-        | [<CompiledName("image/avif")>] ImageAvif
-        | [<CompiledName("image/gif")>] ImageGif
-        | [<CompiledName("image/jpeg")>] ImageJpeg
-        | [<CompiledName("image/png")>] ImagePng
-        | [<CompiledName("image/webp")>] ImageWebp
-        | [<CompiledName("rgb")>] Rgb
-        | [<CompiledName("rgba")>] Rgba
 
 [<Interface>]
 type ImageMetadata =
@@ -22402,27 +16525,6 @@ type MediaBinding =
     [<ParamObject; Emit("$0")>]
     static member Create (input: (ReadableStream<JS.Uint8Array> -> MediaTransformer)) : MediaBinding = jsNative
 
-module MediaTransformationInputOptions =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Fit =
-        | [<CompiledName("contain")>] Contain
-        | [<CompiledName("cover")>] Cover
-        | [<CompiledName("scale-down")>] ScaleDown
-
-module MediaTransformationOutputOptions =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Format =
-        | [<CompiledName("jpg")>] Jpg
-        | [<CompiledName("m4a")>] M4a
-        | [<CompiledName("png")>] Png
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Mode =
-        | [<CompiledName("audio")>] Audio
-        | [<CompiledName("frame")>] Frame
-        | [<CompiledName("spritesheet")>] Spritesheet
-        | [<CompiledName("video")>] Video
-
 /// <summary>
 /// Media transformer for applying transformation operations to media content.
 /// Handles sizing, fitting, and other input transformation parameters.
@@ -22558,21 +16660,6 @@ type NodeStyleServer =
     [<ParamObject; Emit("$0")>]
     static member Create (listen: (obj[] -> NodeStyleServer), address: (unit -> NodeStyleServer.Address.Result)) : NodeStyleServer = jsNative
 
-module NodeStyleServer =
-    module Address =
-        [<Interface>]
-        type Result =
-            abstract port: float option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?port: float) : Result = jsNative
-
-module HttpServerHandler =
-    [<Interface>]
-    type Options =
-        abstract port: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (port: float) : Options = jsNative
-
 [<Erase>]
 type Params<'P> = private Params__ of obj
 
@@ -22589,24 +16676,7 @@ type EventContext<'Env, 'P, 'Data> =
     [<ParamObject; Emit("$0")>]
     static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: EventContext.Next, env: obj, ``params``: obj, data: 'Data) : EventContext<'Env, 'P, 'Data> = jsNative
 
-module EventContext =
-    type Next = delegate of input: U2<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>> option * init: RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option -> JS.Promise<Response>
-
 type PagesFunction<'Env, 'Params, 'Data> = (PagesFunction.Context<'Env, 'Params, 'Data> -> U2<JS.Promise<Response>, Response>)
-
-module PagesFunction =
-    [<Interface>]
-    type Context<'Env, 'Params, 'Data> =
-        abstract request: Request<obj, IncomingRequestCfProperties<obj>> with get, set
-        abstract functionPath: string with get, set
-        abstract waitUntil: (JS.Promise<obj> -> unit) with get, set
-        abstract passThroughOnException: (unit -> unit) with get, set
-        abstract next: EventContext.Next with get, set
-        abstract env: obj with get, set
-        abstract ``params``: obj with get, set
-        abstract data: 'Data with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: EventContext.Next, env: obj, ``params``: obj, data: 'Data) : Context<'Env, 'Params, 'Data> = jsNative
 
 [<Interface>]
 type EventPluginContext<'Env, 'P, 'Data, 'PluginArgs> =
@@ -22622,25 +16692,7 @@ type EventPluginContext<'Env, 'P, 'Data, 'PluginArgs> =
     [<ParamObject; Emit("$0")>]
     static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: EventPluginContext.Next, env: obj, ``params``: obj, data: 'Data, pluginArgs: 'PluginArgs) : EventPluginContext<'Env, 'P, 'Data, 'PluginArgs> = jsNative
 
-module EventPluginContext =
-    type Next = delegate of input: U2<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>> option * init: RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option -> JS.Promise<Response>
-
 type PagesPluginFunction<'Env, 'Params, 'Data, 'PluginArgs> = (PagesPluginFunction.Context<'Env, 'Params, 'Data, 'PluginArgs> -> U2<JS.Promise<Response>, Response>)
-
-module PagesPluginFunction =
-    [<Interface>]
-    type Context<'Env, 'Params, 'Data, 'PluginArgs> =
-        abstract request: Request<obj, IncomingRequestCfProperties<obj>> with get, set
-        abstract functionPath: string with get, set
-        abstract waitUntil: (JS.Promise<obj> -> unit) with get, set
-        abstract passThroughOnException: (unit -> unit) with get, set
-        abstract next: EventPluginContext.Next with get, set
-        abstract env: obj with get, set
-        abstract ``params``: obj with get, set
-        abstract data: 'Data with get, set
-        abstract pluginArgs: 'PluginArgs with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: EventPluginContext.Next, env: obj, ``params``: obj, data: 'Data, pluginArgs: 'PluginArgs) : Context<'Env, 'Params, 'Data, 'PluginArgs> = jsNative
 
 [<Import("PipelineTransformationEntrypoint", "cloudflare:pipelines"); AbstractClass>]
 type PipelineTransformationEntrypoint<'Env, 'I, 'O> (ctx: ExecutionContext<obj>, env: 'Env) =
@@ -22753,121 +16805,6 @@ type WorkerEntrypoint<'Env, 'Props> (ctx: ExecutionContext<obj>, env: 'Env) =
         with get (): 'Env = jsNative
         and set (_: 'Env): unit = jsNative
 
-module WorkerEntrypoint =
-    [<Interface>]
-    type IConnectHandler =
-        abstract connect: socket: Socket -> JS.Promise<unit> option
-        [<ParamObject; Emit("$0")>]
-        static member Create (connect: (Socket -> JS.Promise<unit> option)) : IConnectHandler = jsNative
-
-    [<Interface>]
-    type IEmailHandler =
-        abstract email: message: ForwardableEmailMessage -> JS.Promise<unit> option
-        [<ParamObject; Emit("$0")>]
-        static member Create (email: (ForwardableEmailMessage -> JS.Promise<unit> option)) : IEmailHandler = jsNative
-
-    [<Interface>]
-    type IFetchHandler =
-        abstract fetch: request: Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> -> U2<JS.Promise<Response>, Response>
-        [<ParamObject; Emit("$0")>]
-        static member Create (fetch: (Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> -> U2<JS.Promise<Response>, Response>)) : IFetchHandler = jsNative
-
-    [<Interface>]
-    type IQueueHandler =
-        abstract queue: batch: MessageBatch<obj> -> JS.Promise<unit> option
-        [<ParamObject; Emit("$0")>]
-        static member Create (queue: (MessageBatch<obj> -> JS.Promise<unit> option)) : IQueueHandler = jsNative
-
-    [<Interface>]
-    type IScheduledHandler =
-        abstract scheduled: controller: ScheduledController -> JS.Promise<unit> option
-        [<ParamObject; Emit("$0")>]
-        static member Create (scheduled: (ScheduledController -> JS.Promise<unit> option)) : IScheduledHandler = jsNative
-
-    [<Interface>]
-    type ITailHandler =
-        abstract tail: events: TraceItem[] -> JS.Promise<unit> option
-        [<ParamObject; Emit("$0")>]
-        static member Create (tail: (TraceItem[] -> JS.Promise<unit> option)) : ITailHandler = jsNative
-
-    [<Interface>]
-    type ITailStreamHandler =
-        abstract tailStream: ``event``: TailStream.TailEvent<Onset> -> U3<JS.Promise<U2<(TailStream.TailEvent<ExportedHandlerTailStreamHandler.Result.Item.Event.Item> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>>, (TailStream.TailEvent<ExportedHandlerTailStreamHandler.Result.Item.Event.Item> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>
-        [<ParamObject; Emit("$0")>]
-        static member Create (tailStream: (TailStream.TailEvent<Onset> -> U3<JS.Promise<U2<(TailStream.TailEvent<ExportedHandlerTailStreamHandler.Result.Item.Event.Item> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>>, (TailStream.TailEvent<ExportedHandlerTailStreamHandler.Result.Item.Event.Item> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>)) : ITailStreamHandler = jsNative
-
-    [<Interface>]
-    type ITestHandler =
-        abstract test: controller: TestController -> JS.Promise<unit> option
-        [<ParamObject; Emit("$0")>]
-        static member Create (test: (TestController -> JS.Promise<unit> option)) : ITestHandler = jsNative
-
-    [<Interface>]
-    type ITraceHandler =
-        abstract trace: traces: TraceItem[] -> JS.Promise<unit> option
-        [<ParamObject; Emit("$0")>]
-        static member Create (trace: (TraceItem[] -> JS.Promise<unit> option)) : ITraceHandler = jsNative
-
-module CloudflareWorkersModule =
-    [<Import("DurableObject", "cloudflare:workers"); AbstractClass>]
-    type DurableObject<'Env, 'Props> (ctx: DurableObjectState<obj>, env: 'Env) =
-        member _.__DURABLE_OBJECT_BRAND: unit = jsNative
-        member _.ctx
-            with get (): DurableObjectState<'Props> = jsNative
-            and set (_: DurableObjectState<'Props>): unit = jsNative
-        member _.env
-            with get (): 'Env = jsNative
-            and set (_: 'Env): unit = jsNative
-
-    module DurableObject =
-        [<Interface>]
-        type IAlarmHandler =
-            abstract alarm: ?alarmInfo: AlarmInvocationInfo -> JS.Promise<unit> option
-            [<ParamObject; Emit("$0")>]
-            static member Create (alarm: (AlarmInvocationInfo option -> JS.Promise<unit> option)) : IAlarmHandler = jsNative
-
-        [<Interface>]
-        type IConnectHandler =
-            abstract connect: socket: Socket -> JS.Promise<unit> option
-            [<ParamObject; Emit("$0")>]
-            static member Create (connect: (Socket -> JS.Promise<unit> option)) : IConnectHandler = jsNative
-
-        [<Interface>]
-        type IFetchHandler =
-            abstract fetch: request: Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> -> U2<JS.Promise<Response>, Response>
-            [<ParamObject; Emit("$0")>]
-            static member Create (fetch: (Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> -> U2<JS.Promise<Response>, Response>)) : IFetchHandler = jsNative
-
-        [<Interface>]
-        type IWebSocketCloseHandler =
-            abstract webSocketClose: ws: WebSocket * code: float * reason: string * wasClean: bool -> JS.Promise<unit> option
-            [<ParamObject; Emit("$0")>]
-            static member Create (webSocketClose: Func<WebSocket, float, string, bool, JS.Promise<unit> option>) : IWebSocketCloseHandler = jsNative
-
-        [<Interface>]
-        type IWebSocketErrorHandler =
-            abstract webSocketError: ws: WebSocket * error: obj -> JS.Promise<unit> option
-            [<ParamObject; Emit("$0")>]
-            static member Create (webSocketError: Func<WebSocket, obj, JS.Promise<unit> option>) : IWebSocketErrorHandler = jsNative
-
-        [<Interface>]
-        type IWebSocketMessageHandler =
-            abstract webSocketMessage: ws: WebSocket * message: U2<string, JS.ArrayBuffer> -> JS.Promise<unit> option
-            [<ParamObject; Emit("$0")>]
-            static member Create (webSocketMessage: Func<WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option>) : IWebSocketMessageHandler = jsNative
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type WorkflowDurationLabel =
-        | [<CompiledName("day")>] Day
-        | [<CompiledName("hour")>] Hour
-        | [<CompiledName("minute")>] Minute
-        | [<CompiledName("month")>] Month
-        | [<CompiledName("second")>] Second
-        | [<CompiledName("week")>] Week
-        | [<CompiledName("year")>] Year
-
-    type WorkflowSleepDuration = U2<float, string>
-
 type WebSocketClose2 = delegate of ws: WebSocket * code: float * reason: string * wasClean: bool -> JS.Promise<unit> option
 
 type WebSocketError2 = delegate of ws: WebSocket * error: obj -> JS.Promise<unit> option
@@ -22882,39 +16819,6 @@ type WorkflowDynamicDelayContext =
     abstract error: exn with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (ctx: WorkflowDynamicDelayContext.Ctx, error: exn) : WorkflowDynamicDelayContext = jsNative
-
-module WorkflowDynamicDelayContext =
-    [<Interface>]
-    type Ctx =
-        abstract step: WorkflowDynamicDelayContext.Ctx.Step with get, set
-        abstract attempt: float with get, set
-        abstract config: WorkflowDynamicDelayContext.Ctx.Config with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (step: WorkflowDynamicDelayContext.Ctx.Step, attempt: float, config: WorkflowDynamicDelayContext.Ctx.Config) : Ctx = jsNative
-
-    module Ctx =
-        [<Interface>]
-        type Config =
-            abstract retries: WorkflowDynamicDelayContext.Ctx.Config.Retries option with get, set
-            abstract timeout: CloudflareWorkersModule.WorkflowSleepDuration option with get, set
-            abstract sensitive: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?retries: WorkflowDynamicDelayContext.Ctx.Config.Retries, ?timeout: CloudflareWorkersModule.WorkflowSleepDuration, ?sensitive: string) : Config = jsNative
-
-        module Config =
-            [<Interface>]
-            type Retries =
-                abstract limit: float with get, set
-                abstract backoff: WorkflowBackoff option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (limit: float, ?backoff: WorkflowBackoff) : Retries = jsNative
-
-        [<Interface>]
-        type Step =
-            abstract name: string with get, set
-            abstract count: float with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (name: string, count: float) : Step = jsNative
 
 type WorkflowDelayFunction = (WorkflowDynamicDelayContext -> U3<float, JS.Promise<CloudflareWorkersModule.WorkflowSleepDuration>, string>)
 
@@ -22938,15 +16842,6 @@ type WorkflowStepConfig =
     [<ParamObject; Emit("$0")>]
     static member Create (?retries: WorkflowStepConfig.Retries, ?timeout: CloudflareWorkersModule.WorkflowSleepDuration, ?sensitive: string) : WorkflowStepConfig = jsNative
 
-module WorkflowStepConfig =
-    [<Interface>]
-    type Retries =
-        abstract limit: float with get, set
-        abstract delay: U3<float, WorkflowDelayFunction, string> with get, set
-        abstract backoff: WorkflowBackoff option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (limit: float, delay: U3<float, WorkflowDelayFunction, string>, ?backoff: WorkflowBackoff) : Retries = jsNative
-
 [<Interface>]
 type WorkflowStepConfigWithStaticDelay =
     abstract timeout: CloudflareWorkersModule.WorkflowSleepDuration option with get, set
@@ -22955,15 +16850,6 @@ type WorkflowStepConfigWithStaticDelay =
     [<ParamObject; Emit("$0")>]
     static member Create (?timeout: CloudflareWorkersModule.WorkflowSleepDuration, ?sensitive: string, ?retries: WorkflowStepConfigWithStaticDelay.Retries) : WorkflowStepConfigWithStaticDelay = jsNative
 
-module WorkflowStepConfigWithStaticDelay =
-    [<Interface>]
-    type Retries =
-        abstract limit: float with get, set
-        abstract delay: CloudflareWorkersModule.WorkflowSleepDuration with get, set
-        abstract backoff: WorkflowBackoff option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (limit: float, delay: CloudflareWorkersModule.WorkflowSleepDuration, ?backoff: WorkflowBackoff) : Retries = jsNative
-
 [<Interface>]
 type WorkflowStepConfigWithDelayFunction =
     abstract timeout: CloudflareWorkersModule.WorkflowSleepDuration option with get, set
@@ -22971,15 +16857,6 @@ type WorkflowStepConfigWithDelayFunction =
     abstract retries: WorkflowStepConfigWithDelayFunction.Retries with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (retries: WorkflowStepConfigWithDelayFunction.Retries, ?timeout: CloudflareWorkersModule.WorkflowSleepDuration, ?sensitive: string) : WorkflowStepConfigWithDelayFunction = jsNative
-
-module WorkflowStepConfigWithDelayFunction =
-    [<Interface>]
-    type Retries =
-        abstract limit: float with get, set
-        abstract delay: WorkflowDelayFunction with get, set
-        abstract backoff: WorkflowBackoff option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (limit: float, delay: WorkflowDelayFunction, ?backoff: WorkflowBackoff) : Retries = jsNative
 
 [<Interface>]
 type WorkflowStepRollbackConfig =
@@ -23028,15 +16905,6 @@ type WorkflowStepContext<'Delay> =
     [<ParamObject; Emit("$0")>]
     static member Create (step: WorkflowDynamicDelayContext.Ctx.Step, attempt: float, config: WorkflowStepContext.Config) : WorkflowStepContext<'Delay> = jsNative
 
-module WorkflowStepContext =
-    [<Interface>]
-    type Config =
-        abstract retries: obj option with get, set
-        abstract timeout: CloudflareWorkersModule.WorkflowSleepDuration option with get, set
-        abstract sensitive: string option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?retries: obj, ?timeout: CloudflareWorkersModule.WorkflowSleepDuration, ?sensitive: string) : Config = jsNative
-
 [<Interface>]
 type WorkflowRollbackContext<'T, 'Delay> =
     abstract ctx: WorkflowRollbackContext.Ctx<'Delay> with get, set
@@ -23047,54 +16915,7 @@ type WorkflowRollbackContext<'T, 'Delay> =
     [<ParamObject; Emit("$0")>]
     static member Create (ctx: WorkflowRollbackContext.Ctx<'Delay>, error: exn, stepName: string, ?output: 'T) : WorkflowRollbackContext<'T, 'Delay> = jsNative
 
-module WorkflowRollbackContext =
-    [<Interface>]
-    type Ctx<'Delay> =
-        abstract step: WorkflowDynamicDelayContext.Ctx.Step with get, set
-        abstract attempt: float with get, set
-        abstract config: WorkflowRollbackContext.Ctx.Config with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (step: WorkflowDynamicDelayContext.Ctx.Step, attempt: float, config: WorkflowRollbackContext.Ctx.Config) : Ctx<'Delay> = jsNative
-
-    module Ctx =
-        [<Interface>]
-        type Config =
-            abstract retries: obj option with get, set
-            abstract timeout: CloudflareWorkersModule.WorkflowSleepDuration option with get, set
-            abstract sensitive: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?retries: obj, ?timeout: CloudflareWorkersModule.WorkflowSleepDuration, ?sensitive: string) : Config = jsNative
-
 type WorkflowRollbackHandler<'T, 'Delay> = (WorkflowRollbackHandler.Ctx<'T, 'Delay> -> JS.Promise<unit>)
-
-module WorkflowRollbackHandler =
-    [<Interface>]
-    type Ctx<'T, 'Delay> =
-        abstract ctx: WorkflowRollbackHandler.Ctx.Ctx<'Delay> with get, set
-        abstract error: exn with get, set
-        abstract output: 'T option with get, set
-        /// <remarks>@deprecated Use <c>ctx.step.name</c> and <c>ctx.step.count</c> instead.</remarks>
-        abstract stepName: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (ctx: WorkflowRollbackHandler.Ctx.Ctx<'Delay>, error: exn, stepName: string, ?output: 'T) : Ctx<'T, 'Delay> = jsNative
-
-    module Ctx =
-        [<Interface>]
-        type Ctx<'Delay> =
-            abstract step: WorkflowDynamicDelayContext.Ctx.Step with get, set
-            abstract attempt: float with get, set
-            abstract config: WorkflowRollbackHandler.Ctx.Ctx.Config with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (step: WorkflowDynamicDelayContext.Ctx.Step, attempt: float, config: WorkflowRollbackHandler.Ctx.Ctx.Config) : Ctx<'Delay> = jsNative
-
-        module Ctx =
-            [<Interface>]
-            type Config =
-                abstract retries: obj option with get, set
-                abstract timeout: CloudflareWorkersModule.WorkflowSleepDuration option with get, set
-                abstract sensitive: string option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (?retries: obj, ?timeout: CloudflareWorkersModule.WorkflowSleepDuration, ?sensitive: string) : Config = jsNative
 
 [<Interface>]
 type WorkflowStepRollbackOptions<'T, 'Delay> =
@@ -23102,36 +16923,6 @@ type WorkflowStepRollbackOptions<'T, 'Delay> =
     abstract rollbackConfig: WorkflowStepRollbackConfig option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (rollback: (WorkflowStepRollbackOptions.Rollback.Ctx<'T, 'Delay> -> JS.Promise<unit>), ?rollbackConfig: WorkflowStepRollbackConfig) : WorkflowStepRollbackOptions<'T, 'Delay> = jsNative
-
-module WorkflowStepRollbackOptions =
-    module Rollback =
-        [<Interface>]
-        type Ctx<'T, 'Delay> =
-            abstract ctx: WorkflowStepRollbackOptions.Rollback.Ctx.Ctx<'Delay> with get, set
-            abstract error: exn with get, set
-            abstract output: 'T option with get, set
-            /// <remarks>@deprecated Use <c>ctx.step.name</c> and <c>ctx.step.count</c> instead.</remarks>
-            abstract stepName: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (ctx: WorkflowStepRollbackOptions.Rollback.Ctx.Ctx<'Delay>, error: exn, stepName: string, ?output: 'T) : Ctx<'T, 'Delay> = jsNative
-
-        module Ctx =
-            [<Interface>]
-            type Ctx<'Delay> =
-                abstract step: WorkflowDynamicDelayContext.Ctx.Step with get, set
-                abstract attempt: float with get, set
-                abstract config: WorkflowStepRollbackOptions.Rollback.Ctx.Ctx.Config with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (step: WorkflowDynamicDelayContext.Ctx.Step, attempt: float, config: WorkflowStepRollbackOptions.Rollback.Ctx.Ctx.Config) : Ctx<'Delay> = jsNative
-
-            module Ctx =
-                [<Interface>]
-                type Config =
-                    abstract retries: obj option with get, set
-                    abstract timeout: CloudflareWorkersModule.WorkflowSleepDuration option with get, set
-                    abstract sensitive: string option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (?retries: obj, ?timeout: CloudflareWorkersModule.WorkflowSleepDuration, ?sensitive: string) : Config = jsNative
 
 [<Import("WorkflowStep", "cloudflare:workers"); AbstractClass>]
 type WorkflowStep () =
@@ -23146,132 +16937,6 @@ type WorkflowStep () =
         with get (): WorkflowStep.SleepUntil = jsNative
         and set (_: WorkflowStep.SleepUntil): unit = jsNative
     abstract waitForEvent<'T>: name: string * options: WorkflowStep.WaitForEvent.Options -> JS.Promise<WorkflowStep.WaitForEvent.Result.Item<'T>>
-
-module WorkflowStep =
-    module Do =
-        module Callback =
-            [<Interface>]
-            type Ctx =
-                abstract step: WorkflowDynamicDelayContext.Ctx.Step with get, set
-                abstract attempt: float with get, set
-                abstract config: WorkflowStep.Do.Callback.Ctx.Config with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (step: WorkflowDynamicDelayContext.Ctx.Step, attempt: float, config: WorkflowStep.Do.Callback.Ctx.Config) : Ctx = jsNative
-
-            module Ctx =
-                [<Interface>]
-                type Config =
-                    abstract retries: WorkflowStep.Do.Callback.Ctx.Config.Retries option with get, set
-                    abstract timeout: CloudflareWorkersModule.WorkflowSleepDuration option with get, set
-                    abstract sensitive: string option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (?retries: WorkflowStep.Do.Callback.Ctx.Config.Retries, ?timeout: CloudflareWorkersModule.WorkflowSleepDuration, ?sensitive: string) : Config = jsNative
-
-                module Config =
-                    [<Interface>]
-                    type Retries =
-                        inherit WorkflowDynamicDelayContext.Ctx.Config.Retries
-                        abstract delay: CloudflareWorkersModule.WorkflowSleepDuration with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (limit: float, delay: CloudflareWorkersModule.WorkflowSleepDuration, ?backoff: WorkflowBackoff) : Retries = jsNative
-
-        [<Interface>]
-        type RollbackOptions<'T> =
-            abstract rollback: (WorkflowStep.Do.RollbackOptions.Rollback.Ctx<'T> -> JS.Promise<unit>) with get, set
-            abstract rollbackConfig: WorkflowStepRollbackConfig option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (rollback: (WorkflowStep.Do.RollbackOptions.Rollback.Ctx<'T> -> JS.Promise<unit>), ?rollbackConfig: WorkflowStepRollbackConfig) : RollbackOptions<'T> = jsNative
-
-        module RollbackOptions =
-            module Rollback =
-                [<Interface>]
-                type Ctx<'T> =
-                    abstract ctx: WorkflowStep.Do.Callback.Ctx with get, set
-                    abstract error: exn with get, set
-                    abstract output: 'T option with get, set
-                    /// <remarks>@deprecated Use <c>ctx.step.name</c> and <c>ctx.step.count</c> instead.</remarks>
-                    abstract stepName: string with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (ctx: WorkflowStep.Do.Callback.Ctx, error: exn, stepName: string, ?output: 'T) : Ctx<'T> = jsNative
-
-        [<Interface>]
-        type RollbackOptions2<'T> =
-            abstract rollback: (WorkflowStep.Do.RollbackOptions2.Rollback.Ctx<'T> -> JS.Promise<unit>) with get, set
-            abstract rollbackConfig: WorkflowStepRollbackConfig option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (rollback: (WorkflowStep.Do.RollbackOptions2.Rollback.Ctx<'T> -> JS.Promise<unit>), ?rollbackConfig: WorkflowStepRollbackConfig) : RollbackOptions2<'T> = jsNative
-
-        module RollbackOptions2 =
-            module Rollback =
-                [<Interface>]
-                type Ctx<'T> =
-                    abstract ctx: WorkflowDynamicDelayContext.Ctx with get, set
-                    abstract error: exn with get, set
-                    abstract output: 'T option with get, set
-                    /// <remarks>@deprecated Use <c>ctx.step.name</c> and <c>ctx.step.count</c> instead.</remarks>
-                    abstract stepName: string with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (ctx: WorkflowDynamicDelayContext.Ctx, error: exn, stepName: string, ?output: 'T) : Ctx<'T> = jsNative
-
-        [<Interface>]
-        type RollbackOptions3<'T> =
-            abstract rollback: (WorkflowStep.Do.RollbackOptions3.Rollback.Ctx<'T> -> JS.Promise<unit>) with get, set
-            abstract rollbackConfig: WorkflowStepRollbackConfig option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (rollback: (WorkflowStep.Do.RollbackOptions3.Rollback.Ctx<'T> -> JS.Promise<unit>), ?rollbackConfig: WorkflowStepRollbackConfig) : RollbackOptions3<'T> = jsNative
-
-        module RollbackOptions3 =
-            module Rollback =
-                [<Interface>]
-                type Ctx<'T> =
-                    abstract ctx: WorkflowStep.Do.Callback.Ctx with get, set
-                    abstract error: exn with get, set
-                    abstract output: 'T option with get, set
-                    /// <remarks>@deprecated Use <c>ctx.step.name</c> and <c>ctx.step.count</c> instead.</remarks>
-                    abstract stepName: string with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (ctx: WorkflowStep.Do.Callback.Ctx, error: exn, stepName: string, ?output: 'T) : Ctx<'T> = jsNative
-
-        [<Interface>]
-        type RollbackOptions4<'T> =
-            abstract rollback: (WorkflowStep.Do.RollbackOptions4.Rollback.Ctx<'T> -> JS.Promise<unit>) with get, set
-            abstract rollbackConfig: WorkflowStepRollbackConfig option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (rollback: (WorkflowStep.Do.RollbackOptions4.Rollback.Ctx<'T> -> JS.Promise<unit>), ?rollbackConfig: WorkflowStepRollbackConfig) : RollbackOptions4<'T> = jsNative
-
-        module RollbackOptions4 =
-            module Rollback =
-                [<Interface>]
-                type Ctx<'T> =
-                    abstract ctx: WorkflowStep.Do.Callback.Ctx with get, set
-                    abstract error: exn with get, set
-                    abstract output: 'T option with get, set
-                    /// <remarks>@deprecated Use <c>ctx.step.name</c> and <c>ctx.step.count</c> instead.</remarks>
-                    abstract stepName: string with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (ctx: WorkflowStep.Do.Callback.Ctx, error: exn, stepName: string, ?output: 'T) : Ctx<'T> = jsNative
-
-    type Sleep = delegate of name: string * duration: CloudflareWorkersModule.WorkflowSleepDuration -> JS.Promise<unit>
-
-    type SleepUntil = delegate of name: string * timestamp: U2<float, JS.Date> -> JS.Promise<unit>
-
-    module WaitForEvent =
-        [<Interface>]
-        type Options =
-            abstract ``type``: string with get, set
-            abstract timeout: CloudflareWorkersModule.WorkflowSleepDuration option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, ?timeout: CloudflareWorkersModule.WorkflowSleepDuration) : Options = jsNative
-
-        module Result =
-            [<Interface>]
-            type Item<'T> =
-                abstract payload: obj with get, set
-                abstract timestamp: JS.Date with get, set
-                abstract ``type``: string with get, set
-                abstract sensitive: string option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (payload: obj, timestamp: JS.Date, ``type``: string, ?sensitive: string) : Item<'T> = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type WorkflowInstanceStatus =
@@ -23295,18 +16960,6 @@ type WorkflowEntrypoint<'Env, 'T> (ctx: ExecutionContext<obj>, env: 'Env) =
         with get (): 'Env = jsNative
         and set (_: 'Env): unit = jsNative
     abstract run: ``event``: WorkflowEntrypoint.Run.Event * step: WorkflowStep -> JS.Promise<obj>
-
-module WorkflowEntrypoint =
-    module Run =
-        [<Interface>]
-        type Event =
-            abstract payload: obj
-            abstract timestamp: JS.Date
-            abstract instanceId: string
-            abstract workflowName: string
-            abstract schedule: WorkflowCronSchedule option
-            [<ParamObject; Emit("$0")>]
-            static member Create (payload: obj, timestamp: JS.Date, instanceId: string, workflowName: string, ?schedule: WorkflowCronSchedule) : Event = jsNative
 
 [<Interface>]
 type SecretsStoreSecret =
@@ -24303,15 +17956,6 @@ type VectorizeQueryOptions =
     [<ParamObject; Emit("$0")>]
     static member Create (?topK: float, ?``namespace``: string, ?returnValues: bool, ?returnMetadata: VectorizeQueryOptions.ReturnMetadata, ?filter: VectorizeVectorMetadataFilter) : VectorizeQueryOptions = jsNative
 
-module VectorizeQueryOptions =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type ReturnMetadata =
-        | [<CompiledName("all")>] All
-        | [<CompiledName("indexed")>] Indexed
-        | [<CompiledName("none")>] None
-        | [<CompiledValue(false)>] False
-        | [<CompiledValue(true)>] True
-
 /// <summary>
 /// Information about the configuration of an index.
 /// </summary>
@@ -24784,14 +18428,6 @@ type NonRetryableError (message: string, ?name: string) =
     [<Import("NonRetryableError.isError", "cloudflare:workflows")>]
     static member isError (error: obj) : bool = jsNative
 
-module InstanceStatus =
-    [<Interface>]
-    type Error =
-        abstract name: string with get, set
-        abstract message: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (name: string, message: string) : Error = jsNative
-
 [<Interface>]
 type Workflow<'PARAMS> =
     /// <summary>
@@ -24823,65 +18459,6 @@ type Workflow<'PARAMS> =
     abstract deleteBatch: instanceIds: string[] -> JS.Promise<WorkflowBatchDeleteResult>
     [<ParamObject; Emit("$0")>]
     static member Create (get: (string -> JS.Promise<WorkflowInstance>), create: (WorkflowInstanceCreateOptions<'PARAMS> option -> JS.Promise<WorkflowInstance>), createBatch: (WorkflowInstanceCreateOptions<'PARAMS>[] -> JS.Promise<WorkflowInstance[]>), deleteBatch: (string[] -> JS.Promise<WorkflowBatchDeleteResult>)) : Workflow<'PARAMS> = jsNative
-
-module WorkflowBatchDeleteResult =
-    module Deleted =
-        [<Interface>]
-        type Item =
-            abstract id: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (id: string) : Item = jsNative
-
-    module Errors =
-        [<Interface>]
-        type Item =
-            abstract id: string with get, set
-            abstract code: float with get, set
-            abstract message: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (id: string, code: float, message: string) : Item = jsNative
-
-module WorkflowInstance =
-    [<Interface>]
-    type SendEvent0 =
-        abstract ``type``: string with get, set
-        abstract payload: obj with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: obj) : SendEvent0 = jsNative
-
-module WorkflowInstanceCreateOptions =
-    [<Interface>]
-    type Retention =
-        abstract successRetention: CloudflareWorkersModule.WorkflowSleepDuration option with get, set
-        abstract errorRetention: CloudflareWorkersModule.WorkflowSleepDuration option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?successRetention: CloudflareWorkersModule.WorkflowSleepDuration, ?errorRetention: CloudflareWorkersModule.WorkflowSleepDuration) : Retention = jsNative
-
-module WorkflowInstanceRestartOptions =
-    [<Interface>]
-    type From =
-        /// <summary>
-        /// The step name as defined in your workflow code.
-        /// </summary>
-        abstract name: string with get, set
-        /// <summary>
-        /// 1-indexed occurrence of this step name. Use when the same step name appears multiple times (e.g. in a loop).
-        /// </summary>
-        /// <defaultValue>1</defaultValue>
-        abstract count: float option with get, set
-        /// <summary>
-        /// Step type filter. Use when different step types share the same name.
-        /// </summary>
-        abstract ``type``: WorkflowInstanceRestartOptions.From.Type option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (name: string, ?count: float, ?``type``: WorkflowInstanceRestartOptions.From.Type) : From = jsNative
-
-    module From =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Type =
-            | [<CompiledName("do")>] Do
-            | [<CompiledName("sleep")>] Sleep
-            | [<CompiledName("waitForEvent")>] WaitForEvent
 
 [<Interface>]
 type WorkflowBatchDeleteResult =
@@ -25011,82 +18588,6428 @@ type WorkflowInstance =
     [<ParamObject; Emit("$0")>]
     static member Create (id: string, pause: (unit -> JS.Promise<unit>), resume: (unit -> JS.Promise<unit>), terminate: (WorkflowInstanceTerminateOptions option -> JS.Promise<unit>), restart: (WorkflowInstanceRestartOptions option -> JS.Promise<unit>), delete: (unit -> JS.Promise<unit>), status: (unit -> JS.Promise<InstanceStatus>), sendEvent: (WorkflowInstance.SendEvent0 -> JS.Promise<unit>)) : WorkflowInstance = jsNative
 
-module Cloudflare =
-    module Email =
-        /// <summary>The package's value exports, each bound to its import.</summary>
-        [<Erase>]
-        type Exports =
-            [<Import("EmailMessage", "cloudflare:email")>]
-            static member EmailMessage: EmailMessageConstructor = jsNative
+module AIGatewayUniversalRequest =
+    type Headers =
+        abstract ``cf-aig-metadata``: U2<string, Record<string, U4<string, float, bigint, bool> option>> option with get, set
+        abstract ``cf-aig-custom-cost``: U3<string, AIGatewayUniversalRequest.Headers.CfAigCustomCost, AIGatewayUniversalRequest.Headers.CfAigCustomCost2> option with get, set
+        abstract ``cf-aig-cache-ttl``: U2<string, float> option with get, set
+        abstract ``cf-aig-skip-cache``: U2<string, bool> option with get, set
+        abstract ``cf-aig-cache-key``: string option with get, set
+        abstract ``cf-aig-event-id``: string option with get, set
+        abstract ``cf-aig-request-timeout``: U2<string, float> option with get, set
+        abstract ``cf-aig-max-attempts``: U2<string, float> option with get, set
+        abstract ``cf-aig-retry-delay``: U2<string, float> option with get, set
+        abstract ``cf-aig-backoff``: string option with get, set
+        abstract ``cf-aig-collect-log``: U2<string, bool> option with get, set
+        abstract Authorization: string option with get, set
+        abstract ``Content-Type``: string option with get, set
+        [<EmitIndexer>]
+        abstract Item: string -> obj option with get, set
 
-    module Node =
-        /// <summary>The package's value exports, each bound to its import.</summary>
-        [<Erase>]
-        type Exports =
-            [<Import("httpServerHandler", "cloudflare:node")>]
-            static member httpServerHandler (port: float) : ExportedHandler<obj, obj, obj, obj> = jsNative
-            [<Import("httpServerHandler", "cloudflare:node")>]
-            static member httpServerHandler (options: HttpServerHandler.Options) : ExportedHandler<obj, obj, obj, obj> = jsNative
-            [<Import("httpServerHandler", "cloudflare:node")>]
-            static member httpServerHandler (server: NodeStyleServer) : ExportedHandler<obj, obj, obj, obj> = jsNative
+    module Headers =
+        [<Interface>]
+        type CfAigCustomCost =
+            abstract per_token_in: float option with get, set
+            abstract per_token_out: float option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?per_token_in: float, ?per_token_out: float) : CfAigCustomCost = jsNative
 
-    module Pipelines =
-        /// <summary>The package's value exports, each bound to its import.</summary>
-        [<Erase>]
-        type Exports =
-            [<Import("PipelineTransformationEntrypoint", "cloudflare:pipelines"); EmitConstructor>]
-            static member PipelineTransformationEntrypoint<'Env, 'I, 'O> (ctx: ExecutionContext<obj>, env: 'Env) : PipelineTransformationEntrypoint<'Env, 'I, 'O> = jsNative
+        [<Interface>]
+        type CfAigCustomCost2 =
+            abstract total_cost: float option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?total_cost: float) : CfAigCustomCost2 = jsNative
 
-    module Sockets =
-        /// <summary>The package's value exports, each bound to its import.</summary>
-        [<Erase>]
-        type Exports =
-            [<Import("connect", "cloudflare:sockets")>]
-            static member connect (address: U2<string, SocketAddress>, ?options: SocketOptions) : Socket = jsNative
+module AgentMemoryMessage =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Role =
+        | [<CompiledName("assistant")>] Assistant
+        | [<CompiledName("system")>] System
+        | [<CompiledName("user")>] User
 
-    module Workers =
-        /// <summary>The package's value exports, each bound to its import.</summary>
-        [<Erase>]
-        type Exports =
-            [<Import("RpcStub", "cloudflare:workers")>]
-            static member RpcStub: RpcStubConstructor = jsNative
-            [<Import("RpcTarget", "cloudflare:workers"); EmitConstructor>]
-            static member RpcTarget () : RpcTarget = jsNative
-            [<Import("WorkerEntrypoint", "cloudflare:workers"); EmitConstructor>]
-            static member WorkerEntrypoint<'Env, 'Props> (ctx: ExecutionContext<obj>, env: 'Env) : WorkerEntrypoint<'Env, 'Props> = jsNative
-            [<Import("DurableObject", "cloudflare:workers"); EmitConstructor>]
-            static member DurableObject<'Env, 'Props> (ctx: DurableObjectState<obj>, env: 'Env) : CloudflareWorkersModule.DurableObject<'Env, 'Props> = jsNative
-            [<Import("WorkflowStep", "cloudflare:workers"); EmitConstructor>]
-            static member WorkflowStep () : WorkflowStep = jsNative
-            [<Import("WorkflowEntrypoint", "cloudflare:workers"); EmitConstructor>]
-            static member WorkflowEntrypoint<'Env, 'T> (ctx: ExecutionContext<obj>, env: 'Env) : WorkflowEntrypoint<'Env, 'T> = jsNative
-            [<Import("waitUntil", "cloudflare:workers")>]
-            static member waitUntil (promise: JS.Promise<obj>) : unit = jsNative
-            [<Import("withEnv", "cloudflare:workers")>]
-            static member withEnv (newEnv: obj, fn: (unit -> obj)) : obj = jsNative
-            [<Import("withExports", "cloudflare:workers")>]
-            static member withExports (newExports: obj, fn: (unit -> obj)) : obj = jsNative
-            [<Import("withEnvAndExports", "cloudflare:workers")>]
-            static member withEnvAndExports (newEnv: obj, newExports: obj, fn: (unit -> obj)) : obj = jsNative
-            [<Import("env", "cloudflare:workers")>]
-            static member env: obj = jsNative
-            [<Import("exports", "cloudflare:workers")>]
-            static member exports: obj = jsNative
-            [<Import("cache", "cloudflare:workers")>]
-            static member cache: CacheContext = jsNative
-            [<Import("tracing", "cloudflare:workers")>]
-            static member tracing: Tracing = jsNative
+module Ai =
+    module Run =
+        [<Interface>]
+        type Inputs =
+            abstract requests: obj[] with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (requests: obj[]) : Inputs = jsNative
 
-    module Workflows =
-        /// <summary>The package's value exports, each bound to its import.</summary>
-        [<Erase>]
-        type Exports =
+        [<Interface>]
+        type Options =
+            inherit AiOptions
             /// <summary>
-            /// NonRetryableError allows for a user to throw a fatal error
-            /// that makes a Workflow instance fail immediately without triggering a retry
+            /// Send requests as an asynchronous batch job, only works for supported models
+            /// https://developers.cloudflare.com/workers-ai/features/batch-api
             /// </summary>
-            [<Import("NonRetryableError", "cloudflare:workflows"); EmitConstructor>]
-            static member NonRetryableError (message: string, ?name: string) : NonRetryableError = jsNative
+            abstract queueRequest: bool with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (queueRequest: bool, ?websocket: bool, ?tags: string[], ?gateway: GatewayOptions, ?returnRawResponse: bool, ?prefix: string, ?extraHeaders: obj, ?signal: AbortSignal) : Options = jsNative
+
+        [<Interface>]
+        type Options2 =
+            inherit AiOptions
+            abstract returnRawResponse: bool with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (returnRawResponse: bool, ?queueRequest: bool, ?websocket: bool, ?tags: string[], ?gateway: GatewayOptions, ?prefix: string, ?extraHeaders: obj, ?signal: AbortSignal) : Options2 = jsNative
+
+        [<Interface>]
+        type Options3 =
+            inherit AiOptions
+            /// <summary>
+            /// Establish websocket connections, only works for supported models
+            /// </summary>
+            abstract websocket: bool with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (websocket: bool, ?queueRequest: bool, ?tags: string[], ?gateway: GatewayOptions, ?returnRawResponse: bool, ?prefix: string, ?extraHeaders: obj, ?signal: AbortSignal) : Options3 = jsNative
+
+module AiAutomaticSpeechRecognitionOutput =
+    module Words =
+        [<Interface>]
+        type Item =
+            abstract word: string with get, set
+            abstract start: float with get, set
+            abstract ``end``: float with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (word: string, start: float, ``end``: float) : Item = jsNative
+
+module AiGateway =
+    module Run =
+        [<Interface>]
+        type Options =
+            abstract gateway: UniversalGatewayOptions option with get, set
+            abstract extraHeaders: obj option with get, set
+            abstract signal: AbortSignal option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?gateway: UniversalGatewayOptions, ?extraHeaders: obj, ?signal: AbortSignal) : Options = jsNative
+
+module AiGatewayPatchLog =
+    type Feedback =
+        | NMinus1 = -1
+        | N1 = 1
+
+module AiImageClassificationOutput =
+    [<Interface>]
+    type Item =
+        abstract score: float option with get, set
+        abstract label: string option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?score: float, ?label: string) : Item = jsNative
+
+module AiModelsSearchObject =
+    [<Interface>]
+    type Task =
+        abstract id: string with get, set
+        abstract name: string with get, set
+        abstract description: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (id: string, name: string, description: string) : Task = jsNative
+
+    module Properties =
+        [<Interface>]
+        type Item =
+            abstract property_id: string with get, set
+            abstract value: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (property_id: string, value: string) : Item = jsNative
+
+module AiObjectDetectionOutput =
+    [<Interface>]
+    type Item =
+        abstract score: float option with get, set
+        abstract label: string option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?score: float, ?label: string) : Item = jsNative
+
+module AiSearchChatCompletionsResponse =
+    module Choices =
+        type Item =
+            abstract index: float option with get, set
+            abstract message: AiSearchChatCompletionsResponse.Choices.Item.Message with get, set
+            [<EmitIndexer>]
+            abstract Item: string -> obj with get, set
+
+        module Item =
+            type Message =
+                abstract role: AiSearchMessage.Role with get, set
+                abstract content: string option with get, set
+                [<EmitIndexer>]
+                abstract Item: string -> obj with get, set
+
+module AiSearchConfig =
+    [<Interface>]
+    type IndexMethod =
+        abstract vector: bool option with get, set
+        abstract keyword: bool option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?vector: bool, ?keyword: bool) : IndexMethod = jsNative
+
+    [<Interface>]
+    type IndexingOptions =
+        abstract keyword_tokenizer: AiSearchInstanceInfo.IndexingOptions.KeywordTokenizer option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?keyword_tokenizer: AiSearchInstanceInfo.IndexingOptions.KeywordTokenizer) : IndexingOptions = jsNative
+
+    [<Interface>]
+    type RetrievalOptions =
+        abstract keyword_match_mode: AiSearchOptions.Retrieval.KeywordMatchMode option with get, set
+        abstract boost_by: AiSearchConfig.RetrievalOptions.BoostBy.Item[] option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?keyword_match_mode: AiSearchOptions.Retrieval.KeywordMatchMode, ?boost_by: AiSearchConfig.RetrievalOptions.BoostBy.Item[]) : RetrievalOptions = jsNative
+
+    module CustomMetadata =
+        [<Interface>]
+        type Item =
+            abstract field_name: string with get, set
+            abstract data_type: AiSearchInstanceInfo.CustomMetadata.Item.DataType with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (field_name: string, data_type: AiSearchInstanceInfo.CustomMetadata.Item.DataType) : Item = jsNative
+
+    module RetrievalOptions =
+        module BoostBy =
+            [<Interface>]
+            type Item =
+                abstract field: string with get, set
+                abstract direction: AiSearchOptions.Retrieval.BoostBy.Item.Direction option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (field: string, ?direction: AiSearchOptions.Retrieval.BoostBy.Item.Direction) : Item = jsNative
+
+module AiSearchInstance =
+    module ChatCompletions =
+        type Params =
+            inherit AiSearchChatCompletionsRequest
+            abstract stream: bool with get, set
+
+    module Update =
+        type Config =
+            /// <summary>
+            /// Instance ID (1-32 chars, pattern: ^[a-z0-9_]+(?:-[a-z0-9_]+)*$)
+            /// </summary>
+            abstract id: string option with get, set
+            /// <summary>
+            /// Instance type. Omit to create with built-in storage.
+            /// </summary>
+            abstract ``type``: string option with get, set
+            /// <summary>
+            /// Source URL (required for web-crawler type).
+            /// </summary>
+            abstract source: string option with get, set
+            abstract source_params: obj option with get, set
+            /// <summary>
+            /// Token ID (UUID format)
+            /// </summary>
+            abstract token_id: string option with get, set
+            abstract ai_gateway_id: string option with get, set
+            /// <summary>
+            /// Enable query rewriting (default false)
+            /// </summary>
+            abstract rewrite_query: bool option with get, set
+            /// <summary>
+            /// Enable reranking (default false)
+            /// </summary>
+            abstract reranking: bool option with get, set
+            abstract embedding_model: string option with get, set
+            abstract ai_search_model: string option with get, set
+            abstract rewrite_model: string option with get, set
+            abstract reranking_model: string option with get, set
+            /// <remarks>@deprecated Use index_method instead.</remarks>
+            abstract hybrid_search_enabled: bool option with get, set
+            /// <summary>
+            /// Controls which storage backends are used during indexing. Defaults to vector-only.
+            /// </summary>
+            abstract index_method: AiSearchConfig.IndexMethod option with get, set
+            /// <summary>
+            /// Fusion method for combining vector and keyword results. "rrf" = reciprocal rank fusion (default), "max" = maximum score.
+            /// </summary>
+            abstract fusion_method: AiSearchOptions.Retrieval.FusionMethod option with get, set
+            abstract indexing_options: AiSearchConfig.IndexingOptions option with get, set
+            abstract retrieval_options: AiSearchConfig.RetrievalOptions option with get, set
+            abstract chunk: bool option with get, set
+            abstract chunk_size: float option with get, set
+            abstract chunk_overlap: float option with get, set
+            /// <summary>
+            /// Minimum similarity score (0-1) for a result to be included.
+            /// </summary>
+            abstract score_threshold: float option with get, set
+            abstract max_num_results: float option with get, set
+            abstract cache: bool option with get, set
+            /// <summary>
+            /// Similarity threshold for cache hits. Stricter = fewer cache hits but higher relevance.
+            /// </summary>
+            abstract cache_threshold: AiSearchOptions.Cache.CacheThreshold option with get, set
+            abstract custom_metadata: AiSearchConfig.CustomMetadata.Item[] option with get, set
+            abstract ``namespace``: string option with get, set
+            /// <summary>
+            /// Sync interval in seconds. 3600=1h, 7200=2h, 14400=4h, 21600=6h, 43200=12h, 86400=24h.
+            /// </summary>
+            abstract sync_interval: AiSearchInstanceInfo.SyncInterval option with get, set
+            abstract metadata: Record<string, obj> option with get, set
+            [<EmitIndexer>]
+            abstract Item: string -> obj with get, set
+
+module AiSearchInstanceInfo =
+    [<Interface>]
+    type IndexMethod =
+        abstract vector: bool option with get, set
+        abstract keyword: bool option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?vector: bool, ?keyword: bool) : IndexMethod = jsNative
+
+    [<Interface>]
+    type IndexingOptions =
+        abstract keyword_tokenizer: AiSearchInstanceInfo.IndexingOptions.KeywordTokenizer option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?keyword_tokenizer: AiSearchInstanceInfo.IndexingOptions.KeywordTokenizer) : IndexingOptions = jsNative
+
+    [<Interface>]
+    type RetrievalOptions =
+        abstract keyword_match_mode: AiSearchOptions.Retrieval.KeywordMatchMode option with get, set
+        abstract boost_by: AiSearchInstanceInfo.RetrievalOptions.BoostBy.Item[] option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?keyword_match_mode: AiSearchOptions.Retrieval.KeywordMatchMode, ?boost_by: AiSearchInstanceInfo.RetrievalOptions.BoostBy.Item[]) : RetrievalOptions = jsNative
+
+    type SyncInterval =
+        | N3600 = 3600
+        | N7200 = 7200
+        | N14400 = 14400
+        | N21600 = 21600
+        | N43200 = 43200
+        | N86400 = 86400
+
+    module CustomMetadata =
+        [<Interface>]
+        type Item =
+            abstract field_name: string with get, set
+            abstract data_type: AiSearchInstanceInfo.CustomMetadata.Item.DataType with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (field_name: string, data_type: AiSearchInstanceInfo.CustomMetadata.Item.DataType) : Item = jsNative
+
+        module Item =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type DataType =
+                | [<CompiledName("boolean")>] Boolean
+                | [<CompiledName("datetime")>] Datetime
+                | [<CompiledName("number")>] Number
+                | [<CompiledName("text")>] Text
+
+    module IndexingOptions =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type KeywordTokenizer =
+            | [<CompiledName("porter")>] Porter
+            | [<CompiledName("trigram")>] Trigram
+
+    module RetrievalOptions =
+        module BoostBy =
+            [<Interface>]
+            type Item =
+                abstract field: string with get, set
+                abstract direction: AiSearchOptions.Retrieval.BoostBy.Item.Direction option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (field: string, ?direction: AiSearchOptions.Retrieval.BoostBy.Item.Direction) : Item = jsNative
+
+module AiSearchItemChunk =
+    [<Interface>]
+    type Item =
+        abstract timestamp: float option with get, set
+        abstract key: string with get, set
+        abstract metadata: Record<string, obj> option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (key: string, ?timestamp: float, ?metadata: Record<string, obj>) : Item = jsNative
+
+module AiSearchItemChunksResponse =
+    [<Interface>]
+    type ResultInfo =
+        abstract count: float with get, set
+        abstract total: float with get, set
+        abstract limit: float with get, set
+        abstract offset: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (count: float, total: float, limit: float, offset: float) : ResultInfo = jsNative
+
+module AiSearchItemInfo =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type NextAction =
+        | DELETE
+        | INDEX
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Status =
+        | [<CompiledName("completed")>] Completed
+        | [<CompiledName("error")>] Error
+        | [<CompiledName("outdated")>] Outdated
+        | [<CompiledName("queued")>] Queued
+        | [<CompiledName("running")>] Running
+        | [<CompiledName("skipped")>] Skipped
+
+module AiSearchItemLogsResponse =
+    [<Interface>]
+    type ResultInfo =
+        abstract count: float with get, set
+        abstract per_page: float with get, set
+        abstract cursor: string option with get, set
+        abstract truncated: bool with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (count: float, per_page: float, truncated: bool, ?cursor: string) : ResultInfo = jsNative
+
+module AiSearchItems =
+    module UploadAndPoll =
+        [<Interface>]
+        type Options =
+            inherit AiSearchUploadItemOptions
+            /// <summary>
+            /// Polling interval in milliseconds (default 1000).
+            /// </summary>
+            abstract pollIntervalMs: float option with get, set
+            /// <summary>
+            /// Maximum time to wait in milliseconds (default 30000).
+            /// </summary>
+            abstract timeoutMs: float option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?metadata: Record<string, obj>, ?pollIntervalMs: float, ?timeoutMs: float) : Options = jsNative
+
+module AiSearchJobInfo =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Source =
+        | [<CompiledName("schedule")>] Schedule
+        | [<CompiledName("user")>] User
+
+module AiSearchJobLogsResponse =
+    [<Interface>]
+    type ResultInfo =
+        abstract count: float with get, set
+        abstract page: float with get, set
+        abstract per_page: float with get, set
+        abstract total_count: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (count: float, page: float, per_page: float, total_count: float) : ResultInfo = jsNative
+
+module AiSearchListInstancesParams =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type OrderByDirection =
+        | [<CompiledName("asc")>] Asc
+        | [<CompiledName("desc")>] Desc
+
+module AiSearchListItemsParams =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type SortBy =
+        | [<CompiledName("modified_at")>] ModifiedAt
+        | [<CompiledName("status")>] Status
+
+module AiSearchListItemsResponse =
+    [<Interface>]
+    type ResultInfo =
+        abstract count: float with get, set
+        abstract page: float with get, set
+        abstract per_page: float with get, set
+        abstract total_count: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (count: float, page: float, per_page: float, total_count: float) : ResultInfo = jsNative
+
+module AiSearchListJobsResponse =
+    [<Interface>]
+    type ResultInfo =
+        abstract count: float with get, set
+        abstract page: float with get, set
+        abstract per_page: float with get, set
+        abstract total_count: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (count: float, page: float, per_page: float, total_count: float) : ResultInfo = jsNative
+
+module AiSearchListResponse =
+    [<Interface>]
+    type ResultInfo =
+        abstract count: float with get, set
+        abstract page: float with get, set
+        abstract per_page: float with get, set
+        abstract total_count: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (count: float, page: float, per_page: float, total_count: float) : ResultInfo = jsNative
+
+module AiSearchMessage =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Role =
+        | [<CompiledName("assistant")>] Assistant
+        | [<CompiledName("developer")>] Developer
+        | [<CompiledName("system")>] System
+        | [<CompiledName("tool")>] Tool
+        | [<CompiledName("user")>] User
+
+module AiSearchMultiSearchChunk =
+    [<Interface>]
+    type Item =
+        abstract timestamp: float option with get, set
+        abstract key: string with get, set
+        abstract metadata: Record<string, obj> option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (key: string, ?timestamp: float, ?metadata: Record<string, obj>) : Item = jsNative
+
+    type ScoringDetails =
+        /// <summary>
+        /// Keyword match score (0-1)
+        /// </summary>
+        abstract keyword_score: float option with get, set
+        /// <summary>
+        /// Vector similarity score (0-1)
+        /// </summary>
+        abstract vector_score: float option with get, set
+        /// <summary>
+        /// Keyword rank position
+        /// </summary>
+        abstract keyword_rank: float option with get, set
+        /// <summary>
+        /// Vector rank position
+        /// </summary>
+        abstract vector_rank: float option with get, set
+        /// <summary>
+        /// Reranking model score
+        /// </summary>
+        abstract reranking_score: float option with get, set
+        /// <summary>
+        /// Fusion method used to combine results
+        /// </summary>
+        abstract fusion_method: AiSearchOptions.Retrieval.FusionMethod option with get, set
+        [<EmitIndexer>]
+        abstract Item: string -> obj with get, set
+
+module AiSearchNamespace =
+    module ChatCompletions =
+        type Params =
+            abstract ai_search_options: AiSearchMultiSearchOptions with get, set
+            abstract stream: bool with get, set
+            [<EmitIndexer>]
+            abstract Item: string -> obj with get, set
+            [<EmitIndexer>]
+            abstract Item: float -> obj with get, set
+
+module AiSearchOptions =
+    [<Interface>]
+    type Cache =
+        abstract enabled: bool option with get, set
+        abstract cache_threshold: AiSearchOptions.Cache.CacheThreshold option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?enabled: bool, ?cache_threshold: AiSearchOptions.Cache.CacheThreshold) : Cache = jsNative
+
+    type QueryRewrite =
+        abstract enabled: bool option with get, set
+        abstract model: string option with get, set
+        abstract rewrite_prompt: string option with get, set
+        [<EmitIndexer>]
+        abstract Item: string -> obj with get, set
+
+    type Reranking =
+        abstract enabled: bool option with get, set
+        abstract model: string option with get, set
+        /// <summary>
+        /// Match threshold (0-1, default 0.4)
+        /// </summary>
+        abstract match_threshold: float option with get, set
+        [<EmitIndexer>]
+        abstract Item: string -> obj with get, set
+
+    type Retrieval =
+        /// <summary>
+        /// Which retrieval backend to use. Defaults to the instance's configured index_method.
+        /// </summary>
+        abstract retrieval_type: AiSearchOptions.Retrieval.RetrievalType option with get, set
+        /// <summary>
+        /// Fusion method for combining vector + keyword results.
+        /// </summary>
+        abstract fusion_method: AiSearchOptions.Retrieval.FusionMethod option with get, set
+        /// <summary>
+        /// How keyword terms are combined: "and" = all terms must match, "or" = any term matches.
+        /// </summary>
+        abstract keyword_match_mode: AiSearchOptions.Retrieval.KeywordMatchMode option with get, set
+        /// <summary>
+        /// Minimum similarity score (0-1) for a result to be included. Default 0.4.
+        /// </summary>
+        abstract match_threshold: float option with get, set
+        /// <summary>
+        /// Maximum number of results to return (1-50). Default 10.
+        /// </summary>
+        abstract max_num_results: float option with get, set
+        /// <summary>
+        /// Vectorize metadata filters applied to the search.
+        /// </summary>
+        abstract filters: VectorizeVectorMetadataFilter option with get, set
+        /// <summary>
+        /// Number of surrounding chunks to include for context (0-3). Default 0.
+        /// </summary>
+        abstract context_expansion: float option with get, set
+        /// <summary>
+        /// If true, return only item metadata without chunk text.
+        /// </summary>
+        abstract metadata_only: bool option with get, set
+        /// <summary>
+        /// If true (default), return empty results on retrieval failure instead of throwing.
+        /// </summary>
+        abstract return_on_failure: bool option with get, set
+        /// <summary>
+        /// Boost results by metadata field values. Max 3 entries.
+        /// </summary>
+        abstract boost_by: AiSearchOptions.Retrieval.BoostBy.Item[] option with get, set
+        [<EmitIndexer>]
+        abstract Item: string -> obj with get, set
+
+    module Cache =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type CacheThreshold =
+            | [<CompiledName("anything_goes")>] AnythingGoes
+            | [<CompiledName("close_enough")>] CloseEnough
+            | [<CompiledName("flexible_friend")>] FlexibleFriend
+            | [<CompiledName("super_strict_match")>] SuperStrictMatch
+
+    module Retrieval =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type FusionMethod =
+            | [<CompiledName("max")>] Max
+            | [<CompiledName("rrf")>] Rrf
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type KeywordMatchMode =
+            | [<CompiledName("and")>] And
+            | [<CompiledName("or")>] Or
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type RetrievalType =
+            | [<CompiledName("hybrid")>] Hybrid
+            | [<CompiledName("keyword")>] Keyword
+            | [<CompiledName("vector")>] Vector
+
+        module BoostBy =
+            [<Interface>]
+            type Item =
+                abstract field: string with get, set
+                abstract direction: AiSearchOptions.Retrieval.BoostBy.Item.Direction option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (field: string, ?direction: AiSearchOptions.Retrieval.BoostBy.Item.Direction) : Item = jsNative
+
+            module Item =
+                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                type Direction =
+                    | [<CompiledName("asc")>] Asc
+                    | [<CompiledName("desc")>] Desc
+                    | [<CompiledName("exists")>] Exists
+                    | [<CompiledName("not_exists")>] NotExists
+
+module AiSearchSearchResponse =
+    module Chunks =
+        [<Interface>]
+        type Item =
+            abstract id: string with get, set
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// Match score (0-1)
+            /// </summary>
+            abstract score: float with get, set
+            abstract text: string with get, set
+            abstract item: AiSearchMultiSearchChunk.Item with get, set
+            abstract scoring_details: AiSearchMultiSearchChunk.ScoringDetails option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (id: string, ``type``: string, score: float, text: string, item: AiSearchMultiSearchChunk.Item, ?scoring_details: AiSearchMultiSearchChunk.ScoringDetails) : Item = jsNative
+
+module AiSearchStatsResponse =
+    [<Interface>]
+    type Engine =
+        abstract vectorize: AiSearchStatsResponse.Engine.Vectorize option with get, set
+        abstract r2: AiSearchStatsResponse.Engine.R2 option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?vectorize: AiSearchStatsResponse.Engine.Vectorize, ?r2: AiSearchStatsResponse.Engine.R2) : Engine = jsNative
+
+    module Engine =
+        [<Interface>]
+        type R2 =
+            abstract payloadSizeBytes: float with get, set
+            abstract metadataSizeBytes: float with get, set
+            abstract objectCount: float with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (payloadSizeBytes: float, metadataSizeBytes: float, objectCount: float) : R2 = jsNative
+
+        [<Interface>]
+        type Vectorize =
+            abstract vectorsCount: float with get, set
+            abstract dimensions: float with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (vectorsCount: float, dimensions: float) : Vectorize = jsNative
+
+module AiTextClassificationOutput =
+    [<Interface>]
+    type Item =
+        abstract score: float option with get, set
+        abstract label: string option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?score: float, ?label: string) : Item = jsNative
+
+module AiTextGenerationOutput =
+    module ToolCalls =
+        [<Interface>]
+        type Item =
+            inherit AiTextGenerationToolLegacyOutput
+            inherit AiTextGenerationToolOutput
+            [<ParamObject; Emit("$0")>]
+            static member Create (name: string, arguments: obj, id: string, ``type``: string, ``function``: AiTextGenerationToolOutput.Function) : Item = jsNative
+
+module AiTextGenerationToolInput =
+    [<Interface>]
+    type Function =
+        abstract name: string with get, set
+        abstract description: string with get, set
+        abstract parameters: AiTextGenerationToolInput.Function.Parameters option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string, description: string, ?parameters: AiTextGenerationToolInput.Function.Parameters) : Function = jsNative
+
+    module Function =
+        [<Interface>]
+        type Parameters =
+            abstract ``type``: string with get, set
+            abstract properties: Record<string, AiTextGenerationToolInput.Function.Parameters.Properties.Item> with get, set
+            abstract required: string[] with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (``type``: string, properties: Record<string, AiTextGenerationToolInput.Function.Parameters.Properties.Item>, required: string[]) : Parameters = jsNative
+
+        module Parameters =
+            module Properties =
+                [<Interface>]
+                type Item =
+                    abstract ``type``: string with get, set
+                    abstract description: string option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (``type``: string, ?description: string) : Item = jsNative
+
+module AiTextGenerationToolLegacyInput =
+    [<Interface>]
+    type Parameters =
+        abstract ``type``: string with get, set
+        abstract properties: Record<string, AiTextGenerationToolLegacyInput.Parameters.Properties.Item> with get, set
+        abstract required: string[] with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (``type``: string, properties: Record<string, AiTextGenerationToolLegacyInput.Parameters.Properties.Item>, required: string[]) : Parameters = jsNative
+
+    module Parameters =
+        module Properties =
+            [<Interface>]
+            type Item =
+                abstract ``type``: string with get, set
+                abstract description: string option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (``type``: string, ?description: string) : Item = jsNative
+
+module AiTextGenerationToolOutput =
+    [<Interface>]
+    type Function =
+        abstract name: string with get, set
+        abstract arguments: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string, arguments: string) : Function = jsNative
+
+module Ai_Cf_Ai4Bharat_Indictrans2_En_Indic_1B_Input =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type TargetLanguage =
+        | [<CompiledName("asm_Beng")>] AsmBeng
+        | [<CompiledName("awa_Deva")>] AwaDeva
+        | [<CompiledName("ben_Beng")>] BenBeng
+        | [<CompiledName("bho_Deva")>] BhoDeva
+        | [<CompiledName("brx_Deva")>] BrxDeva
+        | [<CompiledName("doi_Deva")>] DoiDeva
+        | [<CompiledName("eng_Latn")>] EngLatn
+        | [<CompiledName("gom_Deva")>] GomDeva
+        | [<CompiledName("gon_Deva")>] GonDeva
+        | [<CompiledName("guj_Gujr")>] GujGujr
+        | [<CompiledName("hin_Deva")>] HinDeva
+        | [<CompiledName("hne_Deva")>] HneDeva
+        | [<CompiledName("kan_Knda")>] KanKnda
+        | [<CompiledName("kas_Arab")>] KasArab
+        | [<CompiledName("kas_Deva")>] KasDeva
+        | [<CompiledName("kha_Latn")>] KhaLatn
+        | [<CompiledName("lus_Latn")>] LusLatn
+        | [<CompiledName("mag_Deva")>] MagDeva
+        | [<CompiledName("mai_Deva")>] MaiDeva
+        | [<CompiledName("mal_Mlym")>] MalMlym
+        | [<CompiledName("mar_Deva")>] MarDeva
+        | [<CompiledName("mni_Beng")>] MniBeng
+        | [<CompiledName("mni_Mtei")>] MniMtei
+        | [<CompiledName("npi_Deva")>] NpiDeva
+        | [<CompiledName("ory_Orya")>] OryOrya
+        | [<CompiledName("pan_Guru")>] PanGuru
+        | [<CompiledName("san_Deva")>] SanDeva
+        | [<CompiledName("sat_Olck")>] SatOlck
+        | [<CompiledName("snd_Arab")>] SndArab
+        | [<CompiledName("snd_Deva")>] SndDeva
+        | [<CompiledName("tam_Taml")>] TamTaml
+        | [<CompiledName("tel_Telu")>] TelTelu
+        | [<CompiledName("unr_Deva")>] UnrDeva
+        | [<CompiledName("urd_Arab")>] UrdArab
+
+module Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response =
+    [<Interface>]
+    type Usage =
+        /// <summary>
+        /// Total number of tokens in input
+        /// </summary>
+        abstract prompt_tokens: float option with get, set
+        /// <summary>
+        /// Total number of tokens in output
+        /// </summary>
+        abstract completion_tokens: float option with get, set
+        /// <summary>
+        /// Total number of input and output tokens
+        /// </summary>
+        abstract total_tokens: float option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?prompt_tokens: float, ?completion_tokens: float, ?total_tokens: float) : Usage = jsNative
+
+    module Choices =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// Index of the choice in the list
+            /// </summary>
+            abstract index: float option with get, set
+            /// <summary>
+            /// The message generated by the model
+            /// </summary>
+            abstract message: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.Choices.Item.Message option with get, set
+            /// <summary>
+            /// Reason why the model stopped generating
+            /// </summary>
+            abstract finish_reason: string option with get, set
+            /// <summary>
+            /// Stop reason (may be null)
+            /// </summary>
+            abstract stop_reason: string option with get, set
+            /// <summary>
+            /// Log probabilities (if requested)
+            /// </summary>
+            abstract logprobs: obj option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?index: float, ?message: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.Choices.Item.Message, ?finish_reason: string, ?stop_reason: string, ?logprobs: obj) : Item = jsNative
+
+        module Item =
+            [<Interface>]
+            type Message =
+                /// <summary>
+                /// Role of the message author
+                /// </summary>
+                abstract role: string with get, set
+                /// <summary>
+                /// The content of the message
+                /// </summary>
+                abstract content: string with get, set
+                /// <summary>
+                /// Internal reasoning content (if available)
+                /// </summary>
+                abstract reasoning_content: string option with get, set
+                /// <summary>
+                /// Tool calls made by the assistant
+                /// </summary>
+                abstract tool_calls: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.Choices.Item.Message.ToolCalls.Item[] option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (role: string, content: string, ?reasoning_content: string, ?tool_calls: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.Choices.Item.Message.ToolCalls.Item[]) : Message = jsNative
+
+            module Message =
+                module ToolCalls =
+                    [<Interface>]
+                    type Item =
+                        /// <summary>
+                        /// Unique identifier for the tool call
+                        /// </summary>
+                        abstract id: string with get, set
+                        /// <summary>
+                        /// Type of tool call
+                        /// </summary>
+                        abstract ``type``: string with get, set
+                        abstract ``function``: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.Choices.Item.Message.ToolCalls.Item.Function with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (id: string, ``type``: string, ``function``: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.Choices.Item.Message.ToolCalls.Item.Function) : Item = jsNative
+
+                    module Item =
+                        [<Interface>]
+                        type Function =
+                            /// <summary>
+                            /// Name of the function to call
+                            /// </summary>
+                            abstract name: string with get, set
+                            /// <summary>
+                            /// JSON string of arguments for the function
+                            /// </summary>
+                            abstract arguments: string with get, set
+                            [<ParamObject; Emit("$0")>]
+                            static member Create (name: string, arguments: string) : Function = jsNative
+
+module Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages =
+    module Functions =
+        [<Interface>]
+        type Item =
+            abstract name: string with get, set
+            abstract code: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (name: string, code: string) : Item = jsNative
+
+    module Messages =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The role of the message sender (e.g., 'user', 'assistant', 'system', 'tool').
+            /// </summary>
+            abstract role: string with get, set
+            abstract content: U2<string, Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages.Messages.Item.Content.Item[]> with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (role: string, content: U2<string, Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages.Messages.Item.Content.Item[]>) : Item = jsNative
+
+        module Item =
+            module Content =
+                [<Interface>]
+                type Item =
+                    /// <summary>
+                    /// Type of the content (text)
+                    /// </summary>
+                    abstract ``type``: string option with get, set
+                    /// <summary>
+                    /// Text content
+                    /// </summary>
+                    abstract text: string option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?``type``: string, ?text: string) : Item = jsNative
+
+    module Tools =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The name of the tool. More descriptive the better.
+            /// </summary>
+            abstract name: string with get, set
+            /// <summary>
+            /// A brief description of what the tool does.
+            /// </summary>
+            abstract description: string with get, set
+            /// <summary>
+            /// Schema defining the parameters accepted by the tool.
+            /// </summary>
+            abstract parameters: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages.Tools.Item.Parameters with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (name: string, description: string, parameters: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages.Tools.Item.Parameters) : Item = jsNative
+
+        [<Interface>]
+        type Item2 =
+            /// <summary>
+            /// Specifies the type of tool (e.g., 'function').
+            /// </summary>
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// Details of the function tool.
+            /// </summary>
+            abstract ``function``: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages.Tools.Item2.Function with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (``type``: string, ``function``: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages.Tools.Item2.Function) : Item2 = jsNative
+
+        module Item =
+            [<Interface>]
+            type Parameters =
+                /// <summary>
+                /// The type of the parameters object (usually 'object').
+                /// </summary>
+                abstract ``type``: string with get, set
+                /// <summary>
+                /// List of required parameter names.
+                /// </summary>
+                abstract required: string[] option with get, set
+                /// <summary>
+                /// Definitions of each parameter.
+                /// </summary>
+                abstract properties: Record<string, Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages.Tools.Item.Parameters.Properties.Item> with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (``type``: string, properties: Record<string, Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+
+            module Parameters =
+                module Properties =
+                    [<Interface>]
+                    type Item =
+                        /// <summary>
+                        /// The data type of the parameter.
+                        /// </summary>
+                        abstract ``type``: string with get, set
+                        /// <summary>
+                        /// A description of the expected parameter.
+                        /// </summary>
+                        abstract description: string with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (``type``: string, description: string) : Item = jsNative
+
+        module Item2 =
+            [<Interface>]
+            type Function =
+                /// <summary>
+                /// The name of the function.
+                /// </summary>
+                abstract name: string with get, set
+                /// <summary>
+                /// A brief description of what the function does.
+                /// </summary>
+                abstract description: string with get, set
+                /// <summary>
+                /// Schema defining the parameters accepted by the function.
+                /// </summary>
+                abstract parameters: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages.Tools.Item2.Function.Parameters with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (name: string, description: string, parameters: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages.Tools.Item2.Function.Parameters) : Function = jsNative
+
+            module Function =
+                [<Interface>]
+                type Parameters =
+                    /// <summary>
+                    /// The type of the parameters object (usually 'object').
+                    /// </summary>
+                    abstract ``type``: string with get, set
+                    /// <summary>
+                    /// List of required parameter names.
+                    /// </summary>
+                    abstract required: string[] option with get, set
+                    /// <summary>
+                    /// Definitions of each parameter.
+                    /// </summary>
+                    abstract properties: Record<string, Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (``type``: string, properties: Record<string, Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+
+                module Parameters =
+                    module Properties =
+                        [<Interface>]
+                        type Item =
+                            /// <summary>
+                            /// The data type of the parameter.
+                            /// </summary>
+                            abstract ``type``: string with get, set
+                            /// <summary>
+                            /// A description of the expected parameter.
+                            /// </summary>
+                            abstract description: string with get, set
+                            [<ParamObject; Emit("$0")>]
+                            static member Create (``type``: string, description: string) : Item = jsNative
+
+module Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1 =
+    module Functions =
+        [<Interface>]
+        type Item =
+            abstract name: string with get, set
+            abstract code: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (name: string, code: string) : Item = jsNative
+
+    module Messages =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The role of the message sender (e.g., 'user', 'assistant', 'system', 'tool').
+            /// </summary>
+            abstract role: string with get, set
+            abstract content: U2<string, Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1.Messages.Item.Content.Item[]> with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (role: string, content: U2<string, Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1.Messages.Item.Content.Item[]>) : Item = jsNative
+
+        module Item =
+            module Content =
+                [<Interface>]
+                type Item =
+                    /// <summary>
+                    /// Type of the content (text)
+                    /// </summary>
+                    abstract ``type``: string option with get, set
+                    /// <summary>
+                    /// Text content
+                    /// </summary>
+                    abstract text: string option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?``type``: string, ?text: string) : Item = jsNative
+
+    module Tools =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The name of the tool. More descriptive the better.
+            /// </summary>
+            abstract name: string with get, set
+            /// <summary>
+            /// A brief description of what the tool does.
+            /// </summary>
+            abstract description: string with get, set
+            /// <summary>
+            /// Schema defining the parameters accepted by the tool.
+            /// </summary>
+            abstract parameters: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1.Tools.Item.Parameters with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (name: string, description: string, parameters: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1.Tools.Item.Parameters) : Item = jsNative
+
+        [<Interface>]
+        type Item2 =
+            /// <summary>
+            /// Specifies the type of tool (e.g., 'function').
+            /// </summary>
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// Details of the function tool.
+            /// </summary>
+            abstract ``function``: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1.Tools.Item2.Function with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (``type``: string, ``function``: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1.Tools.Item2.Function) : Item2 = jsNative
+
+        module Item =
+            [<Interface>]
+            type Parameters =
+                /// <summary>
+                /// The type of the parameters object (usually 'object').
+                /// </summary>
+                abstract ``type``: string with get, set
+                /// <summary>
+                /// List of required parameter names.
+                /// </summary>
+                abstract required: string[] option with get, set
+                /// <summary>
+                /// Definitions of each parameter.
+                /// </summary>
+                abstract properties: Record<string, Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1.Tools.Item.Parameters.Properties.Item> with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (``type``: string, properties: Record<string, Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+
+            module Parameters =
+                module Properties =
+                    [<Interface>]
+                    type Item =
+                        /// <summary>
+                        /// The data type of the parameter.
+                        /// </summary>
+                        abstract ``type``: string with get, set
+                        /// <summary>
+                        /// A description of the expected parameter.
+                        /// </summary>
+                        abstract description: string with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (``type``: string, description: string) : Item = jsNative
+
+        module Item2 =
+            [<Interface>]
+            type Function =
+                /// <summary>
+                /// The name of the function.
+                /// </summary>
+                abstract name: string with get, set
+                /// <summary>
+                /// A brief description of what the function does.
+                /// </summary>
+                abstract description: string with get, set
+                /// <summary>
+                /// Schema defining the parameters accepted by the function.
+                /// </summary>
+                abstract parameters: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1.Tools.Item2.Function.Parameters with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (name: string, description: string, parameters: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1.Tools.Item2.Function.Parameters) : Function = jsNative
+
+            module Function =
+                [<Interface>]
+                type Parameters =
+                    /// <summary>
+                    /// The type of the parameters object (usually 'object').
+                    /// </summary>
+                    abstract ``type``: string with get, set
+                    /// <summary>
+                    /// List of required parameter names.
+                    /// </summary>
+                    abstract required: string[] option with get, set
+                    /// <summary>
+                    /// Definitions of each parameter.
+                    /// </summary>
+                    abstract properties: Record<string, Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1.Tools.Item2.Function.Parameters.Properties.Item> with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (``type``: string, properties: Record<string, Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+
+                module Parameters =
+                    module Properties =
+                        [<Interface>]
+                        type Item =
+                            /// <summary>
+                            /// The data type of the parameter.
+                            /// </summary>
+                            abstract ``type``: string with get, set
+                            /// <summary>
+                            /// A description of the expected parameter.
+                            /// </summary>
+                            abstract description: string with get, set
+                            [<ParamObject; Emit("$0")>]
+                            static member Create (``type``: string, description: string) : Item = jsNative
+
+module Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Text_Completion_Response =
+    [<Interface>]
+    type Usage =
+        /// <summary>
+        /// Total number of tokens in input
+        /// </summary>
+        abstract prompt_tokens: float option with get, set
+        /// <summary>
+        /// Total number of tokens in output
+        /// </summary>
+        abstract completion_tokens: float option with get, set
+        /// <summary>
+        /// Total number of input and output tokens
+        /// </summary>
+        abstract total_tokens: float option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?prompt_tokens: float, ?completion_tokens: float, ?total_tokens: float) : Usage = jsNative
+
+    module Choices =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// Index of the choice in the list
+            /// </summary>
+            abstract index: float with get, set
+            /// <summary>
+            /// The generated text completion
+            /// </summary>
+            abstract text: string with get, set
+            /// <summary>
+            /// Reason why the model stopped generating
+            /// </summary>
+            abstract finish_reason: string with get, set
+            /// <summary>
+            /// Stop reason (may be null)
+            /// </summary>
+            abstract stop_reason: string option with get, set
+            /// <summary>
+            /// Log probabilities (if requested)
+            /// </summary>
+            abstract logprobs: obj option with get, set
+            /// <summary>
+            /// Log probabilities for the prompt (if requested)
+            /// </summary>
+            abstract prompt_logprobs: obj option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (index: float, text: string, finish_reason: string, ?stop_reason: string, ?logprobs: obj, ?prompt_logprobs: obj) : Item = jsNative
+
+module Ai_Cf_Baai_Bge_Base_En_V1_5_Input2 =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Pooling =
+        | [<CompiledName("cls")>] Cls
+        | [<CompiledName("mean")>] Mean
+
+module Ai_Cf_Baai_Bge_Base_En_V1_5_Input3 =
+    module Requests =
+        [<Interface>]
+        type Item =
+            abstract text: U2<string, string[]> with get, set
+            /// <summary>
+            /// The pooling method used in the embedding process. <c>cls</c> pooling will generate more accurate embeddings on larger inputs - however, embeddings created with cls pooling are not compatible with embeddings generated with mean pooling. The default pooling method is <c>mean</c> in order for this to not be a breaking change, but we highly suggest using the new <c>cls</c> pooling for better accuracy.
+            /// </summary>
+            abstract pooling: Ai_Cf_Baai_Bge_Base_En_V1_5_Input2.Pooling option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (text: U2<string, string[]>, ?pooling: Ai_Cf_Baai_Bge_Base_En_V1_5_Input2.Pooling) : Item = jsNative
+
+module Ai_Cf_Baai_Bge_Large_En_V1_5_Input3 =
+    module Requests =
+        [<Interface>]
+        type Item =
+            abstract text: U2<string, string[]> with get, set
+            /// <summary>
+            /// The pooling method used in the embedding process. <c>cls</c> pooling will generate more accurate embeddings on larger inputs - however, embeddings created with cls pooling are not compatible with embeddings generated with mean pooling. The default pooling method is <c>mean</c> in order for this to not be a breaking change, but we highly suggest using the new <c>cls</c> pooling for better accuracy.
+            /// </summary>
+            abstract pooling: Ai_Cf_Baai_Bge_Base_En_V1_5_Input2.Pooling option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (text: U2<string, string[]>, ?pooling: Ai_Cf_Baai_Bge_Base_En_V1_5_Input2.Pooling) : Item = jsNative
+
+module Ai_Cf_Baai_Bge_M3_Input_QueryAnd_Contexts =
+    module Contexts =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// One of the provided context content
+            /// </summary>
+            abstract text: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?text: string) : Item = jsNative
+
+module Ai_Cf_Baai_Bge_M3_Input_QueryAnd_Contexts_1 =
+    module Contexts =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// One of the provided context content
+            /// </summary>
+            abstract text: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?text: string) : Item = jsNative
+
+module Ai_Cf_Baai_Bge_M3_Output_Query =
+    module Response =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// Index of the context in the request
+            /// </summary>
+            abstract id: float option with get, set
+            /// <summary>
+            /// Score of the context under the index.
+            /// </summary>
+            abstract score: float option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?id: float, ?score: float) : Item = jsNative
+
+module Ai_Cf_Baai_Bge_Reranker_Base_Input =
+    module Contexts =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// One of the provided context content
+            /// </summary>
+            abstract text: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?text: string) : Item = jsNative
+
+module Ai_Cf_Baai_Bge_Reranker_Base_Output =
+    module Response =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// Index of the context in the request
+            /// </summary>
+            abstract id: float option with get, set
+            /// <summary>
+            /// Score of the context under the index.
+            /// </summary>
+            abstract score: float option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?id: float, ?score: float) : Item = jsNative
+
+module Ai_Cf_Baai_Bge_Small_En_V1_5_Input3 =
+    module Requests =
+        [<Interface>]
+        type Item =
+            abstract text: U2<string, string[]> with get, set
+            /// <summary>
+            /// The pooling method used in the embedding process. <c>cls</c> pooling will generate more accurate embeddings on larger inputs - however, embeddings created with cls pooling are not compatible with embeddings generated with mean pooling. The default pooling method is <c>mean</c> in order for this to not be a breaking change, but we highly suggest using the new <c>cls</c> pooling for better accuracy.
+            /// </summary>
+            abstract pooling: Ai_Cf_Baai_Bge_Base_En_V1_5_Input2.Pooling option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (text: U2<string, string[]>, ?pooling: Ai_Cf_Baai_Bge_Base_En_V1_5_Input2.Pooling) : Item = jsNative
+
+module Ai_Cf_Black_Forest_Labs_Flux_2_Dev_Input =
+    [<Interface>]
+    type Multipart =
+        abstract body: obj option with get, set
+        abstract contentType: string option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?body: obj, ?contentType: string) : Multipart = jsNative
+
+module Ai_Cf_Black_Forest_Labs_Flux_2_Klein_4B_Input =
+    [<Interface>]
+    type Multipart =
+        abstract body: obj option with get, set
+        abstract contentType: string option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?body: obj, ?contentType: string) : Multipart = jsNative
+
+module Ai_Cf_Black_Forest_Labs_Flux_2_Klein_9B_Input =
+    [<Interface>]
+    type Multipart =
+        abstract body: obj option with get, set
+        abstract contentType: string option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?body: obj, ?contentType: string) : Multipart = jsNative
+
+module Ai_Cf_Deepgram_Aura_1_Input =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Container =
+        | [<CompiledName("none")>] None
+        | [<CompiledName("ogg")>] Ogg
+        | [<CompiledName("wav")>] Wav
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Encoding =
+        | [<CompiledName("aac")>] Aac
+        | [<CompiledName("alaw")>] Alaw
+        | [<CompiledName("flac")>] Flac
+        | [<CompiledName("linear16")>] Linear16
+        | [<CompiledName("mp3")>] Mp3
+        | [<CompiledName("mulaw")>] Mulaw
+        | [<CompiledName("opus")>] Opus
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Speaker =
+        | [<CompiledName("angus")>] Angus
+        | [<CompiledName("arcas")>] Arcas
+        | [<CompiledName("asteria")>] Asteria
+        | [<CompiledName("athena")>] Athena
+        | [<CompiledName("helios")>] Helios
+        | [<CompiledName("hera")>] Hera
+        | [<CompiledName("luna")>] Luna
+        | [<CompiledName("orion")>] Orion
+        | [<CompiledName("orpheus")>] Orpheus
+        | [<CompiledName("perseus")>] Perseus
+        | [<CompiledName("stella")>] Stella
+        | [<CompiledName("zeus")>] Zeus
+
+module Ai_Cf_Deepgram_Aura_2_En_Input =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Speaker =
+        | [<CompiledName("amalthea")>] Amalthea
+        | [<CompiledName("andromeda")>] Andromeda
+        | [<CompiledName("apollo")>] Apollo
+        | [<CompiledName("arcas")>] Arcas
+        | [<CompiledName("aries")>] Aries
+        | [<CompiledName("asteria")>] Asteria
+        | [<CompiledName("athena")>] Athena
+        | [<CompiledName("atlas")>] Atlas
+        | [<CompiledName("aurora")>] Aurora
+        | [<CompiledName("callista")>] Callista
+        | [<CompiledName("cora")>] Cora
+        | [<CompiledName("cordelia")>] Cordelia
+        | [<CompiledName("delia")>] Delia
+        | [<CompiledName("draco")>] Draco
+        | [<CompiledName("electra")>] Electra
+        | [<CompiledName("harmonia")>] Harmonia
+        | [<CompiledName("helena")>] Helena
+        | [<CompiledName("hera")>] Hera
+        | [<CompiledName("hermes")>] Hermes
+        | [<CompiledName("hyperion")>] Hyperion
+        | [<CompiledName("iris")>] Iris
+        | [<CompiledName("janus")>] Janus
+        | [<CompiledName("juno")>] Juno
+        | [<CompiledName("jupiter")>] Jupiter
+        | [<CompiledName("luna")>] Luna
+        | [<CompiledName("mars")>] Mars
+        | [<CompiledName("minerva")>] Minerva
+        | [<CompiledName("neptune")>] Neptune
+        | [<CompiledName("odysseus")>] Odysseus
+        | [<CompiledName("ophelia")>] Ophelia
+        | [<CompiledName("orion")>] Orion
+        | [<CompiledName("orpheus")>] Orpheus
+        | [<CompiledName("pandora")>] Pandora
+        | [<CompiledName("phoebe")>] Phoebe
+        | [<CompiledName("pluto")>] Pluto
+        | [<CompiledName("saturn")>] Saturn
+        | [<CompiledName("thalia")>] Thalia
+        | [<CompiledName("theia")>] Theia
+        | [<CompiledName("vesta")>] Vesta
+        | [<CompiledName("zeus")>] Zeus
+
+module Ai_Cf_Deepgram_Aura_2_Es_Input =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Speaker =
+        | [<CompiledName("alvaro")>] Alvaro
+        | [<CompiledName("aquila")>] Aquila
+        | [<CompiledName("carina")>] Carina
+        | [<CompiledName("celeste")>] Celeste
+        | [<CompiledName("diana")>] Diana
+        | [<CompiledName("estrella")>] Estrella
+        | [<CompiledName("javier")>] Javier
+        | [<CompiledName("nestor")>] Nestor
+        | [<CompiledName("selena")>] Selena
+        | [<CompiledName("sirio")>] Sirio
+
+module Ai_Cf_Deepgram_Flux_Input =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type MipOptOut =
+        | [<CompiledName("false")>] False
+        | [<CompiledName("true")>] True
+
+module Ai_Cf_Deepgram_Flux_Output =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Event =
+        | EagerEndOfTurn
+        | EndOfTurn
+        | StartOfTurn
+        | TurnResumed
+        | Update
+
+    module Words =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The individual punctuated, properly-cased word from the transcript
+            /// </summary>
+            abstract word: string with get, set
+            /// <summary>
+            /// Confidence that this word was transcribed correctly
+            /// </summary>
+            abstract confidence: float with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (word: string, confidence: float) : Item = jsNative
+
+module Ai_Cf_Deepgram_Nova_3_Input =
+    [<Interface>]
+    type Audio =
+        abstract body: obj with get, set
+        abstract contentType: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (body: obj, contentType: string) : Audio = jsNative
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type CustomTopicMode =
+        | [<CompiledName("extended")>] Extended
+        | [<CompiledName("strict")>] Strict
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Encoding =
+        | [<CompiledName("amr-nb")>] AmrNb
+        | [<CompiledName("amr-wb")>] AmrWb
+        | [<CompiledName("flac")>] Flac
+        | [<CompiledName("g729")>] G729
+        | [<CompiledName("linear16")>] Linear16
+        | [<CompiledName("mulaw")>] Mulaw
+        | [<CompiledName("opus")>] Opus
+        | [<CompiledName("speex")>] Speex
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Mode =
+        | [<CompiledName("finance")>] Finance
+        | [<CompiledName("general")>] General
+        | [<CompiledName("medical")>] Medical
+
+module Ai_Cf_Deepgram_Nova_3_Output =
+    [<Interface>]
+    type Results =
+        abstract channels: Ai_Cf_Deepgram_Nova_3_Output.Results.Channels.Item[] option with get, set
+        abstract summary: Ai_Cf_Deepgram_Nova_3_Output.Results.Summary option with get, set
+        abstract sentiments: Ai_Cf_Deepgram_Nova_3_Output.Results.Sentiments option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?channels: Ai_Cf_Deepgram_Nova_3_Output.Results.Channels.Item[], ?summary: Ai_Cf_Deepgram_Nova_3_Output.Results.Summary, ?sentiments: Ai_Cf_Deepgram_Nova_3_Output.Results.Sentiments) : Results = jsNative
+
+    module Results =
+        [<Interface>]
+        type Sentiments =
+            abstract segments: Ai_Cf_Deepgram_Nova_3_Output.Results.Sentiments.Segments.Item[] option with get, set
+            abstract average: Ai_Cf_Deepgram_Nova_3_Output.Results.Sentiments.Average option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?segments: Ai_Cf_Deepgram_Nova_3_Output.Results.Sentiments.Segments.Item[], ?average: Ai_Cf_Deepgram_Nova_3_Output.Results.Sentiments.Average) : Sentiments = jsNative
+
+        [<Interface>]
+        type Summary =
+            abstract result: string option with get, set
+            abstract short: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?result: string, ?short: string) : Summary = jsNative
+
+        module Channels =
+            [<Interface>]
+            type Item =
+                abstract alternatives: Ai_Cf_Deepgram_Nova_3_Output.Results.Channels.Item.Alternatives.Item[] option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (?alternatives: Ai_Cf_Deepgram_Nova_3_Output.Results.Channels.Item.Alternatives.Item[]) : Item = jsNative
+
+            module Item =
+                module Alternatives =
+                    [<Interface>]
+                    type Item =
+                        abstract confidence: float option with get, set
+                        abstract transcript: string option with get, set
+                        abstract words: Ai_Cf_Deepgram_Nova_3_Output.Results.Channels.Item.Alternatives.Item.Words.Item[] option with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (?confidence: float, ?transcript: string, ?words: Ai_Cf_Deepgram_Nova_3_Output.Results.Channels.Item.Alternatives.Item.Words.Item[]) : Item = jsNative
+
+                    module Item =
+                        module Words =
+                            [<Interface>]
+                            type Item =
+                                abstract confidence: float option with get, set
+                                abstract ``end``: float option with get, set
+                                abstract start: float option with get, set
+                                abstract word: string option with get, set
+                                [<ParamObject; Emit("$0")>]
+                                static member Create (?confidence: float, ?``end``: float, ?start: float, ?word: string) : Item = jsNative
+
+        module Sentiments =
+            [<Interface>]
+            type Average =
+                abstract sentiment: string option with get, set
+                abstract sentiment_score: float option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (?sentiment: string, ?sentiment_score: float) : Average = jsNative
+
+            module Segments =
+                [<Interface>]
+                type Item =
+                    abstract text: string option with get, set
+                    abstract start_word: float option with get, set
+                    abstract end_word: float option with get, set
+                    abstract sentiment: string option with get, set
+                    abstract sentiment_score: float option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?text: string, ?start_word: float, ?end_word: float, ?sentiment: string, ?sentiment_score: float) : Item = jsNative
+
+module Ai_Cf_Google_Gemma_3_12B_It_Messages =
+    module Functions =
+        [<Interface>]
+        type Item =
+            abstract name: string with get, set
+            abstract code: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (name: string, code: string) : Item = jsNative
+
+    module Messages =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The role of the message sender (e.g., 'user', 'assistant', 'system', 'tool').
+            /// </summary>
+            abstract role: string option with get, set
+            abstract content: U2<string, Ai_Cf_Google_Gemma_3_12B_It_Messages.Messages.Item.Content.Item[]> option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?role: string, ?content: U2<string, Ai_Cf_Google_Gemma_3_12B_It_Messages.Messages.Item.Content.Item[]>) : Item = jsNative
+
+        module Item =
+            module Content =
+                [<Interface>]
+                type Item =
+                    /// <summary>
+                    /// Type of the content provided
+                    /// </summary>
+                    abstract ``type``: string option with get, set
+                    abstract text: string option with get, set
+                    abstract image_url: Ai_Cf_Google_Gemma_3_12B_It_Messages.Messages.Item.Content.Item.ImageUrl option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?``type``: string, ?text: string, ?image_url: Ai_Cf_Google_Gemma_3_12B_It_Messages.Messages.Item.Content.Item.ImageUrl) : Item = jsNative
+
+                module Item =
+                    [<Interface>]
+                    type ImageUrl =
+                        /// <summary>
+                        /// image uri with data (e.g. data:image/jpeg;base64,/9j/...). HTTP URL will not be accepted
+                        /// </summary>
+                        abstract url: string option with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (?url: string) : ImageUrl = jsNative
+
+    module Tools =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The name of the tool. More descriptive the better.
+            /// </summary>
+            abstract name: string with get, set
+            /// <summary>
+            /// A brief description of what the tool does.
+            /// </summary>
+            abstract description: string with get, set
+            /// <summary>
+            /// Schema defining the parameters accepted by the tool.
+            /// </summary>
+            abstract parameters: Ai_Cf_Google_Gemma_3_12B_It_Messages.Tools.Item.Parameters with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (name: string, description: string, parameters: Ai_Cf_Google_Gemma_3_12B_It_Messages.Tools.Item.Parameters) : Item = jsNative
+
+        [<Interface>]
+        type Item2 =
+            /// <summary>
+            /// Specifies the type of tool (e.g., 'function').
+            /// </summary>
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// Details of the function tool.
+            /// </summary>
+            abstract ``function``: Ai_Cf_Google_Gemma_3_12B_It_Messages.Tools.Item2.Function with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (``type``: string, ``function``: Ai_Cf_Google_Gemma_3_12B_It_Messages.Tools.Item2.Function) : Item2 = jsNative
+
+        module Item =
+            [<Interface>]
+            type Parameters =
+                /// <summary>
+                /// The type of the parameters object (usually 'object').
+                /// </summary>
+                abstract ``type``: string with get, set
+                /// <summary>
+                /// List of required parameter names.
+                /// </summary>
+                abstract required: string[] option with get, set
+                /// <summary>
+                /// Definitions of each parameter.
+                /// </summary>
+                abstract properties: Record<string, Ai_Cf_Google_Gemma_3_12B_It_Messages.Tools.Item.Parameters.Properties.Item> with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (``type``: string, properties: Record<string, Ai_Cf_Google_Gemma_3_12B_It_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+
+            module Parameters =
+                module Properties =
+                    [<Interface>]
+                    type Item =
+                        /// <summary>
+                        /// The data type of the parameter.
+                        /// </summary>
+                        abstract ``type``: string with get, set
+                        /// <summary>
+                        /// A description of the expected parameter.
+                        /// </summary>
+                        abstract description: string with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (``type``: string, description: string) : Item = jsNative
+
+        module Item2 =
+            [<Interface>]
+            type Function =
+                /// <summary>
+                /// The name of the function.
+                /// </summary>
+                abstract name: string with get, set
+                /// <summary>
+                /// A brief description of what the function does.
+                /// </summary>
+                abstract description: string with get, set
+                /// <summary>
+                /// Schema defining the parameters accepted by the function.
+                /// </summary>
+                abstract parameters: Ai_Cf_Google_Gemma_3_12B_It_Messages.Tools.Item2.Function.Parameters with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (name: string, description: string, parameters: Ai_Cf_Google_Gemma_3_12B_It_Messages.Tools.Item2.Function.Parameters) : Function = jsNative
+
+            module Function =
+                [<Interface>]
+                type Parameters =
+                    /// <summary>
+                    /// The type of the parameters object (usually 'object').
+                    /// </summary>
+                    abstract ``type``: string with get, set
+                    /// <summary>
+                    /// List of required parameter names.
+                    /// </summary>
+                    abstract required: string[] option with get, set
+                    /// <summary>
+                    /// Definitions of each parameter.
+                    /// </summary>
+                    abstract properties: Record<string, Ai_Cf_Google_Gemma_3_12B_It_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (``type``: string, properties: Record<string, Ai_Cf_Google_Gemma_3_12B_It_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+
+                module Parameters =
+                    module Properties =
+                        [<Interface>]
+                        type Item =
+                            /// <summary>
+                            /// The data type of the parameter.
+                            /// </summary>
+                            abstract ``type``: string with get, set
+                            /// <summary>
+                            /// A description of the expected parameter.
+                            /// </summary>
+                            abstract description: string with get, set
+                            [<ParamObject; Emit("$0")>]
+                            static member Create (``type``: string, description: string) : Item = jsNative
+
+module Ai_Cf_Google_Gemma_3_12B_It_Output =
+    [<Interface>]
+    type Usage =
+        /// <summary>
+        /// Total number of tokens in input
+        /// </summary>
+        abstract prompt_tokens: float option with get, set
+        /// <summary>
+        /// Total number of tokens in output
+        /// </summary>
+        abstract completion_tokens: float option with get, set
+        /// <summary>
+        /// Total number of input and output tokens
+        /// </summary>
+        abstract total_tokens: float option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?prompt_tokens: float, ?completion_tokens: float, ?total_tokens: float) : Usage = jsNative
+
+    module ToolCalls =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The arguments passed to be passed to the tool call request
+            /// </summary>
+            abstract arguments: obj option with get, set
+            /// <summary>
+            /// The name of the tool to be called
+            /// </summary>
+            abstract name: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?arguments: obj, ?name: string) : Item = jsNative
+
+module Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages =
+    module Functions =
+        [<Interface>]
+        type Item =
+            abstract name: string with get, set
+            abstract code: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (name: string, code: string) : Item = jsNative
+
+    module Messages =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The role of the message sender (e.g., 'user', 'assistant', 'system', 'tool').
+            /// </summary>
+            abstract role: string option with get, set
+            /// <summary>
+            /// The tool call id. If you don't know what to put here you can fall back to 000000001
+            /// </summary>
+            abstract tool_call_id: string option with get, set
+            abstract content: U3<string, Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Messages.Item.Content.Item[], Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Messages.Item.Content> option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?role: string, ?tool_call_id: string, ?content: U3<string, Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Messages.Item.Content.Item[], Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Messages.Item.Content>) : Item = jsNative
+
+        module Item =
+            [<Interface>]
+            type Content =
+                /// <summary>
+                /// Type of the content provided
+                /// </summary>
+                abstract ``type``: string option with get, set
+                abstract text: string option with get, set
+                abstract image_url: Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Messages.Item.Content.ImageUrl option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (?``type``: string, ?text: string, ?image_url: Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Messages.Item.Content.ImageUrl) : Content = jsNative
+
+            module Content =
+                [<Interface>]
+                type ImageUrl =
+                    /// <summary>
+                    /// image uri with data (e.g. data:image/jpeg;base64,/9j/...). HTTP URL will not be accepted
+                    /// </summary>
+                    abstract url: string option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?url: string) : ImageUrl = jsNative
+
+                [<Interface>]
+                type Item =
+                    /// <summary>
+                    /// Type of the content provided
+                    /// </summary>
+                    abstract ``type``: string option with get, set
+                    abstract text: string option with get, set
+                    abstract image_url: Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Messages.Item.Content.Item.ImageUrl option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?``type``: string, ?text: string, ?image_url: Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Messages.Item.Content.Item.ImageUrl) : Item = jsNative
+
+                module Item =
+                    [<Interface>]
+                    type ImageUrl =
+                        /// <summary>
+                        /// image uri with data (e.g. data:image/jpeg;base64,/9j/...). HTTP URL will not be accepted
+                        /// </summary>
+                        abstract url: string option with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (?url: string) : ImageUrl = jsNative
+
+    module Tools =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The name of the tool. More descriptive the better.
+            /// </summary>
+            abstract name: string with get, set
+            /// <summary>
+            /// A brief description of what the tool does.
+            /// </summary>
+            abstract description: string with get, set
+            /// <summary>
+            /// Schema defining the parameters accepted by the tool.
+            /// </summary>
+            abstract parameters: Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Tools.Item.Parameters with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (name: string, description: string, parameters: Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Tools.Item.Parameters) : Item = jsNative
+
+        [<Interface>]
+        type Item2 =
+            /// <summary>
+            /// Specifies the type of tool (e.g., 'function').
+            /// </summary>
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// Details of the function tool.
+            /// </summary>
+            abstract ``function``: Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Tools.Item2.Function with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (``type``: string, ``function``: Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Tools.Item2.Function) : Item2 = jsNative
+
+        module Item =
+            [<Interface>]
+            type Parameters =
+                /// <summary>
+                /// The type of the parameters object (usually 'object').
+                /// </summary>
+                abstract ``type``: string with get, set
+                /// <summary>
+                /// List of required parameter names.
+                /// </summary>
+                abstract required: string[] option with get, set
+                /// <summary>
+                /// Definitions of each parameter.
+                /// </summary>
+                abstract properties: Record<string, Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Tools.Item.Parameters.Properties.Item> with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (``type``: string, properties: Record<string, Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+
+            module Parameters =
+                module Properties =
+                    [<Interface>]
+                    type Item =
+                        /// <summary>
+                        /// The data type of the parameter.
+                        /// </summary>
+                        abstract ``type``: string with get, set
+                        /// <summary>
+                        /// A description of the expected parameter.
+                        /// </summary>
+                        abstract description: string with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (``type``: string, description: string) : Item = jsNative
+
+        module Item2 =
+            [<Interface>]
+            type Function =
+                /// <summary>
+                /// The name of the function.
+                /// </summary>
+                abstract name: string with get, set
+                /// <summary>
+                /// A brief description of what the function does.
+                /// </summary>
+                abstract description: string with get, set
+                /// <summary>
+                /// Schema defining the parameters accepted by the function.
+                /// </summary>
+                abstract parameters: Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Tools.Item2.Function.Parameters with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (name: string, description: string, parameters: Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Tools.Item2.Function.Parameters) : Function = jsNative
+
+            module Function =
+                [<Interface>]
+                type Parameters =
+                    /// <summary>
+                    /// The type of the parameters object (usually 'object').
+                    /// </summary>
+                    abstract ``type``: string with get, set
+                    /// <summary>
+                    /// List of required parameter names.
+                    /// </summary>
+                    abstract required: string[] option with get, set
+                    /// <summary>
+                    /// Definitions of each parameter.
+                    /// </summary>
+                    abstract properties: Record<string, Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (``type``: string, properties: Record<string, Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+
+                module Parameters =
+                    module Properties =
+                        [<Interface>]
+                        type Item =
+                            /// <summary>
+                            /// The data type of the parameter.
+                            /// </summary>
+                            abstract ``type``: string with get, set
+                            /// <summary>
+                            /// A description of the expected parameter.
+                            /// </summary>
+                            abstract description: string with get, set
+                            [<ParamObject; Emit("$0")>]
+                            static member Create (``type``: string, description: string) : Item = jsNative
+
+module Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Output =
+    module ToolCalls =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The arguments passed to be passed to the tool call request
+            /// </summary>
+            abstract arguments: obj option with get, set
+            /// <summary>
+            /// The name of the tool to be called
+            /// </summary>
+            abstract name: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?arguments: obj, ?name: string) : Item = jsNative
+
+module Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Async_Batch =
+    module Requests =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// User-supplied reference. This field will be present in the response as well it can be used to reference the request and response. It's NOT validated to be unique.
+            /// </summary>
+            abstract external_reference: string option with get, set
+            /// <summary>
+            /// Prompt for the text generation model
+            /// </summary>
+            abstract prompt: string option with get, set
+            /// <summary>
+            /// If true, the response will be streamed back incrementally using SSE, Server Sent Events.
+            /// </summary>
+            abstract stream: bool option with get, set
+            /// <summary>
+            /// The maximum number of tokens to generate in the response.
+            /// </summary>
+            abstract max_tokens: float option with get, set
+            /// <summary>
+            /// Controls the randomness of the output; higher values produce more random results.
+            /// </summary>
+            abstract temperature: float option with get, set
+            /// <summary>
+            /// Adjusts the creativity of the AI's responses by controlling how many possible words it considers. Lower values make outputs more predictable; higher values allow for more varied and creative responses.
+            /// </summary>
+            abstract top_p: float option with get, set
+            /// <summary>
+            /// Random seed for reproducibility of the generation.
+            /// </summary>
+            abstract seed: float option with get, set
+            /// <summary>
+            /// Penalty for repeated tokens; higher values discourage repetition.
+            /// </summary>
+            abstract repetition_penalty: float option with get, set
+            /// <summary>
+            /// Decreases the likelihood of the model repeating the same lines verbatim.
+            /// </summary>
+            abstract frequency_penalty: float option with get, set
+            /// <summary>
+            /// Increases the likelihood of the model introducing new topics.
+            /// </summary>
+            abstract presence_penalty: float option with get, set
+            abstract response_format: Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_JSON_Mode_2 option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?external_reference: string, ?prompt: string, ?stream: bool, ?max_tokens: float, ?temperature: float, ?top_p: float, ?seed: float, ?repetition_penalty: float, ?frequency_penalty: float, ?presence_penalty: float, ?response_format: Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_JSON_Mode_2) : Item = jsNative
+
+module Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_JSON_Mode_2 =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Type =
+        | [<CompiledName("json_object")>] JsonObject
+        | [<CompiledName("json_schema")>] JsonSchema
+
+module Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages =
+    module Functions =
+        [<Interface>]
+        type Item =
+            abstract name: string with get, set
+            abstract code: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (name: string, code: string) : Item = jsNative
+
+    module Messages =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The role of the message sender (e.g., 'user', 'assistant', 'system', 'tool').
+            /// </summary>
+            abstract role: string with get, set
+            abstract content: U2<string, Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages.Messages.Item.Content.Item[]> with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (role: string, content: U2<string, Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages.Messages.Item.Content.Item[]>) : Item = jsNative
+
+        module Item =
+            module Content =
+                [<Interface>]
+                type Item =
+                    /// <summary>
+                    /// Type of the content (text)
+                    /// </summary>
+                    abstract ``type``: string option with get, set
+                    /// <summary>
+                    /// Text content
+                    /// </summary>
+                    abstract text: string option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?``type``: string, ?text: string) : Item = jsNative
+
+    module Tools =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The name of the tool. More descriptive the better.
+            /// </summary>
+            abstract name: string with get, set
+            /// <summary>
+            /// A brief description of what the tool does.
+            /// </summary>
+            abstract description: string with get, set
+            /// <summary>
+            /// Schema defining the parameters accepted by the tool.
+            /// </summary>
+            abstract parameters: Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages.Tools.Item.Parameters with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (name: string, description: string, parameters: Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages.Tools.Item.Parameters) : Item = jsNative
+
+        [<Interface>]
+        type Item2 =
+            /// <summary>
+            /// Specifies the type of tool (e.g., 'function').
+            /// </summary>
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// Details of the function tool.
+            /// </summary>
+            abstract ``function``: Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages.Tools.Item2.Function with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (``type``: string, ``function``: Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages.Tools.Item2.Function) : Item2 = jsNative
+
+        module Item =
+            [<Interface>]
+            type Parameters =
+                /// <summary>
+                /// The type of the parameters object (usually 'object').
+                /// </summary>
+                abstract ``type``: string with get, set
+                /// <summary>
+                /// List of required parameter names.
+                /// </summary>
+                abstract required: string[] option with get, set
+                /// <summary>
+                /// Definitions of each parameter.
+                /// </summary>
+                abstract properties: Record<string, Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages.Tools.Item.Parameters.Properties.Item> with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (``type``: string, properties: Record<string, Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+
+            module Parameters =
+                module Properties =
+                    [<Interface>]
+                    type Item =
+                        /// <summary>
+                        /// The data type of the parameter.
+                        /// </summary>
+                        abstract ``type``: string with get, set
+                        /// <summary>
+                        /// A description of the expected parameter.
+                        /// </summary>
+                        abstract description: string with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (``type``: string, description: string) : Item = jsNative
+
+        module Item2 =
+            [<Interface>]
+            type Function =
+                /// <summary>
+                /// The name of the function.
+                /// </summary>
+                abstract name: string with get, set
+                /// <summary>
+                /// A brief description of what the function does.
+                /// </summary>
+                abstract description: string with get, set
+                /// <summary>
+                /// Schema defining the parameters accepted by the function.
+                /// </summary>
+                abstract parameters: Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages.Tools.Item2.Function.Parameters with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (name: string, description: string, parameters: Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages.Tools.Item2.Function.Parameters) : Function = jsNative
+
+            module Function =
+                [<Interface>]
+                type Parameters =
+                    /// <summary>
+                    /// The type of the parameters object (usually 'object').
+                    /// </summary>
+                    abstract ``type``: string with get, set
+                    /// <summary>
+                    /// List of required parameter names.
+                    /// </summary>
+                    abstract required: string[] option with get, set
+                    /// <summary>
+                    /// Definitions of each parameter.
+                    /// </summary>
+                    abstract properties: Record<string, Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (``type``: string, properties: Record<string, Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+
+                module Parameters =
+                    module Properties =
+                        [<Interface>]
+                        type Item =
+                            /// <summary>
+                            /// The data type of the parameter.
+                            /// </summary>
+                            abstract ``type``: string with get, set
+                            /// <summary>
+                            /// A description of the expected parameter.
+                            /// </summary>
+                            abstract description: string with get, set
+                            [<ParamObject; Emit("$0")>]
+                            static member Create (``type``: string, description: string) : Item = jsNative
+
+module Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Output2 =
+    [<Interface>]
+    type Usage =
+        /// <summary>
+        /// Total number of tokens in input
+        /// </summary>
+        abstract prompt_tokens: float option with get, set
+        /// <summary>
+        /// Total number of tokens in output
+        /// </summary>
+        abstract completion_tokens: float option with get, set
+        /// <summary>
+        /// Total number of input and output tokens
+        /// </summary>
+        abstract total_tokens: float option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?prompt_tokens: float, ?completion_tokens: float, ?total_tokens: float) : Usage = jsNative
+
+    module ToolCalls =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The arguments passed to be passed to the tool call request
+            /// </summary>
+            abstract arguments: obj option with get, set
+            /// <summary>
+            /// The name of the tool to be called
+            /// </summary>
+            abstract name: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?arguments: obj, ?name: string) : Item = jsNative
+
+module Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages =
+    module Functions =
+        [<Interface>]
+        type Item =
+            abstract name: string with get, set
+            abstract code: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (name: string, code: string) : Item = jsNative
+
+    module Messages =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The role of the message sender (e.g., 'user', 'assistant', 'system', 'tool').
+            /// </summary>
+            abstract role: string option with get, set
+            /// <summary>
+            /// The tool call id. If you don't know what to put here you can fall back to 000000001
+            /// </summary>
+            abstract tool_call_id: string option with get, set
+            abstract content: U3<string, Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Messages.Item.Content.Item[], Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Messages.Item.Content> option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?role: string, ?tool_call_id: string, ?content: U3<string, Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Messages.Item.Content.Item[], Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Messages.Item.Content>) : Item = jsNative
+
+        module Item =
+            [<Interface>]
+            type Content =
+                /// <summary>
+                /// Type of the content provided
+                /// </summary>
+                abstract ``type``: string option with get, set
+                abstract text: string option with get, set
+                abstract image_url: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Messages.Item.Content.ImageUrl option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (?``type``: string, ?text: string, ?image_url: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Messages.Item.Content.ImageUrl) : Content = jsNative
+
+            module Content =
+                [<Interface>]
+                type ImageUrl =
+                    /// <summary>
+                    /// image uri with data (e.g. data:image/jpeg;base64,/9j/...). HTTP URL will not be accepted
+                    /// </summary>
+                    abstract url: string option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?url: string) : ImageUrl = jsNative
+
+                [<Interface>]
+                type Item =
+                    /// <summary>
+                    /// Type of the content provided
+                    /// </summary>
+                    abstract ``type``: string option with get, set
+                    abstract text: string option with get, set
+                    abstract image_url: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Messages.Item.Content.Item.ImageUrl option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?``type``: string, ?text: string, ?image_url: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Messages.Item.Content.Item.ImageUrl) : Item = jsNative
+
+                module Item =
+                    [<Interface>]
+                    type ImageUrl =
+                        /// <summary>
+                        /// image uri with data (e.g. data:image/jpeg;base64,/9j/...). HTTP URL will not be accepted
+                        /// </summary>
+                        abstract url: string option with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (?url: string) : ImageUrl = jsNative
+
+    module Tools =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The name of the tool. More descriptive the better.
+            /// </summary>
+            abstract name: string with get, set
+            /// <summary>
+            /// A brief description of what the tool does.
+            /// </summary>
+            abstract description: string with get, set
+            /// <summary>
+            /// Schema defining the parameters accepted by the tool.
+            /// </summary>
+            abstract parameters: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Tools.Item.Parameters with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (name: string, description: string, parameters: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Tools.Item.Parameters) : Item = jsNative
+
+        [<Interface>]
+        type Item2 =
+            /// <summary>
+            /// Specifies the type of tool (e.g., 'function').
+            /// </summary>
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// Details of the function tool.
+            /// </summary>
+            abstract ``function``: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Tools.Item2.Function with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (``type``: string, ``function``: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Tools.Item2.Function) : Item2 = jsNative
+
+        module Item =
+            [<Interface>]
+            type Parameters =
+                /// <summary>
+                /// The type of the parameters object (usually 'object').
+                /// </summary>
+                abstract ``type``: string with get, set
+                /// <summary>
+                /// List of required parameter names.
+                /// </summary>
+                abstract required: string[] option with get, set
+                /// <summary>
+                /// Definitions of each parameter.
+                /// </summary>
+                abstract properties: Record<string, Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Tools.Item.Parameters.Properties.Item> with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (``type``: string, properties: Record<string, Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+
+            module Parameters =
+                module Properties =
+                    [<Interface>]
+                    type Item =
+                        /// <summary>
+                        /// The data type of the parameter.
+                        /// </summary>
+                        abstract ``type``: string with get, set
+                        /// <summary>
+                        /// A description of the expected parameter.
+                        /// </summary>
+                        abstract description: string with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (``type``: string, description: string) : Item = jsNative
+
+        module Item2 =
+            [<Interface>]
+            type Function =
+                /// <summary>
+                /// The name of the function.
+                /// </summary>
+                abstract name: string with get, set
+                /// <summary>
+                /// A brief description of what the function does.
+                /// </summary>
+                abstract description: string with get, set
+                /// <summary>
+                /// Schema defining the parameters accepted by the function.
+                /// </summary>
+                abstract parameters: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Tools.Item2.Function.Parameters with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (name: string, description: string, parameters: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Tools.Item2.Function.Parameters) : Function = jsNative
+
+            module Function =
+                [<Interface>]
+                type Parameters =
+                    /// <summary>
+                    /// The type of the parameters object (usually 'object').
+                    /// </summary>
+                    abstract ``type``: string with get, set
+                    /// <summary>
+                    /// List of required parameter names.
+                    /// </summary>
+                    abstract required: string[] option with get, set
+                    /// <summary>
+                    /// Definitions of each parameter.
+                    /// </summary>
+                    abstract properties: Record<string, Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (``type``: string, properties: Record<string, Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+
+                module Parameters =
+                    module Properties =
+                        [<Interface>]
+                        type Item =
+                            /// <summary>
+                            /// The data type of the parameter.
+                            /// </summary>
+                            abstract ``type``: string with get, set
+                            /// <summary>
+                            /// A description of the expected parameter.
+                            /// </summary>
+                            abstract description: string with get, set
+                            [<ParamObject; Emit("$0")>]
+                            static member Create (``type``: string, description: string) : Item = jsNative
+
+module Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner =
+    module Functions =
+        [<Interface>]
+        type Item =
+            abstract name: string with get, set
+            abstract code: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (name: string, code: string) : Item = jsNative
+
+    module Messages =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The role of the message sender (e.g., 'user', 'assistant', 'system', 'tool').
+            /// </summary>
+            abstract role: string option with get, set
+            /// <summary>
+            /// The tool call id. If you don't know what to put here you can fall back to 000000001
+            /// </summary>
+            abstract tool_call_id: string option with get, set
+            abstract content: U3<string, Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Messages.Item.Content.Item[], Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Messages.Item.Content> option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?role: string, ?tool_call_id: string, ?content: U3<string, Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Messages.Item.Content.Item[], Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Messages.Item.Content>) : Item = jsNative
+
+        module Item =
+            [<Interface>]
+            type Content =
+                /// <summary>
+                /// Type of the content provided
+                /// </summary>
+                abstract ``type``: string option with get, set
+                abstract text: string option with get, set
+                abstract image_url: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Messages.Item.Content.ImageUrl option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (?``type``: string, ?text: string, ?image_url: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Messages.Item.Content.ImageUrl) : Content = jsNative
+
+            module Content =
+                [<Interface>]
+                type ImageUrl =
+                    /// <summary>
+                    /// image uri with data (e.g. data:image/jpeg;base64,/9j/...). HTTP URL will not be accepted
+                    /// </summary>
+                    abstract url: string option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?url: string) : ImageUrl = jsNative
+
+                [<Interface>]
+                type Item =
+                    /// <summary>
+                    /// Type of the content provided
+                    /// </summary>
+                    abstract ``type``: string option with get, set
+                    abstract text: string option with get, set
+                    abstract image_url: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Messages.Item.Content.Item.ImageUrl option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?``type``: string, ?text: string, ?image_url: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Messages.Item.Content.Item.ImageUrl) : Item = jsNative
+
+                module Item =
+                    [<Interface>]
+                    type ImageUrl =
+                        /// <summary>
+                        /// image uri with data (e.g. data:image/jpeg;base64,/9j/...). HTTP URL will not be accepted
+                        /// </summary>
+                        abstract url: string option with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (?url: string) : ImageUrl = jsNative
+
+    module Tools =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The name of the tool. More descriptive the better.
+            /// </summary>
+            abstract name: string with get, set
+            /// <summary>
+            /// A brief description of what the tool does.
+            /// </summary>
+            abstract description: string with get, set
+            /// <summary>
+            /// Schema defining the parameters accepted by the tool.
+            /// </summary>
+            abstract parameters: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Tools.Item.Parameters with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (name: string, description: string, parameters: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Tools.Item.Parameters) : Item = jsNative
+
+        [<Interface>]
+        type Item2 =
+            /// <summary>
+            /// Specifies the type of tool (e.g., 'function').
+            /// </summary>
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// Details of the function tool.
+            /// </summary>
+            abstract ``function``: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Tools.Item2.Function with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (``type``: string, ``function``: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Tools.Item2.Function) : Item2 = jsNative
+
+        module Item =
+            [<Interface>]
+            type Parameters =
+                /// <summary>
+                /// The type of the parameters object (usually 'object').
+                /// </summary>
+                abstract ``type``: string with get, set
+                /// <summary>
+                /// List of required parameter names.
+                /// </summary>
+                abstract required: string[] option with get, set
+                /// <summary>
+                /// Definitions of each parameter.
+                /// </summary>
+                abstract properties: Record<string, Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Tools.Item.Parameters.Properties.Item> with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (``type``: string, properties: Record<string, Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+
+            module Parameters =
+                module Properties =
+                    [<Interface>]
+                    type Item =
+                        /// <summary>
+                        /// The data type of the parameter.
+                        /// </summary>
+                        abstract ``type``: string with get, set
+                        /// <summary>
+                        /// A description of the expected parameter.
+                        /// </summary>
+                        abstract description: string with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (``type``: string, description: string) : Item = jsNative
+
+        module Item2 =
+            [<Interface>]
+            type Function =
+                /// <summary>
+                /// The name of the function.
+                /// </summary>
+                abstract name: string with get, set
+                /// <summary>
+                /// A brief description of what the function does.
+                /// </summary>
+                abstract description: string with get, set
+                /// <summary>
+                /// Schema defining the parameters accepted by the function.
+                /// </summary>
+                abstract parameters: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Tools.Item2.Function.Parameters with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (name: string, description: string, parameters: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Tools.Item2.Function.Parameters) : Function = jsNative
+
+            module Function =
+                [<Interface>]
+                type Parameters =
+                    /// <summary>
+                    /// The type of the parameters object (usually 'object').
+                    /// </summary>
+                    abstract ``type``: string with get, set
+                    /// <summary>
+                    /// List of required parameter names.
+                    /// </summary>
+                    abstract required: string[] option with get, set
+                    /// <summary>
+                    /// Definitions of each parameter.
+                    /// </summary>
+                    abstract properties: Record<string, Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Tools.Item2.Function.Parameters.Properties.Item> with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (``type``: string, properties: Record<string, Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+
+                module Parameters =
+                    module Properties =
+                        [<Interface>]
+                        type Item =
+                            /// <summary>
+                            /// The data type of the parameter.
+                            /// </summary>
+                            abstract ``type``: string with get, set
+                            /// <summary>
+                            /// A description of the expected parameter.
+                            /// </summary>
+                            abstract description: string with get, set
+                            [<ParamObject; Emit("$0")>]
+                            static member Create (``type``: string, description: string) : Item = jsNative
+
+module Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Output =
+    [<Interface>]
+    type Usage =
+        /// <summary>
+        /// Total number of tokens in input
+        /// </summary>
+        abstract prompt_tokens: float option with get, set
+        /// <summary>
+        /// Total number of tokens in output
+        /// </summary>
+        abstract completion_tokens: float option with get, set
+        /// <summary>
+        /// Total number of input and output tokens
+        /// </summary>
+        abstract total_tokens: float option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?prompt_tokens: float, ?completion_tokens: float, ?total_tokens: float) : Usage = jsNative
+
+    module ToolCalls =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The tool call id.
+            /// </summary>
+            abstract id: string option with get, set
+            /// <summary>
+            /// Specifies the type of tool (e.g., 'function').
+            /// </summary>
+            abstract ``type``: string option with get, set
+            /// <summary>
+            /// Details of the function tool.
+            /// </summary>
+            abstract ``function``: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Output.ToolCalls.Item.Function option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?id: string, ?``type``: string, ?``function``: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Output.ToolCalls.Item.Function) : Item = jsNative
+
+        module Item =
+            [<Interface>]
+            type Function =
+                /// <summary>
+                /// The name of the tool to be called
+                /// </summary>
+                abstract name: string option with get, set
+                /// <summary>
+                /// The arguments passed to be passed to the tool call request
+                /// </summary>
+                abstract arguments: obj option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (?name: string, ?arguments: obj) : Function = jsNative
+
+module Ai_Cf_Meta_Llama_Guard_3_8B_Input =
+    [<Interface>]
+    type ResponseFormat =
+        /// <summary>
+        /// Set to json_object to process and output generated text as JSON.
+        /// </summary>
+        abstract ``type``: string option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?``type``: string) : ResponseFormat = jsNative
+
+    module Messages =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The role of the message sender must alternate between 'user' and 'assistant'.
+            /// </summary>
+            abstract role: Ai_Cf_Meta_Llama_Guard_3_8B_Input.Messages.Item.Role with get, set
+            /// <summary>
+            /// The content of the message as a string.
+            /// </summary>
+            abstract content: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (role: Ai_Cf_Meta_Llama_Guard_3_8B_Input.Messages.Item.Role, content: string) : Item = jsNative
+
+        module Item =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Role =
+                | [<CompiledName("assistant")>] Assistant
+                | [<CompiledName("user")>] User
+
+module Ai_Cf_Meta_Llama_Guard_3_8B_Output =
+    [<Interface>]
+    type Response =
+        /// <summary>
+        /// Whether the conversation is safe or not.
+        /// </summary>
+        abstract safe: bool option with get, set
+        /// <summary>
+        /// A list of what hazard categories predicted for the conversation, if the conversation is deemed unsafe.
+        /// </summary>
+        abstract categories: string[] option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?safe: bool, ?categories: string[]) : Response = jsNative
+
+    [<Interface>]
+    type Usage =
+        /// <summary>
+        /// Total number of tokens in input
+        /// </summary>
+        abstract prompt_tokens: float option with get, set
+        /// <summary>
+        /// Total number of tokens in output
+        /// </summary>
+        abstract completion_tokens: float option with get, set
+        /// <summary>
+        /// Total number of input and output tokens
+        /// </summary>
+        abstract total_tokens: float option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?prompt_tokens: float, ?completion_tokens: float, ?total_tokens: float) : Usage = jsNative
+
+module Ai_Cf_Meta_M2M100_1_2B_Input3 =
+    module Requests =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The text to be translated
+            /// </summary>
+            abstract text: string with get, set
+            /// <summary>
+            /// The language code of the source text (e.g., 'en' for English). Defaults to 'en' if not specified
+            /// </summary>
+            abstract source_lang: string option with get, set
+            /// <summary>
+            /// The language code to translate the text into (e.g., 'es' for Spanish)
+            /// </summary>
+            abstract target_lang: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (text: string, target_lang: string, ?source_lang: string) : Item = jsNative
+
+module Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages =
+    module Functions =
+        [<Interface>]
+        type Item =
+            abstract name: string with get, set
+            abstract code: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (name: string, code: string) : Item = jsNative
+
+    module Messages =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The role of the message sender (e.g., 'user', 'assistant', 'system', 'tool').
+            /// </summary>
+            abstract role: string option with get, set
+            /// <summary>
+            /// The tool call id. Must be supplied for tool calls for Mistral-3. If you don't know what to put here you can fall back to 000000001
+            /// </summary>
+            abstract tool_call_id: string option with get, set
+            abstract content: U3<string, Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Messages.Item.Content.Item[], Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Messages.Item.Content> option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?role: string, ?tool_call_id: string, ?content: U3<string, Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Messages.Item.Content.Item[], Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Messages.Item.Content>) : Item = jsNative
+
+        module Item =
+            [<Interface>]
+            type Content =
+                /// <summary>
+                /// Type of the content provided
+                /// </summary>
+                abstract ``type``: string option with get, set
+                abstract text: string option with get, set
+                abstract image_url: Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Messages.Item.Content.ImageUrl option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (?``type``: string, ?text: string, ?image_url: Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Messages.Item.Content.ImageUrl) : Content = jsNative
+
+            module Content =
+                [<Interface>]
+                type ImageUrl =
+                    /// <summary>
+                    /// image uri with data (e.g. data:image/jpeg;base64,/9j/...). HTTP URL will not be accepted
+                    /// </summary>
+                    abstract url: string option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?url: string) : ImageUrl = jsNative
+
+                [<Interface>]
+                type Item =
+                    /// <summary>
+                    /// Type of the content provided
+                    /// </summary>
+                    abstract ``type``: string option with get, set
+                    abstract text: string option with get, set
+                    abstract image_url: Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Messages.Item.Content.Item.ImageUrl option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?``type``: string, ?text: string, ?image_url: Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Messages.Item.Content.Item.ImageUrl) : Item = jsNative
+
+                module Item =
+                    [<Interface>]
+                    type ImageUrl =
+                        /// <summary>
+                        /// image uri with data (e.g. data:image/jpeg;base64,/9j/...). HTTP URL will not be accepted
+                        /// </summary>
+                        abstract url: string option with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (?url: string) : ImageUrl = jsNative
+
+    module Tools =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The name of the tool. More descriptive the better.
+            /// </summary>
+            abstract name: string with get, set
+            /// <summary>
+            /// A brief description of what the tool does.
+            /// </summary>
+            abstract description: string with get, set
+            /// <summary>
+            /// Schema defining the parameters accepted by the tool.
+            /// </summary>
+            abstract parameters: Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Tools.Item.Parameters with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (name: string, description: string, parameters: Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Tools.Item.Parameters) : Item = jsNative
+
+        [<Interface>]
+        type Item2 =
+            /// <summary>
+            /// Specifies the type of tool (e.g., 'function').
+            /// </summary>
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// Details of the function tool.
+            /// </summary>
+            abstract ``function``: Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Tools.Item2.Function with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (``type``: string, ``function``: Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Tools.Item2.Function) : Item2 = jsNative
+
+        module Item =
+            [<Interface>]
+            type Parameters =
+                /// <summary>
+                /// The type of the parameters object (usually 'object').
+                /// </summary>
+                abstract ``type``: string with get, set
+                /// <summary>
+                /// List of required parameter names.
+                /// </summary>
+                abstract required: string[] option with get, set
+                /// <summary>
+                /// Definitions of each parameter.
+                /// </summary>
+                abstract properties: Record<string, Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Tools.Item.Parameters.Properties.Item> with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (``type``: string, properties: Record<string, Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+
+            module Parameters =
+                module Properties =
+                    [<Interface>]
+                    type Item =
+                        /// <summary>
+                        /// The data type of the parameter.
+                        /// </summary>
+                        abstract ``type``: string with get, set
+                        /// <summary>
+                        /// A description of the expected parameter.
+                        /// </summary>
+                        abstract description: string with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (``type``: string, description: string) : Item = jsNative
+
+        module Item2 =
+            [<Interface>]
+            type Function =
+                /// <summary>
+                /// The name of the function.
+                /// </summary>
+                abstract name: string with get, set
+                /// <summary>
+                /// A brief description of what the function does.
+                /// </summary>
+                abstract description: string with get, set
+                /// <summary>
+                /// Schema defining the parameters accepted by the function.
+                /// </summary>
+                abstract parameters: Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Tools.Item2.Function.Parameters with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (name: string, description: string, parameters: Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Tools.Item2.Function.Parameters) : Function = jsNative
+
+            module Function =
+                [<Interface>]
+                type Parameters =
+                    /// <summary>
+                    /// The type of the parameters object (usually 'object').
+                    /// </summary>
+                    abstract ``type``: string with get, set
+                    /// <summary>
+                    /// List of required parameter names.
+                    /// </summary>
+                    abstract required: string[] option with get, set
+                    /// <summary>
+                    /// Definitions of each parameter.
+                    /// </summary>
+                    abstract properties: Record<string, Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (``type``: string, properties: Record<string, Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+
+                module Parameters =
+                    module Properties =
+                        [<Interface>]
+                        type Item =
+                            /// <summary>
+                            /// The data type of the parameter.
+                            /// </summary>
+                            abstract ``type``: string with get, set
+                            /// <summary>
+                            /// A description of the expected parameter.
+                            /// </summary>
+                            abstract description: string with get, set
+                            [<ParamObject; Emit("$0")>]
+                            static member Create (``type``: string, description: string) : Item = jsNative
+
+module Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Output =
+    [<Interface>]
+    type Usage =
+        /// <summary>
+        /// Total number of tokens in input
+        /// </summary>
+        abstract prompt_tokens: float option with get, set
+        /// <summary>
+        /// Total number of tokens in output
+        /// </summary>
+        abstract completion_tokens: float option with get, set
+        /// <summary>
+        /// Total number of input and output tokens
+        /// </summary>
+        abstract total_tokens: float option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?prompt_tokens: float, ?completion_tokens: float, ?total_tokens: float) : Usage = jsNative
+
+    module ToolCalls =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The arguments passed to be passed to the tool call request
+            /// </summary>
+            abstract arguments: obj option with get, set
+            /// <summary>
+            /// The name of the tool to be called
+            /// </summary>
+            abstract name: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?arguments: obj, ?name: string) : Item = jsNative
+
+module Ai_Cf_Moondream_Moondream3_1_9B_A2B_Input =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type CaptionLength =
+        | [<CompiledName("long")>] Long
+        | [<CompiledName("normal")>] Normal
+        | [<CompiledName("short")>] Short
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Task =
+        | [<CompiledName("caption")>] Caption
+        | [<CompiledName("detect")>] Detect
+        | [<CompiledName("point")>] Point
+        | [<CompiledName("query")>] Query
+
+module Ai_Cf_Moondream_Moondream3_1_9B_A2B_Output =
+    [<Interface>]
+    type Metrics =
+        /// <summary>
+        /// Number of input tokens consumed.
+        /// </summary>
+        abstract input_tokens: float with get, set
+        /// <summary>
+        /// Number of output tokens generated.
+        /// </summary>
+        abstract output_tokens: float with get, set
+        /// <summary>
+        /// Prefill time in milliseconds.
+        /// </summary>
+        abstract prefill_time_ms: float with get, set
+        /// <summary>
+        /// Decode time in milliseconds.
+        /// </summary>
+        abstract decode_time_ms: float with get, set
+        /// <summary>
+        /// Time to first token in milliseconds.
+        /// </summary>
+        abstract ttft_ms: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (input_tokens: float, output_tokens: float, prefill_time_ms: float, decode_time_ms: float, ttft_ms: float) : Metrics = jsNative
+
+    [<Interface>]
+    type Reasoning =
+        /// <summary>
+        /// Reasoning text.
+        /// </summary>
+        abstract text: string with get, set
+        /// <summary>
+        /// Grounding information.
+        /// </summary>
+        abstract grounding: obj[] option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (text: string, ?grounding: obj[]) : Reasoning = jsNative
+
+    module Objects =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// Minimum X coordinate.
+            /// </summary>
+            abstract x_min: float with get, set
+            /// <summary>
+            /// Minimum Y coordinate.
+            /// </summary>
+            abstract y_min: float with get, set
+            /// <summary>
+            /// Maximum X coordinate.
+            /// </summary>
+            abstract x_max: float with get, set
+            /// <summary>
+            /// Maximum Y coordinate.
+            /// </summary>
+            abstract y_max: float with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (x_min: float, y_min: float, x_max: float, y_max: float) : Item = jsNative
+
+    module Points =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// X coordinate.
+            /// </summary>
+            abstract x: float with get, set
+            /// <summary>
+            /// Y coordinate.
+            /// </summary>
+            abstract y: float with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (x: float, y: float) : Item = jsNative
+
+module Ai_Cf_Openai_Whisper_Large_V3_Turbo_Input =
+    [<Interface>]
+    type Audio =
+        abstract body: obj option with get, set
+        abstract contentType: string option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?body: obj, ?contentType: string) : Audio = jsNative
+
+module Ai_Cf_Openai_Whisper_Large_V3_Turbo_Output =
+    [<Interface>]
+    type TranscriptionInfo =
+        /// <summary>
+        /// The language of the audio being transcribed or translated.
+        /// </summary>
+        abstract language: string option with get, set
+        /// <summary>
+        /// The confidence level or probability of the detected language being accurate, represented as a decimal between 0 and 1.
+        /// </summary>
+        abstract language_probability: float option with get, set
+        /// <summary>
+        /// The total duration of the original audio file, in seconds.
+        /// </summary>
+        abstract duration: float option with get, set
+        /// <summary>
+        /// The duration of the audio after applying Voice Activity Detection (VAD) to remove silent or irrelevant sections, in seconds.
+        /// </summary>
+        abstract duration_after_vad: float option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?language: string, ?language_probability: float, ?duration: float, ?duration_after_vad: float) : TranscriptionInfo = jsNative
+
+    module Segments =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The starting time of the segment within the audio, in seconds.
+            /// </summary>
+            abstract start: float option with get, set
+            /// <summary>
+            /// The ending time of the segment within the audio, in seconds.
+            /// </summary>
+            abstract ``end``: float option with get, set
+            /// <summary>
+            /// The transcription of the segment.
+            /// </summary>
+            abstract text: string option with get, set
+            /// <summary>
+            /// The temperature used in the decoding process, controlling randomness in predictions. Lower values result in more deterministic outputs.
+            /// </summary>
+            abstract temperature: float option with get, set
+            /// <summary>
+            /// The average log probability of the predictions for the words in this segment, indicating overall confidence.
+            /// </summary>
+            abstract avg_logprob: float option with get, set
+            /// <summary>
+            /// The compression ratio of the input to the output, measuring how much the text was compressed during the transcription process.
+            /// </summary>
+            abstract compression_ratio: float option with get, set
+            /// <summary>
+            /// The probability that the segment contains no speech, represented as a decimal between 0 and 1.
+            /// </summary>
+            abstract no_speech_prob: float option with get, set
+            abstract words: Ai_Cf_Openai_Whisper_Large_V3_Turbo_Output.Segments.Item.Words.Item[] option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?start: float, ?``end``: float, ?text: string, ?temperature: float, ?avg_logprob: float, ?compression_ratio: float, ?no_speech_prob: float, ?words: Ai_Cf_Openai_Whisper_Large_V3_Turbo_Output.Segments.Item.Words.Item[]) : Item = jsNative
+
+        module Item =
+            module Words =
+                [<Interface>]
+                type Item =
+                    /// <summary>
+                    /// The individual word transcribed from the audio.
+                    /// </summary>
+                    abstract word: string option with get, set
+                    /// <summary>
+                    /// The starting time of the word within the audio, in seconds.
+                    /// </summary>
+                    abstract start: float option with get, set
+                    /// <summary>
+                    /// The ending time of the word within the audio, in seconds.
+                    /// </summary>
+                    abstract ``end``: float option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?word: string, ?start: float, ?``end``: float) : Item = jsNative
+
+module Ai_Cf_Openai_Whisper_Output =
+    module Words =
+        [<Interface>]
+        type Item =
+            abstract word: string option with get, set
+            /// <summary>
+            /// The second this word begins in the recording
+            /// </summary>
+            abstract start: float option with get, set
+            /// <summary>
+            /// The ending second when the word completes
+            /// </summary>
+            abstract ``end``: float option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?word: string, ?start: float, ?``end``: float) : Item = jsNative
+
+module Ai_Cf_Openai_Whisper_Tiny_En_Output =
+    module Words =
+        [<Interface>]
+        type Item =
+            abstract word: string option with get, set
+            /// <summary>
+            /// The second this word begins in the recording
+            /// </summary>
+            abstract start: float option with get, set
+            /// <summary>
+            /// The ending second when the word completes
+            /// </summary>
+            abstract ``end``: float option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?word: string, ?start: float, ?``end``: float) : Item = jsNative
+
+module Ai_Cf_Pipecat_Ai_Smart_Turn_V2_Input2 =
+    [<Interface>]
+    type Audio =
+        abstract body: obj with get, set
+        abstract contentType: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (body: obj, contentType: string) : Audio = jsNative
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Dtype =
+        | [<CompiledName("float32")>] Float32
+        | [<CompiledName("float64")>] Float64
+        | [<CompiledName("uint8")>] Uint8
+
+module Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Messages =
+    module Functions =
+        [<Interface>]
+        type Item =
+            abstract name: string with get, set
+            abstract code: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (name: string, code: string) : Item = jsNative
+
+    module Messages =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The role of the message sender (e.g., 'user', 'assistant', 'system', 'tool').
+            /// </summary>
+            abstract role: string with get, set
+            /// <summary>
+            /// The content of the message as a string.
+            /// </summary>
+            abstract content: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (role: string, content: string) : Item = jsNative
+
+    module Tools =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The name of the tool. More descriptive the better.
+            /// </summary>
+            abstract name: string with get, set
+            /// <summary>
+            /// A brief description of what the tool does.
+            /// </summary>
+            abstract description: string with get, set
+            /// <summary>
+            /// Schema defining the parameters accepted by the tool.
+            /// </summary>
+            abstract parameters: Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Messages.Tools.Item.Parameters with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (name: string, description: string, parameters: Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Messages.Tools.Item.Parameters) : Item = jsNative
+
+        [<Interface>]
+        type Item2 =
+            /// <summary>
+            /// Specifies the type of tool (e.g., 'function').
+            /// </summary>
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// Details of the function tool.
+            /// </summary>
+            abstract ``function``: Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Messages.Tools.Item2.Function with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (``type``: string, ``function``: Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Messages.Tools.Item2.Function) : Item2 = jsNative
+
+        module Item =
+            [<Interface>]
+            type Parameters =
+                /// <summary>
+                /// The type of the parameters object (usually 'object').
+                /// </summary>
+                abstract ``type``: string with get, set
+                /// <summary>
+                /// List of required parameter names.
+                /// </summary>
+                abstract required: string[] option with get, set
+                /// <summary>
+                /// Definitions of each parameter.
+                /// </summary>
+                abstract properties: Record<string, Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Messages.Tools.Item.Parameters.Properties.Item> with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (``type``: string, properties: Record<string, Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+
+            module Parameters =
+                module Properties =
+                    [<Interface>]
+                    type Item =
+                        /// <summary>
+                        /// The data type of the parameter.
+                        /// </summary>
+                        abstract ``type``: string with get, set
+                        /// <summary>
+                        /// A description of the expected parameter.
+                        /// </summary>
+                        abstract description: string with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (``type``: string, description: string) : Item = jsNative
+
+        module Item2 =
+            [<Interface>]
+            type Function =
+                /// <summary>
+                /// The name of the function.
+                /// </summary>
+                abstract name: string with get, set
+                /// <summary>
+                /// A brief description of what the function does.
+                /// </summary>
+                abstract description: string with get, set
+                /// <summary>
+                /// Schema defining the parameters accepted by the function.
+                /// </summary>
+                abstract parameters: Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Messages.Tools.Item2.Function.Parameters with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (name: string, description: string, parameters: Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Messages.Tools.Item2.Function.Parameters) : Function = jsNative
+
+            module Function =
+                [<Interface>]
+                type Parameters =
+                    /// <summary>
+                    /// The type of the parameters object (usually 'object').
+                    /// </summary>
+                    abstract ``type``: string with get, set
+                    /// <summary>
+                    /// List of required parameter names.
+                    /// </summary>
+                    abstract required: string[] option with get, set
+                    /// <summary>
+                    /// Definitions of each parameter.
+                    /// </summary>
+                    abstract properties: Record<string, Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (``type``: string, properties: Record<string, Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+
+                module Parameters =
+                    module Properties =
+                        [<Interface>]
+                        type Item =
+                            /// <summary>
+                            /// The data type of the parameter.
+                            /// </summary>
+                            abstract ``type``: string with get, set
+                            /// <summary>
+                            /// A description of the expected parameter.
+                            /// </summary>
+                            abstract description: string with get, set
+                            [<ParamObject; Emit("$0")>]
+                            static member Create (``type``: string, description: string) : Item = jsNative
+
+module Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Output =
+    [<Interface>]
+    type Usage =
+        /// <summary>
+        /// Total number of tokens in input
+        /// </summary>
+        abstract prompt_tokens: float option with get, set
+        /// <summary>
+        /// Total number of tokens in output
+        /// </summary>
+        abstract completion_tokens: float option with get, set
+        /// <summary>
+        /// Total number of input and output tokens
+        /// </summary>
+        abstract total_tokens: float option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?prompt_tokens: float, ?completion_tokens: float, ?total_tokens: float) : Usage = jsNative
+
+    module ToolCalls =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The arguments passed to be passed to the tool call request
+            /// </summary>
+            abstract arguments: obj option with get, set
+            /// <summary>
+            /// The name of the tool to be called
+            /// </summary>
+            abstract name: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?arguments: obj, ?name: string) : Item = jsNative
+
+module Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response =
+    [<Interface>]
+    type Usage =
+        /// <summary>
+        /// Total number of tokens in input
+        /// </summary>
+        abstract prompt_tokens: float option with get, set
+        /// <summary>
+        /// Total number of tokens in output
+        /// </summary>
+        abstract completion_tokens: float option with get, set
+        /// <summary>
+        /// Total number of input and output tokens
+        /// </summary>
+        abstract total_tokens: float option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?prompt_tokens: float, ?completion_tokens: float, ?total_tokens: float) : Usage = jsNative
+
+    module Choices =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// Index of the choice in the list
+            /// </summary>
+            abstract index: float option with get, set
+            /// <summary>
+            /// The message generated by the model
+            /// </summary>
+            abstract message: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.Choices.Item.Message option with get, set
+            /// <summary>
+            /// Reason why the model stopped generating
+            /// </summary>
+            abstract finish_reason: string option with get, set
+            /// <summary>
+            /// Stop reason (may be null)
+            /// </summary>
+            abstract stop_reason: string option with get, set
+            /// <summary>
+            /// Log probabilities (if requested)
+            /// </summary>
+            abstract logprobs: obj option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?index: float, ?message: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.Choices.Item.Message, ?finish_reason: string, ?stop_reason: string, ?logprobs: obj) : Item = jsNative
+
+        module Item =
+            [<Interface>]
+            type Message =
+                /// <summary>
+                /// Role of the message author
+                /// </summary>
+                abstract role: string with get, set
+                /// <summary>
+                /// The content of the message
+                /// </summary>
+                abstract content: string with get, set
+                /// <summary>
+                /// Internal reasoning content (if available)
+                /// </summary>
+                abstract reasoning_content: string option with get, set
+                /// <summary>
+                /// Tool calls made by the assistant
+                /// </summary>
+                abstract tool_calls: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.Choices.Item.Message.ToolCalls.Item[] option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (role: string, content: string, ?reasoning_content: string, ?tool_calls: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.Choices.Item.Message.ToolCalls.Item[]) : Message = jsNative
+
+            module Message =
+                module ToolCalls =
+                    [<Interface>]
+                    type Item =
+                        /// <summary>
+                        /// Unique identifier for the tool call
+                        /// </summary>
+                        abstract id: string with get, set
+                        /// <summary>
+                        /// Type of tool call
+                        /// </summary>
+                        abstract ``type``: string with get, set
+                        abstract ``function``: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.Choices.Item.Message.ToolCalls.Item.Function with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (id: string, ``type``: string, ``function``: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.Choices.Item.Message.ToolCalls.Item.Function) : Item = jsNative
+
+                    module Item =
+                        [<Interface>]
+                        type Function =
+                            /// <summary>
+                            /// Name of the function to call
+                            /// </summary>
+                            abstract name: string with get, set
+                            /// <summary>
+                            /// JSON string of arguments for the function
+                            /// </summary>
+                            abstract arguments: string with get, set
+                            [<ParamObject; Emit("$0")>]
+                            static member Create (name: string, arguments: string) : Function = jsNative
+
+module Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages =
+    module Functions =
+        [<Interface>]
+        type Item =
+            abstract name: string with get, set
+            abstract code: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (name: string, code: string) : Item = jsNative
+
+    module Messages =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The role of the message sender (e.g., 'user', 'assistant', 'system', 'tool').
+            /// </summary>
+            abstract role: string with get, set
+            abstract content: U2<string, Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages.Messages.Item.Content.Item[]> with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (role: string, content: U2<string, Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages.Messages.Item.Content.Item[]>) : Item = jsNative
+
+        module Item =
+            module Content =
+                [<Interface>]
+                type Item =
+                    /// <summary>
+                    /// Type of the content (text)
+                    /// </summary>
+                    abstract ``type``: string option with get, set
+                    /// <summary>
+                    /// Text content
+                    /// </summary>
+                    abstract text: string option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?``type``: string, ?text: string) : Item = jsNative
+
+    module Tools =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The name of the tool. More descriptive the better.
+            /// </summary>
+            abstract name: string with get, set
+            /// <summary>
+            /// A brief description of what the tool does.
+            /// </summary>
+            abstract description: string with get, set
+            /// <summary>
+            /// Schema defining the parameters accepted by the tool.
+            /// </summary>
+            abstract parameters: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages.Tools.Item.Parameters with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (name: string, description: string, parameters: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages.Tools.Item.Parameters) : Item = jsNative
+
+        [<Interface>]
+        type Item2 =
+            /// <summary>
+            /// Specifies the type of tool (e.g., 'function').
+            /// </summary>
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// Details of the function tool.
+            /// </summary>
+            abstract ``function``: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages.Tools.Item2.Function with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (``type``: string, ``function``: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages.Tools.Item2.Function) : Item2 = jsNative
+
+        module Item =
+            [<Interface>]
+            type Parameters =
+                /// <summary>
+                /// The type of the parameters object (usually 'object').
+                /// </summary>
+                abstract ``type``: string with get, set
+                /// <summary>
+                /// List of required parameter names.
+                /// </summary>
+                abstract required: string[] option with get, set
+                /// <summary>
+                /// Definitions of each parameter.
+                /// </summary>
+                abstract properties: Record<string, Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages.Tools.Item.Parameters.Properties.Item> with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (``type``: string, properties: Record<string, Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+
+            module Parameters =
+                module Properties =
+                    [<Interface>]
+                    type Item =
+                        /// <summary>
+                        /// The data type of the parameter.
+                        /// </summary>
+                        abstract ``type``: string with get, set
+                        /// <summary>
+                        /// A description of the expected parameter.
+                        /// </summary>
+                        abstract description: string with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (``type``: string, description: string) : Item = jsNative
+
+        module Item2 =
+            [<Interface>]
+            type Function =
+                /// <summary>
+                /// The name of the function.
+                /// </summary>
+                abstract name: string with get, set
+                /// <summary>
+                /// A brief description of what the function does.
+                /// </summary>
+                abstract description: string with get, set
+                /// <summary>
+                /// Schema defining the parameters accepted by the function.
+                /// </summary>
+                abstract parameters: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages.Tools.Item2.Function.Parameters with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (name: string, description: string, parameters: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages.Tools.Item2.Function.Parameters) : Function = jsNative
+
+            module Function =
+                [<Interface>]
+                type Parameters =
+                    /// <summary>
+                    /// The type of the parameters object (usually 'object').
+                    /// </summary>
+                    abstract ``type``: string with get, set
+                    /// <summary>
+                    /// List of required parameter names.
+                    /// </summary>
+                    abstract required: string[] option with get, set
+                    /// <summary>
+                    /// Definitions of each parameter.
+                    /// </summary>
+                    abstract properties: Record<string, Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (``type``: string, properties: Record<string, Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+
+                module Parameters =
+                    module Properties =
+                        [<Interface>]
+                        type Item =
+                            /// <summary>
+                            /// The data type of the parameter.
+                            /// </summary>
+                            abstract ``type``: string with get, set
+                            /// <summary>
+                            /// A description of the expected parameter.
+                            /// </summary>
+                            abstract description: string with get, set
+                            [<ParamObject; Emit("$0")>]
+                            static member Create (``type``: string, description: string) : Item = jsNative
+
+module Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1 =
+    module Functions =
+        [<Interface>]
+        type Item =
+            abstract name: string with get, set
+            abstract code: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (name: string, code: string) : Item = jsNative
+
+    module Messages =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The role of the message sender (e.g., 'user', 'assistant', 'system', 'tool').
+            /// </summary>
+            abstract role: string with get, set
+            abstract content: U2<string, Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1.Messages.Item.Content.Item[]> with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (role: string, content: U2<string, Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1.Messages.Item.Content.Item[]>) : Item = jsNative
+
+        module Item =
+            module Content =
+                [<Interface>]
+                type Item =
+                    /// <summary>
+                    /// Type of the content (text)
+                    /// </summary>
+                    abstract ``type``: string option with get, set
+                    /// <summary>
+                    /// Text content
+                    /// </summary>
+                    abstract text: string option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?``type``: string, ?text: string) : Item = jsNative
+
+    module Tools =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The name of the tool. More descriptive the better.
+            /// </summary>
+            abstract name: string with get, set
+            /// <summary>
+            /// A brief description of what the tool does.
+            /// </summary>
+            abstract description: string with get, set
+            /// <summary>
+            /// Schema defining the parameters accepted by the tool.
+            /// </summary>
+            abstract parameters: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1.Tools.Item.Parameters with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (name: string, description: string, parameters: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1.Tools.Item.Parameters) : Item = jsNative
+
+        [<Interface>]
+        type Item2 =
+            /// <summary>
+            /// Specifies the type of tool (e.g., 'function').
+            /// </summary>
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// Details of the function tool.
+            /// </summary>
+            abstract ``function``: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1.Tools.Item2.Function with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (``type``: string, ``function``: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1.Tools.Item2.Function) : Item2 = jsNative
+
+        module Item =
+            [<Interface>]
+            type Parameters =
+                /// <summary>
+                /// The type of the parameters object (usually 'object').
+                /// </summary>
+                abstract ``type``: string with get, set
+                /// <summary>
+                /// List of required parameter names.
+                /// </summary>
+                abstract required: string[] option with get, set
+                /// <summary>
+                /// Definitions of each parameter.
+                /// </summary>
+                abstract properties: Record<string, Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1.Tools.Item.Parameters.Properties.Item> with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (``type``: string, properties: Record<string, Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+
+            module Parameters =
+                module Properties =
+                    [<Interface>]
+                    type Item =
+                        /// <summary>
+                        /// The data type of the parameter.
+                        /// </summary>
+                        abstract ``type``: string with get, set
+                        /// <summary>
+                        /// A description of the expected parameter.
+                        /// </summary>
+                        abstract description: string with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (``type``: string, description: string) : Item = jsNative
+
+        module Item2 =
+            [<Interface>]
+            type Function =
+                /// <summary>
+                /// The name of the function.
+                /// </summary>
+                abstract name: string with get, set
+                /// <summary>
+                /// A brief description of what the function does.
+                /// </summary>
+                abstract description: string with get, set
+                /// <summary>
+                /// Schema defining the parameters accepted by the function.
+                /// </summary>
+                abstract parameters: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1.Tools.Item2.Function.Parameters with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (name: string, description: string, parameters: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1.Tools.Item2.Function.Parameters) : Function = jsNative
+
+            module Function =
+                [<Interface>]
+                type Parameters =
+                    /// <summary>
+                    /// The type of the parameters object (usually 'object').
+                    /// </summary>
+                    abstract ``type``: string with get, set
+                    /// <summary>
+                    /// List of required parameter names.
+                    /// </summary>
+                    abstract required: string[] option with get, set
+                    /// <summary>
+                    /// Definitions of each parameter.
+                    /// </summary>
+                    abstract properties: Record<string, Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1.Tools.Item2.Function.Parameters.Properties.Item> with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (``type``: string, properties: Record<string, Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+
+                module Parameters =
+                    module Properties =
+                        [<Interface>]
+                        type Item =
+                            /// <summary>
+                            /// The data type of the parameter.
+                            /// </summary>
+                            abstract ``type``: string with get, set
+                            /// <summary>
+                            /// A description of the expected parameter.
+                            /// </summary>
+                            abstract description: string with get, set
+                            [<ParamObject; Emit("$0")>]
+                            static member Create (``type``: string, description: string) : Item = jsNative
+
+module Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Text_Completion_Response =
+    [<Interface>]
+    type Usage =
+        /// <summary>
+        /// Total number of tokens in input
+        /// </summary>
+        abstract prompt_tokens: float option with get, set
+        /// <summary>
+        /// Total number of tokens in output
+        /// </summary>
+        abstract completion_tokens: float option with get, set
+        /// <summary>
+        /// Total number of input and output tokens
+        /// </summary>
+        abstract total_tokens: float option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?prompt_tokens: float, ?completion_tokens: float, ?total_tokens: float) : Usage = jsNative
+
+    module Choices =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// Index of the choice in the list
+            /// </summary>
+            abstract index: float with get, set
+            /// <summary>
+            /// The generated text completion
+            /// </summary>
+            abstract text: string with get, set
+            /// <summary>
+            /// Reason why the model stopped generating
+            /// </summary>
+            abstract finish_reason: string with get, set
+            /// <summary>
+            /// Stop reason (may be null)
+            /// </summary>
+            abstract stop_reason: string option with get, set
+            /// <summary>
+            /// Log probabilities (if requested)
+            /// </summary>
+            abstract logprobs: obj option with get, set
+            /// <summary>
+            /// Log probabilities for the prompt (if requested)
+            /// </summary>
+            abstract prompt_logprobs: obj option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (index: float, text: string, finish_reason: string, ?stop_reason: string, ?logprobs: obj, ?prompt_logprobs: obj) : Item = jsNative
+
+module Ai_Cf_Qwen_Qwq_32B_Messages =
+    module Functions =
+        [<Interface>]
+        type Item =
+            abstract name: string with get, set
+            abstract code: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (name: string, code: string) : Item = jsNative
+
+    module Messages =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The role of the message sender (e.g., 'user', 'assistant', 'system', 'tool').
+            /// </summary>
+            abstract role: string option with get, set
+            /// <summary>
+            /// The tool call id. If you don't know what to put here you can fall back to 000000001
+            /// </summary>
+            abstract tool_call_id: string option with get, set
+            abstract content: U3<string, Ai_Cf_Qwen_Qwq_32B_Messages.Messages.Item.Content.Item[], Ai_Cf_Qwen_Qwq_32B_Messages.Messages.Item.Content> option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?role: string, ?tool_call_id: string, ?content: U3<string, Ai_Cf_Qwen_Qwq_32B_Messages.Messages.Item.Content.Item[], Ai_Cf_Qwen_Qwq_32B_Messages.Messages.Item.Content>) : Item = jsNative
+
+        module Item =
+            [<Interface>]
+            type Content =
+                /// <summary>
+                /// Type of the content provided
+                /// </summary>
+                abstract ``type``: string option with get, set
+                abstract text: string option with get, set
+                abstract image_url: Ai_Cf_Qwen_Qwq_32B_Messages.Messages.Item.Content.ImageUrl option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (?``type``: string, ?text: string, ?image_url: Ai_Cf_Qwen_Qwq_32B_Messages.Messages.Item.Content.ImageUrl) : Content = jsNative
+
+            module Content =
+                [<Interface>]
+                type ImageUrl =
+                    /// <summary>
+                    /// image uri with data (e.g. data:image/jpeg;base64,/9j/...). HTTP URL will not be accepted
+                    /// </summary>
+                    abstract url: string option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?url: string) : ImageUrl = jsNative
+
+                [<Interface>]
+                type Item =
+                    /// <summary>
+                    /// Type of the content provided
+                    /// </summary>
+                    abstract ``type``: string option with get, set
+                    abstract text: string option with get, set
+                    abstract image_url: Ai_Cf_Qwen_Qwq_32B_Messages.Messages.Item.Content.Item.ImageUrl option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?``type``: string, ?text: string, ?image_url: Ai_Cf_Qwen_Qwq_32B_Messages.Messages.Item.Content.Item.ImageUrl) : Item = jsNative
+
+                module Item =
+                    [<Interface>]
+                    type ImageUrl =
+                        /// <summary>
+                        /// image uri with data (e.g. data:image/jpeg;base64,/9j/...). HTTP URL will not be accepted
+                        /// </summary>
+                        abstract url: string option with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (?url: string) : ImageUrl = jsNative
+
+    module Tools =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The name of the tool. More descriptive the better.
+            /// </summary>
+            abstract name: string with get, set
+            /// <summary>
+            /// A brief description of what the tool does.
+            /// </summary>
+            abstract description: string with get, set
+            /// <summary>
+            /// Schema defining the parameters accepted by the tool.
+            /// </summary>
+            abstract parameters: Ai_Cf_Qwen_Qwq_32B_Messages.Tools.Item.Parameters with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (name: string, description: string, parameters: Ai_Cf_Qwen_Qwq_32B_Messages.Tools.Item.Parameters) : Item = jsNative
+
+        [<Interface>]
+        type Item2 =
+            /// <summary>
+            /// Specifies the type of tool (e.g., 'function').
+            /// </summary>
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// Details of the function tool.
+            /// </summary>
+            abstract ``function``: Ai_Cf_Qwen_Qwq_32B_Messages.Tools.Item2.Function with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (``type``: string, ``function``: Ai_Cf_Qwen_Qwq_32B_Messages.Tools.Item2.Function) : Item2 = jsNative
+
+        module Item =
+            [<Interface>]
+            type Parameters =
+                /// <summary>
+                /// The type of the parameters object (usually 'object').
+                /// </summary>
+                abstract ``type``: string with get, set
+                /// <summary>
+                /// List of required parameter names.
+                /// </summary>
+                abstract required: string[] option with get, set
+                /// <summary>
+                /// Definitions of each parameter.
+                /// </summary>
+                abstract properties: Record<string, Ai_Cf_Qwen_Qwq_32B_Messages.Tools.Item.Parameters.Properties.Item> with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (``type``: string, properties: Record<string, Ai_Cf_Qwen_Qwq_32B_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+
+            module Parameters =
+                module Properties =
+                    [<Interface>]
+                    type Item =
+                        /// <summary>
+                        /// The data type of the parameter.
+                        /// </summary>
+                        abstract ``type``: string with get, set
+                        /// <summary>
+                        /// A description of the expected parameter.
+                        /// </summary>
+                        abstract description: string with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (``type``: string, description: string) : Item = jsNative
+
+        module Item2 =
+            [<Interface>]
+            type Function =
+                /// <summary>
+                /// The name of the function.
+                /// </summary>
+                abstract name: string with get, set
+                /// <summary>
+                /// A brief description of what the function does.
+                /// </summary>
+                abstract description: string with get, set
+                /// <summary>
+                /// Schema defining the parameters accepted by the function.
+                /// </summary>
+                abstract parameters: Ai_Cf_Qwen_Qwq_32B_Messages.Tools.Item2.Function.Parameters with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (name: string, description: string, parameters: Ai_Cf_Qwen_Qwq_32B_Messages.Tools.Item2.Function.Parameters) : Function = jsNative
+
+            module Function =
+                [<Interface>]
+                type Parameters =
+                    /// <summary>
+                    /// The type of the parameters object (usually 'object').
+                    /// </summary>
+                    abstract ``type``: string with get, set
+                    /// <summary>
+                    /// List of required parameter names.
+                    /// </summary>
+                    abstract required: string[] option with get, set
+                    /// <summary>
+                    /// Definitions of each parameter.
+                    /// </summary>
+                    abstract properties: Record<string, Ai_Cf_Qwen_Qwq_32B_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (``type``: string, properties: Record<string, Ai_Cf_Qwen_Qwq_32B_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+
+                module Parameters =
+                    module Properties =
+                        [<Interface>]
+                        type Item =
+                            /// <summary>
+                            /// The data type of the parameter.
+                            /// </summary>
+                            abstract ``type``: string with get, set
+                            /// <summary>
+                            /// A description of the expected parameter.
+                            /// </summary>
+                            abstract description: string with get, set
+                            [<ParamObject; Emit("$0")>]
+                            static member Create (``type``: string, description: string) : Item = jsNative
+
+module Ai_Cf_Qwen_Qwq_32B_Output =
+    [<Interface>]
+    type Usage =
+        /// <summary>
+        /// Total number of tokens in input
+        /// </summary>
+        abstract prompt_tokens: float option with get, set
+        /// <summary>
+        /// Total number of tokens in output
+        /// </summary>
+        abstract completion_tokens: float option with get, set
+        /// <summary>
+        /// Total number of input and output tokens
+        /// </summary>
+        abstract total_tokens: float option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?prompt_tokens: float, ?completion_tokens: float, ?total_tokens: float) : Usage = jsNative
+
+    module ToolCalls =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The arguments passed to be passed to the tool call request
+            /// </summary>
+            abstract arguments: obj option with get, set
+            /// <summary>
+            /// The name of the tool to be called
+            /// </summary>
+            abstract name: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?arguments: obj, ?name: string) : Item = jsNative
+
+module Artifacts =
+    module Create =
+        [<Interface>]
+        type Opts =
+            abstract readOnly: bool option with get, set
+            abstract description: string option with get, set
+            abstract setDefaultBranch: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?readOnly: bool, ?description: string, ?setDefaultBranch: string) : Opts = jsNative
+
+    module Import =
+        [<Interface>]
+        type Params =
+            abstract source: Artifacts.Import.Params.Source with get, set
+            abstract target: Artifacts.Import.Params.Target with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (source: Artifacts.Import.Params.Source, target: Artifacts.Import.Params.Target) : Params = jsNative
+
+        module Params =
+            [<Interface>]
+            type Source =
+                abstract url: string with get, set
+                abstract branch: string option with get, set
+                abstract depth: float option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (url: string, ?branch: string, ?depth: float) : Source = jsNative
+
+            [<Interface>]
+            type Target =
+                abstract name: string with get, set
+                abstract opts: Artifacts.Import.Params.Target.Opts option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (name: string, ?opts: Artifacts.Import.Params.Target.Opts) : Target = jsNative
+
+            module Target =
+                [<Interface>]
+                type Opts =
+                    abstract description: string option with get, set
+                    abstract readOnly: bool option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?description: string, ?readOnly: bool) : Opts = jsNative
+
+    module List =
+        [<Interface>]
+        type Opts =
+            abstract limit: float option with get, set
+            abstract cursor: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?limit: float, ?cursor: string) : Opts = jsNative
+
+module ArtifactsCreateTokenResult =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Scope =
+        | [<CompiledName("read")>] Read
+        | [<CompiledName("write")>] Write
+
+module ArtifactsRepo =
+    module Fork =
+        [<Interface>]
+        type Opts =
+            abstract description: string option with get, set
+            abstract readOnly: bool option with get, set
+            abstract defaultBranchOnly: bool option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?description: string, ?readOnly: bool, ?defaultBranchOnly: bool) : Opts = jsNative
+
+module ArtifactsRepoListResult =
+    module Repos =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// Unique repository ID.
+            /// </summary>
+            abstract id: string with get, set
+            /// <summary>
+            /// Repository name.
+            /// </summary>
+            abstract name: string with get, set
+            /// <summary>
+            /// Repository description, or null if not set.
+            /// </summary>
+            abstract description: string option with get, set
+            /// <summary>
+            /// Default branch name (e.g. "main").
+            /// </summary>
+            abstract defaultBranch: string with get, set
+            /// <summary>
+            /// ISO 8601 creation timestamp.
+            /// </summary>
+            abstract createdAt: string with get, set
+            /// <summary>
+            /// ISO 8601 last-updated timestamp.
+            /// </summary>
+            abstract updatedAt: string with get, set
+            /// <summary>
+            /// ISO 8601 timestamp of the last push, or null if never pushed.
+            /// </summary>
+            abstract lastPushAt: string option with get, set
+            /// <summary>
+            /// Fork source (e.g. "github:owner/repo", "artifacts:namespace/repo"), or null if not a fork.
+            /// </summary>
+            abstract source: string option with get, set
+            /// <summary>
+            /// Whether the repository is read-only.
+            /// </summary>
+            abstract readOnly: bool with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (id: string, name: string, defaultBranch: string, createdAt: string, updatedAt: string, readOnly: bool, ?description: string, ?lastPushAt: string, ?source: string) : Item = jsNative
+
+module ArtifactsTokenInfo =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type State =
+        | [<CompiledName("active")>] Active
+        | [<CompiledName("expired")>] Expired
+        | [<CompiledName("revoked")>] Revoked
+
+module AssistantMessage =
+    [<Interface>]
+    type Audio =
+        abstract id: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (id: string) : Audio = jsNative
+
+    [<Interface>]
+    type FunctionCall =
+        abstract name: string with get, set
+        abstract arguments: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string, arguments: string) : FunctionCall = jsNative
+
+module AssistantMessageContentPart =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Type =
+        | [<CompiledName("refusal")>] Refusal
+        | [<CompiledName("text")>] Text
+
+module AudioParams =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Format =
+        | [<CompiledName("aac")>] Aac
+        | [<CompiledName("flac")>] Flac
+        | [<CompiledName("mp3")>] Mp3
+        | [<CompiledName("opus")>] Opus
+        | [<CompiledName("pcm16")>] Pcm16
+        | [<CompiledName("wav")>] Wav
+
+    [<Interface>]
+    type Voice =
+        abstract id: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (id: string) : Voice = jsNative
+
+module AutoRagListResponse =
+    [<Interface>]
+    type Item =
+        abstract id: string with get, set
+        abstract enable: bool with get, set
+        abstract ``type``: string with get, set
+        abstract source: string with get, set
+        abstract vectorize_name: string with get, set
+        abstract paused: bool with get, set
+        abstract status: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (id: string, enable: bool, ``type``: string, source: string, vectorize_name: string, paused: bool, status: string) : Item = jsNative
+
+module AutoRagSearchRequest =
+    [<Interface>]
+    type RankingOptions =
+        abstract ranker: string option with get, set
+        abstract score_threshold: float option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?ranker: string, ?score_threshold: float) : RankingOptions = jsNative
+
+    [<Interface>]
+    type Reranking =
+        abstract enabled: bool option with get, set
+        abstract model: string option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?enabled: bool, ?model: string) : Reranking = jsNative
+
+module AutoRagSearchResponse =
+    module Data =
+        [<Interface>]
+        type Item =
+            abstract file_id: string with get, set
+            abstract filename: string with get, set
+            abstract score: float with get, set
+            abstract attributes: Record<string, U3<string, float, bool> option> with get, set
+            abstract content: AutoRagSearchResponse.Data.Item.Content.Item[] with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (file_id: string, filename: string, score: float, attributes: Record<string, U3<string, float, bool> option>, content: AutoRagSearchResponse.Data.Item.Content.Item[]) : Item = jsNative
+
+        module Item =
+            module Content =
+                [<Interface>]
+                type Item =
+                    abstract ``type``: string with get, set
+                    abstract text: string with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (``type``: string, text: string) : Item = jsNative
+
+module Base_Ai_Cf_Openai_Gpt_Oss_120B =
+    type Inputs =
+        inherit ResponsesInput
+        abstract audio: unit option with get, set
+        abstract chat_template_kwargs: unit option with get, set
+        abstract frequency_penalty: unit option with get, set
+        abstract function_call: unit option with get, set
+        abstract functions: unit option with get, set
+        abstract logit_bias: unit option with get, set
+        abstract logprobs: unit option with get, set
+        abstract max_completion_tokens: unit option with get, set
+        abstract max_tokens: unit option with get, set
+        abstract messages: unit option with get, set
+        abstract metadata: unit option with get, set
+        abstract modalities: unit option with get, set
+        abstract model: unit option with get, set
+        abstract n: unit option with get, set
+        abstract prediction: unit option with get, set
+        abstract presence_penalty: unit option with get, set
+        abstract reasoning_effort: unit option with get, set
+        abstract response_format: unit option with get, set
+        abstract seed: unit option with get, set
+        abstract stop: unit option with get, set
+        abstract store: unit option with get, set
+        abstract top_logprobs: unit option with get, set
+        abstract user: unit option with get, set
+        abstract web_search_options: unit option with get, set
+
+    type Inputs2 =
+        inherit ChatCompletionsCommonOptions
+        abstract messages: ChatCompletionMessageParam[] with get, set
+        abstract background: unit option with get, set
+        abstract conversation: unit option with get, set
+        abstract ``include``: unit option with get, set
+        abstract input: unit option with get, set
+        abstract instructions: unit option with get, set
+        abstract max_output_tokens: unit option with get, set
+        abstract previous_response_id: unit option with get, set
+        abstract prompt_cache_key: unit option with get, set
+        abstract reasoning: unit option with get, set
+        abstract safety_identifier: unit option with get, set
+        abstract text: unit option with get, set
+        abstract truncation: unit option with get, set
+
+    type PostProcessedOutputs =
+        inherit ChatCompletionsOutput
+        abstract created_at: unit option with get, set
+        abstract error: unit option with get, set
+        abstract incomplete_details: unit option with get, set
+        abstract instructions: unit option with get, set
+        abstract max_output_tokens: unit option with get, set
+        abstract output: unit option with get, set
+        abstract output_text: unit option with get, set
+        abstract parallel_tool_calls: unit option with get, set
+        abstract previous_response_id: unit option with get, set
+        abstract prompt: unit option with get, set
+        abstract reasoning: unit option with get, set
+        abstract safety_identifier: unit option with get, set
+        abstract status: unit option with get, set
+        abstract temperature: unit option with get, set
+        abstract text: unit option with get, set
+        abstract tool_choice: unit option with get, set
+        abstract tools: unit option with get, set
+        abstract top_p: unit option with get, set
+        abstract truncation: unit option with get, set
+
+    type PostProcessedOutputs2 =
+        inherit ResponsesOutput
+        abstract choices: unit option with get, set
+        abstract created: unit option with get, set
+        abstract model: unit option with get, set
+        abstract system_fingerprint: unit option with get, set
+
+module BasicImageTransformationsGravityCoordinates =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Mode =
+        | [<CompiledName("box-center")>] BoxCenter
+        | [<CompiledName("remainder")>] Remainder
+
+module BrowserRun =
+    [<StringEnum(CaseRules.None)>]
+    type Content =
+        | [<CompiledName("content")>] Content
+
+    [<StringEnum(CaseRules.None)>]
+    type Markdown =
+        | [<CompiledName("markdown")>] Markdown
+
+module BrowserRunAccessibilityTreeSuccessResponse =
+    [<Interface>]
+    type Result =
+        /// <summary>
+        /// Root of the accessibility tree, or <c>null</c> when <c>root</c> matched no element.
+        /// </summary>
+        abstract accessibilityTree: BrowserRunSerializedAXNode option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?accessibilityTree: BrowserRunSerializedAXNode) : Result = jsNative
+
+module BrowserRunBaseOptions =
+    [<Interface>]
+    type Authenticate =
+        abstract username: string with get, set
+        abstract password: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (username: string, password: string) : Authenticate = jsNative
+
+    [<Interface>]
+    type GotoOptions =
+        /// <summary>
+        /// Navigation timeout in milliseconds (max 60 000).
+        /// </summary>
+        /// <defaultValue>30000</defaultValue>
+        abstract timeout: float option with get, set
+        /// <summary>
+        /// When to consider navigation complete.
+        /// </summary>
+        /// <defaultValue>"domcontentloaded"</defaultValue>
+        abstract waitUntil: U2<string, BrowserRunLifecycleEvent[]> option with get, set
+        abstract referer: string option with get, set
+        abstract referrerPolicy: string option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?timeout: float, ?waitUntil: U2<string, BrowserRunLifecycleEvent[]>, ?referer: string, ?referrerPolicy: string) : GotoOptions = jsNative
+
+    [<Interface>]
+    type Viewport =
+        abstract width: float with get, set
+        abstract height: float with get, set
+        abstract deviceScaleFactor: float option with get, set
+        abstract isMobile: bool option with get, set
+        abstract isLandscape: bool option with get, set
+        abstract hasTouch: bool option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (width: float, height: float, ?deviceScaleFactor: float, ?isMobile: bool, ?isLandscape: bool, ?hasTouch: bool) : Viewport = jsNative
+
+    [<Interface>]
+    type WaitForSelector =
+        abstract selector: string with get, set
+        abstract hidden: bool option with get, set
+        abstract visible: bool option with get, set
+        /// <summary>
+        /// Timeout in milliseconds. Max 120000
+        /// </summary>
+        abstract timeout: float option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (selector: string, ?hidden: bool, ?visible: bool, ?timeout: float) : WaitForSelector = jsNative
+
+    module AddScriptTag =
+        [<Interface>]
+        type Item =
+            abstract content: string option with get, set
+            abstract url: string option with get, set
+            abstract ``type``: string option with get, set
+            abstract id: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?content: string, ?url: string, ?``type``: string, ?id: string) : Item = jsNative
+
+    module AddStyleTag =
+        [<Interface>]
+        type Item =
+            abstract content: string option with get, set
+            abstract url: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?content: string, ?url: string) : Item = jsNative
+
+    module Cookies =
+        [<Interface>]
+        type Item =
+            abstract name: string with get, set
+            abstract value: string with get, set
+            abstract url: string option with get, set
+            abstract domain: string option with get, set
+            abstract path: string option with get, set
+            abstract secure: bool option with get, set
+            abstract httpOnly: bool option with get, set
+            abstract sameSite: BrowserRunBaseOptions.Cookies.Item.SameSite option with get, set
+            abstract expires: float option with get, set
+            abstract priority: BrowserRunBaseOptions.Cookies.Item.Priority option with get, set
+            abstract sameParty: bool option with get, set
+            abstract sourceScheme: BrowserRunBaseOptions.Cookies.Item.SourceScheme option with get, set
+            abstract sourcePort: float option with get, set
+            abstract partitionKey: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (name: string, value: string, ?url: string, ?domain: string, ?path: string, ?secure: bool, ?httpOnly: bool, ?sameSite: BrowserRunBaseOptions.Cookies.Item.SameSite, ?expires: float, ?priority: BrowserRunBaseOptions.Cookies.Item.Priority, ?sameParty: bool, ?sourceScheme: BrowserRunBaseOptions.Cookies.Item.SourceScheme, ?sourcePort: float, ?partitionKey: string) : Item = jsNative
+
+        module Item =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Priority =
+                | High
+                | Low
+                | Medium
+
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type SameSite =
+                | Lax
+                | None
+                | Strict
+
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type SourceScheme =
+                | NonSecure
+                | Secure
+                | Unset
+
+module BrowserRunErrorResponse =
+    module Errors =
+        [<Interface>]
+        type Item =
+            abstract message: string with get, set
+            abstract code: float option with get, set
+            abstract detail: string option with get, set
+            abstract path: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (message: string, ?code: float, ?detail: string, ?path: string) : Item = jsNative
+
+module BrowserRunJsonBaseOptions =
+    module CustomAi =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// Model ID in <c>&lt;provider&gt;/&lt;model_name&gt;</c> format, e.g. <c>"workers-ai/@cf/meta/llama-3.3-70b-instruct-fp8-fast"</c>.
+            /// </summary>
+            abstract model: string with get, set
+            /// <summary>
+            /// Bearer token. Not needed for workers-ai models.
+            /// </summary>
+            abstract authorization: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (model: string, ?authorization: string) : Item = jsNative
+
+module BrowserRunPDFOptions2 =
+    [<Interface>]
+    type PdfOptions =
+        /// <defaultValue>1</defaultValue>
+        abstract scale: float option with get, set
+        /// <defaultValue>false</defaultValue>
+        abstract displayHeaderFooter: bool option with get, set
+        abstract headerTemplate: string option with get, set
+        abstract footerTemplate: string option with get, set
+        /// <defaultValue>false</defaultValue>
+        abstract printBackground: bool option with get, set
+        /// <defaultValue>false</defaultValue>
+        abstract landscape: bool option with get, set
+        abstract pageRanges: string option with get, set
+        /// <defaultValue>"letter"</defaultValue>
+        abstract format: BrowserRunPDFOptions2.PdfOptions.Format option with get, set
+        abstract width: U2<string, float> option with get, set
+        abstract height: U2<string, float> option with get, set
+        /// <defaultValue>false</defaultValue>
+        abstract preferCSSPageSize: bool option with get, set
+        abstract margin: BrowserRunPDFOptions2.PdfOptions.Margin option with get, set
+        /// <defaultValue>false</defaultValue>
+        abstract omitBackground: bool option with get, set
+        /// <defaultValue>true</defaultValue>
+        abstract tagged: bool option with get, set
+        /// <defaultValue>false</defaultValue>
+        abstract outline: bool option with get, set
+        /// <defaultValue>30000</defaultValue>
+        abstract timeout: float option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?scale: float, ?displayHeaderFooter: bool, ?headerTemplate: string, ?footerTemplate: string, ?printBackground: bool, ?landscape: bool, ?pageRanges: string, ?format: BrowserRunPDFOptions2.PdfOptions.Format, ?width: U2<string, float>, ?height: U2<string, float>, ?preferCSSPageSize: bool, ?margin: BrowserRunPDFOptions2.PdfOptions.Margin, ?omitBackground: bool, ?tagged: bool, ?outline: bool, ?timeout: float) : PdfOptions = jsNative
+
+    module PdfOptions =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Format =
+            | [<CompiledName("a0")>] A0
+            | [<CompiledName("a1")>] A1
+            | [<CompiledName("a2")>] A2
+            | [<CompiledName("a3")>] A3
+            | [<CompiledName("a4")>] A4
+            | [<CompiledName("a5")>] A5
+            | [<CompiledName("a6")>] A6
+            | [<CompiledName("ledger")>] Ledger
+            | [<CompiledName("legal")>] Legal
+            | [<CompiledName("letter")>] Letter
+            | [<CompiledName("tabloid")>] Tabloid
+
+        [<Interface>]
+        type Margin =
+            abstract top: U2<string, float> option with get, set
+            abstract right: U2<string, float> option with get, set
+            abstract bottom: U2<string, float> option with get, set
+            abstract left: U2<string, float> option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?top: U2<string, float>, ?right: U2<string, float>, ?bottom: U2<string, float>, ?left: U2<string, float>) : Margin = jsNative
+
+module BrowserRunPuppeteerScreenshotOptions =
+    [<Interface>]
+    type Clip =
+        abstract x: float with get, set
+        abstract y: float with get, set
+        abstract width: float with get, set
+        abstract height: float with get, set
+        abstract scale: float option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (x: float, y: float, width: float, height: float, ?scale: float) : Clip = jsNative
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Encoding =
+        | [<CompiledName("base64")>] Base64
+        | [<CompiledName("binary")>] Binary
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Type =
+        | [<CompiledName("jpeg")>] Jpeg
+        | [<CompiledName("png")>] Png
+        | [<CompiledName("webp")>] Webp
+
+module BrowserRunScrapeOptions2 =
+    module Elements =
+        [<Interface>]
+        type Item =
+            abstract selector: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (selector: string) : Item = jsNative
+
+module BrowserRunScrapeSuccessResponse =
+    module Result =
+        [<Interface>]
+        type Item =
+            /// <summary>
+            /// The CSS selector used to find elements.
+            /// </summary>
+            abstract selector: string with get, set
+            /// <summary>
+            /// Array of elements matching the selector.
+            /// </summary>
+            abstract results: BrowserRunScrapeSuccessResponse.Result.Item.Results.Item[] with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (selector: string, results: BrowserRunScrapeSuccessResponse.Result.Item.Results.Item[]) : Item = jsNative
+
+        module Item =
+            module Results =
+                [<Interface>]
+                type Item =
+                    /// <summary>
+                    /// Outer HTML of the element.
+                    /// </summary>
+                    abstract html: string with get, set
+                    /// <summary>
+                    /// Text content of the element.
+                    /// </summary>
+                    abstract text: string with get, set
+                    /// <summary>
+                    /// Width of the element in pixels.
+                    /// </summary>
+                    abstract width: float with get, set
+                    /// <summary>
+                    /// Height of the element in pixels.
+                    /// </summary>
+                    abstract height: float with get, set
+                    /// <summary>
+                    /// Top position of the element relative to the viewport in pixels.
+                    /// </summary>
+                    abstract top: float with get, set
+                    /// <summary>
+                    /// Left position of the element relative to the viewport in pixels.
+                    /// </summary>
+                    abstract left: float with get, set
+                    /// <summary>
+                    /// Array of HTML attributes on the element.
+                    /// </summary>
+                    abstract attributes: BrowserRunScrapeSuccessResponse.Result.Item.Results.Item.Attributes.Item[] with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (html: string, text: string, width: float, height: float, top: float, left: float, attributes: BrowserRunScrapeSuccessResponse.Result.Item.Results.Item.Attributes.Item[]) : Item = jsNative
+
+                module Item =
+                    module Attributes =
+                        [<Interface>]
+                        type Item =
+                            /// <summary>
+                            /// Attribute name.
+                            /// </summary>
+                            abstract name: string with get, set
+                            /// <summary>
+                            /// Attribute value.
+                            /// </summary>
+                            abstract value: string with get, set
+                            [<ParamObject; Emit("$0")>]
+                            static member Create (name: string, value: string) : Item = jsNative
+
+module BrowserRunSerializedAXNode =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Checked =
+        | [<CompiledName("mixed")>] Mixed
+        | [<CompiledValue(false)>] False
+        | [<CompiledValue(true)>] True
+
+module BrowserRunSnapshotOptions2 =
+    [<Interface>]
+    type ScreenshotOptions =
+        /// <defaultValue>"png"</defaultValue>
+        abstract ``type``: BrowserRunPuppeteerScreenshotOptions.Type option with get, set
+        abstract quality: float option with get, set
+        abstract fullPage: bool option with get, set
+        abstract clip: BrowserRunPuppeteerScreenshotOptions.Clip option with get, set
+        abstract omitBackground: bool option with get, set
+        abstract optimizeForSpeed: bool option with get, set
+        abstract captureBeyondViewport: bool option with get, set
+        abstract fromSurface: bool option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?``type``: BrowserRunPuppeteerScreenshotOptions.Type, ?quality: float, ?fullPage: bool, ?clip: BrowserRunPuppeteerScreenshotOptions.Clip, ?omitBackground: bool, ?optimizeForSpeed: bool, ?captureBeyondViewport: bool, ?fromSurface: bool) : ScreenshotOptions = jsNative
+
+module BrowserRunSnapshotSuccessResponse =
+    [<Interface>]
+    type Result =
+        /// <summary>
+        /// HTML content of the page.
+        /// </summary>
+        abstract content: string option with get, set
+        /// <summary>
+        /// Base64-encoded screenshot image.
+        /// </summary>
+        abstract screenshot: string option with get, set
+        /// <summary>
+        /// Markdown content. Prefixed with YAML frontmatter (e.g. <c>title</c>) when the
+        /// page provides that metadata.
+        /// </summary>
+        abstract markdown: string option with get, set
+        /// <summary>
+        /// Root of the page's accessibility tree.
+        /// </summary>
+        abstract accessibilityTree: BrowserRunSerializedAXNode option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?content: string, ?screenshot: string, ?markdown: string, ?accessibilityTree: BrowserRunSerializedAXNode) : Result = jsNative
+
+module ChatCompletionChoice =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type FinishReason =
+        | [<CompiledName("content_filter")>] ContentFilter
+        | [<CompiledName("function_call")>] FunctionCall
+        | [<CompiledName("length")>] Length
+        | [<CompiledName("stop")>] Stop
+        | [<CompiledName("tool_calls")>] ToolCalls
+
+module ChatCompletionContentPartFile =
+    [<Interface>]
+    type File =
+        /// <summary>
+        /// Base64 encoded file data.
+        /// </summary>
+        abstract file_data: string option with get, set
+        /// <summary>
+        /// The ID of an uploaded file.
+        /// </summary>
+        abstract file_id: string option with get, set
+        abstract filename: string option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?file_data: string, ?file_id: string, ?filename: string) : File = jsNative
+
+module ChatCompletionContentPartImage =
+    [<Interface>]
+    type ImageUrl =
+        abstract url: string with get, set
+        abstract detail: ChatCompletionContentPartImage.ImageUrl.Detail option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (url: string, ?detail: ChatCompletionContentPartImage.ImageUrl.Detail) : ImageUrl = jsNative
+
+    module ImageUrl =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Detail =
+            | [<CompiledName("auto")>] Auto
+            | [<CompiledName("high")>] High
+            | [<CompiledName("low")>] Low
+
+module ChatCompletionContentPartInputAudio =
+    [<Interface>]
+    type InputAudio =
+        /// <summary>
+        /// Base64 encoded audio data.
+        /// </summary>
+        abstract data: string with get, set
+        abstract format: ChatCompletionContentPartInputAudio.InputAudio.Format with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (data: string, format: ChatCompletionContentPartInputAudio.InputAudio.Format) : InputAudio = jsNative
+
+    module InputAudio =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Format =
+            | [<CompiledName("mp3")>] Mp3
+            | [<CompiledName("wav")>] Wav
+
+module ChatCompletionCustomTool =
+    [<Interface>]
+    type Custom =
+        abstract name: string with get, set
+        abstract description: string option with get, set
+        abstract format: ChatCompletionCustomToolFormat option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string, ?description: string, ?format: ChatCompletionCustomToolFormat) : Custom = jsNative
+
+module ChatCompletionCustomToolGrammarFormat =
+    [<Interface>]
+    type Grammar =
+        abstract definition: string with get, set
+        abstract syntax: ChatCompletionCustomToolGrammarFormat.Grammar.Syntax with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (definition: string, syntax: ChatCompletionCustomToolGrammarFormat.Grammar.Syntax) : Grammar = jsNative
+
+    module Grammar =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Syntax =
+            | [<CompiledName("lark")>] Lark
+            | [<CompiledName("regex")>] Regex
+
+module ChatCompletionMessageCustomToolCall =
+    [<Interface>]
+    type Custom =
+        abstract name: string with get, set
+        abstract input: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string, input: string) : Custom = jsNative
+
+module ChatCompletionMessageFunctionToolCall =
+    [<Interface>]
+    type Function =
+        abstract name: string with get, set
+        /// <summary>
+        /// JSON-encoded arguments string.
+        /// </summary>
+        abstract arguments: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string, arguments: string) : Function = jsNative
+
+module ChatCompletionResponseMessage =
+    [<Interface>]
+    type FunctionCall =
+        abstract name: string with get, set
+        abstract arguments: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string, arguments: string) : FunctionCall = jsNative
+
+module ChatCompletionToolChoiceAllowedTools =
+    [<Interface>]
+    type AllowedTools =
+        abstract mode: ChatCompletionToolChoiceAllowedTools.AllowedTools.Mode with get, set
+        abstract tools: Record<string, obj>[] with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (mode: ChatCompletionToolChoiceAllowedTools.AllowedTools.Mode, tools: Record<string, obj>[]) : AllowedTools = jsNative
+
+    module AllowedTools =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Mode =
+            | [<CompiledName("auto")>] Auto
+            | [<CompiledName("required")>] Required
+
+module ChatCompletionToolChoiceCustom =
+    [<Interface>]
+    type Custom =
+        abstract name: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string) : Custom = jsNative
+
+module ChatCompletionToolChoiceFunction =
+    [<Interface>]
+    type Function =
+        abstract name: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string) : Function = jsNative
+
+module ChatCompletionUrlCitation =
+    [<Interface>]
+    type UrlCitation =
+        abstract url: string with get, set
+        abstract title: string with get, set
+        abstract start_index: float with get, set
+        abstract end_index: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (url: string, title: string, start_index: float, end_index: float) : UrlCitation = jsNative
+
+module ChatCompletionsCommonOptions =
+    [<Interface>]
+    type FunctionCall =
+        abstract name: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string) : FunctionCall = jsNative
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type ServiceTier =
+        | [<CompiledName("auto")>] Auto
+        | [<CompiledName("default")>] Default
+        | [<CompiledName("flex")>] Flex
+        | [<CompiledName("priority")>] Priority
+        | [<CompiledName("scale")>] Scale
+
+    module Modalities =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Item =
+            | [<CompiledName("audio")>] Audio
+            | [<CompiledName("text")>] Text
+
+module CloudflareAccessIdentity =
+    [<Interface>]
+    type Geo =
+        abstract country: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (country: string) : Geo = jsNative
+
+    [<Interface>]
+    type Idp =
+        abstract id: string with get, set
+        abstract ``type``: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (id: string, ``type``: string) : Idp = jsNative
+
+    module Groups =
+        [<Interface>]
+        type Item =
+            abstract id: string with get, set
+            abstract name: string with get, set
+            abstract email: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (id: string, name: string, ?email: string) : Item = jsNative
+
+module CloudflareWorkersModule =
+    [<Import("DurableObject", "cloudflare:workers"); AbstractClass>]
+    type DurableObject<'Env, 'Props> (ctx: DurableObjectState<obj>, env: 'Env) =
+        member _.__DURABLE_OBJECT_BRAND: unit = jsNative
+        member _.ctx
+            with get (): DurableObjectState<'Props> = jsNative
+            and set (_: DurableObjectState<'Props>): unit = jsNative
+        member _.env
+            with get (): 'Env = jsNative
+            and set (_: 'Env): unit = jsNative
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type WorkflowDurationLabel =
+        | [<CompiledName("day")>] Day
+        | [<CompiledName("hour")>] Hour
+        | [<CompiledName("minute")>] Minute
+        | [<CompiledName("month")>] Month
+        | [<CompiledName("second")>] Second
+        | [<CompiledName("week")>] Week
+        | [<CompiledName("year")>] Year
+
+    type WorkflowSleepDuration = U2<float, string>
+
+    module DurableObject =
+        [<Interface>]
+        type IAlarmHandler =
+            abstract alarm: ?alarmInfo: AlarmInvocationInfo -> JS.Promise<unit> option
+            [<ParamObject; Emit("$0")>]
+            static member Create (alarm: (AlarmInvocationInfo option -> JS.Promise<unit> option)) : IAlarmHandler = jsNative
+
+        [<Interface>]
+        type IConnectHandler =
+            abstract connect: socket: Socket -> JS.Promise<unit> option
+            [<ParamObject; Emit("$0")>]
+            static member Create (connect: (Socket -> JS.Promise<unit> option)) : IConnectHandler = jsNative
+
+        [<Interface>]
+        type IFetchHandler =
+            abstract fetch: request: Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> -> U2<JS.Promise<Response>, Response>
+            [<ParamObject; Emit("$0")>]
+            static member Create (fetch: (Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> -> U2<JS.Promise<Response>, Response>)) : IFetchHandler = jsNative
+
+        [<Interface>]
+        type IWebSocketCloseHandler =
+            abstract webSocketClose: ws: WebSocket * code: float * reason: string * wasClean: bool -> JS.Promise<unit> option
+            [<ParamObject; Emit("$0")>]
+            static member Create (webSocketClose: Func<WebSocket, float, string, bool, JS.Promise<unit> option>) : IWebSocketCloseHandler = jsNative
+
+        [<Interface>]
+        type IWebSocketErrorHandler =
+            abstract webSocketError: ws: WebSocket * error: obj -> JS.Promise<unit> option
+            [<ParamObject; Emit("$0")>]
+            static member Create (webSocketError: Func<WebSocket, obj, JS.Promise<unit> option>) : IWebSocketErrorHandler = jsNative
+
+        [<Interface>]
+        type IWebSocketMessageHandler =
+            abstract webSocketMessage: ws: WebSocket * message: U2<string, JS.ArrayBuffer> -> JS.Promise<unit> option
+            [<ParamObject; Emit("$0")>]
+            static member Create (webSocketMessage: Func<WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option>) : IWebSocketMessageHandler = jsNative
+
+module ComparisonFilter =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Type =
+        | [<CompiledName("eq")>] Eq
+        | [<CompiledName("gt")>] Gt
+        | [<CompiledName("gte")>] Gte
+        | [<CompiledName("lt")>] Lt
+        | [<CompiledName("lte")>] Lte
+        | [<CompiledName("ne")>] Ne
+
+module ContainerExecOptions =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Stderr =
+        | [<CompiledName("combined")>] Combined
+        | [<CompiledName("ignore")>] Ignore
+        | [<CompiledName("pipe")>] Pipe
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Stdout =
+        | [<CompiledName("ignore")>] Ignore
+        | [<CompiledName("pipe")>] Pipe
+
+module ConversionOptions =
+    [<Interface>]
+    type Docx =
+        abstract images: EmbeddedImageConversionOptions option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?images: EmbeddedImageConversionOptions) : Docx = jsNative
+
+    [<Interface>]
+    type Html =
+        abstract images: ConversionOptions.Html.Images option with get, set
+        abstract hostname: string option with get, set
+        abstract cssSelector: string option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?images: ConversionOptions.Html.Images, ?hostname: string, ?cssSelector: string) : Html = jsNative
+
+    [<Interface>]
+    type Pdf =
+        abstract images: EmbeddedImageConversionOptions option with get, set
+        abstract metadata: bool option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?images: EmbeddedImageConversionOptions, ?metadata: bool) : Pdf = jsNative
+
+    module Html =
+        [<Interface>]
+        type Images =
+            inherit ImageConversionOptions
+            abstract convert: bool option with get, set
+            abstract maxConvertedImages: float option with get, set
+            abstract convertOGImage: bool option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?descriptionLanguage: ConversionOptions.Html.Images.DescriptionLanguage, ?convert: bool, ?maxConvertedImages: float, ?convertOGImage: bool) : Images = jsNative
+
+        module Images =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type DescriptionLanguage =
+                | [<CompiledName("de")>] De
+                | [<CompiledName("en")>] En
+                | [<CompiledName("es")>] Es
+                | [<CompiledName("fr")>] Fr
+                | [<CompiledName("it")>] It
+                | [<CompiledName("pt")>] Pt
+
+module D1Meta =
+    [<Interface>]
+    type Timings =
+        /// <summary>
+        /// The duration of the SQL query execution by the database instance. It doesn't include any network time.
+        /// </summary>
+        abstract sql_duration_ms: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (sql_duration_ms: float) : Timings = jsNative
+
+module D1PreparedStatement =
+    module Raw =
+        [<Interface>]
+        type Options =
+            abstract columnNames: bool with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (columnNames: bool) : Options = jsNative
+
+        [<Interface>]
+        type Options2 =
+            abstract columnNames: bool option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?columnNames: bool) : Options2 = jsNative
+
+module D1Response =
+    type Meta =
+        inherit D1Meta
+        [<EmitIndexer>]
+        abstract Item: string -> obj with get, set
+
+module DeveloperMessage =
+    module Content =
+        [<Interface>]
+        type Item =
+            abstract ``type``: string with get, set
+            abstract text: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (``type``: string, text: string) : Item = jsNative
+
+module EasyInputMessage =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Role =
+        | [<CompiledName("assistant")>] Assistant
+        | [<CompiledName("developer")>] Developer
+        | [<CompiledName("system")>] System
+        | [<CompiledName("user")>] User
+
+module EventContext =
+    type Next = delegate of input: U2<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>> option * init: RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option -> JS.Promise<Response>
+
+module EventCounts =
+    module ForEach =
+        type Param1 = delegate of param0: float * param1: string * param2: EventCounts -> unit
+
+module EventPluginContext =
+    type Next = delegate of input: U2<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>> option * init: RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option -> JS.Promise<Response>
+
+module ExportedHandlerTailStreamHandler =
+    module Result =
+        [<Interface>]
+        type Item =
+            abstract outcome: (TailStream.TailEvent<Outcome> -> JS.Promise<unit> option) option with get, set
+            abstract spanOpen: (TailStream.TailEvent<SpanOpen> -> JS.Promise<unit> option) option with get, set
+            abstract spanClose: (TailStream.TailEvent<SpanClose> -> JS.Promise<unit> option) option with get, set
+            abstract diagnosticChannel: (TailStream.TailEvent<DiagnosticChannelEvent> -> JS.Promise<unit> option) option with get, set
+            abstract ``exception``: (TailStream.TailEvent<Exception> -> JS.Promise<unit> option) option with get, set
+            abstract log: (TailStream.TailEvent<U2<ExportedHandlerTailStreamHandler.Result.Item.Event.Item2, ExportedHandlerTailStreamHandler.Result.Item.Event.Item3>> -> JS.Promise<unit> option) option with get, set
+            abstract ``return``: (TailStream.TailEvent<Return> -> JS.Promise<unit> option) option with get, set
+            abstract attributes: (TailStream.TailEvent<Attributes> -> JS.Promise<unit> option) option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?outcome: (TailStream.TailEvent<Outcome> -> JS.Promise<unit> option), ?spanOpen: (TailStream.TailEvent<SpanOpen> -> JS.Promise<unit> option), ?spanClose: (TailStream.TailEvent<SpanClose> -> JS.Promise<unit> option), ?diagnosticChannel: (TailStream.TailEvent<DiagnosticChannelEvent> -> JS.Promise<unit> option), ?``exception``: (TailStream.TailEvent<Exception> -> JS.Promise<unit> option), ?log: (TailStream.TailEvent<U2<ExportedHandlerTailStreamHandler.Result.Item.Event.Item2, ExportedHandlerTailStreamHandler.Result.Item.Event.Item3>> -> JS.Promise<unit> option), ?``return``: (TailStream.TailEvent<Return> -> JS.Promise<unit> option), ?attributes: (TailStream.TailEvent<Attributes> -> JS.Promise<unit> option)) : Item = jsNative
+
+        module Item =
+            module Event =
+                [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+                type Item =
+                    | [<CompiledName("attributes")>] Attributes of info: Attribute[]
+                    | [<CompiledName("diagnosticChannel")>] DiagnosticChannel of channel: string * message: obj
+                    | [<CompiledName("exception")>] Exception of name: string * message: string * stack: string option
+                    | [<CompiledName("onset")>] Onset of attributes: Attribute[] * spanId: string * dispatchNamespace: string option * entrypoint: string option * executionModel: string * durableObjectId: string option * scriptName: string option * scriptTags: string[] option * scriptVersion: TailStream.ScriptVersion option * preview: TailStream.TracePreviewInfo option * info: Onset.Info
+                    | [<CompiledName("outcome")>] Outcome of outcome: Outcome.Outcome * cpuTime: float * wallTime: float
+                    | [<CompiledName("return")>] Return of info: FetchResponseInfo option
+                    | [<CompiledName("spanClose")>] SpanClose of outcome: Outcome.Outcome
+                    | [<CompiledName("spanOpen")>] SpanOpen of name: string * spanId: string * info: U3<Attributes, FetchEventInfo, JsRpcEventInfo> option
+                    | [<CompiledName("streamDiagnostic")>] StreamDiagnostic of diagnostic: DroppedEventsDiagnostic
+                    | [<CompiledName("log")>] Log of level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item2.Level * errorInfo: TailStreamErrorInfo option[] option
+
+                [<Interface>]
+                type Item2 =
+                    abstract ``type``: string
+                    abstract level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item2.Level
+                    abstract errorInfo: TailStreamErrorInfo option[] option
+                    abstract message: obj
+                    abstract truncated: bool option
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (``type``: string, level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item2.Level, message: obj, ?errorInfo: TailStreamErrorInfo option[], ?truncated: bool) : Item2 = jsNative
+
+                [<Interface>]
+                type Item3 =
+                    abstract ``type``: string
+                    abstract level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item2.Level
+                    abstract errorInfo: TailStreamErrorInfo option[] option
+                    abstract message: string
+                    abstract truncated: bool
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (``type``: string, level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item2.Level, message: string, truncated: bool, ?errorInfo: TailStreamErrorInfo option[]) : Item3 = jsNative
+
+                module Item2 =
+                    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                    type Level =
+                        | [<CompiledName("debug")>] Debug
+                        | [<CompiledName("error")>] Error
+                        | [<CompiledName("info")>] Info
+                        | [<CompiledName("log")>] Log
+                        | [<CompiledName("warn")>] Warn
+
+module FormData =
+    module ForEach =
+        type Callback = delegate of value: U2<string, File> * key: string * parent: FormData -> unit
+
+module GatewayRetries =
+    type MaxAttempts =
+        | N1 = 1
+        | N2 = 2
+        | N3 = 3
+        | N4 = 4
+        | N5 = 5
+
+module GlobalDescriptor =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Value =
+        | [<CompiledName("anyfunc")>] Anyfunc
+        | [<CompiledName("externref")>] Externref
+        | [<CompiledName("f32")>] F32
+        | [<CompiledName("f64")>] F64
+        | [<CompiledName("i32")>] I32
+        | [<CompiledName("i64")>] I64
+        | [<CompiledName("v128")>] V128
+
+module Headers =
+    module ForEach =
+        type Callback = delegate of value: string * key: string * parent: Headers -> unit
+
+module HelloWorldBinding =
+    module Get =
+        module Result =
+            [<Interface>]
+            type Item =
+                abstract value: string with get, set
+                abstract ms: float option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (value: string, ?ms: float) : Item = jsNative
+
+module HibernatableWebSocketEventInfo =
+    [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+    type Info =
+        | [<CompiledName("close")>] Close of code: float * wasClean: bool
+        | [<CompiledName("error")>] Error
+        | [<CompiledName("message")>] Message
+
+module HttpServerHandler =
+    [<Interface>]
+    type Options =
+        abstract port: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (port: float) : Options = jsNative
+
+module ImageOutputOptions =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Format =
+        | [<CompiledName("image/avif")>] ImageAvif
+        | [<CompiledName("image/gif")>] ImageGif
+        | [<CompiledName("image/jpeg")>] ImageJpeg
+        | [<CompiledName("image/png")>] ImagePng
+        | [<CompiledName("image/webp")>] ImageWebp
+        | [<CompiledName("rgb")>] Rgb
+        | [<CompiledName("rgba")>] Rgba
+
+module ImageTransform =
+    [<Interface>]
+    type Border =
+        abstract color: string option with get, set
+        abstract width: float option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?color: string, ?width: float) : Border = jsNative
+
+    [<Interface>]
+    type Border2 =
+        abstract top: float option with get, set
+        abstract bottom: float option with get, set
+        abstract left: float option with get, set
+        abstract right: float option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?top: float, ?bottom: float, ?left: float, ?right: float) : Border2 = jsNative
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Fit =
+        | [<CompiledName("contain")>] Contain
+        | [<CompiledName("cover")>] Cover
+        | [<CompiledName("crop")>] Crop
+        | [<CompiledName("pad")>] Pad
+        | [<CompiledName("scale-down")>] ScaleDown
+        | [<CompiledName("squeeze")>] Squeeze
+
+    [<Interface>]
+    type Gravity =
+        abstract x: float option with get, set
+        abstract y: float option with get, set
+        abstract mode: BasicImageTransformationsGravityCoordinates.Mode with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (mode: BasicImageTransformationsGravityCoordinates.Mode, ?x: float, ?y: float) : Gravity = jsNative
+
+    type Rotate =
+        | N0 = 0
+        | N90 = 90
+        | N180 = 180
+        | N270 = 270
+
+    [<Interface>]
+    type Trim =
+        abstract top: float option with get, set
+        abstract bottom: float option with get, set
+        abstract left: float option with get, set
+        abstract right: float option with get, set
+        abstract width: float option with get, set
+        abstract height: float option with get, set
+        abstract border: U2<bool, ImageTransform.Trim.Border> option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?top: float, ?bottom: float, ?left: float, ?right: float, ?width: float, ?height: float, ?border: U2<bool, ImageTransform.Trim.Border>) : Trim = jsNative
+
+    module Trim =
+        [<Interface>]
+        type Border =
+            abstract color: string option with get, set
+            abstract tolerance: float option with get, set
+            abstract keep: float option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?color: string, ?tolerance: float, ?keep: float) : Border = jsNative
+
+module IncomingRequestCfProperties =
+    [<Interface>]
+    type BotManagement =
+        inherit IncomingRequestCfPropertiesBotManagementBase
+        /// <summary>
+        /// A <a href="https://developers.cloudflare.com/bots/concepts/ja3-fingerprint/">JA3 Fingerprint</a> to help profile specific SSL/TLS clients
+        /// across different destination IPs, Ports, and X509 certificates.
+        /// </summary>
+        abstract ja3Hash: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (score: float, verifiedBot: bool, corporateProxy: bool, staticResource: bool, detectionIds: float[], ja3Hash: string) : BotManagement = jsNative
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Country =
+        | AD
+        | AE
+        | AF
+        | AG
+        | AI
+        | AL
+        | AM
+        | AO
+        | AQ
+        | AR
+        | AS
+        | AT
+        | AU
+        | AW
+        | AX
+        | AZ
+        | BA
+        | BB
+        | BD
+        | BE
+        | BF
+        | BG
+        | BH
+        | BI
+        | BJ
+        | BL
+        | BM
+        | BN
+        | BO
+        | BQ
+        | BR
+        | BS
+        | BT
+        | BV
+        | BW
+        | BY
+        | BZ
+        | CA
+        | CC
+        | CD
+        | CF
+        | CG
+        | CH
+        | CI
+        | CK
+        | CL
+        | CM
+        | CN
+        | CO
+        | CR
+        | CU
+        | CV
+        | CW
+        | CX
+        | CY
+        | CZ
+        | DE
+        | DJ
+        | DK
+        | DM
+        | DO
+        | DZ
+        | EC
+        | EE
+        | EG
+        | EH
+        | ER
+        | ES
+        | ET
+        | FI
+        | FJ
+        | FK
+        | FM
+        | FO
+        | FR
+        | GA
+        | GB
+        | GD
+        | GE
+        | GF
+        | GG
+        | GH
+        | GI
+        | GL
+        | GM
+        | GN
+        | GP
+        | GQ
+        | GR
+        | GS
+        | GT
+        | GU
+        | GW
+        | GY
+        | HK
+        | HM
+        | HN
+        | HR
+        | HT
+        | HU
+        | ID
+        | IE
+        | IL
+        | IM
+        | IN
+        | IO
+        | IQ
+        | IR
+        | IS
+        | IT
+        | JE
+        | JM
+        | JO
+        | JP
+        | KE
+        | KG
+        | KH
+        | KI
+        | KM
+        | KN
+        | KP
+        | KR
+        | KW
+        | KY
+        | KZ
+        | LA
+        | LB
+        | LC
+        | LI
+        | LK
+        | LR
+        | LS
+        | LT
+        | LU
+        | LV
+        | LY
+        | MA
+        | MC
+        | MD
+        | ME
+        | MF
+        | MG
+        | MH
+        | MK
+        | ML
+        | MM
+        | MN
+        | MO
+        | MP
+        | MQ
+        | MR
+        | MS
+        | MT
+        | MU
+        | MV
+        | MW
+        | MX
+        | MY
+        | MZ
+        | NA
+        | NC
+        | NE
+        | NF
+        | NG
+        | NI
+        | NL
+        | NO
+        | NP
+        | NR
+        | NU
+        | NZ
+        | OM
+        | PA
+        | PE
+        | PF
+        | PG
+        | PH
+        | PK
+        | PL
+        | PM
+        | PN
+        | PR
+        | PS
+        | PT
+        | PW
+        | PY
+        | QA
+        | RE
+        | RO
+        | RS
+        | RU
+        | RW
+        | SA
+        | SB
+        | SC
+        | SD
+        | SE
+        | SG
+        | SH
+        | SI
+        | SJ
+        | SK
+        | SL
+        | SM
+        | SN
+        | SO
+        | SR
+        | SS
+        | ST
+        | SV
+        | SX
+        | SY
+        | SZ
+        | T1
+        | TC
+        | TD
+        | TF
+        | TG
+        | TH
+        | TJ
+        | TK
+        | TL
+        | TM
+        | TN
+        | TO
+        | TR
+        | TT
+        | TV
+        | TW
+        | TZ
+        | UA
+        | UG
+        | UM
+        | US
+        | UY
+        | UZ
+        | VA
+        | VC
+        | VE
+        | VG
+        | VI
+        | VN
+        | VU
+        | WF
+        | WS
+        | YE
+        | YT
+        | ZA
+        | ZM
+        | ZW
+
+module IncomingRequestCfPropertiesTLSClientAuth =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type CertRevoked =
+        | [<CompiledName("0")>] N0
+        | [<CompiledName("1")>] N1
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type CertVerified =
+        | FAILED
+        | [<CompiledName("FAILED:certificate has expired")>] FAILEDCertificateHasExpired
+        | [<CompiledName("FAILED:certificate is not yet valid")>] FAILEDCertificateIsNotYetValid
+        | [<CompiledName("FAILED:self signed certificate")>] FAILEDSelfSignedCertificate
+        | [<CompiledName("FAILED:unable to verify the first certificate")>] FAILEDUnableToVerifyTheFirstCertificate
+        | SUCCESS
+
+module InstanceStatus =
+    [<Interface>]
+    type Error =
+        abstract name: string with get, set
+        abstract message: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string, message: string) : Error = jsNative
+
+module KVNamespace =
+    [<StringEnum(CaseRules.None)>]
+    type ArrayBuffer =
+        | [<CompiledName("arrayBuffer")>] ArrayBuffer
+
+    [<StringEnum(CaseRules.None)>]
+    type Json =
+        | [<CompiledName("json")>] Json
+
+    [<StringEnum(CaseRules.None)>]
+    type Stream =
+        | [<CompiledName("stream")>] Stream
+
+    [<StringEnum(CaseRules.None)>]
+    type Text =
+        | [<CompiledName("text")>] Text
+
+    module Get =
+        [<Interface>]
+        type Options =
+            abstract ``type``: unit option with get, set
+            abstract cacheTtl: float option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?``type``: unit, ?cacheTtl: float) : Options = jsNative
+
+    module List =
+        module Result =
+            [<Interface>]
+            type Item<'Metadata, 'Key> =
+                abstract list_complete: bool with get, set
+                abstract keys: KVNamespaceListKey<'Metadata, 'Key>[] with get, set
+                abstract cursor: string with get, set
+                abstract cacheStatus: string option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (list_complete: bool, keys: KVNamespaceListKey<'Metadata, 'Key>[], cursor: string, ?cacheStatus: string) : Item<'Metadata, 'Key> = jsNative
+
+            [<Interface>]
+            type Item2<'Metadata, 'Key> =
+                abstract list_complete: bool with get, set
+                abstract keys: KVNamespaceListKey<'Metadata, 'Key>[] with get, set
+                abstract cacheStatus: string option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (list_complete: bool, keys: KVNamespaceListKey<'Metadata, 'Key>[], ?cacheStatus: string) : Item2<'Metadata, 'Key> = jsNative
+
+module MediaTransformationInputOptions =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Fit =
+        | [<CompiledName("contain")>] Contain
+        | [<CompiledName("cover")>] Cover
+        | [<CompiledName("scale-down")>] ScaleDown
+
+module MediaTransformationOutputOptions =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Format =
+        | [<CompiledName("jpg")>] Jpg
+        | [<CompiledName("m4a")>] M4a
+        | [<CompiledName("png")>] Png
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Mode =
+        | [<CompiledName("audio")>] Audio
+        | [<CompiledName("frame")>] Frame
+        | [<CompiledName("spritesheet")>] Spritesheet
+        | [<CompiledName("video")>] Video
+
+module ModuleExportDescriptor =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Kind =
+        | [<CompiledName("function")>] Function
+        | [<CompiledName("global")>] Global
+        | [<CompiledName("memory")>] Memory
+        | [<CompiledName("table")>] Table
+
+module NodeStyleServer =
+    module Address =
+        [<Interface>]
+        type Result =
+            abstract port: float option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?port: float) : Result = jsNative
+
+module Onset =
+    [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+    type Info =
+        | [<CompiledName("alarm")>] Alarm of scheduledTime: JS.Date
+        | [<CompiledName("connect")>] Connect
+        | [<CompiledName("custom")>] Custom
+        | [<CompiledName("email")>] Email of mailFrom: string * rcptTo: string * rawSize: float
+        | [<CompiledName("fetch")>] Fetch of ``method``: string * url: string * cfJson: obj option * headers: Header[]
+        | [<CompiledName("hibernatableWebSocket")>] HibernatableWebSocket of info: HibernatableWebSocketEventInfo.Info
+        | [<CompiledName("jsrpc")>] Jsrpc
+        | [<CompiledName("queue")>] Queue of queueName: string * batchSize: float
+        | [<CompiledName("scheduled")>] Scheduled of scheduledTime: JS.Date * cron: string
+        | [<CompiledName("trace")>] Trace of traces: string option[]
+
+module Outcome =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Outcome =
+        | [<CompiledName("aborted")>] Aborted
+        | [<CompiledName("canceled")>] Canceled
+        | [<CompiledName("daemonDown")>] DaemonDown
+        | [<CompiledName("exceededCpu")>] ExceededCpu
+        | [<CompiledName("exceededMemory")>] ExceededMemory
+        | [<CompiledName("exceededWallTime")>] ExceededWallTime
+        | [<CompiledName("exception")>] Exception
+        | [<CompiledName("internalError")>] InternalError
+        | [<CompiledName("killSwitch")>] KillSwitch
+        | [<CompiledName("loadShed")>] LoadShed
+        | [<CompiledName("ok")>] Ok
+        | [<CompiledName("responseStreamDisconnected")>] ResponseStreamDisconnected
+        | [<CompiledName("scriptNotFound")>] ScriptNotFound
+        | [<CompiledName("unknown")>] Unknown
+
+module PagesFunction =
+    [<Interface>]
+    type Context<'Env, 'Params, 'Data> =
+        abstract request: Request<obj, IncomingRequestCfProperties<obj>> with get, set
+        abstract functionPath: string with get, set
+        abstract waitUntil: (JS.Promise<obj> -> unit) with get, set
+        abstract passThroughOnException: (unit -> unit) with get, set
+        abstract next: EventContext.Next with get, set
+        abstract env: obj with get, set
+        abstract ``params``: obj with get, set
+        abstract data: 'Data with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: EventContext.Next, env: obj, ``params``: obj, data: 'Data) : Context<'Env, 'Params, 'Data> = jsNative
+
+module PagesPluginFunction =
+    [<Interface>]
+    type Context<'Env, 'Params, 'Data, 'PluginArgs> =
+        abstract request: Request<obj, IncomingRequestCfProperties<obj>> with get, set
+        abstract functionPath: string with get, set
+        abstract waitUntil: (JS.Promise<obj> -> unit) with get, set
+        abstract passThroughOnException: (unit -> unit) with get, set
+        abstract next: EventPluginContext.Next with get, set
+        abstract env: obj with get, set
+        abstract ``params``: obj with get, set
+        abstract data: 'Data with get, set
+        abstract pluginArgs: 'PluginArgs with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: EventPluginContext.Next, env: obj, ``params``: obj, data: 'Data, pluginArgs: 'PluginArgs) : Context<'Env, 'Params, 'Data, 'PluginArgs> = jsNative
+
+module PredictionContent =
+    module Content =
+        [<Interface>]
+        type Item =
+            abstract ``type``: string with get, set
+            abstract text: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (``type``: string, text: string) : Item = jsNative
+
+module R2Bucket =
+    module Get =
+        [<Interface>]
+        type Options =
+            inherit R2GetOptions
+            abstract onlyIf: U2<Headers, R2Conditional> with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (onlyIf: U2<Headers, R2Conditional>, ?range: U4<Headers, R2Object.Range, R2Object.Range2, R2Object.Range3>, ?ssecKey: U2<string, JS.ArrayBuffer>) : Options = jsNative
+
+        module Options =
+            [<Interface>]
+            type OnlyIf =
+                inherit Headers
+                inherit R2Conditional
+                [<ParamObject; Emit("$0")>]
+                static member Create (get: (string -> string option), getAll: (string -> string[]), getSetCookie: (unit -> string[]), has: (string -> bool), set: Action<string, string>, append: Action<string, string>, delete: (string -> unit), forEach: Action<Headers.ForEach.Callback, 'This option>, entries: (unit -> obj), keys: (unit -> obj), values: (unit -> obj), ?etagMatches: string, ?etagDoesNotMatch: string, ?uploadedBefore: JS.Date, ?uploadedAfter: JS.Date, ?secondsGranularity: bool) : OnlyIf = jsNative
+
+            [<Interface>]
+            type OnlyIf2 =
+                inherit R2Conditional
+                inherit Headers
+                [<ParamObject; Emit("$0")>]
+                static member Create (get: (string -> string option), getAll: (string -> string[]), getSetCookie: (unit -> string[]), has: (string -> bool), set: Action<string, string>, append: Action<string, string>, delete: (string -> unit), forEach: Action<Headers.ForEach.Callback, 'This option>, entries: (unit -> obj), keys: (unit -> obj), values: (unit -> obj), ?etagMatches: string, ?etagDoesNotMatch: string, ?uploadedBefore: JS.Date, ?uploadedAfter: JS.Date, ?secondsGranularity: bool) : OnlyIf2 = jsNative
+
+    module Put =
+        [<Interface>]
+        type Options =
+            inherit R2PutOptions
+            abstract onlyIf: U2<Headers, R2Conditional> with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (onlyIf: U2<Headers, R2Conditional>, ?httpMetadata: U2<Headers, R2HTTPMetadata>, ?customMetadata: Record<string, string>, ?md5: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha1: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha256: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha384: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha512: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?storageClass: string, ?ssecKey: U2<string, JS.ArrayBuffer>) : Options = jsNative
+
+module R2ListOptions =
+    module Include =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Item =
+            | [<CompiledName("customMetadata")>] CustomMetadata
+            | [<CompiledName("httpMetadata")>] HttpMetadata
+
+module R2Object =
+    [<Interface>]
+    type Range =
+        abstract offset: float with get, set
+        abstract length: float option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (offset: float, ?length: float) : Range = jsNative
+
+    [<Interface>]
+    type Range2 =
+        abstract offset: float option with get, set
+        abstract length: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (length: float, ?offset: float) : Range2 = jsNative
+
+    [<Interface>]
+    type Range3 =
+        abstract suffix: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (suffix: float) : Range3 = jsNative
+
+module ReadableStreamBYOBReader =
+    module Read =
+        module Result =
+            [<Interface>]
+            type Item<'T when 'T :> JS.ArrayBufferView> =
+                abstract ``done``: bool with get, set
+                abstract value: 'T with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (``done``: bool, value: 'T) : Item<'T> = jsNative
+
+    module ReadAtLeast =
+        module Result =
+            [<Interface>]
+            type Item<'T when 'T :> JS.ArrayBufferView> =
+                abstract ``done``: bool with get, set
+                abstract value: 'T with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (``done``: bool, value: 'T) : Item<'T> = jsNative
+
+module ReadableStreamDefaultReader =
+    module Read =
+        module Result =
+            [<Interface>]
+            type Item<'R> =
+                abstract ``done``: bool with get, set
+                abstract value: 'R with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (``done``: bool, value: 'R) : Item<'R> = jsNative
+
+            [<Interface>]
+            type Item2 =
+                abstract ``done``: bool with get, set
+                abstract value: unit option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (``done``: bool, ?value: unit) : Item2 = jsNative
+
+module Reasoning =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type GenerateSummary =
+        | [<CompiledName("auto")>] Auto
+        | [<CompiledName("concise")>] Concise
+        | [<CompiledName("detailed")>] Detailed
+
+module Request =
+    [<Interface>]
+    type Fetcher =
+        abstract fetch: input: U3<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, URL> * ?init: RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> -> JS.Promise<Response>
+        abstract connect: address: U2<string, SocketAddress> * ?options: SocketOptions -> Socket
+        [<ParamObject; Emit("$0")>]
+        static member Create (fetch: Func<U3<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, URL>, RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option, JS.Promise<Response>>, connect: Func<U2<string, SocketAddress>, SocketOptions option, Socket>) : Fetcher = jsNative
+
+module RequestInit =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Cache =
+        | [<CompiledName("no-cache")>] NoCache
+        | [<CompiledName("no-store")>] NoStore
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type EncodeResponseBody =
+        | [<CompiledName("automatic")>] Automatic
+        | [<CompiledName("manual")>] Manual
+
+module RequestInitCfProperties =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type GrpcWeb =
+        | [<CompiledName("convert")>] Convert
+        | [<CompiledName("passthrough")>] Passthrough
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Polish =
+        | [<CompiledName("lossless")>] Lossless
+        | [<CompiledName("lossy")>] Lossy
+        | [<CompiledName("off")>] Off
+
+module RequestInitCfPropertiesImage =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Format =
+        | [<CompiledName("avif")>] Avif
+        | [<CompiledName("baseline-jpeg")>] BaselineJpeg
+        | [<CompiledName("jpeg")>] Jpeg
+        | [<CompiledName("json")>] Json
+        | [<CompiledName("png")>] Png
+        | [<CompiledName("png-force")>] PngForce
+        | [<CompiledName("svg")>] Svg
+        | [<CompiledName("webp")>] Webp
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Metadata =
+        | [<CompiledName("copyright")>] Copyright
+        | [<CompiledName("keep")>] Keep
+        | [<CompiledName("none")>] None
+
+module RequestInitCfPropertiesImageDraw =
+    [<Interface>]
+    type Border =
+        abstract color: string with get, set
+        abstract width: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (color: string, width: float) : Border = jsNative
+
+    [<Interface>]
+    type Border2 =
+        abstract color: string with get, set
+        abstract top: float with get, set
+        abstract right: float with get, set
+        abstract bottom: float with get, set
+        abstract left: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (color: string, top: float, right: float, bottom: float, left: float) : Border2 = jsNative
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Fit =
+        | [<CompiledName("contain")>] Contain
+        | [<CompiledName("cover")>] Cover
+        | [<CompiledName("crop")>] Crop
+        | [<CompiledName("pad")>] Pad
+        | [<CompiledName("scale-down")>] ScaleDown
+        | [<CompiledName("scale-up")>] ScaleUp
+        | [<CompiledName("squeeze")>] Squeeze
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Flip =
+        | [<CompiledName("h")>] H
+        | [<CompiledName("hv")>] Hv
+        | [<CompiledName("v")>] V
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Repeat =
+        | [<CompiledName("x")>] X
+        | [<CompiledName("y")>] Y
+        | [<CompiledValue(true)>] True
+
+    type Rotate =
+        | N0 = 0
+        | N90 = 90
+        | N180 = 180
+        | N270 = 270
+        | N360 = 360
+
+    [<Interface>]
+    type Trim =
+        abstract top: float option with get, set
+        abstract bottom: float option with get, set
+        abstract left: float option with get, set
+        abstract right: float option with get, set
+        abstract width: float option with get, set
+        abstract height: float option with get, set
+        abstract border: U2<bool, RequestInitCfPropertiesImageDraw.Trim.Border> option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?top: float, ?bottom: float, ?left: float, ?right: float, ?width: float, ?height: float, ?border: U2<bool, RequestInitCfPropertiesImageDraw.Trim.Border>) : Trim = jsNative
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Upscale =
+        | [<CompiledName("generate")>] Generate
+        | [<CompiledName("interpolate")>] Interpolate
+
+    module Trim =
+        [<Interface>]
+        type Border =
+            abstract color: string option with get, set
+            abstract tolerance: float option with get, set
+            abstract keep: float option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?color: string, ?tolerance: float, ?keep: float) : Border = jsNative
+
+module Response =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Type =
+        | [<CompiledName("default")>] Default
+        | [<CompiledName("error")>] Error
+
+module ResponseError =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Code =
+        | [<CompiledName("empty_image_file")>] EmptyImageFile
+        | [<CompiledName("failed_to_download_image")>] FailedToDownloadImage
+        | [<CompiledName("image_content_policy_violation")>] ImageContentPolicyViolation
+        | [<CompiledName("image_file_not_found")>] ImageFileNotFound
+        | [<CompiledName("image_file_too_large")>] ImageFileTooLarge
+        | [<CompiledName("image_parse_error")>] ImageParseError
+        | [<CompiledName("image_too_large")>] ImageTooLarge
+        | [<CompiledName("image_too_small")>] ImageTooSmall
+        | [<CompiledName("invalid_base64_image")>] InvalidBase64Image
+        | [<CompiledName("invalid_image")>] InvalidImage
+        | [<CompiledName("invalid_image_format")>] InvalidImageFormat
+        | [<CompiledName("invalid_image_mode")>] InvalidImageMode
+        | [<CompiledName("invalid_image_url")>] InvalidImageUrl
+        | [<CompiledName("invalid_prompt")>] InvalidPrompt
+        | [<CompiledName("rate_limit_exceeded")>] RateLimitExceeded
+        | [<CompiledName("server_error")>] ServerError
+        | [<CompiledName("unsupported_image_media_type")>] UnsupportedImageMediaType
+        | [<CompiledName("vector_store_timeout")>] VectorStoreTimeout
+
+module ResponseFormatJSONSchema =
+    [<Interface>]
+    type JsonSchema =
+        abstract name: string with get, set
+        abstract description: string option with get, set
+        abstract schema: Record<string, obj> option with get, set
+        abstract strict: bool option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string, ?description: string, ?schema: Record<string, obj>, ?strict: bool) : JsonSchema = jsNative
+
+module ResponseFunctionToolCall =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Status =
+        | [<CompiledName("completed")>] Completed
+        | [<CompiledName("in_progress")>] InProgress
+        | [<CompiledName("incomplete")>] Incomplete
+
+module ResponseIncompleteDetails =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Reason =
+        | [<CompiledName("content_filter")>] ContentFilter
+        | [<CompiledName("max_output_tokens")>] MaxOutputTokens
+
+module ResponseInputItemMessage =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Role =
+        | [<CompiledName("developer")>] Developer
+        | [<CompiledName("system")>] System
+        | [<CompiledName("user")>] User
+
+module ResponseOutputMessage =
+    module Content =
+        [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+        type Item =
+            | [<CompiledName("refusal")>] Refusal of refusal: string
+            | [<CompiledName("output_text")>] OutputText of text: string * logprobs: Logprob[] option
+
+module ResponsesInput =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Truncation =
+        | [<CompiledName("auto")>] Auto
+        | [<CompiledName("disabled")>] Disabled
+
+module ServiceWorkerGlobalScope =
+    module CompressionStream =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Format =
+            | [<CompiledName("deflate")>] Deflate
+            | [<CompiledName("deflate-raw")>] DeflateRaw
+            | [<CompiledName("gzip")>] Gzip
+
+    module WebSocketPair =
+        [<Interface>]
+        type Result =
+            abstract ``0``: WebSocket with get, set
+            abstract ``1``: WebSocket with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (``0``: WebSocket, ``1``: WebSocket) : Result = jsNative
+
+module Socket =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type SecureTransport =
+        | [<CompiledName("off")>] Off
+        | [<CompiledName("on")>] On
+        | [<CompiledName("starttls")>] Starttls
+
+module SqlStorageCursor =
+    module Next =
+        [<Interface>]
+        type Result<'T> =
+            abstract ``done``: bool option with get, set
+            abstract value: 'T with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (value: 'T, ?``done``: bool) : Result<'T> = jsNative
+
+        [<Interface>]
+        type Result2 =
+            abstract ``done``: bool with get, set
+            abstract value: unit option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (``done``: bool, ?value: unit) : Result2 = jsNative
+
+module SystemMessage =
+    module Content =
+        [<Interface>]
+        type Item =
+            abstract ``type``: string with get, set
+            abstract text: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (``type``: string, text: string) : Item = jsNative
+
+module TableDescriptor =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Element =
+        | [<CompiledName("anyfunc")>] Anyfunc
+        | [<CompiledName("externref")>] Externref
+
+module TailStream =
+    [<Interface>]
+    type ScriptVersion =
+        abstract id: string
+        abstract tag: string option
+        abstract message: string option
+        [<ParamObject; Emit("$0")>]
+        static member Create (id: string, ?tag: string, ?message: string) : ScriptVersion = jsNative
+
+    [<Interface>]
+    type TailEvent<'Event> =
+        abstract invocationId: string
+        abstract spanContext: SpanContext
+        abstract timestamp: JS.Date
+        abstract sequence: float
+        abstract ``event``: 'Event
+        [<ParamObject; Emit("$0")>]
+        static member Create (invocationId: string, spanContext: SpanContext, timestamp: JS.Date, sequence: float, ``event``: 'Event) : TailEvent<'Event> = jsNative
+
+    [<Interface>]
+    type TracePreviewInfo =
+        abstract id: string
+        abstract slug: string
+        abstract name: string
+        [<ParamObject; Emit("$0")>]
+        static member Create (id: string, slug: string, name: string) : TracePreviewInfo = jsNative
+
+module TextOptions =
+    [<Interface>]
+    type Font =
+        /// <summary>
+        /// URL to a font file in TrueType (.ttf), OpenType (.otf), WOFF (.woff), or WOFF2 (.woff2) format
+        /// </summary>
+        abstract url: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (url: string) : Font = jsNative
+
+module ToolMessage =
+    module Content =
+        [<Interface>]
+        type Item =
+            abstract ``type``: string with get, set
+            abstract text: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (``type``: string, text: string) : Item = jsNative
+
+module Tracing =
+    module EnterSpan =
+        type Callback<'A, 'T> = delegate of span: Span * args: 'A -> 'T
+
+    module StartActiveSpan =
+        type Callback<'A, 'T> = delegate of span: Span * args: 'A -> 'T
+
+module Transformer =
+    type Transform<'I, 'O> = delegate of chunk: 'I * controller: TransformStreamDefaultController<'O> -> JS.Promise<unit> option
+
+module URLSearchParams =
+    module ForEach =
+        type Callback = delegate of value: string * key: string * parent: URLSearchParams -> unit
+
+module UnderlyingSink =
+    type Write<'W> = delegate of chunk: 'W * controller: WritableStreamDefaultController -> JS.Promise<unit> option
+
+module UserMessageContentPart =
+    [<Interface>]
+    type File =
+        abstract file_data: string option with get, set
+        abstract file_id: string option with get, set
+        abstract filename: string option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?file_data: string, ?file_id: string, ?filename: string) : File = jsNative
+
+    [<Interface>]
+    type ImageUrl =
+        abstract url: string option with get, set
+        abstract detail: ChatCompletionContentPartImage.ImageUrl.Detail option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?url: string, ?detail: ChatCompletionContentPartImage.ImageUrl.Detail) : ImageUrl = jsNative
+
+    [<Interface>]
+    type InputAudio =
+        abstract data: string option with get, set
+        abstract format: ChatCompletionContentPartInputAudio.InputAudio.Format option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?data: string, ?format: ChatCompletionContentPartInputAudio.InputAudio.Format) : InputAudio = jsNative
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Type =
+        | [<CompiledName("file")>] File
+        | [<CompiledName("image_url")>] ImageUrl
+        | [<CompiledName("input_audio")>] InputAudio
+        | [<CompiledName("text")>] Text
+
+module VectorizeQueryOptions =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type ReturnMetadata =
+        | [<CompiledName("all")>] All
+        | [<CompiledName("indexed")>] Indexed
+        | [<CompiledName("none")>] None
+        | [<CompiledValue(false)>] False
+        | [<CompiledValue(true)>] True
+
+module VectorizeVectorMetadataFilter =
+    [<Interface>]
+    type Item =
+        abstract ``$eq``: U3<string, float, bool> option with get, set
+        abstract ``$gt``: U3<string, float, bool> option with get, set
+        abstract ``$gte``: U3<string, float, bool> option with get, set
+        abstract ``$lt``: U3<string, float, bool> option with get, set
+        abstract ``$lte``: U3<string, float, bool> option with get, set
+        abstract ``$ne``: U3<string, float, bool> option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?``$eq``: U3<string, float, bool>, ?``$gt``: U3<string, float, bool>, ?``$gte``: U3<string, float, bool>, ?``$lt``: U3<string, float, bool>, ?``$lte``: U3<string, float, bool>, ?``$ne``: U3<string, float, bool>) : Item = jsNative
+
+    [<Interface>]
+    type Item2 =
+        abstract ``$in``: U3<string, float, bool>[] option with get, set
+        abstract ``$nin``: U3<string, float, bool>[] option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?``$in``: U3<string, float, bool>[], ?``$nin``: U3<string, float, bool>[]) : Item2 = jsNative
+
+module WebSearchUserLocation =
+    [<Interface>]
+    type Approximate =
+        abstract city: string option with get, set
+        abstract country: string option with get, set
+        abstract region: string option with get, set
+        abstract timezone: string option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?city: string, ?country: string, ?region: string, ?timezone: string) : Approximate = jsNative
+
+module WebSocket =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type BinaryType =
+        | [<CompiledName("arraybuffer")>] Arraybuffer
+        | [<CompiledName("blob")>] Blob
+
+module WorkerEntrypoint =
+    [<Interface>]
+    type IConnectHandler =
+        abstract connect: socket: Socket -> JS.Promise<unit> option
+        [<ParamObject; Emit("$0")>]
+        static member Create (connect: (Socket -> JS.Promise<unit> option)) : IConnectHandler = jsNative
+
+    [<Interface>]
+    type IEmailHandler =
+        abstract email: message: ForwardableEmailMessage -> JS.Promise<unit> option
+        [<ParamObject; Emit("$0")>]
+        static member Create (email: (ForwardableEmailMessage -> JS.Promise<unit> option)) : IEmailHandler = jsNative
+
+    [<Interface>]
+    type IFetchHandler =
+        abstract fetch: request: Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> -> U2<JS.Promise<Response>, Response>
+        [<ParamObject; Emit("$0")>]
+        static member Create (fetch: (Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> -> U2<JS.Promise<Response>, Response>)) : IFetchHandler = jsNative
+
+    [<Interface>]
+    type IQueueHandler =
+        abstract queue: batch: MessageBatch<obj> -> JS.Promise<unit> option
+        [<ParamObject; Emit("$0")>]
+        static member Create (queue: (MessageBatch<obj> -> JS.Promise<unit> option)) : IQueueHandler = jsNative
+
+    [<Interface>]
+    type IScheduledHandler =
+        abstract scheduled: controller: ScheduledController -> JS.Promise<unit> option
+        [<ParamObject; Emit("$0")>]
+        static member Create (scheduled: (ScheduledController -> JS.Promise<unit> option)) : IScheduledHandler = jsNative
+
+    [<Interface>]
+    type ITailHandler =
+        abstract tail: events: TraceItem[] -> JS.Promise<unit> option
+        [<ParamObject; Emit("$0")>]
+        static member Create (tail: (TraceItem[] -> JS.Promise<unit> option)) : ITailHandler = jsNative
+
+    [<Interface>]
+    type ITailStreamHandler =
+        abstract tailStream: ``event``: TailStream.TailEvent<Onset> -> U3<JS.Promise<U2<(TailStream.TailEvent<ExportedHandlerTailStreamHandler.Result.Item.Event.Item> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>>, (TailStream.TailEvent<ExportedHandlerTailStreamHandler.Result.Item.Event.Item> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>
+        [<ParamObject; Emit("$0")>]
+        static member Create (tailStream: (TailStream.TailEvent<Onset> -> U3<JS.Promise<U2<(TailStream.TailEvent<ExportedHandlerTailStreamHandler.Result.Item.Event.Item> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>>, (TailStream.TailEvent<ExportedHandlerTailStreamHandler.Result.Item.Event.Item> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>)) : ITailStreamHandler = jsNative
+
+    [<Interface>]
+    type ITestHandler =
+        abstract test: controller: TestController -> JS.Promise<unit> option
+        [<ParamObject; Emit("$0")>]
+        static member Create (test: (TestController -> JS.Promise<unit> option)) : ITestHandler = jsNative
+
+    [<Interface>]
+    type ITraceHandler =
+        abstract trace: traces: TraceItem[] -> JS.Promise<unit> option
+        [<ParamObject; Emit("$0")>]
+        static member Create (trace: (TraceItem[] -> JS.Promise<unit> option)) : ITraceHandler = jsNative
+
+module WorkflowBatchDeleteResult =
+    module Deleted =
+        [<Interface>]
+        type Item =
+            abstract id: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (id: string) : Item = jsNative
+
+    module Errors =
+        [<Interface>]
+        type Item =
+            abstract id: string with get, set
+            abstract code: float with get, set
+            abstract message: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (id: string, code: float, message: string) : Item = jsNative
+
+module WorkflowDynamicDelayContext =
+    [<Interface>]
+    type Ctx =
+        abstract step: WorkflowDynamicDelayContext.Ctx.Step with get, set
+        abstract attempt: float with get, set
+        abstract config: WorkflowDynamicDelayContext.Ctx.Config with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (step: WorkflowDynamicDelayContext.Ctx.Step, attempt: float, config: WorkflowDynamicDelayContext.Ctx.Config) : Ctx = jsNative
+
+    module Ctx =
+        [<Interface>]
+        type Config =
+            abstract retries: WorkflowDynamicDelayContext.Ctx.Config.Retries option with get, set
+            abstract timeout: CloudflareWorkersModule.WorkflowSleepDuration option with get, set
+            abstract sensitive: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?retries: WorkflowDynamicDelayContext.Ctx.Config.Retries, ?timeout: CloudflareWorkersModule.WorkflowSleepDuration, ?sensitive: string) : Config = jsNative
+
+        [<Interface>]
+        type Step =
+            abstract name: string with get, set
+            abstract count: float with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (name: string, count: float) : Step = jsNative
+
+        module Config =
+            [<Interface>]
+            type Retries =
+                abstract limit: float with get, set
+                abstract backoff: WorkflowBackoff option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (limit: float, ?backoff: WorkflowBackoff) : Retries = jsNative
+
+module WorkflowEntrypoint =
+    module Run =
+        [<Interface>]
+        type Event =
+            abstract payload: obj
+            abstract timestamp: JS.Date
+            abstract instanceId: string
+            abstract workflowName: string
+            abstract schedule: WorkflowCronSchedule option
+            [<ParamObject; Emit("$0")>]
+            static member Create (payload: obj, timestamp: JS.Date, instanceId: string, workflowName: string, ?schedule: WorkflowCronSchedule) : Event = jsNative
+
+module WorkflowInstance =
+    [<Interface>]
+    type SendEvent0 =
+        abstract ``type``: string with get, set
+        abstract payload: obj with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (``type``: string, payload: obj) : SendEvent0 = jsNative
+
+module WorkflowInstanceCreateOptions =
+    [<Interface>]
+    type Retention =
+        abstract successRetention: CloudflareWorkersModule.WorkflowSleepDuration option with get, set
+        abstract errorRetention: CloudflareWorkersModule.WorkflowSleepDuration option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?successRetention: CloudflareWorkersModule.WorkflowSleepDuration, ?errorRetention: CloudflareWorkersModule.WorkflowSleepDuration) : Retention = jsNative
+
+module WorkflowInstanceRestartOptions =
+    [<Interface>]
+    type From =
+        /// <summary>
+        /// The step name as defined in your workflow code.
+        /// </summary>
+        abstract name: string with get, set
+        /// <summary>
+        /// 1-indexed occurrence of this step name. Use when the same step name appears multiple times (e.g. in a loop).
+        /// </summary>
+        /// <defaultValue>1</defaultValue>
+        abstract count: float option with get, set
+        /// <summary>
+        /// Step type filter. Use when different step types share the same name.
+        /// </summary>
+        abstract ``type``: WorkflowInstanceRestartOptions.From.Type option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string, ?count: float, ?``type``: WorkflowInstanceRestartOptions.From.Type) : From = jsNative
+
+    module From =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Type =
+            | [<CompiledName("do")>] Do
+            | [<CompiledName("sleep")>] Sleep
+            | [<CompiledName("waitForEvent")>] WaitForEvent
+
+module WorkflowRollbackContext =
+    [<Interface>]
+    type Ctx<'Delay> =
+        abstract step: WorkflowDynamicDelayContext.Ctx.Step with get, set
+        abstract attempt: float with get, set
+        abstract config: WorkflowRollbackContext.Ctx.Config with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (step: WorkflowDynamicDelayContext.Ctx.Step, attempt: float, config: WorkflowRollbackContext.Ctx.Config) : Ctx<'Delay> = jsNative
+
+    module Ctx =
+        [<Interface>]
+        type Config =
+            abstract retries: obj option with get, set
+            abstract timeout: CloudflareWorkersModule.WorkflowSleepDuration option with get, set
+            abstract sensitive: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?retries: obj, ?timeout: CloudflareWorkersModule.WorkflowSleepDuration, ?sensitive: string) : Config = jsNative
+
+module WorkflowRollbackHandler =
+    [<Interface>]
+    type Ctx<'T, 'Delay> =
+        abstract ctx: WorkflowRollbackHandler.Ctx.Ctx<'Delay> with get, set
+        abstract error: exn with get, set
+        abstract output: 'T option with get, set
+        /// <remarks>@deprecated Use <c>ctx.step.name</c> and <c>ctx.step.count</c> instead.</remarks>
+        abstract stepName: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (ctx: WorkflowRollbackHandler.Ctx.Ctx<'Delay>, error: exn, stepName: string, ?output: 'T) : Ctx<'T, 'Delay> = jsNative
+
+    module Ctx =
+        [<Interface>]
+        type Ctx<'Delay> =
+            abstract step: WorkflowDynamicDelayContext.Ctx.Step with get, set
+            abstract attempt: float with get, set
+            abstract config: WorkflowRollbackHandler.Ctx.Ctx.Config with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (step: WorkflowDynamicDelayContext.Ctx.Step, attempt: float, config: WorkflowRollbackHandler.Ctx.Ctx.Config) : Ctx<'Delay> = jsNative
+
+        module Ctx =
+            [<Interface>]
+            type Config =
+                abstract retries: obj option with get, set
+                abstract timeout: CloudflareWorkersModule.WorkflowSleepDuration option with get, set
+                abstract sensitive: string option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (?retries: obj, ?timeout: CloudflareWorkersModule.WorkflowSleepDuration, ?sensitive: string) : Config = jsNative
+
+module WorkflowStep =
+    type Sleep = delegate of name: string * duration: CloudflareWorkersModule.WorkflowSleepDuration -> JS.Promise<unit>
+
+    type SleepUntil = delegate of name: string * timestamp: U2<float, JS.Date> -> JS.Promise<unit>
+
+    module Do =
+        [<Interface>]
+        type RollbackOptions<'T> =
+            abstract rollback: (WorkflowStep.Do.RollbackOptions.Rollback.Ctx<'T> -> JS.Promise<unit>) with get, set
+            abstract rollbackConfig: WorkflowStepRollbackConfig option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (rollback: (WorkflowStep.Do.RollbackOptions.Rollback.Ctx<'T> -> JS.Promise<unit>), ?rollbackConfig: WorkflowStepRollbackConfig) : RollbackOptions<'T> = jsNative
+
+        [<Interface>]
+        type RollbackOptions2<'T> =
+            abstract rollback: (WorkflowStep.Do.RollbackOptions2.Rollback.Ctx<'T> -> JS.Promise<unit>) with get, set
+            abstract rollbackConfig: WorkflowStepRollbackConfig option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (rollback: (WorkflowStep.Do.RollbackOptions2.Rollback.Ctx<'T> -> JS.Promise<unit>), ?rollbackConfig: WorkflowStepRollbackConfig) : RollbackOptions2<'T> = jsNative
+
+        [<Interface>]
+        type RollbackOptions3<'T> =
+            abstract rollback: (WorkflowStep.Do.RollbackOptions3.Rollback.Ctx<'T> -> JS.Promise<unit>) with get, set
+            abstract rollbackConfig: WorkflowStepRollbackConfig option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (rollback: (WorkflowStep.Do.RollbackOptions3.Rollback.Ctx<'T> -> JS.Promise<unit>), ?rollbackConfig: WorkflowStepRollbackConfig) : RollbackOptions3<'T> = jsNative
+
+        [<Interface>]
+        type RollbackOptions4<'T> =
+            abstract rollback: (WorkflowStep.Do.RollbackOptions4.Rollback.Ctx<'T> -> JS.Promise<unit>) with get, set
+            abstract rollbackConfig: WorkflowStepRollbackConfig option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (rollback: (WorkflowStep.Do.RollbackOptions4.Rollback.Ctx<'T> -> JS.Promise<unit>), ?rollbackConfig: WorkflowStepRollbackConfig) : RollbackOptions4<'T> = jsNative
+
+        module Callback =
+            [<Interface>]
+            type Ctx =
+                abstract step: WorkflowDynamicDelayContext.Ctx.Step with get, set
+                abstract attempt: float with get, set
+                abstract config: WorkflowStep.Do.Callback.Ctx.Config with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (step: WorkflowDynamicDelayContext.Ctx.Step, attempt: float, config: WorkflowStep.Do.Callback.Ctx.Config) : Ctx = jsNative
+
+            module Ctx =
+                [<Interface>]
+                type Config =
+                    abstract retries: WorkflowStep.Do.Callback.Ctx.Config.Retries option with get, set
+                    abstract timeout: CloudflareWorkersModule.WorkflowSleepDuration option with get, set
+                    abstract sensitive: string option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?retries: WorkflowStep.Do.Callback.Ctx.Config.Retries, ?timeout: CloudflareWorkersModule.WorkflowSleepDuration, ?sensitive: string) : Config = jsNative
+
+                module Config =
+                    [<Interface>]
+                    type Retries =
+                        inherit WorkflowDynamicDelayContext.Ctx.Config.Retries
+                        abstract delay: CloudflareWorkersModule.WorkflowSleepDuration with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (limit: float, delay: CloudflareWorkersModule.WorkflowSleepDuration, ?backoff: WorkflowBackoff) : Retries = jsNative
+
+        module RollbackOptions =
+            module Rollback =
+                [<Interface>]
+                type Ctx<'T> =
+                    abstract ctx: WorkflowStep.Do.Callback.Ctx with get, set
+                    abstract error: exn with get, set
+                    abstract output: 'T option with get, set
+                    /// <remarks>@deprecated Use <c>ctx.step.name</c> and <c>ctx.step.count</c> instead.</remarks>
+                    abstract stepName: string with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (ctx: WorkflowStep.Do.Callback.Ctx, error: exn, stepName: string, ?output: 'T) : Ctx<'T> = jsNative
+
+        module RollbackOptions2 =
+            module Rollback =
+                [<Interface>]
+                type Ctx<'T> =
+                    abstract ctx: WorkflowDynamicDelayContext.Ctx with get, set
+                    abstract error: exn with get, set
+                    abstract output: 'T option with get, set
+                    /// <remarks>@deprecated Use <c>ctx.step.name</c> and <c>ctx.step.count</c> instead.</remarks>
+                    abstract stepName: string with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (ctx: WorkflowDynamicDelayContext.Ctx, error: exn, stepName: string, ?output: 'T) : Ctx<'T> = jsNative
+
+        module RollbackOptions3 =
+            module Rollback =
+                [<Interface>]
+                type Ctx<'T> =
+                    abstract ctx: WorkflowStep.Do.Callback.Ctx with get, set
+                    abstract error: exn with get, set
+                    abstract output: 'T option with get, set
+                    /// <remarks>@deprecated Use <c>ctx.step.name</c> and <c>ctx.step.count</c> instead.</remarks>
+                    abstract stepName: string with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (ctx: WorkflowStep.Do.Callback.Ctx, error: exn, stepName: string, ?output: 'T) : Ctx<'T> = jsNative
+
+        module RollbackOptions4 =
+            module Rollback =
+                [<Interface>]
+                type Ctx<'T> =
+                    abstract ctx: WorkflowStep.Do.Callback.Ctx with get, set
+                    abstract error: exn with get, set
+                    abstract output: 'T option with get, set
+                    /// <remarks>@deprecated Use <c>ctx.step.name</c> and <c>ctx.step.count</c> instead.</remarks>
+                    abstract stepName: string with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (ctx: WorkflowStep.Do.Callback.Ctx, error: exn, stepName: string, ?output: 'T) : Ctx<'T> = jsNative
+
+    module WaitForEvent =
+        [<Interface>]
+        type Options =
+            abstract ``type``: string with get, set
+            abstract timeout: CloudflareWorkersModule.WorkflowSleepDuration option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (``type``: string, ?timeout: CloudflareWorkersModule.WorkflowSleepDuration) : Options = jsNative
+
+        module Result =
+            [<Interface>]
+            type Item<'T> =
+                abstract payload: obj with get, set
+                abstract timestamp: JS.Date with get, set
+                abstract ``type``: string with get, set
+                abstract sensitive: string option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (payload: obj, timestamp: JS.Date, ``type``: string, ?sensitive: string) : Item<'T> = jsNative
+
+module WorkflowStepConfig =
+    [<Interface>]
+    type Retries =
+        abstract limit: float with get, set
+        abstract delay: U3<float, WorkflowDelayFunction, string> with get, set
+        abstract backoff: WorkflowBackoff option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (limit: float, delay: U3<float, WorkflowDelayFunction, string>, ?backoff: WorkflowBackoff) : Retries = jsNative
+
+module WorkflowStepConfigWithDelayFunction =
+    [<Interface>]
+    type Retries =
+        abstract limit: float with get, set
+        abstract delay: WorkflowDelayFunction with get, set
+        abstract backoff: WorkflowBackoff option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (limit: float, delay: WorkflowDelayFunction, ?backoff: WorkflowBackoff) : Retries = jsNative
+
+module WorkflowStepConfigWithStaticDelay =
+    [<Interface>]
+    type Retries =
+        abstract limit: float with get, set
+        abstract delay: CloudflareWorkersModule.WorkflowSleepDuration with get, set
+        abstract backoff: WorkflowBackoff option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (limit: float, delay: CloudflareWorkersModule.WorkflowSleepDuration, ?backoff: WorkflowBackoff) : Retries = jsNative
+
+module WorkflowStepContext =
+    [<Interface>]
+    type Config =
+        abstract retries: obj option with get, set
+        abstract timeout: CloudflareWorkersModule.WorkflowSleepDuration option with get, set
+        abstract sensitive: string option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?retries: obj, ?timeout: CloudflareWorkersModule.WorkflowSleepDuration, ?sensitive: string) : Config = jsNative
+
+module WorkflowStepRollbackOptions =
+    module Rollback =
+        [<Interface>]
+        type Ctx<'T, 'Delay> =
+            abstract ctx: WorkflowStepRollbackOptions.Rollback.Ctx.Ctx<'Delay> with get, set
+            abstract error: exn with get, set
+            abstract output: 'T option with get, set
+            /// <remarks>@deprecated Use <c>ctx.step.name</c> and <c>ctx.step.count</c> instead.</remarks>
+            abstract stepName: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (ctx: WorkflowStepRollbackOptions.Rollback.Ctx.Ctx<'Delay>, error: exn, stepName: string, ?output: 'T) : Ctx<'T, 'Delay> = jsNative
+
+        module Ctx =
+            [<Interface>]
+            type Ctx<'Delay> =
+                abstract step: WorkflowDynamicDelayContext.Ctx.Step with get, set
+                abstract attempt: float with get, set
+                abstract config: WorkflowStepRollbackOptions.Rollback.Ctx.Ctx.Config with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (step: WorkflowDynamicDelayContext.Ctx.Step, attempt: float, config: WorkflowStepRollbackOptions.Rollback.Ctx.Ctx.Config) : Ctx<'Delay> = jsNative
+
+            module Ctx =
+                [<Interface>]
+                type Config =
+                    abstract retries: obj option with get, set
+                    abstract timeout: CloudflareWorkersModule.WorkflowSleepDuration option with get, set
+                    abstract sensitive: string option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?retries: obj, ?timeout: CloudflareWorkersModule.WorkflowSleepDuration, ?sensitive: string) : Config = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
@@ -25962,6 +25885,87 @@ type Exports =
     static member Workflow<'PARAMS> () : Workflow<'PARAMS> = jsNative
     [<Global("WorkflowInstance"); EmitConstructor>]
     static member WorkflowInstance () : WorkflowInstance = jsNative
+
+module Cloudflare =
+    module Email =
+        /// <summary>The package's value exports, each bound to its import.</summary>
+        [<Erase>]
+        type Exports =
+            [<Import("EmailMessage", "cloudflare:email")>]
+            static member EmailMessage: EmailMessageConstructor = jsNative
+
+    /// <summary>cloudflare:node</summary>
+    module Node =
+        /// <summary>The package's value exports, each bound to its import.</summary>
+        [<Erase>]
+        type Exports =
+            [<Import("httpServerHandler", "cloudflare:node")>]
+            static member httpServerHandler (port: float) : ExportedHandler<obj, obj, obj, obj> = jsNative
+            [<Import("httpServerHandler", "cloudflare:node")>]
+            static member httpServerHandler (options: HttpServerHandler.Options) : ExportedHandler<obj, obj, obj, obj> = jsNative
+            [<Import("httpServerHandler", "cloudflare:node")>]
+            static member httpServerHandler (server: NodeStyleServer) : ExportedHandler<obj, obj, obj, obj> = jsNative
+
+    /// <summary>cloudflare:pipelines</summary>
+    module Pipelines =
+        /// <summary>The package's value exports, each bound to its import.</summary>
+        [<Erase>]
+        type Exports =
+            [<Import("PipelineTransformationEntrypoint", "cloudflare:pipelines"); EmitConstructor>]
+            static member PipelineTransformationEntrypoint<'Env, 'I, 'O> (ctx: ExecutionContext<obj>, env: 'Env) : PipelineTransformationEntrypoint<'Env, 'I, 'O> = jsNative
+
+    module Sockets =
+        /// <summary>The package's value exports, each bound to its import.</summary>
+        [<Erase>]
+        type Exports =
+            [<Import("connect", "cloudflare:sockets")>]
+            static member connect (address: U2<string, SocketAddress>, ?options: SocketOptions) : Socket = jsNative
+
+    /// <summary>cloudflare:workers</summary>
+    module Workers =
+        /// <summary>The package's value exports, each bound to its import.</summary>
+        [<Erase>]
+        type Exports =
+            [<Import("RpcStub", "cloudflare:workers")>]
+            static member RpcStub: RpcStubConstructor = jsNative
+            [<Import("RpcTarget", "cloudflare:workers"); EmitConstructor>]
+            static member RpcTarget () : RpcTarget = jsNative
+            [<Import("WorkerEntrypoint", "cloudflare:workers"); EmitConstructor>]
+            static member WorkerEntrypoint<'Env, 'Props> (ctx: ExecutionContext<obj>, env: 'Env) : WorkerEntrypoint<'Env, 'Props> = jsNative
+            [<Import("DurableObject", "cloudflare:workers"); EmitConstructor>]
+            static member DurableObject<'Env, 'Props> (ctx: DurableObjectState<obj>, env: 'Env) : CloudflareWorkersModule.DurableObject<'Env, 'Props> = jsNative
+            [<Import("WorkflowStep", "cloudflare:workers"); EmitConstructor>]
+            static member WorkflowStep () : WorkflowStep = jsNative
+            [<Import("WorkflowEntrypoint", "cloudflare:workers"); EmitConstructor>]
+            static member WorkflowEntrypoint<'Env, 'T> (ctx: ExecutionContext<obj>, env: 'Env) : WorkflowEntrypoint<'Env, 'T> = jsNative
+            [<Import("waitUntil", "cloudflare:workers")>]
+            static member waitUntil (promise: JS.Promise<obj>) : unit = jsNative
+            [<Import("withEnv", "cloudflare:workers")>]
+            static member withEnv (newEnv: obj, fn: (unit -> obj)) : obj = jsNative
+            [<Import("withExports", "cloudflare:workers")>]
+            static member withExports (newExports: obj, fn: (unit -> obj)) : obj = jsNative
+            [<Import("withEnvAndExports", "cloudflare:workers")>]
+            static member withEnvAndExports (newEnv: obj, newExports: obj, fn: (unit -> obj)) : obj = jsNative
+            [<Import("env", "cloudflare:workers")>]
+            static member env: obj = jsNative
+            [<Import("exports", "cloudflare:workers")>]
+            static member exports: obj = jsNative
+            [<Import("cache", "cloudflare:workers")>]
+            static member cache: CacheContext = jsNative
+            [<Import("tracing", "cloudflare:workers")>]
+            static member tracing: Tracing = jsNative
+
+    /// <summary>cloudflare:workflows</summary>
+    module Workflows =
+        /// <summary>The package's value exports, each bound to its import.</summary>
+        [<Erase>]
+        type Exports =
+            /// <summary>
+            /// NonRetryableError allows for a user to throw a fatal error
+            /// that makes a Workflow instance fail immediately without triggering a retry
+            /// </summary>
+            [<Import("NonRetryableError", "cloudflare:workflows"); EmitConstructor>]
+            static member NonRetryableError (message: string, ?name: string) : NonRetryableError = jsNative
 
 [<Erase>]
 type U10<'t1, 't2, 't3, 't4, 't5, 't6, 't7, 't8, 't9, 't10> =

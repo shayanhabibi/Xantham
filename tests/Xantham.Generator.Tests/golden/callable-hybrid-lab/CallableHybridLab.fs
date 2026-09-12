@@ -20,15 +20,6 @@ type Widget =
     [<ParamObject; Emit("$0")>]
     static member Create (handler: Widget.Handler) : Widget = jsNative
 
-module Widget =
-    [<Interface>]
-    type Handler =
-        abstract enabled: bool with get, set
-        [<Emit("$0($1...)")>]
-        abstract Invoke: ``event``: string -> string
-        [<ParamObject; Emit("$0")>]
-        static member Create (enabled: bool) : Handler = jsNative
-
 /// <summary>
 /// The same shape, written as a named declaration directly.
 /// </summary>
@@ -97,6 +88,15 @@ type Collides =
     abstract Invoke: string with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (Invoke: string) : Collides = jsNative
+
+module Widget =
+    [<Interface>]
+    type Handler =
+        abstract enabled: bool with get, set
+        [<Emit("$0($1...)")>]
+        abstract Invoke: ``event``: string -> string
+        [<ParamObject; Emit("$0")>]
+        static member Create (enabled: bool) : Handler = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

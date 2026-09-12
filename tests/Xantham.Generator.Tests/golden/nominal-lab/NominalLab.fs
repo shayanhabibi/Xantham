@@ -26,12 +26,6 @@ type Narrow = Record<string, Attr>
 
 type Wide = Record<string, Wide.Item>
 
-module Wide =
-    [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
-    type Item =
-        | [<CompiledName("attr")>] Attr
-        | [<CompiledName("gl")>] Gl
-
 [<Interface>]
 type Geometry<'Attributes> =
     abstract attributes: 'Attributes with get, set
@@ -50,6 +44,12 @@ type Derived =
     abstract extra: float
     [<ParamObject; Emit("$0")>]
     static member Create (extra: float, tag: string) : Derived = jsNative
+
+module Wide =
+    [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
+    type Item =
+        | [<CompiledName("attr")>] Attr
+        | [<CompiledName("gl")>] Gl
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

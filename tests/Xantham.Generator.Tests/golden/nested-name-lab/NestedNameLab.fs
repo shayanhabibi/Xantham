@@ -26,6 +26,97 @@ type Widget =
     [<ParamObject; Emit("$0")>]
     static member Create (options: Widget.Options, metrics: Widget.Metrics) : Widget = jsNative
 
+/// <summary>
+/// The second owner of an <c>options</c> shape, distinct from the first without a suffix.
+/// </summary>
+[<Interface>]
+type Gadget =
+    /// <summary>
+    /// Nests as <c>Gadget.Options</c>, and its members differ from <c>Widget.Options</c>.
+    /// </summary>
+    abstract options: Gadget.Options with get, set
+    /// <summary>
+    /// A nested shape referring to another owner's nested shape, across two modules.
+    /// </summary>
+    abstract borrowed: Gadget.Borrowed with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (options: Gadget.Options, borrowed: Gadget.Borrowed) : Gadget = jsNative
+
+/// <summary>
+/// The owner of a member whose JavaScript key does not open a module.
+/// </summary>
+[<Interface>]
+type Registry =
+    abstract ``beta channel``: RegistryBetaChannel with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``beta channel``: RegistryBetaChannel) : Registry = jsNative
+
+[<Interface>]
+type RegistryBetaChannel =
+    abstract model: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (model: string) : RegistryBetaChannel = jsNative
+
+/// <summary>
+/// Both arms are object shapes, and both are reached at <c>Choice.Either</c>.
+/// </summary>
+[<Interface>]
+type Choice =
+    abstract either: U2<Choice.Either, Choice.Either2> with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (either: U2<Choice.Either, Choice.Either2>) : Choice = jsNative
+
+/// <summary>
+/// The unqualified <c>Node</c>, reached by that name.
+/// </summary>
+[<Interface>]
+type Node =
+    abstract id: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (id: string) : Node = jsNative
+
+module Choice =
+    [<Interface>]
+    type Either =
+        abstract left: string with get, set
+        abstract leftAt: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (left: string, leftAt: float) : Either = jsNative
+
+    [<Interface>]
+    type Either2 =
+        abstract right: string with get, set
+        abstract rightAt: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (right: string, rightAt: float) : Either2 = jsNative
+
+module Cluster =
+    [<Interface>]
+    type Node =
+        abstract peers: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (peers: float) : Node = jsNative
+
+module Configure =
+    [<Interface>]
+    type Settings =
+        abstract verbose: bool with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (verbose: bool) : Settings = jsNative
+
+module Gadget =
+    [<Interface>]
+    type Borrowed =
+        abstract from: Widget.Options with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (from: Widget.Options) : Borrowed = jsNative
+
+    [<Interface>]
+    type Options =
+        abstract serial: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (serial: string) : Options = jsNative
+
 module Widget =
     [<Interface>]
     type Metrics =
@@ -59,97 +150,6 @@ module Widget =
             type Backoff =
                 | [<CompiledName("exponential")>] Exponential
                 | [<CompiledName("linear")>] Linear
-
-/// <summary>
-/// The second owner of an <c>options</c> shape, distinct from the first without a suffix.
-/// </summary>
-[<Interface>]
-type Gadget =
-    /// <summary>
-    /// Nests as <c>Gadget.Options</c>, and its members differ from <c>Widget.Options</c>.
-    /// </summary>
-    abstract options: Gadget.Options with get, set
-    /// <summary>
-    /// A nested shape referring to another owner's nested shape, across two modules.
-    /// </summary>
-    abstract borrowed: Gadget.Borrowed with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (options: Gadget.Options, borrowed: Gadget.Borrowed) : Gadget = jsNative
-
-module Gadget =
-    [<Interface>]
-    type Borrowed =
-        abstract from: Widget.Options with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (from: Widget.Options) : Borrowed = jsNative
-
-    [<Interface>]
-    type Options =
-        abstract serial: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (serial: string) : Options = jsNative
-
-module Configure =
-    [<Interface>]
-    type Settings =
-        abstract verbose: bool with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (verbose: bool) : Settings = jsNative
-
-/// <summary>
-/// The owner of a member whose JavaScript key does not open a module.
-/// </summary>
-[<Interface>]
-type Registry =
-    abstract ``beta channel``: RegistryBetaChannel with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``beta channel``: RegistryBetaChannel) : Registry = jsNative
-
-[<Interface>]
-type RegistryBetaChannel =
-    abstract model: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (model: string) : RegistryBetaChannel = jsNative
-
-/// <summary>
-/// Both arms are object shapes, and both are reached at <c>Choice.Either</c>.
-/// </summary>
-[<Interface>]
-type Choice =
-    abstract either: U2<Choice.Either, Choice.Either2> with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (either: U2<Choice.Either, Choice.Either2>) : Choice = jsNative
-
-module Choice =
-    [<Interface>]
-    type Either =
-        abstract left: string with get, set
-        abstract leftAt: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (left: string, leftAt: float) : Either = jsNative
-
-    [<Interface>]
-    type Either2 =
-        abstract right: string with get, set
-        abstract rightAt: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (right: string, rightAt: float) : Either2 = jsNative
-
-/// <summary>
-/// The unqualified <c>Node</c>, reached by that name.
-/// </summary>
-[<Interface>]
-type Node =
-    abstract id: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (id: string) : Node = jsNative
-
-module Cluster =
-    [<Interface>]
-    type Node =
-        abstract peers: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (peers: float) : Node = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

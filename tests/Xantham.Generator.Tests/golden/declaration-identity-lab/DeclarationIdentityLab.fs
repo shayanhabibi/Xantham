@@ -29,13 +29,6 @@ type PublicBox<'T when 'T :> Item> =
     [<ParamObject; Emit("$0")>]
     static member Create (value: 'T, options: PublicBox.Options) : PublicBox<'T> = jsNative
 
-module PublicBox =
-    [<Interface>]
-    type Options =
-        abstract retry: bool with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (retry: bool) : Options = jsNative
-
 [<Interface>]
 type Config<'T> =
     abstract value: 'T with get, set
@@ -53,13 +46,6 @@ type Holder =
     abstract config: Holder.Config with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (config: Holder.Config) : Holder = jsNative
-
-module Holder =
-    [<Interface>]
-    type Config =
-        abstract value: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (value: string) : Config = jsNative
 
 [<Interface>]
 type GenericClient<'T> =
@@ -88,6 +74,20 @@ type LeftCallback =
     abstract run<'U when 'U :> Left>: value: 'U -> 'U
     [<ParamObject; Emit("$0")>]
     static member Create (run: ('U -> 'U)) : LeftCallback = jsNative
+
+module Holder =
+    [<Interface>]
+    type Config =
+        abstract value: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (value: string) : Config = jsNative
+
+module PublicBox =
+    [<Interface>]
+    type Options =
+        abstract retry: bool with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (retry: bool) : Options = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

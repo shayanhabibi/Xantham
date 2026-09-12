@@ -39,19 +39,6 @@ type Store =
     abstract read: key: string * ?options: ReadOptions<Store.Text> -> JS.Promise<string option>
     abstract read: key: string * ?options: ReadOptions<Store.Bytes> -> JS.Promise<Chunk option>
 
-module Store =
-    [<StringEnum(CaseRules.None)>]
-    type Bytes =
-        | [<CompiledName("bytes")>] Bytes
-
-    [<StringEnum(CaseRules.None)>]
-    type Json =
-        | [<CompiledName("json")>] Json
-
-    [<StringEnum(CaseRules.None)>]
-    type Text =
-        | [<CompiledName("text")>] Text
-
 /// <summary>
 /// Negative: one signature, so the literal separates nothing and widens to <c>string</c>.
 /// </summary>
@@ -86,18 +73,6 @@ type Choice =
     abstract pick: kind: Choice.Pick.Kind -> unit
     abstract pick: kind: Choice.Pick.Kind2 -> unit
 
-module Choice =
-    module Pick =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Kind =
-            | [<CompiledName("a")>] A
-            | [<CompiledName("b")>] B
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Kind2 =
-            | [<CompiledName("c")>] C
-            | [<CompiledName("d")>] D
-
 /// <summary>
 /// Negative: a collision no literal is party to, which drops an overload as it always did.
 /// </summary>
@@ -112,6 +87,18 @@ type Widen =
 type Blend =
     abstract pick: kind: string -> unit
 
+module Choice =
+    module Pick =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Kind =
+            | [<CompiledName("a")>] A
+            | [<CompiledName("b")>] B
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Kind2 =
+            | [<CompiledName("c")>] C
+            | [<CompiledName("d")>] D
+
 module Exports =
     [<StringEnum(CaseRules.None)>]
     type Start =
@@ -120,6 +107,19 @@ module Exports =
     [<StringEnum(CaseRules.None)>]
     type Stop =
         | [<CompiledName("stop")>] Stop
+
+module Store =
+    [<StringEnum(CaseRules.None)>]
+    type Bytes =
+        | [<CompiledName("bytes")>] Bytes
+
+    [<StringEnum(CaseRules.None)>]
+    type Json =
+        | [<CompiledName("json")>] Json
+
+    [<StringEnum(CaseRules.None)>]
+    type Text =
+        | [<CompiledName("text")>] Text
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

@@ -49,30 +49,10 @@ type Ref<'T> = U2<'T, ('T -> unit)>
 /// </summary>
 type Source<'S> = U2<'S, (unit -> 'S)> option
 
-module Each =
-    [<Interface>]
-    type Props<'T, 'U> =
-        abstract items: 'T[] with get, set
-        abstract fallback: string option with get, set
-        abstract render: Each.Props.Render<'T, 'U> with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (items: 'T[], render: Each.Props.Render<'T, 'U>, ?fallback: string) : Props<'T, 'U> = jsNative
-
-    module Props =
-        type Render<'T, 'U> = delegate of item: 'T * index: float -> 'U
-
 /// <summary>
 /// An anonymous object type inside a generic alias.
 /// </summary>
 type Handle<'T> = (unit -> 'T) * Handle.Item<'T>
-
-module Handle =
-    [<Interface>]
-    type Item<'T> =
-        abstract set: ('T -> unit) with get, set
-        abstract reset: unit -> unit
-        [<ParamObject; Emit("$0")>]
-        static member Create (set: ('T -> unit), reset: (unit -> unit)) : Item<'T> = jsNative
 
 /// <summary>
 /// A named bound: the only kind of constraint F# can state.
@@ -110,6 +90,26 @@ type Manifest =
     abstract flags: Record<string, bool> with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (flags: Record<string, bool>) : Manifest = jsNative
+
+module Each =
+    [<Interface>]
+    type Props<'T, 'U> =
+        abstract items: 'T[] with get, set
+        abstract fallback: string option with get, set
+        abstract render: Each.Props.Render<'T, 'U> with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (items: 'T[], render: Each.Props.Render<'T, 'U>, ?fallback: string) : Props<'T, 'U> = jsNative
+
+    module Props =
+        type Render<'T, 'U> = delegate of item: 'T * index: float -> 'U
+
+module Handle =
+    [<Interface>]
+    type Item<'T> =
+        abstract set: ('T -> unit) with get, set
+        abstract reset: unit -> unit
+        [<ParamObject; Emit("$0")>]
+        static member Create (set: ('T -> unit), reset: (unit -> unit)) : Item<'T> = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

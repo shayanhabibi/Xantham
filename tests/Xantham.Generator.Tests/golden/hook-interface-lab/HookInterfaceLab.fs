@@ -34,32 +34,12 @@ type Station (label: string) =
         with get (): string option = jsNative
         and set (_: string option): unit = jsNative
 
-module Station =
-    [<Interface>]
-    type IAlarmHandler =
-        abstract alarm: unit -> string
-        [<ParamObject; Emit("$0")>]
-        static member Create (alarm: (unit -> string)) : IAlarmHandler = jsNative
-
-    [<Interface>]
-    type IFetchHandler =
-        abstract fetch: signal: Signal -> string
-        [<ParamObject; Emit("$0")>]
-        static member Create (fetch: (Signal -> string)) : IFetchHandler = jsNative
-
 /// <summary>
 /// An entrypoint whose hook mentions the class's own type parameter.
 /// </summary>
 [<Import("Relay", "hook-lab:runtime"); AbstractClass>]
 type Relay<'T> (seed: 'T) =
     member _.seed: 'T = jsNative
-
-module Relay =
-    [<Interface>]
-    type IForwardHandler<'T> =
-        abstract forward: value: 'T -> 'T
-        [<ParamObject; Emit("$0")>]
-        static member Create (forward: ('T -> 'T)) : IForwardHandler<'T> = jsNative
 
 /// <summary>
 /// An exported class that is neither abstract nor derived: the interface form, where an
@@ -93,7 +73,28 @@ type Listener =
     [<ParamObject; Emit("$0")>]
     static member Create (?ping: (Signal -> string)) : Listener = jsNative
 
+module Relay =
+    [<Interface>]
+    type IForwardHandler<'T> =
+        abstract forward: value: 'T -> 'T
+        [<ParamObject; Emit("$0")>]
+        static member Create (forward: ('T -> 'T)) : IForwardHandler<'T> = jsNative
+
+module Station =
+    [<Interface>]
+    type IAlarmHandler =
+        abstract alarm: unit -> string
+        [<ParamObject; Emit("$0")>]
+        static member Create (alarm: (unit -> string)) : IAlarmHandler = jsNative
+
+    [<Interface>]
+    type IFetchHandler =
+        abstract fetch: signal: Signal -> string
+        [<ParamObject; Emit("$0")>]
+        static member Create (fetch: (Signal -> string)) : IFetchHandler = jsNative
+
 module HookLab =
+    /// <summary>hook-lab:runtime</summary>
     module Runtime =
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]

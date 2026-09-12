@@ -55,14 +55,6 @@ type Timer =
     [<ParamObject; Emit("$0")>]
     static member Create (progress: float, speed: float, play: (unit -> Timer), seek: Func<float, bool option, Timer>, tween: (float[] -> Timer)) : Timer = jsNative
 
-module Configure =
-    [<Interface>]
-    type Settings =
-        abstract fps: float with get, set
-        abstract muted: bool option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (fps: float, ?muted: bool) : Settings = jsNative
-
 /// <summary>
 /// A homogeneous tuple (D7).
 /// </summary>
@@ -174,6 +166,14 @@ type Utils =
     abstract epsilon: float
     [<ParamObject; Emit("$0")>]
     static member Create (clamp: Clamp, epsilon: float) : Utils = jsNative
+
+module Configure =
+    [<Interface>]
+    type Settings =
+        abstract fps: float with get, set
+        abstract muted: bool option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (fps: float, ?muted: bool) : Settings = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

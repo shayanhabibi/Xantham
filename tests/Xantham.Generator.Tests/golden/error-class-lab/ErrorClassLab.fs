@@ -90,7 +90,24 @@ type Warned =
     [<ParamObject; Emit("$0")>]
     static member Create (note: string, name: string, message: string, ?stack: string, ?cause: obj) : Warned = jsNative
 
+/// <summary>The package's value exports, each bound to its import.</summary>
+[<Erase>]
+type Exports =
+    /// <summary>
+    /// A class no specifier exports: <c>globalThis.Mishap</c> is not a module entrypoint, so it keeps the
+    /// interface form and the flattened members of its base.
+    /// </summary>
+    [<Global("Mishap"); EmitConstructor>]
+    static member Mishap (?message: string) : Mishap = jsNative
+    /// <summary>
+    /// A class no specifier exports: <c>globalThis.Mishap</c> is not a module entrypoint, so it keeps the
+    /// interface form and the flattened members of its base.
+    /// </summary>
+    [<Global("Mishap"); EmitConstructor>]
+    static member Mishap_Overload2 (?message: string, ?options: obj) : Mishap = jsNative
+
 module ErrorLab =
+    /// <summary>error-lab:faults</summary>
     module Faults =
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]
@@ -118,19 +135,3 @@ module ErrorLab =
             /// </summary>
             [<Import("reason", "error-lab:faults")>]
             static member reason (fault: Fault) : exn = jsNative
-
-/// <summary>The package's value exports, each bound to its import.</summary>
-[<Erase>]
-type Exports =
-    /// <summary>
-    /// A class no specifier exports: <c>globalThis.Mishap</c> is not a module entrypoint, so it keeps the
-    /// interface form and the flattened members of its base.
-    /// </summary>
-    [<Global("Mishap"); EmitConstructor>]
-    static member Mishap (?message: string) : Mishap = jsNative
-    /// <summary>
-    /// A class no specifier exports: <c>globalThis.Mishap</c> is not a module entrypoint, so it keeps the
-    /// interface form and the flattened members of its base.
-    /// </summary>
-    [<Global("Mishap"); EmitConstructor>]
-    static member Mishap_Overload2 (?message: string, ?options: obj) : Mishap = jsNative

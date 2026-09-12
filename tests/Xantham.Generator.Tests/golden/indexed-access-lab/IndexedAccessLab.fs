@@ -178,6 +178,18 @@ type ModelMap =
     [<ParamObject; Emit("$0")>]
     static member Create (alpha: ModelMap.Alpha, beta: ModelMap.Beta) : ModelMap = jsNative
 
+/// <summary>
+/// A dispatch target whose map is only ever bounded, never given.
+/// </summary>
+[<Interface>]
+type Feed<'EventMap> =
+    /// <summary>
+    /// A literal index over a bound that declares no keys: the access stays widened.
+    /// </summary>
+    abstract take: ``event``: obj -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (take: (obj -> unit)) : Feed<'EventMap> = jsNative
+
 module ModelMap =
     [<Interface>]
     type Alpha =
@@ -192,18 +204,6 @@ module ModelMap =
         abstract outputs: string with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (inputs: float, outputs: string) : Beta = jsNative
-
-/// <summary>
-/// A dispatch target whose map is only ever bounded, never given.
-/// </summary>
-[<Interface>]
-type Feed<'EventMap> =
-    /// <summary>
-    /// A literal index over a bound that declares no keys: the access stays widened.
-    /// </summary>
-    abstract take: ``event``: obj -> unit
-    [<ParamObject; Emit("$0")>]
-    static member Create (take: (obj -> unit)) : Feed<'EventMap> = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

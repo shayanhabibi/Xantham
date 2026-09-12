@@ -25,6 +25,7 @@ type Exports =
     static member Certificate () : Certificate = jsNative
 
 module Node =
+    /// <summary>node:static-reexport-lab</summary>
     module StaticReexportLab =
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]

@@ -49,14 +49,6 @@ type Extended =
     [<ParamObject; Emit("$0")>]
     static member Create (name: string, extra: bool) : Extended = jsNative
 
-module Label =
-    [<Interface>]
-    type Target =
-        inherit Named
-        abstract id: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (name: string, id: float) : Target = jsNative
-
 /// <summary>
 /// A generic intersection alias: <c>T</c> is bound on the alias and a member reads it.
 /// </summary>
@@ -119,6 +111,14 @@ type Cancelable =
     abstract Invoke: unit -> unit
     [<ParamObject; Emit("$0")>]
     static member Create (cancel: (unit -> unit)) : Cancelable = jsNative
+
+module Label =
+    [<Interface>]
+    type Target =
+        inherit Named
+        abstract id: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string, id: float) : Target = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

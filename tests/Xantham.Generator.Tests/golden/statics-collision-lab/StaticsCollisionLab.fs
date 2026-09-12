@@ -35,6 +35,7 @@ type Depot2 =
     static member ``open`` (slot: string) : Depot2 = jsNative
 
 module StaticsLab =
+    /// <summary>statics-lab:depot</summary>
     module Depot =
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]

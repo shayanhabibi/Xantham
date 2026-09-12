@@ -52,13 +52,6 @@ type Connection =
     [<ParamObject; Emit("$0")>]
     static member Create (options: Connection.Options) : Connection = jsNative
 
-module Connection =
-    [<Interface>]
-    type Options =
-        abstract transport: Transport with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (transport: Transport) : Options = jsNative
-
 [<Interface>]
 type Manager =
     abstract connections: Record<string, Connection> with get, set
@@ -70,6 +63,13 @@ type Agent =
     abstract manager: Manager
     [<ParamObject; Emit("$0")>]
     static member Create (manager: Manager) : Agent = jsNative
+
+module Connection =
+    [<Interface>]
+    type Options =
+        abstract transport: Transport with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (transport: Transport) : Options = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

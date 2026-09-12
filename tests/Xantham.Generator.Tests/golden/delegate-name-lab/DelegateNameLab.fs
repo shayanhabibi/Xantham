@@ -10,15 +10,6 @@ open Fable.Core.JsInterop
 open Fable.Core.JS
 open Fable.Core.TS.Dom
 
-module CallTwo =
-    type Handler = delegate of x: float * y: float -> string
-
-module CallThree =
-    type Handler = delegate of x: float * y: float * label: string -> string
-
-module CallVoidTwo =
-    type Handler = delegate of x: float * y: float -> unit
-
 type TickHandler = delegate of x: float * y: float -> string
 
 /// <summary>
@@ -32,11 +23,6 @@ type EventTarget =
     [<ParamObject; Emit("$0")>]
     static member Create (onTick: EventTarget.OnTick, onDrag: EventTarget.OnDrag, ?onDone: (unit -> unit)) : EventTarget = jsNative
 
-module EventTarget =
-    type OnDrag = delegate of x: float * y: float -> string
-
-    type OnTick = delegate of x: float * y: float -> string
-
 /// <summary>
 /// A retained callback in return position.
 /// </summary>
@@ -47,14 +33,28 @@ type Factory =
     [<ParamObject; Emit("$0")>]
     static member Create (pair: Factory.Pair, make: (float -> Factory.Make.Result)) : Factory = jsNative
 
-module Factory =
-    module Make =
-        type Result = delegate of x: float * y: float -> string
-
-    type Pair = delegate of x: float * y: float -> string
-
 module CallNesting =
     type Outer = delegate of seed: float -> (float -> string)
+
+module CallThree =
+    type Handler = delegate of x: float * y: float * label: string -> string
+
+module CallTwo =
+    type Handler = delegate of x: float * y: float -> string
+
+module CallVoidTwo =
+    type Handler = delegate of x: float * y: float -> unit
+
+module EventTarget =
+    type OnDrag = delegate of x: float * y: float -> string
+
+    type OnTick = delegate of x: float * y: float -> string
+
+module Factory =
+    type Pair = delegate of x: float * y: float -> string
+
+    module Make =
+        type Result = delegate of x: float * y: float -> string
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

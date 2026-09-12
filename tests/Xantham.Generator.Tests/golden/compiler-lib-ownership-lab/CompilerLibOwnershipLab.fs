@@ -33,15 +33,6 @@ type Store =
     [<ParamObject; Emit("$0")>]
     static member Create (update: (Store.Update.Value -> unit)) : Store = jsNative
 
-module Store =
-    module Update =
-        [<Interface>]
-        type Value =
-            abstract ``when``: TypeScript.Lib.Es.Date option with get, set
-            abstract value: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?``when``: TypeScript.Lib.Es.Date, ?value: string) : Value = jsNative
-
 type GlobalThis =
     abstract NaN: float with get, set
     abstract Infinity: float with get, set
@@ -210,6 +201,15 @@ type WindowLike =
     abstract self: WindowLike.Self
     [<ParamObject; Emit("$0")>]
     static member Create (self: WindowLike.Self) : WindowLike = jsNative
+
+module Store =
+    module Update =
+        [<Interface>]
+        type Value =
+            abstract ``when``: TypeScript.Lib.Es.Date option with get, set
+            abstract value: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?``when``: TypeScript.Lib.Es.Date, ?value: string) : Value = jsNative
 
 module WindowLike =
     type Self =

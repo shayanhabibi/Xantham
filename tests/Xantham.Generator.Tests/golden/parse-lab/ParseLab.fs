@@ -16,13 +16,6 @@ type EventMap =
     [<ParamObject; Emit("$0")>]
     static member Create (click: EventMap.Click) : EventMap = jsNative
 
-module EventMap =
-    [<Interface>]
-    type Click =
-        abstract at: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (at: float) : Click = jsNative
-
 [<Interface>]
 type Object3D<'TEventMap> =
     abstract id: float
@@ -49,6 +42,13 @@ type Plain =
     abstract on<'T when 'T :> EventMap>: handler: 'T -> unit
     [<ParamObject; Emit("$0")>]
     static member Create (ping: (float -> unit), echo: ('T -> 'T), on: ('T -> unit)) : Plain = jsNative
+
+module EventMap =
+    [<Interface>]
+    type Click =
+        abstract at: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (at: float) : Click = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

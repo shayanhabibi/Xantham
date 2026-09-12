@@ -6,8 +6,33 @@ open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator.Shape.Spec
 
+/// The nested-module path a dotted declaration name renders under - `[]` for a root name.
+let private modulePath (name: string) =
+    let segments = name.Split '.'
+    if segments.Length <= 1 then [] else List.ofArray segments[.. segments.Length - 2]
+
+/// A declaration's name, for ordering purposes: the `Exports` container's own name stands in
+/// for a type declaration's.
+let private nameFor =
+    function
+    | FsInterface decl -> decl.Name
+    | FsStringEnum decl -> decl.Name
+    | FsTaggedUnion decl -> decl.Name
+    | FsEnum decl -> decl.Name
+    | FsAbbrev decl -> decl.Name
+    | FsDelegateType decl -> decl.Name
+    | FsPhantom decl -> decl.Name
+    | FsMeasure decl -> decl.Name
+    | FsExports container -> container.Name
+
+/// Root declarations first, then every nested module in alphabetical order of its path,
+/// preserving the order already fixed within each.
+let private byModulePath decls =
+    decls |> List.sortBy (nameFor >> modulePath >> fun path -> (List.isEmpty path |> not), path)
+
 /// Fixes the output order the renderer will follow verbatim: declarations in source order with
-/// name as the tiebreak, then the `Exports` type - its members in harvest order - last.
+/// name as the tiebreak, then the `Exports` type - its members in harvest order - last; root
+/// declarations before every specifier module, each module alphabetical by its path.
 let orderDeclarations: Pass<ShapeModel> =
     Pass.pure' "order-declarations" (fun ctx model ->
         let orderKey (order: DeclOrder option) (name: string) =
@@ -67,9 +92,6 @@ let orderDeclarations: Pass<ShapeModel> =
                 | _ -> "")
 
         { model with
-            Decls =
-                match exportDecls with
-                | [] -> decls
-                | exportDecls -> decls @ exportDecls
+            Decls = byModulePath (decls @ exportDecls)
             ExportMembers = []
         })
