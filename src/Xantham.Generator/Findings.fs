@@ -160,6 +160,7 @@ module FindingCodes =
             "MB.OptionalHookAsInterface", "MB005"
             "MB.OptionalParameterFromUnion", "MB006"
             "MB.UnspellableMemberDropped", "MB007"
+            "NE.TypeNameSuffixed", "NE001"
             "HG.AmbientModuleDropped", "HG001"
             "HG.UnwritableGlobalDropped", "HG002"
             "HG.NothingHarvested", "HG003"
@@ -785,6 +786,19 @@ type DetectTaggedUnions =
             | ArmsMergedOnSharedTag(tag, value) ->
                 $"arms sharing '{tag}' = '{value}' merged into one case, carrying the members they agree on"
 
+/// `name-exports`.
+[<Prefix("NE", "name-exports")>]
+type NameExports =
+    /// A declaration whose preferred name a sibling declaration already claimed under this pass;
+    /// it keeps a numeric suffix instead.
+    | [<Exact>] TypeNameSuffixed of original: string * suffixed: string * origin: string
+
+    interface IFindingKind with
+        member this.Message =
+            match this with
+            | TypeNameSuffixed(original, suffixed, origin) ->
+                $"name '{original}' already claimed; this declaration, from {origin}, is written as '{suffixed}'"
+
 /// `shape-interfaces`.
 /// `synthesize-anonymous`. Wave two, lane A: the pass had no findings of its own, because until
 /// the `three` recon nothing had measured what it does to a shape that reaches itself - 518
@@ -1118,6 +1132,7 @@ module FindingCatalogue =
             typeof<TypeReference>
             typeof<TypeParameters>
             typeof<Members>
+            typeof<NameExports>
             typeof<HarvestGlobals>
             typeof<ResolveExportTypes>
             typeof<ResolveTypeTable>

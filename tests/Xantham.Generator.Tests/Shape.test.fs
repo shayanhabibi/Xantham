@@ -1446,6 +1446,42 @@ let shapePassTests =
             Expect.equal (Map.tryFind 41<typeId> named.DeclNames) (Some "Event") "and the global one keeps the bare name"
             Expect.equal (findings |> List.map _.Key) [ "SY004" ] "the nesting is reported once"
 
+        testCase "name-exports suffixes the second declaration under a name the first already claimed" <| fun _ ->
+            // Neither declaration is namespaced, so `claim` cannot resolve the clash by nesting
+            // one of them; the second keeps a numeric suffix instead.
+            let first =
+                { Build.facts (Build.typeResponse 40 TypeFlags.Object) with
+                    Members = [ Build.resolvedMember (Build.symbol 401 "seq" SymbolFlags.Property) 2 ] }
+
+            let second =
+                { Build.facts (Build.typeResponse 41 TypeFlags.Object) with
+                    Members = [ Build.resolvedMember (Build.symbol 402 "at" SymbolFlags.Property) 2 ] }
+
+            let model =
+                { Build.shapeModel (first :: second :: Build.primitives) with
+                    Harvest =
+                        { Exports =
+                            [ Build.export "Session" (Build.symbol 100 "Session" SymbolFlags.Interface)
+                              Build.export "Session" (Build.symbol 101 "Session" SymbolFlags.Interface) ]
+                          Namespaces = Map.empty
+                          ShadowedByLib = 0
+                        }
+                    ExportTypes =
+                        Map.ofList
+                            [ 100<symbolId>, { Declared = Some 40<typeId>; Value = None }
+                              101<symbolId>, { Declared = Some 41<typeId>; Value = None } ] }
+
+            let named, findings = Build.runPass ExportNames.nameExports model
+
+            Expect.equal (Map.tryFind 40<typeId> named.DeclNames) (Some "Session") "the first claimant keeps the plain name"
+            Expect.equal (Map.tryFind 41<typeId> named.DeclNames) (Some "Session2") "the second keeps a numeric suffix"
+            Expect.equal (findings |> List.map _.Key) [ "NE001" ] "the suffix is reported"
+
+            Expect.equal
+                (findings |> List.map _.Message)
+                [ "name 'Session' already claimed; this declaration, from the entry module, is written as 'Session2'" ]
+                "the finding names the original and the suffixed name"
+
         testCase "synthesize-anonymous names the generic declaration behind an instantiation, not the instantiation" <| fun _ ->
             // `Ready<T>` is not exported and is reached only as `Ready<U>` from some generic
             // export. The declaration (30) is what gets the name; the instantiation (31) is
