@@ -30,6 +30,18 @@ let auditCoverage: Pass<ShapeModel> =
 
                     let name = fsName (defaultExportName ctx)
 
+                    // A type export's own declaration carries the fully qualified name
+                    // `name-exports` assigned it - `Store.SetStoreFunction` for a subpath export
+                    // nested under its module - which is the name every other pass's finding
+                    // names it by. Falls back to the bare export name for a value export, which
+                    // `name-exports` does not assign a `DeclNames` entry to.
+                    let qualifiedName (export: HarvestedExport) =
+                        model.ExportTypes
+                        |> Map.tryFind export.Symbol.SymbolId
+                        |> Option.bind _.Declared
+                        |> Option.bind (fun typeId -> Map.tryFind typeId model.DeclNames)
+                        |> Option.defaultValue (name export)
+
                     // An export is represented by a declaration carrying its name, by a declaration nested
                     // under a module of its name (a TS namespace), or by a declaration whose final segment is
                     // its name (a specifier-scoped or namespace-contested type).
@@ -41,13 +53,32 @@ let auditCoverage: Pass<ShapeModel> =
                            |> Set.exists (fun declared ->
                                declared.StartsWith(exported + ".") || declared.EndsWith("." + exported))
 
+                    // The parent symbols of every harvested export, for telling a namespace with
+                    // harvested members apart from one with none.
+                    let namespacesWithMembers =
+                        model.Harvest.Exports
+                        |> List.choose (fun export -> export.Symbol.ParentSymbolId |> ValueOption.toOption)
+                        |> Set.ofList
+
+                    // A namespace export whose own declared members carry none of them the `export`
+                    // keyword - `SolidStore.Unwrappable` in `solid-js` - reaches harvest with no
+                    // member of its own, and holds no type or value surface a declaration could ever
+                    // carry on its behalf.
+                    let opaqueNamespace (export: HarvestedExport) =
+                        hasAny SymbolFlags.Module export.Symbol.Flags
+                        && not (hasAny SymbolFlags.Type export.Symbol.Flags)
+                        && not export.HasValueExport
+                        && not (Set.contains export.Symbol.SymbolId namespacesWithMembers)
+
                     let missing =
                         model.Harvest.Exports
                         |> List.filter (fun export ->
                             export.HasValueExport
                             || hasAny (SymbolFlags.Type ||| SymbolFlags.Module) export.Symbol.Flags)
+                        |> List.filter (opaqueNamespace >> not)
                         |> List.filter (represented >> not)
-                        |> List.map (fun export -> Finding.make (name export) AuditCoverage.ExportNotRepresented)
+                        |> List.map (fun export ->
+                            Finding.make (qualifiedName export) AuditCoverage.ExportNotRepresented)
 
                     return
                         if List.isEmpty missing then
