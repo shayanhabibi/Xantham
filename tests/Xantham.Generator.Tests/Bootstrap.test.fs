@@ -112,6 +112,10 @@ let tests =
                 [ "root.d.ts" ], ([ ".", "root.d.ts" ], [ "./js" ])
             """{ "exports": { ".": { "types": "./root.d.ts" }, "./client/index.js": { "types": "./client/index.d.ts" } } }""",
                 [ "root.d.ts"; "client/index.d.ts" ], ([ ".", "root.d.ts"; "./client/index.js", "client/index.d.ts" ], [])
+            """{ "exports": { ".": { "types": "./root.d.ts" }, "./gone": { "types": "./gone.d.ts" } } }""",
+                [ "root.d.ts" ], ([ ".", "root.d.ts" ], [ "./gone" ])
+            """{ "exports": { ".": { "types": "./root.d.ts" }, "./package.json": "./package.json" } }""",
+                [ "root.d.ts" ], ([ ".", "root.d.ts" ], [])
         ] <| fun (manifest, files, expected) ->
             Expect.equal (enumeration files manifest) expected "root first, subpaths ordinal, skipped keys listed"
 

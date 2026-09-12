@@ -4132,6 +4132,7 @@ module Adapter =
     module RegisterPropertyResolver =
         type Resolver = delegate of target: obj * name: string -> TargetAdapter.Props.Item option
 
+/// <summary>animejs/adapters</summary>
 module Adapters =
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
@@ -4142,6 +4143,7 @@ module Adapters =
         [<Import("registerAdapter", "animejs/adapters")>]
         static member registerAdapter (?detect: (obj -> bool)) : Adapter = jsNative
 
+    /// <summary>animejs/adapters/three</summary>
     module Three =
         [<Interface>]
         type ThreeAdapter =
@@ -4216,6 +4218,7 @@ module Adapters =
                     module RegisterProperty =
                         type Setter = delegate of target: obj * value: float * tween: obj -> unit
 
+/// <summary>animejs/animatable</summary>
 module Animatable =
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
@@ -4226,6 +4229,7 @@ module Animatable =
         [<Import("createAnimatable", "animejs/animatable")>]
         static member createAnimatable (targets: TargetsParam, parameters: AnimatableParams) : AnimatableObject = jsNative
 
+/// <summary>animejs/animation</summary>
 module Animation =
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
@@ -4537,6 +4541,7 @@ module DOMProxy =
             [<ParamObject; Emit("$0")>]
             static member Create (top: obj, right: obj, bottom: obj, left: obj) : Result = jsNative
 
+/// <summary>animejs/draggable</summary>
 module Draggable =
     [<Interface>]
     type OvershootCoords =
@@ -4590,6 +4595,7 @@ module DurationKeyframes =
     module Item =
         type Duration = delegate of target: Target option * index: float option * targets: Target[] option * prevTween: Tween option -> FunctionValueReturn
 
+/// <summary>animejs/easings</summary>
 module Easings =
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
@@ -4611,6 +4617,7 @@ module Easings =
         [<Import("steps", "animejs/easings")>]
         static member steps (?steps: float, ?fromStart: bool) : EasingFunction = jsNative
 
+    /// <summary>animejs/easings/cubic-bezier</summary>
     module CubicBezier =
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]
@@ -4618,6 +4625,7 @@ module Easings =
             [<Import("cubicBezier", "animejs/easings/cubic-bezier")>]
             static member cubicBezier (?mX1: float, ?mY1: float, ?mX2: float, ?mY2: float) : EasingFunction = jsNative
 
+    /// <summary>animejs/easings/eases</summary>
     module Eases =
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]
@@ -4625,6 +4633,7 @@ module Easings =
             [<Import("eases", "animejs/easings/eases")>]
             static member eases: Animejs.Eases = jsNative
 
+    /// <summary>animejs/easings/irregular</summary>
     module Irregular =
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]
@@ -4632,6 +4641,7 @@ module Easings =
             [<Import("irregular", "animejs/easings/irregular")>]
             static member irregular (?length: float, ?randomness: float) : EasingFunction = jsNative
 
+    /// <summary>animejs/easings/linear</summary>
     module Linear =
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]
@@ -4639,6 +4649,7 @@ module Easings =
             [<Import("linear", "animejs/easings/linear")>]
             static member linear ([<ParamArray>] args: TimelinePosition[]) : EasingFunction = jsNative
 
+    /// <summary>animejs/easings/spring</summary>
     module Spring =
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]
@@ -4650,6 +4661,7 @@ module Easings =
             [<Import("createSpring", "animejs/easings/spring")>]
             static member createSpring (?parameters: SpringParams) : Animejs.Spring = jsNative
 
+    /// <summary>animejs/easings/steps</summary>
     module Steps =
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]
@@ -4657,6 +4669,7 @@ module Easings =
             [<Import("steps", "animejs/easings/steps")>]
             static member steps (?steps: float, ?fromStart: bool) : EasingFunction = jsNative
 
+/// <summary>animejs/engine</summary>
 module Engine =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
     type TimeUnit =
@@ -4669,6 +4682,7 @@ module Engine =
         [<Import("engine", "animejs/engine")>]
         static member engine: Engine = jsNative
 
+/// <summary>animejs/events</summary>
 module Events =
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
@@ -4697,6 +4711,7 @@ module Globals =
         [<ParamObject; Emit("$0")>]
         static member Create (showPanel: bool, addAnimation: JS.Function, addSet: JS.Function, addTimeline: JS.Function, addTimelineChild: JS.Function, addTimelineLabel: JS.Function, addTimelineCall: JS.Function, addTimelineSync: JS.Function, resolveStagger: JS.Function, _head: obj, _tail: obj) : Editor = jsNative
 
+/// <summary>animejs/layout</summary>
 module Layout =
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
@@ -4712,6 +4727,7 @@ module PercentageKeyframes =
         [<EmitIndexer>]
         abstract Item: string -> TweenParamValue with get, set
 
+/// <summary>animejs/scope</summary>
 module Scope =
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
@@ -4769,6 +4785,7 @@ module StaggerParams =
         | [<CompiledName("y")>] Y
         | [<CompiledName("z")>] Z
 
+/// <summary>animejs/svg</summary>
 module Svg =
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
@@ -4805,6 +4822,7 @@ module TargetAdapter =
     module RegisterProperty =
         type Setter = delegate of target: obj * value: float * tween: obj -> unit
 
+/// <summary>animejs/text</summary>
 module Text =
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
@@ -4825,6 +4843,7 @@ module Text =
     module ScrambleText =
         type Result = delegate of target: Target option * index: float option * targets: Target[] option * prevTween: Tween option -> ScrambleTextTween
 
+/// <summary>animejs/timeline</summary>
 module Timeline =
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
@@ -4837,6 +4856,7 @@ module Timeline =
     module Add =
         type A3 = delegate of target: Target option * index: float option * targets: Target[] option * prevTween: Tween option * tl: Timeline option -> TimelinePosition
 
+/// <summary>animejs/timer</summary>
 module Timer =
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
@@ -4856,6 +4876,7 @@ module Transforms =
 module Tween =
     type Setter = delegate of target: obj * value: float * tween: Tween -> unit
 
+/// <summary>animejs/utils</summary>
 module Utils =
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
@@ -5078,6 +5099,7 @@ module WAAPITweenOptions =
         | [<CompiledName("add")>] Add
         | [<CompiledName("replace")>] Replace
 
+/// <summary>animejs/waapi</summary>
 module Waapi =
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]

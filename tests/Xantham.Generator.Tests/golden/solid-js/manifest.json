@@ -11,8 +11,8 @@
   "passes": [
     {
       "pass": "harvest-exports",
-      "total": 12,
-      "escape": 12
+      "total": 11,
+      "escape": 11
     },
     {
       "pass": "SY - synthesize-anonymous",

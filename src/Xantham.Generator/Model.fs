@@ -410,7 +410,10 @@ module GeneratorConfig =
                 | true, value when value.ValueKind = JsonValueKind.Array ->
                     value.EnumerateArray()
                     |> Seq.map (fun item ->
-                        if item.ValueKind <> JsonValueKind.String || not (item.GetString().StartsWith "./") then
+                        if
+                            item.ValueKind <> JsonValueKind.String
+                            || not (item.GetString().StartsWith("./", StringComparison.Ordinal))
+                        then
                             failwith "xantham.json: subpaths must be an array of exports keys beginning with ./"
 
                         item.GetString())

@@ -23948,6 +23948,7 @@ module ChatCompletionsCommonOptions =
             | [<CompiledName("text")>] Text
 
 module Cloudflare =
+    /// <summary>cloudflare:email</summary>
     module Email =
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]
@@ -24033,6 +24034,7 @@ module Cloudflare =
             [<Import("PipelineTransformationEntrypoint", "cloudflare:pipelines"); EmitConstructor>]
             static member PipelineTransformationEntrypoint<'Env, 'I, 'O> (ctx: ExecutionContext<obj>, env: 'Env) : Cloudflare.WorkersTypes.Cloudflare.Pipelines.PipelineTransformationEntrypoint<'Env, 'I, 'O> = jsNative
 
+    /// <summary>cloudflare:sockets</summary>
     module Sockets =
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]

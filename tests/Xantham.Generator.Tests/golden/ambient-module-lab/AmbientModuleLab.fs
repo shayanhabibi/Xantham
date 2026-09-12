@@ -133,6 +133,7 @@ module AmbientLab =
             [<Import("Session", "ambient-lab:runtime"); EmitConstructor>]
             static member Session (label: string) : Session = jsNative
 
+    /// <summary>ambient-lab:sockets</summary>
     module Sockets =
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]

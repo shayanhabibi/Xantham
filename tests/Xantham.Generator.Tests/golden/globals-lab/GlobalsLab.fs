@@ -91,6 +91,7 @@ type Exports =
     static member Gadget (widget: Widget) : Gadget = jsNative
 
 module GlobalsLab =
+    /// <summary>globals-lab:extra</summary>
     module Extra =
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]

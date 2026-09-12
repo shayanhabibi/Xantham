@@ -4461,6 +4461,18 @@ let pipelineTests =
                       Expect.stringContains source "[<Import(\"whoami\", \"subpath-lab/alias\")>]" "alias key"
                       Expect.stringContains source "[<Import(\"whoami\", \"subpath-lab/mirror\")>]" "mirror key"
 
+                  testCase "a value-only subpath still carries the rule-13 summary" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+                      Expect.stringContains
+                          source
+                          "/// <summary>subpath-lab/legacy/index.js</summary>\nmodule Legacy ="
+                          "Legacy owns only value exports, so the summary comes from allOwners, not exportedDeclarations"
+                      Expect.stringContains
+                          source
+                          "/// <summary>subpath-lab/mirror</summary>\nmodule Mirror ="
+                          "Mirror owns only value exports, so the summary comes from allOwners, not exportedDeclarations"
+
                   testCase "wildcard and untyped keys are skipped with findings" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                       let symbols = rendered.Files |> List.find (fst >> (=) "symbols.jsonl") |> snd

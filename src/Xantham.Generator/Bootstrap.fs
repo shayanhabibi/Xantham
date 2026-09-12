@@ -39,6 +39,13 @@ let rec private declarationOf (el: JsonElement) : string option =
             |> Seq.tryPick (fun p -> declarationOf p.Value)
     | _ -> None
 
+/// The target an exports subpath resolves to: `declarationOf`, extended to a bare condition
+/// string such as `"./package.json": "./package.json"`.
+let private subpathTargetOf (el: JsonElement) : string option =
+    match el.ValueKind with
+    | JsonValueKind.String -> Some(el.GetString())
+    | _ -> declarationOf el
+
 /// The default root declaration: `types`, `typings`, a root-export `types` string, then
 /// `index.d.ts`. A missing or blocked root in an exports map requires an explicit input.
 let entryFile (packageDir: string) : string =
@@ -154,8 +161,8 @@ let publicPaths (config: GeneratorConfig) (packageDir: string) : PublicPath list
                 match root.TryGetProperty "exports" with
                 | true, exports when exports.ValueKind = JsonValueKind.Object ->
                     exports.EnumerateObject()
-                    |> Seq.filter (fun p -> p.Name.StartsWith "./")
-                    |> Seq.map (fun p -> p.Name, declarationOf p.Value)
+                    |> Seq.filter (fun p -> p.Name.StartsWith("./", StringComparison.Ordinal))
+                    |> Seq.map (fun p -> p.Name, subpathTargetOf p.Value)
                     |> Seq.toList
                     |> Some
                 | _ -> None)
@@ -189,22 +196,27 @@ let publicPaths (config: GeneratorConfig) (packageDir: string) : PublicPath list
                     if key.Contains '*' then
                         skipped @ [ key, HarvestGlobals.SubpathWildcardSkipped key ], taken
                     else
+                        let isTypeScriptFile (file: string) =
+                            [ ".d.ts"; ".d.mts"; ".d.cts"; ".ts"; ".tsx"; ".mts"; ".cts" ]
+                            |> List.exists (fun suffix -> file.EndsWith(suffix, StringComparison.Ordinal))
+
                         match declared with
                         | None -> skipped @ [ key, HarvestGlobals.SubpathWithoutDeclarations key ], taken
+                        | Some file when not (isTypeScriptFile file) -> skipped, taken
                         | Some file ->
                             let path = inside file
 
                             if not (File.Exists path) then
-                                failwith $"package.json: exports key \"{key}\" names a missing declaration file {file}"
-
-                            skipped,
-                            taken
-                            @ [
-                                {
-                                    Key = key
-                                    File = path * uom<declFile>
-                                }
-                            ])
+                                skipped @ [ key, HarvestGlobals.SubpathWithoutDeclarations key ], taken
+                            else
+                                skipped,
+                                taken
+                                @ [
+                                    {
+                                        Key = key
+                                        File = path * uom<declFile>
+                                    }
+                                ])
                 ([], [])
 
         let root =

@@ -82,6 +82,7 @@ module Client =
             [<Import("depth", "subpath-lab/client/deep")>]
             static member depth () : float = jsNative
 
+/// <summary>subpath-lab/legacy/index.js</summary>
 module Legacy =
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
@@ -93,6 +94,7 @@ module Legacy =
         [<Import("Session", "subpath-lab/legacy/index.js"); EmitConstructor>]
         static member Session () : RootSession = jsNative
 
+/// <summary>subpath-lab/mirror</summary>
 module Mirror =
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]

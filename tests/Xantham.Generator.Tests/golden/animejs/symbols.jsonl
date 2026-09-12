@@ -349,4 +349,3 @@
 {"name":"WAAPITweenOptions.Composition","file":"dist/modules/types/index.d.ts","tier":"exact","findings":[{"name":"SY.NameNestedUnderOwner","key":"SY004","pass":"synthesize-anonymous","tier":"exact","symbol":"WAAPITweenOptions.Composition","fields":{"nestedAs":"WAAPITweenOptions.Composition"},"message":"anonymous shape named WAAPITweenOptions.Composition under the declaration that owns it"}]}
 {"name":"Waapi.Exports.WAAPIAnimation","tier":"exact","findings":[]}
 {"name":"Waapi.Exports.waapi","tier":"exact","findings":[]}
-{"name":"","tier":"escape","findings":[{"name":"HG.SubpathWithoutDeclarations","key":"HG009","pass":"harvest-exports","tier":"escape","symbol":"./package.json","fields":{"key":"./package.json"},"message":"exports key \u0022./package.json\u0022 skipped - its conditions supply no declaration file"}]}

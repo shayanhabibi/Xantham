@@ -6,14 +6,9 @@
     "exact": 129,
     "ergonomic": 129,
     "widened": 14,
-    "escape": 80
+    "escape": 79
   },
   "passes": [
-    {
-      "pass": "harvest-exports",
-      "total": 1,
-      "escape": 1
-    },
     {
       "pass": "SY - synthesize-anonymous",
       "total": 72,

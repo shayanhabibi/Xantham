@@ -1410,6 +1410,7 @@ module From =
                 [<ParamObject; Emit("$0")>]
                 static member Create (unsubscribe: (unit -> unit)) : Result = jsNative
 
+/// <summary>solid-js/h</summary>
 module H =
     [<Interface>]
     type H =
@@ -1689,6 +1690,7 @@ module H =
                             [<EmitIndexer>]
                             abstract Item: string -> obj with get, set
 
+    /// <summary>solid-js/h/jsx-dev-runtime</summary>
     module JsxDevRuntime =
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]
@@ -2218,6 +2220,7 @@ module H =
                         [<EmitIndexer>]
                         abstract Item: string -> obj with get, set
 
+    /// <summary>solid-js/h/jsx-runtime</summary>
     module JsxRuntime =
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]
@@ -2231,6 +2234,7 @@ module H =
             [<Import("jsxs", "solid-js/h/jsx-runtime")>]
             static member jsxs (``type``: obj, props: obj) : (unit -> U2<H.JsxDevRuntime.Jsx.Result.Result.Item[], H.JsxDevRuntime.Jsx.Result.Result>) = jsNative
 
+/// <summary>solid-js/html</summary>
 module Html =
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
@@ -2299,6 +2303,7 @@ module JsxDevRuntime =
         [<Import("JSX", "solid-js/jsx-dev-runtime")>]
         static member JSX: JSX2 = jsNative
 
+/// <summary>solid-js/jsx-runtime</summary>
 module JsxRuntime =
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
@@ -3117,6 +3122,7 @@ module Web =
             [<ParamObject; Emit("$0")>]
             static member Create (t: string) : Result = jsNative
 
+    /// <summary>solid-js/web/storage</summary>
     module Storage =
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]
