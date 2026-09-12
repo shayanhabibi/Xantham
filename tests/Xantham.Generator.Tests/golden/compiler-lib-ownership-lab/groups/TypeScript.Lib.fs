@@ -28,45 +28,6 @@ module Es =
         [<ParamObject; Emit("$0")>]
         static member Create (?localeMatcher: DateTimeFormatOptions.LocaleMatcher, ?weekday: DateTimeFormatOptions.Weekday, ?era: DateTimeFormatOptions.Weekday, ?year: DateTimeFormatOptions.Year, ?month: DateTimeFormatOptions.Month, ?day: DateTimeFormatOptions.Year, ?hour: DateTimeFormatOptions.Year, ?minute: DateTimeFormatOptions.Year, ?second: DateTimeFormatOptions.Year, ?timeZoneName: DateTimeFormatOptions.TimeZoneName, ?formatMatcher: DateTimeFormatOptions.FormatMatcher, ?hour12: bool, ?timeZone: string) : DateTimeFormatOptions = jsNative
 
-    module DateTimeFormatOptions =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type FormatMatcher =
-            | [<CompiledName("basic")>] Basic
-            | [<CompiledName("best fit")>] BestFit
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type LocaleMatcher =
-            | [<CompiledName("best fit")>] BestFit
-            | [<CompiledName("lookup")>] Lookup
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Month =
-            | [<CompiledName("2-digit")>] N2Digit
-            | [<CompiledName("long")>] Long
-            | [<CompiledName("narrow")>] Narrow
-            | [<CompiledName("numeric")>] Numeric
-            | [<CompiledName("short")>] Short
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type TimeZoneName =
-            | [<CompiledName("long")>] Long
-            | [<CompiledName("longGeneric")>] LongGeneric
-            | [<CompiledName("longOffset")>] LongOffset
-            | [<CompiledName("short")>] Short
-            | [<CompiledName("shortGeneric")>] ShortGeneric
-            | [<CompiledName("shortOffset")>] ShortOffset
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Weekday =
-            | [<CompiledName("long")>] Long
-            | [<CompiledName("narrow")>] Narrow
-            | [<CompiledName("short")>] Short
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Year =
-            | [<CompiledName("2-digit")>] N2Digit
-            | [<CompiledName("numeric")>] Numeric
-
     [<Interface>]
     type Collator =
         abstract compare: x: string * y: string -> float
@@ -93,46 +54,6 @@ module Es =
         [<ParamObject; Emit("$0")>]
         static member Create (?usage: CollatorOptions.Usage, ?localeMatcher: DateTimeFormatOptions.LocaleMatcher, ?numeric: bool, ?caseFirst: CollatorOptions.CaseFirst, ?sensitivity: CollatorOptions.Sensitivity, ?collation: CollatorOptions.Collation, ?ignorePunctuation: bool) : CollatorOptions = jsNative
 
-    module CollatorOptions =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type CaseFirst =
-            | [<CompiledName("false")>] False
-            | [<CompiledName("lower")>] Lower
-            | [<CompiledName("upper")>] Upper
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Collation =
-            | [<CompiledName("big5han")>] Big5han
-            | [<CompiledName("compat")>] Compat
-            | [<CompiledName("default")>] Default
-            | [<CompiledName("dict")>] Dict
-            | [<CompiledName("direct")>] Direct
-            | [<CompiledName("ducet")>] Ducet
-            | [<CompiledName("emoji")>] Emoji
-            | [<CompiledName("eor")>] Eor
-            | [<CompiledName("gb2312")>] Gb2312
-            | [<CompiledName("phonebk")>] Phonebk
-            | [<CompiledName("phonetic")>] Phonetic
-            | [<CompiledName("pinyin")>] Pinyin
-            | [<CompiledName("reformed")>] Reformed
-            | [<CompiledName("searchjl")>] Searchjl
-            | [<CompiledName("stroke")>] Stroke
-            | [<CompiledName("trad")>] Trad
-            | [<CompiledName("unihan")>] Unihan
-            | [<CompiledName("zhuyin")>] Zhuyin
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Sensitivity =
-            | [<CompiledName("accent")>] Accent
-            | [<CompiledName("base")>] Base
-            | [<CompiledName("case")>] Case
-            | [<CompiledName("variant")>] Variant
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Usage =
-            | [<CompiledName("search")>] Search
-            | [<CompiledName("sort")>] Sort
-
     [<Interface>]
     type DateTimeFormat =
         abstract format: ?date: U2<float, Date> -> string
@@ -147,221 +68,6 @@ module Es =
         [<Emit("$0($1...)")>]
         abstract Invoke: ?locales: U2<string, string[]> * ?options: DateTimeFormatOptions -> DateTimeFormat
 
-    module Float32Array =
-        module Every =
-            type Predicate = delegate of value: float * index: float * array: Float32Array<ArrayBuffer> -> obj
-
-        module Filter =
-            type Predicate = delegate of value: float * index: float * array: Float32Array<ArrayBuffer> -> obj
-
-        module Find =
-            type Predicate = delegate of value: float * index: float * obj: Float32Array<ArrayBuffer> -> bool
-
-        module FindIndex =
-            type Predicate = delegate of value: float * index: float * obj: Float32Array<ArrayBuffer> -> bool
-
-        module ForEach =
-            type Callbackfn = delegate of value: float * index: float * array: Float32Array<ArrayBuffer> -> unit
-
-        module Map =
-            type Callbackfn = delegate of value: float * index: float * array: Float32Array<ArrayBuffer> -> float
-
-        module Reduce =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Float32Array<ArrayBuffer> -> float
-
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Float32Array<ArrayBuffer> -> float
-
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Float32Array<ArrayBuffer> -> 'U
-
-        module ReduceRight =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Float32Array<ArrayBuffer> -> float
-
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Float32Array<ArrayBuffer> -> float
-
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Float32Array<ArrayBuffer> -> 'U
-
-        module Some =
-            type Predicate = delegate of value: float * index: float * array: Float32Array<ArrayBuffer> -> obj
-
-        module Sort =
-            type CompareFn = delegate of a: float * b: float -> float
-
-    module Float32ArrayConstructor =
-        module From =
-            type Mapfn<'T> = delegate of v: 'T * k: float -> float
-
-    module Float64Array =
-        module Every =
-            type Predicate = delegate of value: float * index: float * array: Float64Array<ArrayBuffer> -> obj
-
-        module Filter =
-            type Predicate = delegate of value: float * index: float * array: Float64Array<ArrayBuffer> -> obj
-
-        module Find =
-            type Predicate = delegate of value: float * index: float * obj: Float64Array<ArrayBuffer> -> bool
-
-        module FindIndex =
-            type Predicate = delegate of value: float * index: float * obj: Float64Array<ArrayBuffer> -> bool
-
-        module ForEach =
-            type Callbackfn = delegate of value: float * index: float * array: Float64Array<ArrayBuffer> -> unit
-
-        module Map =
-            type Callbackfn = delegate of value: float * index: float * array: Float64Array<ArrayBuffer> -> float
-
-        module Reduce =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Float64Array<ArrayBuffer> -> float
-
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Float64Array<ArrayBuffer> -> float
-
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Float64Array<ArrayBuffer> -> 'U
-
-        module ReduceRight =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Float64Array<ArrayBuffer> -> float
-
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Float64Array<ArrayBuffer> -> float
-
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Float64Array<ArrayBuffer> -> 'U
-
-        module Some =
-            type Predicate = delegate of value: float * index: float * array: Float64Array<ArrayBuffer> -> obj
-
-        module Sort =
-            type CompareFn = delegate of a: float * b: float -> float
-
-    module Float64ArrayConstructor =
-        module From =
-            type Mapfn<'T> = delegate of v: 'T * k: float -> float
-
-    module Int16Array =
-        module Every =
-            type Predicate = delegate of value: float * index: float * array: Int16Array<ArrayBuffer> -> obj
-
-        module Filter =
-            type Predicate = delegate of value: float * index: float * array: Int16Array<ArrayBuffer> -> obj
-
-        module Find =
-            type Predicate = delegate of value: float * index: float * obj: Int16Array<ArrayBuffer> -> bool
-
-        module FindIndex =
-            type Predicate = delegate of value: float * index: float * obj: Int16Array<ArrayBuffer> -> bool
-
-        module ForEach =
-            type Callbackfn = delegate of value: float * index: float * array: Int16Array<ArrayBuffer> -> unit
-
-        module Map =
-            type Callbackfn = delegate of value: float * index: float * array: Int16Array<ArrayBuffer> -> float
-
-        module Reduce =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int16Array<ArrayBuffer> -> float
-
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int16Array<ArrayBuffer> -> float
-
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Int16Array<ArrayBuffer> -> 'U
-
-        module ReduceRight =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int16Array<ArrayBuffer> -> float
-
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int16Array<ArrayBuffer> -> float
-
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Int16Array<ArrayBuffer> -> 'U
-
-        module Some =
-            type Predicate = delegate of value: float * index: float * array: Int16Array<ArrayBuffer> -> obj
-
-        module Sort =
-            type CompareFn = delegate of a: float * b: float -> float
-
-    module Int16ArrayConstructor =
-        module From =
-            type Mapfn<'T> = delegate of v: 'T * k: float -> float
-
-    module Int32Array =
-        module Every =
-            type Predicate = delegate of value: float * index: float * array: Int32Array<ArrayBuffer> -> obj
-
-        module Filter =
-            type Predicate = delegate of value: float * index: float * array: Int32Array<ArrayBuffer> -> obj
-
-        module Find =
-            type Predicate = delegate of value: float * index: float * obj: Int32Array<ArrayBuffer> -> bool
-
-        module FindIndex =
-            type Predicate = delegate of value: float * index: float * obj: Int32Array<ArrayBuffer> -> bool
-
-        module ForEach =
-            type Callbackfn = delegate of value: float * index: float * array: Int32Array<ArrayBuffer> -> unit
-
-        module Map =
-            type Callbackfn = delegate of value: float * index: float * array: Int32Array<ArrayBuffer> -> float
-
-        module Reduce =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int32Array<ArrayBuffer> -> float
-
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int32Array<ArrayBuffer> -> float
-
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Int32Array<ArrayBuffer> -> 'U
-
-        module ReduceRight =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int32Array<ArrayBuffer> -> float
-
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int32Array<ArrayBuffer> -> float
-
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Int32Array<ArrayBuffer> -> 'U
-
-        module Some =
-            type Predicate = delegate of value: float * index: float * array: Int32Array<ArrayBuffer> -> obj
-
-        module Sort =
-            type CompareFn = delegate of a: float * b: float -> float
-
-    module Int32ArrayConstructor =
-        module From =
-            type Mapfn<'T> = delegate of v: 'T * k: float -> float
-
-    module Int8Array =
-        module Every =
-            type Predicate = delegate of value: float * index: float * array: Int8Array<ArrayBuffer> -> obj
-
-        module Filter =
-            type Predicate = delegate of value: float * index: float * array: Int8Array<ArrayBuffer> -> obj
-
-        module Find =
-            type Predicate = delegate of value: float * index: float * obj: Int8Array<ArrayBuffer> -> bool
-
-        module FindIndex =
-            type Predicate = delegate of value: float * index: float * obj: Int8Array<ArrayBuffer> -> bool
-
-        module ForEach =
-            type Callbackfn = delegate of value: float * index: float * array: Int8Array<ArrayBuffer> -> unit
-
-        module Map =
-            type Callbackfn = delegate of value: float * index: float * array: Int8Array<ArrayBuffer> -> float
-
-        module Reduce =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int8Array<ArrayBuffer> -> float
-
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int8Array<ArrayBuffer> -> float
-
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Int8Array<ArrayBuffer> -> 'U
-
-        module ReduceRight =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int8Array<ArrayBuffer> -> float
-
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int8Array<ArrayBuffer> -> float
-
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Int8Array<ArrayBuffer> -> 'U
-
-        module Some =
-            type Predicate = delegate of value: float * index: float * array: Int8Array<ArrayBuffer> -> obj
-
-        module Sort =
-            type CompareFn = delegate of a: float * b: float -> float
-
-    module Int8ArrayConstructor =
-        module From =
-            type Mapfn<'T> = delegate of v: 'T * k: float -> float
-
     [<Interface>]
     type Intl =
         abstract Collator: CollatorConstructor with get, set
@@ -369,13 +75,6 @@ module Es =
         abstract DateTimeFormat: DateTimeFormatConstructor with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (Collator: CollatorConstructor, NumberFormat: NumberFormatConstructor, DateTimeFormat: DateTimeFormatConstructor) : Intl = jsNative
-
-    module JSON =
-        module Parse =
-            type Reviver = delegate of key: string * value: obj -> obj
-
-        module Stringify =
-            type Replacer = delegate of key: string * value: obj -> obj
 
     [<Interface>]
     type NumberFormat =
@@ -405,36 +104,6 @@ module Es =
         abstract maximumSignificantDigits: float option with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (?localeMatcher: DateTimeFormatOptions.LocaleMatcher, ?style: NumberFormatOptions.Style, ?currency: string, ?currencyDisplay: NumberFormatOptions.CurrencyDisplay, ?useGrouping: bool, ?minimumIntegerDigits: float, ?minimumFractionDigits: float, ?maximumFractionDigits: float, ?minimumSignificantDigits: float, ?maximumSignificantDigits: float) : NumberFormatOptions = jsNative
-
-    module NumberFormatOptions =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type CurrencyDisplay =
-            | [<CompiledName("code")>] Code
-            | [<CompiledName("name")>] Name
-            | [<CompiledName("symbol")>] Symbol
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Style =
-            | [<CompiledName("currency")>] Currency
-            | [<CompiledName("decimal")>] Decimal
-            | [<CompiledName("percent")>] Percent
-
-    module ObjectConstructor =
-        module Create =
-            type Properties =
-                inherit PropertyDescriptorMap
-
-        module DefineProperty =
-            [<Interface>]
-            type Attributes =
-                inherit PropertyDescriptor
-                [<ParamObject; Emit("$0")>]
-                static member Create (?configurable: bool, ?enumerable: bool, ?value: obj, ?writable: bool, ?get: (unit -> obj), ?set: (obj -> unit)) : Attributes = jsNative
-
-        module Freeze =
-            type Result<'T> =
-                [<EmitIndexer>]
-                abstract Item: string -> obj
 
     [<Interface>]
     type ResolvedCollatorOptions =
@@ -483,279 +152,15 @@ module Es =
         [<ParamObject; Emit("$0")>]
         static member Create (locale: string, numberingSystem: string, style: NumberFormatOptions.Style, minimumIntegerDigits: float, useGrouping: bool, ?currency: string, ?currencyDisplay: NumberFormatOptions.CurrencyDisplay, ?minimumFractionDigits: float, ?maximumFractionDigits: float, ?minimumSignificantDigits: float, ?maximumSignificantDigits: float) : ResolvedNumberFormatOptions = jsNative
 
-    module String =
-        module Replace =
-            type Replacer = delegate of substring: string * args: obj[] -> string
-
-    module Uint16Array =
-        module Every =
-            type Predicate = delegate of value: float * index: float * array: Uint16Array<ArrayBuffer> -> obj
-
-        module Filter =
-            type Predicate = delegate of value: float * index: float * array: Uint16Array<ArrayBuffer> -> obj
-
-        module Find =
-            type Predicate = delegate of value: float * index: float * obj: Uint16Array<ArrayBuffer> -> bool
-
-        module FindIndex =
-            type Predicate = delegate of value: float * index: float * obj: Uint16Array<ArrayBuffer> -> bool
-
-        module ForEach =
-            type Callbackfn = delegate of value: float * index: float * array: Uint16Array<ArrayBuffer> -> unit
-
-        module Map =
-            type Callbackfn = delegate of value: float * index: float * array: Uint16Array<ArrayBuffer> -> float
-
-        module Reduce =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint16Array<ArrayBuffer> -> float
-
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint16Array<ArrayBuffer> -> float
-
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Uint16Array<ArrayBuffer> -> 'U
-
-        module ReduceRight =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint16Array<ArrayBuffer> -> float
-
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint16Array<ArrayBuffer> -> float
-
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Uint16Array<ArrayBuffer> -> 'U
-
-        module Some =
-            type Predicate = delegate of value: float * index: float * array: Uint16Array<ArrayBuffer> -> obj
-
-        module Sort =
-            type CompareFn = delegate of a: float * b: float -> float
-
-    module Uint16ArrayConstructor =
-        module From =
-            type Mapfn<'T> = delegate of v: 'T * k: float -> float
-
-    module Uint32Array =
-        module Every =
-            type Predicate = delegate of value: float * index: float * array: Uint32Array<ArrayBuffer> -> obj
-
-        module Filter =
-            type Predicate = delegate of value: float * index: float * array: Uint32Array<ArrayBuffer> -> obj
-
-        module Find =
-            type Predicate = delegate of value: float * index: float * obj: Uint32Array<ArrayBuffer> -> bool
-
-        module FindIndex =
-            type Predicate = delegate of value: float * index: float * obj: Uint32Array<ArrayBuffer> -> bool
-
-        module ForEach =
-            type Callbackfn = delegate of value: float * index: float * array: Uint32Array<ArrayBuffer> -> unit
-
-        module Map =
-            type Callbackfn = delegate of value: float * index: float * array: Uint32Array<ArrayBuffer> -> float
-
-        module Reduce =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint32Array<ArrayBuffer> -> float
-
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint32Array<ArrayBuffer> -> float
-
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Uint32Array<ArrayBuffer> -> 'U
-
-        module ReduceRight =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint32Array<ArrayBuffer> -> float
-
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint32Array<ArrayBuffer> -> float
-
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Uint32Array<ArrayBuffer> -> 'U
-
-        module Some =
-            type Predicate = delegate of value: float * index: float * array: Uint32Array<ArrayBuffer> -> obj
-
-        module Sort =
-            type CompareFn = delegate of a: float * b: float -> float
-
-    module Uint32ArrayConstructor =
-        module From =
-            type Mapfn<'T> = delegate of v: 'T * k: float -> float
-
-    module Uint8Array =
-        module Every =
-            type Predicate = delegate of value: float * index: float * array: Uint8Array<ArrayBuffer> -> obj
-
-        module Filter =
-            type Predicate = delegate of value: float * index: float * array: Uint8Array<ArrayBuffer> -> obj
-
-        module Find =
-            type Predicate = delegate of value: float * index: float * obj: Uint8Array<ArrayBuffer> -> bool
-
-        module FindIndex =
-            type Predicate = delegate of value: float * index: float * obj: Uint8Array<ArrayBuffer> -> bool
-
-        module ForEach =
-            type Callbackfn = delegate of value: float * index: float * array: Uint8Array<ArrayBuffer> -> unit
-
-        module Map =
-            type Callbackfn = delegate of value: float * index: float * array: Uint8Array<ArrayBuffer> -> float
-
-        module Reduce =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint8Array<ArrayBuffer> -> float
-
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint8Array<ArrayBuffer> -> float
-
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Uint8Array<ArrayBuffer> -> 'U
-
-        module ReduceRight =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint8Array<ArrayBuffer> -> float
-
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint8Array<ArrayBuffer> -> float
-
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Uint8Array<ArrayBuffer> -> 'U
-
-        module Some =
-            type Predicate = delegate of value: float * index: float * array: Uint8Array<ArrayBuffer> -> obj
-
-        module Sort =
-            type CompareFn = delegate of a: float * b: float -> float
-
-    module Uint8ArrayConstructor =
-        module From =
-            type Mapfn<'T> = delegate of v: 'T * k: float -> float
-
-    module Uint8ClampedArray =
-        module Every =
-            type Predicate = delegate of value: float * index: float * array: Uint8ClampedArray<ArrayBuffer> -> obj
-
-        module Filter =
-            type Predicate = delegate of value: float * index: float * array: Uint8ClampedArray<ArrayBuffer> -> obj
-
-        module Find =
-            type Predicate = delegate of value: float * index: float * obj: Uint8ClampedArray<ArrayBuffer> -> bool
-
-        module FindIndex =
-            type Predicate = delegate of value: float * index: float * obj: Uint8ClampedArray<ArrayBuffer> -> bool
-
-        module ForEach =
-            type Callbackfn = delegate of value: float * index: float * array: Uint8ClampedArray<ArrayBuffer> -> unit
-
-        module Map =
-            type Callbackfn = delegate of value: float * index: float * array: Uint8ClampedArray<ArrayBuffer> -> float
-
-        module Reduce =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint8ClampedArray<ArrayBuffer> -> float
-
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint8ClampedArray<ArrayBuffer> -> float
-
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Uint8ClampedArray<ArrayBuffer> -> 'U
-
-        module ReduceRight =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint8ClampedArray<ArrayBuffer> -> float
-
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint8ClampedArray<ArrayBuffer> -> float
-
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Uint8ClampedArray<ArrayBuffer> -> 'U
-
-        module Some =
-            type Predicate = delegate of value: float * index: float * array: Uint8ClampedArray<ArrayBuffer> -> obj
-
-        module Sort =
-            type CompareFn = delegate of a: float * b: float -> float
-
-    module Uint8ClampedArrayConstructor =
-        module From =
-            type Mapfn<'T> = delegate of v: 'T * k: float -> float
-
-    module ClassAccessorDecoratorContext =
-        [<Interface>]
-        type Access<'This, 'Value> =
-            /// <summary>
-            /// Determines whether an object has a property with the same name as the decorated element.
-            /// </summary>
-            abstract has: ``object``: 'This -> bool
-            /// <summary>
-            /// Invokes the getter on the provided object.
-            /// </summary>
-            /// <example><c>let value = context.access.get(instance);</c></example>
-            abstract get: ``object``: 'This -> 'Value
-            /// <summary>
-            /// Invokes the setter on the provided object.
-            /// </summary>
-            /// <example><c>context.access.set(instance, value);</c></example>
-            abstract set: ``object``: 'This * value: 'Value -> unit
-            [<ParamObject; Emit("$0")>]
-            static member Create (has: ('This -> bool), get: ('This -> 'Value), set: Action<'This, 'Value>) : Access<'This, 'Value> = jsNative
-
-    module ClassFieldDecoratorContext =
-        [<Interface>]
-        type Access<'This, 'Value> =
-            /// <summary>
-            /// Determines whether an object has a property with the same name as the decorated element.
-            /// </summary>
-            abstract has: ``object``: 'This -> bool
-            /// <summary>
-            /// Gets the value of the field on the provided object.
-            /// </summary>
-            abstract get: ``object``: 'This -> 'Value
-            /// <summary>
-            /// Sets the value of the field on the provided object.
-            /// </summary>
-            abstract set: ``object``: 'This * value: 'Value -> unit
-            [<ParamObject; Emit("$0")>]
-            static member Create (has: ('This -> bool), get: ('This -> 'Value), set: Action<'This, 'Value>) : Access<'This, 'Value> = jsNative
-
-    module ClassGetterDecoratorContext =
-        [<Interface>]
-        type Access<'This, 'Value> =
-            /// <summary>
-            /// Determines whether an object has a property with the same name as the decorated element.
-            /// </summary>
-            abstract has: ``object``: 'This -> bool
-            /// <summary>
-            /// Invokes the getter on the provided object.
-            /// </summary>
-            /// <example><c>let value = context.access.get(instance);</c></example>
-            abstract get: ``object``: 'This -> 'Value
-            [<ParamObject; Emit("$0")>]
-            static member Create (has: ('This -> bool), get: ('This -> 'Value)) : Access<'This, 'Value> = jsNative
-
     /// <summary>
     /// The decorator context types provided to class element decorators.
     /// </summary>
     type ClassMemberDecoratorContext = U5<ClassAccessorDecoratorContext<obj, obj>, ClassFieldDecoratorContext<obj, obj>, ClassGetterDecoratorContext<obj, obj>, ClassMethodDecoratorContext<obj, (obj -> obj)>, ClassSetterDecoratorContext<obj, obj>>
 
-    module ClassMethodDecoratorContext =
-        [<Interface>]
-        type Access<'This, 'Value> =
-            /// <summary>
-            /// Determines whether an object has a property with the same name as the decorated element.
-            /// </summary>
-            abstract has: ``object``: 'This -> bool
-            /// <summary>
-            /// Gets the current value of the method from the provided object.
-            /// </summary>
-            /// <example><c>let fn = context.access.get(instance);</c></example>
-            abstract get: ``object``: 'This -> 'Value
-            [<ParamObject; Emit("$0")>]
-            static member Create (has: ('This -> bool), get: ('This -> 'Value)) : Access<'This, 'Value> = jsNative
-
-    module ClassSetterDecoratorContext =
-        [<Interface>]
-        type Access<'This, 'Value> =
-            /// <summary>
-            /// Determines whether an object has a property with the same name as the decorated element.
-            /// </summary>
-            abstract has: ``object``: 'This -> bool
-            /// <summary>
-            /// Invokes the setter on the provided object.
-            /// </summary>
-            /// <example><c>context.access.set(instance, value);</c></example>
-            abstract set: ``object``: 'This * value: 'Value -> unit
-            [<ParamObject; Emit("$0")>]
-            static member Create (has: ('This -> bool), set: Action<'This, 'Value>) : Access<'This, 'Value> = jsNative
-
     /// <summary>
     /// The decorator context types provided to any decorator.
     /// </summary>
     type DecoratorContext = U6<ClassAccessorDecoratorContext<obj, obj>, ClassDecoratorContext<DecoratorContext.ItemConstructor>, ClassFieldDecoratorContext<obj, obj>, ClassGetterDecoratorContext<obj, obj>, ClassMethodDecoratorContext<obj, (obj -> obj)>, ClassSetterDecoratorContext<obj, obj>>
-
-    module DecoratorContext =
-        type ItemConstructor =
-            [<EmitConstructor>]
-            abstract Create: [<ParamArray>] args: obj -> obj
 
     type DecoratorMetadataObject = obj
 
@@ -1372,12 +777,6 @@ module Es =
         /// <param name="thisArg">The object to be used as the this object.</param>
         /// <param name="args">Arguments to bind to the parameters of the function.</param>
         abstract bind<'A, 'B, 'R>: thisArg: obj * [<ParamArray>] args: 'A -> NewableFunction.Bind.ResultConstructor<'B, 'R>
-
-    module NewableFunction =
-        module Bind =
-            type ResultConstructor<'B, 'R> =
-                [<EmitConstructor>]
-                abstract Create: [<ParamArray>] args: 'B -> 'R
 
     type IArguments =
         abstract length: float with get, set
@@ -2308,9 +1707,6 @@ module Es =
     type PromiseConstructorLike =
         [<EmitConstructor>]
         abstract Create<'T>: executor: PromiseConstructorLike.Executor<'T> -> PromiseLike<'T>
-
-    module PromiseConstructorLike =
-        type Executor<'T> = delegate of resolve: (U2<'T, PromiseLike<'T>> -> unit) * reject: (obj option -> unit) -> unit
 
     [<Interface>]
     type PromiseLike<'T> =
@@ -6241,3 +5637,607 @@ module Es =
         abstract Create: buffer: ArrayBuffer * ?byteOffset: float * ?length: float -> Float64Array<ArrayBuffer>
         [<EmitConstructor>]
         abstract Create: array: U2<ArrayBuffer, ArrayLike<float>> -> Float64Array<ArrayBuffer>
+
+    module ClassAccessorDecoratorContext =
+        [<Interface>]
+        type Access<'This, 'Value> =
+            /// <summary>
+            /// Determines whether an object has a property with the same name as the decorated element.
+            /// </summary>
+            abstract has: ``object``: 'This -> bool
+            /// <summary>
+            /// Invokes the getter on the provided object.
+            /// </summary>
+            /// <example><c>let value = context.access.get(instance);</c></example>
+            abstract get: ``object``: 'This -> 'Value
+            /// <summary>
+            /// Invokes the setter on the provided object.
+            /// </summary>
+            /// <example><c>context.access.set(instance, value);</c></example>
+            abstract set: ``object``: 'This * value: 'Value -> unit
+            [<ParamObject; Emit("$0")>]
+            static member Create (has: ('This -> bool), get: ('This -> 'Value), set: Action<'This, 'Value>) : Access<'This, 'Value> = jsNative
+
+    module ClassFieldDecoratorContext =
+        [<Interface>]
+        type Access<'This, 'Value> =
+            /// <summary>
+            /// Determines whether an object has a property with the same name as the decorated element.
+            /// </summary>
+            abstract has: ``object``: 'This -> bool
+            /// <summary>
+            /// Gets the value of the field on the provided object.
+            /// </summary>
+            abstract get: ``object``: 'This -> 'Value
+            /// <summary>
+            /// Sets the value of the field on the provided object.
+            /// </summary>
+            abstract set: ``object``: 'This * value: 'Value -> unit
+            [<ParamObject; Emit("$0")>]
+            static member Create (has: ('This -> bool), get: ('This -> 'Value), set: Action<'This, 'Value>) : Access<'This, 'Value> = jsNative
+
+    module ClassGetterDecoratorContext =
+        [<Interface>]
+        type Access<'This, 'Value> =
+            /// <summary>
+            /// Determines whether an object has a property with the same name as the decorated element.
+            /// </summary>
+            abstract has: ``object``: 'This -> bool
+            /// <summary>
+            /// Invokes the getter on the provided object.
+            /// </summary>
+            /// <example><c>let value = context.access.get(instance);</c></example>
+            abstract get: ``object``: 'This -> 'Value
+            [<ParamObject; Emit("$0")>]
+            static member Create (has: ('This -> bool), get: ('This -> 'Value)) : Access<'This, 'Value> = jsNative
+
+    module ClassMethodDecoratorContext =
+        [<Interface>]
+        type Access<'This, 'Value> =
+            /// <summary>
+            /// Determines whether an object has a property with the same name as the decorated element.
+            /// </summary>
+            abstract has: ``object``: 'This -> bool
+            /// <summary>
+            /// Gets the current value of the method from the provided object.
+            /// </summary>
+            /// <example><c>let fn = context.access.get(instance);</c></example>
+            abstract get: ``object``: 'This -> 'Value
+            [<ParamObject; Emit("$0")>]
+            static member Create (has: ('This -> bool), get: ('This -> 'Value)) : Access<'This, 'Value> = jsNative
+
+    module ClassSetterDecoratorContext =
+        [<Interface>]
+        type Access<'This, 'Value> =
+            /// <summary>
+            /// Determines whether an object has a property with the same name as the decorated element.
+            /// </summary>
+            abstract has: ``object``: 'This -> bool
+            /// <summary>
+            /// Invokes the setter on the provided object.
+            /// </summary>
+            /// <example><c>context.access.set(instance, value);</c></example>
+            abstract set: ``object``: 'This * value: 'Value -> unit
+            [<ParamObject; Emit("$0")>]
+            static member Create (has: ('This -> bool), set: Action<'This, 'Value>) : Access<'This, 'Value> = jsNative
+
+    module CollatorOptions =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type CaseFirst =
+            | [<CompiledName("false")>] False
+            | [<CompiledName("lower")>] Lower
+            | [<CompiledName("upper")>] Upper
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Collation =
+            | [<CompiledName("big5han")>] Big5han
+            | [<CompiledName("compat")>] Compat
+            | [<CompiledName("default")>] Default
+            | [<CompiledName("dict")>] Dict
+            | [<CompiledName("direct")>] Direct
+            | [<CompiledName("ducet")>] Ducet
+            | [<CompiledName("emoji")>] Emoji
+            | [<CompiledName("eor")>] Eor
+            | [<CompiledName("gb2312")>] Gb2312
+            | [<CompiledName("phonebk")>] Phonebk
+            | [<CompiledName("phonetic")>] Phonetic
+            | [<CompiledName("pinyin")>] Pinyin
+            | [<CompiledName("reformed")>] Reformed
+            | [<CompiledName("searchjl")>] Searchjl
+            | [<CompiledName("stroke")>] Stroke
+            | [<CompiledName("trad")>] Trad
+            | [<CompiledName("unihan")>] Unihan
+            | [<CompiledName("zhuyin")>] Zhuyin
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Sensitivity =
+            | [<CompiledName("accent")>] Accent
+            | [<CompiledName("base")>] Base
+            | [<CompiledName("case")>] Case
+            | [<CompiledName("variant")>] Variant
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Usage =
+            | [<CompiledName("search")>] Search
+            | [<CompiledName("sort")>] Sort
+
+    module DateTimeFormatOptions =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type FormatMatcher =
+            | [<CompiledName("basic")>] Basic
+            | [<CompiledName("best fit")>] BestFit
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type LocaleMatcher =
+            | [<CompiledName("best fit")>] BestFit
+            | [<CompiledName("lookup")>] Lookup
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Month =
+            | [<CompiledName("2-digit")>] N2Digit
+            | [<CompiledName("long")>] Long
+            | [<CompiledName("narrow")>] Narrow
+            | [<CompiledName("numeric")>] Numeric
+            | [<CompiledName("short")>] Short
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type TimeZoneName =
+            | [<CompiledName("long")>] Long
+            | [<CompiledName("longGeneric")>] LongGeneric
+            | [<CompiledName("longOffset")>] LongOffset
+            | [<CompiledName("short")>] Short
+            | [<CompiledName("shortGeneric")>] ShortGeneric
+            | [<CompiledName("shortOffset")>] ShortOffset
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Weekday =
+            | [<CompiledName("long")>] Long
+            | [<CompiledName("narrow")>] Narrow
+            | [<CompiledName("short")>] Short
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Year =
+            | [<CompiledName("2-digit")>] N2Digit
+            | [<CompiledName("numeric")>] Numeric
+
+    module DecoratorContext =
+        type ItemConstructor =
+            [<EmitConstructor>]
+            abstract Create: [<ParamArray>] args: obj -> obj
+
+    module Float32Array =
+        module Every =
+            type Predicate = delegate of value: float * index: float * array: Float32Array<ArrayBuffer> -> obj
+
+        module Filter =
+            type Predicate = delegate of value: float * index: float * array: Float32Array<ArrayBuffer> -> obj
+
+        module Find =
+            type Predicate = delegate of value: float * index: float * obj: Float32Array<ArrayBuffer> -> bool
+
+        module FindIndex =
+            type Predicate = delegate of value: float * index: float * obj: Float32Array<ArrayBuffer> -> bool
+
+        module ForEach =
+            type Callbackfn = delegate of value: float * index: float * array: Float32Array<ArrayBuffer> -> unit
+
+        module Map =
+            type Callbackfn = delegate of value: float * index: float * array: Float32Array<ArrayBuffer> -> float
+
+        module Reduce =
+            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Float32Array<ArrayBuffer> -> float
+
+            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Float32Array<ArrayBuffer> -> float
+
+            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Float32Array<ArrayBuffer> -> 'U
+
+        module ReduceRight =
+            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Float32Array<ArrayBuffer> -> float
+
+            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Float32Array<ArrayBuffer> -> float
+
+            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Float32Array<ArrayBuffer> -> 'U
+
+        module Some =
+            type Predicate = delegate of value: float * index: float * array: Float32Array<ArrayBuffer> -> obj
+
+        module Sort =
+            type CompareFn = delegate of a: float * b: float -> float
+
+    module Float32ArrayConstructor =
+        module From =
+            type Mapfn<'T> = delegate of v: 'T * k: float -> float
+
+    module Float64Array =
+        module Every =
+            type Predicate = delegate of value: float * index: float * array: Float64Array<ArrayBuffer> -> obj
+
+        module Filter =
+            type Predicate = delegate of value: float * index: float * array: Float64Array<ArrayBuffer> -> obj
+
+        module Find =
+            type Predicate = delegate of value: float * index: float * obj: Float64Array<ArrayBuffer> -> bool
+
+        module FindIndex =
+            type Predicate = delegate of value: float * index: float * obj: Float64Array<ArrayBuffer> -> bool
+
+        module ForEach =
+            type Callbackfn = delegate of value: float * index: float * array: Float64Array<ArrayBuffer> -> unit
+
+        module Map =
+            type Callbackfn = delegate of value: float * index: float * array: Float64Array<ArrayBuffer> -> float
+
+        module Reduce =
+            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Float64Array<ArrayBuffer> -> float
+
+            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Float64Array<ArrayBuffer> -> float
+
+            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Float64Array<ArrayBuffer> -> 'U
+
+        module ReduceRight =
+            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Float64Array<ArrayBuffer> -> float
+
+            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Float64Array<ArrayBuffer> -> float
+
+            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Float64Array<ArrayBuffer> -> 'U
+
+        module Some =
+            type Predicate = delegate of value: float * index: float * array: Float64Array<ArrayBuffer> -> obj
+
+        module Sort =
+            type CompareFn = delegate of a: float * b: float -> float
+
+    module Float64ArrayConstructor =
+        module From =
+            type Mapfn<'T> = delegate of v: 'T * k: float -> float
+
+    module Int16Array =
+        module Every =
+            type Predicate = delegate of value: float * index: float * array: Int16Array<ArrayBuffer> -> obj
+
+        module Filter =
+            type Predicate = delegate of value: float * index: float * array: Int16Array<ArrayBuffer> -> obj
+
+        module Find =
+            type Predicate = delegate of value: float * index: float * obj: Int16Array<ArrayBuffer> -> bool
+
+        module FindIndex =
+            type Predicate = delegate of value: float * index: float * obj: Int16Array<ArrayBuffer> -> bool
+
+        module ForEach =
+            type Callbackfn = delegate of value: float * index: float * array: Int16Array<ArrayBuffer> -> unit
+
+        module Map =
+            type Callbackfn = delegate of value: float * index: float * array: Int16Array<ArrayBuffer> -> float
+
+        module Reduce =
+            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int16Array<ArrayBuffer> -> float
+
+            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int16Array<ArrayBuffer> -> float
+
+            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Int16Array<ArrayBuffer> -> 'U
+
+        module ReduceRight =
+            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int16Array<ArrayBuffer> -> float
+
+            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int16Array<ArrayBuffer> -> float
+
+            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Int16Array<ArrayBuffer> -> 'U
+
+        module Some =
+            type Predicate = delegate of value: float * index: float * array: Int16Array<ArrayBuffer> -> obj
+
+        module Sort =
+            type CompareFn = delegate of a: float * b: float -> float
+
+    module Int16ArrayConstructor =
+        module From =
+            type Mapfn<'T> = delegate of v: 'T * k: float -> float
+
+    module Int32Array =
+        module Every =
+            type Predicate = delegate of value: float * index: float * array: Int32Array<ArrayBuffer> -> obj
+
+        module Filter =
+            type Predicate = delegate of value: float * index: float * array: Int32Array<ArrayBuffer> -> obj
+
+        module Find =
+            type Predicate = delegate of value: float * index: float * obj: Int32Array<ArrayBuffer> -> bool
+
+        module FindIndex =
+            type Predicate = delegate of value: float * index: float * obj: Int32Array<ArrayBuffer> -> bool
+
+        module ForEach =
+            type Callbackfn = delegate of value: float * index: float * array: Int32Array<ArrayBuffer> -> unit
+
+        module Map =
+            type Callbackfn = delegate of value: float * index: float * array: Int32Array<ArrayBuffer> -> float
+
+        module Reduce =
+            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int32Array<ArrayBuffer> -> float
+
+            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int32Array<ArrayBuffer> -> float
+
+            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Int32Array<ArrayBuffer> -> 'U
+
+        module ReduceRight =
+            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int32Array<ArrayBuffer> -> float
+
+            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int32Array<ArrayBuffer> -> float
+
+            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Int32Array<ArrayBuffer> -> 'U
+
+        module Some =
+            type Predicate = delegate of value: float * index: float * array: Int32Array<ArrayBuffer> -> obj
+
+        module Sort =
+            type CompareFn = delegate of a: float * b: float -> float
+
+    module Int32ArrayConstructor =
+        module From =
+            type Mapfn<'T> = delegate of v: 'T * k: float -> float
+
+    module Int8Array =
+        module Every =
+            type Predicate = delegate of value: float * index: float * array: Int8Array<ArrayBuffer> -> obj
+
+        module Filter =
+            type Predicate = delegate of value: float * index: float * array: Int8Array<ArrayBuffer> -> obj
+
+        module Find =
+            type Predicate = delegate of value: float * index: float * obj: Int8Array<ArrayBuffer> -> bool
+
+        module FindIndex =
+            type Predicate = delegate of value: float * index: float * obj: Int8Array<ArrayBuffer> -> bool
+
+        module ForEach =
+            type Callbackfn = delegate of value: float * index: float * array: Int8Array<ArrayBuffer> -> unit
+
+        module Map =
+            type Callbackfn = delegate of value: float * index: float * array: Int8Array<ArrayBuffer> -> float
+
+        module Reduce =
+            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int8Array<ArrayBuffer> -> float
+
+            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int8Array<ArrayBuffer> -> float
+
+            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Int8Array<ArrayBuffer> -> 'U
+
+        module ReduceRight =
+            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int8Array<ArrayBuffer> -> float
+
+            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int8Array<ArrayBuffer> -> float
+
+            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Int8Array<ArrayBuffer> -> 'U
+
+        module Some =
+            type Predicate = delegate of value: float * index: float * array: Int8Array<ArrayBuffer> -> obj
+
+        module Sort =
+            type CompareFn = delegate of a: float * b: float -> float
+
+    module Int8ArrayConstructor =
+        module From =
+            type Mapfn<'T> = delegate of v: 'T * k: float -> float
+
+    module JSON =
+        module Parse =
+            type Reviver = delegate of key: string * value: obj -> obj
+
+        module Stringify =
+            type Replacer = delegate of key: string * value: obj -> obj
+
+    module NewableFunction =
+        module Bind =
+            type ResultConstructor<'B, 'R> =
+                [<EmitConstructor>]
+                abstract Create: [<ParamArray>] args: 'B -> 'R
+
+    module NumberFormatOptions =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type CurrencyDisplay =
+            | [<CompiledName("code")>] Code
+            | [<CompiledName("name")>] Name
+            | [<CompiledName("symbol")>] Symbol
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Style =
+            | [<CompiledName("currency")>] Currency
+            | [<CompiledName("decimal")>] Decimal
+            | [<CompiledName("percent")>] Percent
+
+    module ObjectConstructor =
+        module Create =
+            type Properties =
+                inherit PropertyDescriptorMap
+
+        module DefineProperty =
+            [<Interface>]
+            type Attributes =
+                inherit PropertyDescriptor
+                [<ParamObject; Emit("$0")>]
+                static member Create (?configurable: bool, ?enumerable: bool, ?value: obj, ?writable: bool, ?get: (unit -> obj), ?set: (obj -> unit)) : Attributes = jsNative
+
+        module Freeze =
+            type Result<'T> =
+                [<EmitIndexer>]
+                abstract Item: string -> obj
+
+    module PromiseConstructorLike =
+        type Executor<'T> = delegate of resolve: (U2<'T, PromiseLike<'T>> -> unit) * reject: (obj option -> unit) -> unit
+
+    module String =
+        module Replace =
+            type Replacer = delegate of substring: string * args: obj[] -> string
+
+    module Uint16Array =
+        module Every =
+            type Predicate = delegate of value: float * index: float * array: Uint16Array<ArrayBuffer> -> obj
+
+        module Filter =
+            type Predicate = delegate of value: float * index: float * array: Uint16Array<ArrayBuffer> -> obj
+
+        module Find =
+            type Predicate = delegate of value: float * index: float * obj: Uint16Array<ArrayBuffer> -> bool
+
+        module FindIndex =
+            type Predicate = delegate of value: float * index: float * obj: Uint16Array<ArrayBuffer> -> bool
+
+        module ForEach =
+            type Callbackfn = delegate of value: float * index: float * array: Uint16Array<ArrayBuffer> -> unit
+
+        module Map =
+            type Callbackfn = delegate of value: float * index: float * array: Uint16Array<ArrayBuffer> -> float
+
+        module Reduce =
+            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint16Array<ArrayBuffer> -> float
+
+            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint16Array<ArrayBuffer> -> float
+
+            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Uint16Array<ArrayBuffer> -> 'U
+
+        module ReduceRight =
+            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint16Array<ArrayBuffer> -> float
+
+            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint16Array<ArrayBuffer> -> float
+
+            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Uint16Array<ArrayBuffer> -> 'U
+
+        module Some =
+            type Predicate = delegate of value: float * index: float * array: Uint16Array<ArrayBuffer> -> obj
+
+        module Sort =
+            type CompareFn = delegate of a: float * b: float -> float
+
+    module Uint16ArrayConstructor =
+        module From =
+            type Mapfn<'T> = delegate of v: 'T * k: float -> float
+
+    module Uint32Array =
+        module Every =
+            type Predicate = delegate of value: float * index: float * array: Uint32Array<ArrayBuffer> -> obj
+
+        module Filter =
+            type Predicate = delegate of value: float * index: float * array: Uint32Array<ArrayBuffer> -> obj
+
+        module Find =
+            type Predicate = delegate of value: float * index: float * obj: Uint32Array<ArrayBuffer> -> bool
+
+        module FindIndex =
+            type Predicate = delegate of value: float * index: float * obj: Uint32Array<ArrayBuffer> -> bool
+
+        module ForEach =
+            type Callbackfn = delegate of value: float * index: float * array: Uint32Array<ArrayBuffer> -> unit
+
+        module Map =
+            type Callbackfn = delegate of value: float * index: float * array: Uint32Array<ArrayBuffer> -> float
+
+        module Reduce =
+            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint32Array<ArrayBuffer> -> float
+
+            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint32Array<ArrayBuffer> -> float
+
+            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Uint32Array<ArrayBuffer> -> 'U
+
+        module ReduceRight =
+            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint32Array<ArrayBuffer> -> float
+
+            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint32Array<ArrayBuffer> -> float
+
+            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Uint32Array<ArrayBuffer> -> 'U
+
+        module Some =
+            type Predicate = delegate of value: float * index: float * array: Uint32Array<ArrayBuffer> -> obj
+
+        module Sort =
+            type CompareFn = delegate of a: float * b: float -> float
+
+    module Uint32ArrayConstructor =
+        module From =
+            type Mapfn<'T> = delegate of v: 'T * k: float -> float
+
+    module Uint8Array =
+        module Every =
+            type Predicate = delegate of value: float * index: float * array: Uint8Array<ArrayBuffer> -> obj
+
+        module Filter =
+            type Predicate = delegate of value: float * index: float * array: Uint8Array<ArrayBuffer> -> obj
+
+        module Find =
+            type Predicate = delegate of value: float * index: float * obj: Uint8Array<ArrayBuffer> -> bool
+
+        module FindIndex =
+            type Predicate = delegate of value: float * index: float * obj: Uint8Array<ArrayBuffer> -> bool
+
+        module ForEach =
+            type Callbackfn = delegate of value: float * index: float * array: Uint8Array<ArrayBuffer> -> unit
+
+        module Map =
+            type Callbackfn = delegate of value: float * index: float * array: Uint8Array<ArrayBuffer> -> float
+
+        module Reduce =
+            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint8Array<ArrayBuffer> -> float
+
+            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint8Array<ArrayBuffer> -> float
+
+            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Uint8Array<ArrayBuffer> -> 'U
+
+        module ReduceRight =
+            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint8Array<ArrayBuffer> -> float
+
+            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint8Array<ArrayBuffer> -> float
+
+            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Uint8Array<ArrayBuffer> -> 'U
+
+        module Some =
+            type Predicate = delegate of value: float * index: float * array: Uint8Array<ArrayBuffer> -> obj
+
+        module Sort =
+            type CompareFn = delegate of a: float * b: float -> float
+
+    module Uint8ArrayConstructor =
+        module From =
+            type Mapfn<'T> = delegate of v: 'T * k: float -> float
+
+    module Uint8ClampedArray =
+        module Every =
+            type Predicate = delegate of value: float * index: float * array: Uint8ClampedArray<ArrayBuffer> -> obj
+
+        module Filter =
+            type Predicate = delegate of value: float * index: float * array: Uint8ClampedArray<ArrayBuffer> -> obj
+
+        module Find =
+            type Predicate = delegate of value: float * index: float * obj: Uint8ClampedArray<ArrayBuffer> -> bool
+
+        module FindIndex =
+            type Predicate = delegate of value: float * index: float * obj: Uint8ClampedArray<ArrayBuffer> -> bool
+
+        module ForEach =
+            type Callbackfn = delegate of value: float * index: float * array: Uint8ClampedArray<ArrayBuffer> -> unit
+
+        module Map =
+            type Callbackfn = delegate of value: float * index: float * array: Uint8ClampedArray<ArrayBuffer> -> float
+
+        module Reduce =
+            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint8ClampedArray<ArrayBuffer> -> float
+
+            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint8ClampedArray<ArrayBuffer> -> float
+
+            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Uint8ClampedArray<ArrayBuffer> -> 'U
+
+        module ReduceRight =
+            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint8ClampedArray<ArrayBuffer> -> float
+
+            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint8ClampedArray<ArrayBuffer> -> float
+
+            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Uint8ClampedArray<ArrayBuffer> -> 'U
+
+        module Some =
+            type Predicate = delegate of value: float * index: float * array: Uint8ClampedArray<ArrayBuffer> -> obj
+
+        module Sort =
+            type CompareFn = delegate of a: float * b: float -> float
+
+    module Uint8ClampedArrayConstructor =
+        module From =
+            type Mapfn<'T> = delegate of v: 'T * k: float -> float

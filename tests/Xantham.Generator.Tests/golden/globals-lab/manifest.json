@@ -3,7 +3,7 @@
   "package": "globals-lab",
   "module": "GlobalsLab",
   "counts": {
-    "exact": 4,
+    "exact": 5,
     "ergonomic": 6,
     "widened": 0,
     "escape": 0

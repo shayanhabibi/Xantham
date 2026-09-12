@@ -55,14 +55,6 @@ type Timer =
     [<ParamObject; Emit("$0")>]
     static member Create (progress: float, speed: float, play: (unit -> Timer), seek: Func<float, bool option, Timer>, tween: (float[] -> Timer)) : Timer = jsNative
 
-module Configure =
-    [<Interface>]
-    type Settings =
-        abstract fps: float with get, set
-        abstract muted: bool option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (fps: float, ?muted: bool) : Settings = jsNative
-
 /// <summary>
 /// A homogeneous tuple (D7).
 /// </summary>
@@ -225,3 +217,11 @@ type Exports =
     static member makeRoundRect (width: float, height: float, radius: float) : Shape = jsNative
     [<Import("utils", "phase-b-lab")>]
     static member utils: Utils = jsNative
+
+module Configure =
+    [<Interface>]
+    type Settings =
+        abstract fps: float with get, set
+        abstract muted: bool option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (fps: float, ?muted: bool) : Settings = jsNative

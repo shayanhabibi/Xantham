@@ -6,25 +6,35 @@ open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator.Shape.Spec
 
 /// The single-case `[<StringEnum>]` a retained literal is written as: one case, compiled to the
-/// literal, so `Store.Text.Text` reaches JavaScript as `"text"`.
+/// literal, so `Store.Text.Text` reaches JavaScript as `"text"`. Paired with a finding where the
+/// case collides with a reserved F# name and keeps `RequireQualifiedAccess` (LU002).
 let private literalDecl (name: string, text: string, order: DeclOrder option) =
     let case = Naming.enumCaseOfString text
 
-    FsStringEnum
-        {
-            Name = name
-            Docs = ""
-            Tags = []
-            Order = order
-            Cases =
-                [
-                    {
-                        Name = case
-                        CompiledName = (if text = case then None else Some text)
-                        CompiledValue = None
-                    }
-                ]
-        }
+    let decl =
+        FsStringEnum
+            {
+                Name = name
+                Docs = ""
+                Tags = []
+                Order = order
+                Cases =
+                    [
+                        {
+                            Name = case
+                            CompiledName = (if text = case then None else Some text)
+                            CompiledValue = None
+                        }
+                    ]
+            }
+
+    let finding =
+        if Set.contains case reservedCaseNames then
+            Some(Finding.make name (ClassifyLiteralUnions.QualifiedAccessKept case))
+        else
+            None
+
+    decl, finding
 
 /// Overloads that widened into the same F# signature are duplicates the compiler rejects -
 /// .NET overload resolution sees through type abbreviations and ignores return types. The
@@ -48,16 +58,18 @@ let dedupeOverloads: Pass<ShapeModel> =
                 async {
                     let separated = literalOverloads model
 
-                    let literalDecls =
+                    let literalDecls, literalFindings =
                         separated
                         |> List.collect _.Declared
                         |> List.distinctBy (fun (name, _, _) -> name)
                         |> List.map literalDecl
+                        |> List.unzip
 
                     let mutable findings =
-                        separated
-                        |> List.map (fun set ->
-                            Finding.make set.Member (DedupeOverloads.OverloadsDistinguishedByLiteral set.Parameter))
+                        (separated
+                         |> List.map (fun set ->
+                             Finding.make set.Member (DedupeOverloads.OverloadsDistinguishedByLiteral set.Parameter)))
+                        @ List.choose id literalFindings
 
                     let abbrevs =
                         model.Decls
@@ -185,37 +197,9 @@ let dedupeOverloads: Pass<ShapeModel> =
                                     }
                             | decl -> decl)
 
-                    let mutable seenExports = Set.empty
-
-                    let exportMembers =
-                        model.ExportMembers
-                        |> List.filter (fun (_, m) ->
-                            let key, dropped =
-                                match m.Body with
-                                | ExportFunction(parameters, _) ->
-                                    Some("fn", signatureKey [] parameters),
-                                    DedupeOverloads.ExportFunctionOverloadDropped
-                                | ExportConstructor(parameters, _) ->
-                                    Some("new", signatureKey [] parameters), DedupeOverloads.OverloadDropped
-                                | ExportValue _ -> None, DedupeOverloads.OverloadDropped
-
-                            match key with
-                            | None -> true
-                            | Some key ->
-                                let key = (m.Name, key).ToString()
-
-                                if Set.contains key seenExports then
-                                    findings <- findings @ [ Finding.make m.Name dropped ]
-
-                                    false
-                                else
-                                    seenExports <- Set.add key seenExports
-                                    true)
-
                     let model =
                         { model with
                             Decls = decls @ literalDecls
-                            ExportMembers = exportMembers
                         }
 
                     return

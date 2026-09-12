@@ -1,9 +1,10 @@
-/// The shape tier's nano-pass payoff: each pass exercised on a hand-built model, asserted on
+﻿/// The shape tier's nano-pass payoff: each pass exercised on a hand-built model, asserted on
 /// the output model and its findings. No wire, no fixtures.
 module Xantham.Generator.Tests.ShapeTests
 
 open System.Text.Json.Nodes
 open Expecto
+open Xantham.Generator.Measure
 open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator
@@ -32,7 +33,7 @@ let private tuple (id: int) (components: int list) (flags: ElementFlags list) =
     { Build.facts
         { Build.typeResponse id TypeFlags.Object with
             IsTupleType = ValueSome true } with
-        TypeArguments = components
+        TypeArguments = components |> List.map (fun value -> value * uom<typeId>)
         TupleElements = flags }
 
 /// An object type carrying `Array`'s member set over a numeric index signature, the way an
@@ -45,7 +46,7 @@ let private arrayShaped (id: int) (name: string) (element: int) (extra: string l
     { Build.facts
           { Build.typeResponse id TypeFlags.Object with
               IsTupleType = ValueSome false } with
-        SymbolName = Some name
+        SymbolName = Some((fun value -> value * uom<symbolName>) name)
         Members =
             [ "concat"
               "every"
@@ -64,14 +65,14 @@ let private arrayShaped (id: int) (name: string) (element: int) (extra: string l
             |> List.mapi member'
         IndexInfos =
             [ {
-                  KeyTypeId = 2
-                  ValueTypeId = element
+                  KeyTypeId = 2<typeId>
+                  ValueTypeId = (fun value -> value * uom<typeId>) element
                   IsReadonly = false
               } ] }
 
 /// A type parameter type, named by its own symbol the way the resolve tier records it.
 let private typeParam (id: int) (name: string) =
-    { Build.facts (Build.typeResponse id TypeFlags.TypeParameter) with SymbolName = Some name }
+    { Build.facts (Build.typeResponse id TypeFlags.TypeParameter) with SymbolName = Some((fun value -> value * uom<symbolName>) name) }
 
 /// `keyof X`: an index type carrying its operand as its target, the way the checker hands one
 /// back when it cannot finish it.
@@ -89,8 +90,8 @@ let private indexedAccess (id: int) (objectId: int) (keyId: int) =
 let private libType (id: int) (name: string) (arguments: int list) =
     { Build.facts (Build.typeResponse id TypeFlags.Object) with
         Origin = CompilerLib
-        SymbolName = Some name
-        TypeArguments = arguments }
+        SymbolName = Some((fun value -> value * uom<symbolName>) name)
+        TypeArguments = arguments |> List.map (fun value -> value * uom<typeId>) }
 
 [<Tests>]
 let shippedDomTests =
@@ -102,33 +103,33 @@ let shippedDomTests =
             "ReadableStream", [ 1 ], FsApp("Fable.Core.TS.Dom.ReadableStream", [ FsString ])
             "CustomEvent", [ 1 ], FsApp("Fable.Core.TS.Dom.CustomEvent", [ FsString ])
         ] <| fun (name, arguments, expected) ->
-            let dom = { libType 10 name arguments with DeclFile = Some "/compiler/lib.dom.d.ts" }
+            let dom = { libType 10 name arguments with DeclFile = Some ((fun value -> value * uom<declFile>) "/compiler/lib.dom.d.ts") }
             let model = Build.shapeModel (dom :: Build.primitives)
-            let actual, findings = Spec.typeRef Build.context model None "consumer" 10
+            let actual, findings = Spec.typeRef Build.context model None "consumer" 10<typeId>
             Expect.equal actual expected "same pinned compiler declaration as Core.TS"
             Expect.isEmpty findings "no Browser package arity loss or missing binding"
 
         testCase "a package DOM declaration keeps its local identity" <| fun _ ->
-            let local = { libType 10 "EventTarget" [] with Origin = EntryPackage; DeclFile = Some "/pkg/index.d.ts" }
-            let model = { Build.shapeModel [ local ] with DeclNames = Map.ofList [ 10, "EventTarget" ] }
-            let actual, findings = Spec.typeRef Build.context model None "consumer" 10
+            let local = { libType 10 "EventTarget" [] with Origin = EntryPackage; DeclFile = Some ((fun value -> value * uom<declFile>) "/pkg/index.d.ts") }
+            let model = { Build.shapeModel [ local ] with DeclNames = Map.ofList [ 10<typeId>, "EventTarget" ] }
+            let actual, findings = Spec.typeRef Build.context model None "consumer" 10<typeId>
             Expect.equal actual (FsNamed "EventTarget") "the package owns this declaration"
             Expect.isEmpty findings "no remapping"
 
         testCase "shipping compiler DOM declarations keeps the producer identity" <| fun _ ->
-            let dom = { libType 10 "EventTarget" [] with DeclFile = Some "/compiler/lib.dom.d.ts" }
-            let model = { Build.shapeModel [ dom ] with DeclNames = Map.ofList [ 10, "EventTarget" ] }
-            let ctx = { Build.context with Config = { GeneratorConfig.Default with Groups = Map.ofList [ "typescript/lib", Ship ] } }
-            let actual, findings = Spec.typeRef ctx model None "consumer" 10
+            let dom = { libType 10 "EventTarget" [] with DeclFile = Some ((fun value -> value * uom<declFile>) "/compiler/lib.dom.d.ts") }
+            let model = { Build.shapeModel [ dom ] with DeclNames = Map.ofList [ 10<typeId>, "EventTarget" ] }
+            let ctx = { Build.context with Config = { GeneratorConfig.Default with Groups = Map.ofList [ "typescript/lib" * uom<npmDependency>, Ship ] } }
+            let actual, findings = Spec.typeRef ctx model None "consumer" 10<typeId>
             Expect.equal actual (FsNamed "EventTarget") "the producer binds its own declaration"
             Expect.isEmpty findings "no external dependency"
 
         testCase "a widened DOM type argument satisfies its shipped nominal bound" <| fun _ ->
-            let node = { libType 11 "Node" [] with DeclFile = Some "/compiler/lib.dom.d.ts" }
+            let node = { libType 11 "Node" [] with DeclFile = Some ((fun value -> value * uom<declFile>) "/compiler/lib.dom.d.ts") }
             let parameter =
                 { Build.facts (Build.typeResponse 12 TypeFlags.TypeParameter) with
-                    SymbolName = Some "TNode"
-                    Constraint = Some 11 }
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "TNode")
+                    Constraint = Some 11<typeId> }
             let target =
                 { libType 13 "NodeListOf" [ 12 ] with
                     DeclFile = node.DeclFile
@@ -138,7 +139,7 @@ let shippedDomTests =
                     DeclFile = node.DeclFile
                     Response = { Build.typeResponse 10 TypeFlags.Object with Target = ValueSome 13 } }
             let unknown = Build.facts (Build.typeResponse 14 TypeFlags.Any)
-            let actual, findings = Spec.typeRef Build.context (Build.shapeModel [ applied; target; parameter; node; unknown ]) None "consumer" 10
+            let actual, findings = Spec.typeRef Build.context (Build.shapeModel [ applied; target; parameter; node; unknown ]) None "consumer" 10<typeId>
             Expect.equal actual (FsApp("Fable.Core.TS.Dom.NodeListOf", [ FsNamed "Fable.Core.TS.Dom.Node" ])) "obj cannot satisfy the producer's Node constraint"
             Expect.isTrue (findings |> List.exists (fun finding -> finding.Message.Contains "Fable.Core.TS.Dom.NodeListOf")) "the repair reports its loss"
     ]
@@ -150,12 +151,12 @@ let functionConstraintTests =
             let functionType = libType 10 "Function" []
             let parameter =
                 { Build.facts (Build.typeResponse 11 TypeFlags.TypeParameter) with
-                    SymbolName = Some "T"
-                    Constraint = Some 10 }
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "T")
+                    Constraint = Some 10<typeId> }
             let model = Build.shapeModel [ functionType; parameter ]
-            let parameters, scope, findings = Spec.typeParamsOf Build.context model "Holder" [ 11 ]
+            let parameters, scope, findings = Spec.typeParamsOf Build.context model "Holder" [ 11<typeId> ]
             Expect.equal parameters [ { Name = "T"; Constraint = None } ] "F# functions can inhabit T"
-            Expect.equal (Map.find 11 scope) "T" "the generic identity remains"
+            Expect.equal (Map.find 11<typeId> scope) "T" "the generic identity remains"
             Expect.isTrue (findings |> List.exists (fun finding -> finding.Key = "TP010" && finding.Tier = Widened)) "removing callability is an explicit loss"
 
         testCase "other nominal bounds still apply" <| fun _ ->
@@ -163,17 +164,17 @@ let functionConstraintTests =
             let bound = { bound with Origin = EntryPackage }
             let parameter =
                 { Build.facts (Build.typeResponse 11 TypeFlags.TypeParameter) with
-                    SymbolName = Some "T"
-                    Constraint = Some 10 }
-            let model = { Build.shapeModel [ bound; parameter ] with DeclNames = Map.ofList [ 10, "Function" ] }
-            let parameters, _, findings = Spec.typeParamsOf Build.context model "Holder" [ 11 ]
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "T")
+                    Constraint = Some 10<typeId> }
+            let model = { Build.shapeModel [ bound; parameter ] with DeclNames = Map.ofList [ 10<typeId>, "Function" ] }
+            let parameters, _, findings = Spec.typeParamsOf Build.context model "Holder" [ 11<typeId> ]
             Expect.equal parameters [ { Name = "T"; Constraint = Some(FsNamed "Function") } ] "a package's own Function is not JS.Function"
             Expect.isEmpty findings "its nominal constraint is preserved"
     ]
 
 /// `P & { marker }`: a branding intersection, given the ids of its constituents.
 let private intersection (id: int) (members: int list) =
-    { Build.facts (Build.typeResponse id TypeFlags.Intersection) with IntersectionMembers = members }
+    { Build.facts (Build.typeResponse id TypeFlags.Intersection) with IntersectionMembers = members |> List.map (fun value -> value * uom<typeId>) }
 
 /// An object carrying one property, for the marker half of a brand.
 let private marker (id: int) (name: string) (valueType: int) =
@@ -186,7 +187,7 @@ let private genericDecl (id: int) (parameters: int list) (members: ResolvedMembe
         { Build.typeResponse id TypeFlags.Object with
             Target = ValueSome id
             TypeParameters = ValueSome(List.toArray parameters) } with
-        TypeArguments = parameters
+        TypeArguments = parameters |> List.map (fun value -> value * uom<typeId>)
         Members = members }
 
 /// A generic alias over an intersection, paired with one application of it, under a shared
@@ -210,10 +211,10 @@ let private conditionalAliasModel (declaredOperands: int list) (appliedOperands:
           marker 40 "toVar" 1
           marker 41 "tag" 2
           { Build.facts { Build.typeResponse 50 TypeFlags.Intersection with AliasSymbol = ValueSome 100 } with
-              AliasTypeArguments = [ 20 ]
-              IntersectionMembers = declaredOperands }
+              AliasTypeArguments = [ 20<typeId> ]
+              IntersectionMembers = declaredOperands |> List.map (fun value -> value * uom<typeId>) }
           { Build.facts { Build.typeResponse 60 TypeFlags.Intersection with AliasSymbol = ValueSome 100 } with
-              IntersectionMembers = appliedOperands
+              IntersectionMembers = appliedOperands |> List.map (fun value -> value * uom<typeId>)
               Members =
                 [ Build.resolvedMember (Build.symbol 300 "isNode" SymbolFlags.Property) 3
                   Build.resolvedMember (Build.symbol 301 "tag" SymbolFlags.Property) 2 ] } ]
@@ -223,8 +224,8 @@ let private conditionalAliasModel (declaredOperands: int list) (appliedOperands:
                     Namespaces = Map.empty
                     ShadowedByLib = 0
                   }
-        ExportTypes = Map.ofList [ 400, { Declared = None; Value = Some 60 } ]
-        DeclNames = Map.ofList [ 50, "Node" ] }
+        ExportTypes = Map.ofList [ 400<symbolId>, { Declared = None; Value = Some 60<typeId> } ]
+        DeclNames = Map.ofList [ 50<typeId>, "Node" ] }
 
 [<Tests>]
 let typeRefTests =
@@ -233,7 +234,7 @@ let typeRefTests =
             let model = Build.shapeModel Build.primitives
 
             for typeId, expected in [ 1, FsString; 2, FsFloat; 3, FsBool; 4, FsUnit ] do
-                let reference, findings = Spec.typeRef Build.context model None "x" typeId
+                let reference, findings = Spec.typeRef Build.context model None "x" ((fun value -> value * uom<Measure.typeId>) typeId)
                 Expect.equal reference expected $"type {typeId}"
                 Expect.isEmpty findings $"type {typeId} findings"
 
@@ -243,7 +244,7 @@ let typeRefTests =
         // lossy one names the construct and what was lost rather than a flag name.
         testCase "a template literal reads as the string it is at runtime (§4.11)" <| fun _ ->
             let model = Build.shapeModel (intrinsic 10 TypeFlags.TemplateLiteral :: Build.primitives)
-            let reference, findings = Spec.typeRef Build.context model None "x" 10
+            let reference, findings = Spec.typeRef Build.context model None "x" 10<typeId>
 
             Expect.equal reference FsString "`on${string}` is a string"
             Expect.equal (findings |> List.map _.Key) [ "TR037" ] "the template-literal finding, not TR014"
@@ -252,7 +253,7 @@ let typeRefTests =
 
         testCase "an intrinsic string mapping reads as string too" <| fun _ ->
             let model = Build.shapeModel (intrinsic 10 TypeFlags.StringMapping :: Build.primitives)
-            let reference, findings = Spec.typeRef Build.context model None "x" 10
+            let reference, findings = Spec.typeRef Build.context model None "x" 10<typeId>
 
             Expect.equal reference FsString "Uppercase<T> is a string"
             Expect.equal (findings |> List.map _.Key) [ "TR038" ] "named as the mapping it is"
@@ -261,14 +262,14 @@ let typeRefTests =
             // Fable 5 compiles F# `bigint` to the native JavaScript BigInt (the run gate reads
             // that off node). An exact mapping must not appear in the manifest at all.
             let model = Build.shapeModel (intrinsic 10 TypeFlags.BigInt :: Build.primitives)
-            let reference, findings = Spec.typeRef Build.context model None "x" 10
+            let reference, findings = Spec.typeRef Build.context model None "x" 10<typeId>
 
             Expect.equal reference FsBigInt "bigint"
             Expect.isEmpty findings "nothing is lost, so nothing is reported"
 
         testCase "a bigint literal widens to bigint, as its string and number peers do" <| fun _ ->
             let model = Build.shapeModel (intrinsic 10 TypeFlags.BigIntLiteral :: Build.primitives)
-            let reference, findings = Spec.typeRef Build.context model None "x" 10
+            let reference, findings = Spec.typeRef Build.context model None "x" 10<typeId>
 
             Expect.equal reference FsBigInt "2n"
             Expect.equal (findings |> List.map _.Key) [ "TR039" ] "the literal's own widening"
@@ -276,7 +277,7 @@ let typeRefTests =
 
         testCase "TypeScript's object maps to obj, and says that is still a widening" <| fun _ ->
             let model = Build.shapeModel (intrinsic 10 TypeFlags.NonPrimitive :: Build.primitives)
-            let reference, findings = Spec.typeRef Build.context model None "x" 10
+            let reference, findings = Spec.typeRef Build.context model None "x" 10<typeId>
 
             Expect.equal reference FsObj "there is no closer F# type"
             Expect.equal (findings |> List.map _.Key) [ "TR040" ] "reported as the mapping it is, not as an unmapped flag"
@@ -291,8 +292,8 @@ let typeRefTests =
                     :: Build.primitives
                 )
 
-            let plain, plainFindings = Spec.typeRef Build.context model None "x" 10
-            let unique, uniqueFindings = Spec.typeRef Build.context model None "x" 11
+            let plain, plainFindings = Spec.typeRef Build.context model None "x" 10<typeId>
+            let unique, uniqueFindings = Spec.typeRef Build.context model None "x" 11<typeId>
 
             Expect.equal plain FsObj "symbol"
             Expect.equal unique FsObj "unique symbol"
@@ -306,10 +307,10 @@ let typeRefTests =
 
         testCase "a union with undefined hoists to option with an ergonomic finding" <| fun _ ->
             let union =
-                { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 1; 5 ] }
+                { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 1<typeId>; 5<typeId> ] }
 
             let model = Build.shapeModel (union :: Build.primitives)
-            let reference, findings = Spec.typeRef Build.context model None "x" 10
+            let reference, findings = Spec.typeRef Build.context model None "x" 10<typeId>
 
             Expect.equal reference (FsOption FsString) "string | undefined"
             Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "one ergonomic finding"
@@ -323,10 +324,10 @@ let typeRefTests =
 
             let model =
                 Build.shapeModel (
-                    union 10 [ 1; 5 ]
-                    :: union 11 [ 1; 6 ]
-                    :: union 12 [ 1; 5; 6 ]
-                    :: union 13 [ 1; 4 ]
+                    union 10 [ 1<typeId>; 5<typeId> ]
+                    :: union 11 [ 1<typeId>; 6<typeId> ]
+                    :: union 12 [ 1<typeId>; 5<typeId>; 6<typeId> ]
+                    :: union 13 [ 1<typeId>; 4<typeId> ]
                     :: Build.primitives
                 )
 
@@ -342,36 +343,36 @@ let typeRefTests =
                     |> List.filter (snd >> unbox<bool>)
                     |> List.map fst)
 
-            Expect.equal (spellings 10) [ "fromUndefined" ] "string | undefined"
-            Expect.equal (spellings 11) [ "fromNull" ] "string | null"
-            Expect.equal (spellings 12) [ "fromNull"; "fromUndefined" ] "string | null | undefined"
-            Expect.equal (spellings 13) [ "fromVoid" ] "string | void"
+            Expect.equal (spellings 10<typeId>) [ "fromUndefined" ] "string | undefined"
+            Expect.equal (spellings 11<typeId>) [ "fromNull" ] "string | null"
+            Expect.equal (spellings 12<typeId>) [ "fromNull"; "fromUndefined" ] "string | null | undefined"
+            Expect.equal (spellings 13<typeId>) [ "fromVoid" ] "string | void"
 
         testCase "a void return maps to unit and reports no absence" <| fun _ ->
             // `void` in a return position never reaches the union path, so the fifth shape of
             // the alphabet is the one carrying no finding at all.
             let model = Build.shapeModel Build.primitives
-            let reference, findings = Spec.typeRef Build.context model None "f()" 4
+            let reference, findings = Spec.typeRef Build.context model None "f()" 4<typeId>
 
             Expect.equal reference FsUnit "void maps to unit"
             Expect.isEmpty findings "and the site holds no spelling to report"
 
         testCase "a union of null and undefined alone maps to unit, widened" <| fun _ ->
             let union =
-                { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 5; 6 ] }
+                { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 5<typeId>; 6<typeId> ] }
 
             let model = Build.shapeModel (union :: Build.primitives)
-            let reference, findings = Spec.typeRef Build.context model None "x" 10
+            let reference, findings = Spec.typeRef Build.context model None "x" 10<typeId>
 
             Expect.equal reference FsUnit "null | undefined"
             Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
 
         testCase "a union of several non-null members is erased (D4)" <| fun _ ->
             let union =
-                { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 1; 2; 5 ] }
+                { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 1<typeId>; 2<typeId>; 5<typeId> ] }
 
             let model = Build.shapeModel (union :: Build.primitives)
-            let reference, findings = Spec.typeRef Build.context model None "x" 10
+            let reference, findings = Spec.typeRef Build.context model None "x" 10<typeId>
 
             Expect.equal reference (FsOption(FsErasedUnion [ FsString; FsFloat ])) "string | number | undefined"
 
@@ -384,22 +385,22 @@ let typeRefTests =
             // Ten distinct arms, one past `Fable.Core`'s widest `U9`: the render tier owns a
             // `U10` in the emitting file's own footer, so the shape tier keeps every arm.
             let named id name =
-                { Build.facts (Build.typeResponse id TypeFlags.Object) with SymbolName = Some name }
+                { Build.facts (Build.typeResponse id TypeFlags.Object) with SymbolName = Some((fun value -> value * uom<symbolName>) name) }
 
             let names =
                 [ 20, "A"; 21, "B"; 22, "C"; 23, "D"; 24, "E"; 25, "F"; 26, "G" ]
 
             let union =
                 { Build.facts (Build.typeResponse 10 TypeFlags.Union) with
-                    UnionMembers = 1 :: 2 :: 3 :: (names |> List.map fst) }
+                    UnionMembers = 1<typeId> :: 2<typeId> :: 3<typeId> :: (names |> List.map (fst >> (fun value -> value * uom<typeId>))) }
 
             let model =
                 Build.shapeModel (union :: (names |> List.map (fun (id, name) -> named id name)) @ Build.primitives)
 
             let model =
-                { model with DeclNames = names |> Map.ofList }
+                { model with DeclNames = names |> List.map (fun (id, name) -> (fun value -> value * uom<typeId>) id, name) |> Map.ofList }
 
-            let reference, findings = Spec.typeRef Build.context model None "x" 10
+            let reference, findings = Spec.typeRef Build.context model None "x" 10<typeId>
 
             Expect.equal
                 reference
@@ -422,7 +423,7 @@ let typeRefTests =
             let model =
                 Build.shapeModel (tuple 10 [ 1; 2 ] [ ElementFlags.Required; ElementFlags.Required ] :: Build.primitives)
 
-            let reference, findings = Spec.typeRef Build.context model None "x" 10
+            let reference, findings = Spec.typeRef Build.context model None "x" 10<typeId>
 
             Expect.equal reference (FsTuple [ FsString; FsFloat ]) "[string, number]"
             Expect.isEmpty findings "Fable compiles both to the same JS array"
@@ -431,7 +432,7 @@ let typeRefTests =
             // The checker hands `[number, number?]` over as `number` and `number | undefined`,
             // so D1's hoist does the work and D7 imposes nothing of its own.
             let optionalTail =
-                { Build.facts (Build.typeResponse 11 TypeFlags.Union) with UnionMembers = [ 2; 5 ] }
+                { Build.facts (Build.typeResponse 11 TypeFlags.Union) with UnionMembers = [ 2<typeId>; 5<typeId> ] }
 
             let model =
                 Build.shapeModel (
@@ -440,7 +441,7 @@ let typeRefTests =
                     :: Build.primitives
                 )
 
-            let reference, _ = Spec.typeRef Build.context model None "x" 10
+            let reference, _ = Spec.typeRef Build.context model None "x" 10<typeId>
 
             Expect.equal reference (FsTuple [ FsFloat; FsOption FsFloat ]) "[number, number?]"
 
@@ -448,7 +449,7 @@ let typeRefTests =
             let model =
                 Build.shapeModel (tuple 10 [ 1; 2 ] [ ElementFlags.Required; ElementFlags.Rest ] :: Build.primitives)
 
-            let reference, findings = Spec.typeRef Build.context model None "x" 10
+            let reference, findings = Spec.typeRef Build.context model None "x" 10<typeId>
 
             Expect.equal reference (FsArray FsObj) "components disagree, so the element is obj"
             Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
@@ -462,7 +463,7 @@ let typeRefTests =
                     :: Build.primitives
                 )
 
-            let reference, _ = Spec.typeRef Build.context model None "x" 10
+            let reference, _ = Spec.typeRef Build.context model None "x" 10<typeId>
 
             Expect.equal reference (FsArray FsString) "one array level, not two"
 
@@ -470,7 +471,7 @@ let typeRefTests =
             let model =
                 Build.shapeModel (tuple 10 [ 1 ] [ ElementFlags.Required ] :: Build.primitives)
 
-            let reference, findings = Spec.typeRef Build.context model None "x" 10
+            let reference, findings = Spec.typeRef Build.context model None "x" 10<typeId>
 
             Expect.equal reference (FsArray FsString) "widened to its element"
             Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
@@ -478,9 +479,9 @@ let typeRefTests =
         testCase "a type parameter in scope names its variable (§4.9)" <| fun _ ->
             let model =
                 { Build.shapeModel (typeParam 20 "T" :: Build.primitives) with
-                    TypeVars = Map.ofList [ 20, "T" ] }
+                    TypeVars = Map.ofList [ 20<typeId>, "T" ] }
 
-            let reference, findings = Spec.typeRef Build.context model None "x" 20
+            let reference, findings = Spec.typeRef Build.context model None "x" 20<typeId>
 
             Expect.equal reference (FsTypeVar "T") "'T"
             Expect.isEmpty findings "a bound variable costs nothing"
@@ -488,7 +489,7 @@ let typeRefTests =
         testCase "a type parameter of some other declaration is not in scope" <| fun _ ->
             let model = Build.shapeModel (typeParam 20 "T" :: Build.primitives)
 
-            let reference, findings = Spec.typeRef Build.context model None "x" 20
+            let reference, findings = Spec.typeRef Build.context model None "x" 20<typeId>
 
             Expect.equal reference FsObj "nothing here binds T"
             Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
@@ -496,27 +497,27 @@ let typeRefTests =
         testCase "an out-of-scope type parameter widens to its constraint, not to obj" <| fun _ ->
             // `Ai<obj>` does not compile against `'AiModelList :> AiModelListType`: where the
             // declaration bound a constraint, obj is not merely loose but wrong.
-            let bounded = { typeParam 20 "T" with Constraint = Some 60 }
+            let bounded = { typeParam 20 "T" with Constraint = Some 60<typeId> }
             let timer = Build.facts (Build.typeResponse 60 TypeFlags.Object)
 
             let model =
                 { Build.shapeModel (bounded :: timer :: Build.primitives) with
-                    DeclNames = Map.ofList [ 60, "Timer" ] }
+                    DeclNames = Map.ofList [ 60<typeId>, "Timer" ] }
 
-            let reference, findings = Spec.typeRef Build.context model None "x" 20
+            let reference, findings = Spec.typeRef Build.context model None "x" 20<typeId>
 
             Expect.equal reference (FsNamed "Timer") "the tightest thing still true of T"
             Expect.equal (findings |> List.map _.Tier) [ Widened ] "still a widening, just a smaller one"
 
         testCase "an out-of-scope parameter bound to a generic still widens to obj" <| fun _ ->
             // A generic constraint would need an arity this position cannot supply.
-            let bounded = { typeParam 20 "T" with Constraint = Some 30 }
+            let bounded = { typeParam 20 "T" with Constraint = Some 30<typeId> }
 
             let model =
                 { Build.shapeModel (bounded :: genericDecl 30 [ 21 ] [] :: typeParam 21 "E" :: Build.primitives) with
-                    DeclNames = Map.ofList [ 30, "Box" ] }
+                    DeclNames = Map.ofList [ 30<typeId>, "Box" ] }
 
-            let reference, findings = Spec.typeRef Build.context model None "x" 20
+            let reference, findings = Spec.typeRef Build.context model None "x" 20<typeId>
 
             Expect.equal reference FsObj "no arity to write Box at"
             Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
@@ -525,7 +526,7 @@ let typeRefTests =
             // The idiom needs a `'T` to be taken over; without one there is nothing to phantom
             // the key with, and an unphantomed key is just a string.
             let model = Build.shapeModel (keyOf 40 20 :: typeParam 20 "T" :: Build.primitives)
-            let reference, findings = Spec.typeRef Build.context model None "x" 40
+            let reference, findings = Spec.typeRef Build.context model None "x" 40<typeId>
 
             Expect.equal reference FsObj "no operand, no keyof"
             Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
@@ -533,9 +534,9 @@ let typeRefTests =
         testCase "keyof over an in-scope operand reads as keyof of it" <| fun _ ->
             let model =
                 { Build.shapeModel (keyOf 40 20 :: typeParam 20 "T" :: Build.primitives) with
-                    TypeVars = Map.ofList [ 20, "T" ] }
+                    TypeVars = Map.ofList [ 20<typeId>, "T" ] }
 
-            let reference, findings = Spec.typeRef Build.context model None "x" 40
+            let reference, findings = Spec.typeRef Build.context model None "x" 40<typeId>
 
             Expect.equal reference (FsApp("keyof", [ FsTypeVar "T" ])) "keyof<'T>"
             Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "the support idiom is ergonomic, not a widening"
@@ -547,9 +548,9 @@ let typeRefTests =
                 { Build.shapeModel (
                       indexedAccess 41 20 40 :: keyOf 40 20 :: typeParam 20 "T" :: Build.primitives
                   ) with
-                    TypeVars = Map.ofList [ 20, "T" ] }
+                    TypeVars = Map.ofList [ 20<typeId>, "T" ] }
 
-            let reference, findings = Spec.typeRef Build.context model None "x" 41
+            let reference, findings = Spec.typeRef Build.context model None "x" 41<typeId>
 
             Expect.equal reference FsObj "widened"
             Expect.equal (findings |> List.map _.Tier) [ Widened ] "and said so"
@@ -562,13 +563,13 @@ let typeRefTests =
                     { Build.typeResponse 31 TypeFlags.Object with
                         ObjectFlags = ValueSome ObjectFlags.Reference
                         Target = ValueSome 30 } with
-                    TypeArguments = [ 1 ] }
+                    TypeArguments = [ 1<typeId> ] }
 
             let model =
                 { Build.shapeModel (genericDecl 30 [ 20 ] [] :: instantiation :: typeParam 20 "T" :: Build.primitives) with
-                    DeclNames = Map.ofList [ 30, "Box" ] }
+                    DeclNames = Map.ofList [ 30<typeId>, "Box" ] }
 
-            let reference, findings = Spec.typeRef Build.context model None "x" 31
+            let reference, findings = Spec.typeRef Build.context model None "x" 31<typeId>
 
             Expect.equal reference (FsApp("Box", [ FsString ])) "Box<string>, not the expansion"
             Expect.isEmpty findings "an application is exact"
@@ -591,7 +592,7 @@ let typeRefTests =
                     { Build.typeResponse 31 TypeFlags.Object with
                         ObjectFlags = ValueSome ObjectFlags.Reference
                         Target = ValueSome 30 } with
-                    TypeArguments = [ 70 ] }
+                    TypeArguments = [ 70<typeId> ] }
 
             let model =
                 { Build.shapeModel (
@@ -599,12 +600,12 @@ let typeRefTests =
                       :: instantiation
                       :: marker
                       :: lookalike
-                      :: { typeParam 20 "T" with Constraint = Some 60 }
+                      :: { typeParam 20 "T" with Constraint = Some 60<typeId> }
                       :: Build.primitives
                   ) with
-                    DeclNames = Map.ofList [ 30, "Holder"; 60, "Marker"; 70, "Lookalike" ] }
+                    DeclNames = Map.ofList [ 30<typeId>, "Holder"; 60<typeId>, "Marker"; 70<typeId>, "Lookalike" ] }
 
-            let reference, findings = Spec.typeRef Build.context model None "x" 31
+            let reference, findings = Spec.typeRef Build.context model None "x" 31<typeId>
 
             Expect.equal reference (FsApp("Holder", [ FsNamed "Marker" ])) "the argument becomes the bound it cannot state"
 
@@ -625,7 +626,7 @@ let typeRefTests =
 
             let subtype =
                 { Build.facts (Build.typeResponse 70 TypeFlags.Object) with
-                    BaseTypes = [ 60 ]
+                    BaseTypes = [ 60<typeId> ]
                     Members = [ member' 700 "at" ] }
 
             let instantiation =
@@ -633,7 +634,7 @@ let typeRefTests =
                     { Build.typeResponse 31 TypeFlags.Object with
                         ObjectFlags = ValueSome ObjectFlags.Reference
                         Target = ValueSome 30 } with
-                    TypeArguments = [ 70 ] }
+                    TypeArguments = [ 70<typeId> ] }
 
             let model =
                 { Build.shapeModel (
@@ -641,12 +642,12 @@ let typeRefTests =
                       :: instantiation
                       :: marker
                       :: subtype
-                      :: { typeParam 20 "T" with Constraint = Some 60 }
+                      :: { typeParam 20 "T" with Constraint = Some 60<typeId> }
                       :: Build.primitives
                   ) with
-                    DeclNames = Map.ofList [ 30, "Holder"; 60, "Marker"; 70, "Subtype" ] }
+                    DeclNames = Map.ofList [ 30<typeId>, "Holder"; 60<typeId>, "Marker"; 70<typeId>, "Subtype" ] }
 
-            let reference, findings = Spec.typeRef Build.context model None "x" 31
+            let reference, findings = Spec.typeRef Build.context model None "x" 31<typeId>
 
             Expect.equal reference (FsApp("Holder", [ FsNamed "Subtype" ])) "the argument stands"
             Expect.isEmpty findings "a nominal subtype needs no repair"
@@ -664,7 +665,7 @@ let typeRefTests =
                 { Build.facts
                     { Build.typeResponse 71 TypeFlags.Object with
                         IsTupleType = ValueSome true } with
-                    TypeArguments = [ 1; 2 ] }
+                    TypeArguments = [ 1<typeId>; 2<typeId> ] }
 
             let instantiation argument typeId =
                 { Build.facts
@@ -676,17 +677,17 @@ let typeRefTests =
             let model =
                 { Build.shapeModel (
                       genericDecl 30 [ 20 ] []
-                      :: instantiation 1 31
-                      :: instantiation 71 32
+                      :: instantiation 1<typeId> 31
+                      :: instantiation 71<typeId> 32
                       :: marker
                       :: tuple
-                      :: { typeParam 20 "T" with Constraint = Some 60 }
+                      :: { typeParam 20 "T" with Constraint = Some 60<typeId> }
                       :: Build.primitives
                   ) with
-                    DeclNames = Map.ofList [ 30, "Holder"; 60, "Lengthy" ] }
+                    DeclNames = Map.ofList [ 30<typeId>, "Holder"; 60<typeId>, "Lengthy" ] }
 
-            let primitive, primitiveFindings = Spec.typeRef Build.context model None "x" 31
-            let tupled, tupleFindings = Spec.typeRef Build.context model None "x" 32
+            let primitive, primitiveFindings = Spec.typeRef Build.context model None "x" 31<typeId>
+            let tupled, tupleFindings = Spec.typeRef Build.context model None "x" 32<typeId>
 
             Expect.equal primitive (FsApp("Holder", [ FsNamed "Lengthy" ])) "string is written as the bound"
             Expect.equal tupled (FsApp("Holder", [ FsNamed "Lengthy" ])) "and so is a tuple"
@@ -707,14 +708,14 @@ let typeRefTests =
             // The negative that keeps `EventListenerOrEventListenerObject<'EventType>` exact:
             // `'EventType :> Event` already satisfies the parameter it is passed to.
             let event = Build.facts (Build.typeResponse 60 TypeFlags.Object)
-            let variable = { typeParam 21 "EventType" with Constraint = Some 60 }
+            let variable = { typeParam 21 "EventType" with Constraint = Some 60<typeId> }
 
             let instantiation =
                 { Build.facts
                     { Build.typeResponse 31 TypeFlags.Object with
                         ObjectFlags = ValueSome ObjectFlags.Reference
                         Target = ValueSome 30 } with
-                    TypeArguments = [ 21 ] }
+                    TypeArguments = [ 21<typeId> ] }
 
             let model =
                 { Build.shapeModel (
@@ -722,13 +723,13 @@ let typeRefTests =
                       :: instantiation
                       :: event
                       :: variable
-                      :: { typeParam 20 "T" with Constraint = Some 60 }
+                      :: { typeParam 20 "T" with Constraint = Some 60<typeId> }
                       :: Build.primitives
                   ) with
-                    DeclNames = Map.ofList [ 30, "Listener"; 60, "Event" ]
-                    TypeVars = Map.ofList [ 21, "EventType" ] }
+                    DeclNames = Map.ofList [ 30<typeId>, "Listener"; 60<typeId>, "Event" ]
+                    TypeVars = Map.ofList [ 21<typeId>, "EventType" ] }
 
-            let reference, findings = Spec.typeRef Build.context model None "x" 31
+            let reference, findings = Spec.typeRef Build.context model None "x" 31<typeId>
 
             Expect.equal reference (FsApp("Listener", [ FsTypeVar "EventType" ])) "the variable stands"
             Expect.isEmpty findings "nothing to repair"
@@ -737,23 +738,23 @@ let typeRefTests =
             // `map(next: T): Box<T>` refers to the declaration itself; F# has no bare `Box`.
             let model =
                 { Build.shapeModel (genericDecl 30 [ 20 ] [] :: typeParam 20 "T" :: Build.primitives) with
-                    DeclNames = Map.ofList [ 30, "Box" ]
-                    TypeVars = Map.ofList [ 20, "T" ] }
+                    DeclNames = Map.ofList [ 30<typeId>, "Box" ]
+                    TypeVars = Map.ofList [ 20<typeId>, "T" ] }
 
-            let reference, findings = Spec.typeRef Build.context model None "x" 30
+            let reference, findings = Spec.typeRef Build.context model None "x" 30<typeId>
 
             Expect.equal reference (FsApp("Box", [ FsTypeVar "T" ])) "Box<'T>"
             Expect.isEmpty findings "exact"
 
         testCase "a named literal union references its declaration, hoist intact" <| fun _ ->
             let union =
-                { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 7; 8; 5 ] }
+                { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 7<typeId>; 8<typeId>; 5<typeId> ] }
 
             let model =
                 { Build.shapeModel (union :: stringLiteral 7 "ms" :: stringLiteral 8 "s" :: Build.primitives) with
-                    DeclNames = Map.ofList [ 10, "TimeUnit" ] }
+                    DeclNames = Map.ofList [ 10<typeId>, "TimeUnit" ] }
 
-            let reference, findings = Spec.typeRef Build.context model None "x" 10
+            let reference, findings = Spec.typeRef Build.context model None "x" 10<typeId>
 
             Expect.equal reference (FsOption(FsNamed "TimeUnit")) "the classified union's name"
             Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "only the hoist"
@@ -762,16 +763,16 @@ let typeRefTests =
             let array =
                 { Build.facts (Build.typeResponse 11 TypeFlags.Object) with
                     Origin = CompilerLib
-                    SymbolName = Some "Array"
-                    TypeArguments = [ 20 ] }
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "Array")
+                    TypeArguments = [ 20<typeId> ] }
 
             let element = Build.facts (Build.typeResponse 20 TypeFlags.Object)
 
             let model =
-                { Build.shapeModel [ array; element ] with DeclNames = Map.ofList [ 20, "Timer" ] }
+                { Build.shapeModel [ array; element ] with DeclNames = Map.ofList [ 20<typeId>, "Timer" ] }
 
             Expect.equal
-                (Spec.typeRef Build.context model None "x" 11)
+                (Spec.typeRef Build.context model None "x" 11<typeId>)
                 (FsArray(FsNamed "Timer"), [])
                 "Array<Timer> -> Timer[], whatever the lib group's disposition"
 
@@ -782,7 +783,7 @@ let typeRefTests =
             let model = Build.shapeModel (arrayShaped 30 "Chapters" 1 [] :: Build.primitives)
 
             Expect.equal
-                (Spec.typeRef Build.context model None "x" 30)
+                (Spec.typeRef Build.context model None "x" 30<typeId>)
                 (FsArray FsString, [])
                 "the element the index signature carries"
 
@@ -796,12 +797,12 @@ let typeRefTests =
             let intersected =
                 { arrayShaped 40 "Tagged" 1 [ "kind"; "rank" ] with
                     Response = { Build.typeResponse 40 TypeFlags.Intersection with IsTupleType = ValueSome false }
-                    IntersectionMembers = [ 42; 41 ] }
+                    IntersectionMembers = [ 42<typeId>; 41<typeId> ] }
 
             let model =
                 Build.shapeModel (intersected :: other :: arrayShaped 42 "ReadonlyArray" 1 [] :: Build.primitives)
 
-            let reference, findings = Spec.typeRef Build.context model None "Tagged" 40
+            let reference, findings = Spec.typeRef Build.context model None "Tagged" 40<typeId>
 
             Expect.equal reference (FsArray FsString) "the element array"
             Expect.equal (findings |> List.map _.Key) [ "TR048" ] "one drop, counted"
@@ -810,16 +811,16 @@ let typeRefTests =
         testCase "an indexable shape with none of Array's members is not an array" <| fun _ ->
             let register =
                 { Build.facts (Build.typeResponse 50 TypeFlags.Object) with
-                    SymbolName = Some "Register"
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "Register")
                     Members = [ Build.resolvedMember (Build.symbol 500 "length" SymbolFlags.Property) 2 ]
-                    IndexInfos = [ { KeyTypeId = 2; ValueTypeId = 1; IsReadonly = false } ] }
+                    IndexInfos = [ { KeyTypeId = 2<typeId>; ValueTypeId = 1<typeId>; IsReadonly = false } ] }
 
             let model =
                 { Build.shapeModel (register :: Build.primitives) with
-                    DeclNames = Map.ofList [ 50, "Register" ] }
+                    DeclNames = Map.ofList [ 50<typeId>, "Register" ] }
 
             Expect.equal
-                (Spec.typeRef Build.context model None "x" 50)
+                (Spec.typeRef Build.context model None "x" 50<typeId>)
                 (FsNamed "Register", [])
                 "a numeric index signature and `length` are not an array on their own"
 
@@ -827,23 +828,23 @@ let typeRefTests =
         <| fun _ ->
             let anonymous =
                 { Build.facts (Build.typeResponse 60 TypeFlags.Object) with
-                    SymbolName = Some "__type" }
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "__type") }
 
             let named =
                 { Build.facts (Build.typeResponse 61 TypeFlags.Object) with
-                    SymbolName = Some "Env" }
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "Env") }
 
             let model = Build.shapeModel (anonymous :: named :: Build.primitives)
 
-            let _, anonymousFindings = Spec.typeRef Build.context model None "x" 60
+            let _, anonymousFindings = Spec.typeRef Build.context model None "x" 60<typeId>
             Expect.equal (anonymousFindings |> List.map _.Key) [ "TR047" ] "nothing was ever going to be named"
 
-            let _, ownFindings = Spec.typeRef Build.context model None "Env" 61
+            let _, ownFindings = Spec.typeRef Build.context model None "Env" 61<typeId>
             Expect.equal (ownFindings |> List.map _.Key) [ "TR047" ] "nor at the declaration of the name itself"
 
             // Read from somewhere else, the name is one the reader follows and this run owes
             // them a declaration for.
-            let _, referenceFindings = Spec.typeRef Build.context model None "Holder.env" 61
+            let _, referenceFindings = Spec.typeRef Build.context model None "Holder.env" 61<typeId>
             Expect.equal (referenceFindings |> List.map _.Key) [ "TR023" ] "a reference that leads nowhere"
 
         testCase "an anonymous callback of arity 1 reads as an F# function type (D5a)" <| fun _ ->
@@ -857,7 +858,7 @@ let typeRefTests =
             let model = Build.shapeModel (callback :: Build.primitives)
 
             Expect.equal
-                (Spec.typeRef Build.context model None "x" 12)
+                (Spec.typeRef Build.context model None "x" 12<typeId>)
                 (FsFunc(FsString, FsUnit), [])
                 "(value: string) => void -> (string -> unit)"
 
@@ -875,7 +876,7 @@ let typeRefTests =
                               4 ] }
 
             let model = Build.shapeModel (callback :: Build.primitives)
-            let reference, findings = Spec.typeRef Build.context model None "x" 12
+            let reference, findings = Spec.typeRef Build.context model None "x" 12<typeId>
             Expect.equal reference (FsDelegate([ FsString; FsFloat ], FsUnit)) "Action<string, float>"
 
             Expect.equal
@@ -901,7 +902,7 @@ let typeRefTests =
                               13 ] }
 
             let model = Build.shapeModel (outer :: inner :: Build.primitives)
-            let reference, findings = Spec.typeRef Build.context model None "x" 12
+            let reference, findings = Spec.typeRef Build.context model None "x" 12<typeId>
 
             Expect.equal
                 reference
@@ -919,7 +920,7 @@ let typeRefTests =
                     { Build.typeResponse 13 TypeFlags.TypeParameter with IsThisType = ValueSome true }
 
             let model = Build.shapeModel [ thisType ]
-            let reference, findings = Spec.typeRef Build.context model (Some "Timer") "Timer.play()" 13
+            let reference, findings = Spec.typeRef Build.context model (Some "Timer") "Timer.play()" 13<typeId>
 
             Expect.equal reference (FsNamed "Timer") "chainable"
             Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "ergonomic, not silent"
@@ -928,16 +929,16 @@ let typeRefTests =
             let aliased = Build.facts (Build.typeResponse 20 TypeFlags.Object)
 
             let model =
-                { Build.shapeModel [ aliased ] with DeclNames = Map.ofList [ 20, "Options" ] }
+                { Build.shapeModel [ aliased ] with DeclNames = Map.ofList [ 20<typeId>, "Options" ] }
 
-            Expect.equal (Spec.typeRef Build.context model None "x" 20) (FsNamed "Options", []) "alias reference"
+            Expect.equal (Spec.typeRef Build.context model None "x" 20<typeId>) (FsNamed "Options", []) "alias reference"
 
         testCase "an external object type widens to obj and the finding names it" <| fun _ ->
             let external =
-                { Build.facts (Build.typeResponse 21 TypeFlags.Object) with SymbolName = Some "RegExp" }
+                { Build.facts (Build.typeResponse 21 TypeFlags.Object) with SymbolName = Some ((fun value -> value * uom<symbolName>) "RegExp") }
 
             let model = Build.shapeModel [ external ]
-            let reference, findings = Spec.typeRef Build.context model None "x" 21
+            let reference, findings = Spec.typeRef Build.context model None "x" 21<typeId>
 
             Expect.equal reference FsObj "widened"
 
@@ -948,16 +949,16 @@ let typeRefTests =
             | findings -> failtest $"expected one finding, got %A{findings}"
 
         testCase "a type id absent from the table is an escape, not an exception" <| fun _ ->
-            let reference, findings = Spec.typeRef Build.context (Build.shapeModel []) None "x" 99
+            let reference, findings = Spec.typeRef Build.context (Build.shapeModel []) None "x" 99<typeId>
 
             Expect.equal reference FsObj "widened"
             Expect.equal (findings |> List.map _.Tier) [ Escape ] "escape"
 
         testCase "a deliberately-not-followed type reports its reason" <| fun _ ->
             let model =
-                { Build.shapeModel [] with NotFollowed = Map.ofList [ 99, "beyond the depth cutoff (12)" ] }
+                { Build.shapeModel [] with NotFollowed = Map.ofList [ 99<typeId>, "beyond the depth cutoff (12)" ] }
 
-            let reference, findings = Spec.typeRef Build.context model None "x" 99
+            let reference, findings = Spec.typeRef Build.context model None "x" 99<typeId>
 
             Expect.equal reference FsObj "widened"
             Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened, not escaped"
@@ -967,30 +968,30 @@ let typeRefTests =
             let external =
                 { Build.facts (Build.typeResponse 21 TypeFlags.Object) with
                     Origin = CompilerLib
-                    SymbolName = Some "RegExp" }
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "RegExp") }
 
             let context =
                 { Build.context with
                     Config =
                         { GeneratorConfig.Default with
-                            Groups = Map.ofList [ "typescript/lib", Reference ] } }
+                            Groups = Map.ofList [ "typescript/lib" * uom<npmDependency>, Reference ] } }
 
             Expect.equal
-                (Spec.typeRef context (Build.shapeModel [ external ]) None "x" 21)
+                (Spec.typeRef context (Build.shapeModel [ external ]) None "x" 21<typeId>)
                 (FsNamed "TypeScript.Lib.Es.RegExp", [])
                 "the O7 template"
 
         testCase "an anonymous type in a referenced group still widens, with a finding" <| fun _ ->
             let external =
-                { Build.facts (Build.typeResponse 22 TypeFlags.Object) with Origin = Dependency "left-pad" }
+                { Build.facts (Build.typeResponse 22 TypeFlags.Object) with Origin = PackageId.Dependency ("left-pad" * uom<npmDependency>) }
 
             let context =
                 { Build.context with
                     Config =
                         { GeneratorConfig.Default with
-                            Groups = Map.ofList [ "left-pad", Reference ] } }
+                            Groups = Map.ofList [ "left-pad" * uom<npmDependency>, Reference ] } }
 
-            let reference, findings = Spec.typeRef context (Build.shapeModel [ external ]) None "x" 22
+            let reference, findings = Spec.typeRef context (Build.shapeModel [ external ]) None "x" 22<typeId>
 
             Expect.equal reference FsObj "nothing to template with"
             Expect.equal (findings |> List.map _.Tier) [ Widened ] "reported, not silent"
@@ -1001,13 +1002,13 @@ let typeRefTests =
             { Build.context with
                 Config =
                     { GeneratorConfig.Default with
-                        Groups = Map.ofList [ "typescript/lib", GroupDisposition.Map(Map.ofList names) ] } }
+                        Groups = Map.ofList [ "typescript/lib" * uom<npmDependency>, GroupDisposition.Map(Map.ofList names) ] } }
 
         testCase "a mapped group's type is written as the binding its table names" <| fun _ ->
             let external =
                 { Build.facts (Build.typeResponse 21 TypeFlags.Object) with
                     Origin = CompilerLib
-                    SymbolName = Some "RegExp" }
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "RegExp") }
 
             let context =
                 mappedLib
@@ -1018,7 +1019,7 @@ let typeRefTests =
                       } ]
 
             Expect.equal
-                (Spec.typeRef context (Build.shapeModel [ external ]) None "x" 21)
+                (Spec.typeRef context (Build.shapeModel [ external ]) None "x" 21<typeId>)
                 (FsNamed "System.Text.RegularExpressions.Regex", [])
                 "the destination, exact"
 
@@ -1026,8 +1027,8 @@ let typeRefTests =
             let external =
                 { Build.facts (Build.typeResponse 21 TypeFlags.Object) with
                     Origin = CompilerLib
-                    SymbolName = Some "WeakRef"
-                    TypeArguments = [ 1 ] }
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "WeakRef")
+                    TypeArguments = [ 1<typeId> ] }
 
             let context =
                 mappedLib
@@ -1040,7 +1041,7 @@ let typeRefTests =
             let model = Build.shapeModel (Build.primitives @ [ external ])
 
             Expect.equal
-                (Spec.typeRef context model None "x" 21)
+                (Spec.typeRef context model None "x" 21<typeId>)
                 (FsApp("System.WeakReference", [ FsString ]), [])
                 "the argument is shaped at its position"
 
@@ -1048,8 +1049,8 @@ let typeRefTests =
             let external =
                 { Build.facts (Build.typeResponse 21 TypeFlags.Object) with
                     Origin = CompilerLib
-                    SymbolName = Some "Iterator"
-                    TypeArguments = [ 1; 2; 4 ] }
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "Iterator")
+                    TypeArguments = [ 1<typeId>; 2<typeId>; 4<typeId> ] }
 
             let context =
                 mappedLib
@@ -1060,7 +1061,7 @@ let typeRefTests =
                       } ]
 
             let model = Build.shapeModel (Build.primitives @ [ external ])
-            let reference, findings = Spec.typeRef context model None "x" 21
+            let reference, findings = Spec.typeRef context model None "x" 21<typeId>
 
             Expect.equal reference FsObj "an application that would not compile is not written"
             Expect.equal (findings |> List.map _.Key) [ "TR053" ] "the arity mismatch is reported"
@@ -1070,7 +1071,7 @@ let typeRefTests =
             let external =
                 { Build.facts (Build.typeResponse 21 TypeFlags.Object) with
                     Origin = CompilerLib
-                    SymbolName = Some "Response" }
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "Response") }
 
             let context =
                 mappedLib
@@ -1080,14 +1081,14 @@ let typeRefTests =
                           Arity = 0
                       } ]
 
-            let reference, findings = Spec.typeRef context (Build.shapeModel [ external ]) None "x" 21
+            let reference, findings = Spec.typeRef context (Build.shapeModel [ external ]) None "x" 21<typeId>
 
             Expect.equal reference FsObj "mapping is per name"
             Expect.equal (findings |> List.map _.Key) [ "TR023" ] "reported as any unbound name is"
 
         testCase "an anonymous type in a mapped group widens, with a finding of its own" <| fun _ ->
             let external =
-                { Build.facts (Build.typeResponse 22 TypeFlags.Object) with Origin = Dependency "left-pad" }
+                { Build.facts (Build.typeResponse 22 TypeFlags.Object) with Origin = PackageId.StringDependency "left-pad" }
 
             let context =
                 { Build.context with
@@ -1095,7 +1096,7 @@ let typeRefTests =
                         { GeneratorConfig.Default with
                             Groups =
                                 Map.ofList
-                                    [ "left-pad",
+                                    [ "left-pad" * uom<npmDependency>,
                                       GroupDisposition.Map(
                                           Map.ofList
                                               [ "Padded",
@@ -1105,7 +1106,7 @@ let typeRefTests =
                                                 } ]
                                       ) ] } }
 
-            let reference, findings = Spec.typeRef context (Build.shapeModel [ external ]) None "x" 22
+            let reference, findings = Spec.typeRef context (Build.shapeModel [ external ]) None "x" 22<typeId>
 
             Expect.equal reference FsObj "the destination binds names and this type has none"
             Expect.equal (findings |> List.map _.Key) [ "TR052" ] "reported, not silent"
@@ -1126,7 +1127,7 @@ let private ansiRegexShaped () =
                       ReadOnly = true } ] }
 
     let regExpType =
-        { Build.facts (Build.typeResponse 21 TypeFlags.Object) with SymbolName = Some "RegExp" }
+        { Build.facts (Build.typeResponse 21 TypeFlags.Object) with SymbolName = Some ((fun value -> value * uom<symbolName>) "RegExp") }
 
     let functionType =
         { Build.facts (Build.typeResponse 30 TypeFlags.Object) with
@@ -1146,8 +1147,8 @@ let private ansiRegexShaped () =
             }
         ExportTypes =
             Map.ofList
-                [ 100, { Declared = Some 20; Value = None }
-                  200, { Declared = None; Value = Some 30 } ] }
+                [ 100<symbolId>, { Declared = Some 20<typeId>; Value = None }
+                  200<symbolId>, { Declared = None; Value = Some 30<typeId> } ] }
 
 [<Tests>]
 let shapePassTests =
@@ -1158,7 +1159,7 @@ let shapePassTests =
             let model, findings = Build.runPass ExportNames.nameExports (ansiRegexShaped ())
 
             Expect.isEmpty findings "no findings"
-            Expect.equal model.DeclNames (Map.ofList [ 20, "Options" ]) "the alias's type, not the function"
+            Expect.equal model.DeclNames (Map.ofList [ 20<typeId>, "Options" ]) "the alias's type, not the function"
 
         testCase "shape-interfaces shapes the plain object alias" <| fun _ ->
             let named, _ = Build.runPass ExportNames.nameExports (ansiRegexShaped ())
@@ -1185,10 +1186,10 @@ let shapePassTests =
 
             let bagType =
                 { Build.facts (Build.typeResponse 20 TypeFlags.Object) with
-                    SymbolName = Some "Bag"
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "Bag")
                     IndexInfos =
-                        [ { KeyTypeId = 1
-                            ValueTypeId = 2
+                        [ { KeyTypeId = 1<typeId>
+                            ValueTypeId = 2<typeId>
                             IsReadonly = false } ] }
 
             let model =
@@ -1197,7 +1198,7 @@ let shapePassTests =
                                 Namespaces = Map.empty
                                 ShadowedByLib = 0
                               }
-                    ExportTypes = Map.ofList [ 100, { Declared = Some 20; Value = None } ] }
+                    ExportTypes = Map.ofList [ 100<symbolId>, { Declared = Some 20<typeId>; Value = None } ] }
 
             let named, _ = Build.runPass ExportNames.nameExports model
             let shaped, _ = Build.runPass Interfaces.shapeInterfaces named
@@ -1219,10 +1220,10 @@ let shapePassTests =
 
             let bagType =
                 { Build.facts (Build.typeResponse 20 TypeFlags.Object) with
-                    SymbolName = Some "FrozenBag"
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "FrozenBag")
                     IndexInfos =
-                        [ { KeyTypeId = 1
-                            ValueTypeId = 1
+                        [ { KeyTypeId = 1<typeId>
+                            ValueTypeId = 1<typeId>
                             IsReadonly = true } ] }
 
             let model =
@@ -1231,7 +1232,7 @@ let shapePassTests =
                                 Namespaces = Map.empty
                                 ShadowedByLib = 0
                               }
-                    ExportTypes = Map.ofList [ 100, { Declared = Some 20; Value = None } ] }
+                    ExportTypes = Map.ofList [ 100<symbolId>, { Declared = Some 20<typeId>; Value = None } ] }
 
             let named, _ = Build.runPass ExportNames.nameExports model
             let shaped, _ = Build.runPass Interfaces.shapeInterfaces named
@@ -1252,8 +1253,8 @@ let shapePassTests =
                 { Build.facts (Build.typeResponse 20 TypeFlags.Object) with
                     Members = [ Build.resolvedMember (Build.symbol 101 "label" SymbolFlags.Property) 1 ]
                     IndexInfos =
-                        [ { KeyTypeId = 1
-                            ValueTypeId = 2
+                        [ { KeyTypeId = 1<typeId>
+                            ValueTypeId = 2<typeId>
                             IsReadonly = false } ] }
 
             let model =
@@ -1262,7 +1263,7 @@ let shapePassTests =
                                 Namespaces = Map.empty
                                 ShadowedByLib = 0
                               }
-                    ExportTypes = Map.ofList [ 100, { Declared = Some 20; Value = None } ] }
+                    ExportTypes = Map.ofList [ 100<symbolId>, { Declared = Some 20<typeId>; Value = None } ] }
 
             let named, _ = Build.runPass ExportNames.nameExports model
             let shaped, _ = Build.runPass Interfaces.shapeInterfaces named
@@ -1278,7 +1279,7 @@ let shapePassTests =
             let model, _ = Build.runPass Ordering.orderDeclarations shaped
 
             match model.Decls with
-            | [ FsExports [ m ] ] ->
+            | [ FsExports { Members = [ { Member = m } ] } ] ->
                 Expect.equal m.Name "ansiRegex" "named after the declaring symbol, not 'default'"
                 Expect.equal m.Binding ImportDefault "bound as the default import"
 
@@ -1290,7 +1291,7 @@ let shapePassTests =
 
                 Expect.equal
                     (findings |> List.map (fun f -> f.Tier, f.Symbol))
-                    [ Ergonomic, "ansiRegex(options)"; Widened, "ansiRegex()" ]
+                    [ Ergonomic, "Exports.ansiRegex(options)"; Widened, "Exports.ansiRegex()" ]
                     "the hoist and the widening are both findings"
             | decls -> failtest $"expected the Exports group, got %A{decls}"
 
@@ -1312,17 +1313,17 @@ let shapePassTests =
                                 Namespaces = Map.empty
                                 ShadowedByLib = 0
                               }
-                    ExportTypes = Map.ofList [ 400, { Declared = None; Value = Some 41 } ] }
+                    ExportTypes = Map.ofList [ 400<symbolId>, { Declared = None; Value = Some 41<typeId> } ] }
 
             let named, _ = Build.runPass Anonymous.synthesizeAnonymous model
 
-            Expect.equal (Map.tryFind 40 named.DeclNames) (Some "Make.Options") "path-derived name"
-            Expect.equal (Map.tryFind 41 named.DeclNames) None "the callable itself stays inline"
+            Expect.equal (Map.tryFind 40<typeId> named.DeclNames) (Some "Make.Options") "path-derived name"
+            Expect.equal (Map.tryFind 41<typeId> named.DeclNames) None "the callable itself stays inline"
 
         testCase "synthesize-anonymous prefers a non-exported type's own name" <| fun _ ->
             let internal' =
                 { Build.facts (Build.typeResponse 40 TypeFlags.Object) with
-                    SymbolName = Some "Globals"
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "Globals")
                     Members = [ Build.resolvedMember (Build.symbol 401 "speed" SymbolFlags.Property) 2 ] }
 
             let model =
@@ -1332,29 +1333,29 @@ let shapePassTests =
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
-                    ExportTypes = Map.ofList [ 400, { Declared = None; Value = Some 40 } ] }
+                    ExportTypes = Map.ofList [ 400<symbolId>, { Declared = None; Value = Some 40<typeId> } ] }
 
             let named, _ = Build.runPass Anonymous.synthesizeAnonymous model
 
-            Expect.equal (Map.tryFind 40 named.DeclNames) (Some "Globals") "its own name, not the path"
+            Expect.equal (Map.tryFind 40<typeId> named.DeclNames) (Some "Globals") "its own name, not the path"
 
         testCase "synthesize-anonymous nests a namespaced type under the namespace, not a number" <| fun _ ->
             // `TailStream.TailEvent` beside the global `TailEvent`: two declarations of one
             // name, and TypeScript separates them by the namespace one of them is written in.
             let exported =
                 { Build.facts (Build.typeResponse 40 TypeFlags.Object) with
-                    SymbolName = Some "Event"
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "Event")
                     Members = [ Build.resolvedMember (Build.symbol 401 "at" SymbolFlags.Property) 2 ] }
 
             let namespaced =
                 { Build.facts (Build.typeResponse 41 TypeFlags.Object) with
-                    SymbolName = Some "Event"
-                    SymbolParent = Some 900
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "Event")
+                    SymbolParent = Some 900<symbolId>
                     Members = [ Build.resolvedMember (Build.symbol 402 "seq" SymbolFlags.Property) 2 ] }
 
             let holder =
                 { Build.facts (Build.typeResponse 42 TypeFlags.Object) with
-                    SymbolName = Some "Holder"
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "Holder")
                     Members =
                         [ Build.resolvedMember (Build.symbol 403 "first" SymbolFlags.Property) 40
                           Build.resolvedMember (Build.symbol 404 "second" SymbolFlags.Property) 41 ] }
@@ -1363,15 +1364,15 @@ let shapePassTests =
                 { Build.shapeModel (exported :: namespaced :: holder :: Build.primitives) with
                     Harvest =
                         { Exports = [ Build.export "holder" (Build.symbol 400 "holder" SymbolFlags.BlockScopedVariable) ]
-                          Namespaces = Map.ofList [ 900, "TailStream" ]
+                          Namespaces = Map.ofList [ 900<symbolId>, ((fun value -> value * uom<symbolName>) "TailStream") ]
                           ShadowedByLib = 0
                         }
-                    ExportTypes = Map.ofList [ 400, { Declared = None; Value = Some 42 } ] }
+                    ExportTypes = Map.ofList [ 400<symbolId>, { Declared = None; Value = Some 42<typeId> } ] }
 
             let named, findings = Build.runPass Anonymous.synthesizeAnonymous model
 
-            Expect.equal (Map.tryFind 40 named.DeclNames) (Some "Event") "the first claimant keeps the bare name"
-            Expect.equal (Map.tryFind 41 named.DeclNames) (Some "TailStream.Event") "the second nests under its namespace"
+            Expect.equal (Map.tryFind 40<typeId> named.DeclNames) (Some "Event") "the first claimant keeps the bare name"
+            Expect.equal (Map.tryFind 41<typeId> named.DeclNames) (Some "TailStream.Event") "the second nests under its namespace"
 
             Expect.contains (findings |> List.map _.Key) "SY004" "and the nesting is reported like any other"
 
@@ -1380,18 +1381,18 @@ let shapePassTests =
             // separates nothing, so the second claimant disambiguates by number.
             let exported =
                 { Build.facts (Build.typeResponse 40 TypeFlags.Object) with
-                    SymbolName = Some "Event"
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "Event")
                     Members = [ Build.resolvedMember (Build.symbol 401 "at" SymbolFlags.Property) 2 ] }
 
             let namespaced =
                 { Build.facts (Build.typeResponse 41 TypeFlags.Object) with
-                    SymbolName = Some "Event"
-                    SymbolParent = Some 900
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "Event")
+                    SymbolParent = Some 900<symbolId>
                     Members = [ Build.resolvedMember (Build.symbol 402 "seq" SymbolFlags.Property) 2 ] }
 
             let holder =
                 { Build.facts (Build.typeResponse 42 TypeFlags.Object) with
-                    SymbolName = Some "Holder"
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "Holder")
                     Members =
                         [ Build.resolvedMember (Build.symbol 403 "first" SymbolFlags.Property) 40
                           Build.resolvedMember (Build.symbol 404 "second" SymbolFlags.Property) 41 ] }
@@ -1403,11 +1404,11 @@ let shapePassTests =
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
-                    ExportTypes = Map.ofList [ 400, { Declared = None; Value = Some 42 } ] }
+                    ExportTypes = Map.ofList [ 400<symbolId>, { Declared = None; Value = Some 42<typeId> } ] }
 
             let named, _ = Build.runPass Anonymous.synthesizeAnonymous model
 
-            Expect.equal (Map.tryFind 41 named.DeclNames) (Some "Event2") "the numeric suffix is what is left"
+            Expect.equal (Map.tryFind 41<typeId> named.DeclNames) (Some "Event2") "the numeric suffix is what is left"
 
         testCase "name-exports nests the namespaced claimant of a contested name" <| fun _ ->
             // `CloudflareWorkersModule.WorkflowSleepDuration` claims the name before the global
@@ -1431,19 +1432,55 @@ let shapePassTests =
                         { Exports =
                             [ Build.export "Event" inNamespace
                               Build.export "Event" (Build.symbol 101 "Event" SymbolFlags.Interface) ]
-                          Namespaces = Map.ofList [ 900, "TailStream" ]
+                          Namespaces = Map.ofList [ 900<symbolId>, ((fun value -> value * uom<symbolName>) "TailStream") ]
                           ShadowedByLib = 0
                         }
                     ExportTypes =
                         Map.ofList
-                            [ 100, { Declared = Some 40; Value = None }
-                              101, { Declared = Some 41; Value = None } ] }
+                            [ 100<symbolId>, { Declared = Some 40<typeId>; Value = None }
+                              101<symbolId>, { Declared = Some 41<typeId>; Value = None } ] }
 
             let named, findings = Build.runPass ExportNames.nameExports model
 
-            Expect.equal (Map.tryFind 40 named.DeclNames) (Some "TailStream.Event") "the namespaced export nests"
-            Expect.equal (Map.tryFind 41 named.DeclNames) (Some "Event") "and the global one keeps the bare name"
+            Expect.equal (Map.tryFind 40<typeId> named.DeclNames) (Some "TailStream.Event") "the namespaced export nests"
+            Expect.equal (Map.tryFind 41<typeId> named.DeclNames) (Some "Event") "and the global one keeps the bare name"
             Expect.equal (findings |> List.map _.Key) [ "SY004" ] "the nesting is reported once"
+
+        testCase "name-exports suffixes the second declaration under a name the first already claimed" <| fun _ ->
+            // Neither declaration is namespaced, so `claim` cannot resolve the clash by nesting
+            // one of them; the second keeps a numeric suffix instead.
+            let first =
+                { Build.facts (Build.typeResponse 40 TypeFlags.Object) with
+                    Members = [ Build.resolvedMember (Build.symbol 401 "seq" SymbolFlags.Property) 2 ] }
+
+            let second =
+                { Build.facts (Build.typeResponse 41 TypeFlags.Object) with
+                    Members = [ Build.resolvedMember (Build.symbol 402 "at" SymbolFlags.Property) 2 ] }
+
+            let model =
+                { Build.shapeModel (first :: second :: Build.primitives) with
+                    Harvest =
+                        { Exports =
+                            [ Build.export "Session" (Build.symbol 100 "Session" SymbolFlags.Interface)
+                              Build.export "Session" (Build.symbol 101 "Session" SymbolFlags.Interface) ]
+                          Namespaces = Map.empty
+                          ShadowedByLib = 0
+                        }
+                    ExportTypes =
+                        Map.ofList
+                            [ 100<symbolId>, { Declared = Some 40<typeId>; Value = None }
+                              101<symbolId>, { Declared = Some 41<typeId>; Value = None } ] }
+
+            let named, findings = Build.runPass ExportNames.nameExports model
+
+            Expect.equal (Map.tryFind 40<typeId> named.DeclNames) (Some "Session") "the first claimant keeps the plain name"
+            Expect.equal (Map.tryFind 41<typeId> named.DeclNames) (Some "Session2") "the second keeps a numeric suffix"
+            Expect.equal (findings |> List.map _.Key) [ "NE001" ] "the suffix is reported"
+
+            Expect.equal
+                (findings |> List.map _.Message)
+                [ "name 'Session' already claimed; this declaration, from the entry module, is written as 'Session2'" ]
+                "the finding names the original and the suffixed name"
 
         testCase "synthesize-anonymous names the generic declaration behind an instantiation, not the instantiation" <| fun _ ->
             // `Ready<T>` is not exported and is reached only as `Ready<U>` from some generic
@@ -1452,15 +1489,15 @@ let shapePassTests =
             let declaration =
                 genericDecl 30 [ 20 ] [ Build.resolvedMember (Build.symbol 301 "latest" SymbolFlags.Property) 20 ]
 
-            let declaration = { declaration with SymbolName = Some "Ready" }
+            let declaration = { declaration with SymbolName = Some ((fun value -> value * uom<symbolName>) "Ready") }
 
             let instantiation =
                 { Build.facts
                     { Build.typeResponse 31 TypeFlags.Object with
                         ObjectFlags = ValueSome ObjectFlags.Reference
                         Target = ValueSome 30 } with
-                    SymbolName = Some "Ready"
-                    TypeArguments = [ 21 ]
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "Ready")
+                    TypeArguments = [ 21<typeId> ]
                     Members = [ Build.resolvedMember (Build.symbol 301 "latest" SymbolFlags.Property) 21 ] }
 
             let model =
@@ -1469,12 +1506,12 @@ let shapePassTests =
                                 Namespaces = Map.empty
                                 ShadowedByLib = 0
                               }
-                    ExportTypes = Map.ofList [ 400, { Declared = None; Value = Some 31 } ] }
+                    ExportTypes = Map.ofList [ 400<symbolId>, { Declared = None; Value = Some 31<typeId> } ] }
 
             let named, _ = Build.runPass Anonymous.synthesizeAnonymous model
 
-            Expect.equal (Map.tryFind 30 named.DeclNames) (Some "Ready") "the declaration is named"
-            Expect.equal (Map.tryFind 31 named.DeclNames) None "the instantiation is written as an application"
+            Expect.equal (Map.tryFind 30<typeId> named.DeclNames) (Some "Ready") "the declaration is named"
+            Expect.equal (Map.tryFind 31<typeId> named.DeclNames) None "the instantiation is written as an application"
 
         testCase "synthesize-anonymous recognises an alias whose intersection body defers on a conditional" <| fun _ ->
             // `three`'s `Node<TNodeType>` (`docs/plans/generator-three-rung.md` §11.4):
@@ -1490,8 +1527,8 @@ let shapePassTests =
 
             let named, findings = Build.runPass Anonymous.synthesizeAnonymous model
 
-            Expect.equal (Map.tryFind 60 named.DeclNames) (Some "Node") "the application reads back the declaration's name"
-            Expect.equal (Map.tryFind 60 named.DeclParams) (Some [ 2 ]) "the argument comes back off the operands that resolved"
+            Expect.equal (Map.tryFind 60<typeId> named.DeclNames) (Some "Node") "the application reads back the declaration's name"
+            Expect.equal (Map.tryFind 60<typeId> named.DeclParams) (Some [ 2<typeId> ]) "the argument comes back off the operands that resolved"
             Expect.equal (findings |> List.map _.Key) [ "SY001" ] "recognition, not a second hoist"
 
         testCase "synthesize-anonymous aligns the operands a vanished conditional leaves behind" <| fun _ ->
@@ -1501,35 +1538,35 @@ let shapePassTests =
 
             let named, findings = Build.runPass Anonymous.synthesizeAnonymous model
 
-            Expect.equal (Map.tryFind 60 named.DeclNames) (Some "Node") "the shorter application is still the same alias"
-            Expect.equal (Map.tryFind 60 named.DeclParams) (Some [ 2 ]) "the surviving operands carry the argument"
+            Expect.equal (Map.tryFind 60<typeId> named.DeclNames) (Some "Node") "the shorter application is still the same alias"
+            Expect.equal (Map.tryFind 60<typeId> named.DeclParams) (Some [ 2<typeId> ]) "the surviving operands carry the argument"
             Expect.equal (findings |> List.map _.Key) [ "SY001" ] "recognition, not a second hoist"
 
         testCase "synthesize-anonymous uses exact alias arguments after an operand disappears" <| fun _ ->
             let model = conditionalAliasModel [ 30; 31 ] [ 30; 40 ]
-            let application = model.Types[60]
+            let application = model.Types[60<typeId>]
             let model =
-                { model with Types = Map.add 60 { application with Response = { application.Response with AliasTypeArguments = ValueSome [| 2 |] } } model.Types }
+                { model with Types = Map.add 60<typeId> { application with Response = { application.Response with AliasTypeArguments = ValueSome [| 2 |] } } model.Types }
             let named, findings = Build.runPass Anonymous.synthesizeAnonymous model
-            (Map.tryFind 60 named.DeclNames, Map.tryFind 60 named.DeclParams, findings |> List.map _.Key)
-            |> Flip.Expect.equal "" (Some "Node", Some [ 2 ], [ "SY001" ])
+            (Map.tryFind 60<typeId> named.DeclNames, Map.tryFind 60<typeId> named.DeclParams, findings |> List.map _.Key)
+            |> Flip.Expect.equal "" (Some "Node", Some [ 2<typeId> ], [ "SY001" ])
 
         testTheory "an alias application cannot replace an opaque generic declaration" [
             10 ==> []
             60 ==> []
         ] <| fun (applicationId, expected) ->
             let model = conditionalAliasModel [ 30; 31 ] [ 30; 40 ]
-            let application = model.Types[60]
+            let application = model.Types[60<typeId>]
             let model =
                 { model with
                     Types =
                         model.Types
-                        |> Map.remove 60
-                        |> Map.add applicationId { application with Response = { application.Response with Id = applicationId } }
-                        |> Map.add 20 { model.Types[20] with SymbolName = Some "T" }
-                    DeclNames = Map.add applicationId "Node" model.DeclNames
-                    DeclParams = Map.ofList [ applicationId, [ 2 ] ]
-                    AliasApplications = Map.ofList [ applicationId, 50 ] }
+                        |> Map.remove 60<typeId>
+                        |> Map.add ((fun value -> value * uom<typeId>) applicationId) { application with Response = { application.Response with Id = applicationId } }
+                        |> Map.add 20<typeId> { model.Types[20<typeId>] with SymbolName = Some ((fun value -> value * uom<symbolName>) "T") }
+                    DeclNames = Map.add ((fun value -> value * uom<typeId>) applicationId) "Node" model.DeclNames
+                    DeclParams = Map.ofList [ ((fun value -> value * uom<typeId>) applicationId), [ 2<typeId> ] ]
+                    AliasApplications = Map.ofList [ ((fun value -> value * uom<typeId>) applicationId), 50<typeId> ] }
             let shaped, _ = Build.runPass Interfaces.shapeInterfaces model
 
             shaped.Decls |> Flip.Expect.equal "the generic alias owns the name" expected
@@ -1540,19 +1577,19 @@ let shapePassTests =
             |> Flip.Expect.equal "the opaque generic is declared once" [ "Node", 1 ]
 
         testTheory "alias argument recovery rejects conflicting bindings" [
-            false ==> (Some "Node", Some [ 2 ])
+            false ==> (Some "Node", Some [ 2<typeId> ])
             true ==> (None, None)
         ] <| fun (conflicts, expected) ->
             let model = conditionalAliasModel [ 30; 31; 32; 34 ] [ 30; 40; 41; 44 ]
-            let declared = model.Types[50]
+            let declared = model.Types[50<typeId>]
             let types =
                 model.Types
-                |> Map.add 31 (Build.facts (Build.typeResponse 31 TypeFlags.Object))
-                |> Map.add 34 (marker 34 "copy" 20)
-                |> Map.add 44 (marker 44 "copy" (if conflicts then 1 else 2))
-                |> Map.add 50 { declared with Members = model.Types[60].Members }
+                |> Map.add 31<typeId> (Build.facts (Build.typeResponse 31 TypeFlags.Object))
+                |> Map.add 34<typeId> (marker 34 "copy" 20)
+                |> Map.add 44<typeId> (marker 44 "copy" (if conflicts then 1 else 2))
+                |> Map.add 50<typeId> { declared with Members = model.Types[60<typeId>].Members }
             let named, _ = Build.runPass Anonymous.synthesizeAnonymous { model with Types = types }
-            (Map.tryFind 60 named.DeclNames, Map.tryFind 60 named.DeclParams) |> Flip.Expect.equal "" expected
+            (Map.tryFind 60<typeId> named.DeclNames, Map.tryFind 60<typeId> named.DeclParams) |> Flip.Expect.equal "" expected
 
         testCase "synthesize-anonymous widens an alias whose argument only the conditional carried" <| fun _ ->
             // Drop the tag operand and the parameter appears under the conditional alone. The
@@ -1563,7 +1600,7 @@ let shapePassTests =
 
             let named, findings = Build.runPass Anonymous.synthesizeAnonymous model
 
-            Expect.equal (Map.tryFind 60 named.DeclNames) None "no second declaration under a minted name"
+            Expect.equal (Map.tryFind 60<typeId> named.DeclNames) None "no second declaration under a minted name"
             Expect.equal (findings |> List.map _.Key) [ "SY002" ] "the widening is reported"
 
         testCase "bind-free-type-params declares a hoisted object over the parameters it reads" <| fun _ ->
@@ -1583,14 +1620,14 @@ let shapePassTests =
 
             let model =
                 { Build.shapeModel (props :: render :: typeParam 20 "T" :: typeParam 21 "U" :: Build.primitives) with
-                    DeclNames = Map.ofList [ 40, "EachProps" ] }
+                    DeclNames = Map.ofList [ 40<typeId>, "EachProps" ] }
 
             let bound, _ = Build.runPass FreeTypeParams.bindFreeTypeParams model
 
-            Expect.equal (Map.tryFind 40 bound.DeclParams) (Some [ 20; 21 ]) "T then U, as first read"
+            Expect.equal (Map.tryFind 40<typeId> bound.DeclParams) (Some [ 20<typeId>; 21<typeId> ]) "T then U, as first read"
 
             let reference, findings =
-                Spec.typeRef Build.context { bound with TypeVars = Map.ofList [ 20, "T"; 21, "U" ] } None "x" 40
+                Spec.typeRef Build.context { bound with TypeVars = Map.ofList [ 20<typeId>, "T"; 21<typeId>, "U" ] } None "x" 40<typeId>
 
             Expect.equal reference (FsApp("EachProps", [ FsTypeVar "T"; FsTypeVar "U" ])) "applied back where they are in scope"
             Expect.isEmpty findings "an application over in-scope variables is exact"
@@ -1600,15 +1637,15 @@ let shapePassTests =
             |> List.map (fun flags ->
                 let opaque =
                     { Build.facts (Build.typeResponse 42 flags) with
-                        AliasTypeArguments = [ 20 ] }
+                        AliasTypeArguments = [ 20<typeId> ] }
                 let props =
                     { Build.facts (Build.typeResponse 40 TypeFlags.Object) with
                         Members = [ Build.resolvedMember (Build.symbol 401 "target" SymbolFlags.Property) 42 ] }
                 let model =
                     { Build.shapeModel (props :: opaque :: typeParam 20 "T" :: Build.primitives) with
-                        DeclNames = Map.ofList [ 40, "Props" ] }
+                        DeclNames = Map.ofList [ 40<typeId>, "Props" ] }
                 let bound, _ = Build.runPass FreeTypeParams.bindFreeTypeParams model
-                Map.tryFind 40 bound.DeclParams)
+                Map.tryFind 40<typeId> bound.DeclParams)
             |> Flip.Expect.equal "opaque references have no emitted type arguments" [ None; None ]
 
         testCase "bind-free-type-params leaves a signature's own parameters to the signature" <| fun _ ->
@@ -1618,20 +1655,20 @@ let shapePassTests =
                 { Build.facts (Build.typeResponse 42 TypeFlags.Object) with
                     CallSignatures =
                         [ { Build.signature [ Build.resolvedMember (Build.symbol 403 "key" SymbolFlags.FunctionScopedVariable) 20 ] 1 with
-                              TypeParameters = [ 20 ] } ] }
+                              TypeParameters = [ 20<typeId> ] } ] }
 
             let store =
                 { Build.facts (Build.typeResponse 40 TypeFlags.Object) with
-                    SymbolName = Some "Store"
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "Store")
                     Members = [ Build.resolvedMember (Build.symbol 402 "read" SymbolFlags.Method) 42 ] }
 
             let model =
                 { Build.shapeModel (store :: read :: typeParam 20 "K" :: Build.primitives) with
-                    DeclNames = Map.ofList [ 40, "Store" ] }
+                    DeclNames = Map.ofList [ 40<typeId>, "Store" ] }
 
             let bound, _ = Build.runPass FreeTypeParams.bindFreeTypeParams model
 
-            Expect.equal (Map.tryFind 40 bound.DeclParams) None "nothing free"
+            Expect.equal (Map.tryFind 40<typeId> bound.DeclParams) None "nothing free"
 
         testCase "shape-interfaces flattens an object intersection and inherits its named operands" <| fun _ ->
             // `type NamedTimed = Named & Timed`: the resolve tier read both member sets off the
@@ -1643,22 +1680,22 @@ let shapePassTests =
 
             let named =
                 { Build.facts (Build.typeResponse 40 TypeFlags.Object) with
-                    SymbolName = Some "Named"
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "Named")
                     Members = [ name ] }
 
             let timed =
                 { Build.facts (Build.typeResponse 41 TypeFlags.Object) with
-                    SymbolName = Some "Timed"
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "Timed")
                     Members = [ at ] }
 
             let both =
                 { Build.facts (Build.typeResponse 50 TypeFlags.Intersection) with
-                    IntersectionMembers = [ 40; 41 ]
+                    IntersectionMembers = [ 40<typeId>; 41<typeId> ]
                     Members = [ name; at ] }
 
             let model =
                 { Build.shapeModel (named :: timed :: both :: Build.primitives) with
-                    DeclNames = Map.ofList [ 40, "Named"; 41, "Timed"; 50, "NamedTimed" ] }
+                    DeclNames = Map.ofList [ 40<typeId>, "Named"; 41<typeId>, "Timed"; 50<typeId>, "NamedTimed" ] }
 
             let shaped, findings = Build.runPass Interfaces.shapeInterfaces model
 
@@ -1686,7 +1723,7 @@ let shapePassTests =
                 (Ergonomic, "NamedTimed")
                 "the flattening is recorded on the declaration"
 
-            let reference, refFindings = Spec.typeRef Build.context shaped None "x" 50
+            let reference, refFindings = Spec.typeRef Build.context shaped None "x" 50<typeId>
             Expect.equal reference (FsNamed "NamedTimed") "a reference names it"
             Expect.isEmpty refFindings "at no further cost"
 
@@ -1700,18 +1737,18 @@ let shapePassTests =
 
             let baseType =
                 { Build.facts (Build.typeResponse 40 TypeFlags.Object) with
-                    SymbolName = Some "Base"
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "Base")
                     Members = [ name ] }
 
             let derived =
                 { Build.facts (Build.typeResponse 41 TypeFlags.Object) with
-                    SymbolName = Some "Derived"
-                    BaseTypes = [ 40 ]
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "Derived")
+                    BaseTypes = [ 40<typeId> ]
                     Members = [ extra; name ] }
 
             let model =
                 { Build.shapeModel (baseType :: derived :: Build.primitives) with
-                    DeclNames = Map.ofList [ 40, "Base"; 41, "Derived" ] }
+                    DeclNames = Map.ofList [ 40<typeId>, "Base"; 41<typeId>, "Derived" ] }
 
             let shaped, findings = Build.runPass Interfaces.shapeInterfaces model
 
@@ -1752,17 +1789,17 @@ let shapePassTests =
                     { Build.typeResponse 31 TypeFlags.Object with
                         ObjectFlags = ValueSome ObjectFlags.Reference
                         Target = ValueSome 30 } with
-                    TypeArguments = [ 1 ] }
+                    TypeArguments = [ 1<typeId> ] }
 
             let tagged =
                 { Build.facts (Build.typeResponse 41 TypeFlags.Object) with
-                    SymbolName = Some "Tagged"
-                    BaseTypes = [ 31 ]
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "Tagged")
+                    BaseTypes = [ 31<typeId> ]
                     Members = [ tag; value ] }
 
             let model =
                 { Build.shapeModel (boxDecl :: instantiation :: tagged :: typeParam 20 "T" :: Build.primitives) with
-                    DeclNames = Map.ofList [ 30, "Box"; 41, "Tagged" ] }
+                    DeclNames = Map.ofList [ 30<typeId>, "Box"; 41<typeId>, "Tagged" ] }
 
             let shaped, findings = Build.runPass Interfaces.shapeInterfaces model
 
@@ -1788,13 +1825,13 @@ let shapePassTests =
 
             let deferred =
                 { Build.facts (Build.typeResponse 41 TypeFlags.Object) with
-                    SymbolName = Some "Deferred"
-                    BaseTypes = [ 40 ]
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "Deferred")
+                    BaseTypes = [ 40<typeId> ]
                     Members = [ tag ] }
 
             let model =
                 { Build.shapeModel (libType 40 "Promise" [ 1 ] :: deferred :: Build.primitives) with
-                    DeclNames = Map.ofList [ 41, "Deferred" ] }
+                    DeclNames = Map.ofList [ 41<typeId>, "Deferred" ] }
 
             let shaped, findings = Build.runPass Interfaces.shapeInterfaces model
 
@@ -1822,13 +1859,13 @@ let shapePassTests =
 
             let failure =
                 { Build.facts (Build.typeResponse 41 TypeFlags.Object) with
-                    SymbolName = Some "Failure"
-                    BaseTypes = [ 40 ]
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "Failure")
+                    BaseTypes = [ 40<typeId> ]
                     Members = [ code ] }
 
             let model =
                 { Build.shapeModel (libType 40 "IterableIterator" [ 1 ] :: failure :: Build.primitives) with
-                    DeclNames = Map.ofList [ 41, "Failure" ] }
+                    DeclNames = Map.ofList [ 41<typeId>, "Failure" ] }
 
             let shaped, findings = Build.runPass Interfaces.shapeInterfaces model
 
@@ -1855,18 +1892,18 @@ let shapePassTests =
 
             let a =
                 { Build.facts (Build.typeResponse 40 TypeFlags.Object) with
-                    SymbolName = Some "A"
-                    BaseTypes = [ 41 ]
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "A")
+                    BaseTypes = [ 41<typeId> ]
                     Members = [ up ] }
 
             let b =
                 { Build.facts (Build.typeResponse 41 TypeFlags.Object) with
-                    SymbolName = Some "B"
-                    BaseTypes = [ 40 ]
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "B")
+                    BaseTypes = [ 40<typeId> ]
                     Members = [ down ] }
 
             let model =
-                { Build.shapeModel (a :: b :: Build.primitives) with DeclNames = Map.ofList [ 40, "A"; 41, "B" ] }
+                { Build.shapeModel (a :: b :: Build.primitives) with DeclNames = Map.ofList [ 40<typeId>, "A"; 41<typeId>, "B" ] }
 
             let shaped, findings = Build.runPass Interfaces.shapeInterfaces model
 
@@ -1925,20 +1962,20 @@ let shapePassTests =
             // saying which case it is.
             let named =
                 { Build.facts (Build.typeResponse 40 TypeFlags.Object) with
-                    SymbolName = Some "Named"
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "Named")
                     Members = [ Build.resolvedMember (Build.symbol 401 "name" SymbolFlags.Property) 1 ] }
 
             let bare =
-                { Build.facts (Build.typeResponse 51 TypeFlags.Intersection) with IntersectionMembers = [ 20; 40 ] }
+                { Build.facts (Build.typeResponse 51 TypeFlags.Intersection) with IntersectionMembers = [ 20<typeId>; 40<typeId> ] }
 
             let model =
                 { Build.shapeModel (named :: bare :: typeParam 20 "T" :: Build.primitives) with
-                    DeclNames = Map.ofList [ 40, "Named" ] }
+                    DeclNames = Map.ofList [ 40<typeId>, "Named" ] }
 
             let named, _ = Build.runPass Anonymous.synthesizeAnonymous model
-            Expect.equal (Map.tryFind 51 named.DeclNames) None "nothing to name"
+            Expect.equal (Map.tryFind 51<typeId> named.DeclNames) None "nothing to name"
 
-            let reference, findings = Spec.typeRef Build.context named None "x" 51
+            let reference, findings = Spec.typeRef Build.context named None "x" 51<typeId>
             Expect.equal reference FsObj "widened"
 
             Expect.equal
@@ -1952,10 +1989,10 @@ let shapePassTests =
             let empty = Build.facts (Build.typeResponse 80 TypeFlags.Object)
 
             let idiom =
-                { Build.facts (Build.typeResponse 81 TypeFlags.Intersection) with IntersectionMembers = [ 1; 80 ] }
+                { Build.facts (Build.typeResponse 81 TypeFlags.Intersection) with IntersectionMembers = [ 1<typeId>; 80<typeId> ] }
 
             let model = Build.shapeModel (empty :: idiom :: Build.primitives)
-            let reference, findings = Spec.typeRef Build.context model None "Ease" 81
+            let reference, findings = Spec.typeRef Build.context model None "Ease" 81<typeId>
             Expect.equal reference FsString "the operand that declares something is the type"
 
             Expect.equal
@@ -1971,10 +2008,10 @@ let shapePassTests =
                     Members = [ Build.resolvedMember (Build.symbol 820 "count" SymbolFlags.Property) 2 ] }
 
             let branded =
-                { Build.facts (Build.typeResponse 83 TypeFlags.Intersection) with IntersectionMembers = [ 1; 82 ] }
+                { Build.facts (Build.typeResponse 83 TypeFlags.Intersection) with IntersectionMembers = [ 1<typeId>; 82<typeId> ] }
 
             let model = Build.shapeModel (counted :: branded :: Build.primitives)
-            let reference, findings = Spec.typeRef Build.context model None "Counted" 83
+            let reference, findings = Spec.typeRef Build.context model None "Counted" 83<typeId>
             Expect.equal reference FsObj "widened"
 
             Expect.equal
@@ -1994,14 +2031,14 @@ let shapePassTests =
 
             let overloaded =
                 { Build.facts (Build.typeResponse 92 TypeFlags.Intersection) with
-                    IntersectionMembers = [ 90; 91 ]
+                    IntersectionMembers = [ 90<typeId>; 91<typeId> ]
                     CallSignatures =
                         [ Build.signature [ value; length ] 2; Build.signature [ length ] 2 ] }
 
             let model =
                 Build.shapeModel (callable 90 [ value; length ] :: callable 91 [ length ] :: overloaded :: Build.primitives)
 
-            let reference, findings = Spec.typeRef Build.context model None "Utils.round" 92
+            let reference, findings = Spec.typeRef Build.context model None "Utils.round" 92<typeId>
             Expect.equal reference (FsDelegate([ FsFloat; FsFloat ], FsFloat)) "the first signature shapes the delegate"
 
             Expect.equal
@@ -2027,18 +2064,18 @@ let shapePassTests =
                               Optional = optional } ] }
 
             let flattened =
-                { Build.facts (Build.typeResponse 76 TypeFlags.Intersection) with IntersectionMembers = [ 70; 71 ] }
+                { Build.facts (Build.typeResponse 76 TypeFlags.Intersection) with IntersectionMembers = [ 70<typeId>; 71<typeId> ] }
 
             let destinations =
                 { Build.facts (Build.typeResponse 77 TypeFlags.Intersection) with
-                    IntersectionMembers = [ 72; 73 ]
+                    IntersectionMembers = [ 72<typeId>; 73<typeId> ]
                     Members = [ Build.resolvedMember (Build.symbol 770 "to" SymbolFlags.Property) 76 ] }
 
             let model =
                 { Build.shapeModel (
                     [
-                        union 70 [ 1; 2 ]
-                        union 71 [ 1; 2; 5 ]
+                        union 70 [ 1<typeId>; 2<typeId> ]
+                        union 71 [ 1<typeId>; 2<typeId>; 5<typeId> ]
                         operand 72 71 true
                         operand 73 70 false
                         flattened
@@ -2046,7 +2083,7 @@ let shapePassTests =
                     ]
                     @ Build.primitives
                   ) with
-                    DeclNames = Map.ofList [ 77, "Destinations" ] }
+                    DeclNames = Map.ofList [ 77<typeId>, "Destinations" ] }
 
             let shaped, findings = Build.runPass Interfaces.shapeInterfaces model
 
@@ -2075,16 +2112,16 @@ let shapePassTests =
                     Members = [ Build.resolvedMember (Build.symbol (id * 10) "to" SymbolFlags.Property) memberTypeId ] }
 
             let flattened =
-                { Build.facts (Build.typeResponse 78 TypeFlags.Intersection) with IntersectionMembers = [ 1; 2 ] }
+                { Build.facts (Build.typeResponse 78 TypeFlags.Intersection) with IntersectionMembers = [ 1<typeId>; 2<typeId> ] }
 
             let destinations =
                 { Build.facts (Build.typeResponse 79 TypeFlags.Intersection) with
-                    IntersectionMembers = [ 74; 75 ]
+                    IntersectionMembers = [ 74<typeId>; 75<typeId> ]
                     Members = [ Build.resolvedMember (Build.symbol 790 "to" SymbolFlags.Property) 78 ] }
 
             let model =
                 { Build.shapeModel ([ operand 74 1; operand 75 2; flattened; destinations ] @ Build.primitives) with
-                    DeclNames = Map.ofList [ 79, "Destinations" ] }
+                    DeclNames = Map.ofList [ 79<typeId>, "Destinations" ] }
 
             let _, findings = Build.runPass Interfaces.shapeInterfaces model
 
@@ -2094,11 +2131,11 @@ let shapePassTests =
 
         testCase "classify-literal-unions makes a StringEnum with CompiledName per case" <| fun _ ->
             let union =
-                { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 7; 8 ] }
+                { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 7<typeId>; 8<typeId> ] }
 
             let model =
                 { Build.shapeModel [ union; stringLiteral 7 "ms"; stringLiteral 8 "s" ] with
-                    DeclNames = Map.ofList [ 10, "TimeUnit" ] }
+                    DeclNames = Map.ofList [ 10<typeId>, "TimeUnit" ] }
 
             let shaped, findings = Build.runPass LiteralUnions.classifyLiteralUnions model
 
@@ -2116,11 +2153,11 @@ let shapePassTests =
 
         testCase "classify-literal-unions keeps mixed unions in one StringEnum via CompiledValue (D12)" <| fun _ ->
             let union =
-                { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 7; 9 ] }
+                { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 7<typeId>; 9<typeId> ] }
 
             let model =
                 { Build.shapeModel [ union; stringLiteral 7 "auto"; numberLiteral 9 1.5 ] with
-                    DeclNames = Map.ofList [ 10, "Speed" ] }
+                    DeclNames = Map.ofList [ 10<typeId>, "Speed" ] }
 
             let shaped, findings = Build.runPass LiteralUnions.classifyLiteralUnions model
 
@@ -2136,11 +2173,11 @@ let shapePassTests =
 
         testCase "classify-literal-unions makes an F# enum from an all-integer union" <| fun _ ->
             let union =
-                { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 7; 9 ] }
+                { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 7<typeId>; 9<typeId> ] }
 
             let model =
                 { Build.shapeModel [ union; numberLiteral 7 0.0; numberLiteral 9 1.0 ] with
-                    DeclNames = Map.ofList [ 10, "Flag" ] }
+                    DeclNames = Map.ofList [ 10<typeId>, "Flag" ] }
 
             let shaped, _ = Build.runPass LiteralUnions.classifyLiteralUnions model
 
@@ -2151,17 +2188,17 @@ let shapePassTests =
         testCase "classify-literal-unions sanitises a real enum member name outside the identifier shape"
         <| fun _ ->
             let union =
-                { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 7; 8 ] }
+                { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 7<typeId>; 8<typeId> ] }
 
             let member1 =
-                { stringLiteral 7 "meta" with SymbolName = Some "@cf/meta" }
+                { stringLiteral 7 "meta" with SymbolName = Some ((fun value -> value * uom<symbolName>) "@cf/meta") }
 
             let member2 =
-                { stringLiteral 8 "onetwo" with SymbolName = Some "one-two" }
+                { stringLiteral 8 "onetwo" with SymbolName = Some ((fun value -> value * uom<symbolName>) "one-two") }
 
             let model =
                 { Build.shapeModel [ union; member1; member2 ] with
-                    DeclNames = Map.ofList [ 10, "Kind" ] }
+                    DeclNames = Map.ofList [ 10<typeId>, "Kind" ] }
 
             let shaped, findings = Build.runPass LiteralUnions.classifyLiteralUnions model
 
@@ -2190,7 +2227,7 @@ let shapePassTests =
 
             let model =
                 { Build.shapeModel (callback :: timer :: Build.primitives) with
-                    DeclNames = Map.ofList [ 50, "TimerCallback"; 60, "Timer" ] }
+                    DeclNames = Map.ofList [ 50<typeId>, "TimerCallback"; 60<typeId>, "Timer" ] }
 
             let shaped, findings = Build.runPass Callbacks.shapeCallbacks model
 
@@ -2221,7 +2258,7 @@ let shapePassTests =
 
             let model =
                 { Build.shapeModel (methodType :: thisType :: timer :: Build.primitives) with
-                    DeclNames = Map.ofList [ 60, "Timer" ] }
+                    DeclNames = Map.ofList [ 60<typeId>, "Timer" ] }
 
             let shaped, findings = Build.runPass Interfaces.shapeInterfaces model
 
@@ -2246,7 +2283,7 @@ let shapePassTests =
 
             let model =
                 { Build.shapeModel (box :: typeParam 20 "T" :: Build.primitives) with
-                    DeclNames = Map.ofList [ 30, "Box" ] }
+                    DeclNames = Map.ofList [ 30<typeId>, "Box" ] }
 
             let shaped, _ = Build.runPass Interfaces.shapeInterfaces model
 
@@ -2260,7 +2297,7 @@ let shapePassTests =
             | decls -> failtest $"expected one interface, got %A{decls}"
 
         testCase "a constraint naming a generated type survives" <| fun _ ->
-            let bounded = { typeParam 20 "T" with Constraint = Some 60 }
+            let bounded = { typeParam 20 "T" with Constraint = Some 60<typeId> }
             let timer = Build.facts (Build.typeResponse 60 TypeFlags.Object)
 
             let holder =
@@ -2268,7 +2305,7 @@ let shapePassTests =
 
             let model =
                 { Build.shapeModel (holder :: bounded :: timer :: Build.primitives) with
-                    DeclNames = Map.ofList [ 30, "Holder"; 60, "Timer" ] }
+                    DeclNames = Map.ofList [ 30<typeId>, "Holder"; 60<typeId>, "Timer" ] }
 
             let shaped, findings = Build.runPass Interfaces.shapeInterfaces model
 
@@ -2285,17 +2322,17 @@ let shapePassTests =
             // `T extends Renderable` where `Renderable = JSAnimation | Timeline`: the union
             // renders as an erased `U2`, and F# rejects a subtype constraint against a sealed
             // type outright (FS0698). A wrong constraint is worse than none.
-            let bounded = { typeParam 20 "T" with Constraint = Some 60 }
+            let bounded = { typeParam 20 "T" with Constraint = Some 60<typeId> }
 
             let renderable =
-                { Build.facts (Build.typeResponse 60 TypeFlags.Union) with UnionMembers = [ 1; 2 ] }
+                { Build.facts (Build.typeResponse 60 TypeFlags.Union) with UnionMembers = [ 1<typeId>; 2<typeId> ] }
 
             let holder =
                 genericDecl 30 [ 20 ] [ Build.resolvedMember (Build.symbol 300 "held" SymbolFlags.Property) 20 ]
 
             let model =
                 { Build.shapeModel (holder :: bounded :: renderable :: Build.primitives) with
-                    DeclNames = Map.ofList [ 30, "Holder"; 60, "Renderable" ] }
+                    DeclNames = Map.ofList [ 30<typeId>, "Holder"; 60<typeId>, "Renderable" ] }
 
             let shaped, findings = Build.runPass Interfaces.shapeInterfaces model
 
@@ -2309,14 +2346,14 @@ let shapePassTests =
         testCase "a constraint with no F# form is dropped with a finding" <| fun _ ->
             // `K extends string`: an F# subtype constraint cannot name a primitive, and the
             // nearest approximation would reject code TypeScript accepts.
-            let bounded = { typeParam 20 "K" with Constraint = Some 1 }
+            let bounded = { typeParam 20 "K" with Constraint = Some 1<typeId> }
 
             let keyed =
                 genericDecl 30 [ 20 ] [ Build.resolvedMember (Build.symbol 300 "key" SymbolFlags.Property) 20 ]
 
             let model =
                 { Build.shapeModel (keyed :: bounded :: Build.primitives) with
-                    DeclNames = Map.ofList [ 30, "Keyed" ] }
+                    DeclNames = Map.ofList [ 30<typeId>, "Keyed" ] }
 
             let shaped, findings = Build.runPass Interfaces.shapeInterfaces model
 
@@ -2336,14 +2373,14 @@ let shapePassTests =
                         [ { Build.signature
                                 [ Build.resolvedMember (Build.symbol 700 "key" SymbolFlags.FunctionScopedVariable) 21 ]
                                 20 with
-                              TypeParameters = [ 21 ] } ] }
+                              TypeParameters = [ 21<typeId> ] } ] }
 
             let accessor =
                 genericDecl 30 [ 20 ] [ Build.resolvedMember (Build.symbol 300 "read" SymbolFlags.Method) 70 ]
 
             let model =
                 { Build.shapeModel (accessor :: read :: typeParam 20 "T" :: typeParam 21 "K" :: Build.primitives) with
-                    DeclNames = Map.ofList [ 30, "Accessor" ] }
+                    DeclNames = Map.ofList [ 30<typeId>, "Accessor" ] }
 
             let shaped, findings = Build.runPass Interfaces.shapeInterfaces model
 
@@ -2373,7 +2410,7 @@ let shapePassTests =
                         [ { Build.signature
                                 [ Build.resolvedMember (Build.symbol 700 "key" SymbolFlags.FunctionScopedVariable) 40 ]
                                 4 with
-                              TypeParameters = [ 21 ] } ] }
+                              TypeParameters = [ 21<typeId> ] } ] }
 
             let accessor =
                 genericDecl 30 [ 20 ] [ Build.resolvedMember (Build.symbol 300 "read" SymbolFlags.Method) 70 ]
@@ -2382,7 +2419,7 @@ let shapePassTests =
                 { Build.shapeModel (
                       accessor :: read :: keyofT :: typeParam 20 "T" :: typeParam 21 "K" :: Build.primitives
                   ) with
-                    DeclNames = Map.ofList [ 30, "Accessor" ] }
+                    DeclNames = Map.ofList [ 30<typeId>, "Accessor" ] }
 
             let shaped, findings = Build.runPass Interfaces.shapeInterfaces model
 
@@ -2414,7 +2451,7 @@ let shapePassTests =
                         [ { Build.signature
                                 [ Build.resolvedMember (Build.symbol 700 "key" SymbolFlags.FunctionScopedVariable) 21 ]
                                 41 with
-                              TypeParameters = [ 21 ] } ] }
+                              TypeParameters = [ 21<typeId> ] } ] }
 
             let accessor =
                 genericDecl 30 [ 20 ] [ Build.resolvedMember (Build.symbol 300 "read" SymbolFlags.Method) 70 ]
@@ -2426,10 +2463,10 @@ let shapePassTests =
                       :: indexedAccess 41 20 21
                       :: keyOf 40 20
                       :: typeParam 20 "T"
-                      :: { typeParam 21 "K" with Constraint = Some 40 }
+                      :: { typeParam 21 "K" with Constraint = Some 40<typeId> }
                       :: Build.primitives
                   ) with
-                    DeclNames = Map.ofList [ 30, "Accessor" ] }
+                    DeclNames = Map.ofList [ 30<typeId>, "Accessor" ] }
 
             let shaped, findings = Build.runPass Interfaces.shapeInterfaces model
 
@@ -2461,7 +2498,7 @@ let shapePassTests =
                         [ { Build.signature
                                 [ Build.resolvedMember (Build.symbol 700 "key" SymbolFlags.FunctionScopedVariable) 21 ]
                                 4 with
-                              TypeParameters = [ 21 ] } ] }
+                              TypeParameters = [ 21<typeId> ] } ] }
 
             let accessor =
                 genericDecl 30 [ 20 ] [ Build.resolvedMember (Build.symbol 300 "read" SymbolFlags.Method) 70 ]
@@ -2472,10 +2509,10 @@ let shapePassTests =
                       :: read
                       :: keyOf 40 20
                       :: typeParam 20 "T"
-                      :: { typeParam 21 "K" with Constraint = Some 40 }
+                      :: { typeParam 21 "K" with Constraint = Some 40<typeId> }
                       :: Build.primitives
                   ) with
-                    DeclNames = Map.ofList [ 30, "Accessor" ] }
+                    DeclNames = Map.ofList [ 30<typeId>, "Accessor" ] }
 
             let shaped, _ = Build.runPass Interfaces.shapeInterfaces model
 
@@ -2497,7 +2534,7 @@ let shapePassTests =
             // variable is only reachable through the alias's arguments.
             let mapper =
                 { Build.facts (Build.typeResponse 50 TypeFlags.Object) with
-                    AliasTypeArguments = [ 20 ]
+                    AliasTypeArguments = [ 20<typeId> ]
                     CallSignatures =
                         [ Build.signature
                               [ Build.resolvedMember (Build.symbol 500 "input" SymbolFlags.FunctionScopedVariable) 20 ]
@@ -2505,7 +2542,7 @@ let shapePassTests =
 
             let model =
                 { Build.shapeModel (mapper :: typeParam 20 "T" :: Build.primitives) with
-                    DeclNames = Map.ofList [ 50, "Mapper" ] }
+                    DeclNames = Map.ofList [ 50<typeId>, "Mapper" ] }
 
             let shaped, findings = Build.runPass Callbacks.shapeCallbacks model
 
@@ -2525,28 +2562,28 @@ let shapePassTests =
                 { Build.signature
                       [ Build.resolvedMember (Build.symbol 500 "value" SymbolFlags.FunctionScopedVariable) 21 ]
                       21 with
-                    TypeParameters = [ 21 ] }
+                    TypeParameters = [ 21<typeId> ] }
 
             let other =
                 { Build.signature
                       [ Build.resolvedMember (Build.symbol 501 "value" SymbolFlags.FunctionScopedVariable) 22 ]
                       22 with
-                    TypeParameters = [ 22 ] }
+                    TypeParameters = [ 22<typeId> ] }
 
             let setter =
                 { Build.facts (Build.typeResponse 50 TypeFlags.Object) with
-                    AliasTypeArguments = [ 20 ]
+                    AliasTypeArguments = [ 20<typeId> ]
                     CallSignatures = [ signature; other ] }
 
             let model =
                 { Build.shapeModel (
                       setter
                       :: typeParam 20 "T"
-                      :: { typeParam 21 "U" with Constraint = Some 20 }
-                      :: { typeParam 22 "U" with Constraint = Some 20 }
+                      :: { typeParam 21 "U" with Constraint = Some 20<typeId> }
+                      :: { typeParam 22 "U" with Constraint = Some 20<typeId> }
                       :: Build.primitives
                   ) with
-                    DeclNames = Map.ofList [ 50, "Setter" ] }
+                    DeclNames = Map.ofList [ 50<typeId>, "Setter" ] }
 
             let shaped, findings = Build.runPass Callbacks.shapeCallbacks model
 
@@ -2571,28 +2608,28 @@ let shapePassTests =
                 { Build.signature
                       [ Build.resolvedMember (Build.symbol 500 "value" SymbolFlags.FunctionScopedVariable) 21 ]
                       21 with
-                    TypeParameters = [ 21 ] }
+                    TypeParameters = [ 21<typeId> ] }
 
             let other =
                 { Build.signature
                       [ Build.resolvedMember (Build.symbol 501 "value" SymbolFlags.FunctionScopedVariable) 22 ]
                       22 with
-                    TypeParameters = [ 22 ] }
+                    TypeParameters = [ 22<typeId> ] }
 
             let divergent =
                 { Build.facts (Build.typeResponse 50 TypeFlags.Object) with
-                    AliasTypeArguments = [ 20 ]
+                    AliasTypeArguments = [ 20<typeId> ]
                     CallSignatures = [ signature; other ] }
 
             let model =
                 { Build.shapeModel (
                       divergent
                       :: typeParam 20 "T"
-                      :: { typeParam 21 "U" with Constraint = Some 20 }
-                      :: { typeParam 22 "U" with Constraint = Some 1 }
+                      :: { typeParam 21 "U" with Constraint = Some 20<typeId> }
+                      :: { typeParam 22 "U" with Constraint = Some 1<typeId> }
                       :: Build.primitives
                   ) with
-                    DeclNames = Map.ofList [ 50, "DivergentBound" ] }
+                    DeclNames = Map.ofList [ 50<typeId>, "DivergentBound" ] }
 
             let shaped, findings = Build.runPass Callbacks.shapeCallbacks model
 
@@ -2625,13 +2662,13 @@ let shapePassTests =
                 Build.shapeModel (
                     callback 71 50
                     :: callback 72 51
-                    :: tuple [ ElementFlags.Required ] [ 1 ] 71
+                    :: tuple [ ElementFlags.Required ] [ 1<typeId> ] 71
                     :: tuple [] [] 72
                     :: Build.primitives
                 )
 
-            let single, singleFindings = Spec.typeRef Build.context model None "x" 50
-            let empty, emptyFindings = Spec.typeRef Build.context model None "x" 51
+            let single, singleFindings = Spec.typeRef Build.context model None "x" 50<typeId>
+            let empty, emptyFindings = Spec.typeRef Build.context model None "x" 51<typeId>
 
             Expect.equal single (FsFunc(FsString, FsUnit)) "string -> unit"
             Expect.equal empty (FsFunc(FsUnit, FsUnit)) "unit -> unit"
@@ -2645,7 +2682,7 @@ let shapePassTests =
                     { Build.typeResponse 71 TypeFlags.Object with
                         IsTupleType = ValueSome true } with
                     TupleElements = [ ElementFlags.Required; ElementFlags.Rest ]
-                    TypeArguments = [ 1; 2 ] }
+                    TypeArguments = [ 1<typeId>; 2<typeId> ] }
 
             let callback =
                 { Build.facts (Build.typeResponse 50 TypeFlags.Object) with
@@ -2656,7 +2693,7 @@ let shapePassTests =
                               HasRest = true } ] }
 
             let model = Build.shapeModel (callback :: variadic :: Build.primitives)
-            let reference, findings = Spec.typeRef Build.context model None "x" 50
+            let reference, findings = Spec.typeRef Build.context model None "x" 50<typeId>
 
             Expect.equal reference (FsFunc(FsArray FsObj, FsUnit)) "the rest tail still widens"
             Expect.equal (findings |> List.map _.Key) [ "TR028" ] "and says so"
@@ -2682,15 +2719,15 @@ let shapePassTests =
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
-                    ExportTypes = Map.ofList [ 800, { Declared = Some 80; Value = Some 81 } ]
-                    DeclNames = Map.ofList [ 80, "Timer" ] }
+                    ExportTypes = Map.ofList [ 800<symbolId>, { Declared = Some 80<typeId>; Value = Some 81<typeId> } ]
+                    DeclNames = Map.ofList [ 80<typeId>, "Timer" ] }
 
             let shaped, findings = Build.runPass Classes.shapeClasses model
 
             Expect.isEmpty (findings |> List.filter (fun f -> f.Tier = Escape)) "no drops"
 
             match shaped.ExportMembers with
-            | [ (0, m) ] ->
+            | [ { HarvestIndex = 0; Member = m } ] ->
                 Expect.equal m.Name "Timer" "constructor member name"
 
                 match m.Body with
@@ -2757,8 +2794,8 @@ let shapePassTests =
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
-                    ExportTypes = Map.ofList [ 810, { Declared = Some 80; Value = Some 81 } ]
-                    DeclNames = Map.ofList [ 80, "Clash" ]
+                    ExportTypes = Map.ofList [ 810<symbolId>, { Declared = Some 80<typeId>; Value = Some 81<typeId> } ]
+                    DeclNames = Map.ofList [ 80<typeId>, "Clash" ]
                     Decls = [ declared ] }
 
             let shaped, findings = Build.runPass Classes.shapeClasses model
@@ -2789,12 +2826,12 @@ let shapePassTests =
         /// carrying `prototype`, the statics, and the construct signatures.
         let gaugeInstance =
             { Build.facts (Build.typeResponse 60 TypeFlags.Object) with
-                SymbolName = Some "Gauge"
+                SymbolName = Some ((fun value -> value * uom<symbolName>) "Gauge")
                 Members = [ Build.resolvedMember (Build.symbol 601 "size" SymbolFlags.Property) 2 ] }
 
         let gaugeStatic (symbolName: string option) =
             { Build.facts (Build.typeResponse 61 TypeFlags.Object) with
-                SymbolName = symbolName
+                SymbolName = symbolName |> Option.map (fun value -> value * uom<Measure.symbolName>)
                 Members =
                     [ Build.resolvedMember (Build.symbol 602 "prototype" SymbolFlags.Property) 60
                       { Build.resolvedMember (Build.symbol 603 "UNIT" SymbolFlags.Property) 1 with ReadOnly = true } ]
@@ -2812,12 +2849,12 @@ let shapePassTests =
 
             let model =
                 { Build.shapeModel (gaugeInstance :: gaugeStatic (Some "Gauge") :: scope :: Build.primitives) with
-                    DeclNames = Map.ofList [ 60, "Gauge"; 62, "Scope" ] }
+                    DeclNames = Map.ofList [ 60<typeId>, "Gauge"; 62<typeId>, "Scope" ] }
 
             let named, _ = Build.runPass ConstructorObjects.nameConstructorObjects model
 
-            Expect.equal (Map.tryFind 61 named.DeclNames) (Some "GaugeConstructor") "named after what it constructs"
-            Expect.equal (Map.tryFind 60 named.DeclNames) (Some "Gauge") "the instance side keeps its own name"
+            Expect.equal (Map.tryFind 61<typeId> named.DeclNames) (Some "GaugeConstructor") "named after what it constructs"
+            Expect.equal (Map.tryFind 60<typeId> named.DeclNames) (Some "Gauge") "the instance side keeps its own name"
 
         testCase "name-constructor-objects leaves an unreferenced class's static side alone" <| fun _ ->
             // Nothing names `typeof Gauge`, so the constructor object is `shape-classes`'s work
@@ -2830,12 +2867,12 @@ let shapePassTests =
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
-                    ExportTypes = Map.ofList [ 600, { Declared = Some 60; Value = Some 61 } ]
-                    DeclNames = Map.ofList [ 60, "Gauge" ] }
+                    ExportTypes = Map.ofList [ 600<symbolId>, { Declared = Some 60<typeId>; Value = Some 61<typeId> } ]
+                    DeclNames = Map.ofList [ 60<typeId>, "Gauge" ] }
 
             let named, _ = Build.runPass ConstructorObjects.nameConstructorObjects model
 
-            Expect.equal (Map.tryFind 61 named.DeclNames) None "no declaration for a class's own static side"
+            Expect.equal (Map.tryFind 61<typeId> named.DeclNames) None "no declaration for a class's own static side"
 
         testCase "name-constructor-objects names a non-class export's value type after the export" <| fun _ ->
             // `declare const widgets: { new (size: number): Gauge }`: the checker calls the
@@ -2848,17 +2885,17 @@ let shapePassTests =
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
-                    ExportTypes = Map.ofList [ 600, { Declared = None; Value = Some 61 } ]
-                    DeclNames = Map.ofList [ 60, "Gauge" ] }
+                    ExportTypes = Map.ofList [ 600<symbolId>, { Declared = None; Value = Some 61<typeId> } ]
+                    DeclNames = Map.ofList [ 60<typeId>, "Gauge" ] }
 
             let named, _ = Build.runPass ConstructorObjects.nameConstructorObjects model
 
-            Expect.equal (Map.tryFind 61 named.DeclNames) (Some "WidgetsConstructor") "named after the export"
+            Expect.equal (Map.tryFind 61<typeId> named.DeclNames) (Some "WidgetsConstructor") "named after the export"
 
         testCase "shape-interfaces reads construct signatures as EmitConstructor Create members" <| fun _ ->
             let model =
                 { Build.shapeModel (gaugeInstance :: gaugeStatic (Some "Gauge") :: Build.primitives) with
-                    DeclNames = Map.ofList [ 60, "Gauge"; 61, "GaugeConstructor" ] }
+                    DeclNames = Map.ofList [ 60<typeId>, "Gauge"; 61<typeId>, "GaugeConstructor" ] }
 
             let shaped, findings = Build.runPass Interfaces.shapeInterfaces model
 
@@ -2891,7 +2928,7 @@ let shapePassTests =
 
             let model =
                 { Build.shapeModel (gaugeInstance :: gaugeStatic (Some "__type") :: holder :: Build.primitives) with
-                    DeclNames = Map.ofList [ 60, "Gauge"; 63, "Holder" ] }
+                    DeclNames = Map.ofList [ 60<typeId>, "Gauge"; 63<typeId>, "Holder" ] }
 
             let shaped, findings = Build.runPass Interfaces.shapeInterfaces model
 
@@ -2917,7 +2954,7 @@ let shapePassTests =
                 let instance =
                     { Build.facts (Build.typeResponse id TypeFlags.Object) with
                         Members = [ Build.resolvedMember (Build.symbol (id * 10) "label" SymbolFlags.Property) 1 ]
-                        BaseTypes = bases }
+                        BaseTypes = bases |> List.map (fun value -> value * uom<typeId>) }
 
                 let static' =
                     { Build.facts (Build.typeResponse (id + 1) TypeFlags.Object) with
@@ -2952,12 +2989,12 @@ let shapePassTests =
                     { Build.export name (Build.symbol (id + 2) name (SymbolFlags.Class ||| SymbolFlags.Value)) with
                         Origin = origin }
 
-                [ instance; static' ], declaration, export, (id + 2, { Declared = Some id; Value = Some(id + 1) })
+                [ instance; static' ], declaration, export, ((fun value -> value * uom<symbolId>) (id + 2), { Declared = Some ((fun value -> value * uom<typeId>) id); Value = Some((fun value -> value * uom<typeId>) (id + 1)) })
 
             let cases =
-                [ entrypoint "Derived" 80 true [] (FromAmbientModule "lab:tools")
-                  entrypoint "Based" 90 false [ 1 ] (FromAmbientModule "lab:tools")
-                  entrypoint "Plain" 100 false [] (FromAmbientModule "lab:tools")
+                [ entrypoint "Derived" 80 true [] (ExportOrigin.StringFromAmbientModule "lab:tools")
+                  entrypoint "Based" 90 false [ 1 ] (ExportOrigin.StringFromAmbientModule "lab:tools")
+                  entrypoint "Plain" 100 false [] (ExportOrigin.StringFromAmbientModule "lab:tools")
                   entrypoint "Global" 110 true [] FromGlobal ]
 
             let model =
@@ -2990,7 +3027,7 @@ let shapePassTests =
                                              | _ -> None) with
             | decl ->
                 let entry = decl.Entrypoint.Value
-                Expect.equal entry.Binding (ImportFrom("Derived", "lab:tools")) "the specifier's import binds the class"
+                Expect.equal entry.Binding (ImportFrom("Derived", "lab:tools" * uom<importSpecifier>)) "the specifier's import binds the class"
                 Expect.equal (entry.Parameters |> List.map _.Name) [ "label" ] "the construct signature's parameters"
 
         testCase "shape-classes inherits exn where the entrypoint's base is the lib's Error" <| fun _ ->
@@ -3000,13 +3037,13 @@ let shapePassTests =
             let libBase (id: int) (name: string) =
                 { Build.facts (Build.typeResponse id TypeFlags.Object) with
                     Origin = CompilerLib
-                    SymbolName = Some name }
+                    SymbolName = Some((fun value -> value * uom<symbolName>) name) }
 
             let entrypoint (name: string) (id: int) (baseId: int) =
                 let instance =
                     { Build.facts (Build.typeResponse id TypeFlags.Object) with
                         Members = [ Build.resolvedMember (Build.symbol (id * 10) "code" SymbolFlags.Property) 2 ]
-                        BaseTypes = [ baseId ] }
+                        BaseTypes = [ ((fun value -> value * uom<typeId>) baseId) ] }
 
                 let static' =
                     { Build.facts (Build.typeResponse (id + 1) TypeFlags.Object) with
@@ -3038,9 +3075,9 @@ let shapePassTests =
 
                 let export =
                     { Build.export name (Build.symbol (id + 2) name (SymbolFlags.Class ||| SymbolFlags.Value)) with
-                        Origin = FromAmbientModule "lab:faults" }
+                        Origin = ExportOrigin.StringFromAmbientModule "lab:faults" }
 
-                [ instance; static' ], declaration, export, (id + 2, { Declared = Some id; Value = Some(id + 1) })
+                [ instance; static' ], declaration, export, ((fun value -> value * uom<symbolId>) (id + 2), { Declared = Some ((fun value -> value * uom<typeId>) id); Value = Some((fun value -> value * uom<typeId>) (id + 1)) })
 
             let cases = [ entrypoint "Fault" 80 70; entrypoint "Tick" 90 71 ]
 
@@ -3068,7 +3105,7 @@ let shapePassTests =
                     | _ -> None)
 
             Expect.equal
-                ((entrypointOf "Fault").Value.Inherits)
+                (entrypointOf "Fault").Value.Inherits
                 (Some(FsNamed "exn"))
                 "the class a consumer raises carries the exception base"
 
@@ -3086,7 +3123,7 @@ let shapePassTests =
             let instance =
                 { Build.facts (Build.typeResponse 80 TypeFlags.Object) with
                     Members = [ Build.resolvedMember (Build.symbol 801 "jaw" SymbolFlags.Property) 2 ]
-                    BaseTypes = [ 70 ] }
+                    BaseTypes = [ 70<typeId> ] }
 
             let static' =
                 { Build.facts (Build.typeResponse 81 TypeFlags.Object) with
@@ -3110,11 +3147,11 @@ let shapePassTests =
                     Harvest =
                         { Exports =
                             [ { Build.export "Vise" (Build.symbol 800 "Vise" (SymbolFlags.Class ||| SymbolFlags.Value)) with
-                                  Origin = FromAmbientModule "lab:tools" } ]
+                                  Origin = ExportOrigin.StringFromAmbientModule "lab:tools" } ]
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
-                    ExportTypes = Map.ofList [ 800, { Declared = Some 80; Value = Some 81 } ]
+                    ExportTypes = Map.ofList [ 800<symbolId>, { Declared = Some 80<typeId>; Value = Some 81<typeId> } ]
                     Decls = [ declaration ] }
 
             let shaped, findings = Build.runPass Classes.shapeClasses model
@@ -3169,8 +3206,8 @@ let shapePassTests =
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
-                    ExportTypes = Map.ofList [ 810, { Declared = Some 80; Value = Some 81 } ]
-                    DeclNames = Map.ofList [ 80, "DOMException" ]
+                    ExportTypes = Map.ofList [ 810<symbolId>, { Declared = Some 80<typeId>; Value = Some 81<typeId> } ]
+                    DeclNames = Map.ofList [ 80<typeId>, "DOMException" ]
                     Decls = [ declared ] }
 
             let _, findings = Build.runPass Classes.shapeClasses model
@@ -3449,7 +3486,7 @@ let shapePassTests =
 
             let owner =
                 { Build.facts (Build.typeResponse 10 TypeFlags.Object) with
-                    SymbolName = Some "Store"
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "Store")
                     Members = [ Build.resolvedMember (Build.symbol 100 "read" SymbolFlags.Method) 20 ]
                 }
 
@@ -3471,7 +3508,7 @@ let shapePassTests =
                           SymbolName = None
                       }
                   ] with
-                DeclNames = Map.ofList [ 10, "Store" ]
+                DeclNames = Map.ofList [ 10<typeId>, "Store" ]
             }
 
         testCase "a literal keeps its type at the parameter position that separates an overload set"
@@ -3479,7 +3516,7 @@ let shapePassTests =
             let model = literalOverloadModel ()
 
             let kept, keptFindings =
-                Spec.typeRef Build.context model None "Store.read(kind)" 30
+                Spec.typeRef Build.context model None "Store.read(kind)" 30<typeId>
 
             Expect.equal kept (FsNamed "Store.Text") "the literal is written as a type nested under its owner"
 
@@ -3488,7 +3525,7 @@ let shapePassTests =
                 [ Exact, "TR056" ]
                 "and the site reports exact rather than widened"
 
-            let widened, widenedFindings = Spec.typeRef Build.context model None "Label.kind" 30
+            let widened, widenedFindings = Spec.typeRef Build.context model None "Label.kind" 30<typeId>
 
             Expect.equal widened FsString "the same literal type elsewhere still widens"
 
@@ -3519,19 +3556,22 @@ let shapePassTests =
                 [ "Store.Json", [ "Json", Some "json" ]; "Store.Text", [ "Text", Some "text" ] ]
                 "one declaration per literal, each compiled to the literal it stands for"
 
-        // Wave eight, item 3. Retention reads the members of a declaration, so an exported
-        // function's overloads arrive widened and `DO004` prices the drop as its own loss.
-        testCase "dedupe-overloads reports an exported function's dropped overload as DO004" <| fun _ ->
+        testCase "dedupe-overloads preserves export candidates for the final collision pass" <| fun _ ->
             let export name body =
-                0,
                 {
-                    Name = name
-                    Docs = ""
-                    Tags = []
-                    TypeParameters = []
-                    Binding = ImportNamed name
-                    Body = body
-                    Settable = false
+                    Owner = EntryModule
+                    HarvestIndex = 0
+                    ExportName = name
+                    SourceSymbolId = 0<symbolId>
+                    SignatureOrdinal = None
+                    Member =
+                        { Name = name
+                          Docs = ""
+                          Tags = []
+                          TypeParameters = []
+                          Binding = ImportNamed name
+                          Body = body
+                          Settable = false }
                 }
 
             let parameter name =
@@ -3555,15 +3595,12 @@ let shapePassTests =
 
             let shaped, findings = Build.runPass Overloads.dedupeOverloads model
 
-            Expect.equal
-                (findings |> List.map (fun f -> f.Tier, f.Key, f.Symbol))
-                [ Widened, "DO004", "emit"; Widened, "DO001", "make" ]
-                "the function drop is an export-function loss; a constructor drop stays DO001"
+            Expect.isEmpty findings "the early overload pass does not price or drop export collisions"
 
             Expect.equal
-                (shaped.ExportMembers |> List.map (fun (_, m) -> m.Name))
-                [ "emit"; "make" ]
-                "one of each survives"
+                (shaped.ExportMembers |> List.map (fun owned -> owned.Member.Name))
+                [ "emit"; "emit"; "make"; "make" ]
+                "every candidate survives unchanged"
 
         testCase "detect-tagged-unions reads the arms' fields, not the arm types" <| fun _ ->
             // The arm properties become the case fields, because that is what Fable's erasure
@@ -3576,7 +3613,7 @@ let shapePassTests =
                           Build.resolvedMember (Build.symbol (id * 10 + 1) extra SymbolFlags.Property) 2 ] }
 
             let union =
-                { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 20; 21 ] }
+                { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 20<typeId>; 21<typeId> ] }
 
             let model =
                 { Build.shapeModel (
@@ -3587,7 +3624,7 @@ let shapePassTests =
                       :: stringLiteral 8 "round-rect"
                       :: Build.primitives
                   ) with
-                    DeclNames = Map.ofList [ 10, "Shape" ] }
+                    DeclNames = Map.ofList [ 10<typeId>, "Shape" ] }
 
             let shaped, findings = Build.runPass TaggedUnions.detectTaggedUnions model
 
@@ -3619,7 +3656,7 @@ let shapePassTests =
                           Build.resolvedMember (Build.symbol (id * 10 + 1) "run" SymbolFlags.Method) 30 ] }
 
             let union =
-                { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 20; 21 ] }
+                { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 20<typeId>; 21<typeId> ] }
 
             let model =
                 { Build.shapeModel (
@@ -3631,7 +3668,7 @@ let shapePassTests =
                       :: stringLiteral 8 "b"
                       :: Build.primitives
                   ) with
-                    DeclNames = Map.ofList [ 10, "Shape" ] }
+                    DeclNames = Map.ofList [ 10<typeId>, "Shape" ] }
 
             let shaped, findings = Build.runPass TaggedUnions.detectTaggedUnions model
 
@@ -3652,7 +3689,7 @@ let shapePassTests =
                           Build.resolvedMember (Build.symbol (id * 10 + 1) extra SymbolFlags.Property) 2 ] }
 
             let union =
-                { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 20; 21 ] }
+                { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 20<typeId>; 21<typeId> ] }
 
             let model =
                 { Build.shapeModel (
@@ -3663,7 +3700,7 @@ let shapePassTests =
                       :: stringLiteral 8 "round-rect"
                       :: Build.primitives
                   ) with
-                    DeclNames = Map.ofList [ 10, "Shape" ] }
+                    DeclNames = Map.ofList [ 10<typeId>, "Shape" ] }
 
             let shaped, findings = Build.runPass TaggedUnions.detectTaggedUnions model
 
@@ -3683,11 +3720,11 @@ let shapePassTests =
             // instantiation references it, so the chain must strictly decrease.
             let twin id =
                 { Build.facts (Build.typeResponse id TypeFlags.Union) with
-                    UnionMembers = [ 1; 2 ] }
+                    UnionMembers = [ 1<typeId>; 2<typeId> ] }
 
             let model =
                 { Build.shapeModel (twin 10 :: twin 11 :: Build.primitives) with
-                    DeclNames = Map.ofList [ 10, "ScrollThresholdValue"; 11, "TimelinePosition" ] }
+                    DeclNames = Map.ofList [ 10<typeId>, "ScrollThresholdValue"; 11<typeId>, "TimelinePosition" ] }
 
             let shaped, findings = Build.runPass Aliases.shapeAliases model
 
@@ -3711,7 +3748,7 @@ let shapePassTests =
             // own position rather than disappearing with the wrapper.
             let model = Build.shapeModel (libType 10 "Promise" [ 1 ] :: Build.primitives)
 
-            let reference, findings = Spec.typeRef Build.context model None "x" 10
+            let reference, findings = Spec.typeRef Build.context model None "x" 10<typeId>
 
             Expect.equal reference (FsApp("JS.Promise", [ FsString ])) "the binding is written"
             Expect.isEmpty findings "and nothing is lost saying it that way"
@@ -3722,7 +3759,7 @@ let shapePassTests =
             // parameter that goes missing is exactly what a finding is for.
             let model = Build.shapeModel (libType 10 "Uint8Array" [ 1 ] :: Build.primitives)
 
-            let reference, findings = Spec.typeRef Build.context model None "x" 10
+            let reference, findings = Spec.typeRef Build.context model None "x" 10<typeId>
 
             Expect.equal reference (FsNamed "JS.Uint8Array") "the name survives the lib's drift"
             Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "and the dropped argument is recorded"
@@ -3732,7 +3769,7 @@ let shapePassTests =
             // emit code that does not compile, so it widens the way it always did.
             let model = Build.shapeModel (libType 10 "Map" [ 1 ] :: Build.primitives)
 
-            let reference, findings = Spec.typeRef Build.context model None "x" 10
+            let reference, findings = Spec.typeRef Build.context model None "x" 10<typeId>
 
             Expect.equal reference FsObj "no binding is claimed"
             Expect.equal (findings |> List.map _.Tier) [ Widened ] "and the widening is the ordinary one"
@@ -3743,7 +3780,7 @@ let shapePassTests =
             // the loss note carries.
             let model = Build.shapeModel (libType 10 "Error" [] :: Build.primitives)
 
-            let reference, findings = Spec.typeRef Build.context model None "x" 10
+            let reference, findings = Spec.typeRef Build.context model None "x" 10<typeId>
 
             Expect.equal reference (FsNamed "exn") "the binding is written"
 
@@ -3754,7 +3791,7 @@ let shapePassTests =
 
         testCase "an unbound ECMAScript name keeps widening" <| fun _ ->
             let model = Build.shapeModel (libType 10 "Iterable" [ 1 ] :: Build.primitives)
-            let reference, findings = Spec.typeRef Build.context model None "x" 10
+            let reference, findings = Spec.typeRef Build.context model None "x" 10<typeId>
             Expect.equal reference FsObj "synchronous iterables have no JS binding"
             Expect.equal (findings |> List.map _.Tier) [ Widened ] "the loss is reported"
 
@@ -3763,12 +3800,12 @@ let shapePassTests =
             // `Promise` is the group: this one is the entry package's, and it ships.
             let model =
                 { Build.shapeModel (
-                      { Build.facts (Build.typeResponse 10 TypeFlags.Object) with SymbolName = Some "Promise" }
+                      { Build.facts (Build.typeResponse 10 TypeFlags.Object) with SymbolName = Some ((fun value -> value * uom<symbolName>) "Promise") }
                       :: Build.primitives
                   ) with
-                    DeclNames = Map.ofList [ 10, "Promise" ] }
+                    DeclNames = Map.ofList [ 10<typeId>, "Promise" ] }
 
-            let reference, findings = Spec.typeRef Build.context model None "x" 10
+            let reference, findings = Spec.typeRef Build.context model None "x" 10<typeId>
 
             Expect.equal reference (FsNamed "Promise") "the declaration this run generates wins"
             Expect.isEmpty findings "and no lib binding is invented over it"
@@ -3779,9 +3816,9 @@ let shapePassTests =
             // primitive carrying the measure the declaration emits (§4.6, D11).
             let model =
                 { Build.shapeModel (intersection 10 [ 1; 11 ] :: marker 11 "__brand" 1 :: Build.primitives) with
-                    DeclNames = Map.ofList [ 10, "UserId" ] }
+                    DeclNames = Map.ofList [ 10<typeId>, "UserId" ] }
 
-            let reference, findings = Spec.typeRef Build.context model None "x" 10
+            let reference, findings = Spec.typeRef Build.context model None "x" 10<typeId>
 
             Expect.equal reference (FsBranded(FsString, "UserId")) "the brand is written at the use"
             Expect.isEmpty findings "and costs nothing: the measure says what the intersection said"
@@ -3791,7 +3828,7 @@ let shapePassTests =
             // anonymous brand has nothing to carry and the nominality is what is lost.
             let model = Build.shapeModel (intersection 10 [ 1; 11 ] :: marker 11 "__brand" 1 :: Build.primitives)
 
-            let reference, findings = Spec.typeRef Build.context model None "x" 10
+            let reference, findings = Spec.typeRef Build.context model None "x" 10<typeId>
 
             Expect.equal reference FsString "the primitive survives"
             Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "the brand does not, and says so"
@@ -3801,9 +3838,9 @@ let shapePassTests =
             // as a brand would throw that member away and call the result exact.
             let model =
                 { Build.shapeModel (intersection 10 [ 1; 11 ] :: marker 11 "count" 2 :: Build.primitives) with
-                    DeclNames = Map.ofList [ 10, "Counted" ] }
+                    DeclNames = Map.ofList [ 10<typeId>, "Counted" ] }
 
-            let reference, findings = Spec.typeRef Build.context model None "x" 10
+            let reference, findings = Spec.typeRef Build.context model None "x" 10<typeId>
 
             Expect.equal reference FsObj "no brand, and no shape either yet"
             Expect.equal (findings |> List.map _.Tier) [ Widened ] "the widening is recorded"
@@ -3813,15 +3850,15 @@ let shapePassTests =
             // distributes, and the arms are its own working, carrying no names. One brand, not two.
             let model =
                 { Build.shapeModel (
-                      { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 12; 13 ] }
+                      { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 12<typeId>; 13<typeId> ] }
                       :: intersection 12 [ 3; 11 ]
                       :: intersection 13 [ 3; 11 ]
                       :: marker 11 "__brand" 1
                       :: Build.primitives
                   ) with
-                    DeclNames = Map.ofList [ 10, "Verified" ] }
+                    DeclNames = Map.ofList [ 10<typeId>, "Verified" ] }
 
-            let reference, _ = Spec.typeRef Build.context model None "x" 10
+            let reference, _ = Spec.typeRef Build.context model None "x" 10<typeId>
 
             Expect.equal reference (FsBranded(FsBool, "Verified")) "the distribution is undone"
 
@@ -3830,7 +3867,7 @@ let shapePassTests =
             // `string<UserId>`, so there is no abbreviation left to write.
             let model =
                 { Build.shapeModel (intersection 10 [ 1; 11 ] :: marker 11 "__brand" 1 :: Build.primitives) with
-                    DeclNames = Map.ofList [ 10, "UserId" ] }
+                    DeclNames = Map.ofList [ 10<typeId>, "UserId" ] }
 
             let shaped, findings = Build.runPass Aliases.shapeAliases model
 
@@ -3855,11 +3892,11 @@ let shapePassTests =
             // abbreviation - so the declaration keeps its name and arity as a phantom.
             let conditional =
                 { Build.facts (Build.typeResponse 10 TypeFlags.Conditional) with
-                    AliasTypeArguments = [ 20 ] }
+                    AliasTypeArguments = [ 20<typeId> ] }
 
             let model =
                 { Build.shapeModel (conditional :: typeParam 20 "T" :: Build.primitives) with
-                    DeclNames = Map.ofList [ 10, "Unwrap" ] }
+                    DeclNames = Map.ofList [ 10<typeId>, "Unwrap" ] }
 
             let shaped, findings = Build.runPass Aliases.shapeAliases model
 
@@ -3884,11 +3921,11 @@ let shapePassTests =
             // value is a string at runtime, so the phantom says so rather than obj.
             let template =
                 { Build.facts (Build.typeResponse 10 TypeFlags.TemplateLiteral) with
-                    AliasTypeArguments = [ 20 ] }
+                    AliasTypeArguments = [ 20<typeId> ] }
 
             let model =
                 { Build.shapeModel (template :: typeParam 20 "T" :: Build.primitives) with
-                    DeclNames = Map.ofList [ 10, "Prefixed" ] }
+                    DeclNames = Map.ofList [ 10<typeId>, "Prefixed" ] }
 
             let shaped, _ = Build.runPass Aliases.shapeAliases model
 
@@ -3908,13 +3945,13 @@ let shapePassTests =
                     { Build.typeResponse 10 TypeFlags.Object with
                         ObjectFlags = ValueSome ObjectFlags.Reference
                         Target = ValueSome 90 } with
-                    SymbolName = Some "Array"
-                    TypeArguments = [ 20 ]
-                    AliasTypeArguments = [ 20 ] }
+                    SymbolName = Some ((fun value -> value * uom<symbolName>) "Array")
+                    TypeArguments = [ 20<typeId> ]
+                    AliasTypeArguments = [ 20<typeId> ] }
 
             let model =
                 { Build.shapeModel (array' :: typeParam 20 "T" :: Build.primitives) with
-                    DeclNames = Map.ofList [ 10, "Alias" ] }
+                    DeclNames = Map.ofList [ 10<typeId>, "Alias" ] }
 
             let shaped, _ = Build.runPass Aliases.shapeAliases model
 
@@ -3947,17 +3984,22 @@ let shapePassTests =
             let model =
                 { Build.shapeModel [] with
                     Decls =
-                        [ interface' "B" { File = "b.ts"; NodeIndex = 5 }
-                          interface' "A" { File = "a.ts"; NodeIndex = 9 } ]
+                        [ interface' "B" { File = ((fun value -> value * uom<declFile>) "b.ts"); NodeIndex = 5<nodeId> }
+                          interface' "A" { File = ((fun value -> value * uom<declFile>) "a.ts"); NodeIndex = 9<nodeId> } ]
                     ExportMembers =
-                        [ 0,
-                          { Name = "make"
-                            Docs = ""
-                            Tags = []
-                            TypeParameters = []
-                            Binding = ImportNamed "make"
-                            Body = ExportValue FsFloat
-                            Settable = false } ] }
+                        [ { Owner = EntryModule
+                            HarvestIndex = 0
+                            ExportName = "make"
+                            SourceSymbolId = 0<symbolId>
+                            SignatureOrdinal = None
+                            Member =
+                                { Name = "make"
+                                  Docs = ""
+                                  Tags = []
+                                  TypeParameters = []
+                                  Binding = ImportNamed "make"
+                                  Body = ExportValue FsFloat
+                                  Settable = false } } ] }
 
             let ordered, _ = Build.runPass Ordering.orderDeclarations model
 
@@ -3970,6 +4012,47 @@ let shapePassTests =
 
             Expect.equal names [ "A"; "B"; "<exports>" ] "file order first, Exports last"
             Expect.isEmpty ordered.ExportMembers "consumed into the Exports decl"
+
+        testCase "order-declarations groups public owners without deduplicating shared exports" <| fun _ ->
+            let member' owner index ordinal =
+                { Owner = owner
+                  HarvestIndex = index
+                  ExportName = "check"
+                  SourceSymbolId = 41<symbolId>
+                  SignatureOrdinal = Some ordinal
+                  Member =
+                    { Name = "check"
+                      Docs = ""
+                      Tags = []
+                      TypeParameters = []
+                      Binding = ImportNamed "check"
+                      Body = ExportFunction([], FsString)
+                      Settable = false } }
+
+            let model =
+                { Build.shapeModel [] with
+                    ExportMembers =
+                        [ member' (AmbientModule ((fun value -> value * uom<importSpecifier>) "pkg/strict")) 2 1
+                          member' EntryModule 0 0
+                          member' (AmbientModule ((fun value -> value * uom<importSpecifier>) "pkg/strict")) 1 0 ] }
+
+            let ordered, _ = Build.runPass Ordering.orderDeclarations model
+
+            let containers =
+                ordered.Decls
+                |> List.choose (function
+                    | FsExports container -> Some(container.Name, container.Members)
+                    | _ -> None)
+
+            Expect.equal
+                (containers |> List.map fst)
+                [ "Exports"; "Pkg.Strict.Exports" ]
+                "containers follow ordinal allocated-path order"
+
+            Expect.equal
+                (containers |> List.map (fun (_, members) -> members |> List.map _.SignatureOrdinal))
+                [ [ Some 0 ]; [ Some 0; Some 1 ] ]
+                "owners remain distinct while overloads retain harvest order"
 
         testCase "repair-arity keeps an alias whose target lost its parameters, as a phantom" <| fun _ ->
             // `type Params<'P> = obj` is FS0035. The erased phantom `shape-aliases` writes for a
@@ -4228,7 +4311,7 @@ let private constraintParameters expected used =
               { Build.typeResponse id TypeFlags.Object with
                   Target = ValueSome 30
                   ObjectFlags = ValueSome ObjectFlags.Reference } with
-            SymbolName = Some "Box"
+            SymbolName = Some ((fun value -> value * uom<symbolName>) "Box")
             TypeArguments = [ argument ] }
 
     let model =
@@ -4236,33 +4319,33 @@ let private constraintParameters expected used =
               genericDecl 30 [ 25 ] []
               :: typeParam 25 "Value"
               :: typeParam 20 "T"
-              :: { typeParam 21 "E" with Constraint = Some 31 }
-              :: { typeParam 22 "F" with Constraint = Some 32 }
-              :: applied 31 20
-              :: applied 32 21
+              :: { typeParam 21 "E" with Constraint = Some 31<typeId> }
+              :: { typeParam 22 "F" with Constraint = Some 32<typeId> }
+              :: applied 31 20<typeId>
+              :: applied 32 21<typeId>
               :: Build.primitives
           ) with
-            DeclNames = Map.ofList [ 30, "Box" ] }
+            DeclNames = Map.ofList [ 30<typeId>, "Box" ] }
 
     let signature =
         { Build.signature
               [ Build.resolvedMember (Build.symbol 500 "value" SymbolFlags.FunctionScopedVariable) used ]
               4 with
-            TypeParameters = [ 20; 21; 22 ] }
+            TypeParameters = [ 20<typeId>; 21<typeId>; 22<typeId> ] }
 
     let callable =
         { Build.facts (Build.typeResponse 40 TypeFlags.Object) with CallSignatures = [ signature ] }
 
     let model =
         { model with
-            Types = Map.add 40 callable model.Types
+            Types = Map.add 40<typeId> callable model.Types
             Harvest =
                 { HarvestModel.Empty with
                     Exports = [ Build.export "use" (Build.symbol 400 "use" SymbolFlags.Function) ] }
-            ExportTypes = Map.ofList [ 400, { Declared = None; Value = Some 40 } ] }
+            ExportTypes = Map.ofList [ 400<symbolId>, { Declared = None; Value = Some 40<typeId> } ] }
 
     let shaped, findings = Build.runPass Exports.shapeExports model
-    let parameters = shaped.ExportMembers |> List.exactlyOne |> snd |> _.TypeParameters
+    let parameters = shaped.ExportMembers |> List.exactlyOne |> _.Member.TypeParameters
 
     (parameters |> List.map _.Name,
      findings |> List.filter (fun finding -> finding.Key = "TP006") |> List.map _.Message), expected
@@ -4290,11 +4373,11 @@ let privateAliasReferences =
             { Build.facts
                   { Build.typeResponse 30 TypeFlags.Object with
                       ObjectFlags = ValueSome(ObjectFlags.Anonymous ||| ObjectFlags.Instantiated) } with
-                AliasTypeArguments = [ 20 ]
+                AliasTypeArguments = [ 20<typeId> ]
                 Members = [ Build.resolvedMember (Build.symbol 300 "value" SymbolFlags.Property) 20 ] }
         let model =
             { Build.shapeModel [ alias; typeParam 20 "T" ] with
-                DeclNames = Map.ofList [ 30, "Accept.Config" ]
-                TypeVars = Map.ofList [ 20, "T" ] }
-        let reference, findings = Spec.typeRef Build.context model None "accept" 30
+                DeclNames = Map.ofList [ 30<typeId>, "Accept.Config" ]
+                TypeVars = Map.ofList [ 20<typeId>, "T" ] }
+        let reference, findings = Spec.typeRef Build.context model None "accept" 30<typeId>
         (reference, findings) |> Flip.Expect.equal "" (FsApp("Accept.Config", [ FsTypeVar "T" ]), [])

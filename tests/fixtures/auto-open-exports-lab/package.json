@@ -1,0 +1,7 @@
+{
+    "name": "auto-open-exports-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "main": "index.js",
+    "description": "Hand-authored fixture for #74: a package's value exports, minimal enough that the generated Exports type is the whole story - `autoOpenExports` marks it [<AutoOpen>], off by default."
+}

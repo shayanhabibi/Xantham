@@ -13,9 +13,9 @@ let context =
     {
         Session = Unchecked.defaultof<Session<TscMailbox>>
         Config = GeneratorConfig.Default
-        PackageDir = "."
-        PackageName = "test-pkg"
-        EntryFile = "index.d.ts"
+        PackageDir = "." * Measure.uom<Measure.dirPath>
+        PackageName = "test-pkg" * Measure.uom<Measure.npmDependency>
+        EntryFile = "index.d.ts" * Measure.uom<Measure.declFile>
     }
 
 let symbol (id: int) (name: string) (flags: SymbolFlags) : SymbolResponse =
@@ -71,7 +71,7 @@ let resolvedMember (sym: SymbolResponse) (typeId: int) : ResolvedMember =
         Tags = []
         Optional = false
         ReadOnly = false
-        TypeId = typeId
+        TypeId = typeId * Measure.uom<Measure.typeId>
     }
 
 let export (name: string) (sym: SymbolResponse) : HarvestedExport =
@@ -90,7 +90,10 @@ let shapeModel (table: TypeFacts list) : ShapeModel =
     {
         Harvest = HarvestModel.Empty
         ExportTypes = Map.empty
-        Types = table |> List.map (fun facts -> facts.Response.Id, facts) |> Map.ofList
+        Types =
+            table
+            |> List.map (fun facts -> facts.Response.Id * Measure.uom<Measure.typeId>, facts)
+            |> Map.ofList
         NotFollowed = Map.empty
         DeclNames = Map.empty
         DeclOrders = Map.empty
@@ -100,6 +103,7 @@ let shapeModel (table: TypeFacts list) : ShapeModel =
         TypeVars = Map.empty
         KeyVars = Map.empty
         Decls = []
+        RuntimePackage = "lab" * Measure.uom<Measure.importSpecifier>
     }
 
 /// A call or construct signature over the given parameters, no rest tail.
@@ -109,7 +113,7 @@ let signature (parameters: ResolvedMember list) (returnTypeId: int) : ResolvedSi
         HasRest = false
         TypeParameters = []
         IsAbstract = false
-        ReturnTypeId = returnTypeId
+        ReturnTypeId = returnTypeId * Measure.uom<Measure.typeId>
     }
 
 /// Runs one pass to completion under the wire-less context and splits the outcome.

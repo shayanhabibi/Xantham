@@ -178,21 +178,6 @@ type ModelMap =
     [<ParamObject; Emit("$0")>]
     static member Create (alpha: ModelMap.Alpha, beta: ModelMap.Beta) : ModelMap = jsNative
 
-module ModelMap =
-    [<Interface>]
-    type Alpha =
-        abstract inputs: string with get, set
-        abstract outputs: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (inputs: string, outputs: float) : Alpha = jsNative
-
-    [<Interface>]
-    type Beta =
-        abstract inputs: float with get, set
-        abstract outputs: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (inputs: float, outputs: string) : Beta = jsNative
-
 /// <summary>
 /// A dispatch target whose map is only ever bounded, never given.
 /// </summary>
@@ -242,6 +227,21 @@ type Exports =
     /// </summary>
     [<Import("Feed", "indexed-access-lab"); EmitConstructor>]
     static member Feed<'EventMap> () : Feed<'EventMap> = jsNative
+
+module ModelMap =
+    [<Interface>]
+    type Alpha =
+        abstract inputs: string with get, set
+        abstract outputs: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (inputs: string, outputs: float) : Alpha = jsNative
+
+    [<Interface>]
+    type Beta =
+        abstract inputs: float with get, set
+        abstract outputs: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (inputs: float, outputs: string) : Beta = jsNative
 
 [<Erase>]
 type U12<'t1, 't2, 't3, 't4, 't5, 't6, 't7, 't8, 't9, 't10, 't11, 't12> =

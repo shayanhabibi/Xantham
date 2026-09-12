@@ -1,4 +1,4 @@
-namespace Xantham.Generator
+﻿namespace Xantham.Generator
 
 open System
 open System.ComponentModel.DataAnnotations
@@ -7,6 +7,7 @@ open System.Text.Json
 open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 open System.ComponentModel
+open Measure
 
 
 /// The package boundary a symbol or type originates from, classified from its declaration's
@@ -17,10 +18,12 @@ type PackageId =
     /// The compiler's own `lib.*.d.ts` (bundled with the `typescript` npm package).
     | CompilerLib
     /// A dependency, by npm name (`@scope/name` kept whole).
-    | Dependency of string
+    | Dependency of string<npmDependency>
     /// No declaration path to classify by - anonymous and synthetic shapes. Treated as part
     /// of the entry package, which is what they are in practice.
     | Unclassified
+
+    static member inline StringDependency(dep: string) = dep * uom<npmDependency> |> Dependency
 
 /// The F# destination of one mapped name (O7's `map`).
 [<Description("The destination of each redirected name, keyed by the TypeScript name the group declares. A name outside the table widens.")>]
@@ -112,7 +115,7 @@ module CompilerLibLayout =
         failwith $"xantham.json: compilerLib.{field} {expectation}"
 
     let private validateRoot (name: string) =
-        if System.String.IsNullOrWhiteSpace name then
+        if String.IsNullOrWhiteSpace name then
             invalid "module" "must be a nonempty dotted F# module name"
 
         name.Split('.')
@@ -121,7 +124,7 @@ module CompilerLibLayout =
                 invalid "module" "must be a nonempty dotted F# module name")
 
     let private validateChild field (name: string) =
-        if System.String.IsNullOrWhiteSpace name || not (Identifier.isPlain name) then
+        if String.IsNullOrWhiteSpace name || not (Identifier.isPlain name) then
             invalid field "must be one nonempty F# identifier"
 
     /// Applies defaults and verifies the names can become the compiler-library's nested modules.
@@ -173,7 +176,7 @@ type GeneratorConfig =
         /// dependency, `typescript/lib` for the compiler lib.
         [<Description("What the generator does with each package boundary its declarations reach (decision O7), keyed \
         by npm name, with the compiler's own library as `typescript/lib`. An unlisted group widens.")>]
-        Groups: Map<string, GroupDisposition>
+        Groups: Map<string<npmDependency>, GroupDisposition>
         /// The compiler's `lib` option, as `tsconfig.json` spells it (`["esnext"]`). `None` is the
         /// compiler's default, which includes the DOM. A global type library that redeclares DOM
         /// names (`@cloudflare/workers-types`) must set this to what its README prescribes: with
@@ -224,6 +227,11 @@ type GeneratorConfig =
         ResolveNoInfer: bool
         /// Names and opening policy for the compiler's combined library binding.
         CompilerLib: CompilerLibConfig
+        /// Marks every generated `Exports` type `[<AutoOpen>]`, so a package's value exports
+        /// resolve unqualified.
+        [<Description("Mark every generated `Exports` type [<AutoOpen>], so package's value exports resolve unqualified. \
+        Defaults to false.")>]
+        AutoOpenExports: bool
     }
 
     static member Default =
@@ -239,6 +247,7 @@ type GeneratorConfig =
             RuntimePackage = None
             ResolveNoInfer = false
             CompilerLib = CompilerLibConfig.Default
+            AutoOpenExports = false
         }
 
 module GeneratorConfig =
@@ -326,7 +335,7 @@ module GeneratorConfig =
                 | true, value when value.ValueKind = JsonValueKind.String ->
                     let name = value.GetString()
 
-                    if System.String.IsNullOrWhiteSpace name then
+                    if String.IsNullOrWhiteSpace name then
                         failwith "xantham.json: runtime must be a nonempty string"
 
                     Some name
@@ -337,7 +346,7 @@ module GeneratorConfig =
                 match doc.RootElement.TryGetProperty "groups" with
                 | true, v when v.ValueKind = JsonValueKind.Object ->
                     v.EnumerateObject()
-                    |> Seq.map (fun p -> p.Name, parseGroup p.Name p.Value)
+                    |> Seq.map (fun p -> (p.Name * uom<_>), parseGroup p.Name p.Value)
                     |> Map.ofSeq
                 | _ -> Map.empty
 
@@ -365,7 +374,7 @@ module GeneratorConfig =
 
                         let name = item.GetString()
 
-                        if System.String.IsNullOrWhiteSpace name then
+                        if String.IsNullOrWhiteSpace name then
                             failwith "xantham.json: types must be an array of nonempty strings"
 
                         name)
@@ -381,7 +390,7 @@ module GeneratorConfig =
                     |> Seq.map (fun item ->
                         if
                             item.ValueKind <> JsonValueKind.String
-                            || System.String.IsNullOrWhiteSpace(item.GetString())
+                            || String.IsNullOrWhiteSpace(item.GetString())
                         then
                             failwith "xantham.json: declarationReferences must be an array of nonempty paths"
 
@@ -431,6 +440,7 @@ module GeneratorConfig =
                 RuntimePackage = runtime
                 ResolveNoInfer = boolField "resolveNoInfer" GeneratorConfig.Default.ResolveNoInfer
                 CompilerLib = compilerLib
+                AutoOpenExports = boolField "autoOpenExports" GeneratorConfig.Default.AutoOpenExports
             }
 
     /// Loads `<packageDir>/xantham.json`.
@@ -455,22 +465,28 @@ module GeneratorConfig =
     /// `__`, which DefinitelyTyped's convention cannot express either; `runtime` in
     /// `xantham.json` overrides the whole derivation for that and for every other package the
     /// convention does not describe.
-    let derivedRuntimePackage (packageName: string) =
+    let derivedRuntimePackage (packageName: string<npmDependency>) =
+        let packageName = packageName / uom<npmDependency>
         let prefix = "@types/"
 
-        if not (packageName.StartsWith(prefix, System.StringComparison.Ordinal)) then
-            packageName
-        else
-            let mangled = packageName.Substring prefix.Length
+        let specifier =
+            if not (packageName.StartsWith(prefix, StringComparison.Ordinal)) then
+                packageName
+            else
+                let mangled = packageName.Substring prefix.Length
 
-            match mangled.IndexOf("__", System.StringComparison.Ordinal) with
-            | -1 -> if mangled = "" then packageName else mangled
-            | at -> $"@{mangled.Substring(0, at)}/{mangled.Substring(at + 2)}"
+                match mangled.IndexOf("__", StringComparison.Ordinal) with
+                | -1 -> if mangled = "" then packageName else mangled
+                | at -> $"@{mangled.Substring(0, at)}/{mangled.Substring(at + 2)}"
+
+        specifier * uom<importSpecifier>
 
     /// The configured runtime package, or the derived one. What every `[<Import(…)>]` the run
     /// renders names.
-    let runtimePackage (config: GeneratorConfig) (packageName: string) =
-        config.RuntimePackage |> Option.defaultValue (derivedRuntimePackage packageName)
+    let runtimePackage (config: GeneratorConfig) (packageName: string<npmDependency>) =
+        config.RuntimePackage
+        |> Option.map (fun value -> value * uom<importSpecifier>)
+        |> Option.defaultValue (derivedRuntimePackage packageName)
 
     /// The key a group is addressed by under `xantham.json`'s `groups`; `None` for the groups
     /// that are not configurable (the entry package always ships).
@@ -478,7 +494,7 @@ module GeneratorConfig =
         function
         | EntryPackage
         | Unclassified -> None
-        | CompilerLib -> Some "typescript/lib"
+        | CompilerLib -> Some("typescript/lib" * uom<npmDependency>)
         | Dependency name -> Some name
 
     /// A group's effective disposition: the entry always ships, everything else is `widen`
@@ -495,10 +511,10 @@ module GeneratorConfig =
 /// here. Renaming anything below is a breaking change to every shipped binding.
 module Naming =
     let private capitalize (part: string) =
-        string (System.Char.ToUpperInvariant part[0]) + part.Substring 1
+        string (Char.ToUpperInvariant part[0]) + part.Substring 1
 
     let private segments (text: string) =
-        text.Split([| '-'; '_'; '.' |], System.StringSplitOptions.RemoveEmptyEntries)
+        text.Split([| '-'; '_'; '.' |], StringSplitOptions.RemoveEmptyEntries)
 
     /// One path segment of a package name, PascalCased: `workers-types` -> `WorkersTypes`.
     let pascalSegment (text: string) =
@@ -519,12 +535,12 @@ module Naming =
         else
             let separated =
                 name
-                |> Seq.map (fun c -> if System.Char.IsLetterOrDigit c then c else '-')
-                |> System.String.Concat
+                |> Seq.map (fun c -> if Char.IsLetterOrDigit c then c else '-')
+                |> String.Concat
 
             match pascalSegment separated with
             | "" -> "Item"
-            | text when System.Char.IsLetter text[0] -> text
+            | text when Char.IsLetter text[0] -> text
             | text -> "N" + text
 
     /// A package's module name: `@scope/pkg-name` -> `Scope.PkgName`.
@@ -536,8 +552,8 @@ module Naming =
     /// distinguishes nothing on this side, where the declarations and the library are one
     /// binding. Deriving it here rather than at the call site keeps a declaration and every
     /// cross-package reference to it on the same name.
-    let packageModule (packageName: string) =
-        (GeneratorConfig.derivedRuntimePackage packageName).TrimStart('@').Split('/')
+    let packageModule (packageName: string<npmDependency>) =
+        (GeneratorConfig.derivedRuntimePackage packageName / uom<importSpecifier>).TrimStart('@').Split('/')
         |> Array.map pascalSegment
         |> String.concat "."
 
@@ -562,8 +578,10 @@ module Naming =
 
     /// A package's module under a namespace: `FSharp.CloudEdge` over `@cloudedge/agents` is
     /// `FSharp.CloudEdge.Agents`.
-    let private underNamespace (ns: string) (packageName: string) =
-        let derived = GeneratorConfig.derivedRuntimePackage packageName
+    let private underNamespace (ns: string) (packageName: string<npmDependency>) =
+        let derived =
+            GeneratorConfig.derivedRuntimePackage packageName / uom<importSpecifier>
+
         $"{ns}.{pascalSegment (derived.Split('/') |> Array.last)}"
 
     /// A dependency's module under the entry package's configured namespace, or its derived
@@ -572,7 +590,7 @@ module Naming =
     /// The namespace reaches the groups `groups` names, which is the family the entry package
     /// declares itself part of. Selecting them by configuration rather than by npm scope lets a
     /// family span scopes, and lets an unscoped one exist at all.
-    let namespacedModule (config: GeneratorConfig) (packageName: string) =
+    let namespacedModule (config: GeneratorConfig) (packageName: string<npmDependency>) =
         match config.Namespace with
         | Some ns when Map.containsKey packageName config.Groups -> underNamespace ns packageName
         | _ -> packageModule packageName
@@ -582,7 +600,7 @@ module Naming =
     /// A package generated as the entry takes the same name under a namespace that a run
     /// referencing it templates, so one `namespace` in each member of a family is the whole
     /// configuration. The family's root sets `module` to take the namespace bare.
-    let groupModule (config: GeneratorConfig) (entryPackageName: string) =
+    let groupModule (config: GeneratorConfig) (entryPackageName: string<npmDependency>) =
         function
         | EntryPackage
         | Unclassified ->
@@ -706,9 +724,9 @@ module Naming =
     /// starting with a digit - because the failure it prevents is a whole file that will not
     /// compile, and the cost of a false negative is one finding.
     let isWritableTypeName (name: string) =
-        not (System.String.IsNullOrEmpty name)
-        && (System.Char.IsLetter name[0] || name[0] = '_')
-        && name |> Seq.forall (fun c -> System.Char.IsLetterOrDigit c || c = '_')
+        not (String.IsNullOrEmpty name)
+        && (Char.IsLetter name[0] || name[0] = '_')
+        && name |> Seq.forall (fun c -> Char.IsLetterOrDigit c || c = '_')
 
     /// The DU case name for a string-literal union member: PascalCased over separator
     /// segments (`"utf-8"` -> `Utf8`), prefixed when the result cannot start an F# case.
@@ -716,12 +734,12 @@ module Naming =
     let enumCaseOfString (text: string) =
         let cleaned =
             text
-            |> Seq.map (fun c -> if System.Char.IsLetterOrDigit c then c else '-')
-            |> System.String.Concat
+            |> Seq.map (fun c -> if Char.IsLetterOrDigit c then c else '-')
+            |> String.Concat
 
         match pascalSegment cleaned with
         | "" -> "Empty"
-        | name when System.Char.IsLetter name[0] -> name
+        | name when Char.IsLetter name[0] -> name
         | name -> "N" + name
 
     /// The DU case name for a numeric-literal union member (D12): `1` -> `N1`,
@@ -738,8 +756,9 @@ module Naming =
 
     /// The name a default export falls back to when its symbol is itself named `default`:
     /// the package name's last segment, camelCased (`ansi-regex` -> `ansiRegex`).
-    let defaultExport (packageName: string) =
-        let last = packageName.TrimStart('@').Split('/') |> Array.last
+    let defaultExport (packageName: string<npmDependency>) =
+        let last =
+            (packageName / uom<npmDependency>).TrimStart('@').Split('/') |> Array.last
 
         segments last
         |> Array.mapi (fun i part ->
@@ -758,11 +777,11 @@ type Context =
         Session: Session<TscMailbox>
         Config: GeneratorConfig
         /// Absolute path of the package being generated from.
-        PackageDir: string
+        PackageDir: string<dirPath>
         /// The `name` field of the package manifest, or the directory name without one.
-        PackageName: string
+        PackageName: string<npmDependency>
         /// Absolute path of the declaration entry point the program was created over.
-        EntryFile: string
+        EntryFile: string<declFile>
     }
 
 /// What a pass produced: the advanced model, or the model plus the findings that say where the
@@ -794,7 +813,11 @@ module Pass =
 /// A deterministic source-order key parsed from a declaration node handle (`index.kind.path`).
 /// The handle is otherwise opaque; only the file path and node index are read, and only for
 /// ordering output the way the author ordered source.
-type DeclOrder = { File: string; NodeIndex: int }
+type DeclOrder =
+    {
+        File: string<declFile>
+        NodeIndex: int<nodeId>
+    }
 
 /// Where a harvested name came from, which is what decides how a *value* binds in JavaScript.
 /// Types are unaffected: an interface is the same F# declaration either way.
@@ -808,7 +831,16 @@ type ExportOrigin =
     /// An export of an ambient module declaration (`declare module "cloudflare:workers"`),
     /// carrying the specifier that declaration quotes. Values bind with
     /// `[<Import(name, specifier)>]`.
-    | FromAmbientModule of specifier: string
+    | FromAmbientModule of specifier: string<importSpecifier>
+
+    static member inline StringFromAmbientModule specifier =
+        (specifier: string) * uom<importSpecifier> |> FromAmbientModule
+
+/// The public JavaScript surface which owns an exported value occurrence.
+type ExportOwner =
+    | EntryModule
+    | AmbientModule of specifier: string<importSpecifier>
+    | GlobalScope
 
 /// One export of the entry module, aliases already followed to their origin so re-exports
 /// appear once under the name they are exported as. A global type library has no module to
@@ -836,7 +868,7 @@ type HarvestModel =
         /// The namespaces the entry package declares, by symbol id, under names an F# module
         /// can be spelled with. A declaration written inside one nests under it where a second
         /// declaration claims the same name.
-        Namespaces: Map<int, string>
+        Namespaces: Map<int<symbolId>, string<symbolName>>
         /// Count of the entry package's own declared names that a `lib.*.d.ts` declaration of
         /// the same name precedes: `harvest-globals` groups such a name as the compiler lib
         /// (`Grouping.classify`) and it does not reach `Exports` - unless the compiler-lib
@@ -867,7 +899,7 @@ type ResolvedMember =
         Tags: JSDocTagInfo list
         Optional: bool
         ReadOnly: bool
-        TypeId: int
+        TypeId: int<typeId>
     }
 
 /// One index signature (`[key: string]: V`) as the resolve tier records it. These are
@@ -876,8 +908,8 @@ type ResolvedMember =
 /// the shape tier has to consult both before deciding a type has no shape worth declaring.
 type ResolvedIndex =
     {
-        KeyTypeId: int
-        ValueTypeId: int
+        KeyTypeId: int<typeId>
+        ValueTypeId: int<typeId>
         IsReadonly: bool
     }
 
@@ -888,11 +920,11 @@ type ResolvedSignature =
         HasRest: bool
         /// The signature's own type parameters (§4.9). A generic *function* carries them here
         /// rather than on its type, which is where a callback alias's `T` lives.
-        TypeParameters: int list
+        TypeParameters: int<typeId> list
         /// A construct signature of an `abstract class`, which TypeScript refuses `new` on. It
         /// marks the class as one written to be derived from (§4.4).
         IsAbstract: bool
-        ReturnTypeId: int
+        ReturnTypeId: int<typeId>
     }
 
 /// A conditional type's mapping facts (§4.11).
@@ -902,7 +934,7 @@ type ConditionalFacts =
         Name: string option
         /// The branch the mapping takes, named for the manifest and carried by id. Absent where
         /// both branches are reachable and inhabited.
-        Branch: (string * int) option
+        Branch: (string * int<typeId>) option
     }
 
 /// A `TypeResponse` plus the derived facts of the kinds the skeleton resolves: object members,
@@ -915,18 +947,18 @@ type TypeFacts =
         Origin: PackageId
         /// Name of the type's own symbol where it has one - what a `reference` emission
         /// templates with, and what a widening finding names.
-        SymbolName: string option
+        SymbolName: string<symbolName> option
         /// File of the type's own symbol's first declaration, as the wire reports it.
-        DeclFile: string option
+        DeclFile: string<declFile> option
         /// Complete declaration handles of the actual type symbol, retained for catalog identity.
-        Declarations: string list
+        Declarations: string<declHandle> list
         /// Alias arguments retain concrete substitutions for declaration catalog specialization keys.
         DeclarationArguments: TypeResponse list
         /// Declaration handles of the alias applied at this type occurrence.
-        AliasDeclarations: string list
+        AliasDeclarations: string<declHandle> list
         /// Symbol id of the declaration the type's own symbol is written inside - a namespace,
         /// where `HarvestModel.Namespaces` has a name for it.
-        SymbolParent: int option
+        SymbolParent: int<symbolId> option
         Members: ResolvedMember list
         /// Index signatures (§4.10). Kept apart from `Members` because they are not properties:
         /// they have no name, and a type may carry one with no members at all.
@@ -934,10 +966,10 @@ type TypeFacts =
         CallSignatures: ResolvedSignature list
         ConstructSignatures: ResolvedSignature list
         /// `extends` bases of an interface or class instance type, by id.
-        BaseTypes: int list
+        BaseTypes: int<typeId> list
         /// Type arguments of a generic reference, resolved for *every* group - an external
         /// `Array<T>` carries entry-package types that must still be reached (O7 note).
-        TypeArguments: int list
+        TypeArguments: int<typeId> list
         /// A tuple's per-element flags, in element order, copied off its *target* - the wire
         /// carries them there, not on the reference. The target itself is deliberately left out
         /// of the table: deriving it drags all of `Array.prototype` in again for every distinct
@@ -946,25 +978,25 @@ type TypeFacts =
         /// The arguments the type's *alias* was written with, by id (§4.9). On the declaration
         /// form of a generic alias these are its own parameters - `type Mapper<T> = (t: T) => T`
         /// leaves the function type itself parameterless, so this is the only place `T` appears.
-        AliasTypeArguments: int list
+        AliasTypeArguments: int<typeId> list
         /// The constituents of an intersection, in the checker's order. Separate from
         /// `UnionMembers` because the two mean opposite things and the passes that read one
         /// must never see the other.
-        IntersectionMembers: int list
+        IntersectionMembers: int<typeId> list
         /// A type parameter's `extends` bound, by id (§4.9). Only type parameters carry one.
-        Constraint: int option
+        Constraint: int<typeId> option
         /// A type parameter's default type argument, by id (§4.9).
-        Default: int option
+        Default: int<typeId> option
         /// `T extends U ? X : Y` (§4.11), where the type is one.
         Conditional: ConditionalFacts option
-        UnionMembers: int list
+        UnionMembers: int<typeId> list
         /// Compiler-returned literal-union alias after removing nullish members; populated only for catalog generation or reuse.
-        NonNullableAlias: int option
+        NonNullableAlias: int<typeId> option
         /// The alias name and single argument an indexed-access reference was written through,
         /// where the checker has already expanded past it before the flags reach the shaper
         /// (§4.11's `NoInfer`). Populated only at an indexed-access reference site, never on a
         /// declaration - unrelated to `AliasTypeArguments`, which serves the declaration form.
-        AliasIdentity: (string * int) option
+        AliasIdentity: (string<symbolName> * int<typeId>) option
     }
 
 module TypeFacts =
@@ -1000,22 +1032,22 @@ module TypeFacts =
 /// the two are separate fields rather than one.
 type ExportTypeIds =
     {
-        Declared: int option
-        Value: int option
+        Declared: int<typeId> option
+        Value: int<typeId> option
     }
 
 type ResolveModel =
     {
         Harvest: HarvestModel
         /// Export symbol id -> the type ids the checker gave for it.
-        ExportTypes: Map<int, ExportTypeIds>
+        ExportTypes: Map<int<symbolId>, ExportTypeIds>
         /// The type table. Closed: every id referenced by a `TypeFacts` is a key here or in
         /// `NotFollowed` - that closure is the tier's invariant.
-        Types: Map<int, TypeFacts>
+        Types: Map<int<typeId>, TypeFacts>
         /// Ids deliberately not resolved, with the reason - the depth cutoff, or a response the
         /// compiler could not encode - so a reader of the table can tell "not followed" from
         /// "missing".
-        NotFollowed: Map<int, string>
+        NotFollowed: Map<int<typeId>, string>
     }
 
 // ---------------------------------------------------------------------------------------------
@@ -1168,7 +1200,7 @@ type ImportBinding =
     | GlobalName of string
     /// An export of an ambient module, under the specifier that module declares. The specifier
     /// is the declaration's own rather than the run's runtime package.
-    | ImportFrom of name: string * specifier: string
+    | ImportFrom of name: string * specifier: string<importSpecifier>
 
 /// What one *bound* member is - a member whose body is not F# but a reference into JavaScript,
 /// carried by an `ImportBinding`. Two kinds of declaration hold these: the `Exports` type, whose
@@ -1200,6 +1232,23 @@ type FsExportMember =
         /// A settable static or mutable global, rendered `with get, set`. Assignment to it
         /// compiles to a JavaScript property write.
         Settable: bool
+    }
+
+type OwnedExportMember =
+    {
+        Owner: ExportOwner
+        HarvestIndex: int
+        ExportName: string
+        SourceSymbolId: int<symbolId>
+        SignatureOrdinal: int option
+        Member: FsExportMember
+    }
+
+type FsExportContainer =
+    {
+        Name: string
+        Owner: ExportOwner
+        Members: OwnedExportMember list
     }
 
 /// What makes a declaration an F# *class* rather than an interface (§4.4): the import that binds
@@ -1388,7 +1437,7 @@ type FsDecl =
     | FsAbbrev of FsAbbrevDecl
     | FsDelegateType of FsDelegateDecl
     /// The one `Exports` type gathering the module's value exports.
-    | FsExports of FsExportMember list
+    | FsExports of FsExportContainer
 
 /// How a `K extends keyof T` variable is written in F# (§4.10, the open keyof regime).
 /// TypeScript's key variable has no F# counterpart of its own: a bare `'K` would be an
@@ -1405,36 +1454,38 @@ type KeyBinding =
 type ShapeModel =
     {
         Harvest: HarvestModel
-        ExportTypes: Map<int, ExportTypeIds>
-        Types: Map<int, TypeFacts>
-        NotFollowed: Map<int, string>
+        ExportTypes: Map<int<symbolId>, ExportTypeIds>
+        Types: Map<int<typeId>, TypeFacts>
+        NotFollowed: Map<int<typeId>, string>
         /// Type id -> the F# type name this run declares for it - exports named first, then
         /// synthesized names for reachable anonymous shapes (hash-consing by id, §4.4). What
         /// lets a reference come out as `FsNamed` rather than an expansion.
-        DeclNames: Map<int, string>
+        DeclNames: Map<int<typeId>, string>
         /// Type id -> the source order its declaration sorts under: the export's own order, or
         /// for a synthesized declaration the order of the export that first reached it.
-        DeclOrders: Map<int, DeclOrder option>
+        DeclOrders: Map<int<typeId>, DeclOrder option>
         /// Type id -> the type-parameter ids a declaration reads without binding, in first-use
         /// order (§4.9). An anonymous object type hoisted out of a generic scope - the `props`
         /// of `each<T, U>(props: { items: T[]; render: (item: T) => U })` - binds nothing of
         /// its own, so it is declared over these and every reference applies them back.
-        DeclParams: Map<int, int list>
+        DeclParams: Map<int<typeId>, int<typeId> list>
         /// Recognized generic application id -> the declaration id whose name it references.
-        AliasApplications: Map<int, int>
+        AliasApplications: Map<int<typeId>, int<typeId>>
         /// `Exports` members accumulated by the class/function/value passes, keyed by harvest
         /// position so `order-declarations` can assemble them in source order.
-        ExportMembers: (int * FsExportMember) list
+        ExportMembers: OwnedExportMember list
         /// Type-parameter id -> the name it is in scope under, for the declaration currently
         /// being shaped. Scope lives on the model rather than in `typeRef`'s arguments because
         /// it is a property of *where* the reference is written, not of the reference: a pass
         /// binds it once around a declaration and every nested `typeRef` inherits it.
-        TypeVars: Map<int, string>
+        TypeVars: Map<int<typeId>, string>
         /// Type-parameter id -> the support-package idiom its uses are written as, for the
         /// signature currently being shaped (§4.10). Scoped like `TypeVars`, and for the same
         /// reason: `K extends keyof T` binds nothing outside the signature that declared it.
-        KeyVars: Map<int, KeyBinding>
+        KeyVars: Map<int<typeId>, KeyBinding>
         Decls: FsDecl list
+        /// The specifier value exports import from; ambient modules under it are entry owners.
+        RuntimePackage: string<importSpecifier>
     }
 
 // ---------------------------------------------------------------------------------------------
@@ -1444,15 +1495,15 @@ type ShapeModel =
 type RenderModel =
     {
         ModuleName: string
-        PackageName: string
+        PackageName: string<npmDependency>
         /// The npm package every `[<Import(…)>]` names - the configured `runtime`, or the one
         /// derived from `PackageName`. Distinct from `PackageName`, which stays the package the
         /// *declarations* came from: a `@types/*` package is the provenance of the binding and
         /// never the specifier a consumer's bundler resolves.
-        RuntimePackage: string
+        RuntimePackage: string<importSpecifier>
         /// Absolute path of the package generated from; the manifest writes declaration files
         /// relative to it.
-        PackageDir: string
+        PackageDir: string<dirPath>
         Decls: FsDecl list
         /// Every finding of every earlier tier, stamped with its pass.
         Findings: Finding list
@@ -1499,8 +1550,13 @@ module Grouping =
         | ValueSome handles when handles.Length > 0 ->
             match handles[0].Split([| '.' |], 3) with
             | [| index; _kind; path |] ->
-                match System.Int32.TryParse index with
-                | true, index -> Some { File = path; NodeIndex = index }
+                match Int32.TryParse index with
+                | true, index ->
+                    Some
+                        {
+                            File = (path * uom<declFile>)
+                            NodeIndex = (index * uom<nodeId>)
+                        }
                 | _ -> None
             | _ -> None
         | _ -> None
@@ -1509,7 +1565,7 @@ module Grouping =
     let declFile (symbol: SymbolResponse voption) : string option =
         symbol
         |> ValueOption.bind (fun s -> declOrder s.Declarations |> ValueOption.ofOption)
-        |> ValueOption.map (fun order -> order.File.Replace('\\', '/'))
+        |> ValueOption.map (fun order -> (order.File / uom<declFile>).Replace('\\', '/'))
         |> ValueOption.toOption
 
     /// The compiler-lib family a declaration file belongs to: `Dom` for the browser and worker
@@ -1539,9 +1595,9 @@ module Grouping =
     /// rather than unclassified: unclassified means Ship, and full derivation of a mistaken
     /// standard-lib file is the expensive failure, while a mis-grouped oddball is a visible
     /// finding.
-    let classifyFile (packageDir: string) (filePath: string) : PackageId =
-        let path = filePath.Replace('\\', '/')
-        let root = packageDir.Replace('\\', '/').TrimEnd '/' + "/"
+    let classifyFile (packageDir: string<dirPath>) (filePath: string<filePath>) : PackageId =
+        let path = (filePath / uom<filePath>).Replace('\\', '/')
+        let root = (packageDir / uom<dirPath>).Replace('\\', '/').TrimEnd '/' + "/"
         let file = path.Substring(path.LastIndexOf '/' + 1)
         let isLibFile = file.StartsWith "lib." && file.EndsWith ".d.ts"
         let installedAt = path.LastIndexOf "/node_modules/"
@@ -1552,7 +1608,7 @@ module Grouping =
         // separates a dependency from its host, one at or above it is the entry package's
         // own installation.
         if
-            path.StartsWith(root, System.StringComparison.OrdinalIgnoreCase)
+            path.StartsWith(root, StringComparison.OrdinalIgnoreCase)
             && installedAt < root.Length - 1
         then
             EntryPackage
@@ -1563,29 +1619,31 @@ module Grouping =
                 match path.Substring(at + "/node_modules/".Length).Split '/' with
                 | parts when parts.Length > 0 && (parts[0] = "typescript" || parts[0] = "@typescript") -> CompilerLib
                 | _ when isLibFile -> CompilerLib
-                | parts when parts.Length > 1 && parts[0].StartsWith "@" -> Dependency $"{parts[0]}/{parts[1]}"
-                | parts when parts.Length > 0 -> Dependency parts[0]
+                | parts when parts.Length > 1 && parts[0].StartsWith "@" ->
+                    Dependency($"{parts[0]}/{parts[1]}" * uom<npmDependency>)
+                | parts when parts.Length > 0 -> Dependency(parts[0] * uom<npmDependency>)
                 | _ -> Unclassified
 
     /// Entry sources first, then package-relative dependency and compiler sources.
     /// Compiler installation directories must not decide declaration or export order.
-    let sourceOrderKey (packageDir: string) (filePath: string) =
-        let path = filePath.Replace('\\', '/')
+    let sourceOrderKey (packageDir: string<dirPath>) (filePath: string<filePath>) =
+        let path = (filePath / uom<filePath>).Replace('\\', '/')
 
         let relative () =
-            System.IO.Path.GetRelativePath(packageDir, path).Replace('\\', '/')
+            Path.GetRelativePath(packageDir / uom<dirPath>, path).Replace('\\', '/')
 
-        match classifyFile packageDir path with
+        match classifyFile packageDir filePath with
         | EntryPackage -> 0, "", relative ()
         | CompilerLib -> 1, "typescript/lib", path.Substring(path.LastIndexOf '/' + 1)
         | Dependency package ->
-            let at = path.LastIndexOf("/node_modules/", System.StringComparison.Ordinal)
+            let package = package / uom<npmDependency>
+            let at = path.LastIndexOf("/node_modules/", StringComparison.Ordinal)
             1, package, path.Substring(at + "/node_modules/".Length + package.Length + 1)
         | Unclassified -> 1, "", relative ()
 
     /// A symbol's origin, using its first declaration. The synthetic global environment has
     /// no declaration; compiler-lib disposition controls whether resolve follows its members.
-    let classify (packageDir: string) (symbol: SymbolResponse voption) : PackageId =
+    let classify (packageDir: string<dirPath>) (symbol: SymbolResponse voption) : PackageId =
         match
             symbol
             |> ValueOption.bind (fun s -> declOrder s.Declarations |> ValueOption.ofOption)
@@ -1597,21 +1655,21 @@ module Grouping =
         // so it groups with the compiler lib and widens with a name, identity only.
         | ValueNone when symbol |> ValueOption.exists (fun s -> s.Name = "globalThis") -> CompilerLib
         | ValueNone -> Unclassified
-        | ValueSome order -> classifyFile packageDir order.File
+        | ValueSome order -> classifyFile packageDir (order.File / uom<node>)
 
     /// Whether any of `symbol`'s declarations sits under `packageDir`, by the same root test
     /// `classify` applies to only the first. Declaration merging can carry a symbol's list past
     /// its own file: a `lib.*.d.ts` declaration first in the list sends `classify` to
     /// `CompilerLib`, and this is what still finds the entry package's own declaration among
     /// the rest.
-    let declaresUnderPackage (packageDir: string) (symbol: SymbolResponse) : bool =
-        let root = packageDir.Replace('\\', '/').TrimEnd '/' + "/"
+    let declaresUnderPackage (packageDir: string<dirPath>) (symbol: SymbolResponse) : bool =
+        let root = (packageDir / uom<dirPath>).Replace('\\', '/').TrimEnd '/' + "/"
 
         let underRoot (path: string) =
             let path = path.Replace('\\', '/')
             let installedAt = path.LastIndexOf "/node_modules/"
 
-            path.StartsWith(root, System.StringComparison.OrdinalIgnoreCase)
+            path.StartsWith(root, StringComparison.OrdinalIgnoreCase)
             && installedAt < root.Length - 1
 
         symbol.Declarations

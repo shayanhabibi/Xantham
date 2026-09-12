@@ -20,70 +20,6 @@ type Signal =
     static member Create (label: string) : Signal = jsNative
 
 /// <summary>
-/// An entrypoint a consumer derives from. <c>run</c> is the mandatory slot; <c>fetch</c> and <c>alarm</c> are
-/// the platform's lifecycle hooks, called where the object provides them.
-/// </summary>
-[<Import("Station", "hook-lab:runtime"); AbstractClass>]
-type Station (label: string) =
-    member _.label: string = jsNative
-    abstract run: signal: Signal -> string
-    /// <summary>
-    /// An optional property rather than an optional method: nothing calls this one.
-    /// </summary>
-    member _.tag
-        with get (): string option = jsNative
-        and set (_: string option): unit = jsNative
-
-module Station =
-    [<Interface>]
-    type IAlarmHandler =
-        abstract alarm: unit -> string
-        [<ParamObject; Emit("$0")>]
-        static member Create (alarm: (unit -> string)) : IAlarmHandler = jsNative
-
-    [<Interface>]
-    type IFetchHandler =
-        abstract fetch: signal: Signal -> string
-        [<ParamObject; Emit("$0")>]
-        static member Create (fetch: (Signal -> string)) : IFetchHandler = jsNative
-
-/// <summary>
-/// An entrypoint whose hook mentions the class's own type parameter.
-/// </summary>
-[<Import("Relay", "hook-lab:runtime"); AbstractClass>]
-type Relay<'T> (seed: 'T) =
-    member _.seed: 'T = jsNative
-
-module Relay =
-    [<Interface>]
-    type IForwardHandler<'T> =
-        abstract forward: value: 'T -> 'T
-        [<ParamObject; Emit("$0")>]
-        static member Create (forward: ('T -> 'T)) : IForwardHandler<'T> = jsNative
-
-/// <summary>
-/// An exported class that is neither abstract nor derived: the interface form, where an
-/// optional method is an option property because there is no class to hang a hook off.
-/// </summary>
-[<Interface>]
-type Hub =
-    abstract depth: float
-    abstract probe: (Signal -> string) option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (depth: float, ?probe: (Signal -> string)) : Hub = jsNative
-
-/// <summary>
-/// A class whose base this run declares. An F# interface admits no <c>inherit</c> of a class, so
-/// this keeps the interface form and its inherited optional method stays an option.
-/// </summary>
-[<Interface>]
-type Annex =
-    inherit Hub
-    abstract tag: string
-    [<ParamObject; Emit("$0")>]
-    static member Create (tag: string, depth: float, ?probe: (Signal -> string)) : Annex = jsNative
-
-/// <summary>
 /// A plain interface carrying an optional method. Nothing derives from it, so the method stays
 /// an option property.
 /// </summary>
@@ -93,29 +29,96 @@ type Listener =
     [<ParamObject; Emit("$0")>]
     static member Create (?ping: (Signal -> string)) : Listener = jsNative
 
-/// <summary>The package's value exports, each bound to its import.</summary>
-[<Erase>]
-type Exports =
-    /// <summary>
-    /// An entrypoint a consumer derives from. <c>run</c> is the mandatory slot; <c>fetch</c> and <c>alarm</c> are
-    /// the platform's lifecycle hooks, called where the object provides them.
-    /// </summary>
-    [<Import("Station", "hook-lab:runtime"); EmitConstructor>]
-    static member Station (label: string) : Station = jsNative
-    /// <summary>
-    /// An entrypoint whose hook mentions the class's own type parameter.
-    /// </summary>
-    [<Import("Relay", "hook-lab:runtime"); EmitConstructor>]
-    static member Relay<'T> (seed: 'T) : Relay<'T> = jsNative
-    /// <summary>
-    /// An exported class that is neither abstract nor derived: the interface form, where an
-    /// optional method is an option property because there is no class to hang a hook off.
-    /// </summary>
-    [<Import("Hub", "hook-lab:runtime"); EmitConstructor>]
-    static member Hub (depth: float) : Hub = jsNative
-    /// <summary>
-    /// A class whose base this run declares. An F# interface admits no <c>inherit</c> of a class, so
-    /// this keeps the interface form and its inherited optional method stays an option.
-    /// </summary>
-    [<Import("Annex", "hook-lab:runtime"); EmitConstructor>]
-    static member Annex (depth: float, tag: string) : Annex = jsNative
+module HookLab =
+    /// <summary>hook-lab:runtime</summary>
+    module Runtime =
+        /// <summary>
+        /// An entrypoint a consumer derives from. <c>run</c> is the mandatory slot; <c>fetch</c> and <c>alarm</c> are
+        /// the platform's lifecycle hooks, called where the object provides them.
+        /// </summary>
+        [<Import("Station", "hook-lab:runtime"); AbstractClass>]
+        type Station (label: string) =
+            member _.label: string = jsNative
+            abstract run: signal: Signal -> string
+            /// <summary>
+            /// An optional property rather than an optional method: nothing calls this one.
+            /// </summary>
+            member _.tag
+                with get (): string option = jsNative
+                and set (_: string option): unit = jsNative
+
+        /// <summary>
+        /// An entrypoint whose hook mentions the class's own type parameter.
+        /// </summary>
+        [<Import("Relay", "hook-lab:runtime"); AbstractClass>]
+        type Relay<'T> (seed: 'T) =
+            member _.seed: 'T = jsNative
+
+        /// <summary>
+        /// An exported class that is neither abstract nor derived: the interface form, where an
+        /// optional method is an option property because there is no class to hang a hook off.
+        /// </summary>
+        [<Interface>]
+        type Hub =
+            abstract depth: float
+            abstract probe: (Signal -> string) option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (depth: float, ?probe: (Signal -> string)) : Hub = jsNative
+
+        /// <summary>
+        /// A class whose base this run declares. An F# interface admits no <c>inherit</c> of a class, so
+        /// this keeps the interface form and its inherited optional method stays an option.
+        /// </summary>
+        [<Interface>]
+        type Annex =
+            inherit Hub
+            abstract tag: string
+            [<ParamObject; Emit("$0")>]
+            static member Create (tag: string, depth: float, ?probe: (Signal -> string)) : Annex = jsNative
+
+        /// <summary>The package's value exports, each bound to its import.</summary>
+        [<Erase>]
+        type Exports =
+            /// <summary>
+            /// An entrypoint a consumer derives from. <c>run</c> is the mandatory slot; <c>fetch</c> and <c>alarm</c> are
+            /// the platform's lifecycle hooks, called where the object provides them.
+            /// </summary>
+            [<Import("Station", "hook-lab:runtime"); EmitConstructor>]
+            static member Station (label: string) : Station = jsNative
+            /// <summary>
+            /// An entrypoint whose hook mentions the class's own type parameter.
+            /// </summary>
+            [<Import("Relay", "hook-lab:runtime"); EmitConstructor>]
+            static member Relay<'T> (seed: 'T) : Relay<'T> = jsNative
+            /// <summary>
+            /// An exported class that is neither abstract nor derived: the interface form, where an
+            /// optional method is an option property because there is no class to hang a hook off.
+            /// </summary>
+            [<Import("Hub", "hook-lab:runtime"); EmitConstructor>]
+            static member Hub (depth: float) : Hub = jsNative
+            /// <summary>
+            /// A class whose base this run declares. An F# interface admits no <c>inherit</c> of a class, so
+            /// this keeps the interface form and its inherited optional method stays an option.
+            /// </summary>
+            [<Import("Annex", "hook-lab:runtime"); EmitConstructor>]
+            static member Annex (depth: float, tag: string) : Annex = jsNative
+
+        module Relay =
+            [<Interface>]
+            type IForwardHandler<'T> =
+                abstract forward: value: 'T -> 'T
+                [<ParamObject; Emit("$0")>]
+                static member Create (forward: ('T -> 'T)) : IForwardHandler<'T> = jsNative
+
+        module Station =
+            [<Interface>]
+            type IAlarmHandler =
+                abstract alarm: unit -> string
+                [<ParamObject; Emit("$0")>]
+                static member Create (alarm: (unit -> string)) : IAlarmHandler = jsNative
+
+            [<Interface>]
+            type IFetchHandler =
+                abstract fetch: signal: Signal -> string
+                [<ParamObject; Emit("$0")>]
+                static member Create (fetch: (Signal -> string)) : IFetchHandler = jsNative

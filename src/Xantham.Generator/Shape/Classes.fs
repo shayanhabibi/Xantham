@@ -1,9 +1,11 @@
 ﻿module Xantham.Generator.Shape.Classes
 
 open Xantham.Generator
+open Xantham.Generator.Measure
 open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator.Shape.Spec
+open Xantham.Generator.Shape.ExportLayout
 
 /// The F# name an already-shaped member answers to, for the collision test below. An indexer is
 /// spelled `Item` (§4.10), which is a name a static could carry too.
@@ -36,6 +38,23 @@ let private staticBinding (binding: ImportBinding) (key: string) =
     | GlobalName name -> GlobalName $"{name}.{key}"
     | ImportFrom(name, specifier) -> ImportFrom($"{name}.{key}", specifier)
 
+/// The ambient module specifier an `ImportFrom` binding carries; `None` for every other binding
+/// form.
+let private specifierOfBinding (binding: ImportBinding) =
+    match binding with
+    | ImportFrom(_, specifier) -> Some specifier
+    | ImportDefault
+    | ImportNamed _
+    | GlobalName _ -> None
+
+/// The ambient-module specifier an export path carries; `None` for the entry module and the
+///global scope.
+let private specifierOfOrigin (origin: ExportOrigin) =
+    match origin with
+    | FromAmbientModule specifier -> Some specifier
+    | FromModule
+    | FromGlobal -> None
+
 /// The closed vocabulary `SC008` reports, so a corpus aggregates by reason.
 module private Refusal =
     [<Literal>]
@@ -52,7 +71,7 @@ module private Refusal =
 /// The TypeScript base a class derives that F# reaches as `exn`, if it has one. `Error` is the
 /// only lib name bound to F#'s exception type, and only through the compiler-lib table, so a
 /// class whose base is shipped by this run or by a mapped group is not one of these.
-let private exnBase (ctx: Context) (model: ShapeModel) (bases: int list) =
+let private exnBase (ctx: Context) (model: ShapeModel) (bases: int<typeId> list) =
     if GeneratorConfig.disposition ctx.Config CompilerLib = Ship then
         None
     else
@@ -60,7 +79,7 @@ let private exnBase (ctx: Context) (model: ShapeModel) (bases: int list) =
         |> List.tryPick (fun baseId ->
             match Map.tryFind baseId model.Types with
             | Some facts ->
-                match facts.Origin, facts.SymbolName with
+                match facts.Origin, (facts.SymbolName |> Option.map (fun value -> value / uom<symbolName>)) with
                 | CompilerLib, Some baseName ->
                     match Naming.LibBindings.tryFind baseName with
                     | Some("exn", _, _) -> Some baseName
@@ -92,7 +111,9 @@ let shapeClasses: Pass<ShapeModel> =
                             | _ -> None)
                         |> Map.ofList
 
-                    let mutable statics: Map<string, FsExportMember list> = Map.empty
+                    // One entry per export path reaching the declaration.
+                    let mutable statics: Map<string, (ExportOrigin * FsExportMember list) list> =
+                        Map.empty
 
                     // The declarations that convert to the class form, by name.
                     let mutable entrypoints: Map<string, FsEntrypoint> = Map.empty
@@ -174,9 +195,14 @@ let shapeClasses: Pass<ShapeModel> =
                                     let declaredIn =
                                         Map.tryFind m.TypeId model.Types
                                         |> Option.bind (fun facts -> GeneratorConfig.groupKey facts.Origin)
-                                        |> Option.defaultValue "another group"
+                                        |> Option.defaultValue ("another group" * uom<npmDependency>)
 
-                                    emit (Finding.make owner (ShapeClasses.StaticMethodWithoutSignatures declaredIn))
+                                    emit (
+                                        Finding.make
+                                            owner
+                                            (ShapeClasses.StaticMethodWithoutSignatures
+                                             <| declaredIn / uom<npmDependency>)
+                                    )
                                 elif settable then
                                     emit (Finding.make owner ShapeClasses.StaticSettable)
 
@@ -196,7 +222,12 @@ let shapeClasses: Pass<ShapeModel> =
                     /// parameters of its first construct signature, and the import that binds the
                     /// JavaScript constructor. Refused where F# would not admit the result, and
                     /// the declaration then keeps the interface form it already has.
-                    let admitEntrypoint (export: HarvestedExport) (facts: TypeFacts) (bases: int list) (name: string) =
+                    let admitEntrypoint
+                        (export: HarvestedExport)
+                        (facts: TypeFacts)
+                        (bases: int<typeId> list)
+                        (name: string)
+                        =
                         let declaration =
                             model.Decls
                             |> List.tryPick (function
@@ -237,7 +268,7 @@ let shapeClasses: Pass<ShapeModel> =
                                     match export.Origin with
                                     | FromAmbientModule specifier -> specifier
                                     | FromGlobal
-                                    | FromModule -> ""
+                                    | FromModule -> "" * uom<importSpecifier>
 
                                 let inheritsExn = exnBase ctx model bases
 
@@ -251,12 +282,18 @@ let shapeClasses: Pass<ShapeModel> =
                                         }
                                         entrypoints
 
-                                emit (Finding.make name (ShapeClasses.EntrypointClassEmitted specifier))
+                                emit (
+                                    Finding.make
+                                        name
+                                        (ShapeClasses.EntrypointClassEmitted(specifier / uom<importSpecifier>))
+                                )
 
                                 match inheritsExn with
                                 | Some baseName ->
                                     emit (Finding.make name (ShapeClasses.EntrypointClassInheritsExn baseName))
                                 | None -> ()
+
+                    let runtimePackage = GeneratorConfig.runtimePackage ctx.Config ctx.PackageName
 
                     let members =
                         model.Harvest.Exports
@@ -268,7 +305,7 @@ let shapeClasses: Pass<ShapeModel> =
                                 let name = fsName fallback export
 
                                 let valueFacts =
-                                    Map.tryFind export.Symbol.Id model.ExportTypes
+                                    Map.tryFind export.Symbol.SymbolId model.ExportTypes
                                     |> Option.bind _.Value
                                     |> Option.bind (fun typeId -> Map.tryFind typeId model.Types)
 
@@ -279,7 +316,7 @@ let shapeClasses: Pass<ShapeModel> =
                                     []
                                 | Some facts ->
                                     let declaredId =
-                                        Map.tryFind export.Symbol.Id model.ExportTypes |> Option.bind _.Declared
+                                        Map.tryFind export.Symbol.SymbolId model.ExportTypes |> Option.bind _.Declared
 
                                     // The name the *instance* side is declared under, which a clash
                                     // renames: `cloudflare:workers`'s `DurableObject` class is
@@ -325,7 +362,8 @@ let shapeClasses: Pass<ShapeModel> =
                                         statics <-
                                             Map.add
                                                 declaredName
-                                                ((Map.tryFind declaredName statics |> Option.defaultValue []) @ shaped)
+                                                ((Map.tryFind declaredName statics |> Option.defaultValue [])
+                                                 @ [ export.Origin, shaped ])
                                                 statics
 
                                     let bases =
@@ -338,22 +376,66 @@ let shapeClasses: Pass<ShapeModel> =
                                         admitEntrypoint export facts bases declaredName
 
                                     facts.ConstructSignatures
-                                    |> List.map (fun signature ->
+                                    |> List.mapi (fun ordinal signature ->
                                         let typeParameters, parameters, returns, signatureFindings =
                                             shapeSignature ctx model (Some name) name signature
 
                                         findings <- findings @ signatureFindings
 
-                                        index,
                                         {
-                                            Name = name
-                                            Docs = export.Docs
-                                            Tags = export.Tags
-                                            TypeParameters = typeParameters
-                                            Binding = bindingOf export
-                                            Body = ExportConstructor(parameters, returns)
-                                            Settable = false
+                                            Owner = ownerOf runtimePackage export.Origin
+                                            HarvestIndex = index
+                                            ExportName = export.ExportName
+                                            SourceSymbolId = export.Symbol.SymbolId
+                                            SignatureOrdinal = Some ordinal
+                                            Member =
+                                                {
+                                                    Name = name
+                                                    Docs = export.Docs
+                                                    Tags = export.Tags
+                                                    TypeParameters = typeParameters
+                                                    Binding = bindingOf export
+                                                    Body = ExportConstructor(parameters, returns)
+                                                    Settable = false
+                                                }
                                         }))
+
+                    // A class reachable through several export paths (`export * from`) contributes
+                    // one occurrence of its statics per path; collapse to the path the class's own
+                    // entrypoint binding already carries, or the first path in harvest order when
+                    // it carries none, and raise SC010 for every path dropped.
+                    let statics =
+                        statics
+                        |> Map.map (fun declaredName occurrences ->
+                            match occurrences with
+                            | [ (_, members) ] -> members
+                            | occurrences ->
+                                let canonicalSpecifier =
+                                    Map.tryFind declaredName entrypoints
+                                    |> Option.bind (fun entrypoint -> specifierOfBinding entrypoint.Binding)
+
+                                let winningOrigin, winningMembers =
+                                    canonicalSpecifier
+                                    |> Option.bind (fun specifier ->
+                                        occurrences
+                                        |> List.tryFind (fun (origin, _) -> specifierOfOrigin origin = Some specifier))
+                                    |> Option.defaultValue (List.head occurrences)
+
+                                for origin, dropped in occurrences do
+                                    if origin <> winningOrigin then
+                                        let specifierText =
+                                            specifierOfOrigin origin
+                                            |> Option.map (fun specifier -> specifier / uom<importSpecifier>)
+                                            |> Option.defaultValue ""
+
+                                        for droppedMember in dropped do
+                                            emit (
+                                                Finding.make
+                                                    $"{declaredName}.{droppedMember.Name}"
+                                                    (ShapeClasses.StaticAliasPathCollapsed specifierText)
+                                            )
+
+                                winningMembers)
 
                     let decls =
                         model.Decls

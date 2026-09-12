@@ -84,6 +84,10 @@
         }
       },
       "description": "The module layout and opening policy for the combined TypeScript compiler-library binding."
+    },
+    "autoOpenExports": {
+      "type": "boolean",
+      "description": "Mark every generated `Exports` type [<AutoOpen>], so a package's value exports resolve unqualified. Defaults false."
     }
   },
   "$defs": {

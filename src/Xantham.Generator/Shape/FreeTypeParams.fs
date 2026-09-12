@@ -1,6 +1,8 @@
 ﻿module Xantham.Generator.Shape.FreeTypeParams
 
 open Xantham.Generator
+open Xantham.Generator.Measure
+open Xantham.Generator.Measure
 open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator.Shape.Spec
@@ -8,11 +10,11 @@ open Xantham.Generator.Shape.Spec
 /// The type-parameter ids a declaration reads without binding, in first-use order (§4.9). A
 /// signature's own parameters are bound inside it, and another named declaration binds its own,
 /// so the walk stops there; a hoisted anonymous declaration is walked into.
-let private freeTypeParams (model: ShapeModel) (root: int) : int list =
+let private freeTypeParams (model: ShapeModel) (root: int<Measure.typeId>) : int<Measure.typeId> list =
     let mutable found = []
     let mutable visited = Set.empty
 
-    let rec go (bound: Set<int>) (typeId: int) =
+    let rec go (bound: Set<int<Measure.typeId>>) (typeId: int<Measure.typeId>) =
         if not (Set.contains typeId visited) then
             visited <- Set.add typeId visited
 
@@ -65,7 +67,7 @@ let private freeTypeParams (model: ShapeModel) (root: int) : int list =
                         go bound id
 
                     if flag TypeFlags.Index facts then
-                        facts.Response.Target |> ValueOption.iter (go bound)
+                        facts.Response.TargetTypeId |> ValueOption.iter (go bound)
 
     match Map.tryFind root model.Types with
     | Some facts -> go (Set.ofList (declParamIds facts)) root
@@ -127,8 +129,8 @@ let private reuseAnonymousApplications (model: ShapeModel) =
                 match Map.tryFind left model.Types, Map.tryFind right model.Types with
                 | Some original, Some applied when original.Response.Flags = applied.Response.Flags ->
                     if
-                        original.Response.Target.IsSome
-                        && original.Response.Target = applied.Response.Target
+                        original.Response.TargetTypeId.IsSome
+                        && original.Response.TargetTypeId = applied.Response.TargetTypeId
                         && not original.TypeArguments.IsEmpty
                     then
                         pairwise same original.TypeArguments applied.TypeArguments

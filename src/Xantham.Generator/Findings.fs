@@ -160,17 +160,20 @@ module FindingCodes =
             "MB.OptionalHookAsInterface", "MB005"
             "MB.OptionalParameterFromUnion", "MB006"
             "MB.UnspellableMemberDropped", "MB007"
+            "NE.TypeNameSuffixed", "NE001"
             "HG.AmbientModuleDropped", "HG001"
             "HG.UnwritableGlobalDropped", "HG002"
             "HG.NothingHarvested", "HG003"
             "HG.AmbientModuleHarvested", "HG004"
             "HG.AmbientModuleWildcard", "HG005"
             "HG.NamespaceIsModuleBody", "HG006"
+            "HG.AmbientModuleAliasDivergent", "HG007"
             "RE.FacetNotResolved", "RE001"
             "RT.FrontierNotResolved", "RT001"
             "RT.TypeNotResolved", "RT002"
             "RT.FrontierTooWide", "RT003"
             "LU.NonStringLiteralCase", "LU001"
+            "LU.QualifiedAccessKept", "LU002"
             "DT.ArmNotPlainData", "DT001"
             "DT.TaggedUnion", "DT002"
             "DT.TagValueShared", "DT003"
@@ -201,9 +204,11 @@ module FindingCodes =
             "SC.EntrypointClassEmitted", "SC007"
             "SC.EntrypointClassRefused", "SC008"
             "SC.EntrypointClassInheritsExn", "SC009"
+            "SC.StaticAliasPathCollapsed", "SC010"
             "SE.NoValueType", "SE001"
             "SE.RuntimeSpecifierDerived", "SE002"
             "SE.MutableValueReadOnly", "SE003"
+            "SE.ExportPathAllocated", "SE004"
             "SP.ParamObjectSynthesized", "SP001"
             "SP.MethodMemberAsCreateParameter", "SP002"
             "SP.CreateNotSynthesized", "SP003"
@@ -212,6 +217,10 @@ module FindingCodes =
             "DO.OverloadsDistinguishedByLiteralUnion", "DO003"
             "DO.ExportFunctionOverloadDropped", "DO004"
             "DO.KeyofConstrainedOverloadDropped", "DO005"
+            "DO.ExportOccurrenceConsolidated", "DO006"
+            "DO.ExportMemberRenamed", "DO007"
+            "DO.ExportReturnTypesUnioned", "DO008"
+            "DO.ExportDeclarationsConsolidated", "DO009"
             "RA.GenericAliasDropped", "RA001"
             "RA.ReferenceToDroppedAlias", "RA002"
             "RA.GenericWithoutArguments", "RA003"
@@ -689,6 +698,7 @@ type HarvestGlobals =
     | [<Exact>] AmbientModuleHarvested of specifier: string * exports: int
     | [<Escape>] AmbientModuleWildcard of specifier: string
     | [<Exact>] NamespaceIsModuleBody of ns: string * specifier: string
+    | [<Widened>] AmbientModuleAliasDivergent of name: string * spellings: string list
 
     interface IFindingKind with
         member this.Message =
@@ -706,6 +716,9 @@ type HarvestGlobals =
                 $"ambient module \"{specifier}\" dropped - a wildcard specifier names no module an import can resolve"
             | NamespaceIsModuleBody(ns, specifier) ->
                 $"{ns} is the body of ambient module \"{specifier}\" (export =) rather than a global"
+            | AmbientModuleAliasDivergent(name, spellings) ->
+                let spellings = spellings |> List.map (sprintf "\"%s\"") |> String.concat ", "
+                $"\"node:{name}\" collapses {spellings}, whose export sets disagree"
 
 /// `resolve-export-types`.
 [<Prefix("RE", "resolve-export-types")>]
@@ -741,11 +754,16 @@ type ResolveTypeTable =
 [<Prefix("LU", "classify-literal-unions")>]
 type ClassifyLiteralUnions =
     | [<Exact>] NonStringLiteralCase
+    /// A single-case string enum whose case is a reserved F# name (`Ok`, `Error`, `Some`, `None`,
+    /// `ValueSome`, `ValueNone`) keeps `RequireQualifiedAccess`.
+    | [<Ergonomic>] QualifiedAccessKept of caseName: string
 
     interface IFindingKind with
         member this.Message =
             match this with
             | NonStringLiteralCase -> "non-string literal case carries CompiledValue (D12)"
+            | QualifiedAccessKept caseName ->
+                $"single-case string enum keeps RequireQualifiedAccess: case {caseName} is a reserved F# name"
 
 /// `detect-tagged-unions`.
 [<Prefix("DT", "detect-tagged-unions")>]
@@ -767,6 +785,19 @@ type DetectTaggedUnions =
                 $"discriminated by '{tag}', but two arms carry '{value}'; left as an erased union"
             | ArmsMergedOnSharedTag(tag, value) ->
                 $"arms sharing '{tag}' = '{value}' merged into one case, carrying the members they agree on"
+
+/// `name-exports`.
+[<Prefix("NE", "name-exports")>]
+type NameExports =
+    /// A declaration whose preferred name a sibling declaration already claimed under this pass;
+    /// it keeps a numeric suffix instead.
+    | [<Exact>] TypeNameSuffixed of original: string * suffixed: string * origin: string
+
+    interface IFindingKind with
+        member this.Message =
+            match this with
+            | TypeNameSuffixed(original, suffixed, origin) ->
+                $"name '{original}' already claimed; this declaration, from {origin}, is written as '{suffixed}'"
 
 /// `shape-interfaces`.
 /// `synthesize-anonymous`. Wave two, lane A: the pass had no findings of its own, because until
@@ -905,6 +936,10 @@ type ShapeClasses =
     /// and why. The declaration keeps the interface form, `Create` included.
     | [<Widened>] EntrypointClassRefused of reason: string
     | [<Ergonomic>] EntrypointClassInheritsExn of baseName: string
+    /// A class static reachable through a second export path (`export * from`). One member is
+    ///emitted under the specifier the class's own binding uses, or the first harvested path when
+    /// the class carries none; the dropped path's specifier is recorded here.
+    | [<Exact>] StaticAliasPathCollapsed of specifier: string
 
     interface IFindingKind with
         member this.Message =
@@ -924,6 +959,8 @@ type ShapeClasses =
             | EntrypointClassRefused reason -> $"entrypoint class kept the interface form: {reason}"
             | EntrypointClassInheritsExn baseName ->
                 $"entrypoint class derives from {baseName} as exn; a consumer raises it and catches it by type"
+            | StaticAliasPathCollapsed specifier ->
+                $"static also exported from {specifier}; one member emitted under the class's own specifier"
 
 /// `shape-exports`.
 [<Prefix("SE", "shape-exports")>]
@@ -936,6 +973,9 @@ type ShapeExports =
     /// Wave four, lane N. A `var` or `let` binding - a global or a module export - emitted
     /// get-only, so an assignment a consumer is entitled to write has no F# form.
     | [<Widened>] MutableValueReadOnly
+    /// An export owner whose normalized F# container path collided with another owner or an
+    /// existing declaration and therefore received a deterministic hash suffix.
+    | [<Ergonomic>] ExportPathAllocated of owner: string * allocatedPath: string
 
     interface IFindingKind with
         member this.Message =
@@ -944,6 +984,8 @@ type ShapeExports =
             | RuntimeSpecifierDerived specifier ->
                 $"types-only package has no runtime; imports bind to {specifier}, derived rather than configured"
             | MutableValueReadOnly -> "mutable binding emitted read-only"
+            | ExportPathAllocated(owner, allocatedPath) ->
+                $"export owner {owner} allocated as {allocatedPath} to avoid an F# name collision"
 
 /// `synthesize-paramobjects`.
 [<Prefix("SP", "synthesize-paramobjects")>]
@@ -980,11 +1022,32 @@ type DedupeOverloads =
     /// Wave nine, item 2. An overload dropped where the separating parameter takes a type
     /// parameter constrained by `keyof`. Every overload in the set maps to one F# parameter type.
     | [<Widened>] KeyofConstrainedOverloadDropped of parameter: string
+    /// Export layout, task 5. Repeated occurrences of one export signature consolidated to the
+    /// earliest; provenance agreed on every field.
+    | [<Exact>] ExportOccurrenceConsolidated of owner: string * exportName: string * occurrences: int
+    /// Export layout, task 5. An export member renamed to keep it callable beside a sibling the
+    /// compiler cannot tell it from: an ambiguous call form, or a member-kind conflict.
+    | [<Ergonomic>] ExportMemberRenamed of owner: string * exportName: string * memberName: string * reason: string
+    /// Export layout, task 5. Overloads with one compiled parameter signature and different
+    /// returns read as one member returning the erased union of every return.
+    | [<Widened>] ExportReturnTypesUnioned of owner: string * exportName: string * arms: string
+    /// Export layout, task 5. Different declarations mapped to one F# signature, return
+    /// included, consolidated to one member; the erased constraint or alias is recorded on the
+    /// member's own mapping findings.
+    | [<Ergonomic>] ExportDeclarationsConsolidated of owner: string * exportName: string * declarations: int
 
     interface IFindingKind with
         member this.Message =
             match this with
             | OverloadDropped -> "overload dropped: identical to an earlier one after widening"
+            | ExportOccurrenceConsolidated(owner, exportName, occurrences) ->
+                $"{occurrences} occurrences of export {exportName} under {owner} consolidated to one member"
+            | ExportMemberRenamed(owner, exportName, memberName, reason) ->
+                $"export {exportName} under {owner} renamed {memberName}: {reason}"
+            | ExportReturnTypesUnioned(owner, exportName, arms) ->
+                $"export {exportName} under {owner} returns the union of its overloads' returns ({arms})"
+            | ExportDeclarationsConsolidated(owner, exportName, declarations) ->
+                $"{declarations} declarations of export {exportName} under {owner} map to one signature; consolidated to one member"
             | OverloadsDistinguishedByLiteral parameter ->
                 $"overload kept; parameter {parameter} is literal-typed and separates it"
             | OverloadsDistinguishedByLiteralUnion parameter ->
@@ -1069,6 +1132,7 @@ module FindingCatalogue =
             typeof<TypeReference>
             typeof<TypeParameters>
             typeof<Members>
+            typeof<NameExports>
             typeof<HarvestGlobals>
             typeof<ResolveExportTypes>
             typeof<ResolveTypeTable>

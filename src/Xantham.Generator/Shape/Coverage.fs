@@ -1,4 +1,4 @@
-﻿module Xantham.Generator.Shape.Coverage
+module Xantham.Generator.Shape.Coverage
 
 open Xantham.Generator
 open Xantham.TypeScript.Wire
@@ -25,19 +25,21 @@ let auditCoverage: Pass<ShapeModel> =
                             | FsDelegateType decl -> [ decl.Name ]
                             | FsPhantom decl -> [ decl.Name ]
                             | FsMeasure decl -> [ decl.Name ]
-                            | FsExports members -> members |> List.map _.Name)
+                            | FsExports container -> container.Members |> List.map (fun owned -> owned.Member.Name))
                         |> Set.ofList
 
                     let name = fsName (defaultExportName ctx)
 
-                    // A namespace arrives as the module the declarations written inside it nest
-                    // in, so a name under it stands for the export where no declaration carries
-                    // the export's own name.
+                    // An export is represented by a declaration carrying its name, by a declaration nested
+                    // under a module of its name (a TS namespace), or by a declaration whose final segment is
+                    // its name (a specifier-scoped or namespace-contested type).
                     let represented (export: HarvestedExport) =
                         let exported = name export
 
                         Set.contains exported generated
-                        || generated |> Set.exists (fun declared -> declared.StartsWith(exported + "."))
+                        || generated
+                           |> Set.exists (fun declared ->
+                               declared.StartsWith(exported + ".") || declared.EndsWith("." + exported))
 
                     let missing =
                         model.Harvest.Exports

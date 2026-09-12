@@ -24,5 +24,6 @@ let passes: Pass<ShapeModel> list =
         Overloads.dedupeOverloads
         Ordering.orderDeclarations
         Arity.repairArity
+        ExportCollisions.resolveExportCollisions
         Coverage.auditCoverage
     ]

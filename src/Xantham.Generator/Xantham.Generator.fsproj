@@ -7,16 +7,19 @@
     <ItemGroup>
         <!-- The order is the pipeline's order: the model first, then one file per tier in the
              order the tiers run, then the fold that sequences them. -->
+        <Compile Include="Measures.fs" />
         <Compile Include="Findings.fs" />
         <Compile Include="Model.fs" />
         <Compile Include="Bootstrap.fs" />
         <Compile Include="ExportProvenance.fs" />
         <Compile Include="Harvest.fs" />
         <Compile Include="Resolve.fs" />
-        <!-- Tier 3 - Shape. `Spec.fs` first: it is what every pass is written against.
+        <!-- Tier 3 - Shape. `ExportLayout.fs` then `Spec.fs` first: the container allocation
+             and the vocabulary every pass is written against.
              The passes then follow in execution order, which is also the order they may
              refer to one another in, and `Passes.fs` closes the folder with the list the
              pipeline runs. -->
+        <Compile Include="Shape\ExportLayout.fs" />
         <Compile Include="Shape\Spec.fs" />
         <Compile Include="Shape\ExportNames.fs" />
         <Compile Include="Shape\Anonymous.fs" />
@@ -34,6 +37,7 @@
         <Compile Include="Shape\Overloads.fs" />
         <Compile Include="Shape\Arity.fs" />
         <Compile Include="Shape\Ordering.fs" />
+        <Compile Include="Shape\ExportCollisions.fs" />
         <Compile Include="Shape\Coverage.fs" />
         <Compile Include="Shape\Passes.fs" />
         <Compile Include="Render.fs" />

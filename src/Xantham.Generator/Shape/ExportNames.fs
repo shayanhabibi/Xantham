@@ -1,6 +1,7 @@
 module Xantham.Generator.Shape.ExportNames
 
 open Xantham.Generator
+open Xantham.Generator.Measure
 open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator.Shape.Spec
@@ -13,7 +14,7 @@ let declarationExports (ctx: Context) (model: ShapeModel) =
         if not (hasAny SymbolFlags.Type export.Symbol.Flags) then
             None
         else
-            Map.tryFind export.Symbol.Id model.ExportTypes
+            Map.tryFind export.Symbol.SymbolId model.ExportTypes
             |> Option.bind _.Declared
             |> Option.map (fun typeId -> typeId, export))
     |> List.groupBy fst
@@ -54,6 +55,7 @@ let nameExports: Pass<ShapeModel> =
             fun ctx model ->
                 async {
                     let fallback = defaultExportName ctx
+                    let pathOf = ExportLayout.declPath (ExportLayout.modulePaths model) model
 
                     let claim (taken: Set<string>) (preferred: string) =
                         if not (Set.contains preferred taken) then
@@ -65,10 +67,17 @@ let nameExports: Pass<ShapeModel> =
                     /// The module name an export nests under, where its symbol is written inside
                     /// a namespace this run names.
                     let namespaceOf (export: HarvestedExport) =
-                        export.Symbol.Parent
+                        export.Symbol.ParentSymbolId
                         |> ValueOption.toOption
                         |> Option.bind (fun parent -> Map.tryFind parent model.Harvest.Namespaces)
-                        |> Option.map Naming.pascalSegment
+                        |> Option.map (fun value -> Naming.pascalSegment (value / uom<symbolName>))
+
+                    /// Where a declaration was harvested from, in the words a manifest reads.
+                    let originOf (export: HarvestedExport) =
+                        match export.Origin with
+                        | FromModule -> "the entry module"
+                        | FromGlobal -> "global scope"
+                        | FromAmbientModule specifier -> $"ambient module \"{specifier / uom<importSpecifier>}\""
 
                     // The claim every export makes, in harvest order, read before any of them is
                     // granted. A contested name is visible only from the whole list, and the
@@ -78,13 +87,18 @@ let nameExports: Pass<ShapeModel> =
                         declarationExports ctx model
                         |> List.filter (fun (typeId, _) -> not (Map.containsKey typeId model.DeclNames))
                         |> List.map (fun (typeId, export) ->
-                            typeId, export.Order, fsName fallback export, namespaceOf export)
+                            typeId,
+                            export.Order,
+                            fsName fallback export,
+                            namespaceOf export,
+                            originOf export,
+                            pathOf export)
 
                     let declared = model.DeclNames |> Map.toList |> List.map snd |> Set.ofList
 
                     let contested =
                         claimants
-                        |> List.countBy (fun (_, _, preferred, _) -> preferred)
+                        |> List.countBy (fun (_, _, preferred, _, _, _) -> preferred)
                         |> List.filter (fun (preferred, count) -> count > 1 || Set.contains preferred declared)
                         |> List.map fst
                         |> Set.ofList
@@ -92,21 +106,30 @@ let nameExports: Pass<ShapeModel> =
                     let names, orders, _, findings =
                         claimants
                         |> List.fold
-                            (fun (names, orders, taken, findings) (typeId, order, preferred, owner) ->
-                                let wanted =
-                                    match owner with
-                                    | Some ns when Set.contains preferred contested -> nestUnder ns preferred
-                                    | _ -> preferred
+                            (fun (names, orders, taken, findings) (typeId, order, preferred, owner, origin, path) ->
+                                let wanted, nestedUnderNamespace =
+                                    match path, owner with
+                                    | (_ :: _ as path), _ -> (path @ [ preferred ]) |> String.concat ".", false
+                                    | [], Some ns when Set.contains preferred contested -> nestUnder ns preferred, true
+                                    | [], _ -> preferred, false
 
                                 let name = claim taken wanted
 
-                                Map.add typeId name names,
-                                Map.add typeId order orders,
-                                Set.add name taken,
-                                if name.Contains "." then
-                                    findings @ [ Finding.make name (SynthesizeAnonymous.NameNestedUnderOwner name) ]
-                                else
-                                    findings)
+                                let findings =
+                                    if nestedUnderNamespace && name.Contains "." then
+                                        findings
+                                        @ [ Finding.make name (SynthesizeAnonymous.NameNestedUnderOwner name) ]
+                                    else
+                                        findings
+
+                                let findings =
+                                    if name <> wanted then
+                                        findings
+                                        @ [ Finding.make name (NameExports.TypeNameSuffixed(wanted, name, origin)) ]
+                                    else
+                                        findings
+
+                                Map.add typeId name names, Map.add typeId order orders, Set.add name taken, findings)
                             (model.DeclNames, model.DeclOrders, declared, [])
 
                     let model =

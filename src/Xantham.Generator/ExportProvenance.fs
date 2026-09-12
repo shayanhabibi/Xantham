@@ -5,10 +5,11 @@ module internal Xantham.Generator.ExportProvenance
 open System.Collections.Generic
 open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
+open Measure
 
 type private Key =
-    | Export of moduleId: int * name: string
-    | Symbol of symbolId: int
+    | Export of moduleId: int<symbolId> * name: string
+    | Symbol of symbolId: int<symbolId>
 
 type private Rule =
     | Present
@@ -54,14 +55,14 @@ let rec private typeOnly (node: Node<AnyNode>) =
 /// One module inventory's cache. Symbol ids are
 /// session-local graph keys only; the catalog's persistent declaration identity is unchanged.
 let reader (ctx: Context) =
-    let symbols = Dictionary<int, SymbolResponse>()
-    let modules = Dictionary<int, ModuleExports>()
-    let files = Dictionary<string, Ast.SourceFile voption>()
+    let symbols = Dictionary<int<symbolId>, SymbolResponse>()
+    let modules = Dictionary<int<symbolId>, ModuleExports>()
+    let files = Dictionary<string<declFile>, Ast.SourceFile voption>()
     let rules = Dictionary<Key, Rule>()
     let present = HashSet<Key>()
 
     let remember (symbol: SymbolResponse) =
-        symbols[symbol.Id] <- symbol
+        symbols[symbol.SymbolId] <- symbol
         symbol
 
     let node handle =
@@ -71,11 +72,11 @@ let reader (ctx: Context) =
             | ValueSome handle ->
                 let! source =
                     async {
-                        match files.TryGetValue handle.Path with
+                        match files.TryGetValue(handle.Path * uom<declFile>) with
                         | true, source -> return source
                         | _ ->
                             let! source = ctx.Session.getSourceFile (DocumentIdentifier.FileName handle.Path)
-                            files[handle.Path] <- source
+                            files[(handle.Path * uom<declFile>)] <- source
                             return source
                     }
 
@@ -105,8 +106,8 @@ let reader (ctx: Context) =
             match modules.TryGetValue moduleId with
             | true, exports -> return exports
             | _ ->
-                let! direct = ctx.Session.getExportsOfSymbol moduleId
-                let! all = ctx.Session.getExportsOfModule moduleId
+                let! direct = ctx.Session.getExportsOfSymbol (moduleId / uom<_>)
+                let! all = ctx.Session.getExportsOfModule (moduleId / uom<_>)
 
                 let inventory (values: SymbolResponse[] voption) =
                     values
@@ -152,14 +153,14 @@ let reader (ctx: Context) =
 
             return
                 match target with
-                | ValueSome target -> Through [ Symbol((remember target).Id) ]
+                | ValueSome target -> Through [ Symbol((remember target).SymbolId) ]
                 | ValueNone -> Absent
         }
 
     let imported moduleNode name fallback =
         async {
             match! symbolAt moduleNode with
-            | Some target -> return Through [ Export(target.Id, name) ]
+            | Some target -> return Through [ Export(target.SymbolId, name) ]
             | None -> return! immediate fallback
         }
 
@@ -191,7 +192,7 @@ let reader (ctx: Context) =
                         let! target = ctx.Session.getExportSpecifierLocalTargetSymbol (location declaration)
 
                         match target with
-                        | ValueSome target -> return Through [ Symbol((remember target).Id) ]
+                        | ValueSome target -> return Through [ Symbol((remember target).SymbolId) ]
                         | ValueNone -> return! immediate symbol
                 | SyntaxKind.ImportSpecifier
                 | SyntaxKind.ImportClause ->
@@ -243,16 +244,16 @@ let reader (ctx: Context) =
                             let! exports = moduleExports moduleId
 
                             match Map.tryFind name exports.Direct with
-                            | Some symbol -> return Through [ Symbol symbol.Id ]
+                            | Some symbol -> return Through [ Symbol symbol.SymbolId ]
                             | None ->
                                 match Map.tryFind "export=" exports.Direct with
                                 | Some assignment ->
                                     let! target = origin assignment
 
                                     if name = "default" then
-                                        return Through [ Symbol assignment.Id ]
+                                        return Through [ Symbol assignment.SymbolId ]
                                     else
-                                        return ThroughBoth(Symbol assignment.Id, Export(target.Id, name))
+                                        return ThroughBoth(Symbol assignment.SymbolId, Export(target.SymbolId, name))
                                 | None ->
                                     match Map.tryFind name exports.All with
                                     | None -> return Absent
@@ -263,7 +264,7 @@ let reader (ctx: Context) =
                                             exports.Stars
                                             |> List.map (fun target ->
                                                 async {
-                                                    let! candidates = moduleExports target.Id
+                                                    let! candidates = moduleExports target.SymbolId
 
                                                     match Map.tryFind name candidates.All with
                                                     | Some candidate ->
@@ -271,7 +272,7 @@ let reader (ctx: Context) =
 
                                                         return
                                                             if candidate.Id = expected.Id then
-                                                                Some(Export(target.Id, name))
+                                                                Some(Export(target.SymbolId, name))
                                                             else
                                                                 None
                                                     | None -> return None
@@ -325,4 +326,4 @@ let reader (ctx: Context) =
 
     fun (moduleSymbol: SymbolResponse) name ->
         remember moduleSymbol |> ignore
-        reaches Set.empty (Export(moduleSymbol.Id, name))
+        reaches Set.empty (Export(moduleSymbol.SymbolId, name))

@@ -89,5 +89,11 @@ type Exports =
     /// </summary>
     [<Global("Gadget"); EmitConstructor>]
     static member Gadget (widget: Widget) : Gadget = jsNative
-    [<Import("extra", "globals-lab:extra")>]
-    static member extra: float = jsNative
+
+module GlobalsLab =
+    module Extra =
+        /// <summary>The package's value exports, each bound to its import.</summary>
+        [<Erase>]
+        type Exports =
+            [<Import("extra", "globals-lab:extra")>]
+            static member extra: float = jsNative

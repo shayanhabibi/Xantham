@@ -6,6 +6,7 @@ module Xantham.Generator.Pipeline
 
 open System
 open System.IO
+open Xantham.Generator.Measure
 open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 
@@ -83,7 +84,7 @@ let toResolve (harvest: HarvestModel) : ResolveModel =
     }
 
 /// Resolve -> Shape: everything resolved is carried, the declarations start empty.
-let toShape (resolve: ResolveModel) : ShapeModel =
+let toShape (runtimePackage: string<importSpecifier>) (resolve: ResolveModel) : ShapeModel =
     {
         Harvest = resolve.Harvest
         ExportTypes = resolve.ExportTypes
@@ -97,6 +98,7 @@ let toShape (resolve: ResolveModel) : ShapeModel =
         TypeVars = Map.empty
         KeyVars = Map.empty
         Decls = []
+        RuntimePackage = runtimePackage
     }
 
 /// The generated module's name: the config override, the configured namespace, or the entry
@@ -111,6 +113,26 @@ let private exportedDeclarations (ctx: Context) (shape: ShapeModel) =
     |> List.choose (fun (typeId, export) -> Map.tryFind typeId shape.DeclNames |> Option.map (fun name -> name, export))
     |> Map.ofList
 
+/// The runtime specifier of each nested module path the entry module writes for an ambient
+/// module owner - the one-line summary `Render.renderSources` places above that module's
+/// opening line (rule 13). A path a TS `namespace` nests a companion module under carries no
+/// entry here, since only `Shape.ExportLayout.preferredPath` reaches an owner directly.
+let private moduleSpecifiers (ctx: Context) (shape: ShapeModel) : Map<string list, string<importSpecifier>> =
+    let owners =
+        exportedDeclarations ctx shape
+        |> Map.toList
+        |> List.map (fun (_, export) -> Shape.ExportLayout.ownerOf shape.RuntimePackage export.Origin)
+        |> List.distinct
+
+    let hasEntryOwner = owners |> List.contains EntryModule
+
+    owners
+    |> List.choose (fun owner ->
+        match owner, Shape.ExportLayout.preferredPath shape.RuntimePackage hasEntryOwner owner with
+        | AmbientModule specifier, (_ :: _ as path) -> Some(path, specifier)
+        | _ -> None)
+    |> Map.ofList
+
 /// Origin of each named type that was reached while shaping declarations. Explicit exports
 /// supply their declaration ownership; other named types keep their own symbol origin.
 let private declOrigins compilerOnly (ctx: Context) (shape: ShapeModel) : Map<string, PackageId> =
@@ -120,7 +142,7 @@ let private declOrigins compilerOnly (ctx: Context) (shape: ShapeModel) : Map<st
         shape.Harvest.Exports
         |> List.fold
             (fun map export ->
-                match Map.tryFind export.Symbol.Id shape.ExportTypes with
+                match Map.tryFind export.Symbol.SymbolId shape.ExportTypes with
                 | Some ids ->
                     let origin = Grouping.classify ctx.PackageDir (ValueSome export.Symbol)
 
@@ -143,7 +165,12 @@ let private declOrigins compilerOnly (ctx: Context) (shape: ShapeModel) : Map<st
             match Map.tryFind name origins, Map.tryFind typeId shape.Types with
             | None, Some facts ->
                 let origin =
-                    match Map.tryFind name declared, facts.SymbolName, facts.DeclFile, facts.Origin with
+                    match
+                        Map.tryFind name declared,
+                        (facts.SymbolName |> Option.map (fun value -> value / uom<_>)),
+                        (facts.DeclFile |> Option.map (fun value -> value / uom<_>)),
+                        facts.Origin
+                    with
                     // A global object belongs to reusable core only when the complete source
                     // inventory certifies that this program adds no declarations to it.
                     | _, Some "globalThis", None, _ when compilerOnly -> CompilerLib
@@ -168,7 +195,7 @@ let private declFamilies (shape: ShapeModel) : Map<string, string> =
               Some {
                        Origin = CompilerLib
                        DeclFile = Some file
-                   } -> Map.add name (Grouping.libFamily file) families
+                   } -> Map.add name (Grouping.libFamily (file / uom<_>)) families
             | _ -> families)
         Map.empty
 
@@ -221,11 +248,11 @@ let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel)
     let groupOf decl =
         let origin =
             match Render.declName decl with
-            | Some name when Map.containsKey name origins -> originOf name
+            | name when Map.containsKey name origins -> originOf name
             | name ->
                 secondaryAliasOrder decl
-                |> Option.map (fun order -> Grouping.classifyFile ctx.PackageDir order.File)
-                |> Option.defaultWith (fun () -> name |> Option.map originOf |> Option.defaultValue Unclassified)
+                |> Option.map (fun order -> Grouping.classifyFile ctx.PackageDir (order.File / uom<node>))
+                |> Option.defaultWith (fun () -> name |> originOf)
 
         emittingGroup ctx origin
 
@@ -247,20 +274,21 @@ let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel)
         | CompilerLib ->
             let family =
                 match Render.declName decl with
-                | Some name when Map.containsKey name origins ->
+                | name when Map.containsKey name origins ->
                     Map.tryFind name declared
                     |> Option.bind _.Order
-                    |> Option.map (fun order -> Grouping.libFamily order.File)
+                    |> Option.map (fun order -> Grouping.libFamily (order.File / uom<_>))
                     |> Option.defaultWith (fun () -> familyOf name)
                 | name ->
                     secondaryAliasOrder decl
-                    |> Option.map (fun order -> Grouping.libFamily order.File)
-                    |> Option.defaultWith (fun () -> name |> Option.map familyOf |> Option.defaultValue "Es")
+                    |> Option.map (fun order -> Grouping.libFamily (order.File / uom<_>))
+                    |> Option.defaultWith (fun () -> name |> familyOf)
 
             CompilerLib, family
         | origin -> origin, ""
 
     let placed = shape.Decls |> List.groupBy placementOf |> Map.ofList
+    let entrySpecifiers = moduleSpecifiers ctx shape
 
     let moduleOf (origin: PackageId, family: string) : Render.GroupModule =
         let decls = placed |> Map.tryFind (origin, family) |> Option.defaultValue []
@@ -274,6 +302,7 @@ let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel)
                 Namespace = None
                 RuntimePackage = GeneratorConfig.runtimePackage ctx.Config ctx.PackageName
                 CompilerLib = None
+                ModuleSpecifiers = entrySpecifiers
                 Decls = decls
             }
         | Some key ->
@@ -297,6 +326,7 @@ let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel)
                     match origin with
                     | CompilerLib -> Some(if family = "Dom" then Render.Dom else Render.Es)
                     | _ -> None
+                ModuleSpecifiers = Map.empty
                 Decls = decls
             }
 
@@ -335,7 +365,10 @@ let private namespaceFindings (ctx: Context) (shape: ShapeModel) =
                     Some(key, named)
             | _ -> None)
         |> List.sortBy fst
-        |> List.map (fun (key, named) -> Finding.make key (EmitGroups.GroupModuleFromNamespace(key, named)))
+        |> List.map (fun (key, named) ->
+            Finding.make
+                (key / uom<npmDependency>)
+                (EmitGroups.GroupModuleFromNamespace(key / uom<npmDependency>, named)))
 
 /// Shape -> Render: declarations plus every finding of every earlier tier.
 let toRender (ctx: Context) (shape: ShapeModel) (findings: Finding list) : RenderModel =
@@ -359,7 +392,13 @@ let generate (config: GeneratorConfig) (packageDir: string) : Async<RenderModel>
 
         let! harvest, harvestFindings = runTier ctx Harvest.passes HarvestModel.Empty
         let! resolve, resolveFindings = runTier ctx Resolve.passes (toResolve harvest)
-        let! shape, shapeFindings = runTier ctx Shape.Passes.passes (toShape resolve)
+
+        let! shape, shapeFindings =
+            runTier
+                ctx
+                Shape.Passes.passes
+                (toShape (GeneratorConfig.runtimePackage ctx.Config ctx.PackageName) resolve)
+
         let! compilerOnly = compilerOnlyScope ctx
 
         let! shape, catalog =

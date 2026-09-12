@@ -1,6 +1,7 @@
 ﻿module Xantham.Generator.Shape.Anonymous
 
 open Xantham.Generator
+open Xantham.Generator.Measure
 open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator.Shape.Spec
@@ -45,13 +46,13 @@ let private isAliasIntersectionForm (model: ShapeModel) (facts: TypeFacts) =
 /// smallest type id carrying it that binds parameters of its own. The checker creates an
 /// alias's declared type before it can instantiate it, so the smallest such id is the declared
 /// form and every larger one carrying the same alias symbol is an application of it.
-let private aliasDeclarationForms (model: ShapeModel) : Map<int, int> =
+let private aliasDeclarationForms (model: ShapeModel) : Map<int<Measure.symbolId>, int<Measure.typeId>> =
     model.Types
     |> Map.toList
     |> List.sortBy fst
     |> List.fold
         (fun forms (typeId, facts) ->
-            match facts.Response.AliasSymbol with
+            match facts.Response.AliasSymbolId with
             | ValueSome alias when
                 not (Map.containsKey alias forms)
                 && isAliasIntersectionForm model facts
@@ -63,7 +64,12 @@ let private aliasDeclarationForms (model: ShapeModel) : Map<int, int> =
 
 /// The consistent parameter bindings recoverable from two compiler-identified forms of one
 /// alias. Transformed fragments contribute no bindings; conflicting bindings reject the result.
-let private unifyAlias (model: ShapeModel) (parameters: Set<int>) (declared: int) (instance: int) =
+let private unifyAlias
+    (model: ShapeModel)
+    (parameters: Set<int<Measure.typeId>>)
+    (declared: int<Measure.typeId>)
+    (instance: int<Measure.typeId>)
+    =
     let mutable subst = Map.empty
     let mutable ok = true
     let mutable seen = Set.empty
@@ -91,7 +97,7 @@ let private unifyAlias (model: ShapeModel) (parameters: Set<int>) (declared: int
             else
                 None
 
-    let rec go (left: int) (right: int) =
+    let rec go (left: int<Measure.typeId>) (right: int<Measure.typeId>) =
         if ok && not (Set.contains (left, right) seen) then
             seen <- Set.add (left, right) seen
 
@@ -107,10 +113,10 @@ let private unifyAlias (model: ShapeModel) (parameters: Set<int>) (declared: int
                 match Map.tryFind left model.Types, Map.tryFind right model.Types with
                 | Some declaredFacts, Some instanceFacts ->
                     match
-                        declaredFacts.Response.AliasSymbol,
-                        instanceFacts.Response.AliasSymbol,
-                        declaredFacts.Response.AliasTypeArguments,
-                        instanceFacts.Response.AliasTypeArguments
+                        declaredFacts.Response.AliasSymbolId,
+                        instanceFacts.Response.AliasSymbolId,
+                        declaredFacts.Response.AliasArgumentTypeIds,
+                        instanceFacts.Response.AliasArgumentTypeIds
                     with
                     | ValueSome declaredAlias, ValueSome instanceAlias, ValueSome declaredArgs, ValueSome instanceArgs when
                         declaredAlias = instanceAlias
@@ -119,7 +125,7 @@ let private unifyAlias (model: ShapeModel) (parameters: Set<int>) (declared: int
                         ->
                         Array.iter2 go declaredArgs instanceArgs
                     | _ ->
-                        match declaredFacts.Response.Target, instanceFacts.Response.Target with
+                        match declaredFacts.Response.TargetTypeId, instanceFacts.Response.TargetTypeId with
                         // A deferred operand and its resolution, which stand in the same place and
                         // share no structure: `(unknown extends TNodeType ? {} : NodeExtensions<
                         // TNodeType>)` arrives at `Node<number>` as `NodeExtensions<number>`, and
@@ -178,26 +184,26 @@ let private unifyAlias (model: ShapeModel) (parameters: Set<int>) (declared: int
 /// operand paths recover a complete, consistent substitution for the declaration parameters.
 let internal aliasInstantiationOf
     (model: ShapeModel)
-    (forms: Map<int, int>)
+    (forms: Map<int<Measure.symbolId>, int<Measure.typeId>>)
     (facts: TypeFacts)
-    : (string * int list option) option =
-    match facts.Response.AliasSymbol with
+    : (string * int<Measure.typeId> list option) option =
+    match facts.Response.AliasSymbolId with
     | ValueSome alias when isFlattenable model facts ->
         match Map.tryFind alias forms with
-        | Some declared when declared <> facts.Response.Id ->
+        | Some declared when declared <> facts.Response.TypeId ->
             match Map.tryFind declared model.DeclNames, Map.tryFind declared model.Types with
             | Some name, Some declaredFacts ->
                 let parameters = declParamIds declaredFacts
 
                 let arguments =
-                    facts.Response.AliasTypeArguments
+                    facts.Response.AliasArgumentTypeIds
                     |> ValueOption.toOption
                     |> Option.map Array.toList
                     |> Option.filter (fun arguments ->
                         arguments.Length = parameters.Length
                         && arguments |> List.forall (fun argument -> Map.containsKey argument model.Types))
                     |> Option.orElseWith (fun () ->
-                        unifyAlias model (Set.ofList parameters) declared facts.Response.Id
+                        unifyAlias model (Set.ofList parameters) declared facts.Response.TypeId
                         |> Option.bind (fun subst ->
                             // A parameter the body never mentions cannot be recovered, and an
                             // application short of an argument is not writable F#.
@@ -243,7 +249,23 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
     let namespaceOf (facts: TypeFacts) =
         facts.SymbolParent
         |> Option.bind (fun parent -> Map.tryFind parent model.Harvest.Namespaces)
-        |> Option.map Naming.pascalSegment
+        |> Option.map (fun value -> Naming.pascalSegment (value / uom<symbolName>))
+
+    /// The specifier module path of the export whose types are being walked, dotted; empty at
+    /// the root.
+    let mutable modulePrefix = ""
+
+    let underPrefix (name: string) =
+        if modulePrefix = "" || name.StartsWith(modulePrefix + ".") then
+            name
+        else
+            $"{modulePrefix}.{name}"
+
+    let withoutPrefix (name: string) =
+        if modulePrefix <> "" && name.StartsWith(modulePrefix + ".") then
+            name.Substring(modulePrefix.Length + 1)
+        else
+            name
 
     let claim (owner: string option) (preferred: string) typeId order =
         // A member key reaches here verbatim, and a declaration name admits less than a member
@@ -256,8 +278,8 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
         // beside the global class of that name.
         let wanted =
             match owner with
-            | Some ns when Set.contains admitted taken -> nestUnder ns admitted
-            | _ -> admitted
+            | Some ns when Set.contains (underPrefix admitted) taken -> underPrefix (nestUnder ns admitted)
+            | _ -> underPrefix admitted
 
         let unique =
             if not (Set.contains wanted taken) then
@@ -277,7 +299,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                     Finding.make unique (SynthesizeAnonymous.NameSanitisedForIdentifier(preferred, unique))
                 ]
 
-        if unique.Contains "." then
+        if (withoutPrefix unique).Contains "." then
             findings <-
                 findings
                 @ [ Finding.make unique (SynthesizeAnonymous.NameNestedUnderOwner unique) ]
@@ -296,7 +318,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                | Some m -> (literalOf m).IsSome
                | None -> false)
         && not (isBooleanPair model remaining)
-        && (Set.contains facts.Response.Id recoveredAliases
+        && (Set.contains facts.Response.TypeId recoveredAliases
             || (namedUnionByMembers { model with DeclNames = names } remaining).IsNone)
 
     /// A union `detect-tagged-unions` will declare (D4, §4.5(2)): every arm an object type
@@ -344,7 +366,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
         Set.ofList (exported @ methods)
 
     let needsName (facts: TypeFacts) =
-        if Map.containsKey facts.Response.Id names then
+        if Map.containsKey facts.Response.TypeId names then
             false
         elif flag TypeFlags.Union facts && not (flag TypeFlags.Boolean facts) then
             isLiteralUnion facts || becomesTaggedUnion facts
@@ -354,7 +376,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
             // string>` said only how many arguments there are.
             (GeneratorConfig.disposition ctx.Config facts.Origin = Ship
              || facts.SymbolName |> Option.forall isSyntheticName)
-            && not (Set.contains facts.Response.Id signatureShaped)
+            && not (Set.contains facts.Response.TypeId signatureShaped)
             // F# has no rank-2 form, so a generic signature can only be approximated by
             // hoisting its variables onto the declaration - and a reference has nothing to
             // apply them back with. Written inline, they stay in the scope that bound them.
@@ -399,7 +421,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
         else
             false
 
-    let rec walk (path: string) (order: DeclOrder option) (typeId: int) =
+    let rec walk (path: string) (order: DeclOrder option) (typeId: int<Measure.typeId>) =
         if not (Set.contains typeId visited) then
             visited <- Set.add typeId visited
 
@@ -411,13 +433,13 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                 // The generic declaration behind an instantiation is named ahead of it, so
                 // `Ready<T>` reached only through `Resource<T> = Ready<T> | ...` declares
                 // `Ready<'T>` once and instantiations are applications of it (§4.9).
-                match facts.Response.Target with
+                match facts.Response.TargetTypeId with
                 | ValueSome target when target <> typeId && Map.containsKey target model.Types -> walk path order target
                 | _ -> ()
 
                 // Private alias declarations precede their applications too. A deferred
                 // conditional has no members to walk, so its first application supplies its name.
-                match facts.Response.AliasSymbol with
+                match facts.Response.AliasSymbolId with
                 | ValueSome alias when isFlattenable model facts ->
                     match Map.tryFind alias aliasForms with
                     | Some declared when declared <> typeId && not (Map.containsKey declared names) ->
@@ -434,7 +456,8 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                     // the type's own symbol has a namespace left to fall back on.
                     let preferred, owner =
                         match facts.SymbolName with
-                        | Some name when not (isSyntheticName name) -> Naming.pascalSegment name, namespaceOf facts
+                        | Some name when not (isSyntheticName name) ->
+                            Naming.pascalSegment (name / uom<symbolName>), namespaceOf facts
                         | _ -> path, None
 
                     let claimed = claim owner preferred typeId order
@@ -458,7 +481,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                 | Some(name, Some arguments) ->
                     names <- Map.add typeId name names
                     declParams <- Map.add typeId arguments declParams
-                    let declared = aliasForms[facts.Response.AliasSymbol.Value]
+                    let declared = aliasForms[facts.Response.AliasSymbolId.Value]
                     aliasApplications <- Map.add typeId declared aliasApplications
 
                     findings <-
@@ -537,11 +560,13 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                             | _ -> ()
 
     let fallback = defaultExportName ctx
+    let pathOf = ExportLayout.declPath (ExportLayout.modulePaths model) model
 
     for export in model.Harvest.Exports do
-        let root = Naming.pascalSegment (fsName fallback export)
+        modulePrefix <- pathOf export |> String.concat "."
+        let root = underPrefix (Naming.pascalSegment (fsName fallback export))
 
-        match Map.tryFind export.Symbol.Id model.ExportTypes with
+        match Map.tryFind export.Symbol.SymbolId model.ExportTypes with
         | Some ids ->
             for typeId in [ yield! Option.toList ids.Declared; yield! Option.toList ids.Value ] do
                 walk root export.Order typeId

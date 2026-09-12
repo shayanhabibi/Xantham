@@ -124,17 +124,20 @@ let findingsTests =
                     "MB.OptionalHookAsInterface MB005 ergonomic"
                     "MB.OptionalParameterFromUnion MB006 ergonomic"
                     "MB.UnspellableMemberDropped MB007 widened"
+                    "NE.TypeNameSuffixed NE001 exact"
                     "HG.AmbientModuleDropped HG001 escape"
                     "HG.UnwritableGlobalDropped HG002 escape"
                     "HG.NothingHarvested HG003 escape"
                     "HG.AmbientModuleHarvested HG004 exact"
                     "HG.AmbientModuleWildcard HG005 escape"
                     "HG.NamespaceIsModuleBody HG006 exact"
+                    "HG.AmbientModuleAliasDivergent HG007 widened"
                     "RE.FacetNotResolved RE001 escape"
                     "RT.FrontierNotResolved RT001 widened"
                     "RT.TypeNotResolved RT002 widened"
                     "RT.FrontierTooWide RT003 widened"
                     "LU.NonStringLiteralCase LU001 exact"
+                    "LU.QualifiedAccessKept LU002 ergonomic"
                     "DT.ArmNotPlainData DT001 ergonomic"
                     "DT.TaggedUnion DT002 exact"
                     "DT.TagValueShared DT003 ergonomic"
@@ -165,9 +168,11 @@ let findingsTests =
                     "SC.EntrypointClassEmitted SC007 exact"
                     "SC.EntrypointClassRefused SC008 widened"
                     "SC.EntrypointClassInheritsExn SC009 ergonomic"
+                    "SC.StaticAliasPathCollapsed SC010 exact"
                     "SE.NoValueType SE001 escape"
                     "SE.RuntimeSpecifierDerived SE002 ergonomic"
                     "SE.MutableValueReadOnly SE003 widened"
+                    "SE.ExportPathAllocated SE004 ergonomic"
                     "SP.ParamObjectSynthesized SP001 ergonomic"
                     "SP.MethodMemberAsCreateParameter SP002 ergonomic"
                     "SP.CreateNotSynthesized SP003 ergonomic"
@@ -176,6 +181,10 @@ let findingsTests =
                     "DO.OverloadsDistinguishedByLiteralUnion DO003 exact"
                     "DO.ExportFunctionOverloadDropped DO004 widened"
                     "DO.KeyofConstrainedOverloadDropped DO005 widened"
+                    "DO.ExportOccurrenceConsolidated DO006 exact"
+                    "DO.ExportMemberRenamed DO007 ergonomic"
+                    "DO.ExportReturnTypesUnioned DO008 widened"
+                    "DO.ExportDeclarationsConsolidated DO009 ergonomic"
                     "RA.GenericAliasDropped RA001 widened"
                     "RA.ReferenceToDroppedAlias RA002 widened"
                     "RA.GenericWithoutArguments RA003 widened"
@@ -199,10 +208,10 @@ let findingsTests =
 
           testCase "a pass is labelled with the prefix of the union it owns" <| fun _ ->
               Expect.equal (FindingCatalogue.passLabel "shape-interfaces") "SI - shape-interfaces" "a pass with a union"
-              Expect.equal (FindingCatalogue.passLabel "name-exports") "name-exports" "a pass without one stays bare"
+              Expect.equal (FindingCatalogue.passLabel "name-exports") "NE - name-exports" "a pass with a union"
 
               let passes = FindingCatalogue.passPrefixes |> Map.toList |> List.map fst
-              Expect.equal passes.Length 14 "every per-pass union names its pass"
+              Expect.equal passes.Length 15 "every per-pass union names its pass"
 
           testCase "a finding derives name, key, tier, payload and message from its kind" <| fun _ ->
               let finding = Finding.make "Options.legacy" (TypeReference.UnionTooWide(10, 9))

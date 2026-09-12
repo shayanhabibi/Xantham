@@ -4,7 +4,7 @@
   "module": "SolidJs",
   "counts": {
     "exact": 22,
-    "ergonomic": 96,
+    "ergonomic": 97,
     "widened": 55,
     "escape": 18
   },

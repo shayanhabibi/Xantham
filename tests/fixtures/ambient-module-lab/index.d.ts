@@ -98,6 +98,36 @@ declare module "ambient-lab:runtime" {
     export = AmbientLabRuntime;
 }
 
+/** An ambient module under the `lab` specifier: a class and an interface sharing their names
+ * with `ambient-lab:lab/promises`'s. */
+declare module "ambient-lab:lab" {
+    export class Session {
+        constructor(id: string);
+        readonly id: string;
+    }
+
+    export interface Constants {
+        readonly epoch: number;
+    }
+}
+
+/** The nested specifier `lab/promises`: its own `Session` and `Constants`, plus a signature
+ * referring back to `ambient-lab:lab`'s `Session`. */
+declare module "ambient-lab:lab/promises" {
+    import { Session as LabSession } from "ambient-lab:lab";
+
+    export class Session {
+        constructor(id: string);
+        readonly id: string;
+    }
+
+    export interface Constants {
+        readonly epoch: number;
+    }
+
+    export function describe(session: LabSession): string;
+}
+
 /** An ambient module exporting nothing. */
 declare module "ambient-lab:empty" {}
 

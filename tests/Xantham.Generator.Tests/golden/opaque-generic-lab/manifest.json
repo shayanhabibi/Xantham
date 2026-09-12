@@ -3,7 +3,7 @@
   "package": "opaque-generic-lab",
   "module": "OpaqueGenericLab",
   "counts": {
-    "exact": 1,
+    "exact": 4,
     "ergonomic": 7,
     "widened": 2,
     "escape": 0

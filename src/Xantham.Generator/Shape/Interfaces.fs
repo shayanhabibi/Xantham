@@ -55,7 +55,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                     let fallbackDocs =
                         model.Harvest.Exports
                         |> List.choose (fun export ->
-                            Map.tryFind export.Symbol.Id model.ExportTypes
+                            Map.tryFind export.Symbol.SymbolId model.ExportTypes
                             |> Option.bind _.Declared
                             |> Option.map (fun typeId -> typeId, (export.Docs, export.Tags)))
                         |> Map.ofList
@@ -81,7 +81,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                         exclusiveUnions
                         |> List.collect (fun (_, _, outcome) ->
                             match outcome with
-                            | Choice1Of2(_, arms) -> arms |> List.map (fun a -> a.Facts.Response.Id)
+                            | Choice1Of2(_, arms) -> arms |> List.map (fun a -> a.Facts.Response.TypeId)
                             | Choice2Of2 _ -> [])
                         |> Set.ofList
 
@@ -130,7 +130,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                                 // §4.4's heritage rule and §4.6's is-a relation through one
                                 // gate: a declared base and an intersection operand are both a
                                 // type this declaration *is*. Members are declared in full too.
-                                let inheritable (operandId: int) =
+                                let inheritable (operandId: int<Measure.typeId>) =
                                     match typeRef ctx { model with TypeVars = scope } None name operandId with
                                     | (FsNamed operand | FsApp(operand, _)) as reference, refFindings ->
                                         if not (Set.contains operand interfaceNames) then
@@ -201,7 +201,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                                 // `record` is what separates the two callers: a declared base
                                 // says per base what became of it, where an intersection says
                                 // `IntersectionFlattened` once for the whole operand list.
-                                let admit (record: bool) (operandId: int) =
+                                let admit (record: bool) (operandId: int<Measure.typeId>) =
                                     match inheritable operandId with
                                     | Ok(operand, reference, refFindings) ->
                                         if not (List.exists (fun (taken, _) -> taken = operand) inherits) then

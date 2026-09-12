@@ -3,7 +3,7 @@
   "package": "nominal-lab",
   "module": "NominalLab",
   "counts": {
-    "exact": 4,
+    "exact": 5,
     "ergonomic": 5,
     "widened": 2,
     "escape": 0

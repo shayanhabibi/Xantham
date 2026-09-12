@@ -49,14 +49,6 @@ type Extended =
     [<ParamObject; Emit("$0")>]
     static member Create (name: string, extra: bool) : Extended = jsNative
 
-module Label =
-    [<Interface>]
-    type Target =
-        inherit Named
-        abstract id: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (name: string, id: float) : Target = jsNative
-
 /// <summary>
 /// A generic intersection alias: <c>T</c> is bound on the alias and a member reads it.
 /// </summary>
@@ -133,3 +125,11 @@ type Exports =
     /// </summary>
     [<Import("merge", "intersection-lab")>]
     static member merge<'T> (``base``: obj) : 'T = jsNative
+
+module Label =
+    [<Interface>]
+    type Target =
+        inherit Named
+        abstract id: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string, id: float) : Target = jsNative

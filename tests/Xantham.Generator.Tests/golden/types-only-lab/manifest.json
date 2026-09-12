@@ -3,7 +3,7 @@
   "package": "@types/types-only-lab",
   "module": "TypesOnlyLab",
   "counts": {
-    "exact": 2,
+    "exact": 3,
     "ergonomic": 2,
     "widened": 0,
     "escape": 0

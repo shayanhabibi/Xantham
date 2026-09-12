@@ -3,8 +3,8 @@
   "package": "compiler-lib-ownership-lab",
   "module": "CompilerLibOwnershipLab",
   "counts": {
-    "exact": 39,
-    "ergonomic": 70,
+    "exact": 56,
+    "ergonomic": 82,
     "widened": 152,
     "escape": 58
   },
@@ -54,14 +54,19 @@
     },
     {
       "pass": "DO - dedupe-overloads",
-      "total": 8,
-      "widened": 8
+      "total": 2,
+      "widened": 2
     },
     {
       "pass": "RA - repair-arity",
       "total": 3,
       "ergonomic": 1,
       "widened": 2
+    },
+    {
+      "pass": "resolve-export-collisions",
+      "total": 6,
+      "widened": 6
     },
     {
       "pass": "render-source",

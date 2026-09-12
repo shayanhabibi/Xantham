@@ -20,15 +20,6 @@ type Widget =
     [<ParamObject; Emit("$0")>]
     static member Create (handler: Widget.Handler) : Widget = jsNative
 
-module Widget =
-    [<Interface>]
-    type Handler =
-        abstract enabled: bool with get, set
-        [<Emit("$0($1...)")>]
-        abstract Invoke: ``event``: string -> string
-        [<ParamObject; Emit("$0")>]
-        static member Create (enabled: bool) : Handler = jsNative
-
 /// <summary>
 /// The same shape, written as a named declaration directly.
 /// </summary>
@@ -110,10 +101,19 @@ type Exports =
     [<Import("multi", "callable-hybrid-lab")>]
     static member multi (x: float, y: float) : float = jsNative
     [<Import("ambiguous", "callable-hybrid-lab")>]
-    static member ambiguous (x: float) : float = jsNative
+    static member ambiguous (x: float) : U2<float, string> = jsNative
     [<Import("identity", "callable-hybrid-lab")>]
     static member identity<'T> (value: 'T) : 'T = jsNative
     [<Import("boxedNumber", "callable-hybrid-lab")>]
     static member boxedNumber () : float = jsNative
     [<Import("collides", "callable-hybrid-lab")>]
     static member collides (x: float) : float = jsNative
+
+module Widget =
+    [<Interface>]
+    type Handler =
+        abstract enabled: bool with get, set
+        [<Emit("$0($1...)")>]
+        abstract Invoke: ``event``: string -> string
+        [<ParamObject; Emit("$0")>]
+        static member Create (enabled: bool) : Handler = jsNative

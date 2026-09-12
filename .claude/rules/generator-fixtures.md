@@ -49,12 +49,12 @@ worth more than one written to match what the code already did.
 shell one-liner. Iterating on a pass:
 
 ```
-dotnet fsi build.fsx -- test --quick --update --no-run-gate --filter "<suite>"
+dotnet fsi build.fsx -- test --quick --update --filter "<suite>"
 ```
 
 - `--quick` skips setup, `--update` regenerates the goldens before asserting against them
-  (it runs the suite twice: once writing, once checking), `--no-run-gate` drops the Fable run
-  gate, which is much the slowest step.
+  (it runs the suite twice: once writing, once checking). The Fable run gate, much the slowest
+  step, is opt-in through `--run-gate`.
 - `--filter` narrows to one suite by name, where you know which one you are moving.
 
 Every one of those flags removes something that is real safety on the way out and pure latency on
@@ -69,9 +69,9 @@ later) are **still regenerated and still gated on every change**. Nothing here r
 - `dotnet build Xantham.slnx` - the compile gate compiles the committed goldens against
   Fable.Core and `Xantham.Fable.Core.TS`. This is what decides whether a generated binding is
   legal F#, and it decides it by compiling, not by being read.
-- `dotnet fsi build.fsx -- test` - Expecto suites plus the Fable run gate.
+- `dotnet fsi build.fsx -- test --run-gate` - Expecto suites plus the Fable run gate.
 
-Unless the managing agent or the user directs otherwise:
+Unless the user directs otherwise:
 
 - **Do not open a large golden binding file, and do not page through its diff.**
 - **Do not load a fixture's `symbols.jsonl`.** A run writes its report as two files: `manifest.json`
@@ -106,15 +106,14 @@ What a large fixture is *for* is the numbers it produces. Report those:
 
 Targeted `grep` for the construct you changed, and a bounded sample of representative diff hunks
 (`git diff -- <path> | head -n 200`), satisfy the repository's "read the diff before committing
-it" rule. You are reviewing it in aggregate plus samples; the managing agent does the
-large-fixture judgment at integration.
+it" rule. You are reviewing it in aggregate plus samples, not re-reading the whole corpus.
 
 ### Hand back what you cannot explain
 
 If a large fixture moves in a way your small evidence does not account for — a diff in a package
 you did not target, a count that moved the wrong way, a hunk you do not understand — **report it
-to the managing agent with the pointer and stop**. Do not spend context chasing it. An unexplained
-diff handed over early is cheap; one discovered at merge time, under three other branches, is not.
+to the user with the pointer and stop**. Do not spend context chasing it. An unexplained diff
+handed over early is cheap; one discovered later, under other unrelated changes, is not.
 
 ### Reduce bugs to a reproducer
 
@@ -137,34 +136,28 @@ or a compile error quoted with its code. **A text or metadata search over the as
 sufficient**: `Fable.Core.Py` declares `Iterable`, `Iterator` and other names that a bare search
 reports as present and that a JavaScript binding cannot reach.
 
-Do not stall the lane on it. Record the gap, widen as the mapping already does, and carry on.
+Do not stall on it. Record the gap, widen as the mapping already does, and carry on.
 
-## Working alongside other branches
+## Append-only lists
 
-Generator work is usually dispatched several branches at a time, and the passes themselves merge
-cleanly: `Shape/` is one file per pass over the shared `Spec.fs`, so two branches on different
-passes touch different files, and even the single 3,593-line file that preceded it auto-merged on
-every branch of the last wave. What conflicts is the handful of **append-only lists**. Most have
-since been turned into patterns or made to read the tree, and the ones that remain need care:
+`Shape/` is one file per pass over the shared `Spec.fs`, so concurrent work on different passes
+touches different files. What still needs care, whenever more than one change lands on the
+generator around the same time, is the handful of **append-only lists**:
 
 - **Finding codes come from a table, not a position.** `FindingCodes.table` in `Findings.fs` maps
   a case's stable name (`TR.NullableHoistedToOption`) to its numeric code (`TR032`), and a case
   with no row fails at first use. Appending, retiring or reordering a case moves no other key, and
-  a retired case keeps its row so a number is never handed out twice. **If the manager pre-declared
-  your cases at dispatch, use those and edit `Findings.fs` no further.** A new case costs three
-  edits — the union case, its `FindingCodes.table` row, and its `Findings.test.fs` snapshot line —
-  so one discovered mid-task is a request back to the manager, not a local change. `Pipeline.test.fs`
-  and `Shape.test.fs` pin codes as bare string literals, deliberately, because those codes are
-  published in every manifest.
+  a retired case keeps its row so a number is never handed out twice. A new case costs three
+  edits — the union case, its `FindingCodes.table` row, and its `Findings.test.fs` snapshot line.
+  `Pipeline.test.fs` and `Shape.test.fs` pin codes as bare string literals, deliberately, because
+  those codes are published in every manifest.
 - **The run gate is still a two-place addition** — link the golden in
   `Xantham.Generator.RunGate.fsproj` and add the checks to its `Program.fs`. Both are deliberate
-  (a check is a judgement about behaviour, not a file listing), so both can conflict. Only add a
-  lab to the run gate if it has runtime behaviour to prove; the compile gate already covers "does
-  it compile", and covers it automatically.
+  (a check is a judgement about behaviour, not a file listing). Only add a lab to the run gate if
+  it has runtime behaviour to prove; the compile gate already covers "does it compile", and covers
+  it automatically.
 - **Goldens are regenerated, not merged.** Generation is deterministic, so a conflict in a golden
   or a manifest is resolved by taking either side and re-running with `--update`, never by hand.
-- Say in your handover file which finding codes you added and which large-fixture counts moved.
-  That is what the managing agent composes; a branch that reports only "green" cannot be composed.
 
 ## For the managing agent
 
@@ -218,7 +211,7 @@ The rest of the dispatch checklist:
 ## Asking for more
 
 This is a default, not a wall. **If you believe you need to load something larger to do the task
-properly, ask the managing agent or the user — with the exact reasoning**: what you are trying to
-establish, what you already tried to establish it with, and why the aggregate did not settle it.
-A specific request is normally granted. Silently loading 30k lines, or silently shipping a change
-you could not verify, are both worse than asking.
+properly, ask the user — with the exact reasoning**: what you are trying to establish, what you
+already tried to establish it with, and why the aggregate did not settle it. A specific request is
+normally granted. Silently loading 30k lines, or silently shipping a change you could not verify,
+are both worse than asking.

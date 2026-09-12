@@ -3,33 +3,23 @@
   "package": "ambient-module-lab",
   "module": "AmbientModuleLab",
   "counts": {
-    "exact": 7,
-    "ergonomic": 8,
-    "widened": 3,
+    "exact": 20,
+    "ergonomic": 13,
+    "widened": 2,
     "escape": 2
   },
   "passes": [
     {
       "pass": "HG - harvest-globals",
-      "total": 6,
-      "exact": 4,
+      "total": 8,
+      "exact": 6,
       "escape": 2
-    },
-    {
-      "pass": "name-exports",
-      "total": 1,
-      "exact": 1
     },
     {
       "pass": "SI - shape-interfaces",
       "total": 6,
       "exact": 1,
       "ergonomic": 4,
-      "widened": 1
-    },
-    {
-      "pass": "SA - shape-aliases",
-      "total": 1,
       "widened": 1
     },
     {
@@ -41,8 +31,8 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 13,
-      "ergonomic": 13
+      "total": 17,
+      "ergonomic": 17
     }
   ]
 }

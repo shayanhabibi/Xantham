@@ -213,14 +213,6 @@ module Browser =
         [<ParamObject; Emit("$0")>]
         static member Create (Echo: (obj -> unit), StdErr: TextStreamWriter, StdOut: TextStreamWriter, Arguments: WScript.Arguments, ScriptFullName: string, Quit: (float option -> float), BuildVersion: float, FullName: string, Interactive: bool, Name: string, Path: string, ScriptName: string, StdIn: TextStreamReader, Version: string, ConnectObject: Action<obj, string>, CreateObject: Func<string, string option, obj>, DisconnectObject: (obj -> unit), GetObject: Func<string, string option, string option, obj>, Sleep: (float -> unit)) : WScript = jsNative
 
-    module WScript =
-        [<Interface>]
-        type Arguments =
-            abstract length: float with get, set
-            abstract Item: n: float -> string
-            [<ParamObject; Emit("$0")>]
-            static member Create (length: float, Item: (float -> string)) : Arguments = jsNative
-
     /// <summary>
     /// Represents an Automation SAFEARRAY
     /// </summary>
@@ -256,13 +248,6 @@ module Browser =
         abstract moveNext: unit -> unit
         [<ParamObject; Emit("$0")>]
         static member Create (atEnd: (unit -> bool), item: (unit -> 'T), moveFirst: (unit -> unit), moveNext: (unit -> unit)) : Enumerator<'T> = jsNative
-
-    module EnumeratorConstructor =
-        [<Interface>]
-        type Collection<'T> =
-            abstract Item: index: obj -> 'T
-            [<ParamObject; Emit("$0")>]
-            static member Create (Item: (obj -> 'T)) : Collection<'T> = jsNative
 
     type EnumeratorConstructor =
         [<EmitConstructor>]
@@ -326,3 +311,18 @@ module Browser =
         abstract getVarDate: (unit -> VarDate) with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (getVarDate: (unit -> VarDate)) : Date = jsNative
+
+    module EnumeratorConstructor =
+        [<Interface>]
+        type Collection<'T> =
+            abstract Item: index: obj -> 'T
+            [<ParamObject; Emit("$0")>]
+            static member Create (Item: (obj -> 'T)) : Collection<'T> = jsNative
+
+    module WScript =
+        [<Interface>]
+        type Arguments =
+            abstract length: float with get, set
+            abstract Item: n: float -> string
+            [<ParamObject; Emit("$0")>]
+            static member Create (length: float, Item: (float -> string)) : Arguments = jsNative

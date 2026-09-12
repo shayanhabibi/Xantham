@@ -1,4 +1,4 @@
-﻿/// The run gate's checks: each one exercises a generated binding and reads the JavaScript
+/// The run gate's checks: each one exercises a generated binding and reads the JavaScript
 /// side back through `emitJsExpr` or a fixture runtime hook, so the claim under test is what
 /// the erasure *did*, not what the F# type said. Node exits non-zero when any check failed,
 /// after printing all of them.
@@ -487,18 +487,22 @@ let private workarounds () =
 /// `inherit` is a source construct: this type existing at all is the check the interface form
 /// could not pass (FS0946), and its behaviour is what the checks below read.
 type private Bench(label: string) =
-    inherit AmbientModuleLab.Workbench(label)
+    inherit AmbientModuleLab.AmbientLab.Tools.Workbench(label)
 
     override this.run(payload) = $"derived:{this.label}:{payload.label}"
 
 /// An ambient module declaration binds to the specifier it quotes rather than to the package the
 /// rest of the file imports from, and a renamed re-export binds under the exported name.
 let private ambientModules () =
-    let payload = AmbientModuleLab.Exports.connect "socket"
+    let payload = AmbientModuleLab.AmbientLab.Sockets.Exports.connect "socket"
     equal "a renamed re-export reaches the export, not the module-local name" "socket" payload.label
-    equal "a function imported from a specifier reaches that module" 6.0 (AmbientModuleLab.Exports.measure payload)
 
-    let hammer = AmbientModuleLab.Exports.Hammer 4.0
+    equal
+        "a function imported from a specifier reaches that module"
+        6.0
+        (AmbientModuleLab.AmbientLab.Tools.Exports.measure payload)
+
+    let hammer = AmbientModuleLab.AmbientLab.Tools.Exports.Hammer 4.0
     let hammerClass: obj = import "Hammer" "ambient-lab:tools"
 
     check
@@ -506,11 +510,15 @@ let private ambientModules () =
         (emitJsExpr (hammer, hammerClass) "$0 instanceof $1")
 
     equal "and its method runs" "socket:4" (hammer.strike payload)
-    equal "a static dots off the imported name" 12.0 AmbientModuleLab.Hammer.LIMIT
+    equal "a static dots off the imported name" 12.0 AmbientModuleLab.AmbientLab.Tools.Hammer.LIMIT
 
     // `declare module "ambient-lab:runtime" { export = AmbientLabRuntime }`. Nothing puts the
     // namespace on `globalThis`, so a `[<Global>]` binding to it would read `undefined`.
-    equal "an `export =` namespace's members read through the specifier" "1.4.0" AmbientModuleLab.Exports.version
+    equal
+        "an `export =` namespace's members read through the specifier"
+        "1.4.0"
+        AmbientModuleLab.AmbientLab.Runtime.Exports.version
+
     check "and the namespace itself is no global" (emitJsExpr () "globalThis.AmbientLabRuntime === undefined")
 
 /// The entrypoint form: an `[<AbstractClass>]` under the specifier's import, which a consumer
@@ -525,7 +533,7 @@ let private entrypointClasses () =
     equal "the base constructor's assignment reads back off the instance" "vice" bench.label
     equal "and the JavaScript prototype carries the same value" "vice" (emitJsExpr bench "$0.label")
 
-    let payload = AmbientModuleLab.Exports.connect "socket"
+    let payload = AmbientModuleLab.AmbientLab.Sockets.Exports.connect "socket"
     equal "the override is what F# calls" "derived:vice:socket" (bench.run payload)
 
     equal
@@ -536,7 +544,7 @@ let private entrypointClasses () =
     // `class Snag extends Error`: the base is the compiler library's, and `Error` binds to `exn`,
     // so the class form carries `inherit exn` and F# sees an exception. `errorClasses` below is
     // where that is exercised; here it is the JavaScript object that is under test.
-    let snag = AmbientModuleLab.Exports.Snag "torn"
+    let snag = AmbientModuleLab.AmbientLab.Tools.Exports.Snag "torn"
     check "a class over a lib base is still the module's class" (emitJsExpr snag "$0 instanceof Error")
     equal "and its base constructor ran" "torn" snag.message
 
@@ -546,7 +554,7 @@ let private entrypointClasses () =
     equal "a global abstract class keeps its ParamObject Create" 9.0 anvil.mass
 
     let vise =
-        AmbientModuleLab.Vise.Create(2.0, 5.0, (fun (p: AmbientModuleLab.Payload) -> p.label))
+        AmbientModuleLab.AmbientLab.Tools.Vise.Create(2.0, 5.0, (fun (p: AmbientModuleLab.Payload) -> p.label))
 
     equal "and so does a class whose base this run declares" 2.0 vise.jaw
 
@@ -555,37 +563,37 @@ let private entrypointClasses () =
 /// `interface … with` are source constructs, and this type compiling is half of what the
 /// emission claims.
 type private Handled(label: string) =
-    inherit HookInterfaceLab.Station(label)
+    inherit HookInterfaceLab.HookLab.Runtime.Station(label)
 
     override this.run(signal) = $"run:{this.label}:{signal.label}"
 
-    interface HookInterfaceLab.Station.IFetchHandler with
+    interface HookInterfaceLab.HookLab.Runtime.Station.IFetchHandler with
         member this.fetch(signal) = $"fetch:{this.label}:{signal.label}"
 
 /// The negative of the same claim: a subclass providing no hook at all.
 type private Unhandled(label: string) =
-    inherit HookInterfaceLab.Station(label)
+    inherit HookInterfaceLab.HookLab.Runtime.Station(label)
 
     override this.run(signal) = $"run:{this.label}:{signal.label}"
 
 /// A subclass opting into both hooks, so a check can read what Fable emits for a class carrying
 /// more than one interface implementation at once.
 type private HandledBoth(label: string) =
-    inherit HookInterfaceLab.Station(label)
+    inherit HookInterfaceLab.HookLab.Runtime.Station(label)
 
     override this.run(signal) = $"run:{this.label}:{signal.label}"
 
-    interface HookInterfaceLab.Station.IFetchHandler with
+    interface HookInterfaceLab.HookLab.Runtime.Station.IFetchHandler with
         member this.fetch(signal) = $"fetch:{this.label}:{signal.label}"
 
-    interface HookInterfaceLab.Station.IAlarmHandler with
+    interface HookInterfaceLab.HookLab.Runtime.Station.IAlarmHandler with
         member this.alarm() = $"alarm:{this.label}"
 
 /// A hook whose interface carries its owner's type parameter.
 type private Forwarder(seed: string) =
-    inherit HookInterfaceLab.Relay<string>(seed)
+    inherit HookInterfaceLab.HookLab.Runtime.Relay<string>(seed)
 
-    interface HookInterfaceLab.Relay.IForwardHandler<string> with
+    interface HookInterfaceLab.HookLab.Runtime.Relay.IForwardHandler<string> with
         member _.forward value = $"forward:{value}"
 
 /// An optional method of an entrypoint class, emitted as an interface a subclass opts into. The
@@ -631,7 +639,7 @@ let private optionalHooks () =
     equal "and the base constructor's argument arrived" "seed" forwarder.seed
 
     let asData =
-        HookInterfaceLab.Station.IFetchHandler.Create(fun (s: HookInterfaceLab.Signal) -> s.label)
+        HookInterfaceLab.HookLab.Runtime.Station.IFetchHandler.Create(fun (s: HookInterfaceLab.Signal) -> s.label)
 
     equal
         "the hook interface's Create is the object literal a handler map is"
@@ -700,12 +708,15 @@ let private optionalHooks () =
         "and the class overriding an abstract base member emits that name too"
         (emitJsExpr unhandled "Object.getOwnPropertyNames(Object.getPrototypeOf($0)).indexOf(\"run\") >= 0")
 
-/// A class renamed by a name clash: its statics bind through the *export* name and are declared
-/// on the type the instance side took.
+/// A class sharing a global interface's name: it declares inside its specifier's module, and its
+/// statics bind through the export name onto that declaration.
 let private renamedStatics () =
-    equal "a renamed class's static reads off the selector its export name spells" 7.0 StaticsCollisionLab.Depot2.LIMIT
+    equal
+        "a specifier-scoped class's static reads off its export name"
+        7.0
+        StaticsCollisionLab.StaticsLab.Depot.Depot.LIMIT
 
-    let depot = StaticsCollisionLab.Depot2.``open`` "a"
+    let depot = StaticsCollisionLab.StaticsLab.Depot.Depot.``open`` "a"
     equal "and its static method reaches the same object" "a" depot.slot
 
 /// Wave six's remaining probe, over the hand-written forms in `Probes.fs` that no lab golden yet
@@ -713,7 +724,7 @@ let private renamedStatics () =
 /// onto `hook-interface-lab` and `nested-name-lab` once lanes AA and AD landed; see `optionalHooks`
 /// and `nestedNames` above.
 let private probes () =
-    let payload = AmbientModuleLab.Exports.connect "socket"
+    let payload = AmbientModuleLab.AmbientLab.Sockets.Exports.connect "socket"
 
     // Two forms `nested-name-lab` (lane AD) does not carry: a nested inline shape holding a field
     // of its own owner's type, and an import bound from inside the nested module rather than at
@@ -777,7 +788,7 @@ let private paramObjectOverloads () =
 /// what the flattened form could not reach. `Fault` inherits `exn`, so `Retry` is an F# exception
 /// and the checks below raise it.
 type private Retry(message: string) =
-    inherit ErrorClassLab.Fault(message)
+    inherit ErrorClassLab.ErrorLab.Faults.Fault(message)
 
     override this.describe(detail) = $"retry:{this.message}:{detail}"
 
@@ -789,12 +800,12 @@ let private errorClasses () =
 
     // The imported constructor's own instance, raised and caught by the type it was declared
     // under. `raise` typechecks because the binding derives `exn`, and the catch is a type test.
-    let imported = ErrorClassLab.Exports.Fault "torn"
+    let imported = ErrorClassLab.ErrorLab.Faults.Exports.Fault "torn"
 
     let caught =
         try
             raise imported
-        with :? ErrorClassLab.Fault as fault ->
+        with :? ErrorClassLab.ErrorLab.Faults.Fault as fault ->
             fault.message
 
     equal "an entrypoint class over Error is raised and caught by its own type" "torn" caught
@@ -805,7 +816,7 @@ let private errorClasses () =
     let byBase =
         try
             raise derived
-        with :? ErrorClassLab.Fault as fault ->
+        with :? ErrorClassLab.ErrorLab.Faults.Fault as fault ->
             fault.describe "twice"
 
     equal "and a consumer's subclass is caught as the base it derives" "retry:stalled:twice" byBase
@@ -815,7 +826,7 @@ let private errorClasses () =
             raise derived
         with
         | :? Retry as retry -> $"own:{retry.message}"
-        | :? ErrorClassLab.Fault -> "base"
+        | :? ErrorClassLab.ErrorLab.Faults.Fault -> "base"
 
     equal "the subclass's own type is what the narrower handler matches" "own:stalled" byOwnType
 
@@ -839,13 +850,13 @@ let private errorClasses () =
     // The negative: an entrypoint with no base inherits nothing, so it is a plain class. A
     // `raise` of it would not typecheck, which is the claim; what runs here is that the class
     // form still reaches its member.
-    let runner = ErrorClassLab.Exports.Runner "plain"
+    let runner = ErrorClassLab.ErrorLab.Faults.Exports.Runner "plain"
     equal "an entrypoint with no base is still the module's class" "base:plain:once" (runner.run "once")
     check "and is no exception" (emitJsExpr runner "!($0 instanceof Error)")
 
     // `Error` in a reference position now reads as `exn` rather than `obj`, so what comes back is
     // catchable without a cast.
-    let reason = ErrorClassLab.Exports.reason imported
+    let reason = ErrorClassLab.ErrorLab.Faults.Exports.reason imported
 
     equal
         "a returned Error is an exn the consumer can raise"
@@ -1930,9 +1941,9 @@ let private callableHybrids () =
     equal "and the one-argument arity" 4.0 (CallableHybridLab.Exports.multi 3.0)
 
     equal
-        "a hybrid whose overloads collided still calls the surviving arity"
+        "a hybrid whose overloads collided on their parameters calls the one function, under the union of their returns"
         30.0
-        (CallableHybridLab.Exports.ambiguous 3.0)
+        (unbox<float>(CallableHybridLab.Exports.ambiguous 3.0))
 
     equal
         "a call signature's own type parameter reaches through generically"
@@ -1948,6 +1959,36 @@ let private callableHybrids () =
         "a hybrid whose member is already named Invoke keeps the plain call"
         6.0
         (CallableHybridLab.Exports.collides 5.0)
+
+/// Export owners reach their own containers: the root ambient module, a subpath, a re-export
+/// alias and a mutable global each bind to their own JavaScript target, and a unioned or
+/// literal-separated overload still selects the one exported function.
+let private exportLayout () =
+    equal "the root module's export reaches the root runtime" "root:x" (LayoutLab.Exports.check "x")
+
+    equal
+        "a subpath's export of the same name reaches the subpath runtime"
+        "strict:x"
+        (LayoutLab.Strict.Exports.check "x")
+
+    equal "a renamed re-export reaches the root export" "root:x" (LayoutLab.Aliases.Exports.renamedCheck "x")
+    equal "the root value reads its own module" "root" LayoutLab.Exports.mode
+    equal "the subpath value reads its own module" "strict" LayoutLab.Strict.Exports.mode
+
+    LayoutLab.Globals.Exports.sharedFlag <- true
+    check "a mutable global writes through to globalThis" (emitJsExpr () "globalThis.sharedFlag === true")
+
+    equal
+        "a return-only overload pair is one member whose union carries what the function returns"
+        "x"
+        (unbox<string>(LayoutLab.Exports.pick "x"))
+
+    equal
+        "a literal-separated overload selects the one exported function"
+        "left"
+        (unbox<string>(LayoutLab.Exports.dispatch LayoutLab.Exports.Left))
+
+    equal "and so does its sibling" "right" (unbox<string>(LayoutLab.Exports.dispatch LayoutLab.Exports.Right))
 
 [<EntryPoint>]
 let main _ =
@@ -1982,6 +2023,7 @@ let main _ =
     recordIndex ()
     callableHybrids ()
     patternParameters ()
+    exportLayout ()
 
     match failures with
     | [] ->

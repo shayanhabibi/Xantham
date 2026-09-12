@@ -39,19 +39,6 @@ type Store =
     abstract read: key: string * ?options: ReadOptions<Store.Text> -> JS.Promise<string option>
     abstract read: key: string * ?options: ReadOptions<Store.Bytes> -> JS.Promise<Chunk option>
 
-module Store =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Bytes =
-        | [<CompiledName("bytes")>] Bytes
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Json =
-        | [<CompiledName("json")>] Json
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Text =
-        | [<CompiledName("text")>] Text
-
 /// <summary>
 /// Negative: one signature, so the literal separates nothing and widens to <c>string</c>.
 /// </summary>
@@ -86,18 +73,6 @@ type Choice =
     abstract pick: kind: Choice.Pick.Kind -> unit
     abstract pick: kind: Choice.Pick.Kind2 -> unit
 
-module Choice =
-    module Pick =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Kind =
-            | [<CompiledName("a")>] A
-            | [<CompiledName("b")>] B
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Kind2 =
-            | [<CompiledName("c")>] C
-            | [<CompiledName("d")>] D
-
 /// <summary>
 /// Negative: a collision no literal is party to, which drops an overload as it always did.
 /// </summary>
@@ -120,4 +95,44 @@ type Exports =
     /// so an exported function reaches deduplication widened. The second drops as <c>DO004</c>.
     /// </summary>
     [<Import("emit", "literal-overload-lab")>]
-    static member emit (kind: string) : unit = jsNative
+    static member emit (kind: Exports.Start) : unit = jsNative
+    /// <summary>
+    /// Negative: a literal tells these two apart, and retention reads the members of a declaration,
+    /// so an exported function reaches deduplication widened. The second drops as <c>DO004</c>.
+    /// </summary>
+    [<Import("emit", "literal-overload-lab")>]
+    static member emit (kind: Exports.Stop) : unit = jsNative
+
+module Choice =
+    module Pick =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Kind =
+            | [<CompiledName("a")>] A
+            | [<CompiledName("b")>] B
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Kind2 =
+            | [<CompiledName("c")>] C
+            | [<CompiledName("d")>] D
+
+module Exports =
+    [<StringEnum(CaseRules.None)>]
+    type Start =
+        | [<CompiledName("start")>] Start
+
+    [<StringEnum(CaseRules.None)>]
+    type Stop =
+        | [<CompiledName("stop")>] Stop
+
+module Store =
+    [<StringEnum(CaseRules.None)>]
+    type Bytes =
+        | [<CompiledName("bytes")>] Bytes
+
+    [<StringEnum(CaseRules.None)>]
+    type Json =
+        | [<CompiledName("json")>] Json
+
+    [<StringEnum(CaseRules.None)>]
+    type Text =
+        | [<CompiledName("text")>] Text

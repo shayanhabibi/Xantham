@@ -3,9 +3,9 @@
   "package": "@cloudflare/workers-types",
   "module": "Cloudflare.WorkersTypes",
   "counts": {
-    "exact": 238,
-    "ergonomic": 1069,
-    "widened": 369,
+    "exact": 410,
+    "ergonomic": 1070,
+    "widened": 370,
     "escape": 111
   },
   "passes": [
@@ -14,11 +14,6 @@
       "total": 8,
       "exact": 7,
       "escape": 1
-    },
-    {
-      "pass": "name-exports",
-      "total": 3,
-      "exact": 3
     },
     {
       "pass": "SY - synthesize-anonymous",
@@ -54,9 +49,9 @@
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 78,
+      "total": 75,
       "ergonomic": 38,
-      "widened": 39,
+      "widened": 36,
       "escape": 1
     },
     {

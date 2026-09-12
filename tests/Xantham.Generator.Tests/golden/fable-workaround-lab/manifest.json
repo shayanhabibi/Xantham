@@ -3,7 +3,7 @@
   "package": "fable-workaround-lab",
   "module": "FableWorkaroundLab",
   "counts": {
-    "exact": 8,
+    "exact": 9,
     "ergonomic": 7,
     "widened": 0,
     "escape": 0

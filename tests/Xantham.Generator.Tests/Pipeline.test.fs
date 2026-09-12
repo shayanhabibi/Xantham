@@ -1,4 +1,4 @@
-/// End-to-end against the live compiler: fixtures through the whole pipeline, diffed against
+﻿/// End-to-end against the live compiler: fixtures through the whole pipeline, diffed against
 /// the committed goldens, plus the run-twice determinism property.
 ///
 /// The npm fixture packages are installed and therefore untracked: a linked worktree carries
@@ -14,6 +14,7 @@ open System.Text.Json
 open Expecto
 open Xantham.TypeScript.Wire
 open Xantham.Generator
+open Xantham.Generator.Measure
 
 let private required =
     match Environment.GetEnvironmentVariable "XANTHAM_REQUIRE_TSC" with
@@ -84,15 +85,19 @@ let private inheritsOf (source: string) (name: string) =
     match
         lines
         |> Array.tryFindIndex (fun line ->
-            line.StartsWith $"type {name} ="
-            || line.StartsWith $"type {name}<"
-            || line.StartsWith $"type {name} (")
+            let trimmed = line.TrimStart()
+
+            trimmed.StartsWith $"type {name} ="
+            || trimmed.StartsWith $"type {name}<"
+            || trimmed.StartsWith $"type {name} (")
     with
     | None -> failtest $"no declaration named {name} in the rendered source"
     | Some start ->
+        let indent = lines[start].Length - lines[start].TrimStart().Length
+
         lines
         |> Array.skip (start + 1)
-        |> Array.takeWhile (fun line -> line.StartsWith "    ")
+        |> Array.takeWhile (fun line -> line.Length > indent && line.StartsWith(String.replicate (indent + 1) " "))
         |> Array.choose (fun line ->
             let trimmed = line.Trim()
 
@@ -101,6 +106,31 @@ let private inheritsOf (source: string) (name: string) =
             else
                 None)
         |> List.ofArray
+
+/// The body of a `module Name =` block: every line more indented than the header, dedented text
+/// unchanged. Scopes an assertion to one specifier module regardless of how deeply it nests.
+let private moduleBodyOf (source: string) (name: string) =
+    let lines = source.Replace("\r\n", "\n").Split '\n'
+    let header = $"module {name} ="
+
+    match lines |> Array.tryFindIndex (fun line -> line.TrimStart() = header) with
+    | None -> failtest $"no module named {name} in the rendered source"
+    | Some start ->
+        let indent = lines[start].Length - lines[start].TrimStart().Length
+
+        lines
+        |> Array.skip (start + 1)
+        |> Array.takeWhile (fun line ->
+            String.IsNullOrWhiteSpace line || line.Length - line.TrimStart().Length > indent)
+        |> String.concat "\n"
+
+/// The doc comment line immediately above a declaration line, trimmed.
+let private summaryBefore (source: string) (declaration: string) =
+    let lines = source.Replace("\r\n", "\n").Split '\n'
+
+    match lines |> Array.tryFindIndex (fun line -> line.TrimStart() = declaration) with
+    | None -> failtest $"no line \"{declaration}\" in the rendered source"
+    | Some idx -> lines[idx - 1].Trim()
 
 /// The absence facts a site carries: whether it was written with a `?` marker, and the
 /// spellings its hoist to `option` reported. TypeScript writes absence five ways and F# has
@@ -398,7 +428,7 @@ let configTests =
             withConfig """{ "lib": ["esnext", "webworker"], /* comment */ "groups": { "typescript/lib": "reference" } }"""
             <| fun config ->
                 Expect.equal config.Lib (Some [ "esnext"; "webworker" ]) "lib carried through in order"
-                Expect.equal (Map.find "typescript/lib" config.Groups) Reference "groups still parsed beside it"
+                Expect.equal (Map.find ("typescript/lib" * uom<npmDependency>) config.Groups) Reference "groups still parsed beside it"
 
         testCase "lib that is not an array of strings is an error, not a silent default" <| fun _ ->
             Expect.throws (fun () -> withConfig """{ "lib": "esnext" }""" ignore) "a bare string is refused"
@@ -410,22 +440,22 @@ let configTests =
             <| fun config -> Expect.equal config.RuntimePackage (Some "three") "the key round-trips"
 
         testCase "the derived runtime package is DefinitelyTyped's own naming convention" <| fun _ ->
-            let derived = GeneratorConfig.derivedRuntimePackage
+            let derived = (fun s -> s * uom<npmDependency>) >> GeneratorConfig.derivedRuntimePackage
 
             // The types are published under `@types/`; the code is not published there at all.
-            Expect.equal (derived "@types/three") "three" "an unscoped package loses the prefix"
+            Expect.equal (derived "@types/three") ("three" * uom<importSpecifier>) "an unscoped package loses the prefix"
 
             // DefinitelyTyped publishes one flat `@types` scope, so it folds a scoped package's
             // own scope into the name with a double underscore. Unfolding it is the only way a
             // scoped package's runtime name is recoverable: nothing in a DT manifest states it.
-            Expect.equal (derived "@types/babel__core") "@babel/core" "a scope-mangled name unfolds"
-            Expect.equal (derived "@types/babel__plugin-transform-react-jsx") "@babel/plugin-transform-react-jsx" "hyphens are untouched"
+            Expect.equal (derived "@types/babel__core") ("@babel/core" * uom<importSpecifier>) "a scope-mangled name unfolds"
+            Expect.equal (derived "@types/babel__plugin-transform-react-jsx") ("@babel/plugin-transform-react-jsx" * uom<importSpecifier>) "hyphens are untouched"
 
             // Everything that is its own runtime keeps its own name, which is every rung of the
             // corpus - a scoped package included, since only the `@types` scope means this.
-            Expect.equal (derived "three") "three" "an ordinary package is unchanged"
-            Expect.equal (derived "@cloudflare/workers-types") "@cloudflare/workers-types" "another scope is not @types"
-            Expect.equal (derived "phase-b-lab") "phase-b-lab" "and so is a lab"
+            Expect.equal (derived "three") ("three" * uom<importSpecifier>) "an ordinary package is unchanged"
+            Expect.equal (derived "@cloudflare/workers-types") ("@cloudflare/workers-types" * uom<importSpecifier>) "another scope is not @types"
+            Expect.equal (derived "phase-b-lab") ("phase-b-lab" * uom<importSpecifier>) "and so is a lab"
 
         // Wave five, lane R. A group's value is a string for the dispositions that need no
         // detail, and an object for the one that does: a mapped group has to say which name
@@ -444,10 +474,10 @@ let configTests =
                     }
                 }"""
             <| fun config ->
-                Expect.equal (Map.find "typescript/lib" config.Groups) Reference "a string group is unchanged"
+                Expect.equal (Map.find ("typescript/lib" * uom<npmDependency>) config.Groups) Reference "a string group is unchanged"
 
                 Expect.equal
-                    (Map.find "@types/node" config.Groups)
+                    (Map.find ("@types/node" * uom<npmDependency>) config.Groups)
                     (GroupDisposition.Map(
                         Map.ofList
                             [
@@ -479,8 +509,8 @@ let configTests =
                 { GeneratorConfig.Default with
                     RuntimePackage = Some "not-derivable" }
 
-            Expect.equal (GeneratorConfig.runtimePackage config "@types/three") "not-derivable" "config decides"
-            Expect.equal (GeneratorConfig.runtimePackage GeneratorConfig.Default "@types/three") "three" "unset derives"
+            Expect.equal (GeneratorConfig.runtimePackage config ("@types/three" * uom<npmDependency>)) ("not-derivable" * uom<importSpecifier>) "config decides"
+            Expect.equal (GeneratorConfig.runtimePackage GeneratorConfig.Default ("@types/three" * uom<npmDependency>)) ("three" * uom<importSpecifier>) "unset derives"
     ]
 
 /// Wave five, lane R: the `map` disposition, generated under the lab's own `xantham.json`.
@@ -504,7 +534,7 @@ let pipelineTests =
                   testCase "a reference disposition templates lib types instead of widening" <| fun _ ->
                       let config =
                           { GeneratorConfig.Default with
-                              Groups = Map.ofList [ "typescript/lib", Reference ] }
+                              Groups = Map.ofList [ "typescript/lib" * uom<npmDependency>, Reference ] }
 
                       let rendered = Async.RunSynchronously(Pipeline.generate config package)
                       let source = rendered.Files |> List.find (fst >> (=) "AnsiRegex.fs") |> snd
@@ -653,20 +683,23 @@ let pipelineTests =
                     Expect.isFalse (source.Contains "[<Global(\"Shapes\")>]") "one with only types is not"
 
                   // Wave seven lane AI, item 3. `AmbientLabRuntime.Session` and the top-level
-                  // `Session` are two declarations of one name, and the namespace is what
-                  // separates them.
+                  // `Session` are two declarations of one name. `AmbientLabRuntime` is exported
+                  // as `ambient-lab:runtime`'s body (`export =`), so the specifier it groups
+                  // under is what separates them, ahead of the namespace it is also written in.
                   testCase "a namespaced declaration nests rather than taking a number" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                     let source = rendered.Files |> List.head |> snd
 
-                    Expect.stringContains source "module AmbientLabRuntime =" "the namespace opens a module"
+                    Expect.stringContains source "module Runtime =" "its specifier opens a module"
 
                     Expect.stringContains
                         source
-                        "static member Session (label: string) : AmbientLabRuntime.Session"
+                        "static member Session (label: string) : Session"
                         "and the constructor hands back the nested declaration"
 
-                    Expect.isFalse (source.Contains "Session2") "so neither declaration takes a suffix"
+                    let runtime = moduleBodyOf source "Runtime"
+                    Expect.stringContains runtime "type Session =" "the nested declaration keeps its plain name"
+                    Expect.isFalse (runtime.Contains "Session2") "so neither declaration takes a suffix"
 
                   testCase "a class an ambient module exports to be derived from is an F# class" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -709,7 +742,10 @@ let pipelineTests =
                         |> List.filter (fun finding -> finding.Key = "SC008")
                         |> List.map _.Symbol
 
-                    Expect.equal refused [ "Vise" ] "a base this run declares is the one refusal the lab reaches"
+                    Expect.equal
+                        refused
+                        [ "AmbientLab.Tools.Vise" ]
+                        "a base this run declares is the one refusal the lab reaches"
 
                   testCase "a wildcard specifier and an empty module are escapes" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -720,7 +756,63 @@ let pipelineTests =
                         |> List.map (fun finding -> finding.Key, finding.Symbol)
 
                     Expect.contains harvest ("HG005", "\"ambient-lab:*\"") "a wildcard names no importable module"
-                    Expect.contains harvest ("HG001", "\"ambient-lab:empty\"") "a module exporting nothing is still dropped" ])
+                    Expect.contains harvest ("HG001", "\"ambient-lab:empty\"") "a module exporting nothing is still dropped"
+
+                  // Specifier-scoped modules: `ambient-lab:lab` and its nested `ambient-lab:lab/promises`
+                  // each declare a `Session` class and a `Constants` interface under the same name, so
+                  // nesting rather than a numeric suffix is what keeps them apart.
+                  testCase "same-named types in different specifier modules nest instead of taking a number" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.isFalse (source.Contains "Session2") "the lab specifier module's Session needs no suffix"
+                    Expect.isFalse (source.Contains "Session3") "the nested promises specifier module's Session needs no suffix"
+                    Expect.isFalse (source.Contains "Constants2") "the lab specifier module's Constants needs no suffix"
+
+                    let lab = moduleBodyOf source "Lab"
+                    Expect.stringContains lab "type Session =" "Lab nests its own Session"
+                    Expect.stringContains lab "type Constants =" "Lab nests its own Constants"
+
+                    let promises = moduleBodyOf source "Promises"
+                    Expect.stringContains promises "type Session =" "Lab.Promises nests a Session distinct from Lab's"
+                    Expect.stringContains promises "type Constants =" "Lab.Promises nests a Constants distinct from Lab's"
+
+                  testCase "a signature referencing another specifier module's export spells it fully qualified" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    // `describe` takes `ambient-lab:lab`'s `Session`, not `ambient-lab:lab/promises`'s
+                    // own same-named type, so the parameter needs the qualified path from the root
+                    // rather than the bare name its own module shadows.
+                    Expect.stringContains
+                        source
+                        "static member describe (session: Lab.Session) : string = jsNative"
+                        "a cross-module reference is qualified relative to the root module"
+
+                  testCase "each specifier module documents the specifier it groups" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    let labSummary = summaryBefore source "module Lab ="
+                    Expect.stringContains labSummary "ambient-lab:lab" "the summary names the exact specifier"
+                    Expect.isFalse (labSummary.Contains "\n") "the summary is one line"
+
+                    let promisesSummary = summaryBefore source "module Promises ="
+                    Expect.stringContains promisesSummary "ambient-lab:lab/promises" "the nested specifier's summary names its own specifier"
+                    Expect.isFalse (promisesSummary.Contains "\n") "the summary is one line"
+
+                  testCase "root globals render before any specifier module" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    // `Anvil`'s companion `Create` is the last root global this fixture declares.
+                    let lastRootGlobal = source.IndexOf "[<Global(\"Anvil\"); EmitConstructor>]"
+                    let firstSpecifierModule = source.IndexOf "module Lab ="
+
+                    Expect.isGreaterThan lastRootGlobal 0 "the root global companion is in the rendered source"
+                    Expect.isGreaterThan firstSpecifierModule 0 "the specifier module is in the rendered source"
+                    Expect.isLessThan lastRootGlobal firstSpecifierModule "every root global renders before the first specifier module" ])
+                
 
         yield!
             fixtureTests "error-class-lab" (handFixture "error-class-lab") GeneratorConfig.Default (fun package ->
@@ -753,8 +845,10 @@ let pipelineTests =
                     Expect.equal
                         raised
                         [
-                            "Fault", "entrypoint class derives from Error as exn; a consumer raises it and catches it by type"
-                            "Halt", "entrypoint class derives from Error as exn; a consumer raises it and catches it by type"
+                            "ErrorLab.Faults.Fault",
+                            "entrypoint class derives from Error as exn; a consumer raises it and catches it by type"
+                            "ErrorLab.Faults.Halt",
+                            "entrypoint class derives from Error as exn; a consumer raises it and catches it by type"
                         ]
                         "and each one is reported under the TypeScript base it was mapped from"
 
@@ -1155,11 +1249,11 @@ let pipelineTests =
                              |> List.filter (fun finding -> finding.Key = "TR058")
                              |> List.map (fun finding -> finding.Symbol, finding.Message)
                              |> List.sort)
-                            [ "Reduced",
+                            [ "Exports.reduced",
+                              "'then' collides across the intersection's operands and TypeScript reduces the whole type to never; the operand that does not mark 'then' nullable is the type"
+                              "Reduced",
                               "'then' collides across the intersection's operands and TypeScript reduces the whole type to never; the operand that does not mark 'then' nullable is the type"
                               "Timer.then(callback)(self)",
-                              "'then' collides across the intersection's operands and TypeScript reduces the whole type to never; the operand that does not mark 'then' nullable is the type"
-                              "reduced",
                               "'then' collides across the intersection's operands and TypeScript reduces the whole type to never; the operand that does not mark 'then' nullable is the type" ]
                             "the alias, its use and the member position are each owned once"
 
@@ -1522,8 +1616,13 @@ let pipelineTests =
 
                     Expect.isTrue
                         (rendered.Findings
-                         |> List.exists (fun f -> f.Symbol.StartsWith "values" && f.Tier = Widened))
-                        "and the widening is recorded"
+                         |> List.exists (fun f -> f.Symbol = "Exports.values()" && f.Tier = Widened))
+                        "and the widening is recorded against the member"
+
+                    Expect.contains
+                        (Render.symbolTiers rendered |> List.map (fun (name, tier, _) -> name, tier))
+                        ("Exports.values", Widened)
+                        "so the member's manifest row grades widened"
 
                   testCase "a type-level computation over an open operand emits an erased phantom" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -1828,7 +1927,16 @@ let pipelineTests =
 
                           Expect.stringContains source "module rec Fable.Core.TS" "the configured root owns the combined file"
                           Expect.stringContains source "[<AutoOpen>]\nmodule Browser =" "the configured DOM child keeps its own opening policy"
-                          Expect.stringContains source "Fable.Core.TS.Browser." "compiler-library references use the configured fully qualified family" ])
+                          Expect.stringContains source "Fable.Core.TS.Browser." "compiler-library references use the configured fully qualified family"
+
+                      testCase "symbols report compiler libs without a platform rid" <| fun _ ->
+                          let rendered =
+                              Async.RunSynchronously(Pipeline.generate (handConfig (handFixture "lib-ship-lab")) package)
+
+                          let symbols = rendered.Files |> List.find (fun (path, _) -> path = "symbols.jsonl") |> snd
+
+                          Expect.isFalse (symbols.Contains "@typescript/typescript-") "rid stripped"
+                          Expect.stringContains symbols "node_modules/typescript/lib/" "neutral path" ])
 
         yield!
             fixtureTests
@@ -2280,7 +2388,7 @@ let pipelineTests =
                       // land in - `never` is the only branch this drops.
                       Expect.equal
                           deferred
-                          [ "Divergent"; "OrUndefined"; "divergent(value)" ]
+                          [ "Divergent"; "Exports.divergent(value)"; "OrUndefined" ]
                           "both divergent pairs and the use site of one"
 
                       Expect.isEmpty
@@ -2600,34 +2708,39 @@ let pipelineTests =
 
                       testCase "the alphabet reads the same at return and parameter positions" <| fun _ ->
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
-
-                          Expect.equal (absenceAt rendered "getOrNull()") (false, [ "fromNull" ]) "the KV miss"
+                          // An export member's findings carry its container-qualified name, the
+                          // same name as its manifest row.
+                          Expect.equal (absenceAt rendered "Exports.getOrNull()") (false, [ "fromNull" ]) "the KV miss"
 
                           Expect.equal
-                              (absenceAt rendered "getOrUndefined()")
+                              (absenceAt rendered "Exports.getOrUndefined()")
                               (false, [ "fromUndefined" ])
                               "the Durable Object storage miss"
 
                           Expect.equal
-                              (absenceAt rendered "voidOrValue()")
+                              (absenceAt rendered "Exports.voidOrValue()")
                               (false, [ "fromVoid" ])
                               "void inside a union hoists like the other two"
 
-                          Expect.equal (absenceAt rendered "fireAndForget") (false, []) "a void return, again"
+                          Expect.equal (absenceAt rendered "Exports.fireAndForget") (false, []) "a void return, again"
 
                           // Wave seven, lane AG: the `?` marker reads the same at a parameter as
                           // at a property. The checker leaves it off the parameter symbol, so the
                           // resolve tier follows the symbol's declaration handle into the blob and
                           // reads the token there.
                           Expect.equal
-                              (absenceAt rendered "withOptional(fallback)")
+                              (absenceAt rendered "Exports.withOptional(fallback)")
                               (true, [ "fromUndefined" ])
                               "an optional parameter reports its ? marker beside its hoist"
 
                           Expect.equal
-                              (absenceAt rendered "withNullable(fallback)")
+                              (absenceAt rendered "Exports.withNullable(fallback)")
                               (false, [ "fromNull" ])
                               "and a nullable parameter reports only its spelling"
+
+                          Expect.isFalse
+                              (rendered.Findings |> List.exists (fun f -> f.Symbol.StartsWith "entry."))
+                              "the owner-tagged pseudo-symbol is retired"
 
                       testCase "all five shapes render as the same two F# forms" <| fun _ ->
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -2867,15 +2980,20 @@ let pipelineTests =
 
                           Expect.equal
                               (symbolsOf "MB005")
-                              [ "Relay.forward"; "Station.alarm"; "Station.fetch" ]
+                              [ "HookLab.Runtime.Relay.forward"; "HookLab.Runtime.Station.alarm"; "HookLab.Runtime.Station.fetch" ]
                               "one finding per hook, at the member it was declared as"
 
                           let options = symbolsOf "MB003"
-                          Expect.contains options "Station.tag" "the optional data member still reports as an option"
+
+                          Expect.contains
+                              options
+                              "HookLab.Runtime.Station.tag"
+                              "the optional data member still reports as an option"
+
                           Expect.contains options "Listener.ping" "and so does a plain interface's optional method"
 
                           Expect.isFalse
-                              (options |> List.exists (fun symbol -> symbol = "Station.fetch"))
+                              (options |> List.exists (fun symbol -> symbol = "HookLab.Runtime.Station.fetch"))
                               "a hook is reported once, as a hook" ])
 
         // Wave six lane AA's second fixture. `shape-classes` keys its statics side table by the
@@ -2890,27 +3008,34 @@ let pipelineTests =
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                           let source = rendered.Files |> List.head |> snd
 
-                          let declaration (name: string) =
-                              let start = source.IndexOf $"type {name} ="
+                          let declaration (body: string) (name: string) =
+                              let start = body.IndexOf $"type {name} ="
                               Expect.isGreaterThan start -1 $"{name} is declared"
 
-                              let next =
-                                  source.IndexOf("\ntype ", start + 1) |> fun i -> if i < 0 then source.Length else i
+                              let boundary (marker: string) =
+                                  body.IndexOf(marker, start + 1) |> fun i -> if i < 0 then body.Length else i
 
-                              source.Substring(start, next - start)
+                              let next = min (boundary "\ntype ") (boundary "\nmodule ")
+
+                              body.Substring(start, next - start)
+
+                          // The exported class shares its bare name with the global interface, so
+                          // its declaration is only reachable through the specifier module it now
+                          // nests under.
+                          let nested = moduleBodyOf source "Depot"
 
                           Expect.stringContains
-                              (declaration "Depot2")
+                              (declaration nested "Depot")
                               "static member LIMIT"
                               "the static reaches the declaration the class's instance side took"
 
                           Expect.stringContains
-                              (declaration "Depot2")
+                              (declaration nested "Depot")
                               "static member ``open``"
                               "and so does the static method"
 
                           Expect.isFalse
-                              ((declaration "Depot").Contains "LIMIT")
+                              ((declaration source "Depot").Contains "LIMIT")
                               "the global interface that kept the export name carries none of them" ])
 
         // Wave seven lane AF's fixture. A string-literal parameter type is what tells an overload
@@ -3015,24 +3140,25 @@ let pipelineTests =
                               (source.Contains "Blend.Pick")
                               "and neither arm-set earns a declaration"
 
-                      // Wave eight lane AO, item 3. Retention reads a declaration's members, and
-                      // an exported function has none, so a literal that would have separated the
-                      // set at a member position separates nothing here.
-                      testCase "an exported function's overloads reach deduplication widened" <| fun _ ->
+                      // An exported function's overloads separate on a literal parameter the same way
+                      // a member's do, under the container that binds them.
+                      testCase "an exported function's overloads keep the literal that separates them" <| fun _ ->
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                           let source = rendered.Files |> List.head |> snd
 
                           Expect.stringContains
                               source
-                              "static member emit (kind: string) : unit"
-                              "the literal widens at the exported position"
+                              "static member emit (kind: Exports.Start) : unit"
+                              "the literal is kept at the exported position"
 
-                          Expect.equal
-                              (rendered.Findings
-                               |> List.filter (fun finding -> finding.Key = "DO004")
-                               |> List.map _.Symbol)
-                              [ "emit" ]
-                              "and the drop reports as an export-function loss rather than DO001"
+                          Expect.stringContains
+                              source
+                              "static member emit (kind: Exports.Stop) : unit"
+                              "and the second overload keeps its own literal"
+
+                          Expect.isEmpty
+                              (rendered.Findings |> List.filter (fun finding -> finding.Key = "DO004"))
+                              "nothing is dropped"
 
                       testCase "the findings say which literals were kept and which overload sets they separate"
                       <| fun _ ->
@@ -3045,11 +3171,11 @@ let pipelineTests =
                               |> List.distinct
                               |> List.sort
 
-                          Expect.equal (symbolsOf "DO002") [ "Store.read" ] "one finding per overload set a literal separates"
+                          Expect.equal (symbolsOf "DO002") [ "Exports.emit"; "Store.read" ] "one finding per overload set a literal separates"
 
                           Expect.equal
                               (symbolsOf "TR056")
-                              [ "Store.read(kind)"; "Store.read(options)" ]
+                              [ "Exports.emit(kind)"; "Store.read(kind)"; "Store.read(options)" ]
                               "and one per position the literal is kept at"
 
                           Expect.equal
@@ -3129,12 +3255,12 @@ let pipelineTests =
 
                           Expect.equal
                               (symbolsOf "MB001")
-                              [ "Station.marked(b)"; "marked(b)"; "markedAny(b)" ]
+                              [ "Exports.marked(b)"; "Exports.markedAny(b)"; "Station.marked(b)" ]
                               "every ? in the fixture, at a bare function and at a method"
 
                           Expect.equal
                               (symbolsOf "MB006")
-                              [ "Station.unioned(b)"; "unioned(b)" ]
+                              [ "Exports.unioned(b)"; "Station.unioned(b)" ]
                               "and the parameters whose type admits undefined without one"
 
                       testCase "a required parameter carries neither finding" <| fun _ ->
@@ -3654,7 +3780,7 @@ let pipelineTests =
                               (rendered.Findings
                                |> List.filter (fun finding -> finding.Message.Contains "not among the generated")
                                |> List.map _.Symbol)
-                              [ "Panel.widget"; "Panel.boxed"; "Panel.pair"; "mount(widget)"; "mount()" ]
+                              [ "Panel.widget"; "Panel.boxed"; "Panel.pair"; "Exports.mount(widget)"; "Exports.mount()" ]
                               "every reference into the dependency is a widening with a name" ])
 
         // Wave five lane S (O7's `ship` disposition). Two dependencies are installed beside the
@@ -3859,7 +3985,7 @@ let pipelineTests =
 
                           Expect.equal
                               (declarationsIn rendered)
-                              [ "Panel"; "PanelPair"; "Draft.Panel"; "Exports" ]
+                              [ "Panel"; "PanelPair"; "Exports"; "Draft.Panel" ]
                               "and the dependency's shape is not re-derived under a second name"
 
                       testCase "the entry package's own alias over an object literal is declared here" <| fun _ ->
@@ -4055,7 +4181,7 @@ let pipelineTests =
                            |> List.filter (fun f -> f.Key = "TR020")
                            |> List.map _.Symbol
                            |> List.sort)
-                          [ "Feed.take(event)"; "runModel()"; "runModel(input)" ]
+                          [ "Exports.runModel()"; "Exports.runModel(input)"; "Feed.take(event)" ]
                           "and these three are the only accesses left widened" ])
 
         // Wave thirteen lane CH. A pure index signature reached anonymously resolves
@@ -4309,7 +4435,47 @@ let pipelineTests =
                             source
                             "| [<CompiledName(\"ok\")>] Ok of value: string"
                             "the generic arm's members were read after it was met as a reference" ])
+        yield!
+            fixtureTests "export-layout-lab" (handFixture "export-layout-lab") GeneratorConfig.Default <| fun package -> [
+                testCase "Nested modules are created for exported values" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+                    Expect.stringContains source "module Strict" "the nested module Strict for `(layout-lab/strict).mode` is created"
+                    Expect.stringContains source "module Aliases" "the nested module Aliases for `(layout-lab/aliases).renamedCheck` is created"
+            ]
+        yield!
+            fixtureTests "single-case-enum-lab" (handFixture "single-case-enum-lab") GeneratorConfig.Default (fun package -> [
+                testCase "a single-case string enum is not RequireQualifiedAccess" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+                    Expect.stringContains source "    [<StringEnum(CaseRules.None)>]\n    type Fast =" "single case drops RQA"
+                    Expect.stringContains source "[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]\ntype Level =" "multi case keeps RQA"
+                    Expect.stringContains source "    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]\n    type Ok =" "reserved case keeps RQA"
+                    Expect.stringContains source "    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]\n    type Error =" "reserved case keeps RQA"
+                testCase "a reserved single case records LU002" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let symbols = rendered.Files |> List.find (fst >> (=) "symbols.jsonl") |> snd
+                    Expect.stringContains symbols "\"key\":\"LU002\"" "finding recorded" ])
+        yield!
+            fixtureTests "auto-open-exports-lab" (handFixture "auto-open-exports-lab") { GeneratorConfig.Default with AutoOpenExports = true } (fun package ->
+                [ testCase "autoOpenExports marks the generated Exports type AutoOpen" <| fun _ ->
+                    let config =
+                        { GeneratorConfig.Default with
+                            AutoOpenExports = true }
 
+                    let rendered = Async.RunSynchronously(Pipeline.generate config package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.stringContains
+                        source
+                        "[<AutoOpen>]\n[<Erase>]\ntype"
+                        "the flag prepends [<AutoOpen>] on the Exports type, before [<Erase>]"
+
+                  testCase "autoOpenExports defaults to false, leaving Exports unmarked" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.isFalse (source.Contains "[<AutoOpen>]") "the default config emits no [<AutoOpen>]" ])
     ]
 
 [<Tests>]
@@ -4317,4 +4483,43 @@ let typeOnlyExportTests =
     testList "type-only export fixture" [
         yield! fixtureTests "type-only-export-lab" (handFixture "type-only-export-lab")
             (handConfig (handFixture "type-only-export-lab")) (fun _ -> [])
+    ]
+
+[<Tests>]
+let staticReexportTests =
+    testList "static re-export fixture" [
+        yield!
+            fixtureTests "static-reexport-lab" (handFixture "static-reexport-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a re-exported class emits each static once" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    // The collapse keeps the first harvested export path, "node:static-reexport-lab".
+                    let hits =
+                        System.Text.RegularExpressions.Regex.Matches(
+                            source,
+                            "static member exportChallenge \\(spkac: string\\)"
+                        )
+                            .Count
+
+                    Expect.equal hits 1 "one static for the string overload"
+
+                    Expect.stringContains
+                        source
+                        "[<Import(\"Certificate.exportChallenge\", \"node:static-reexport-lab\")>]"
+                        "the first export path in harvest order wins"
+
+                    Expect.isFalse
+                        (source.Contains "[<Import(\"Certificate.exportChallenge\", \"static-reexport-lab\")>]")
+                        "the alias path collapsed"
+
+                  testCase "the collapsed path records SC010 exactly once" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let symbols = rendered.Files |> List.find (fst >> (=) "symbols.jsonl") |> snd
+
+                      let hits =
+                          System.Text.RegularExpressions.Regex.Matches(symbols, "\"key\":\"SC010\"").Count
+
+                      Expect.equal hits 1 "one collapsed path"
+                      Expect.stringContains symbols "\"static-reexport-lab\"" "names the collapsed specifier" ])
     ]

@@ -1,4 +1,4 @@
-#r "nuget: Partas.Build, 0.4.0-alpha.3"
+﻿#r "nuget: Partas.Build, 0.4.0-alpha.3"
 #r "nuget: Partas.TypeProvider.BuildHelper, 0.2.5"
 #r "nuget: Str"
 #r "nuget: Fake.IO.FileSystem"
@@ -63,6 +63,7 @@ module Spec =
                     "Xantham.TypeScript.Wire"
                     "Xantham.Fable.Core"
                     "Xantham.Fable.Core.TS"
+                    "Xantham.Fable.Node"
                     "Xantham.Cli"
                 ]
 
@@ -107,7 +108,7 @@ module Options =
 
     let skipTests =
         Input.option<bool> "--skip-tests" |> Input.description "Skip running tests"
-    
+
     type Generate =
         | Ast
         | Proto
@@ -118,21 +119,22 @@ module Options =
 
     let generateOnly =
         Input.optionMaybe<Generate> "--only"
-        |> Input.mapFromAmong [
-            "ast", Some Ast
-            "proto", Some Proto
-            "session", Some Session
-            "schema", Some Schema
-            "compiler-lib", Some CompilerLib
-            "node-lib", Some NodeLib
-        ]
+        |> Input.mapFromAmong
+            [
+                "ast", Some Ast
+                "proto", Some Proto
+                "session", Some Session
+                "schema", Some Schema
+                "compiler-lib", Some CompilerLib
+                "node-lib", Some NodeLib
+            ]
         |> Input.description
             "Limit generation to one layer: ast | proto | session | schema | compiler-lib | node-lib. The first four by default."
 
-    /// The generator's inner loop, in three flags. An agent iterating on a pass runs
-    /// `test --quick --update --no-run-gate` until the Expecto suite is green, then drops all
-    /// three for the full gate before it commits. Each flag removes a step that is real safety
-    /// on the way out and pure latency on the way in.
+    /// The generator's inner loop. An agent iterating on a pass runs `test --quick --update`
+    /// until the Expecto suite is green, then runs `test --run-gate` for the full gate before it
+    /// commits. The run gate is opt-in because it is much the slowest step and proves runtime
+    /// behaviour the compile gate and the suites already bound.
     let updateGoldens =
         Input.option<bool> "--update"
         |> Input.alias "-u"
@@ -146,10 +148,10 @@ module Options =
             "Run only tests whose name matches, e.g. --filter \"generator e2e\". Every test by default."
         |> Input.def ""
 
-    let skipRunGate =
-        Input.option<bool> "--no-run-gate"
+    let runGate =
+        Input.option<bool> "--run-gate"
         |> Input.description
-            "Skip the Fable run gate, much the slowest step. The compile gate and the Expecto suites still run."
+            "Also run the Fable run gate, much the slowest step. Required before a commit that touches a golden."
         |> Input.def false
 
     /// `findings` reads the manifests, which is the only part of a large fixture worth reading:
@@ -238,6 +240,7 @@ module Stages =
     let docs =
         input {
             let! watch = Options.watch
+
             and! buildStage =
                 build (
                     Spec.srcProjects
@@ -313,7 +316,8 @@ module Stages =
                     }
                     // Named rather than excluded, so a third layer does not turn `--only` into a list of
                     // everything it is not.
-                    let wanted layer = only.IsNone || only |> Option.contains layer
+                    let wanted layer =
+                        only.IsNone || only |> Option.contains layer
 
                     stage "generate ast" {
                         when' (wanted Options.Ast)
@@ -360,7 +364,9 @@ module Stages =
                     // opt in explicitly so ordinary generated-layer runs do not rewrite it.
                     stage "generate node-lib" {
                         when' (only |> Option.contains Options.NodeLib)
-                        run "dotnet run --project src/Xantham.Cli -- generate node_modules/@types/node -o src/Xantham.Fable.Node --config src/Xantham.Fable.Node/xantham.json"
+
+                        run
+                            "dotnet run --project src/Xantham.Cli -- generate node_modules/@types/node -o src/Xantham.Fable.Node --config src/Xantham.Fable.Node/xantham.json"
                     }
                 }
         }
@@ -380,16 +386,38 @@ module Stages =
             and! config = Options.config
             and! update = Options.updateGoldens
             and! filter = Options.testFilter
-            and! skipRunGate = Options.skipRunGate
+            and! runGate = Options.runGate
 
+            // Each test project is an Expecto console app and runs as its built executable, with
+            // output streamed as written. `--filter` is Expecto's own hint: a substring of the full test name.
             // `cmd` quotes each interpolation hole as one argument, so the flag and its value
-            // have to be part of the format string rather than a pre-baked `" --filter ..."`
-            // hole - that arrives as a single argument and MSBuild rejects it as one switch.
-            let suite =
-                if System.String.IsNullOrWhiteSpace filter then
-                    cmd $"dotnet test {Repo.Project.SolutionFile} -c {config} --no-build"
-                else
-                    cmd $"dotnet test {Repo.Project.SolutionFile} -c {config} --no-build --filter {filter}"
+            // have to be part of the format string rather than a pre-baked `" --filter ..."` hole.
+            let suites = Spec.testProjects |> List.filter _.Name.EndsWith(".Tests")
+
+            let suite (name: string) =
+                stage name {
+                    for project in suites do
+                        let output =
+                            System.IO.Path.Combine(
+                                System.IO.Path.GetDirectoryName project.Path,
+                                "bin",
+                                config,
+                                "net10.0"
+                            )
+
+                        let assembly = System.IO.Path.Combine(output, project.Name + ".dll")
+
+                        let command =
+                            if System.String.IsNullOrWhiteSpace filter then
+                                cmd $"dotnet {assembly}"
+                            else
+                                cmd $"dotnet {assembly} --filter {filter}"
+
+                        stage project.Name {
+                            workingDir output
+                            run command
+                        }
+                }
 
             return
                 stage "test" {
@@ -403,16 +431,16 @@ module Stages =
                     stage "regenerate goldens" {
                         when' update
                         envVars [ ("XANTHAM_UPDATE_GOLDEN", "1") ]
-                        run suite
+                        suite "write"
                     }
 
-                    run suite
+                    suite "check"
                     // The Fable *run* gate (§5 of the architecture plan): the linked goldens compiled
                     // by Fable and executed under node against the fixtures' JavaScript runtimes.
                     // `--noCache` because Fable's up-to-date check missed a changed linked golden once,
                     // and a gate that skips its compile is not a gate.
                     stage "run gate" {
-                        when' (not skipRunGate)
+                        when' runGate
                         workingDir "tests/Xantham.Generator.RunGate"
 
                         run
@@ -567,6 +595,7 @@ exit (
                 hidden
                 PackageVersion.writeCliPackageVersion
             }
+
             Stages.deps
             Stages.generate
         }

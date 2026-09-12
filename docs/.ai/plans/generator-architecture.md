@@ -1287,6 +1287,115 @@ nominal `JS.Function` constraints: generic interfaces and abstract methods fail 
 an annotated inline function specializes to an F# function. The generator retains its existing
 function constraints. Reproduction details are in `../probes/constrain-function/README.md`.
 
+## Generator identity measures (2026-09-11)
+
+The generator keeps distinct measures for compiler symbol, type and node IDs, and for
+opaque strings carried through its records: source symbol names, declaration handles,
+declaration files, package names, directory paths and JavaScript import specifiers.
+Import specifiers are distinct from npm package identities because they also include
+ambient modules and public subpaths. Wire protocol records and JSON text remain boundary
+representations; the generator raises values when constructing its internal model.
+
+Raise with `value * uom<role>` and lower with `value / uom<role>`. Composite measures
+can lose only the relevant dimension: a declaration file becomes a file path through
+`file / uom<node>`. The operators support both strings and integer IDs and preserve the
+underlying value. The former tag/untag/retag helpers are removed.
+
+Measures describe a value's role, not a prohibition on transforming it. Lower once
+inside a naming, path-normalization or rendering boundary. Generated F# names, source
+fragments, diagnostic messages and joined header text remain ordinary strings; do not
+raise prose merely to satisfy an identity-bearing parameter. This changes internal F#
+signatures, not the generated binding or manifest format.
+
+## Export companion modules (2026-09-11)
+
+Ordering allows public export containers to nest under companion modules of existing
+types. In workers-types, `type Cloudflare` therefore coexists with one `module Cloudflare`
+containing `Email.Exports`, `Workers.Exports`, and `Workflows.Exports`. Reserving every
+type name as a module path had unnecessarily allocated a separate hashed parent for
+each ambient owner. Type names and identities stay unchanged; normalized owner-path
+collisions and `Exports` type-leaf reservations still use the existing allocator.
+
+Verification: the installed workers-types regression failed before the change and
+passes afterward; all nine path-allocation tests pass. FCS probes accept companion
+modules for interfaces, aliases, measures, unions, and delegates inside a recursive
+root module. Regenerated workers-types with `lib: ["esnext"]` compiles against Core
+and Core.TS with zero errors and 98 identifier warnings; the committed CompileGate
+also builds with zero errors (one FSharp.Core version warning). This is a focused
+layout correction; the remaining export-collision and
+runtime acceptance tasks in the export-module plan are still pending.
+
+## Export collision resolution (2026-09-12)
+
+The late `resolve-export-collisions` pass keeps every candidate an owner's value exports
+produce. Under one exported name: repeated occurrences of one declaration consolidate
+(`DO006`, Exact); different declarations mapping to one F# signature, return included,
+consolidate (`DO009`, Ergonomic); candidates with one compiled parameter signature and
+different returns become one member returning the erased union of every return, in harvest
+order (`DO008`, Widened); an ambiguous call form or a member-kind conflict takes a numbered
+`<name>_OverloadN` name that skips every original member and accessor (`DO007`, Ergonomic).
+`DO004` stays defined and unused. The dispatch brief's original `pick_Overload2` contract
+was corrected to the union: two F# names for one JavaScript function with identical
+parameters give the call site nothing to choose on.
+
+Export functions share the interface members' literal-overload retention: a literal
+parameter that separates an exported overload set keeps its single-case `StringEnum`
+type under the container (`Exports.Left`), and a signature returning one of those literals
+keeps it at the return position too.
+
+Findings raised for an export member carry its container-qualified name
+(`Exports.check()`, `Strict.Exports.check(value)`), identical to its manifest row, so the
+row's tier follows its own findings. The `entry`, `global` and `ambient:<specifier>`
+pseudo-symbols are retired, which is why every manifest's `exact` count fell by the
+number of pseudo-rows it carried. Container names are allocated once
+(`ExportLayout.containersFor`) and read by shaping, literal retention and ordering alike;
+`ShapeModel.RuntimePackage` carries the specifier that allocation needs.
+
+Migration impact: consumers of a return-only overload pair now call one member and match
+on `U2`/`U3` rather than choosing a member; `dispatch`-style literal overloads gain typed
+arguments; the `layout-lab` fixture merged into `export-layout-lab` with a runtime and run
+gate checks. Known consequence: a constructor's own call signature and the one it inherits
+(`EvalErrorConstructor` over `ErrorConstructor`) now union to `U2<EvalError, Error>` where
+the old pass dropped the inherited one.
+
+Verification: 689 Expecto tests, the solution compile gate over every golden, and the run
+gate's 443 checks pass. Findings moved `DO004` 8 -> 0, `DO008` 0 -> 8, `DO007` 0 -> 1
+(`error-class-lab` `Mishap(?message)` beside `Mishap(?message, ?options)`), `TR056` +4.
+
+## 0.1.0 release wave (2026-09-12)
+
+Single-case string enums render without `RequireQualifiedAccess` (#75). The attribute stays
+when the single case is a reserved F# name (`Ok`, `Error`, `Some`, `None`, `ValueSome`,
+`ValueNone`; `Shape.Spec.reservedCaseNames`), recorded as `LU002` (Ergonomic) at the mint site
+in `dedupe-overloads`, the only pass that mints one. Consumer impact: a
+single-case enum is written `Exports.Left`, and the previous `Exports.Left.Left` form is a
+compile error (FS0812). Multi-case enums and tagged unions are unchanged.
+
+`autoOpenExports` (#74), a `xantham.json` boolean, default `false`, places `[<AutoOpen>]`
+before `[<Erase>]` on every generated `Exports` type, root and nested. With the flag off the
+output is byte-identical to before.
+
+A class reachable through an `export * from` alias path (`declare module "node:crypto"
+{ export * from "crypto" }`) emits each static member once (#73). Static occurrences group by
+declaration identity; the kept occurrence uses the specifier the class's
+own binding uses, or the first harvested path when the class carries none; each dropped
+occurrence records `SC010` (Exact) with its specifier on `Class.member`. The type keeps its
+single declaration site. Two distinct same-named classes in different ambient modules are not
+this case and remain broken by `SA.AbbreviationNameTaken` (recorded, out of scope).
+
+Manifest `file` paths for compiler-library declarations read `node_modules/typescript/lib/...`
+on every platform (#67). The declaration-catalog suite runs behind the `Tsc.locate` guard for
+its two nullable-alias lists; four lists stay disabled on one defect, `Exports has no stable
+declaration or parent role`, 22/38 cases (#66). `build.fsx -- test` runs the Expecto
+executables directly, and the nested consumer builds in the catalog and export-provenance
+suites carry the repository `global.json`.
+
+Verification: 711 Expecto tests, the compile gate, and the run gate pass. Findings moved
+`LU002` 0 -> 2 (`single-case-enum-lab`), `SC010` 0 -> 1 (`static-reexport-lab`); four
+goldens moved by the attribute line only. Regenerating `@types/node` compiles with zero
+errors (previously 50x FS0438): 1677 exact / 1924 ergonomic / 867 widened / 356 escape,
+`SC010` x1495, 289,053 lines. The Node project stays out of the solution (#71 open).
+
 # Easy Nits 
 
 To include in scope when a phases implementation/attempt ends up being small/quick.

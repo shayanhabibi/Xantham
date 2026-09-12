@@ -34,6 +34,8 @@ let private run executable directory arguments =
     child.ExitCode, output.Result + errors.Result
 
 let private compile directory (source: string) (consumer: string) =
+    // The consumer builds with the repository's SDK.
+    File.Copy(Path.Combine(__SOURCE_DIRECTORY__, "..", "..", "global.json"), Path.Combine(directory, "global.json"), true)
     File.WriteAllText(Path.Combine(directory, "Binding.fs"), source)
     File.WriteAllText(Path.Combine(directory, "Consumer.fs"), consumer)
     let coreTs = Path.Combine(__SOURCE_DIRECTORY__, "..", "..", "src", "Xantham.Fable.Core.TS", "Xantham.Fable.Core.TS.fsproj") |> Path.GetFullPath
