@@ -171,6 +171,7 @@ module FindingCodes =
             "RT.TypeNotResolved", "RT002"
             "RT.FrontierTooWide", "RT003"
             "LU.NonStringLiteralCase", "LU001"
+            "LU.QualifiedAccessKept", "LU002"
             "DT.ArmNotPlainData", "DT001"
             "DT.TaggedUnion", "DT002"
             "DT.TagValueShared", "DT003"
@@ -201,6 +202,7 @@ module FindingCodes =
             "SC.EntrypointClassEmitted", "SC007"
             "SC.EntrypointClassRefused", "SC008"
             "SC.EntrypointClassInheritsExn", "SC009"
+            "SC.StaticAliasPathCollapsed", "SC010"
             "SE.NoValueType", "SE001"
             "SE.RuntimeSpecifierDerived", "SE002"
             "SE.MutableValueReadOnly", "SE003"
@@ -746,11 +748,16 @@ type ResolveTypeTable =
 [<Prefix("LU", "classify-literal-unions")>]
 type ClassifyLiteralUnions =
     | [<Exact>] NonStringLiteralCase
+    /// A single-case string enum whose case is a reserved F# name (`Ok`, `Error`, `Some`, `None`,
+    /// `ValueSome`, `ValueNone`) keeps `RequireQualifiedAccess`.
+    | [<Ergonomic>] QualifiedAccessKept of caseName: string
 
     interface IFindingKind with
         member this.Message =
             match this with
             | NonStringLiteralCase -> "non-string literal case carries CompiledValue (D12)"
+            | QualifiedAccessKept caseName ->
+                $"single-case string enum keeps RequireQualifiedAccess: case {caseName} is a reserved F# name"
 
 /// `detect-tagged-unions`.
 [<Prefix("DT", "detect-tagged-unions")>]
@@ -910,6 +917,9 @@ type ShapeClasses =
     /// and why. The declaration keeps the interface form, `Create` included.
     | [<Widened>] EntrypointClassRefused of reason: string
     | [<Ergonomic>] EntrypointClassInheritsExn of baseName: string
+    /// A class static reachable through a second export path (`export * from`). One member is
+    /// emitted under the declaring module's specifier; the alias specifier is recorded here.
+    | [<Exact>] StaticAliasPathCollapsed of specifier: string
 
     interface IFindingKind with
         member this.Message =
@@ -929,6 +939,8 @@ type ShapeClasses =
             | EntrypointClassRefused reason -> $"entrypoint class kept the interface form: {reason}"
             | EntrypointClassInheritsExn baseName ->
                 $"entrypoint class derives from {baseName} as exn; a consumer raises it and catches it by type"
+            | StaticAliasPathCollapsed specifier ->
+                $"static also exported from {specifier}; one member emitted under the declaring module's specifier"
 
 /// `shape-exports`.
 [<Prefix("SE", "shape-exports")>]
