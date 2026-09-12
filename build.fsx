@@ -63,6 +63,7 @@ module Spec =
                     "Xantham.TypeScript.Wire"
                     "Xantham.Fable.Core"
                     "Xantham.Fable.Core.TS"
+                    "Xantham.Fable.Node"
                     "Xantham.Cli"
                 ]
 
