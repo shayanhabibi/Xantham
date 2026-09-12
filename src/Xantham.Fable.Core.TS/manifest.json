@@ -3,10 +3,10 @@
   "package": "fable-core-ts-input",
   "module": "FableCoreTsInput",
   "counts": {
-    "exact": 1448,
-    "ergonomic": 1806,
-    "widened": 625,
-    "escape": 522
+    "exact": 1279,
+    "ergonomic": 1844,
+    "widened": 632,
+    "escape": 660
   },
   "passes": [
     {
@@ -74,8 +74,9 @@
     },
     {
       "pass": "resolve-export-collisions",
-      "total": 12,
-      "widened": 12
+      "total": 21,
+      "ergonomic": 15,
+      "widened": 6
     },
     {
       "pass": "render-source",

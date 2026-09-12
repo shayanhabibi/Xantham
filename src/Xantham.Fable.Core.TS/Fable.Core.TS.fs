@@ -11,68 +11,6 @@ open Fable.Core.JS
 
 [<AutoOpen>]
 module Es =
-    module ClassAccessorDecoratorContext =
-        [<Interface>]
-        type Access<'This, 'Value> =
-            /// <summary>
-            /// Determines whether an object has a property with the same name as the decorated element.
-            /// </summary>
-            abstract has: ``object``: 'This -> bool
-            /// <summary>
-            /// Invokes the getter on the provided object.
-            /// </summary>
-            /// <example><c>let value = context.access.get(instance);</c></example>
-            abstract get: ``object``: 'This -> 'Value
-            /// <summary>
-            /// Invokes the setter on the provided object.
-            /// </summary>
-            /// <example><c>context.access.set(instance, value);</c></example>
-            abstract set: ``object``: 'This * value: 'Value -> unit
-
-            [<ParamObject; Emit("$0")>]
-            static member Create
-                (has: ('This -> bool), get: ('This -> 'Value), set: Action<'This, 'Value>)
-                : Access<'This, 'Value> =
-                jsNative
-
-    module ClassFieldDecoratorContext =
-        [<Interface>]
-        type Access<'This, 'Value> =
-            /// <summary>
-            /// Determines whether an object has a property with the same name as the decorated element.
-            /// </summary>
-            abstract has: ``object``: 'This -> bool
-            /// <summary>
-            /// Gets the value of the field on the provided object.
-            /// </summary>
-            abstract get: ``object``: 'This -> 'Value
-            /// <summary>
-            /// Sets the value of the field on the provided object.
-            /// </summary>
-            abstract set: ``object``: 'This * value: 'Value -> unit
-
-            [<ParamObject; Emit("$0")>]
-            static member Create
-                (has: ('This -> bool), get: ('This -> 'Value), set: Action<'This, 'Value>)
-                : Access<'This, 'Value> =
-                jsNative
-
-    module ClassGetterDecoratorContext =
-        [<Interface>]
-        type Access<'This, 'Value> =
-            /// <summary>
-            /// Determines whether an object has a property with the same name as the decorated element.
-            /// </summary>
-            abstract has: ``object``: 'This -> bool
-            /// <summary>
-            /// Invokes the getter on the provided object.
-            /// </summary>
-            /// <example><c>let value = context.access.get(instance);</c></example>
-            abstract get: ``object``: 'This -> 'Value
-
-            [<ParamObject; Emit("$0")>]
-            static member Create(has: ('This -> bool), get: ('This -> 'Value)) : Access<'This, 'Value> = jsNative
-
     /// <summary>
     /// The decorator context types provided to class element decorators.
     /// </summary>
@@ -84,38 +22,6 @@ module Es =
             ClassMethodDecoratorContext<obj, (obj -> obj)>,
             ClassSetterDecoratorContext<obj, obj>
          >
-
-    module ClassMethodDecoratorContext =
-        [<Interface>]
-        type Access<'This, 'Value> =
-            /// <summary>
-            /// Determines whether an object has a property with the same name as the decorated element.
-            /// </summary>
-            abstract has: ``object``: 'This -> bool
-            /// <summary>
-            /// Gets the current value of the method from the provided object.
-            /// </summary>
-            /// <example><c>let fn = context.access.get(instance);</c></example>
-            abstract get: ``object``: 'This -> 'Value
-
-            [<ParamObject; Emit("$0")>]
-            static member Create(has: ('This -> bool), get: ('This -> 'Value)) : Access<'This, 'Value> = jsNative
-
-    module ClassSetterDecoratorContext =
-        [<Interface>]
-        type Access<'This, 'Value> =
-            /// <summary>
-            /// Determines whether an object has a property with the same name as the decorated element.
-            /// </summary>
-            abstract has: ``object``: 'This -> bool
-            /// <summary>
-            /// Invokes the setter on the provided object.
-            /// </summary>
-            /// <example><c>context.access.set(instance, value);</c></example>
-            abstract set: ``object``: 'This * value: 'Value -> unit
-
-            [<ParamObject; Emit("$0")>]
-            static member Create(has: ('This -> bool), set: Action<'This, 'Value>) : Access<'This, 'Value> = jsNative
 
     /// <summary>
     /// The decorator context types provided to any decorator.
@@ -129,11 +35,6 @@ module Es =
             ClassMethodDecoratorContext<obj, (obj -> obj)>,
             ClassSetterDecoratorContext<obj, obj>
          >
-
-    module DecoratorContext =
-        type ItemConstructor =
-            [<EmitConstructor>]
-            abstract Create: [<ParamArray>] args: obj -> obj
 
     type DecoratorMetadataObject = obj
 
@@ -525,154 +426,6 @@ module Es =
 
     type ParameterDecorator = delegate of target: Object * propertyKey: obj option * parameterIndex: float -> unit
 
-    module ArrayIterator =
-        module Every =
-            type Predicate<'T> = delegate of value: 'T * index: float -> obj
-
-        module Filter =
-            type Predicate<'T> = delegate of value: 'T * index: float -> bool
-
-            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
-
-        module Find =
-            type Predicate<'T> = delegate of value: 'T * index: float -> bool
-
-            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
-
-        module FlatMap =
-            type Callback<'T, 'U> =
-                delegate of value: 'T * index: float -> U2<Iterable<'U, obj, unit>, Iterator<'U, obj, unit>>
-
-        module ForEach =
-            type Callbackfn<'T> = delegate of value: 'T * index: float -> unit
-
-        module Map =
-            type Callbackfn<'T, 'U> = delegate of value: 'T * index: float -> 'U
-
-        module Reduce =
-            type Callbackfn<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
-
-            type Callbackfn2<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
-
-            type Callbackfn3<'U, 'T> = delegate of previousValue: 'U * currentValue: 'T * currentIndex: float -> 'U
-
-        module Some =
-            type Predicate<'T> = delegate of value: 'T * index: float -> obj
-
-    module IteratorObject =
-        module Every =
-            type Predicate<'T> = delegate of value: 'T * index: float -> obj
-
-        module Filter =
-            type Predicate<'T> = delegate of value: 'T * index: float -> bool
-
-            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
-
-        module Find =
-            type Predicate<'T> = delegate of value: 'T * index: float -> bool
-
-            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
-
-        module FlatMap =
-            type Callback<'T, 'U> =
-                delegate of value: 'T * index: float -> U2<Iterable<'U, obj, unit>, Iterator<'U, obj, unit>>
-
-        module ForEach =
-            type Callbackfn<'T> = delegate of value: 'T * index: float -> unit
-
-        module Map =
-            type Callbackfn<'T, 'U> = delegate of value: 'T * index: float -> 'U
-
-        module Reduce =
-            type Callbackfn<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
-
-            type Callbackfn2<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
-
-            type Callbackfn3<'U, 'T> = delegate of previousValue: 'U * currentValue: 'T * currentIndex: float -> 'U
-
-        module Some =
-            type Predicate<'T> = delegate of value: 'T * index: float -> obj
-
-    module Float32Array =
-        module Every =
-            type Predicate = delegate of value: float * index: float * array: Float32Array<ArrayBufferLike> -> obj
-
-        module Filter =
-            type Predicate = delegate of value: float * index: float * array: Float32Array<ArrayBufferLike> -> obj
-
-        module Find =
-            type Predicate = delegate of value: float * index: float * obj: Float32Array<ArrayBufferLike> -> bool
-
-        module FindIndex =
-            type Predicate = delegate of value: float * index: float * obj: Float32Array<ArrayBufferLike> -> bool
-
-        module FindLast =
-            type Predicate = delegate of value: float * index: float * array: Float32Array<ArrayBufferLike> -> bool
-
-            type Predicate2 = delegate of value: float * index: float * array: Float32Array<ArrayBufferLike> -> obj
-
-        module FindLastIndex =
-            type Predicate = delegate of value: float * index: float * array: Float32Array<ArrayBufferLike> -> obj
-
-        module ForEach =
-            type Callbackfn = delegate of value: float * index: float * array: Float32Array<ArrayBufferLike> -> unit
-
-        module Map =
-            type Callbackfn = delegate of value: float * index: float * array: Float32Array<ArrayBufferLike> -> float
-
-        module Reduce =
-            type Callbackfn =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Float32Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn2 =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Float32Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn3<'U> =
-                delegate of
-                    previousValue: 'U * currentValue: float * currentIndex: float * array: Float32Array<ArrayBufferLike> ->
-                        'U
-
-        module ReduceRight =
-            type Callbackfn =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Float32Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn2 =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Float32Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn3<'U> =
-                delegate of
-                    previousValue: 'U * currentValue: float * currentIndex: float * array: Float32Array<ArrayBufferLike> ->
-                        'U
-
-        module Some =
-            type Predicate = delegate of value: float * index: float * array: Float32Array<ArrayBufferLike> -> obj
-
-        module Sort =
-            type CompareFn = delegate of a: float * b: float -> float
-
-        module ToSorted =
-            type CompareFn = delegate of a: float * b: float -> float
-
     [<Interface>]
     type NumberFormatOptions =
         abstract localeMatcher: NumberFormatOptions.LocaleMatcher option with get, set
@@ -724,515 +477,7 @@ module Es =
             ) : NumberFormatOptions =
             jsNative
 
-    module NumberFormatOptions =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type CompactDisplay =
-            | [<CompiledName("long")>] Long
-            | [<CompiledName("short")>] Short
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type CurrencyDisplay =
-            | [<CompiledName("code")>] Code
-            | [<CompiledName("name")>] Name
-            | [<CompiledName("narrowSymbol")>] NarrowSymbol
-            | [<CompiledName("symbol")>] Symbol
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type CurrencySign =
-            | [<CompiledName("accounting")>] Accounting
-            | [<CompiledName("standard")>] Standard
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type LocaleMatcher =
-            | [<CompiledName("best fit")>] BestFit
-            | [<CompiledName("lookup")>] Lookup
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Notation =
-            | [<CompiledName("compact")>] Compact
-            | [<CompiledName("engineering")>] Engineering
-            | [<CompiledName("scientific")>] Scientific
-            | [<CompiledName("standard")>] Standard
-
-        type RoundingIncrement =
-            | N1 = 1
-            | N2 = 2
-            | N5 = 5
-            | N10 = 10
-            | N20 = 20
-            | N25 = 25
-            | N50 = 50
-            | N100 = 100
-            | N200 = 200
-            | N250 = 250
-            | N500 = 500
-            | N1000 = 1000
-            | N2000 = 2000
-            | N2500 = 2500
-            | N5000 = 5000
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type RoundingMode =
-            | [<CompiledName("ceil")>] Ceil
-            | [<CompiledName("expand")>] Expand
-            | [<CompiledName("floor")>] Floor
-            | [<CompiledName("halfCeil")>] HalfCeil
-            | [<CompiledName("halfEven")>] HalfEven
-            | [<CompiledName("halfExpand")>] HalfExpand
-            | [<CompiledName("halfFloor")>] HalfFloor
-            | [<CompiledName("halfTrunc")>] HalfTrunc
-            | [<CompiledName("trunc")>] Trunc
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type RoundingPriority =
-            | [<CompiledName("auto")>] Auto
-            | [<CompiledName("lessPrecision")>] LessPrecision
-            | [<CompiledName("morePrecision")>] MorePrecision
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type SignDisplay =
-            | [<CompiledName("always")>] Always
-            | [<CompiledName("auto")>] Auto
-            | [<CompiledName("exceptZero")>] ExceptZero
-            | [<CompiledName("negative")>] Negative
-            | [<CompiledName("never")>] Never
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Style =
-            | [<CompiledName("currency")>] Currency
-            | [<CompiledName("decimal")>] Decimal
-            | [<CompiledName("percent")>] Percent
-            | [<CompiledName("unit")>] Unit
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type TrailingZeroDisplay =
-            | [<CompiledName("auto")>] Auto
-            | [<CompiledName("stripIfInteger")>] StripIfInteger
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type UnitDisplay =
-            | [<CompiledName("long")>] Long
-            | [<CompiledName("narrow")>] Narrow
-            | [<CompiledName("short")>] Short
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type UseGrouping =
-            | [<CompiledName("always")>] Always
-            | [<CompiledName("auto")>] Auto
-            | [<CompiledName("false")>] False
-            | [<CompiledName("min2")>] Min2
-            | [<CompiledName("true")>] True
-            | [<CompiledValue(false)>] False2
-            | [<CompiledValue(true)>] True2
-
-    module Uint8Array =
-        module Every =
-            type Predicate = delegate of value: float * index: float * array: Uint8Array<ArrayBufferLike> -> obj
-
-        module Filter =
-            type Predicate = delegate of value: float * index: float * array: Uint8Array<ArrayBufferLike> -> obj
-
-        module Find =
-            type Predicate = delegate of value: float * index: float * obj: Uint8Array<ArrayBufferLike> -> bool
-
-        module FindIndex =
-            type Predicate = delegate of value: float * index: float * obj: Uint8Array<ArrayBufferLike> -> bool
-
-        module FindLast =
-            type Predicate = delegate of value: float * index: float * array: Uint8Array<ArrayBufferLike> -> bool
-
-            type Predicate2 = delegate of value: float * index: float * array: Uint8Array<ArrayBufferLike> -> obj
-
-        module FindLastIndex =
-            type Predicate = delegate of value: float * index: float * array: Uint8Array<ArrayBufferLike> -> obj
-
-        module ForEach =
-            type Callbackfn = delegate of value: float * index: float * array: Uint8Array<ArrayBufferLike> -> unit
-
-        module Map =
-            type Callbackfn = delegate of value: float * index: float * array: Uint8Array<ArrayBufferLike> -> float
-
-        module Reduce =
-            type Callbackfn =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Uint8Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn2 =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Uint8Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn3<'U> =
-                delegate of
-                    previousValue: 'U * currentValue: float * currentIndex: float * array: Uint8Array<ArrayBufferLike> ->
-                        'U
-
-        module ReduceRight =
-            type Callbackfn =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Uint8Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn2 =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Uint8Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn3<'U> =
-                delegate of
-                    previousValue: 'U * currentValue: float * currentIndex: float * array: Uint8Array<ArrayBufferLike> ->
-                        'U
-
-        module SetFromBase64 =
-            [<Interface>]
-            type Options =
-                abstract alphabet: Uint8Array.ToBase64.Options.Alphabet option with get, set
-                abstract lastChunkHandling: Uint8Array.SetFromBase64.Options.LastChunkHandling option with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create
-                    (
-                        ?alphabet: Uint8Array.ToBase64.Options.Alphabet,
-                        ?lastChunkHandling: Uint8Array.SetFromBase64.Options.LastChunkHandling
-                    ) : Options =
-                    jsNative
-
-            module Options =
-                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                type LastChunkHandling =
-                    | [<CompiledName("loose")>] Loose
-                    | [<CompiledName("stop-before-partial")>] StopBeforePartial
-                    | [<CompiledName("strict")>] Strict
-
-            [<Interface>]
-            type Result =
-                abstract read: float with get, set
-                abstract written: float with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create(read: float, written: float) : Result = jsNative
-
-        module SetFromHex =
-            [<Interface>]
-            type Result =
-                abstract read: float with get, set
-                abstract written: float with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create(read: float, written: float) : Result = jsNative
-
-        module Some =
-            type Predicate = delegate of value: float * index: float * array: Uint8Array<ArrayBufferLike> -> obj
-
-        module Sort =
-            type CompareFn = delegate of a: float * b: float -> float
-
-        module ToBase64 =
-            [<Interface>]
-            type Options =
-                abstract alphabet: Uint8Array.ToBase64.Options.Alphabet option with get, set
-                abstract omitPadding: bool option with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create(?alphabet: Uint8Array.ToBase64.Options.Alphabet, ?omitPadding: bool) : Options =
-                    jsNative
-
-            module Options =
-                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                type Alphabet =
-                    | [<CompiledName("base64")>] Base64
-                    | [<CompiledName("base64url")>] Base64url
-
-        module ToSorted =
-            type CompareFn = delegate of a: float * b: float -> float
-
     type Apply<'T> = delegate of target: 'T * thisArg: obj * argArray: obj[] -> obj
-
-    module ArrayBufferConstructor =
-        [<Interface>]
-        type Options =
-            abstract maxByteLength: float option with get, set
-
-            [<ParamObject; Emit("$0")>]
-            static member Create(?maxByteLength: float) : Options = jsNative
-
-    module ArrayConstructor =
-        module From =
-            type Mapfn<'T, 'U> = delegate of v: 'T * k: float -> 'U
-
-            type Mapfn2<'T, 'U> = delegate of v: 'T * k: float -> 'U
-
-        module FromAsync =
-            type MapFn<'T, 'U> = delegate of value: obj * index: float -> 'U
-
-    module Atomics =
-        module Wait =
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type Result =
-                | [<CompiledName("not-equal")>] NotEqual
-                | [<CompiledName("ok")>] Ok
-                | [<CompiledName("timed-out")>] TimedOut
-
-        module WaitAsync =
-            [<Interface>]
-            type Result =
-                abstract async: bool with get, set
-                abstract value: Atomics.WaitAsync.Result.Value with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create(async: bool, value: Atomics.WaitAsync.Result.Value) : Result = jsNative
-
-            module Result =
-                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                type Value =
-                    | [<CompiledName("not-equal")>] NotEqual
-                    | [<CompiledName("timed-out")>] TimedOut
-
-            [<Interface>]
-            type Result2 =
-                abstract async: bool with get, set
-                abstract value: Promise<Atomics.WaitAsync.Result2.Value.Item> with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create(async: bool, value: Promise<Atomics.WaitAsync.Result2.Value.Item>) : Result2 =
-                    jsNative
-
-            module Result2 =
-                module Value =
-                    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                    type Item =
-                        | [<CompiledName("ok")>] Ok
-                        | [<CompiledName("timed-out")>] TimedOut
-
-            [<Interface>]
-            type Result3 =
-                abstract async: bool with get, set
-                abstract value: Atomics.WaitAsync.Result.Value with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create(async: bool, value: Atomics.WaitAsync.Result.Value) : Result3 = jsNative
-
-            [<Interface>]
-            type Result4 =
-                abstract async: bool with get, set
-                abstract value: Promise<Atomics.WaitAsync.Result2.Value.Item> with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create(async: bool, value: Promise<Atomics.WaitAsync.Result2.Value.Item>) : Result4 =
-                    jsNative
-
-    module BigInt64Array =
-        module Every =
-            type Predicate = delegate of value: bigint * index: float * array: BigInt64Array<ArrayBufferLike> -> bool
-
-        module Filter =
-            type Predicate = delegate of value: bigint * index: float * array: BigInt64Array<ArrayBufferLike> -> obj
-
-        module Find =
-            type Predicate = delegate of value: bigint * index: float * array: BigInt64Array<ArrayBufferLike> -> bool
-
-        module FindIndex =
-            type Predicate = delegate of value: bigint * index: float * array: BigInt64Array<ArrayBufferLike> -> bool
-
-        module FindLast =
-            type Predicate = delegate of value: bigint * index: float * array: BigInt64Array<ArrayBufferLike> -> bool
-
-            type Predicate2 = delegate of value: bigint * index: float * array: BigInt64Array<ArrayBufferLike> -> obj
-
-        module FindLastIndex =
-            type Predicate = delegate of value: bigint * index: float * array: BigInt64Array<ArrayBufferLike> -> obj
-
-        module ForEach =
-            type Callbackfn = delegate of value: bigint * index: float * array: BigInt64Array<ArrayBufferLike> -> unit
-
-        module Map =
-            type Callbackfn = delegate of value: bigint * index: float * array: BigInt64Array<ArrayBufferLike> -> bigint
-
-        module Reduce =
-            type Callbackfn =
-                delegate of
-                    previousValue: bigint *
-                    currentValue: bigint *
-                    currentIndex: float *
-                    array: BigInt64Array<ArrayBufferLike> ->
-                        bigint
-
-            type Callbackfn2<'U> =
-                delegate of
-                    previousValue: 'U *
-                    currentValue: bigint *
-                    currentIndex: float *
-                    array: BigInt64Array<ArrayBufferLike> ->
-                        'U
-
-        module ReduceRight =
-            type Callbackfn =
-                delegate of
-                    previousValue: bigint *
-                    currentValue: bigint *
-                    currentIndex: float *
-                    array: BigInt64Array<ArrayBufferLike> ->
-                        bigint
-
-            type Callbackfn2<'U> =
-                delegate of
-                    previousValue: 'U *
-                    currentValue: bigint *
-                    currentIndex: float *
-                    array: BigInt64Array<ArrayBufferLike> ->
-                        'U
-
-        module Some =
-            type Predicate = delegate of value: bigint * index: float * array: BigInt64Array<ArrayBufferLike> -> bool
-
-        module Sort =
-            type CompareFn = delegate of a: bigint * b: bigint -> U2<float, bigint>
-
-        module ToSorted =
-            type CompareFn = delegate of a: bigint * b: bigint -> float
-
-    module BigInt64ArrayConstructor =
-        module From =
-            type Mapfn<'U> = delegate of v: 'U * k: float -> bigint
-
-            type Mapfn2<'T> = delegate of v: 'T * k: float -> bigint
-
-    module BigIntToLocaleStringOptions =
-        type MinimumFractionDigits =
-            | N0 = 0
-            | N1 = 1
-            | N2 = 2
-            | N3 = 3
-            | N4 = 4
-            | N5 = 5
-            | N6 = 6
-            | N7 = 7
-            | N8 = 8
-            | N9 = 9
-            | N10 = 10
-            | N11 = 11
-            | N12 = 12
-            | N13 = 13
-            | N14 = 14
-            | N15 = 15
-            | N16 = 16
-            | N17 = 17
-            | N18 = 18
-            | N19 = 19
-            | N20 = 20
-
-        type MinimumIntegerDigits =
-            | N1 = 1
-            | N2 = 2
-            | N3 = 3
-            | N4 = 4
-            | N5 = 5
-            | N6 = 6
-            | N7 = 7
-            | N8 = 8
-            | N9 = 9
-            | N10 = 10
-            | N11 = 11
-            | N12 = 12
-            | N13 = 13
-            | N14 = 14
-            | N15 = 15
-            | N16 = 16
-            | N17 = 17
-            | N18 = 18
-            | N19 = 19
-            | N20 = 20
-            | N21 = 21
-
-    module BigUint64Array =
-        module Every =
-            type Predicate = delegate of value: bigint * index: float * array: BigUint64Array<ArrayBufferLike> -> bool
-
-        module Filter =
-            type Predicate = delegate of value: bigint * index: float * array: BigUint64Array<ArrayBufferLike> -> obj
-
-        module Find =
-            type Predicate = delegate of value: bigint * index: float * array: BigUint64Array<ArrayBufferLike> -> bool
-
-        module FindIndex =
-            type Predicate = delegate of value: bigint * index: float * array: BigUint64Array<ArrayBufferLike> -> bool
-
-        module FindLast =
-            type Predicate = delegate of value: bigint * index: float * array: BigUint64Array<ArrayBufferLike> -> bool
-
-            type Predicate2 = delegate of value: bigint * index: float * array: BigUint64Array<ArrayBufferLike> -> obj
-
-        module FindLastIndex =
-            type Predicate = delegate of value: bigint * index: float * array: BigUint64Array<ArrayBufferLike> -> obj
-
-        module ForEach =
-            type Callbackfn = delegate of value: bigint * index: float * array: BigUint64Array<ArrayBufferLike> -> unit
-
-        module Map =
-            type Callbackfn =
-                delegate of value: bigint * index: float * array: BigUint64Array<ArrayBufferLike> -> bigint
-
-        module Reduce =
-            type Callbackfn =
-                delegate of
-                    previousValue: bigint *
-                    currentValue: bigint *
-                    currentIndex: float *
-                    array: BigUint64Array<ArrayBufferLike> ->
-                        bigint
-
-            type Callbackfn2<'U> =
-                delegate of
-                    previousValue: 'U *
-                    currentValue: bigint *
-                    currentIndex: float *
-                    array: BigUint64Array<ArrayBufferLike> ->
-                        'U
-
-        module ReduceRight =
-            type Callbackfn =
-                delegate of
-                    previousValue: bigint *
-                    currentValue: bigint *
-                    currentIndex: float *
-                    array: BigUint64Array<ArrayBufferLike> ->
-                        bigint
-
-            type Callbackfn2<'U> =
-                delegate of
-                    previousValue: 'U *
-                    currentValue: bigint *
-                    currentIndex: float *
-                    array: BigUint64Array<ArrayBufferLike> ->
-                        'U
-
-        module Some =
-            type Predicate = delegate of value: bigint * index: float * array: BigUint64Array<ArrayBufferLike> -> bool
-
-        module Sort =
-            type CompareFn = delegate of a: bigint * b: bigint -> U2<float, bigint>
-
-        module ToSorted =
-            type CompareFn = delegate of a: bigint * b: bigint -> float
-
-    module BigUint64ArrayConstructor =
-        module From =
-            type Mapfn<'U> = delegate of v: 'U * k: float -> bigint
-
-            type Mapfn2<'T> = delegate of v: 'T * k: float -> bigint
 
     [<Interface>]
     type Collator =
@@ -1285,40 +530,6 @@ module Es =
                 ?ignorePunctuation: bool
             ) : CollatorOptions =
             jsNative
-
-    module CollatorOptions =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Collation =
-            | [<CompiledName("big5han")>] Big5han
-            | [<CompiledName("compat")>] Compat
-            | [<CompiledName("default")>] Default
-            | [<CompiledName("dict")>] Dict
-            | [<CompiledName("direct")>] Direct
-            | [<CompiledName("ducet")>] Ducet
-            | [<CompiledName("emoji")>] Emoji
-            | [<CompiledName("eor")>] Eor
-            | [<CompiledName("gb2312")>] Gb2312
-            | [<CompiledName("phonebk")>] Phonebk
-            | [<CompiledName("phonetic")>] Phonetic
-            | [<CompiledName("pinyin")>] Pinyin
-            | [<CompiledName("reformed")>] Reformed
-            | [<CompiledName("searchjl")>] Searchjl
-            | [<CompiledName("stroke")>] Stroke
-            | [<CompiledName("trad")>] Trad
-            | [<CompiledName("unihan")>] Unihan
-            | [<CompiledName("zhuyin")>] Zhuyin
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Sensitivity =
-            | [<CompiledName("accent")>] Accent
-            | [<CompiledName("base")>] Base
-            | [<CompiledName("case")>] Case
-            | [<CompiledName("variant")>] Variant
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Usage =
-            | [<CompiledName("search")>] Search
-            | [<CompiledName("sort")>] Sort
 
     type Construct<'T> = delegate of target: 'T * argArray: obj[] * newTarget: Function -> obj
 
@@ -1443,53 +654,6 @@ module Es =
             ) : DateTimeFormatOptions =
             jsNative
 
-    module DateTimeFormatOptions =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type DateStyle =
-            | [<CompiledName("full")>] Full
-            | [<CompiledName("long")>] Long
-            | [<CompiledName("medium")>] Medium
-            | [<CompiledName("short")>] Short
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type FormatMatcher =
-            | [<CompiledName("basic")>] Basic
-            | [<CompiledName("best fit")>] BestFit
-
-        type FractionalSecondDigits =
-            | N1 = 1
-            | N2 = 2
-            | N3 = 3
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type HourCycle =
-            | [<CompiledName("h11")>] H11
-            | [<CompiledName("h12")>] H12
-            | [<CompiledName("h23")>] H23
-            | [<CompiledName("h24")>] H24
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Month =
-            | [<CompiledName("2-digit")>] N2Digit
-            | [<CompiledName("long")>] Long
-            | [<CompiledName("narrow")>] Narrow
-            | [<CompiledName("numeric")>] Numeric
-            | [<CompiledName("short")>] Short
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type TimeZoneName =
-            | [<CompiledName("long")>] Long
-            | [<CompiledName("longGeneric")>] LongGeneric
-            | [<CompiledName("longOffset")>] LongOffset
-            | [<CompiledName("short")>] Short
-            | [<CompiledName("shortGeneric")>] ShortGeneric
-            | [<CompiledName("shortOffset")>] ShortOffset
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Year =
-            | [<CompiledName("2-digit")>] N2Digit
-            | [<CompiledName("numeric")>] Numeric
-
     [<Interface>]
     type DateTimeFormatPart =
         abstract ``type``: DateTimeFormatPart.Type with get, set
@@ -1497,23 +661,6 @@ module Es =
 
         [<ParamObject; Emit("$0")>]
         static member Create(``type``: DateTimeFormatPart.Type, value: string) : DateTimeFormatPart = jsNative
-
-    module DateTimeFormatPart =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Type =
-            | [<CompiledName("day")>] Day
-            | [<CompiledName("dayPeriod")>] DayPeriod
-            | [<CompiledName("era")>] Era
-            | [<CompiledName("fractionalSecond")>] FractionalSecond
-            | [<CompiledName("hour")>] Hour
-            | [<CompiledName("literal")>] Literal
-            | [<CompiledName("minute")>] Minute
-            | [<CompiledName("month")>] Month
-            | [<CompiledName("second")>] Second
-            | [<CompiledName("timeZoneName")>] TimeZoneName
-            | [<CompiledName("unknown")>] Unknown
-            | [<CompiledName("weekday")>] Weekday
-            | [<CompiledName("year")>] Year
 
     [<Interface>]
     type DateTimeLikeObject =
@@ -1667,55 +814,6 @@ module Es =
         abstract toJSON: unit -> string
         abstract valueOf: unit -> unit
 
-    module Duration =
-        module Round =
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type RoundTo =
-                | [<CompiledName("day")>] Day
-                | [<CompiledName("days")>] Days
-                | [<CompiledName("hour")>] Hour
-                | [<CompiledName("hours")>] Hours
-                | [<CompiledName("microsecond")>] Microsecond
-                | [<CompiledName("microseconds")>] Microseconds
-                | [<CompiledName("millisecond")>] Millisecond
-                | [<CompiledName("milliseconds")>] Milliseconds
-                | [<CompiledName("minute")>] Minute
-                | [<CompiledName("minutes")>] Minutes
-                | [<CompiledName("nanosecond")>] Nanosecond
-                | [<CompiledName("nanoseconds")>] Nanoseconds
-                | [<CompiledName("second")>] Second
-                | [<CompiledName("seconds")>] Seconds
-
-        module With =
-            [<Interface>]
-            type DurationLike =
-                abstract days: float option with get, set
-                abstract hours: float option with get, set
-                abstract microseconds: float option with get, set
-                abstract milliseconds: float option with get, set
-                abstract minutes: float option with get, set
-                abstract months: float option with get, set
-                abstract nanoseconds: float option with get, set
-                abstract seconds: float option with get, set
-                abstract weeks: float option with get, set
-                abstract years: float option with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create
-                    (
-                        ?days: float,
-                        ?hours: float,
-                        ?microseconds: float,
-                        ?milliseconds: float,
-                        ?minutes: float,
-                        ?months: float,
-                        ?nanoseconds: float,
-                        ?seconds: float,
-                        ?weeks: float,
-                        ?years: float
-                    ) : DurationLike =
-                    jsNative
-
     type DurationConstructor =
         abstract from: item: U3<string, Duration, DurationLikeObject> -> Duration
 
@@ -1772,66 +870,6 @@ module Es =
                 resolvedOptions: (unit -> ResolvedDurationFormatOptions)
             ) : DurationFormat =
             jsNative
-
-    module DurationFormat =
-        module Format =
-            [<Interface>]
-            type Duration =
-                abstract days: float option with get, set
-                abstract hours: float option with get, set
-                abstract microseconds: float option with get, set
-                abstract milliseconds: float option with get, set
-                abstract minutes: float option with get, set
-                abstract months: float option with get, set
-                abstract nanoseconds: float option with get, set
-                abstract seconds: float option with get, set
-                abstract weeks: float option with get, set
-                abstract years: float option with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create
-                    (
-                        ?days: float,
-                        ?hours: float,
-                        ?microseconds: float,
-                        ?milliseconds: float,
-                        ?minutes: float,
-                        ?months: float,
-                        ?nanoseconds: float,
-                        ?seconds: float,
-                        ?weeks: float,
-                        ?years: float
-                    ) : Duration =
-                    jsNative
-
-        module FormatToParts =
-            module Result =
-                [<Interface>]
-                type Item =
-                    abstract ``type``: string with get, set
-                    abstract value: string with get, set
-                    abstract unit: ZonedDateTime.Until.Options.Item option with get, set
-
-                    [<ParamObject; Emit("$0")>]
-                    static member Create
-                        (``type``: string, value: string, ?unit: ZonedDateTime.Until.Options.Item)
-                        : Item =
-                        jsNative
-
-                [<Interface>]
-                type Item2 =
-                    abstract ``type``: RelativeTimeFormat.FormatToParts.Result.Item2.Type with get, set
-                    abstract value: string with get, set
-                    abstract unit: ZonedDateTime.Until.Options.Item with get, set
-
-                    [<ParamObject; Emit("$0")>]
-                    static member Create
-                        (
-                            ``type``: RelativeTimeFormat.FormatToParts.Result.Item2.Type,
-                            value: string,
-                            unit: ZonedDateTime.Until.Options.Item
-                        ) : Item2 =
-                        jsNative
 
     type DurationFormatConstructor =
         /// <summary>
@@ -1914,38 +952,6 @@ module Es =
             ) : DurationFormatOptions =
             jsNative
 
-    module DurationFormatOptions =
-        type FractionalDigits =
-            | N0 = 0
-            | N1 = 1
-            | N2 = 2
-            | N3 = 3
-            | N4 = 4
-            | N5 = 5
-            | N6 = 6
-            | N7 = 7
-            | N8 = 8
-            | N9 = 9
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Milliseconds =
-            | [<CompiledName("long")>] Long
-            | [<CompiledName("narrow")>] Narrow
-            | [<CompiledName("numeric")>] Numeric
-            | [<CompiledName("short")>] Short
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Style =
-            | [<CompiledName("digital")>] Digital
-            | [<CompiledName("long")>] Long
-            | [<CompiledName("narrow")>] Narrow
-            | [<CompiledName("short")>] Short
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type YearsDisplay =
-            | [<CompiledName("always")>] Always
-            | [<CompiledName("auto")>] Auto
-
     [<Interface>]
     type DurationLikeObject =
         abstract years: float option with get, set
@@ -2005,54 +1011,6 @@ module Es =
             ) : DurationRoundingOptions =
             jsNative
 
-    module DurationRoundingOptions =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type LargestUnit =
-            | [<CompiledName("auto")>] Auto
-            | [<CompiledName("day")>] Day
-            | [<CompiledName("days")>] Days
-            | [<CompiledName("hour")>] Hour
-            | [<CompiledName("hours")>] Hours
-            | [<CompiledName("microsecond")>] Microsecond
-            | [<CompiledName("microseconds")>] Microseconds
-            | [<CompiledName("millisecond")>] Millisecond
-            | [<CompiledName("milliseconds")>] Milliseconds
-            | [<CompiledName("minute")>] Minute
-            | [<CompiledName("minutes")>] Minutes
-            | [<CompiledName("month")>] Month
-            | [<CompiledName("months")>] Months
-            | [<CompiledName("nanosecond")>] Nanosecond
-            | [<CompiledName("nanoseconds")>] Nanoseconds
-            | [<CompiledName("second")>] Second
-            | [<CompiledName("seconds")>] Seconds
-            | [<CompiledName("week")>] Week
-            | [<CompiledName("weeks")>] Weeks
-            | [<CompiledName("year")>] Year
-            | [<CompiledName("years")>] Years
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type SmallestUnit =
-            | [<CompiledName("day")>] Day
-            | [<CompiledName("days")>] Days
-            | [<CompiledName("hour")>] Hour
-            | [<CompiledName("hours")>] Hours
-            | [<CompiledName("microsecond")>] Microsecond
-            | [<CompiledName("microseconds")>] Microseconds
-            | [<CompiledName("millisecond")>] Millisecond
-            | [<CompiledName("milliseconds")>] Milliseconds
-            | [<CompiledName("minute")>] Minute
-            | [<CompiledName("minutes")>] Minutes
-            | [<CompiledName("month")>] Month
-            | [<CompiledName("months")>] Months
-            | [<CompiledName("nanosecond")>] Nanosecond
-            | [<CompiledName("nanoseconds")>] Nanoseconds
-            | [<CompiledName("second")>] Second
-            | [<CompiledName("seconds")>] Seconds
-            | [<CompiledName("week")>] Week
-            | [<CompiledName("weeks")>] Weeks
-            | [<CompiledName("year")>] Year
-            | [<CompiledName("years")>] Years
-
     [<Interface>]
     type DurationToStringOptions =
         inherit ToStringRoundingOptionsWithFractionalSeconds<DurationToStringOptions.Base.Item>
@@ -2067,26 +1025,6 @@ module Es =
             ) : DurationToStringOptions =
             jsNative
 
-    module DurationToStringOptions =
-        module Base =
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type Item =
-                | [<CompiledName("microsecond")>] Microsecond
-                | [<CompiledName("millisecond")>] Millisecond
-                | [<CompiledName("nanosecond")>] Nanosecond
-                | [<CompiledName("second")>] Second
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type SmallestUnit =
-            | [<CompiledName("microsecond")>] Microsecond
-            | [<CompiledName("microseconds")>] Microseconds
-            | [<CompiledName("millisecond")>] Millisecond
-            | [<CompiledName("milliseconds")>] Milliseconds
-            | [<CompiledName("nanosecond")>] Nanosecond
-            | [<CompiledName("nanoseconds")>] Nanoseconds
-            | [<CompiledName("second")>] Second
-            | [<CompiledName("seconds")>] Seconds
-
     [<Interface>]
     type DurationTotalOptions =
         inherit DurationRelativeToOptions
@@ -2100,218 +1038,6 @@ module Es =
                     U6<string, DateLikeObject, PlainDate, PlainDateTime, ZonedDateTime, ZonedDateTimeLikeObject>
             ) : DurationTotalOptions =
             jsNative
-
-    module Float16Array =
-        module Every =
-            type Predicate = delegate of value: float * index: float * array: Float16Array<ArrayBufferLike> -> obj
-
-        module Filter =
-            type Predicate = delegate of value: float * index: float * array: Float16Array<ArrayBufferLike> -> obj
-
-        module Find =
-            type Predicate = delegate of value: float * index: float * obj: Float16Array<ArrayBufferLike> -> bool
-
-        module FindIndex =
-            type Predicate = delegate of value: float * index: float * obj: Float16Array<ArrayBufferLike> -> bool
-
-        module FindLast =
-            type Predicate = delegate of value: float * index: float * array: Float16Array<ArrayBufferLike> -> bool
-
-            type Predicate2 = delegate of value: float * index: float * array: Float16Array<ArrayBufferLike> -> obj
-
-        module FindLastIndex =
-            type Predicate = delegate of value: float * index: float * array: Float16Array<ArrayBufferLike> -> obj
-
-        module ForEach =
-            type Callbackfn = delegate of value: float * index: float * array: Float16Array<ArrayBufferLike> -> unit
-
-        module Map =
-            type Callbackfn = delegate of value: float * index: float * array: Float16Array<ArrayBufferLike> -> float
-
-        module Reduce =
-            type Callbackfn =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Float16Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn2 =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Float16Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn3<'U> =
-                delegate of
-                    previousValue: 'U * currentValue: float * currentIndex: float * array: Float16Array<ArrayBufferLike> ->
-                        'U
-
-        module ReduceRight =
-            type Callbackfn =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Float16Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn2 =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Float16Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn3<'U> =
-                delegate of
-                    previousValue: 'U * currentValue: float * currentIndex: float * array: Float16Array<ArrayBufferLike> ->
-                        'U
-
-        module Some =
-            type Predicate = delegate of value: float * index: float * array: Float16Array<ArrayBufferLike> -> obj
-
-        module Sort =
-            type CompareFn = delegate of a: float * b: float -> float
-
-        module ToSorted =
-            type CompareFn = delegate of a: float * b: float -> float
-
-    module Float16ArrayConstructor =
-        module From =
-            type Mapfn<'T> = delegate of v: 'T * k: float -> float
-
-            type Mapfn2<'T> = delegate of v: 'T * k: float -> float
-
-    module Float32ArrayConstructor =
-        module From =
-            type Mapfn<'T> = delegate of v: 'T * k: float -> float
-
-            type Mapfn2<'T> = delegate of v: 'T * k: float -> float
-
-    module Float64Array =
-        module Every =
-            type Predicate = delegate of value: float * index: float * array: Float64Array<ArrayBufferLike> -> obj
-
-        module Filter =
-            type Predicate = delegate of value: float * index: float * array: Float64Array<ArrayBufferLike> -> obj
-
-        module Find =
-            type Predicate = delegate of value: float * index: float * obj: Float64Array<ArrayBufferLike> -> bool
-
-        module FindIndex =
-            type Predicate = delegate of value: float * index: float * obj: Float64Array<ArrayBufferLike> -> bool
-
-        module FindLast =
-            type Predicate = delegate of value: float * index: float * array: Float64Array<ArrayBufferLike> -> bool
-
-            type Predicate2 = delegate of value: float * index: float * array: Float64Array<ArrayBufferLike> -> obj
-
-        module FindLastIndex =
-            type Predicate = delegate of value: float * index: float * array: Float64Array<ArrayBufferLike> -> obj
-
-        module ForEach =
-            type Callbackfn = delegate of value: float * index: float * array: Float64Array<ArrayBufferLike> -> unit
-
-        module Map =
-            type Callbackfn = delegate of value: float * index: float * array: Float64Array<ArrayBufferLike> -> float
-
-        module Reduce =
-            type Callbackfn =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Float64Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn2 =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Float64Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn3<'U> =
-                delegate of
-                    previousValue: 'U * currentValue: float * currentIndex: float * array: Float64Array<ArrayBufferLike> ->
-                        'U
-
-        module ReduceRight =
-            type Callbackfn =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Float64Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn2 =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Float64Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn3<'U> =
-                delegate of
-                    previousValue: 'U * currentValue: float * currentIndex: float * array: Float64Array<ArrayBufferLike> ->
-                        'U
-
-        module Some =
-            type Predicate = delegate of value: float * index: float * array: Float64Array<ArrayBufferLike> -> obj
-
-        module Sort =
-            type CompareFn = delegate of a: float * b: float -> float
-
-        module ToSorted =
-            type CompareFn = delegate of a: float * b: float -> float
-
-    module Float64ArrayConstructor =
-        module From =
-            type Mapfn<'T> = delegate of v: 'T * k: float -> float
-
-            type Mapfn2<'T> = delegate of v: 'T * k: float -> float
-
-    module FormDataIterator =
-        module Every =
-            type Predicate<'T> = delegate of value: 'T * index: float -> obj
-
-        module Filter =
-            type Predicate<'T> = delegate of value: 'T * index: float -> bool
-
-            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
-
-        module Find =
-            type Predicate<'T> = delegate of value: 'T * index: float -> bool
-
-            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
-
-        module FlatMap =
-            type Callback<'T, 'U> =
-                delegate of value: 'T * index: float -> U2<Iterable<'U, obj, unit>, Iterator<'U, obj, unit>>
-
-        module ForEach =
-            type Callbackfn<'T> = delegate of value: 'T * index: float -> unit
-
-        module Map =
-            type Callbackfn<'T, 'U> = delegate of value: 'T * index: float -> 'U
-
-        module Reduce =
-            type Callbackfn<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
-
-            type Callbackfn2<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
-
-            type Callbackfn3<'U, 'T> = delegate of previousValue: 'U * currentValue: 'T * currentIndex: float -> 'U
-
-        module Some =
-            type Predicate<'T> = delegate of value: 'T * index: float -> obj
 
     type Get<'T> = delegate of target: 'T * p: obj * receiver: obj -> obj
 
@@ -8032,40 +6758,6 @@ module Es =
 
     type Has<'T> = delegate of target: 'T * p: obj -> bool
 
-    module HeadersIterator =
-        module Every =
-            type Predicate<'T> = delegate of value: 'T * index: float -> obj
-
-        module Filter =
-            type Predicate<'T> = delegate of value: 'T * index: float -> bool
-
-            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
-
-        module Find =
-            type Predicate<'T> = delegate of value: 'T * index: float -> bool
-
-            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
-
-        module FlatMap =
-            type Callback<'T, 'U> =
-                delegate of value: 'T * index: float -> U2<Iterable<'U, obj, unit>, Iterator<'U, obj, unit>>
-
-        module ForEach =
-            type Callbackfn<'T> = delegate of value: 'T * index: float -> unit
-
-        module Map =
-            type Callbackfn<'T, 'U> = delegate of value: 'T * index: float -> 'U
-
-        module Reduce =
-            type Callbackfn<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
-
-            type Callbackfn2<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
-
-            type Callbackfn3<'U, 'T> = delegate of previousValue: 'U * currentValue: 'T * currentIndex: float -> 'U
-
-        module Some =
-            type Predicate<'T> = delegate of value: 'T * index: float -> obj
-
     type Instant =
         abstract epochMilliseconds: float
         abstract epochNanoseconds: bigint
@@ -8117,252 +6809,6 @@ module Es =
                 ?fractionalSecondDigits: ZonedDateTimeToStringOptions.FractionalSecondDigits
             ) : InstantToStringOptions =
             jsNative
-
-    module Int16Array =
-        module Every =
-            type Predicate = delegate of value: float * index: float * array: Int16Array<ArrayBufferLike> -> obj
-
-        module Filter =
-            type Predicate = delegate of value: float * index: float * array: Int16Array<ArrayBufferLike> -> obj
-
-        module Find =
-            type Predicate = delegate of value: float * index: float * obj: Int16Array<ArrayBufferLike> -> bool
-
-        module FindIndex =
-            type Predicate = delegate of value: float * index: float * obj: Int16Array<ArrayBufferLike> -> bool
-
-        module FindLast =
-            type Predicate = delegate of value: float * index: float * array: Int16Array<ArrayBufferLike> -> bool
-
-            type Predicate2 = delegate of value: float * index: float * array: Int16Array<ArrayBufferLike> -> obj
-
-        module FindLastIndex =
-            type Predicate = delegate of value: float * index: float * array: Int16Array<ArrayBufferLike> -> obj
-
-        module ForEach =
-            type Callbackfn = delegate of value: float * index: float * array: Int16Array<ArrayBufferLike> -> unit
-
-        module Map =
-            type Callbackfn = delegate of value: float * index: float * array: Int16Array<ArrayBufferLike> -> float
-
-        module Reduce =
-            type Callbackfn =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Int16Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn2 =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Int16Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn3<'U> =
-                delegate of
-                    previousValue: 'U * currentValue: float * currentIndex: float * array: Int16Array<ArrayBufferLike> ->
-                        'U
-
-        module ReduceRight =
-            type Callbackfn =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Int16Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn2 =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Int16Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn3<'U> =
-                delegate of
-                    previousValue: 'U * currentValue: float * currentIndex: float * array: Int16Array<ArrayBufferLike> ->
-                        'U
-
-        module Some =
-            type Predicate = delegate of value: float * index: float * array: Int16Array<ArrayBufferLike> -> obj
-
-        module Sort =
-            type CompareFn = delegate of a: float * b: float -> float
-
-        module ToSorted =
-            type CompareFn = delegate of a: float * b: float -> float
-
-    module Int16ArrayConstructor =
-        module From =
-            type Mapfn<'T> = delegate of v: 'T * k: float -> float
-
-            type Mapfn2<'T> = delegate of v: 'T * k: float -> float
-
-    module Int32Array =
-        module Every =
-            type Predicate = delegate of value: float * index: float * array: Int32Array<ArrayBufferLike> -> obj
-
-        module Filter =
-            type Predicate = delegate of value: float * index: float * array: Int32Array<ArrayBufferLike> -> obj
-
-        module Find =
-            type Predicate = delegate of value: float * index: float * obj: Int32Array<ArrayBufferLike> -> bool
-
-        module FindIndex =
-            type Predicate = delegate of value: float * index: float * obj: Int32Array<ArrayBufferLike> -> bool
-
-        module FindLast =
-            type Predicate = delegate of value: float * index: float * array: Int32Array<ArrayBufferLike> -> bool
-
-            type Predicate2 = delegate of value: float * index: float * array: Int32Array<ArrayBufferLike> -> obj
-
-        module FindLastIndex =
-            type Predicate = delegate of value: float * index: float * array: Int32Array<ArrayBufferLike> -> obj
-
-        module ForEach =
-            type Callbackfn = delegate of value: float * index: float * array: Int32Array<ArrayBufferLike> -> unit
-
-        module Map =
-            type Callbackfn = delegate of value: float * index: float * array: Int32Array<ArrayBufferLike> -> float
-
-        module Reduce =
-            type Callbackfn =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Int32Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn2 =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Int32Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn3<'U> =
-                delegate of
-                    previousValue: 'U * currentValue: float * currentIndex: float * array: Int32Array<ArrayBufferLike> ->
-                        'U
-
-        module ReduceRight =
-            type Callbackfn =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Int32Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn2 =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Int32Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn3<'U> =
-                delegate of
-                    previousValue: 'U * currentValue: float * currentIndex: float * array: Int32Array<ArrayBufferLike> ->
-                        'U
-
-        module Some =
-            type Predicate = delegate of value: float * index: float * array: Int32Array<ArrayBufferLike> -> obj
-
-        module Sort =
-            type CompareFn = delegate of a: float * b: float -> float
-
-        module ToSorted =
-            type CompareFn = delegate of a: float * b: float -> float
-
-    module Int32ArrayConstructor =
-        module From =
-            type Mapfn<'T> = delegate of v: 'T * k: float -> float
-
-            type Mapfn2<'T> = delegate of v: 'T * k: float -> float
-
-    module Int8Array =
-        module Every =
-            type Predicate = delegate of value: float * index: float * array: Int8Array<ArrayBufferLike> -> obj
-
-        module Filter =
-            type Predicate = delegate of value: float * index: float * array: Int8Array<ArrayBufferLike> -> obj
-
-        module Find =
-            type Predicate = delegate of value: float * index: float * obj: Int8Array<ArrayBufferLike> -> bool
-
-        module FindIndex =
-            type Predicate = delegate of value: float * index: float * obj: Int8Array<ArrayBufferLike> -> bool
-
-        module FindLast =
-            type Predicate = delegate of value: float * index: float * array: Int8Array<ArrayBufferLike> -> bool
-
-            type Predicate2 = delegate of value: float * index: float * array: Int8Array<ArrayBufferLike> -> obj
-
-        module FindLastIndex =
-            type Predicate = delegate of value: float * index: float * array: Int8Array<ArrayBufferLike> -> obj
-
-        module ForEach =
-            type Callbackfn = delegate of value: float * index: float * array: Int8Array<ArrayBufferLike> -> unit
-
-        module Map =
-            type Callbackfn = delegate of value: float * index: float * array: Int8Array<ArrayBufferLike> -> float
-
-        module Reduce =
-            type Callbackfn =
-                delegate of
-                    previousValue: float * currentValue: float * currentIndex: float * array: Int8Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn2 =
-                delegate of
-                    previousValue: float * currentValue: float * currentIndex: float * array: Int8Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn3<'U> =
-                delegate of
-                    previousValue: 'U * currentValue: float * currentIndex: float * array: Int8Array<ArrayBufferLike> ->
-                        'U
-
-        module ReduceRight =
-            type Callbackfn =
-                delegate of
-                    previousValue: float * currentValue: float * currentIndex: float * array: Int8Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn2 =
-                delegate of
-                    previousValue: float * currentValue: float * currentIndex: float * array: Int8Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn3<'U> =
-                delegate of
-                    previousValue: 'U * currentValue: float * currentIndex: float * array: Int8Array<ArrayBufferLike> ->
-                        'U
-
-        module Some =
-            type Predicate = delegate of value: float * index: float * array: Int8Array<ArrayBufferLike> -> obj
-
-        module Sort =
-            type CompareFn = delegate of a: float * b: float -> float
-
-        module ToSorted =
-            type CompareFn = delegate of a: float * b: float -> float
-
-    module Int8ArrayConstructor =
-        module From =
-            type Mapfn<'T> = delegate of v: 'T * k: float -> float
-
-            type Mapfn2<'T> = delegate of v: 'T * k: float -> float
 
     [<Interface>]
     type Intl =
@@ -8448,75 +6894,6 @@ module Es =
                 DurationFormat: DurationFormatConstructor
             ) : Intl =
             jsNative
-
-    module Intl =
-        module DisplayNames =
-            module SupportedLocalesOf =
-                [<Interface>]
-                type Options =
-                    abstract localeMatcher: NumberFormatOptions.LocaleMatcher option with get, set
-
-                    [<ParamObject; Emit("$0")>]
-                    static member Create(?localeMatcher: NumberFormatOptions.LocaleMatcher) : Options = jsNative
-
-        module DurationFormat =
-            module SupportedLocalesOf =
-                [<Interface>]
-                type Options =
-                    abstract localeMatcher: NumberFormatOptions.LocaleMatcher option with get, set
-
-                    [<ParamObject; Emit("$0")>]
-                    static member Create(?localeMatcher: NumberFormatOptions.LocaleMatcher) : Options = jsNative
-
-        module ListFormat =
-            module SupportedLocalesOf =
-                [<Interface>]
-                type Options =
-                    /// <summary>
-                    /// The locale matching algorithm to use. For information about this option, see <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_negotiation">Intl page</a>.
-                    /// </summary>
-                    abstract localeMatcher: NumberFormatOptions.LocaleMatcher option with get, set
-
-                    [<ParamObject; Emit("$0")>]
-                    static member Create(?localeMatcher: NumberFormatOptions.LocaleMatcher) : Options = jsNative
-
-        module PluralRules =
-            module SupportedLocalesOf =
-                [<Interface>]
-                type Options =
-                    abstract localeMatcher: NumberFormatOptions.LocaleMatcher option with get, set
-
-                    [<ParamObject; Emit("$0")>]
-                    static member Create(?localeMatcher: NumberFormatOptions.LocaleMatcher) : Options = jsNative
-
-                [<Interface>]
-                type Options2 =
-                    abstract localeMatcher: NumberFormatOptions.LocaleMatcher option with get, set
-
-                    [<ParamObject; Emit("$0")>]
-                    static member Create(?localeMatcher: NumberFormatOptions.LocaleMatcher) : Options2 = jsNative
-
-        module Segmenter =
-            module SupportedLocalesOf =
-                [<Interface>]
-                type Options =
-                    /// <summary>
-                    /// The locale matching algorithm to use. For information about this option, see <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_negotiation">Intl page</a>.
-                    /// </summary>
-                    abstract localeMatcher: NumberFormatOptions.LocaleMatcher option with get, set
-
-                    [<ParamObject; Emit("$0")>]
-                    static member Create(?localeMatcher: NumberFormatOptions.LocaleMatcher) : Options = jsNative
-
-        module SupportedValuesOf =
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type Key =
-                | [<CompiledName("calendar")>] Calendar
-                | [<CompiledName("collation")>] Collation
-                | [<CompiledName("currency")>] Currency
-                | [<CompiledName("numberingSystem")>] NumberingSystem
-                | [<CompiledName("timeZone")>] TimeZone
-                | [<CompiledName("unit")>] Unit
 
     type Iterator2<'T, 'TResult, 'TNext> =
         inherit IteratorObject<'T, 'TResult, 'TNext>
@@ -8613,47 +6990,6 @@ module Es =
         /// </param>
         abstract find: predicate: Iterator2.Find.Predicate2<'T> -> 'T option
 
-    module Iterator2 =
-        module Every =
-            type Predicate<'T> = delegate of value: 'T * index: float -> obj
-
-        module Filter =
-            type Predicate<'T> = delegate of value: 'T * index: float -> bool
-
-            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
-
-        module Find =
-            type Predicate<'T> = delegate of value: 'T * index: float -> bool
-
-            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
-
-        module FlatMap =
-            type Callback<'T, 'U> =
-                delegate of value: 'T * index: float -> U2<Iterable<'U, obj, unit>, Iterator<'U, obj, unit>>
-
-        module ForEach =
-            type Callbackfn<'T> = delegate of value: 'T * index: float -> unit
-
-        module Map =
-            type Callbackfn<'T, 'U> = delegate of value: 'T * index: float -> 'U
-
-        module Reduce =
-            type Callbackfn<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
-
-            type Callbackfn2<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
-
-            type Callbackfn3<'U, 'T> = delegate of previousValue: 'U * currentValue: 'T * currentIndex: float -> 'U
-
-        module Some =
-            type Predicate<'T> = delegate of value: 'T * index: float -> obj
-
-    module JSON =
-        module Parse =
-            type Reviver = delegate of key: string * value: obj -> obj
-
-        module Stringify =
-            type Replacer = delegate of key: string * value: obj -> obj
-
     [<Interface>]
     type ListFormat =
         /// <summary>
@@ -8695,24 +7031,6 @@ module Es =
                 resolvedOptions: (unit -> ResolvedListFormatOptions)
             ) : ListFormat =
             jsNative
-
-    module ListFormat =
-        module FormatToParts =
-            module Result =
-                [<Interface>]
-                type Item =
-                    abstract ``type``: ListFormat.FormatToParts.Result.Item.Type with get, set
-                    abstract value: string with get, set
-
-                    [<ParamObject; Emit("$0")>]
-                    static member Create(``type``: ListFormat.FormatToParts.Result.Item.Type, value: string) : Item =
-                        jsNative
-
-                module Item =
-                    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                    type Type =
-                        | [<CompiledName("element")>] Element
-                        | [<CompiledName("literal")>] Literal
 
     type ListFormatConstructor =
         /// <summary>
@@ -8857,13 +7175,6 @@ module Es =
             ) : Locale =
             jsNative
 
-    module Locale =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type CaseFirst =
-            | [<CompiledName("false")>] False
-            | [<CompiledName("lower")>] Lower
-            | [<CompiledName("upper")>] Upper
-
     type LocaleConstructor =
         [<EmitConstructor>]
         abstract Create: tag: U2<string, Locale> * ?options: LocaleOptions -> Locale
@@ -8927,82 +7238,6 @@ module Es =
             ) : LocaleOptions =
             jsNative
 
-    module Map =
-        module ForEach =
-            type Callbackfn<'V, 'K> = delegate of value: 'V * key: 'K * map: Map<'K, 'V> -> unit
-
-    module MapConstructor =
-        module GroupBy =
-            type KeySelector<'T, 'K> = delegate of item: 'T * index: float -> 'K
-
-    module MapIterator =
-        module Every =
-            type Predicate<'T> = delegate of value: 'T * index: float -> obj
-
-        module Filter =
-            type Predicate<'T> = delegate of value: 'T * index: float -> bool
-
-            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
-
-        module Find =
-            type Predicate<'T> = delegate of value: 'T * index: float -> bool
-
-            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
-
-        module FlatMap =
-            type Callback<'T, 'U> =
-                delegate of value: 'T * index: float -> U2<Iterable<'U, obj, unit>, Iterator<'U, obj, unit>>
-
-        module ForEach =
-            type Callbackfn<'T> = delegate of value: 'T * index: float -> unit
-
-        module Map =
-            type Callbackfn<'T, 'U> = delegate of value: 'T * index: float -> 'U
-
-        module Reduce =
-            type Callbackfn<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
-
-            type Callbackfn2<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
-
-            type Callbackfn3<'U, 'T> = delegate of previousValue: 'U * currentValue: 'T * currentIndex: float -> 'U
-
-        module Some =
-            type Predicate<'T> = delegate of value: 'T * index: float -> obj
-
-    module MediaKeyStatusMapIterator =
-        module Every =
-            type Predicate<'T> = delegate of value: 'T * index: float -> obj
-
-        module Filter =
-            type Predicate<'T> = delegate of value: 'T * index: float -> bool
-
-            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
-
-        module Find =
-            type Predicate<'T> = delegate of value: 'T * index: float -> bool
-
-            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
-
-        module FlatMap =
-            type Callback<'T, 'U> =
-                delegate of value: 'T * index: float -> U2<Iterable<'U, obj, unit>, Iterator<'U, obj, unit>>
-
-        module ForEach =
-            type Callbackfn<'T> = delegate of value: 'T * index: float -> unit
-
-        module Map =
-            type Callbackfn<'T, 'U> = delegate of value: 'T * index: float -> 'U
-
-        module Reduce =
-            type Callbackfn<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
-
-            type Callbackfn2<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
-
-            type Callbackfn3<'U, 'T> = delegate of previousValue: 'U * currentValue: 'T * currentIndex: float -> 'U
-
-        module Some =
-            type Predicate<'T> = delegate of value: 'T * index: float -> obj
-
     [<Interface>]
     type Now =
         abstract timeZoneId: (unit -> string) with get, set
@@ -9064,28 +7299,6 @@ module Es =
         [<ParamObject; Emit("$0")>]
         static member Create(``type``: NumberFormatPart.Type, value: string) : NumberFormatPart = jsNative
 
-    module NumberFormatPart =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Type =
-            | [<CompiledName("compact")>] Compact
-            | [<CompiledName("currency")>] Currency
-            | [<CompiledName("decimal")>] Decimal
-            | [<CompiledName("exponentInteger")>] ExponentInteger
-            | [<CompiledName("exponentMinusSign")>] ExponentMinusSign
-            | [<CompiledName("exponentSeparator")>] ExponentSeparator
-            | [<CompiledName("fraction")>] Fraction
-            | [<CompiledName("group")>] Group
-            | [<CompiledName("infinity")>] Infinity
-            | [<CompiledName("integer")>] Integer
-            | [<CompiledName("literal")>] Literal
-            | [<CompiledName("minusSign")>] MinusSign
-            | [<CompiledName("nan")>] Nan
-            | [<CompiledName("percent")>] Percent
-            | [<CompiledName("percentSign")>] PercentSign
-            | [<CompiledName("plusSign")>] PlusSign
-            | [<CompiledName("unit")>] Unit
-            | [<CompiledName("unknown")>] Unknown
-
     [<Interface>]
     type NumberRangeFormatPart =
         abstract ``type``: NumberRangeFormatPart.Type with get, set
@@ -9098,82 +7311,12 @@ module Es =
             : NumberRangeFormatPart =
             jsNative
 
-    module NumberRangeFormatPart =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Source =
-            | [<CompiledName("endRange")>] EndRange
-            | [<CompiledName("shared")>] Shared
-            | [<CompiledName("startRange")>] StartRange
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Type =
-            | [<CompiledName("approximatelySign")>] ApproximatelySign
-            | [<CompiledName("compact")>] Compact
-            | [<CompiledName("currency")>] Currency
-            | [<CompiledName("decimal")>] Decimal
-            | [<CompiledName("exponentInteger")>] ExponentInteger
-            | [<CompiledName("exponentMinusSign")>] ExponentMinusSign
-            | [<CompiledName("exponentSeparator")>] ExponentSeparator
-            | [<CompiledName("fraction")>] Fraction
-            | [<CompiledName("group")>] Group
-            | [<CompiledName("infinity")>] Infinity
-            | [<CompiledName("integer")>] Integer
-            | [<CompiledName("literal")>] Literal
-            | [<CompiledName("minusSign")>] MinusSign
-            | [<CompiledName("nan")>] Nan
-            | [<CompiledName("percent")>] Percent
-            | [<CompiledName("percentSign")>] PercentSign
-            | [<CompiledName("plusSign")>] PlusSign
-            | [<CompiledName("unit")>] Unit
-            | [<CompiledName("unknown")>] Unknown
-
-    module ObjectConstructor =
-        module Create =
-            type Properties =
-                inherit PropertyDescriptorMap
-
-        module DefineProperty =
-            [<Interface>]
-            type Attributes =
-                inherit PropertyDescriptor
-
-                [<ParamObject; Emit("$0")>]
-                static member Create
-                    (
-                        ?configurable: bool,
-                        ?enumerable: bool,
-                        ?value: obj,
-                        ?writable: bool,
-                        ?get: (unit -> obj),
-                        ?set: (obj -> unit)
-                    ) : Attributes =
-                    jsNative
-
-        module Freeze =
-            type Result<'T> =
-                [<EmitIndexer>]
-                abstract Item: string -> obj
-
-        module GetOwnPropertyDescriptors =
-            type Result =
-                [<EmitIndexer>]
-                abstract Item: string -> PropertyDescriptor with get, set
-
-        module GroupBy =
-            type KeySelector<'T, 'K> = delegate of item: 'T * index: float -> 'K
-
     [<Interface>]
     type OverflowOptions =
         abstract overflow: OverflowOptions.Overflow option with get, set
 
         [<ParamObject; Emit("$0")>]
         static member Create(?overflow: OverflowOptions.Overflow) : OverflowOptions = jsNative
-
-    module OverflowOptions =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Overflow =
-            | [<CompiledName("constrain")>] Constrain
-            | [<CompiledName("reject")>] Reject
 
     type PlainDate =
         abstract calendarId: string
@@ -9226,16 +7369,6 @@ module Es =
 
         abstract toJSON: unit -> string
         abstract valueOf: unit -> unit
-
-    module PlainDate =
-        module Until =
-            module Options =
-                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                type Item =
-                    | [<CompiledName("day")>] Day
-                    | [<CompiledName("month")>] Month
-                    | [<CompiledName("week")>] Week
-                    | [<CompiledName("year")>] Year
 
     type PlainDateConstructor =
         abstract from:
@@ -9311,41 +7444,6 @@ module Es =
         abstract toPlainDate: unit -> PlainDate
         abstract toPlainTime: unit -> PlainTime
 
-    module PlainDateTime =
-        module With =
-            [<Interface>]
-            type DateTimeLike =
-                abstract day: float option with get, set
-                abstract era: string option with get, set
-                abstract eraYear: float option with get, set
-                abstract hour: float option with get, set
-                abstract microsecond: float option with get, set
-                abstract millisecond: float option with get, set
-                abstract minute: float option with get, set
-                abstract month: float option with get, set
-                abstract monthCode: string option with get, set
-                abstract nanosecond: float option with get, set
-                abstract second: float option with get, set
-                abstract year: float option with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create
-                    (
-                        ?day: float,
-                        ?era: string,
-                        ?eraYear: float,
-                        ?hour: float,
-                        ?microsecond: float,
-                        ?millisecond: float,
-                        ?minute: float,
-                        ?month: float,
-                        ?monthCode: string,
-                        ?nanosecond: float,
-                        ?second: float,
-                        ?year: float
-                    ) : DateTimeLike =
-                    jsNative
-
     type PlainDateTimeConstructor =
         abstract from:
             item: U5<string, DateTimeLikeObject, PlainDate, PlainDateTime, ZonedDateTime> * ?options: OverflowOptions ->
@@ -9392,14 +7490,6 @@ module Es =
         [<ParamObject; Emit("$0")>]
         static member Create(?calendarName: PlainDateToStringOptions.CalendarName) : PlainDateToStringOptions = jsNative
 
-    module PlainDateToStringOptions =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type CalendarName =
-            | [<CompiledName("always")>] Always
-            | [<CompiledName("auto")>] Auto
-            | [<CompiledName("critical")>] Critical
-            | [<CompiledName("never")>] Never
-
     [<Interface>]
     type PlainDateToZonedDateTimeOptions =
         abstract plainTime: U5<string, PlainDateTime, PlainTime, TimeLikeObject, ZonedDateTime> option with get, set
@@ -9445,23 +7535,6 @@ module Es =
                 toPlainDate: (PlainMonthDayToPlainDateOptions -> PlainDate)
             ) : PlainMonthDay =
             jsNative
-
-    module PlainMonthDay =
-        module With =
-            [<Interface>]
-            type MonthDayLike =
-                abstract day: float option with get, set
-                abstract era: string option with get, set
-                abstract eraYear: float option with get, set
-                abstract month: float option with get, set
-                abstract monthCode: string option with get, set
-                abstract year: float option with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create
-                    (?day: float, ?era: string, ?eraYear: float, ?month: float, ?monthCode: string, ?year: float)
-                    : MonthDayLike =
-                    jsNative
 
     type PlainMonthDayConstructor =
         abstract from: item: U3<string, DateLikeObject, PlainMonthDay> * ?options: OverflowOptions -> PlainMonthDay
@@ -9510,56 +7583,6 @@ module Es =
         abstract toJSON: unit -> string
         abstract valueOf: unit -> unit
 
-    module PlainTime =
-        module Round =
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type RoundTo =
-                | [<CompiledName("hour")>] Hour
-                | [<CompiledName("hours")>] Hours
-                | [<CompiledName("microsecond")>] Microsecond
-                | [<CompiledName("microseconds")>] Microseconds
-                | [<CompiledName("millisecond")>] Millisecond
-                | [<CompiledName("milliseconds")>] Milliseconds
-                | [<CompiledName("minute")>] Minute
-                | [<CompiledName("minutes")>] Minutes
-                | [<CompiledName("nanosecond")>] Nanosecond
-                | [<CompiledName("nanoseconds")>] Nanoseconds
-                | [<CompiledName("second")>] Second
-                | [<CompiledName("seconds")>] Seconds
-
-        module Until =
-            module Options =
-                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                type Item =
-                    | [<CompiledName("hour")>] Hour
-                    | [<CompiledName("microsecond")>] Microsecond
-                    | [<CompiledName("millisecond")>] Millisecond
-                    | [<CompiledName("minute")>] Minute
-                    | [<CompiledName("nanosecond")>] Nanosecond
-                    | [<CompiledName("second")>] Second
-
-        module With =
-            [<Interface>]
-            type TimeLike =
-                abstract hour: float option with get, set
-                abstract microsecond: float option with get, set
-                abstract millisecond: float option with get, set
-                abstract minute: float option with get, set
-                abstract nanosecond: float option with get, set
-                abstract second: float option with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create
-                    (
-                        ?hour: float,
-                        ?microsecond: float,
-                        ?millisecond: float,
-                        ?minute: float,
-                        ?nanosecond: float,
-                        ?second: float
-                    ) : TimeLike =
-                    jsNative
-
     type PlainTimeConstructor =
         abstract from:
             item: U5<string, PlainDateTime, PlainTime, TimeLikeObject, ZonedDateTime> * ?options: OverflowOptions ->
@@ -9593,16 +7616,6 @@ module Es =
                 ?fractionalSecondDigits: ZonedDateTimeToStringOptions.FractionalSecondDigits
             ) : PlainTimeToStringOptions =
             jsNative
-
-    module PlainTimeToStringOptions =
-        module Base =
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type Item =
-                | [<CompiledName("microsecond")>] Microsecond
-                | [<CompiledName("millisecond")>] Millisecond
-                | [<CompiledName("minute")>] Minute
-                | [<CompiledName("nanosecond")>] Nanosecond
-                | [<CompiledName("second")>] Second
 
     [<Interface>]
     type PlainYearMonth =
@@ -9683,29 +7696,6 @@ module Es =
             ) : PlainYearMonth =
             jsNative
 
-    module PlainYearMonth =
-        module Until =
-            module Options =
-                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                type Item =
-                    | [<CompiledName("month")>] Month
-                    | [<CompiledName("year")>] Year
-
-        module With =
-            [<Interface>]
-            type YearMonthLike =
-                abstract era: string option with get, set
-                abstract eraYear: float option with get, set
-                abstract month: float option with get, set
-                abstract monthCode: string option with get, set
-                abstract year: float option with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create
-                    (?era: string, ?eraYear: float, ?month: float, ?monthCode: string, ?year: float)
-                    : YearMonthLike =
-                    jsNative
-
     type PlainYearMonthConstructor =
         abstract from:
             item: U3<string, PlainYearMonth, YearMonthLikeObject> * ?options: OverflowOptions -> PlainYearMonth
@@ -9775,47 +7765,6 @@ module Es =
                 ?maximumSignificantDigits: float
             ) : PluralRulesOptions =
             jsNative
-
-    module PluralRulesOptions =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Type =
-            | [<CompiledName("cardinal")>] Cardinal
-            | [<CompiledName("ordinal")>] Ordinal
-
-    module PromiseConstructor =
-        module AllSettled =
-            module Result =
-                module Item =
-                    [<RequireQualifiedAccess; TypeScriptTaggedUnion("status", CaseRules.None)>]
-                    type Item =
-                        | [<CompiledName("fulfilled")>] Fulfilled of value: obj
-                        | [<CompiledName("rejected")>] Rejected of reason: obj
-
-                    [<RequireQualifiedAccess; TypeScriptTaggedUnion("status", CaseRules.None)>]
-                    type Item2 =
-                        | [<CompiledName("fulfilled")>] Fulfilled of value: obj
-                        | [<CompiledName("rejected")>] Rejected of reason: obj
-
-        type Executor<'T> =
-            delegate of resolve: (U2<'T, PromiseLike<'T>> -> unit) * reject: (obj option -> unit) -> unit
-
-    module ProxyConstructor =
-        module Revocable =
-            [<Interface>]
-            type Result<'T> =
-                abstract proxy: 'T with get, set
-                abstract revoke: (unit -> unit) with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create(proxy: 'T, revoke: (unit -> unit)) : Result<'T> = jsNative
-
-    module ReadonlyMap =
-        module ForEach =
-            type Callbackfn<'V, 'K> = delegate of value: 'V * key: 'K * map: ReadonlyMap<'K, 'V> -> unit
-
-    module ReadonlySet =
-        module ForEach =
-            type Callbackfn<'T> = delegate of value: 'T * value2: 'T * set: ReadonlySet<'T> -> unit
 
     type Reflect =
         /// <summary>
@@ -9946,60 +7895,6 @@ module Es =
         /// <returns>Whether setting the prototype was successful.</returns>
         abstract setPrototypeOf: Reflect.SetPrototypeOf with get, set
 
-    module Reflect =
-        module Construct =
-            type NewTargetConstructor =
-                [<EmitConstructor>]
-                abstract Create: [<ParamArray>] args: obj -> obj
-
-            type TargetConstructor<'A, 'R> =
-                [<EmitConstructor>]
-                abstract Create: [<ParamArray>] args: 'A -> 'R
-
-        type DefineProperty =
-            delegate of
-                target: obj * propertyKey: PropertyKey * attributes: ObjectConstructor.DefineProperty.Attributes -> bool
-
-        type DeleteProperty = delegate of target: obj * propertyKey: PropertyKey -> bool
-
-        type Has = delegate of target: obj * propertyKey: PropertyKey -> bool
-
-        type SetPrototypeOf = delegate of target: obj * proto: obj option -> bool
-
-    module RegExpStringIterator =
-        module Every =
-            type Predicate<'T> = delegate of value: 'T * index: float -> obj
-
-        module Filter =
-            type Predicate<'T> = delegate of value: 'T * index: float -> bool
-
-            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
-
-        module Find =
-            type Predicate<'T> = delegate of value: 'T * index: float -> bool
-
-            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
-
-        module FlatMap =
-            type Callback<'T, 'U> =
-                delegate of value: 'T * index: float -> U2<Iterable<'U, obj, unit>, Iterator<'U, obj, unit>>
-
-        module ForEach =
-            type Callbackfn<'T> = delegate of value: 'T * index: float -> unit
-
-        module Map =
-            type Callbackfn<'T, 'U> = delegate of value: 'T * index: float -> 'U
-
-        module Reduce =
-            type Callbackfn<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
-
-            type Callbackfn2<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
-
-            type Callbackfn3<'U, 'T> = delegate of previousValue: 'U * currentValue: 'T * currentIndex: float -> 'U
-
-        module Some =
-            type Predicate<'T> = delegate of value: 'T * index: float -> obj
-
     [<Interface>]
     type RelativeTimeFormat =
         /// <summary>
@@ -10061,84 +7956,6 @@ module Es =
                 resolvedOptions: (unit -> ResolvedRelativeTimeFormatOptions)
             ) : RelativeTimeFormat =
             jsNative
-
-    module RelativeTimeFormat =
-        module Format =
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type Unit =
-                | [<CompiledName("day")>] Day
-                | [<CompiledName("days")>] Days
-                | [<CompiledName("hour")>] Hour
-                | [<CompiledName("hours")>] Hours
-                | [<CompiledName("minute")>] Minute
-                | [<CompiledName("minutes")>] Minutes
-                | [<CompiledName("month")>] Month
-                | [<CompiledName("months")>] Months
-                | [<CompiledName("quarter")>] Quarter
-                | [<CompiledName("quarters")>] Quarters
-                | [<CompiledName("second")>] Second
-                | [<CompiledName("seconds")>] Seconds
-                | [<CompiledName("week")>] Week
-                | [<CompiledName("weeks")>] Weeks
-                | [<CompiledName("year")>] Year
-                | [<CompiledName("years")>] Years
-
-        module FormatToParts =
-            module Result =
-                [<Interface>]
-                type Item =
-                    abstract ``type``: string with get, set
-                    abstract value: string with get, set
-
-                    [<ParamObject; Emit("$0")>]
-                    static member Create(``type``: string, value: string) : Item = jsNative
-
-                [<Interface>]
-                type Item2 =
-                    abstract ``type``: RelativeTimeFormat.FormatToParts.Result.Item2.Type with get, set
-                    abstract value: string with get, set
-                    abstract unit: RelativeTimeFormat.FormatToParts.Result.Item2.Unit with get, set
-
-                    [<ParamObject; Emit("$0")>]
-                    static member Create
-                        (
-                            ``type``: RelativeTimeFormat.FormatToParts.Result.Item2.Type,
-                            value: string,
-                            unit: RelativeTimeFormat.FormatToParts.Result.Item2.Unit
-                        ) : Item2 =
-                        jsNative
-
-                module Item2 =
-                    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                    type Type =
-                        | [<CompiledName("compact")>] Compact
-                        | [<CompiledName("currency")>] Currency
-                        | [<CompiledName("decimal")>] Decimal
-                        | [<CompiledName("exponentInteger")>] ExponentInteger
-                        | [<CompiledName("exponentMinusSign")>] ExponentMinusSign
-                        | [<CompiledName("exponentSeparator")>] ExponentSeparator
-                        | [<CompiledName("fraction")>] Fraction
-                        | [<CompiledName("group")>] Group
-                        | [<CompiledName("infinity")>] Infinity
-                        | [<CompiledName("integer")>] Integer
-                        | [<CompiledName("minusSign")>] MinusSign
-                        | [<CompiledName("nan")>] Nan
-                        | [<CompiledName("percent")>] Percent
-                        | [<CompiledName("percentSign")>] PercentSign
-                        | [<CompiledName("plusSign")>] PlusSign
-                        | [<CompiledName("unit")>] Unit
-                        | [<CompiledName("unknown")>] Unknown
-
-                    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                    type Unit =
-                        | [<CompiledName("day")>] Day
-                        | [<CompiledName("hour")>] Hour
-                        | [<CompiledName("minute")>] Minute
-                        | [<CompiledName("month")>] Month
-                        | [<CompiledName("quarter")>] Quarter
-                        | [<CompiledName("second")>] Second
-                        | [<CompiledName("week")>] Week
-                        | [<CompiledName("year")>] Year
 
     type RelativeTimeFormatConstructor =
         /// <summary>
@@ -10285,26 +8102,6 @@ module Es =
             ) : ResolvedDisplayNamesOptions =
             jsNative
 
-    module ResolvedDisplayNamesOptions =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Fallback =
-            | [<CompiledName("code")>] Code
-            | [<CompiledName("none")>] None
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type LanguageDisplay =
-            | [<CompiledName("dialect")>] Dialect
-            | [<CompiledName("standard")>] Standard
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Type =
-            | [<CompiledName("calendar")>] Calendar
-            | [<CompiledName("currency")>] Currency
-            | [<CompiledName("dateTimeField")>] DateTimeField
-            | [<CompiledName("language")>] Language
-            | [<CompiledName("region")>] Region
-            | [<CompiledName("script")>] Script
-
     [<Interface>]
     type ResolvedDurationFormatOptions =
         abstract locale: string with get, set
@@ -10374,13 +8171,6 @@ module Es =
             : ResolvedListFormatOptions =
             jsNative
 
-    module ResolvedListFormatOptions =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Type =
-            | [<CompiledName("conjunction")>] Conjunction
-            | [<CompiledName("disjunction")>] Disjunction
-            | [<CompiledName("unit")>] Unit
-
     [<Interface>]
     type ResolvedNumberFormatOptions =
         abstract locale: string with get, set
@@ -10432,14 +8222,6 @@ module Es =
             ) : ResolvedNumberFormatOptions =
             jsNative
 
-    module ResolvedNumberFormatOptions =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type UseGrouping =
-            | [<CompiledName("always")>] Always
-            | [<CompiledName("auto")>] Auto
-            | [<CompiledName("min2")>] Min2
-            | [<CompiledValue(false)>] False
-
     [<Interface>]
     type ResolvedPluralRulesOptions =
         abstract locale: string with get, set
@@ -10464,17 +8246,6 @@ module Es =
                 ?maximumSignificantDigits: float
             ) : ResolvedPluralRulesOptions =
             jsNative
-
-    module ResolvedPluralRulesOptions =
-        module PluralCategories =
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type Item =
-                | [<CompiledName("few")>] Few
-                | [<CompiledName("many")>] Many
-                | [<CompiledName("one")>] One
-                | [<CompiledName("other")>] Other
-                | [<CompiledName("two")>] Two
-                | [<CompiledName("zero")>] Zero
 
     [<Interface>]
     type ResolvedRelativeTimeFormatOptions =
@@ -10503,13 +8274,6 @@ module Es =
             (locale: string, granularity: ResolvedSegmenterOptions.Granularity)
             : ResolvedSegmenterOptions =
             jsNative
-
-    module ResolvedSegmenterOptions =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Granularity =
-            | [<CompiledName("grapheme")>] Grapheme
-            | [<CompiledName("sentence")>] Sentence
-            | [<CompiledName("word")>] Word
 
     [<Interface>]
     type RoundingOptions<'Units> =
@@ -10639,128 +8403,9 @@ module Es =
         [<ParamObject; Emit("$0")>]
         static member Create(containing: (float option -> SegmentData option)) : Segments = jsNative
 
-    module Set =
-        module ForEach =
-            type Callbackfn<'T> = delegate of value: 'T * value2: 'T * set: Set<'T> -> unit
-
     type Set2<'T> = delegate of target: 'T * p: obj * newValue: obj * receiver: obj -> bool
 
-    module SetIterator =
-        module Every =
-            type Predicate<'T> = delegate of value: 'T * index: float -> obj
-
-        module Filter =
-            type Predicate<'T> = delegate of value: 'T * index: float -> bool
-
-            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
-
-        module Find =
-            type Predicate<'T> = delegate of value: 'T * index: float -> bool
-
-            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
-
-        module FlatMap =
-            type Callback<'T, 'U> =
-                delegate of value: 'T * index: float -> U2<Iterable<'U, obj, unit>, Iterator<'U, obj, unit>>
-
-        module ForEach =
-            type Callbackfn<'T> = delegate of value: 'T * index: float -> unit
-
-        module Map =
-            type Callbackfn<'T, 'U> = delegate of value: 'T * index: float -> 'U
-
-        module Reduce =
-            type Callbackfn<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
-
-            type Callbackfn2<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
-
-            type Callbackfn3<'U, 'T> = delegate of previousValue: 'U * currentValue: 'T * currentIndex: float -> 'U
-
-        module Some =
-            type Predicate<'T> = delegate of value: 'T * index: float -> obj
-
     type SetPrototypeOf<'T> = delegate of target: 'T * v: obj option -> bool
-
-    module SharedArrayBufferConstructor =
-        [<Interface>]
-        type Options =
-            abstract maxByteLength: float option with get, set
-
-            [<ParamObject; Emit("$0")>]
-            static member Create(?maxByteLength: float) : Options = jsNative
-
-    module String =
-        module Match =
-            type Matcher = interface end
-
-        module Normalize =
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type Form =
-                | NFC
-                | NFD
-                | NFKC
-                | NFKD
-
-        module Replace =
-            type Replacer = delegate of substring: string * args: obj[] -> string
-
-            type Replacer2 = delegate of substring: string * args: obj[] -> string
-
-            type SearchValue = interface end
-
-            type SearchValue2 = interface end
-
-        module ReplaceAll =
-            type Replacer = delegate of substring: string * args: obj[] -> string
-
-        module Search =
-            type Searcher = interface end
-
-        module Split =
-            type Splitter = interface end
-
-    module StringConstructor =
-        module Raw =
-            [<Interface>]
-            type Template =
-                abstract raw: U2<ArrayLike<string>, string[]> with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create(raw: U2<ArrayLike<string>, string[]>) : Template = jsNative
-
-    module StylePropertyMapReadOnlyIterator =
-        module Every =
-            type Predicate<'T> = delegate of value: 'T * index: float -> obj
-
-        module Filter =
-            type Predicate<'T> = delegate of value: 'T * index: float -> bool
-
-            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
-
-        module Find =
-            type Predicate<'T> = delegate of value: 'T * index: float -> bool
-
-            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
-
-        module FlatMap =
-            type Callback<'T, 'U> =
-                delegate of value: 'T * index: float -> U2<Iterable<'U, obj, unit>, Iterator<'U, obj, unit>>
-
-        module ForEach =
-            type Callbackfn<'T> = delegate of value: 'T * index: float -> unit
-
-        module Map =
-            type Callbackfn<'T, 'U> = delegate of value: 'T * index: float -> 'U
-
-        module Reduce =
-            type Callbackfn<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
-
-            type Callbackfn2<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
-
-            type Callbackfn3<'U, 'T> = delegate of previousValue: 'U * currentValue: 'T * currentIndex: float -> 'U
-
-        module Some =
-            type Predicate<'T> = delegate of value: 'T * index: float -> obj
 
     [<Interface>]
     type Temporal =
@@ -10801,12 +8446,6 @@ module Es =
         [<ParamObject; Emit("$0")>]
         static member Create(?direction: TextInfo.Direction) : TextInfo = jsNative
 
-    module TextInfo =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Direction =
-            | [<CompiledName("ltr")>] Ltr
-            | [<CompiledName("rtl")>] Rtl
-
     [<Interface>]
     type TimeLikeObject =
         abstract hour: float option with get, set
@@ -10832,18 +8471,6 @@ module Es =
             : ToStringRoundingOptions<'Units> =
             jsNative
 
-    module ToStringRoundingOptions =
-        [<Interface>]
-        type Base<'Units> =
-            abstract smallestUnit: U2<'Units, string> option with get, set
-            abstract roundingMode: NumberFormatOptions.RoundingMode option with get, set
-
-            [<ParamObject; Emit("$0")>]
-            static member Create
-                (?smallestUnit: U2<'Units, string>, ?roundingMode: NumberFormatOptions.RoundingMode)
-                : Base<'Units> =
-                jsNative
-
     [<Interface>]
     type ToStringRoundingOptionsWithFractionalSeconds<'Units> =
         inherit ToStringRoundingOptions<'Units>
@@ -10864,326 +8491,6 @@ module Es =
 
         [<ParamObject; Emit("$0")>]
         static member Create(direction: ZonedDateTime.GetTimeZoneTransition.Direction) : TransitionOptions = jsNative
-
-    module URLSearchParamsIterator =
-        module Every =
-            type Predicate<'T> = delegate of value: 'T * index: float -> obj
-
-        module Filter =
-            type Predicate<'T> = delegate of value: 'T * index: float -> bool
-
-            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
-
-        module Find =
-            type Predicate<'T> = delegate of value: 'T * index: float -> bool
-
-            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
-
-        module FlatMap =
-            type Callback<'T, 'U> =
-                delegate of value: 'T * index: float -> U2<Iterable<'U, obj, unit>, Iterator<'U, obj, unit>>
-
-        module ForEach =
-            type Callbackfn<'T> = delegate of value: 'T * index: float -> unit
-
-        module Map =
-            type Callbackfn<'T, 'U> = delegate of value: 'T * index: float -> 'U
-
-        module Reduce =
-            type Callbackfn<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
-
-            type Callbackfn2<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
-
-            type Callbackfn3<'U, 'T> = delegate of previousValue: 'U * currentValue: 'T * currentIndex: float -> 'U
-
-        module Some =
-            type Predicate<'T> = delegate of value: 'T * index: float -> obj
-
-    module Uint16Array =
-        module Every =
-            type Predicate = delegate of value: float * index: float * array: Uint16Array<ArrayBufferLike> -> obj
-
-        module Filter =
-            type Predicate = delegate of value: float * index: float * array: Uint16Array<ArrayBufferLike> -> obj
-
-        module Find =
-            type Predicate = delegate of value: float * index: float * obj: Uint16Array<ArrayBufferLike> -> bool
-
-        module FindIndex =
-            type Predicate = delegate of value: float * index: float * obj: Uint16Array<ArrayBufferLike> -> bool
-
-        module FindLast =
-            type Predicate = delegate of value: float * index: float * array: Uint16Array<ArrayBufferLike> -> bool
-
-            type Predicate2 = delegate of value: float * index: float * array: Uint16Array<ArrayBufferLike> -> obj
-
-        module FindLastIndex =
-            type Predicate = delegate of value: float * index: float * array: Uint16Array<ArrayBufferLike> -> obj
-
-        module ForEach =
-            type Callbackfn = delegate of value: float * index: float * array: Uint16Array<ArrayBufferLike> -> unit
-
-        module Map =
-            type Callbackfn = delegate of value: float * index: float * array: Uint16Array<ArrayBufferLike> -> float
-
-        module Reduce =
-            type Callbackfn =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Uint16Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn2 =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Uint16Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn3<'U> =
-                delegate of
-                    previousValue: 'U * currentValue: float * currentIndex: float * array: Uint16Array<ArrayBufferLike> ->
-                        'U
-
-        module ReduceRight =
-            type Callbackfn =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Uint16Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn2 =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Uint16Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn3<'U> =
-                delegate of
-                    previousValue: 'U * currentValue: float * currentIndex: float * array: Uint16Array<ArrayBufferLike> ->
-                        'U
-
-        module Some =
-            type Predicate = delegate of value: float * index: float * array: Uint16Array<ArrayBufferLike> -> obj
-
-        module Sort =
-            type CompareFn = delegate of a: float * b: float -> float
-
-        module ToSorted =
-            type CompareFn = delegate of a: float * b: float -> float
-
-    module Uint16ArrayConstructor =
-        module From =
-            type Mapfn<'T> = delegate of v: 'T * k: float -> float
-
-            type Mapfn2<'T> = delegate of v: 'T * k: float -> float
-
-    module Uint32Array =
-        module Every =
-            type Predicate = delegate of value: float * index: float * array: Uint32Array<ArrayBufferLike> -> obj
-
-        module Filter =
-            type Predicate = delegate of value: float * index: float * array: Uint32Array<ArrayBufferLike> -> obj
-
-        module Find =
-            type Predicate = delegate of value: float * index: float * obj: Uint32Array<ArrayBufferLike> -> bool
-
-        module FindIndex =
-            type Predicate = delegate of value: float * index: float * obj: Uint32Array<ArrayBufferLike> -> bool
-
-        module FindLast =
-            type Predicate = delegate of value: float * index: float * array: Uint32Array<ArrayBufferLike> -> bool
-
-            type Predicate2 = delegate of value: float * index: float * array: Uint32Array<ArrayBufferLike> -> obj
-
-        module FindLastIndex =
-            type Predicate = delegate of value: float * index: float * array: Uint32Array<ArrayBufferLike> -> obj
-
-        module ForEach =
-            type Callbackfn = delegate of value: float * index: float * array: Uint32Array<ArrayBufferLike> -> unit
-
-        module Map =
-            type Callbackfn = delegate of value: float * index: float * array: Uint32Array<ArrayBufferLike> -> float
-
-        module Reduce =
-            type Callbackfn =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Uint32Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn2 =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Uint32Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn3<'U> =
-                delegate of
-                    previousValue: 'U * currentValue: float * currentIndex: float * array: Uint32Array<ArrayBufferLike> ->
-                        'U
-
-        module ReduceRight =
-            type Callbackfn =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Uint32Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn2 =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Uint32Array<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn3<'U> =
-                delegate of
-                    previousValue: 'U * currentValue: float * currentIndex: float * array: Uint32Array<ArrayBufferLike> ->
-                        'U
-
-        module Some =
-            type Predicate = delegate of value: float * index: float * array: Uint32Array<ArrayBufferLike> -> obj
-
-        module Sort =
-            type CompareFn = delegate of a: float * b: float -> float
-
-        module ToSorted =
-            type CompareFn = delegate of a: float * b: float -> float
-
-    module Uint32ArrayConstructor =
-        module From =
-            type Mapfn<'T> = delegate of v: 'T * k: float -> float
-
-            type Mapfn2<'T> = delegate of v: 'T * k: float -> float
-
-    module Uint8ArrayConstructor =
-        module From =
-            type Mapfn<'T> = delegate of v: 'T * k: float -> float
-
-            type Mapfn2<'T> = delegate of v: 'T * k: float -> float
-
-        module FromBase64 =
-            [<Interface>]
-            type Options =
-                abstract alphabet: Uint8Array.ToBase64.Options.Alphabet option with get, set
-                abstract lastChunkHandling: Uint8Array.SetFromBase64.Options.LastChunkHandling option with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create
-                    (
-                        ?alphabet: Uint8Array.ToBase64.Options.Alphabet,
-                        ?lastChunkHandling: Uint8Array.SetFromBase64.Options.LastChunkHandling
-                    ) : Options =
-                    jsNative
-
-    module Uint8ClampedArray =
-        module Every =
-            type Predicate = delegate of value: float * index: float * array: Uint8ClampedArray<ArrayBufferLike> -> obj
-
-        module Filter =
-            type Predicate = delegate of value: float * index: float * array: Uint8ClampedArray<ArrayBufferLike> -> obj
-
-        module Find =
-            type Predicate = delegate of value: float * index: float * obj: Uint8ClampedArray<ArrayBufferLike> -> bool
-
-        module FindIndex =
-            type Predicate = delegate of value: float * index: float * obj: Uint8ClampedArray<ArrayBufferLike> -> bool
-
-        module FindLast =
-            type Predicate = delegate of value: float * index: float * array: Uint8ClampedArray<ArrayBufferLike> -> bool
-
-            type Predicate2 = delegate of value: float * index: float * array: Uint8ClampedArray<ArrayBufferLike> -> obj
-
-        module FindLastIndex =
-            type Predicate = delegate of value: float * index: float * array: Uint8ClampedArray<ArrayBufferLike> -> obj
-
-        module ForEach =
-            type Callbackfn =
-                delegate of value: float * index: float * array: Uint8ClampedArray<ArrayBufferLike> -> unit
-
-        module Map =
-            type Callbackfn =
-                delegate of value: float * index: float * array: Uint8ClampedArray<ArrayBufferLike> -> float
-
-        module Reduce =
-            type Callbackfn =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Uint8ClampedArray<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn2 =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Uint8ClampedArray<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn3<'U> =
-                delegate of
-                    previousValue: 'U *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Uint8ClampedArray<ArrayBufferLike> ->
-                        'U
-
-        module ReduceRight =
-            type Callbackfn =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Uint8ClampedArray<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn2 =
-                delegate of
-                    previousValue: float *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Uint8ClampedArray<ArrayBufferLike> ->
-                        float
-
-            type Callbackfn3<'U> =
-                delegate of
-                    previousValue: 'U *
-                    currentValue: float *
-                    currentIndex: float *
-                    array: Uint8ClampedArray<ArrayBufferLike> ->
-                        'U
-
-        module Some =
-            type Predicate = delegate of value: float * index: float * array: Uint8ClampedArray<ArrayBufferLike> -> obj
-
-        module Sort =
-            type CompareFn = delegate of a: float * b: float -> float
-
-        module ToSorted =
-            type CompareFn = delegate of a: float * b: float -> float
-
-    module Uint8ClampedArrayConstructor =
-        module From =
-            type Mapfn<'T> = delegate of v: 'T * k: float -> float
-
-            type Mapfn2<'T> = delegate of v: 'T * k: float -> float
 
     [<Interface>]
     type WeekInfo =
@@ -11212,22 +8519,6 @@ module Es =
             (?year: float, ?era: string, ?eraYear: float, ?month: float, ?monthCode: string, ?calendar: string)
             : YearMonthLikeObject =
             jsNative
-
-    module YearMonthLikeObject =
-        [<Interface>]
-        type Base =
-            abstract year: float option with get, set
-            abstract era: string option with get, set
-            abstract eraYear: float option with get, set
-            abstract month: float option with get, set
-            abstract monthCode: string option with get, set
-            abstract calendar: string option with get, set
-
-            [<ParamObject; Emit("$0")>]
-            static member Create
-                (?year: float, ?era: string, ?eraYear: float, ?month: float, ?monthCode: string, ?calendar: string)
-                : Base =
-                jsNative
 
     type ZonedDateTime =
         abstract calendarId: string
@@ -11305,76 +8596,6 @@ module Es =
         abstract toPlainTime: unit -> PlainTime
         abstract toPlainDateTime: unit -> PlainDateTime
 
-    module ZonedDateTime =
-        module GetTimeZoneTransition =
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type Direction =
-                | [<CompiledName("next")>] Next
-                | [<CompiledName("previous")>] Previous
-
-        module Round =
-            module RoundTo =
-                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                type Item =
-                    | [<CompiledName("day")>] Day
-                    | [<CompiledName("hour")>] Hour
-                    | [<CompiledName("microsecond")>] Microsecond
-                    | [<CompiledName("millisecond")>] Millisecond
-                    | [<CompiledName("minute")>] Minute
-                    | [<CompiledName("nanosecond")>] Nanosecond
-                    | [<CompiledName("second")>] Second
-
-        module Until =
-            module Options =
-                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                type Item =
-                    | [<CompiledName("day")>] Day
-                    | [<CompiledName("hour")>] Hour
-                    | [<CompiledName("microsecond")>] Microsecond
-                    | [<CompiledName("millisecond")>] Millisecond
-                    | [<CompiledName("minute")>] Minute
-                    | [<CompiledName("month")>] Month
-                    | [<CompiledName("nanosecond")>] Nanosecond
-                    | [<CompiledName("second")>] Second
-                    | [<CompiledName("week")>] Week
-                    | [<CompiledName("year")>] Year
-
-        module With =
-            [<Interface>]
-            type ZonedDateTimeLike =
-                abstract day: float option with get, set
-                abstract era: string option with get, set
-                abstract eraYear: float option with get, set
-                abstract hour: float option with get, set
-                abstract microsecond: float option with get, set
-                abstract millisecond: float option with get, set
-                abstract minute: float option with get, set
-                abstract month: float option with get, set
-                abstract monthCode: string option with get, set
-                abstract nanosecond: float option with get, set
-                abstract offset: string option with get, set
-                abstract second: float option with get, set
-                abstract year: float option with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create
-                    (
-                        ?day: float,
-                        ?era: string,
-                        ?eraYear: float,
-                        ?hour: float,
-                        ?microsecond: float,
-                        ?millisecond: float,
-                        ?minute: float,
-                        ?month: float,
-                        ?monthCode: string,
-                        ?nanosecond: float,
-                        ?offset: string,
-                        ?second: float,
-                        ?year: float
-                    ) : ZonedDateTimeLike =
-                    jsNative
-
     type ZonedDateTimeConstructor =
         abstract from:
             item: U3<string, ZonedDateTime, ZonedDateTimeLikeObject> * ?options: ZonedDateTimeFromOptions ->
@@ -11402,21 +8623,6 @@ module Es =
                 ?overflow: OverflowOptions.Overflow
             ) : ZonedDateTimeFromOptions =
             jsNative
-
-    module ZonedDateTimeFromOptions =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Disambiguation =
-            | [<CompiledName("compatible")>] Compatible
-            | [<CompiledName("earlier")>] Earlier
-            | [<CompiledName("later")>] Later
-            | [<CompiledName("reject")>] Reject
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Offset =
-            | [<CompiledName("ignore")>] Ignore
-            | [<CompiledName("prefer")>] Prefer
-            | [<CompiledName("reject")>] Reject
-            | [<CompiledName("use")>] Use
 
     [<Interface>]
     type ZonedDateTimeLikeObject =
@@ -11462,45 +8668,6 @@ module Es =
                 ?calendarName: PlainDateToStringOptions.CalendarName
             ) : ZonedDateTimeToStringOptions =
             jsNative
-
-    module ZonedDateTimeToStringOptions =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type FractionalSecondDigits =
-            | [<CompiledName("auto")>] Auto
-            | [<CompiledValue(0)>] N0
-            | [<CompiledValue(1)>] N1
-            | [<CompiledValue(2)>] N2
-            | [<CompiledValue(3)>] N3
-            | [<CompiledValue(4)>] N4
-            | [<CompiledValue(5)>] N5
-            | [<CompiledValue(6)>] N6
-            | [<CompiledValue(7)>] N7
-            | [<CompiledValue(8)>] N8
-            | [<CompiledValue(9)>] N9
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Offset =
-            | [<CompiledName("auto")>] Auto
-            | [<CompiledName("never")>] Never
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type SmallestUnit =
-            | [<CompiledName("microsecond")>] Microsecond
-            | [<CompiledName("microseconds")>] Microseconds
-            | [<CompiledName("millisecond")>] Millisecond
-            | [<CompiledName("milliseconds")>] Milliseconds
-            | [<CompiledName("minute")>] Minute
-            | [<CompiledName("minutes")>] Minutes
-            | [<CompiledName("nanosecond")>] Nanosecond
-            | [<CompiledName("nanoseconds")>] Nanoseconds
-            | [<CompiledName("second")>] Second
-            | [<CompiledName("seconds")>] Seconds
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type TimeZoneName =
-            | [<CompiledName("auto")>] Auto
-            | [<CompiledName("critical")>] Critical
-            | [<CompiledName("never")>] Never
 
     [<Interface>]
     type Map<'K, 'V> =
@@ -11920,40 +9087,6 @@ module Es =
         /// immediately returns that element value. Otherwise, find returns undefined.
         /// </param>
         abstract find: predicate: Generator.Find.Predicate2<'T> -> 'T option
-
-    module Generator =
-        module Every =
-            type Predicate<'T> = delegate of value: 'T * index: float -> obj
-
-        module Filter =
-            type Predicate<'T> = delegate of value: 'T * index: float -> bool
-
-            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
-
-        module Find =
-            type Predicate<'T> = delegate of value: 'T * index: float -> bool
-
-            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
-
-        module FlatMap =
-            type Callback<'T, 'U> =
-                delegate of value: 'T * index: float -> U2<Iterable<'U, obj, unit>, Iterator<'U, obj, unit>>
-
-        module ForEach =
-            type Callbackfn<'T> = delegate of value: 'T * index: float -> unit
-
-        module Map =
-            type Callbackfn<'T, 'U> = delegate of value: 'T * index: float -> 'U
-
-        module Reduce =
-            type Callbackfn<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
-
-            type Callbackfn2<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
-
-            type Callbackfn3<'U, 'T> = delegate of previousValue: 'U * currentValue: 'T * currentIndex: float -> 'U
-
-        module Some =
-            type Predicate<'T> = delegate of value: 'T * index: float -> obj
 
     type GeneratorFunction =
         /// <summary>
@@ -12800,40 +9933,6 @@ module Es =
         /// immediately returns that element value. Otherwise, find returns undefined.
         /// </param>
         abstract find: predicate: StringIterator.Find.Predicate2<'T> -> 'T option
-
-    module StringIterator =
-        module Every =
-            type Predicate<'T> = delegate of value: 'T * index: float -> obj
-
-        module Filter =
-            type Predicate<'T> = delegate of value: 'T * index: float -> bool
-
-            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
-
-        module Find =
-            type Predicate<'T> = delegate of value: 'T * index: float -> bool
-
-            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
-
-        module FlatMap =
-            type Callback<'T, 'U> =
-                delegate of value: 'T * index: float -> U2<Iterable<'U, obj, unit>, Iterator<'U, obj, unit>>
-
-        module ForEach =
-            type Callbackfn<'T> = delegate of value: 'T * index: float -> unit
-
-        module Map =
-            type Callbackfn<'T, 'U> = delegate of value: 'T * index: float -> 'U
-
-        module Reduce =
-            type Callbackfn<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
-
-            type Callbackfn2<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
-
-            type Callbackfn3<'U, 'T> = delegate of previousValue: 'U * currentValue: 'T * currentIndex: float -> 'U
-
-        module Some =
-            type Predicate<'T> = delegate of value: 'T * index: float -> obj
 
     [<Interface>]
     type ProxyHandler<'T> =
@@ -15846,12 +12945,6 @@ module Es =
         abstract bind<'A, 'B, 'R> :
             thisArg: obj * [<ParamArray>] args: 'A -> NewableFunction.Bind.ResultConstructor<'B, 'R>
 
-    module NewableFunction =
-        module Bind =
-            type ResultConstructor<'B, 'R> =
-                [<EmitConstructor>]
-                abstract Create: [<ParamArray>] args: 'B -> 'R
-
     type IArguments =
         abstract length: float with get, set
         abstract callee: Function with get, set
@@ -17664,10 +14757,6 @@ module Es =
     type PromiseConstructorLike =
         [<EmitConstructor>]
         abstract Create<'T> : executor: PromiseConstructorLike.Executor<'T> -> PromiseLike<'T>
-
-    module PromiseConstructorLike =
-        type Executor<'T> =
-            delegate of resolve: (U2<'T, PromiseLike<'T>> -> unit) * reject: (obj option -> unit) -> unit
 
     [<Interface>]
     type PromiseLike<'T> =
@@ -23316,6 +20405,2917 @@ module Es =
         [<EmitConstructor>]
         abstract Create: unit -> AsyncDisposableStack
 
+    module ArrayBufferConstructor =
+        [<Interface>]
+        type Options =
+            abstract maxByteLength: float option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create(?maxByteLength: float) : Options = jsNative
+
+    module ArrayConstructor =
+        module From =
+            type Mapfn<'T, 'U> = delegate of v: 'T * k: float -> 'U
+
+            type Mapfn2<'T, 'U> = delegate of v: 'T * k: float -> 'U
+
+        module FromAsync =
+            type MapFn<'T, 'U> = delegate of value: obj * index: float -> 'U
+
+    module ArrayIterator =
+        module Every =
+            type Predicate<'T> = delegate of value: 'T * index: float -> obj
+
+        module Filter =
+            type Predicate<'T> = delegate of value: 'T * index: float -> bool
+
+            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
+
+        module Find =
+            type Predicate<'T> = delegate of value: 'T * index: float -> bool
+
+            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
+
+        module FlatMap =
+            type Callback<'T, 'U> =
+                delegate of value: 'T * index: float -> U2<Iterable<'U, obj, unit>, Iterator<'U, obj, unit>>
+
+        module ForEach =
+            type Callbackfn<'T> = delegate of value: 'T * index: float -> unit
+
+        module Map =
+            type Callbackfn<'T, 'U> = delegate of value: 'T * index: float -> 'U
+
+        module Reduce =
+            type Callbackfn<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
+
+            type Callbackfn2<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
+
+            type Callbackfn3<'U, 'T> = delegate of previousValue: 'U * currentValue: 'T * currentIndex: float -> 'U
+
+        module Some =
+            type Predicate<'T> = delegate of value: 'T * index: float -> obj
+
+    module Atomics =
+        module Wait =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Result =
+                | [<CompiledName("not-equal")>] NotEqual
+                | [<CompiledName("ok")>] Ok
+                | [<CompiledName("timed-out")>] TimedOut
+
+        module WaitAsync =
+            [<Interface>]
+            type Result =
+                abstract async: bool with get, set
+                abstract value: Atomics.WaitAsync.Result.Value with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create(async: bool, value: Atomics.WaitAsync.Result.Value) : Result = jsNative
+
+            [<Interface>]
+            type Result2 =
+                abstract async: bool with get, set
+                abstract value: Promise<Atomics.WaitAsync.Result2.Value.Item> with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create(async: bool, value: Promise<Atomics.WaitAsync.Result2.Value.Item>) : Result2 =
+                    jsNative
+
+            [<Interface>]
+            type Result3 =
+                abstract async: bool with get, set
+                abstract value: Atomics.WaitAsync.Result.Value with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create(async: bool, value: Atomics.WaitAsync.Result.Value) : Result3 = jsNative
+
+            [<Interface>]
+            type Result4 =
+                abstract async: bool with get, set
+                abstract value: Promise<Atomics.WaitAsync.Result2.Value.Item> with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create(async: bool, value: Promise<Atomics.WaitAsync.Result2.Value.Item>) : Result4 =
+                    jsNative
+
+            module Result =
+                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                type Value =
+                    | [<CompiledName("not-equal")>] NotEqual
+                    | [<CompiledName("timed-out")>] TimedOut
+
+            module Result2 =
+                module Value =
+                    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                    type Item =
+                        | [<CompiledName("ok")>] Ok
+                        | [<CompiledName("timed-out")>] TimedOut
+
+    module BigInt64Array =
+        module Every =
+            type Predicate = delegate of value: bigint * index: float * array: BigInt64Array<ArrayBufferLike> -> bool
+
+        module Filter =
+            type Predicate = delegate of value: bigint * index: float * array: BigInt64Array<ArrayBufferLike> -> obj
+
+        module Find =
+            type Predicate = delegate of value: bigint * index: float * array: BigInt64Array<ArrayBufferLike> -> bool
+
+        module FindIndex =
+            type Predicate = delegate of value: bigint * index: float * array: BigInt64Array<ArrayBufferLike> -> bool
+
+        module FindLast =
+            type Predicate = delegate of value: bigint * index: float * array: BigInt64Array<ArrayBufferLike> -> bool
+
+            type Predicate2 = delegate of value: bigint * index: float * array: BigInt64Array<ArrayBufferLike> -> obj
+
+        module FindLastIndex =
+            type Predicate = delegate of value: bigint * index: float * array: BigInt64Array<ArrayBufferLike> -> obj
+
+        module ForEach =
+            type Callbackfn = delegate of value: bigint * index: float * array: BigInt64Array<ArrayBufferLike> -> unit
+
+        module Map =
+            type Callbackfn = delegate of value: bigint * index: float * array: BigInt64Array<ArrayBufferLike> -> bigint
+
+        module Reduce =
+            type Callbackfn =
+                delegate of
+                    previousValue: bigint *
+                    currentValue: bigint *
+                    currentIndex: float *
+                    array: BigInt64Array<ArrayBufferLike> ->
+                        bigint
+
+            type Callbackfn2<'U> =
+                delegate of
+                    previousValue: 'U *
+                    currentValue: bigint *
+                    currentIndex: float *
+                    array: BigInt64Array<ArrayBufferLike> ->
+                        'U
+
+        module ReduceRight =
+            type Callbackfn =
+                delegate of
+                    previousValue: bigint *
+                    currentValue: bigint *
+                    currentIndex: float *
+                    array: BigInt64Array<ArrayBufferLike> ->
+                        bigint
+
+            type Callbackfn2<'U> =
+                delegate of
+                    previousValue: 'U *
+                    currentValue: bigint *
+                    currentIndex: float *
+                    array: BigInt64Array<ArrayBufferLike> ->
+                        'U
+
+        module Some =
+            type Predicate = delegate of value: bigint * index: float * array: BigInt64Array<ArrayBufferLike> -> bool
+
+        module Sort =
+            type CompareFn = delegate of a: bigint * b: bigint -> U2<float, bigint>
+
+        module ToSorted =
+            type CompareFn = delegate of a: bigint * b: bigint -> float
+
+    module BigInt64ArrayConstructor =
+        module From =
+            type Mapfn<'U> = delegate of v: 'U * k: float -> bigint
+
+            type Mapfn2<'T> = delegate of v: 'T * k: float -> bigint
+
+    module BigIntToLocaleStringOptions =
+        type MinimumFractionDigits =
+            | N0 = 0
+            | N1 = 1
+            | N2 = 2
+            | N3 = 3
+            | N4 = 4
+            | N5 = 5
+            | N6 = 6
+            | N7 = 7
+            | N8 = 8
+            | N9 = 9
+            | N10 = 10
+            | N11 = 11
+            | N12 = 12
+            | N13 = 13
+            | N14 = 14
+            | N15 = 15
+            | N16 = 16
+            | N17 = 17
+            | N18 = 18
+            | N19 = 19
+            | N20 = 20
+
+        type MinimumIntegerDigits =
+            | N1 = 1
+            | N2 = 2
+            | N3 = 3
+            | N4 = 4
+            | N5 = 5
+            | N6 = 6
+            | N7 = 7
+            | N8 = 8
+            | N9 = 9
+            | N10 = 10
+            | N11 = 11
+            | N12 = 12
+            | N13 = 13
+            | N14 = 14
+            | N15 = 15
+            | N16 = 16
+            | N17 = 17
+            | N18 = 18
+            | N19 = 19
+            | N20 = 20
+            | N21 = 21
+
+    module BigUint64Array =
+        module Every =
+            type Predicate = delegate of value: bigint * index: float * array: BigUint64Array<ArrayBufferLike> -> bool
+
+        module Filter =
+            type Predicate = delegate of value: bigint * index: float * array: BigUint64Array<ArrayBufferLike> -> obj
+
+        module Find =
+            type Predicate = delegate of value: bigint * index: float * array: BigUint64Array<ArrayBufferLike> -> bool
+
+        module FindIndex =
+            type Predicate = delegate of value: bigint * index: float * array: BigUint64Array<ArrayBufferLike> -> bool
+
+        module FindLast =
+            type Predicate = delegate of value: bigint * index: float * array: BigUint64Array<ArrayBufferLike> -> bool
+
+            type Predicate2 = delegate of value: bigint * index: float * array: BigUint64Array<ArrayBufferLike> -> obj
+
+        module FindLastIndex =
+            type Predicate = delegate of value: bigint * index: float * array: BigUint64Array<ArrayBufferLike> -> obj
+
+        module ForEach =
+            type Callbackfn = delegate of value: bigint * index: float * array: BigUint64Array<ArrayBufferLike> -> unit
+
+        module Map =
+            type Callbackfn =
+                delegate of value: bigint * index: float * array: BigUint64Array<ArrayBufferLike> -> bigint
+
+        module Reduce =
+            type Callbackfn =
+                delegate of
+                    previousValue: bigint *
+                    currentValue: bigint *
+                    currentIndex: float *
+                    array: BigUint64Array<ArrayBufferLike> ->
+                        bigint
+
+            type Callbackfn2<'U> =
+                delegate of
+                    previousValue: 'U *
+                    currentValue: bigint *
+                    currentIndex: float *
+                    array: BigUint64Array<ArrayBufferLike> ->
+                        'U
+
+        module ReduceRight =
+            type Callbackfn =
+                delegate of
+                    previousValue: bigint *
+                    currentValue: bigint *
+                    currentIndex: float *
+                    array: BigUint64Array<ArrayBufferLike> ->
+                        bigint
+
+            type Callbackfn2<'U> =
+                delegate of
+                    previousValue: 'U *
+                    currentValue: bigint *
+                    currentIndex: float *
+                    array: BigUint64Array<ArrayBufferLike> ->
+                        'U
+
+        module Some =
+            type Predicate = delegate of value: bigint * index: float * array: BigUint64Array<ArrayBufferLike> -> bool
+
+        module Sort =
+            type CompareFn = delegate of a: bigint * b: bigint -> U2<float, bigint>
+
+        module ToSorted =
+            type CompareFn = delegate of a: bigint * b: bigint -> float
+
+    module BigUint64ArrayConstructor =
+        module From =
+            type Mapfn<'U> = delegate of v: 'U * k: float -> bigint
+
+            type Mapfn2<'T> = delegate of v: 'T * k: float -> bigint
+
+    module ClassAccessorDecoratorContext =
+        [<Interface>]
+        type Access<'This, 'Value> =
+            /// <summary>
+            /// Determines whether an object has a property with the same name as the decorated element.
+            /// </summary>
+            abstract has: ``object``: 'This -> bool
+            /// <summary>
+            /// Invokes the getter on the provided object.
+            /// </summary>
+            /// <example><c>let value = context.access.get(instance);</c></example>
+            abstract get: ``object``: 'This -> 'Value
+            /// <summary>
+            /// Invokes the setter on the provided object.
+            /// </summary>
+            /// <example><c>context.access.set(instance, value);</c></example>
+            abstract set: ``object``: 'This * value: 'Value -> unit
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (has: ('This -> bool), get: ('This -> 'Value), set: Action<'This, 'Value>)
+                : Access<'This, 'Value> =
+                jsNative
+
+    module ClassFieldDecoratorContext =
+        [<Interface>]
+        type Access<'This, 'Value> =
+            /// <summary>
+            /// Determines whether an object has a property with the same name as the decorated element.
+            /// </summary>
+            abstract has: ``object``: 'This -> bool
+            /// <summary>
+            /// Gets the value of the field on the provided object.
+            /// </summary>
+            abstract get: ``object``: 'This -> 'Value
+            /// <summary>
+            /// Sets the value of the field on the provided object.
+            /// </summary>
+            abstract set: ``object``: 'This * value: 'Value -> unit
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (has: ('This -> bool), get: ('This -> 'Value), set: Action<'This, 'Value>)
+                : Access<'This, 'Value> =
+                jsNative
+
+    module ClassGetterDecoratorContext =
+        [<Interface>]
+        type Access<'This, 'Value> =
+            /// <summary>
+            /// Determines whether an object has a property with the same name as the decorated element.
+            /// </summary>
+            abstract has: ``object``: 'This -> bool
+            /// <summary>
+            /// Invokes the getter on the provided object.
+            /// </summary>
+            /// <example><c>let value = context.access.get(instance);</c></example>
+            abstract get: ``object``: 'This -> 'Value
+
+            [<ParamObject; Emit("$0")>]
+            static member Create(has: ('This -> bool), get: ('This -> 'Value)) : Access<'This, 'Value> = jsNative
+
+    module ClassMethodDecoratorContext =
+        [<Interface>]
+        type Access<'This, 'Value> =
+            /// <summary>
+            /// Determines whether an object has a property with the same name as the decorated element.
+            /// </summary>
+            abstract has: ``object``: 'This -> bool
+            /// <summary>
+            /// Gets the current value of the method from the provided object.
+            /// </summary>
+            /// <example><c>let fn = context.access.get(instance);</c></example>
+            abstract get: ``object``: 'This -> 'Value
+
+            [<ParamObject; Emit("$0")>]
+            static member Create(has: ('This -> bool), get: ('This -> 'Value)) : Access<'This, 'Value> = jsNative
+
+    module ClassSetterDecoratorContext =
+        [<Interface>]
+        type Access<'This, 'Value> =
+            /// <summary>
+            /// Determines whether an object has a property with the same name as the decorated element.
+            /// </summary>
+            abstract has: ``object``: 'This -> bool
+            /// <summary>
+            /// Invokes the setter on the provided object.
+            /// </summary>
+            /// <example><c>context.access.set(instance, value);</c></example>
+            abstract set: ``object``: 'This * value: 'Value -> unit
+
+            [<ParamObject; Emit("$0")>]
+            static member Create(has: ('This -> bool), set: Action<'This, 'Value>) : Access<'This, 'Value> = jsNative
+
+    module CollatorOptions =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Collation =
+            | [<CompiledName("big5han")>] Big5han
+            | [<CompiledName("compat")>] Compat
+            | [<CompiledName("default")>] Default
+            | [<CompiledName("dict")>] Dict
+            | [<CompiledName("direct")>] Direct
+            | [<CompiledName("ducet")>] Ducet
+            | [<CompiledName("emoji")>] Emoji
+            | [<CompiledName("eor")>] Eor
+            | [<CompiledName("gb2312")>] Gb2312
+            | [<CompiledName("phonebk")>] Phonebk
+            | [<CompiledName("phonetic")>] Phonetic
+            | [<CompiledName("pinyin")>] Pinyin
+            | [<CompiledName("reformed")>] Reformed
+            | [<CompiledName("searchjl")>] Searchjl
+            | [<CompiledName("stroke")>] Stroke
+            | [<CompiledName("trad")>] Trad
+            | [<CompiledName("unihan")>] Unihan
+            | [<CompiledName("zhuyin")>] Zhuyin
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Sensitivity =
+            | [<CompiledName("accent")>] Accent
+            | [<CompiledName("base")>] Base
+            | [<CompiledName("case")>] Case
+            | [<CompiledName("variant")>] Variant
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Usage =
+            | [<CompiledName("search")>] Search
+            | [<CompiledName("sort")>] Sort
+
+    module DateTimeFormatOptions =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type DateStyle =
+            | [<CompiledName("full")>] Full
+            | [<CompiledName("long")>] Long
+            | [<CompiledName("medium")>] Medium
+            | [<CompiledName("short")>] Short
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type FormatMatcher =
+            | [<CompiledName("basic")>] Basic
+            | [<CompiledName("best fit")>] BestFit
+
+        type FractionalSecondDigits =
+            | N1 = 1
+            | N2 = 2
+            | N3 = 3
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type HourCycle =
+            | [<CompiledName("h11")>] H11
+            | [<CompiledName("h12")>] H12
+            | [<CompiledName("h23")>] H23
+            | [<CompiledName("h24")>] H24
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Month =
+            | [<CompiledName("2-digit")>] N2Digit
+            | [<CompiledName("long")>] Long
+            | [<CompiledName("narrow")>] Narrow
+            | [<CompiledName("numeric")>] Numeric
+            | [<CompiledName("short")>] Short
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type TimeZoneName =
+            | [<CompiledName("long")>] Long
+            | [<CompiledName("longGeneric")>] LongGeneric
+            | [<CompiledName("longOffset")>] LongOffset
+            | [<CompiledName("short")>] Short
+            | [<CompiledName("shortGeneric")>] ShortGeneric
+            | [<CompiledName("shortOffset")>] ShortOffset
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Year =
+            | [<CompiledName("2-digit")>] N2Digit
+            | [<CompiledName("numeric")>] Numeric
+
+    module DateTimeFormatPart =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Type =
+            | [<CompiledName("day")>] Day
+            | [<CompiledName("dayPeriod")>] DayPeriod
+            | [<CompiledName("era")>] Era
+            | [<CompiledName("fractionalSecond")>] FractionalSecond
+            | [<CompiledName("hour")>] Hour
+            | [<CompiledName("literal")>] Literal
+            | [<CompiledName("minute")>] Minute
+            | [<CompiledName("month")>] Month
+            | [<CompiledName("second")>] Second
+            | [<CompiledName("timeZoneName")>] TimeZoneName
+            | [<CompiledName("unknown")>] Unknown
+            | [<CompiledName("weekday")>] Weekday
+            | [<CompiledName("year")>] Year
+
+    module DecoratorContext =
+        type ItemConstructor =
+            [<EmitConstructor>]
+            abstract Create: [<ParamArray>] args: obj -> obj
+
+    module Duration =
+        module Round =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type RoundTo =
+                | [<CompiledName("day")>] Day
+                | [<CompiledName("days")>] Days
+                | [<CompiledName("hour")>] Hour
+                | [<CompiledName("hours")>] Hours
+                | [<CompiledName("microsecond")>] Microsecond
+                | [<CompiledName("microseconds")>] Microseconds
+                | [<CompiledName("millisecond")>] Millisecond
+                | [<CompiledName("milliseconds")>] Milliseconds
+                | [<CompiledName("minute")>] Minute
+                | [<CompiledName("minutes")>] Minutes
+                | [<CompiledName("nanosecond")>] Nanosecond
+                | [<CompiledName("nanoseconds")>] Nanoseconds
+                | [<CompiledName("second")>] Second
+                | [<CompiledName("seconds")>] Seconds
+
+        module With =
+            [<Interface>]
+            type DurationLike =
+                abstract days: float option with get, set
+                abstract hours: float option with get, set
+                abstract microseconds: float option with get, set
+                abstract milliseconds: float option with get, set
+                abstract minutes: float option with get, set
+                abstract months: float option with get, set
+                abstract nanoseconds: float option with get, set
+                abstract seconds: float option with get, set
+                abstract weeks: float option with get, set
+                abstract years: float option with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create
+                    (
+                        ?days: float,
+                        ?hours: float,
+                        ?microseconds: float,
+                        ?milliseconds: float,
+                        ?minutes: float,
+                        ?months: float,
+                        ?nanoseconds: float,
+                        ?seconds: float,
+                        ?weeks: float,
+                        ?years: float
+                    ) : DurationLike =
+                    jsNative
+
+    module DurationFormat =
+        module Format =
+            [<Interface>]
+            type Duration =
+                abstract days: float option with get, set
+                abstract hours: float option with get, set
+                abstract microseconds: float option with get, set
+                abstract milliseconds: float option with get, set
+                abstract minutes: float option with get, set
+                abstract months: float option with get, set
+                abstract nanoseconds: float option with get, set
+                abstract seconds: float option with get, set
+                abstract weeks: float option with get, set
+                abstract years: float option with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create
+                    (
+                        ?days: float,
+                        ?hours: float,
+                        ?microseconds: float,
+                        ?milliseconds: float,
+                        ?minutes: float,
+                        ?months: float,
+                        ?nanoseconds: float,
+                        ?seconds: float,
+                        ?weeks: float,
+                        ?years: float
+                    ) : Duration =
+                    jsNative
+
+        module FormatToParts =
+            module Result =
+                [<Interface>]
+                type Item =
+                    abstract ``type``: string with get, set
+                    abstract value: string with get, set
+                    abstract unit: Fable.Core.TS.Es.ZonedDateTime.Until.Options.Item option with get, set
+
+                    [<ParamObject; Emit("$0")>]
+                    static member Create
+                        (``type``: string, value: string, ?unit: Fable.Core.TS.Es.ZonedDateTime.Until.Options.Item)
+                        : Item =
+                        jsNative
+
+                [<Interface>]
+                type Item2 =
+                    abstract ``type``: RelativeTimeFormat.FormatToParts.Result.Item2.Type with get, set
+                    abstract value: string with get, set
+                    abstract unit: Fable.Core.TS.Es.ZonedDateTime.Until.Options.Item with get, set
+
+                    [<ParamObject; Emit("$0")>]
+                    static member Create
+                        (
+                            ``type``: RelativeTimeFormat.FormatToParts.Result.Item2.Type,
+                            value: string,
+                            unit: Fable.Core.TS.Es.ZonedDateTime.Until.Options.Item
+                        ) : Item2 =
+                        jsNative
+
+    module DurationFormatOptions =
+        type FractionalDigits =
+            | N0 = 0
+            | N1 = 1
+            | N2 = 2
+            | N3 = 3
+            | N4 = 4
+            | N5 = 5
+            | N6 = 6
+            | N7 = 7
+            | N8 = 8
+            | N9 = 9
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Milliseconds =
+            | [<CompiledName("long")>] Long
+            | [<CompiledName("narrow")>] Narrow
+            | [<CompiledName("numeric")>] Numeric
+            | [<CompiledName("short")>] Short
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Style =
+            | [<CompiledName("digital")>] Digital
+            | [<CompiledName("long")>] Long
+            | [<CompiledName("narrow")>] Narrow
+            | [<CompiledName("short")>] Short
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type YearsDisplay =
+            | [<CompiledName("always")>] Always
+            | [<CompiledName("auto")>] Auto
+
+    module DurationRoundingOptions =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type LargestUnit =
+            | [<CompiledName("auto")>] Auto
+            | [<CompiledName("day")>] Day
+            | [<CompiledName("days")>] Days
+            | [<CompiledName("hour")>] Hour
+            | [<CompiledName("hours")>] Hours
+            | [<CompiledName("microsecond")>] Microsecond
+            | [<CompiledName("microseconds")>] Microseconds
+            | [<CompiledName("millisecond")>] Millisecond
+            | [<CompiledName("milliseconds")>] Milliseconds
+            | [<CompiledName("minute")>] Minute
+            | [<CompiledName("minutes")>] Minutes
+            | [<CompiledName("month")>] Month
+            | [<CompiledName("months")>] Months
+            | [<CompiledName("nanosecond")>] Nanosecond
+            | [<CompiledName("nanoseconds")>] Nanoseconds
+            | [<CompiledName("second")>] Second
+            | [<CompiledName("seconds")>] Seconds
+            | [<CompiledName("week")>] Week
+            | [<CompiledName("weeks")>] Weeks
+            | [<CompiledName("year")>] Year
+            | [<CompiledName("years")>] Years
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type SmallestUnit =
+            | [<CompiledName("day")>] Day
+            | [<CompiledName("days")>] Days
+            | [<CompiledName("hour")>] Hour
+            | [<CompiledName("hours")>] Hours
+            | [<CompiledName("microsecond")>] Microsecond
+            | [<CompiledName("microseconds")>] Microseconds
+            | [<CompiledName("millisecond")>] Millisecond
+            | [<CompiledName("milliseconds")>] Milliseconds
+            | [<CompiledName("minute")>] Minute
+            | [<CompiledName("minutes")>] Minutes
+            | [<CompiledName("month")>] Month
+            | [<CompiledName("months")>] Months
+            | [<CompiledName("nanosecond")>] Nanosecond
+            | [<CompiledName("nanoseconds")>] Nanoseconds
+            | [<CompiledName("second")>] Second
+            | [<CompiledName("seconds")>] Seconds
+            | [<CompiledName("week")>] Week
+            | [<CompiledName("weeks")>] Weeks
+            | [<CompiledName("year")>] Year
+            | [<CompiledName("years")>] Years
+
+    module DurationToStringOptions =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type SmallestUnit =
+            | [<CompiledName("microsecond")>] Microsecond
+            | [<CompiledName("microseconds")>] Microseconds
+            | [<CompiledName("millisecond")>] Millisecond
+            | [<CompiledName("milliseconds")>] Milliseconds
+            | [<CompiledName("nanosecond")>] Nanosecond
+            | [<CompiledName("nanoseconds")>] Nanoseconds
+            | [<CompiledName("second")>] Second
+            | [<CompiledName("seconds")>] Seconds
+
+        module Base =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Item =
+                | [<CompiledName("microsecond")>] Microsecond
+                | [<CompiledName("millisecond")>] Millisecond
+                | [<CompiledName("nanosecond")>] Nanosecond
+                | [<CompiledName("second")>] Second
+
+    module Float16Array =
+        module Every =
+            type Predicate = delegate of value: float * index: float * array: Float16Array<ArrayBufferLike> -> obj
+
+        module Filter =
+            type Predicate = delegate of value: float * index: float * array: Float16Array<ArrayBufferLike> -> obj
+
+        module Find =
+            type Predicate = delegate of value: float * index: float * obj: Float16Array<ArrayBufferLike> -> bool
+
+        module FindIndex =
+            type Predicate = delegate of value: float * index: float * obj: Float16Array<ArrayBufferLike> -> bool
+
+        module FindLast =
+            type Predicate = delegate of value: float * index: float * array: Float16Array<ArrayBufferLike> -> bool
+
+            type Predicate2 = delegate of value: float * index: float * array: Float16Array<ArrayBufferLike> -> obj
+
+        module FindLastIndex =
+            type Predicate = delegate of value: float * index: float * array: Float16Array<ArrayBufferLike> -> obj
+
+        module ForEach =
+            type Callbackfn = delegate of value: float * index: float * array: Float16Array<ArrayBufferLike> -> unit
+
+        module Map =
+            type Callbackfn = delegate of value: float * index: float * array: Float16Array<ArrayBufferLike> -> float
+
+        module Reduce =
+            type Callbackfn =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Float16Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn2 =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Float16Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn3<'U> =
+                delegate of
+                    previousValue: 'U * currentValue: float * currentIndex: float * array: Float16Array<ArrayBufferLike> ->
+                        'U
+
+        module ReduceRight =
+            type Callbackfn =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Float16Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn2 =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Float16Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn3<'U> =
+                delegate of
+                    previousValue: 'U * currentValue: float * currentIndex: float * array: Float16Array<ArrayBufferLike> ->
+                        'U
+
+        module Some =
+            type Predicate = delegate of value: float * index: float * array: Float16Array<ArrayBufferLike> -> obj
+
+        module Sort =
+            type CompareFn = delegate of a: float * b: float -> float
+
+        module ToSorted =
+            type CompareFn = delegate of a: float * b: float -> float
+
+    module Float16ArrayConstructor =
+        module From =
+            type Mapfn<'T> = delegate of v: 'T * k: float -> float
+
+            type Mapfn2<'T> = delegate of v: 'T * k: float -> float
+
+    module Float32Array =
+        module Every =
+            type Predicate = delegate of value: float * index: float * array: Float32Array<ArrayBufferLike> -> obj
+
+        module Filter =
+            type Predicate = delegate of value: float * index: float * array: Float32Array<ArrayBufferLike> -> obj
+
+        module Find =
+            type Predicate = delegate of value: float * index: float * obj: Float32Array<ArrayBufferLike> -> bool
+
+        module FindIndex =
+            type Predicate = delegate of value: float * index: float * obj: Float32Array<ArrayBufferLike> -> bool
+
+        module FindLast =
+            type Predicate = delegate of value: float * index: float * array: Float32Array<ArrayBufferLike> -> bool
+
+            type Predicate2 = delegate of value: float * index: float * array: Float32Array<ArrayBufferLike> -> obj
+
+        module FindLastIndex =
+            type Predicate = delegate of value: float * index: float * array: Float32Array<ArrayBufferLike> -> obj
+
+        module ForEach =
+            type Callbackfn = delegate of value: float * index: float * array: Float32Array<ArrayBufferLike> -> unit
+
+        module Map =
+            type Callbackfn = delegate of value: float * index: float * array: Float32Array<ArrayBufferLike> -> float
+
+        module Reduce =
+            type Callbackfn =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Float32Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn2 =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Float32Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn3<'U> =
+                delegate of
+                    previousValue: 'U * currentValue: float * currentIndex: float * array: Float32Array<ArrayBufferLike> ->
+                        'U
+
+        module ReduceRight =
+            type Callbackfn =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Float32Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn2 =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Float32Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn3<'U> =
+                delegate of
+                    previousValue: 'U * currentValue: float * currentIndex: float * array: Float32Array<ArrayBufferLike> ->
+                        'U
+
+        module Some =
+            type Predicate = delegate of value: float * index: float * array: Float32Array<ArrayBufferLike> -> obj
+
+        module Sort =
+            type CompareFn = delegate of a: float * b: float -> float
+
+        module ToSorted =
+            type CompareFn = delegate of a: float * b: float -> float
+
+    module Float32ArrayConstructor =
+        module From =
+            type Mapfn<'T> = delegate of v: 'T * k: float -> float
+
+            type Mapfn2<'T> = delegate of v: 'T * k: float -> float
+
+    module Float64Array =
+        module Every =
+            type Predicate = delegate of value: float * index: float * array: Float64Array<ArrayBufferLike> -> obj
+
+        module Filter =
+            type Predicate = delegate of value: float * index: float * array: Float64Array<ArrayBufferLike> -> obj
+
+        module Find =
+            type Predicate = delegate of value: float * index: float * obj: Float64Array<ArrayBufferLike> -> bool
+
+        module FindIndex =
+            type Predicate = delegate of value: float * index: float * obj: Float64Array<ArrayBufferLike> -> bool
+
+        module FindLast =
+            type Predicate = delegate of value: float * index: float * array: Float64Array<ArrayBufferLike> -> bool
+
+            type Predicate2 = delegate of value: float * index: float * array: Float64Array<ArrayBufferLike> -> obj
+
+        module FindLastIndex =
+            type Predicate = delegate of value: float * index: float * array: Float64Array<ArrayBufferLike> -> obj
+
+        module ForEach =
+            type Callbackfn = delegate of value: float * index: float * array: Float64Array<ArrayBufferLike> -> unit
+
+        module Map =
+            type Callbackfn = delegate of value: float * index: float * array: Float64Array<ArrayBufferLike> -> float
+
+        module Reduce =
+            type Callbackfn =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Float64Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn2 =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Float64Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn3<'U> =
+                delegate of
+                    previousValue: 'U * currentValue: float * currentIndex: float * array: Float64Array<ArrayBufferLike> ->
+                        'U
+
+        module ReduceRight =
+            type Callbackfn =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Float64Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn2 =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Float64Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn3<'U> =
+                delegate of
+                    previousValue: 'U * currentValue: float * currentIndex: float * array: Float64Array<ArrayBufferLike> ->
+                        'U
+
+        module Some =
+            type Predicate = delegate of value: float * index: float * array: Float64Array<ArrayBufferLike> -> obj
+
+        module Sort =
+            type CompareFn = delegate of a: float * b: float -> float
+
+        module ToSorted =
+            type CompareFn = delegate of a: float * b: float -> float
+
+    module Float64ArrayConstructor =
+        module From =
+            type Mapfn<'T> = delegate of v: 'T * k: float -> float
+
+            type Mapfn2<'T> = delegate of v: 'T * k: float -> float
+
+    module FormDataIterator =
+        module Every =
+            type Predicate<'T> = delegate of value: 'T * index: float -> obj
+
+        module Filter =
+            type Predicate<'T> = delegate of value: 'T * index: float -> bool
+
+            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
+
+        module Find =
+            type Predicate<'T> = delegate of value: 'T * index: float -> bool
+
+            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
+
+        module FlatMap =
+            type Callback<'T, 'U> =
+                delegate of value: 'T * index: float -> U2<Iterable<'U, obj, unit>, Iterator<'U, obj, unit>>
+
+        module ForEach =
+            type Callbackfn<'T> = delegate of value: 'T * index: float -> unit
+
+        module Map =
+            type Callbackfn<'T, 'U> = delegate of value: 'T * index: float -> 'U
+
+        module Reduce =
+            type Callbackfn<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
+
+            type Callbackfn2<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
+
+            type Callbackfn3<'U, 'T> = delegate of previousValue: 'U * currentValue: 'T * currentIndex: float -> 'U
+
+        module Some =
+            type Predicate<'T> = delegate of value: 'T * index: float -> obj
+
+    module Generator =
+        module Every =
+            type Predicate<'T> = delegate of value: 'T * index: float -> obj
+
+        module Filter =
+            type Predicate<'T> = delegate of value: 'T * index: float -> bool
+
+            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
+
+        module Find =
+            type Predicate<'T> = delegate of value: 'T * index: float -> bool
+
+            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
+
+        module FlatMap =
+            type Callback<'T, 'U> =
+                delegate of value: 'T * index: float -> U2<Iterable<'U, obj, unit>, Iterator<'U, obj, unit>>
+
+        module ForEach =
+            type Callbackfn<'T> = delegate of value: 'T * index: float -> unit
+
+        module Map =
+            type Callbackfn<'T, 'U> = delegate of value: 'T * index: float -> 'U
+
+        module Reduce =
+            type Callbackfn<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
+
+            type Callbackfn2<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
+
+            type Callbackfn3<'U, 'T> = delegate of previousValue: 'U * currentValue: 'T * currentIndex: float -> 'U
+
+        module Some =
+            type Predicate<'T> = delegate of value: 'T * index: float -> obj
+
+    module HeadersIterator =
+        module Every =
+            type Predicate<'T> = delegate of value: 'T * index: float -> obj
+
+        module Filter =
+            type Predicate<'T> = delegate of value: 'T * index: float -> bool
+
+            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
+
+        module Find =
+            type Predicate<'T> = delegate of value: 'T * index: float -> bool
+
+            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
+
+        module FlatMap =
+            type Callback<'T, 'U> =
+                delegate of value: 'T * index: float -> U2<Iterable<'U, obj, unit>, Iterator<'U, obj, unit>>
+
+        module ForEach =
+            type Callbackfn<'T> = delegate of value: 'T * index: float -> unit
+
+        module Map =
+            type Callbackfn<'T, 'U> = delegate of value: 'T * index: float -> 'U
+
+        module Reduce =
+            type Callbackfn<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
+
+            type Callbackfn2<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
+
+            type Callbackfn3<'U, 'T> = delegate of previousValue: 'U * currentValue: 'T * currentIndex: float -> 'U
+
+        module Some =
+            type Predicate<'T> = delegate of value: 'T * index: float -> obj
+
+    module Int16Array =
+        module Every =
+            type Predicate = delegate of value: float * index: float * array: Int16Array<ArrayBufferLike> -> obj
+
+        module Filter =
+            type Predicate = delegate of value: float * index: float * array: Int16Array<ArrayBufferLike> -> obj
+
+        module Find =
+            type Predicate = delegate of value: float * index: float * obj: Int16Array<ArrayBufferLike> -> bool
+
+        module FindIndex =
+            type Predicate = delegate of value: float * index: float * obj: Int16Array<ArrayBufferLike> -> bool
+
+        module FindLast =
+            type Predicate = delegate of value: float * index: float * array: Int16Array<ArrayBufferLike> -> bool
+
+            type Predicate2 = delegate of value: float * index: float * array: Int16Array<ArrayBufferLike> -> obj
+
+        module FindLastIndex =
+            type Predicate = delegate of value: float * index: float * array: Int16Array<ArrayBufferLike> -> obj
+
+        module ForEach =
+            type Callbackfn = delegate of value: float * index: float * array: Int16Array<ArrayBufferLike> -> unit
+
+        module Map =
+            type Callbackfn = delegate of value: float * index: float * array: Int16Array<ArrayBufferLike> -> float
+
+        module Reduce =
+            type Callbackfn =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Int16Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn2 =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Int16Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn3<'U> =
+                delegate of
+                    previousValue: 'U * currentValue: float * currentIndex: float * array: Int16Array<ArrayBufferLike> ->
+                        'U
+
+        module ReduceRight =
+            type Callbackfn =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Int16Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn2 =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Int16Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn3<'U> =
+                delegate of
+                    previousValue: 'U * currentValue: float * currentIndex: float * array: Int16Array<ArrayBufferLike> ->
+                        'U
+
+        module Some =
+            type Predicate = delegate of value: float * index: float * array: Int16Array<ArrayBufferLike> -> obj
+
+        module Sort =
+            type CompareFn = delegate of a: float * b: float -> float
+
+        module ToSorted =
+            type CompareFn = delegate of a: float * b: float -> float
+
+    module Int16ArrayConstructor =
+        module From =
+            type Mapfn<'T> = delegate of v: 'T * k: float -> float
+
+            type Mapfn2<'T> = delegate of v: 'T * k: float -> float
+
+    module Int32Array =
+        module Every =
+            type Predicate = delegate of value: float * index: float * array: Int32Array<ArrayBufferLike> -> obj
+
+        module Filter =
+            type Predicate = delegate of value: float * index: float * array: Int32Array<ArrayBufferLike> -> obj
+
+        module Find =
+            type Predicate = delegate of value: float * index: float * obj: Int32Array<ArrayBufferLike> -> bool
+
+        module FindIndex =
+            type Predicate = delegate of value: float * index: float * obj: Int32Array<ArrayBufferLike> -> bool
+
+        module FindLast =
+            type Predicate = delegate of value: float * index: float * array: Int32Array<ArrayBufferLike> -> bool
+
+            type Predicate2 = delegate of value: float * index: float * array: Int32Array<ArrayBufferLike> -> obj
+
+        module FindLastIndex =
+            type Predicate = delegate of value: float * index: float * array: Int32Array<ArrayBufferLike> -> obj
+
+        module ForEach =
+            type Callbackfn = delegate of value: float * index: float * array: Int32Array<ArrayBufferLike> -> unit
+
+        module Map =
+            type Callbackfn = delegate of value: float * index: float * array: Int32Array<ArrayBufferLike> -> float
+
+        module Reduce =
+            type Callbackfn =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Int32Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn2 =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Int32Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn3<'U> =
+                delegate of
+                    previousValue: 'U * currentValue: float * currentIndex: float * array: Int32Array<ArrayBufferLike> ->
+                        'U
+
+        module ReduceRight =
+            type Callbackfn =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Int32Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn2 =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Int32Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn3<'U> =
+                delegate of
+                    previousValue: 'U * currentValue: float * currentIndex: float * array: Int32Array<ArrayBufferLike> ->
+                        'U
+
+        module Some =
+            type Predicate = delegate of value: float * index: float * array: Int32Array<ArrayBufferLike> -> obj
+
+        module Sort =
+            type CompareFn = delegate of a: float * b: float -> float
+
+        module ToSorted =
+            type CompareFn = delegate of a: float * b: float -> float
+
+    module Int32ArrayConstructor =
+        module From =
+            type Mapfn<'T> = delegate of v: 'T * k: float -> float
+
+            type Mapfn2<'T> = delegate of v: 'T * k: float -> float
+
+    module Int8Array =
+        module Every =
+            type Predicate = delegate of value: float * index: float * array: Int8Array<ArrayBufferLike> -> obj
+
+        module Filter =
+            type Predicate = delegate of value: float * index: float * array: Int8Array<ArrayBufferLike> -> obj
+
+        module Find =
+            type Predicate = delegate of value: float * index: float * obj: Int8Array<ArrayBufferLike> -> bool
+
+        module FindIndex =
+            type Predicate = delegate of value: float * index: float * obj: Int8Array<ArrayBufferLike> -> bool
+
+        module FindLast =
+            type Predicate = delegate of value: float * index: float * array: Int8Array<ArrayBufferLike> -> bool
+
+            type Predicate2 = delegate of value: float * index: float * array: Int8Array<ArrayBufferLike> -> obj
+
+        module FindLastIndex =
+            type Predicate = delegate of value: float * index: float * array: Int8Array<ArrayBufferLike> -> obj
+
+        module ForEach =
+            type Callbackfn = delegate of value: float * index: float * array: Int8Array<ArrayBufferLike> -> unit
+
+        module Map =
+            type Callbackfn = delegate of value: float * index: float * array: Int8Array<ArrayBufferLike> -> float
+
+        module Reduce =
+            type Callbackfn =
+                delegate of
+                    previousValue: float * currentValue: float * currentIndex: float * array: Int8Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn2 =
+                delegate of
+                    previousValue: float * currentValue: float * currentIndex: float * array: Int8Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn3<'U> =
+                delegate of
+                    previousValue: 'U * currentValue: float * currentIndex: float * array: Int8Array<ArrayBufferLike> ->
+                        'U
+
+        module ReduceRight =
+            type Callbackfn =
+                delegate of
+                    previousValue: float * currentValue: float * currentIndex: float * array: Int8Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn2 =
+                delegate of
+                    previousValue: float * currentValue: float * currentIndex: float * array: Int8Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn3<'U> =
+                delegate of
+                    previousValue: 'U * currentValue: float * currentIndex: float * array: Int8Array<ArrayBufferLike> ->
+                        'U
+
+        module Some =
+            type Predicate = delegate of value: float * index: float * array: Int8Array<ArrayBufferLike> -> obj
+
+        module Sort =
+            type CompareFn = delegate of a: float * b: float -> float
+
+        module ToSorted =
+            type CompareFn = delegate of a: float * b: float -> float
+
+    module Int8ArrayConstructor =
+        module From =
+            type Mapfn<'T> = delegate of v: 'T * k: float -> float
+
+            type Mapfn2<'T> = delegate of v: 'T * k: float -> float
+
+    module Intl =
+        module DisplayNames =
+            module SupportedLocalesOf =
+                [<Interface>]
+                type Options =
+                    abstract localeMatcher: NumberFormatOptions.LocaleMatcher option with get, set
+
+                    [<ParamObject; Emit("$0")>]
+                    static member Create(?localeMatcher: NumberFormatOptions.LocaleMatcher) : Options = jsNative
+
+        module DurationFormat =
+            module SupportedLocalesOf =
+                [<Interface>]
+                type Options =
+                    abstract localeMatcher: NumberFormatOptions.LocaleMatcher option with get, set
+
+                    [<ParamObject; Emit("$0")>]
+                    static member Create(?localeMatcher: NumberFormatOptions.LocaleMatcher) : Options = jsNative
+
+        module ListFormat =
+            module SupportedLocalesOf =
+                [<Interface>]
+                type Options =
+                    /// <summary>
+                    /// The locale matching algorithm to use. For information about this option, see <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_negotiation">Intl page</a>.
+                    /// </summary>
+                    abstract localeMatcher: NumberFormatOptions.LocaleMatcher option with get, set
+
+                    [<ParamObject; Emit("$0")>]
+                    static member Create(?localeMatcher: NumberFormatOptions.LocaleMatcher) : Options = jsNative
+
+        module PluralRules =
+            module SupportedLocalesOf =
+                [<Interface>]
+                type Options =
+                    abstract localeMatcher: NumberFormatOptions.LocaleMatcher option with get, set
+
+                    [<ParamObject; Emit("$0")>]
+                    static member Create(?localeMatcher: NumberFormatOptions.LocaleMatcher) : Options = jsNative
+
+                [<Interface>]
+                type Options2 =
+                    abstract localeMatcher: NumberFormatOptions.LocaleMatcher option with get, set
+
+                    [<ParamObject; Emit("$0")>]
+                    static member Create(?localeMatcher: NumberFormatOptions.LocaleMatcher) : Options2 = jsNative
+
+        module Segmenter =
+            module SupportedLocalesOf =
+                [<Interface>]
+                type Options =
+                    /// <summary>
+                    /// The locale matching algorithm to use. For information about this option, see <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_negotiation">Intl page</a>.
+                    /// </summary>
+                    abstract localeMatcher: NumberFormatOptions.LocaleMatcher option with get, set
+
+                    [<ParamObject; Emit("$0")>]
+                    static member Create(?localeMatcher: NumberFormatOptions.LocaleMatcher) : Options = jsNative
+
+        module SupportedValuesOf =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Key =
+                | [<CompiledName("calendar")>] Calendar
+                | [<CompiledName("collation")>] Collation
+                | [<CompiledName("currency")>] Currency
+                | [<CompiledName("numberingSystem")>] NumberingSystem
+                | [<CompiledName("timeZone")>] TimeZone
+                | [<CompiledName("unit")>] Unit
+
+    module Iterator2 =
+        module Every =
+            type Predicate<'T> = delegate of value: 'T * index: float -> obj
+
+        module Filter =
+            type Predicate<'T> = delegate of value: 'T * index: float -> bool
+
+            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
+
+        module Find =
+            type Predicate<'T> = delegate of value: 'T * index: float -> bool
+
+            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
+
+        module FlatMap =
+            type Callback<'T, 'U> =
+                delegate of value: 'T * index: float -> U2<Iterable<'U, obj, unit>, Iterator<'U, obj, unit>>
+
+        module ForEach =
+            type Callbackfn<'T> = delegate of value: 'T * index: float -> unit
+
+        module Map =
+            type Callbackfn<'T, 'U> = delegate of value: 'T * index: float -> 'U
+
+        module Reduce =
+            type Callbackfn<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
+
+            type Callbackfn2<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
+
+            type Callbackfn3<'U, 'T> = delegate of previousValue: 'U * currentValue: 'T * currentIndex: float -> 'U
+
+        module Some =
+            type Predicate<'T> = delegate of value: 'T * index: float -> obj
+
+    module IteratorObject =
+        module Every =
+            type Predicate<'T> = delegate of value: 'T * index: float -> obj
+
+        module Filter =
+            type Predicate<'T> = delegate of value: 'T * index: float -> bool
+
+            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
+
+        module Find =
+            type Predicate<'T> = delegate of value: 'T * index: float -> bool
+
+            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
+
+        module FlatMap =
+            type Callback<'T, 'U> =
+                delegate of value: 'T * index: float -> U2<Iterable<'U, obj, unit>, Iterator<'U, obj, unit>>
+
+        module ForEach =
+            type Callbackfn<'T> = delegate of value: 'T * index: float -> unit
+
+        module Map =
+            type Callbackfn<'T, 'U> = delegate of value: 'T * index: float -> 'U
+
+        module Reduce =
+            type Callbackfn<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
+
+            type Callbackfn2<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
+
+            type Callbackfn3<'U, 'T> = delegate of previousValue: 'U * currentValue: 'T * currentIndex: float -> 'U
+
+        module Some =
+            type Predicate<'T> = delegate of value: 'T * index: float -> obj
+
+    module JSON =
+        module Parse =
+            type Reviver = delegate of key: string * value: obj -> obj
+
+        module Stringify =
+            type Replacer = delegate of key: string * value: obj -> obj
+
+    module ListFormat =
+        module FormatToParts =
+            module Result =
+                [<Interface>]
+                type Item =
+                    abstract ``type``: ListFormat.FormatToParts.Result.Item.Type with get, set
+                    abstract value: string with get, set
+
+                    [<ParamObject; Emit("$0")>]
+                    static member Create(``type``: ListFormat.FormatToParts.Result.Item.Type, value: string) : Item =
+                        jsNative
+
+                module Item =
+                    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                    type Type =
+                        | [<CompiledName("element")>] Element
+                        | [<CompiledName("literal")>] Literal
+
+    module Locale =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type CaseFirst =
+            | [<CompiledName("false")>] False
+            | [<CompiledName("lower")>] Lower
+            | [<CompiledName("upper")>] Upper
+
+    module Map =
+        module ForEach =
+            type Callbackfn<'V, 'K> = delegate of value: 'V * key: 'K * map: Map<'K, 'V> -> unit
+
+    module MapConstructor =
+        module GroupBy =
+            type KeySelector<'T, 'K> = delegate of item: 'T * index: float -> 'K
+
+    module MapIterator =
+        module Every =
+            type Predicate<'T> = delegate of value: 'T * index: float -> obj
+
+        module Filter =
+            type Predicate<'T> = delegate of value: 'T * index: float -> bool
+
+            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
+
+        module Find =
+            type Predicate<'T> = delegate of value: 'T * index: float -> bool
+
+            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
+
+        module FlatMap =
+            type Callback<'T, 'U> =
+                delegate of value: 'T * index: float -> U2<Iterable<'U, obj, unit>, Iterator<'U, obj, unit>>
+
+        module ForEach =
+            type Callbackfn<'T> = delegate of value: 'T * index: float -> unit
+
+        module Map =
+            type Callbackfn<'T, 'U> = delegate of value: 'T * index: float -> 'U
+
+        module Reduce =
+            type Callbackfn<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
+
+            type Callbackfn2<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
+
+            type Callbackfn3<'U, 'T> = delegate of previousValue: 'U * currentValue: 'T * currentIndex: float -> 'U
+
+        module Some =
+            type Predicate<'T> = delegate of value: 'T * index: float -> obj
+
+    module MediaKeyStatusMapIterator =
+        module Every =
+            type Predicate<'T> = delegate of value: 'T * index: float -> obj
+
+        module Filter =
+            type Predicate<'T> = delegate of value: 'T * index: float -> bool
+
+            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
+
+        module Find =
+            type Predicate<'T> = delegate of value: 'T * index: float -> bool
+
+            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
+
+        module FlatMap =
+            type Callback<'T, 'U> =
+                delegate of value: 'T * index: float -> U2<Iterable<'U, obj, unit>, Iterator<'U, obj, unit>>
+
+        module ForEach =
+            type Callbackfn<'T> = delegate of value: 'T * index: float -> unit
+
+        module Map =
+            type Callbackfn<'T, 'U> = delegate of value: 'T * index: float -> 'U
+
+        module Reduce =
+            type Callbackfn<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
+
+            type Callbackfn2<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
+
+            type Callbackfn3<'U, 'T> = delegate of previousValue: 'U * currentValue: 'T * currentIndex: float -> 'U
+
+        module Some =
+            type Predicate<'T> = delegate of value: 'T * index: float -> obj
+
+    module NewableFunction =
+        module Bind =
+            type ResultConstructor<'B, 'R> =
+                [<EmitConstructor>]
+                abstract Create: [<ParamArray>] args: 'B -> 'R
+
+    module NumberFormatOptions =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type CompactDisplay =
+            | [<CompiledName("long")>] Long
+            | [<CompiledName("short")>] Short
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type CurrencyDisplay =
+            | [<CompiledName("code")>] Code
+            | [<CompiledName("name")>] Name
+            | [<CompiledName("narrowSymbol")>] NarrowSymbol
+            | [<CompiledName("symbol")>] Symbol
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type CurrencySign =
+            | [<CompiledName("accounting")>] Accounting
+            | [<CompiledName("standard")>] Standard
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type LocaleMatcher =
+            | [<CompiledName("best fit")>] BestFit
+            | [<CompiledName("lookup")>] Lookup
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Notation =
+            | [<CompiledName("compact")>] Compact
+            | [<CompiledName("engineering")>] Engineering
+            | [<CompiledName("scientific")>] Scientific
+            | [<CompiledName("standard")>] Standard
+
+        type RoundingIncrement =
+            | N1 = 1
+            | N2 = 2
+            | N5 = 5
+            | N10 = 10
+            | N20 = 20
+            | N25 = 25
+            | N50 = 50
+            | N100 = 100
+            | N200 = 200
+            | N250 = 250
+            | N500 = 500
+            | N1000 = 1000
+            | N2000 = 2000
+            | N2500 = 2500
+            | N5000 = 5000
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type RoundingMode =
+            | [<CompiledName("ceil")>] Ceil
+            | [<CompiledName("expand")>] Expand
+            | [<CompiledName("floor")>] Floor
+            | [<CompiledName("halfCeil")>] HalfCeil
+            | [<CompiledName("halfEven")>] HalfEven
+            | [<CompiledName("halfExpand")>] HalfExpand
+            | [<CompiledName("halfFloor")>] HalfFloor
+            | [<CompiledName("halfTrunc")>] HalfTrunc
+            | [<CompiledName("trunc")>] Trunc
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type RoundingPriority =
+            | [<CompiledName("auto")>] Auto
+            | [<CompiledName("lessPrecision")>] LessPrecision
+            | [<CompiledName("morePrecision")>] MorePrecision
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type SignDisplay =
+            | [<CompiledName("always")>] Always
+            | [<CompiledName("auto")>] Auto
+            | [<CompiledName("exceptZero")>] ExceptZero
+            | [<CompiledName("negative")>] Negative
+            | [<CompiledName("never")>] Never
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Style =
+            | [<CompiledName("currency")>] Currency
+            | [<CompiledName("decimal")>] Decimal
+            | [<CompiledName("percent")>] Percent
+            | [<CompiledName("unit")>] Unit
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type TrailingZeroDisplay =
+            | [<CompiledName("auto")>] Auto
+            | [<CompiledName("stripIfInteger")>] StripIfInteger
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type UnitDisplay =
+            | [<CompiledName("long")>] Long
+            | [<CompiledName("narrow")>] Narrow
+            | [<CompiledName("short")>] Short
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type UseGrouping =
+            | [<CompiledName("always")>] Always
+            | [<CompiledName("auto")>] Auto
+            | [<CompiledName("false")>] False
+            | [<CompiledName("min2")>] Min2
+            | [<CompiledName("true")>] True
+            | [<CompiledValue(false)>] False2
+            | [<CompiledValue(true)>] True2
+
+    module NumberFormatPart =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Type =
+            | [<CompiledName("compact")>] Compact
+            | [<CompiledName("currency")>] Currency
+            | [<CompiledName("decimal")>] Decimal
+            | [<CompiledName("exponentInteger")>] ExponentInteger
+            | [<CompiledName("exponentMinusSign")>] ExponentMinusSign
+            | [<CompiledName("exponentSeparator")>] ExponentSeparator
+            | [<CompiledName("fraction")>] Fraction
+            | [<CompiledName("group")>] Group
+            | [<CompiledName("infinity")>] Infinity
+            | [<CompiledName("integer")>] Integer
+            | [<CompiledName("literal")>] Literal
+            | [<CompiledName("minusSign")>] MinusSign
+            | [<CompiledName("nan")>] Nan
+            | [<CompiledName("percent")>] Percent
+            | [<CompiledName("percentSign")>] PercentSign
+            | [<CompiledName("plusSign")>] PlusSign
+            | [<CompiledName("unit")>] Unit
+            | [<CompiledName("unknown")>] Unknown
+
+    module NumberRangeFormatPart =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Source =
+            | [<CompiledName("endRange")>] EndRange
+            | [<CompiledName("shared")>] Shared
+            | [<CompiledName("startRange")>] StartRange
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Type =
+            | [<CompiledName("approximatelySign")>] ApproximatelySign
+            | [<CompiledName("compact")>] Compact
+            | [<CompiledName("currency")>] Currency
+            | [<CompiledName("decimal")>] Decimal
+            | [<CompiledName("exponentInteger")>] ExponentInteger
+            | [<CompiledName("exponentMinusSign")>] ExponentMinusSign
+            | [<CompiledName("exponentSeparator")>] ExponentSeparator
+            | [<CompiledName("fraction")>] Fraction
+            | [<CompiledName("group")>] Group
+            | [<CompiledName("infinity")>] Infinity
+            | [<CompiledName("integer")>] Integer
+            | [<CompiledName("literal")>] Literal
+            | [<CompiledName("minusSign")>] MinusSign
+            | [<CompiledName("nan")>] Nan
+            | [<CompiledName("percent")>] Percent
+            | [<CompiledName("percentSign")>] PercentSign
+            | [<CompiledName("plusSign")>] PlusSign
+            | [<CompiledName("unit")>] Unit
+            | [<CompiledName("unknown")>] Unknown
+
+    module ObjectConstructor =
+        module Create =
+            type Properties =
+                inherit PropertyDescriptorMap
+
+        module DefineProperty =
+            [<Interface>]
+            type Attributes =
+                inherit PropertyDescriptor
+
+                [<ParamObject; Emit("$0")>]
+                static member Create
+                    (
+                        ?configurable: bool,
+                        ?enumerable: bool,
+                        ?value: obj,
+                        ?writable: bool,
+                        ?get: (unit -> obj),
+                        ?set: (obj -> unit)
+                    ) : Attributes =
+                    jsNative
+
+        module Freeze =
+            type Result<'T> =
+                [<EmitIndexer>]
+                abstract Item: string -> obj
+
+        module GetOwnPropertyDescriptors =
+            type Result =
+                [<EmitIndexer>]
+                abstract Item: string -> PropertyDescriptor with get, set
+
+        module GroupBy =
+            type KeySelector<'T, 'K> = delegate of item: 'T * index: float -> 'K
+
+    module OverflowOptions =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Overflow =
+            | [<CompiledName("constrain")>] Constrain
+            | [<CompiledName("reject")>] Reject
+
+    module PlainDate =
+        module Until =
+            module Options =
+                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                type Item =
+                    | [<CompiledName("day")>] Day
+                    | [<CompiledName("month")>] Month
+                    | [<CompiledName("week")>] Week
+                    | [<CompiledName("year")>] Year
+
+    module PlainDateTime =
+        module With =
+            [<Interface>]
+            type DateTimeLike =
+                abstract day: float option with get, set
+                abstract era: string option with get, set
+                abstract eraYear: float option with get, set
+                abstract hour: float option with get, set
+                abstract microsecond: float option with get, set
+                abstract millisecond: float option with get, set
+                abstract minute: float option with get, set
+                abstract month: float option with get, set
+                abstract monthCode: string option with get, set
+                abstract nanosecond: float option with get, set
+                abstract second: float option with get, set
+                abstract year: float option with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create
+                    (
+                        ?day: float,
+                        ?era: string,
+                        ?eraYear: float,
+                        ?hour: float,
+                        ?microsecond: float,
+                        ?millisecond: float,
+                        ?minute: float,
+                        ?month: float,
+                        ?monthCode: string,
+                        ?nanosecond: float,
+                        ?second: float,
+                        ?year: float
+                    ) : DateTimeLike =
+                    jsNative
+
+    module PlainDateToStringOptions =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type CalendarName =
+            | [<CompiledName("always")>] Always
+            | [<CompiledName("auto")>] Auto
+            | [<CompiledName("critical")>] Critical
+            | [<CompiledName("never")>] Never
+
+    module PlainMonthDay =
+        module With =
+            [<Interface>]
+            type MonthDayLike =
+                abstract day: float option with get, set
+                abstract era: string option with get, set
+                abstract eraYear: float option with get, set
+                abstract month: float option with get, set
+                abstract monthCode: string option with get, set
+                abstract year: float option with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create
+                    (?day: float, ?era: string, ?eraYear: float, ?month: float, ?monthCode: string, ?year: float)
+                    : MonthDayLike =
+                    jsNative
+
+    module PlainTime =
+        module Round =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type RoundTo =
+                | [<CompiledName("hour")>] Hour
+                | [<CompiledName("hours")>] Hours
+                | [<CompiledName("microsecond")>] Microsecond
+                | [<CompiledName("microseconds")>] Microseconds
+                | [<CompiledName("millisecond")>] Millisecond
+                | [<CompiledName("milliseconds")>] Milliseconds
+                | [<CompiledName("minute")>] Minute
+                | [<CompiledName("minutes")>] Minutes
+                | [<CompiledName("nanosecond")>] Nanosecond
+                | [<CompiledName("nanoseconds")>] Nanoseconds
+                | [<CompiledName("second")>] Second
+                | [<CompiledName("seconds")>] Seconds
+
+        module Until =
+            module Options =
+                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                type Item =
+                    | [<CompiledName("hour")>] Hour
+                    | [<CompiledName("microsecond")>] Microsecond
+                    | [<CompiledName("millisecond")>] Millisecond
+                    | [<CompiledName("minute")>] Minute
+                    | [<CompiledName("nanosecond")>] Nanosecond
+                    | [<CompiledName("second")>] Second
+
+        module With =
+            [<Interface>]
+            type TimeLike =
+                abstract hour: float option with get, set
+                abstract microsecond: float option with get, set
+                abstract millisecond: float option with get, set
+                abstract minute: float option with get, set
+                abstract nanosecond: float option with get, set
+                abstract second: float option with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create
+                    (
+                        ?hour: float,
+                        ?microsecond: float,
+                        ?millisecond: float,
+                        ?minute: float,
+                        ?nanosecond: float,
+                        ?second: float
+                    ) : TimeLike =
+                    jsNative
+
+    module PlainTimeToStringOptions =
+        module Base =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Item =
+                | [<CompiledName("microsecond")>] Microsecond
+                | [<CompiledName("millisecond")>] Millisecond
+                | [<CompiledName("minute")>] Minute
+                | [<CompiledName("nanosecond")>] Nanosecond
+                | [<CompiledName("second")>] Second
+
+    module PlainYearMonth =
+        module Until =
+            module Options =
+                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                type Item =
+                    | [<CompiledName("month")>] Month
+                    | [<CompiledName("year")>] Year
+
+        module With =
+            [<Interface>]
+            type YearMonthLike =
+                abstract era: string option with get, set
+                abstract eraYear: float option with get, set
+                abstract month: float option with get, set
+                abstract monthCode: string option with get, set
+                abstract year: float option with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create
+                    (?era: string, ?eraYear: float, ?month: float, ?monthCode: string, ?year: float)
+                    : YearMonthLike =
+                    jsNative
+
+    module PluralRulesOptions =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Type =
+            | [<CompiledName("cardinal")>] Cardinal
+            | [<CompiledName("ordinal")>] Ordinal
+
+    module PromiseConstructor =
+        type Executor<'T> =
+            delegate of resolve: (U2<'T, PromiseLike<'T>> -> unit) * reject: (obj option -> unit) -> unit
+
+        module AllSettled =
+            module Result =
+                module Item =
+                    [<RequireQualifiedAccess; TypeScriptTaggedUnion("status", CaseRules.None)>]
+                    type Item =
+                        | [<CompiledName("fulfilled")>] Fulfilled of value: obj
+                        | [<CompiledName("rejected")>] Rejected of reason: obj
+
+                    [<RequireQualifiedAccess; TypeScriptTaggedUnion("status", CaseRules.None)>]
+                    type Item2 =
+                        | [<CompiledName("fulfilled")>] Fulfilled of value: obj
+                        | [<CompiledName("rejected")>] Rejected of reason: obj
+
+    module PromiseConstructorLike =
+        type Executor<'T> =
+            delegate of resolve: (U2<'T, PromiseLike<'T>> -> unit) * reject: (obj option -> unit) -> unit
+
+    module ProxyConstructor =
+        module Revocable =
+            [<Interface>]
+            type Result<'T> =
+                abstract proxy: 'T with get, set
+                abstract revoke: (unit -> unit) with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create(proxy: 'T, revoke: (unit -> unit)) : Result<'T> = jsNative
+
+    module ReadonlyMap =
+        module ForEach =
+            type Callbackfn<'V, 'K> = delegate of value: 'V * key: 'K * map: ReadonlyMap<'K, 'V> -> unit
+
+    module ReadonlySet =
+        module ForEach =
+            type Callbackfn<'T> = delegate of value: 'T * value2: 'T * set: ReadonlySet<'T> -> unit
+
+    module Reflect =
+        type DefineProperty =
+            delegate of
+                target: obj * propertyKey: PropertyKey * attributes: ObjectConstructor.DefineProperty.Attributes -> bool
+
+        type DeleteProperty = delegate of target: obj * propertyKey: PropertyKey -> bool
+
+        type Has = delegate of target: obj * propertyKey: PropertyKey -> bool
+
+        type SetPrototypeOf = delegate of target: obj * proto: obj option -> bool
+
+        module Construct =
+            type NewTargetConstructor =
+                [<EmitConstructor>]
+                abstract Create: [<ParamArray>] args: obj -> obj
+
+            type TargetConstructor<'A, 'R> =
+                [<EmitConstructor>]
+                abstract Create: [<ParamArray>] args: 'A -> 'R
+
+    module RegExpStringIterator =
+        module Every =
+            type Predicate<'T> = delegate of value: 'T * index: float -> obj
+
+        module Filter =
+            type Predicate<'T> = delegate of value: 'T * index: float -> bool
+
+            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
+
+        module Find =
+            type Predicate<'T> = delegate of value: 'T * index: float -> bool
+
+            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
+
+        module FlatMap =
+            type Callback<'T, 'U> =
+                delegate of value: 'T * index: float -> U2<Iterable<'U, obj, unit>, Iterator<'U, obj, unit>>
+
+        module ForEach =
+            type Callbackfn<'T> = delegate of value: 'T * index: float -> unit
+
+        module Map =
+            type Callbackfn<'T, 'U> = delegate of value: 'T * index: float -> 'U
+
+        module Reduce =
+            type Callbackfn<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
+
+            type Callbackfn2<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
+
+            type Callbackfn3<'U, 'T> = delegate of previousValue: 'U * currentValue: 'T * currentIndex: float -> 'U
+
+        module Some =
+            type Predicate<'T> = delegate of value: 'T * index: float -> obj
+
+    module RelativeTimeFormat =
+        module Format =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Unit =
+                | [<CompiledName("day")>] Day
+                | [<CompiledName("days")>] Days
+                | [<CompiledName("hour")>] Hour
+                | [<CompiledName("hours")>] Hours
+                | [<CompiledName("minute")>] Minute
+                | [<CompiledName("minutes")>] Minutes
+                | [<CompiledName("month")>] Month
+                | [<CompiledName("months")>] Months
+                | [<CompiledName("quarter")>] Quarter
+                | [<CompiledName("quarters")>] Quarters
+                | [<CompiledName("second")>] Second
+                | [<CompiledName("seconds")>] Seconds
+                | [<CompiledName("week")>] Week
+                | [<CompiledName("weeks")>] Weeks
+                | [<CompiledName("year")>] Year
+                | [<CompiledName("years")>] Years
+
+        module FormatToParts =
+            module Result =
+                [<Interface>]
+                type Item =
+                    abstract ``type``: string with get, set
+                    abstract value: string with get, set
+
+                    [<ParamObject; Emit("$0")>]
+                    static member Create(``type``: string, value: string) : Item = jsNative
+
+                [<Interface>]
+                type Item2 =
+                    abstract ``type``: RelativeTimeFormat.FormatToParts.Result.Item2.Type with get, set
+                    abstract value: string with get, set
+                    abstract unit: RelativeTimeFormat.FormatToParts.Result.Item2.Unit with get, set
+
+                    [<ParamObject; Emit("$0")>]
+                    static member Create
+                        (
+                            ``type``: RelativeTimeFormat.FormatToParts.Result.Item2.Type,
+                            value: string,
+                            unit: RelativeTimeFormat.FormatToParts.Result.Item2.Unit
+                        ) : Item2 =
+                        jsNative
+
+                module Item2 =
+                    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                    type Type =
+                        | [<CompiledName("compact")>] Compact
+                        | [<CompiledName("currency")>] Currency
+                        | [<CompiledName("decimal")>] Decimal
+                        | [<CompiledName("exponentInteger")>] ExponentInteger
+                        | [<CompiledName("exponentMinusSign")>] ExponentMinusSign
+                        | [<CompiledName("exponentSeparator")>] ExponentSeparator
+                        | [<CompiledName("fraction")>] Fraction
+                        | [<CompiledName("group")>] Group
+                        | [<CompiledName("infinity")>] Infinity
+                        | [<CompiledName("integer")>] Integer
+                        | [<CompiledName("minusSign")>] MinusSign
+                        | [<CompiledName("nan")>] Nan
+                        | [<CompiledName("percent")>] Percent
+                        | [<CompiledName("percentSign")>] PercentSign
+                        | [<CompiledName("plusSign")>] PlusSign
+                        | [<CompiledName("unit")>] Unit
+                        | [<CompiledName("unknown")>] Unknown
+
+                    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                    type Unit =
+                        | [<CompiledName("day")>] Day
+                        | [<CompiledName("hour")>] Hour
+                        | [<CompiledName("minute")>] Minute
+                        | [<CompiledName("month")>] Month
+                        | [<CompiledName("quarter")>] Quarter
+                        | [<CompiledName("second")>] Second
+                        | [<CompiledName("week")>] Week
+                        | [<CompiledName("year")>] Year
+
+    module ResolvedDisplayNamesOptions =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Fallback =
+            | [<CompiledName("code")>] Code
+            | [<CompiledName("none")>] None
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type LanguageDisplay =
+            | [<CompiledName("dialect")>] Dialect
+            | [<CompiledName("standard")>] Standard
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Type =
+            | [<CompiledName("calendar")>] Calendar
+            | [<CompiledName("currency")>] Currency
+            | [<CompiledName("dateTimeField")>] DateTimeField
+            | [<CompiledName("language")>] Language
+            | [<CompiledName("region")>] Region
+            | [<CompiledName("script")>] Script
+
+    module ResolvedListFormatOptions =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Type =
+            | [<CompiledName("conjunction")>] Conjunction
+            | [<CompiledName("disjunction")>] Disjunction
+            | [<CompiledName("unit")>] Unit
+
+    module ResolvedNumberFormatOptions =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type UseGrouping =
+            | [<CompiledName("always")>] Always
+            | [<CompiledName("auto")>] Auto
+            | [<CompiledName("min2")>] Min2
+            | [<CompiledValue(false)>] False
+
+    module ResolvedPluralRulesOptions =
+        module PluralCategories =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Item =
+                | [<CompiledName("few")>] Few
+                | [<CompiledName("many")>] Many
+                | [<CompiledName("one")>] One
+                | [<CompiledName("other")>] Other
+                | [<CompiledName("two")>] Two
+                | [<CompiledName("zero")>] Zero
+
+    module ResolvedSegmenterOptions =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Granularity =
+            | [<CompiledName("grapheme")>] Grapheme
+            | [<CompiledName("sentence")>] Sentence
+            | [<CompiledName("word")>] Word
+
+    module Set =
+        module ForEach =
+            type Callbackfn<'T> = delegate of value: 'T * value2: 'T * set: Set<'T> -> unit
+
+    module SetIterator =
+        module Every =
+            type Predicate<'T> = delegate of value: 'T * index: float -> obj
+
+        module Filter =
+            type Predicate<'T> = delegate of value: 'T * index: float -> bool
+
+            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
+
+        module Find =
+            type Predicate<'T> = delegate of value: 'T * index: float -> bool
+
+            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
+
+        module FlatMap =
+            type Callback<'T, 'U> =
+                delegate of value: 'T * index: float -> U2<Iterable<'U, obj, unit>, Iterator<'U, obj, unit>>
+
+        module ForEach =
+            type Callbackfn<'T> = delegate of value: 'T * index: float -> unit
+
+        module Map =
+            type Callbackfn<'T, 'U> = delegate of value: 'T * index: float -> 'U
+
+        module Reduce =
+            type Callbackfn<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
+
+            type Callbackfn2<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
+
+            type Callbackfn3<'U, 'T> = delegate of previousValue: 'U * currentValue: 'T * currentIndex: float -> 'U
+
+        module Some =
+            type Predicate<'T> = delegate of value: 'T * index: float -> obj
+
+    module SharedArrayBufferConstructor =
+        [<Interface>]
+        type Options =
+            abstract maxByteLength: float option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create(?maxByteLength: float) : Options = jsNative
+
+    module String =
+        module Match =
+            type Matcher = interface end
+
+        module Normalize =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Form =
+                | NFC
+                | NFD
+                | NFKC
+                | NFKD
+
+        module Replace =
+            type Replacer = delegate of substring: string * args: obj[] -> string
+
+            type Replacer2 = delegate of substring: string * args: obj[] -> string
+
+            type SearchValue = interface end
+
+            type SearchValue2 = interface end
+
+        module ReplaceAll =
+            type Replacer = delegate of substring: string * args: obj[] -> string
+
+        module Search =
+            type Searcher = interface end
+
+        module Split =
+            type Splitter = interface end
+
+    module StringConstructor =
+        module Raw =
+            [<Interface>]
+            type Template =
+                abstract raw: U2<ArrayLike<string>, string[]> with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create(raw: U2<ArrayLike<string>, string[]>) : Template = jsNative
+
+    module StringIterator =
+        module Every =
+            type Predicate<'T> = delegate of value: 'T * index: float -> obj
+
+        module Filter =
+            type Predicate<'T> = delegate of value: 'T * index: float -> bool
+
+            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
+
+        module Find =
+            type Predicate<'T> = delegate of value: 'T * index: float -> bool
+
+            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
+
+        module FlatMap =
+            type Callback<'T, 'U> =
+                delegate of value: 'T * index: float -> U2<Iterable<'U, obj, unit>, Iterator<'U, obj, unit>>
+
+        module ForEach =
+            type Callbackfn<'T> = delegate of value: 'T * index: float -> unit
+
+        module Map =
+            type Callbackfn<'T, 'U> = delegate of value: 'T * index: float -> 'U
+
+        module Reduce =
+            type Callbackfn<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
+
+            type Callbackfn2<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
+
+            type Callbackfn3<'U, 'T> = delegate of previousValue: 'U * currentValue: 'T * currentIndex: float -> 'U
+
+        module Some =
+            type Predicate<'T> = delegate of value: 'T * index: float -> obj
+
+    module StylePropertyMapReadOnlyIterator =
+        module Every =
+            type Predicate<'T> = delegate of value: 'T * index: float -> obj
+
+        module Filter =
+            type Predicate<'T> = delegate of value: 'T * index: float -> bool
+
+            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
+
+        module Find =
+            type Predicate<'T> = delegate of value: 'T * index: float -> bool
+
+            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
+
+        module FlatMap =
+            type Callback<'T, 'U> =
+                delegate of value: 'T * index: float -> U2<Iterable<'U, obj, unit>, Iterator<'U, obj, unit>>
+
+        module ForEach =
+            type Callbackfn<'T> = delegate of value: 'T * index: float -> unit
+
+        module Map =
+            type Callbackfn<'T, 'U> = delegate of value: 'T * index: float -> 'U
+
+        module Reduce =
+            type Callbackfn<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
+
+            type Callbackfn2<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
+
+            type Callbackfn3<'U, 'T> = delegate of previousValue: 'U * currentValue: 'T * currentIndex: float -> 'U
+
+        module Some =
+            type Predicate<'T> = delegate of value: 'T * index: float -> obj
+
+    module TextInfo =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Direction =
+            | [<CompiledName("ltr")>] Ltr
+            | [<CompiledName("rtl")>] Rtl
+
+    module ToStringRoundingOptions =
+        [<Interface>]
+        type Base<'Units> =
+            abstract smallestUnit: U2<'Units, string> option with get, set
+            abstract roundingMode: NumberFormatOptions.RoundingMode option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (?smallestUnit: U2<'Units, string>, ?roundingMode: NumberFormatOptions.RoundingMode)
+                : Base<'Units> =
+                jsNative
+
+    module URLSearchParamsIterator =
+        module Every =
+            type Predicate<'T> = delegate of value: 'T * index: float -> obj
+
+        module Filter =
+            type Predicate<'T> = delegate of value: 'T * index: float -> bool
+
+            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
+
+        module Find =
+            type Predicate<'T> = delegate of value: 'T * index: float -> bool
+
+            type Predicate2<'T> = delegate of value: 'T * index: float -> obj
+
+        module FlatMap =
+            type Callback<'T, 'U> =
+                delegate of value: 'T * index: float -> U2<Iterable<'U, obj, unit>, Iterator<'U, obj, unit>>
+
+        module ForEach =
+            type Callbackfn<'T> = delegate of value: 'T * index: float -> unit
+
+        module Map =
+            type Callbackfn<'T, 'U> = delegate of value: 'T * index: float -> 'U
+
+        module Reduce =
+            type Callbackfn<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
+
+            type Callbackfn2<'T> = delegate of previousValue: 'T * currentValue: 'T * currentIndex: float -> 'T
+
+            type Callbackfn3<'U, 'T> = delegate of previousValue: 'U * currentValue: 'T * currentIndex: float -> 'U
+
+        module Some =
+            type Predicate<'T> = delegate of value: 'T * index: float -> obj
+
+    module Uint16Array =
+        module Every =
+            type Predicate = delegate of value: float * index: float * array: Uint16Array<ArrayBufferLike> -> obj
+
+        module Filter =
+            type Predicate = delegate of value: float * index: float * array: Uint16Array<ArrayBufferLike> -> obj
+
+        module Find =
+            type Predicate = delegate of value: float * index: float * obj: Uint16Array<ArrayBufferLike> -> bool
+
+        module FindIndex =
+            type Predicate = delegate of value: float * index: float * obj: Uint16Array<ArrayBufferLike> -> bool
+
+        module FindLast =
+            type Predicate = delegate of value: float * index: float * array: Uint16Array<ArrayBufferLike> -> bool
+
+            type Predicate2 = delegate of value: float * index: float * array: Uint16Array<ArrayBufferLike> -> obj
+
+        module FindLastIndex =
+            type Predicate = delegate of value: float * index: float * array: Uint16Array<ArrayBufferLike> -> obj
+
+        module ForEach =
+            type Callbackfn = delegate of value: float * index: float * array: Uint16Array<ArrayBufferLike> -> unit
+
+        module Map =
+            type Callbackfn = delegate of value: float * index: float * array: Uint16Array<ArrayBufferLike> -> float
+
+        module Reduce =
+            type Callbackfn =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Uint16Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn2 =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Uint16Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn3<'U> =
+                delegate of
+                    previousValue: 'U * currentValue: float * currentIndex: float * array: Uint16Array<ArrayBufferLike> ->
+                        'U
+
+        module ReduceRight =
+            type Callbackfn =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Uint16Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn2 =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Uint16Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn3<'U> =
+                delegate of
+                    previousValue: 'U * currentValue: float * currentIndex: float * array: Uint16Array<ArrayBufferLike> ->
+                        'U
+
+        module Some =
+            type Predicate = delegate of value: float * index: float * array: Uint16Array<ArrayBufferLike> -> obj
+
+        module Sort =
+            type CompareFn = delegate of a: float * b: float -> float
+
+        module ToSorted =
+            type CompareFn = delegate of a: float * b: float -> float
+
+    module Uint16ArrayConstructor =
+        module From =
+            type Mapfn<'T> = delegate of v: 'T * k: float -> float
+
+            type Mapfn2<'T> = delegate of v: 'T * k: float -> float
+
+    module Uint32Array =
+        module Every =
+            type Predicate = delegate of value: float * index: float * array: Uint32Array<ArrayBufferLike> -> obj
+
+        module Filter =
+            type Predicate = delegate of value: float * index: float * array: Uint32Array<ArrayBufferLike> -> obj
+
+        module Find =
+            type Predicate = delegate of value: float * index: float * obj: Uint32Array<ArrayBufferLike> -> bool
+
+        module FindIndex =
+            type Predicate = delegate of value: float * index: float * obj: Uint32Array<ArrayBufferLike> -> bool
+
+        module FindLast =
+            type Predicate = delegate of value: float * index: float * array: Uint32Array<ArrayBufferLike> -> bool
+
+            type Predicate2 = delegate of value: float * index: float * array: Uint32Array<ArrayBufferLike> -> obj
+
+        module FindLastIndex =
+            type Predicate = delegate of value: float * index: float * array: Uint32Array<ArrayBufferLike> -> obj
+
+        module ForEach =
+            type Callbackfn = delegate of value: float * index: float * array: Uint32Array<ArrayBufferLike> -> unit
+
+        module Map =
+            type Callbackfn = delegate of value: float * index: float * array: Uint32Array<ArrayBufferLike> -> float
+
+        module Reduce =
+            type Callbackfn =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Uint32Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn2 =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Uint32Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn3<'U> =
+                delegate of
+                    previousValue: 'U * currentValue: float * currentIndex: float * array: Uint32Array<ArrayBufferLike> ->
+                        'U
+
+        module ReduceRight =
+            type Callbackfn =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Uint32Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn2 =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Uint32Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn3<'U> =
+                delegate of
+                    previousValue: 'U * currentValue: float * currentIndex: float * array: Uint32Array<ArrayBufferLike> ->
+                        'U
+
+        module Some =
+            type Predicate = delegate of value: float * index: float * array: Uint32Array<ArrayBufferLike> -> obj
+
+        module Sort =
+            type CompareFn = delegate of a: float * b: float -> float
+
+        module ToSorted =
+            type CompareFn = delegate of a: float * b: float -> float
+
+    module Uint32ArrayConstructor =
+        module From =
+            type Mapfn<'T> = delegate of v: 'T * k: float -> float
+
+            type Mapfn2<'T> = delegate of v: 'T * k: float -> float
+
+    module Uint8Array =
+        module Every =
+            type Predicate = delegate of value: float * index: float * array: Uint8Array<ArrayBufferLike> -> obj
+
+        module Filter =
+            type Predicate = delegate of value: float * index: float * array: Uint8Array<ArrayBufferLike> -> obj
+
+        module Find =
+            type Predicate = delegate of value: float * index: float * obj: Uint8Array<ArrayBufferLike> -> bool
+
+        module FindIndex =
+            type Predicate = delegate of value: float * index: float * obj: Uint8Array<ArrayBufferLike> -> bool
+
+        module FindLast =
+            type Predicate = delegate of value: float * index: float * array: Uint8Array<ArrayBufferLike> -> bool
+
+            type Predicate2 = delegate of value: float * index: float * array: Uint8Array<ArrayBufferLike> -> obj
+
+        module FindLastIndex =
+            type Predicate = delegate of value: float * index: float * array: Uint8Array<ArrayBufferLike> -> obj
+
+        module ForEach =
+            type Callbackfn = delegate of value: float * index: float * array: Uint8Array<ArrayBufferLike> -> unit
+
+        module Map =
+            type Callbackfn = delegate of value: float * index: float * array: Uint8Array<ArrayBufferLike> -> float
+
+        module Reduce =
+            type Callbackfn =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Uint8Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn2 =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Uint8Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn3<'U> =
+                delegate of
+                    previousValue: 'U * currentValue: float * currentIndex: float * array: Uint8Array<ArrayBufferLike> ->
+                        'U
+
+        module ReduceRight =
+            type Callbackfn =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Uint8Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn2 =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Uint8Array<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn3<'U> =
+                delegate of
+                    previousValue: 'U * currentValue: float * currentIndex: float * array: Uint8Array<ArrayBufferLike> ->
+                        'U
+
+        module SetFromBase64 =
+            [<Interface>]
+            type Options =
+                abstract alphabet: Uint8Array.ToBase64.Options.Alphabet option with get, set
+                abstract lastChunkHandling: Uint8Array.SetFromBase64.Options.LastChunkHandling option with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create
+                    (
+                        ?alphabet: Uint8Array.ToBase64.Options.Alphabet,
+                        ?lastChunkHandling: Uint8Array.SetFromBase64.Options.LastChunkHandling
+                    ) : Options =
+                    jsNative
+
+            [<Interface>]
+            type Result =
+                abstract read: float with get, set
+                abstract written: float with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create(read: float, written: float) : Result = jsNative
+
+            module Options =
+                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                type LastChunkHandling =
+                    | [<CompiledName("loose")>] Loose
+                    | [<CompiledName("stop-before-partial")>] StopBeforePartial
+                    | [<CompiledName("strict")>] Strict
+
+        module SetFromHex =
+            [<Interface>]
+            type Result =
+                abstract read: float with get, set
+                abstract written: float with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create(read: float, written: float) : Result = jsNative
+
+        module Some =
+            type Predicate = delegate of value: float * index: float * array: Uint8Array<ArrayBufferLike> -> obj
+
+        module Sort =
+            type CompareFn = delegate of a: float * b: float -> float
+
+        module ToBase64 =
+            [<Interface>]
+            type Options =
+                abstract alphabet: Uint8Array.ToBase64.Options.Alphabet option with get, set
+                abstract omitPadding: bool option with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create(?alphabet: Uint8Array.ToBase64.Options.Alphabet, ?omitPadding: bool) : Options =
+                    jsNative
+
+            module Options =
+                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                type Alphabet =
+                    | [<CompiledName("base64")>] Base64
+                    | [<CompiledName("base64url")>] Base64url
+
+        module ToSorted =
+            type CompareFn = delegate of a: float * b: float -> float
+
+    module Uint8ArrayConstructor =
+        module From =
+            type Mapfn<'T> = delegate of v: 'T * k: float -> float
+
+            type Mapfn2<'T> = delegate of v: 'T * k: float -> float
+
+        module FromBase64 =
+            [<Interface>]
+            type Options =
+                abstract alphabet: Uint8Array.ToBase64.Options.Alphabet option with get, set
+                abstract lastChunkHandling: Uint8Array.SetFromBase64.Options.LastChunkHandling option with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create
+                    (
+                        ?alphabet: Uint8Array.ToBase64.Options.Alphabet,
+                        ?lastChunkHandling: Uint8Array.SetFromBase64.Options.LastChunkHandling
+                    ) : Options =
+                    jsNative
+
+    module Uint8ClampedArray =
+        module Every =
+            type Predicate = delegate of value: float * index: float * array: Uint8ClampedArray<ArrayBufferLike> -> obj
+
+        module Filter =
+            type Predicate = delegate of value: float * index: float * array: Uint8ClampedArray<ArrayBufferLike> -> obj
+
+        module Find =
+            type Predicate = delegate of value: float * index: float * obj: Uint8ClampedArray<ArrayBufferLike> -> bool
+
+        module FindIndex =
+            type Predicate = delegate of value: float * index: float * obj: Uint8ClampedArray<ArrayBufferLike> -> bool
+
+        module FindLast =
+            type Predicate = delegate of value: float * index: float * array: Uint8ClampedArray<ArrayBufferLike> -> bool
+
+            type Predicate2 = delegate of value: float * index: float * array: Uint8ClampedArray<ArrayBufferLike> -> obj
+
+        module FindLastIndex =
+            type Predicate = delegate of value: float * index: float * array: Uint8ClampedArray<ArrayBufferLike> -> obj
+
+        module ForEach =
+            type Callbackfn =
+                delegate of value: float * index: float * array: Uint8ClampedArray<ArrayBufferLike> -> unit
+
+        module Map =
+            type Callbackfn =
+                delegate of value: float * index: float * array: Uint8ClampedArray<ArrayBufferLike> -> float
+
+        module Reduce =
+            type Callbackfn =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Uint8ClampedArray<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn2 =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Uint8ClampedArray<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn3<'U> =
+                delegate of
+                    previousValue: 'U *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Uint8ClampedArray<ArrayBufferLike> ->
+                        'U
+
+        module ReduceRight =
+            type Callbackfn =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Uint8ClampedArray<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn2 =
+                delegate of
+                    previousValue: float *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Uint8ClampedArray<ArrayBufferLike> ->
+                        float
+
+            type Callbackfn3<'U> =
+                delegate of
+                    previousValue: 'U *
+                    currentValue: float *
+                    currentIndex: float *
+                    array: Uint8ClampedArray<ArrayBufferLike> ->
+                        'U
+
+        module Some =
+            type Predicate = delegate of value: float * index: float * array: Uint8ClampedArray<ArrayBufferLike> -> obj
+
+        module Sort =
+            type CompareFn = delegate of a: float * b: float -> float
+
+        module ToSorted =
+            type CompareFn = delegate of a: float * b: float -> float
+
+    module Uint8ClampedArrayConstructor =
+        module From =
+            type Mapfn<'T> = delegate of v: 'T * k: float -> float
+
+            type Mapfn2<'T> = delegate of v: 'T * k: float -> float
+
+    module YearMonthLikeObject =
+        [<Interface>]
+        type Base =
+            abstract year: float option with get, set
+            abstract era: string option with get, set
+            abstract eraYear: float option with get, set
+            abstract month: float option with get, set
+            abstract monthCode: string option with get, set
+            abstract calendar: string option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (?year: float, ?era: string, ?eraYear: float, ?month: float, ?monthCode: string, ?calendar: string)
+                : Base =
+                jsNative
+
+    module ZonedDateTime =
+        module GetTimeZoneTransition =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Direction =
+                | [<CompiledName("next")>] Next
+                | [<CompiledName("previous")>] Previous
+
+        module Round =
+            module RoundTo =
+                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                type Item =
+                    | [<CompiledName("day")>] Day
+                    | [<CompiledName("hour")>] Hour
+                    | [<CompiledName("microsecond")>] Microsecond
+                    | [<CompiledName("millisecond")>] Millisecond
+                    | [<CompiledName("minute")>] Minute
+                    | [<CompiledName("nanosecond")>] Nanosecond
+                    | [<CompiledName("second")>] Second
+
+        module Until =
+            module Options =
+                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                type Item =
+                    | [<CompiledName("day")>] Day
+                    | [<CompiledName("hour")>] Hour
+                    | [<CompiledName("microsecond")>] Microsecond
+                    | [<CompiledName("millisecond")>] Millisecond
+                    | [<CompiledName("minute")>] Minute
+                    | [<CompiledName("month")>] Month
+                    | [<CompiledName("nanosecond")>] Nanosecond
+                    | [<CompiledName("second")>] Second
+                    | [<CompiledName("week")>] Week
+                    | [<CompiledName("year")>] Year
+
+        module With =
+            [<Interface>]
+            type ZonedDateTimeLike =
+                abstract day: float option with get, set
+                abstract era: string option with get, set
+                abstract eraYear: float option with get, set
+                abstract hour: float option with get, set
+                abstract microsecond: float option with get, set
+                abstract millisecond: float option with get, set
+                abstract minute: float option with get, set
+                abstract month: float option with get, set
+                abstract monthCode: string option with get, set
+                abstract nanosecond: float option with get, set
+                abstract offset: string option with get, set
+                abstract second: float option with get, set
+                abstract year: float option with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create
+                    (
+                        ?day: float,
+                        ?era: string,
+                        ?eraYear: float,
+                        ?hour: float,
+                        ?microsecond: float,
+                        ?millisecond: float,
+                        ?minute: float,
+                        ?month: float,
+                        ?monthCode: string,
+                        ?nanosecond: float,
+                        ?offset: string,
+                        ?second: float,
+                        ?year: float
+                    ) : ZonedDateTimeLike =
+                    jsNative
+
+    module ZonedDateTimeFromOptions =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Disambiguation =
+            | [<CompiledName("compatible")>] Compatible
+            | [<CompiledName("earlier")>] Earlier
+            | [<CompiledName("later")>] Later
+            | [<CompiledName("reject")>] Reject
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Offset =
+            | [<CompiledName("ignore")>] Ignore
+            | [<CompiledName("prefer")>] Prefer
+            | [<CompiledName("reject")>] Reject
+            | [<CompiledName("use")>] Use
+
+    module ZonedDateTimeToStringOptions =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type FractionalSecondDigits =
+            | [<CompiledName("auto")>] Auto
+            | [<CompiledValue(0)>] N0
+            | [<CompiledValue(1)>] N1
+            | [<CompiledValue(2)>] N2
+            | [<CompiledValue(3)>] N3
+            | [<CompiledValue(4)>] N4
+            | [<CompiledValue(5)>] N5
+            | [<CompiledValue(6)>] N6
+            | [<CompiledValue(7)>] N7
+            | [<CompiledValue(8)>] N8
+            | [<CompiledValue(9)>] N9
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Offset =
+            | [<CompiledName("auto")>] Auto
+            | [<CompiledName("never")>] Never
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type SmallestUnit =
+            | [<CompiledName("microsecond")>] Microsecond
+            | [<CompiledName("microseconds")>] Microseconds
+            | [<CompiledName("millisecond")>] Millisecond
+            | [<CompiledName("milliseconds")>] Milliseconds
+            | [<CompiledName("minute")>] Minute
+            | [<CompiledName("minutes")>] Minutes
+            | [<CompiledName("nanosecond")>] Nanosecond
+            | [<CompiledName("nanoseconds")>] Nanoseconds
+            | [<CompiledName("second")>] Second
+            | [<CompiledName("seconds")>] Seconds
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type TimeZoneName =
+            | [<CompiledName("auto")>] Auto
+            | [<CompiledName("critical")>] Critical
+            | [<CompiledName("never")>] Never
+
 module Dom =
     [<Interface>]
     type AacEncoderConfig =
@@ -23489,10 +23489,6 @@ module Dom =
         static member Create
             (?currentTime: CSSNumberish, ?timelineTime: CSSNumberish, ?bubbles: bool, ?cancelable: bool, ?composed: bool) : AnimationPlaybackEventInit =
             jsNative
-
-    module CSSNumericArray =
-        module ForEach =
-            type Callbackfn = delegate of value: CSSNumericValue * key: float * parent: CSSNumericArray -> unit
 
     [<Interface>]
     type AssignedNodesOptions =
@@ -24020,15 +24016,6 @@ module Dom =
             : BlobEventInit =
             jsNative
 
-    module ReadableStream =
-        module GetReader =
-            [<Interface>]
-            type Options =
-                abstract mode: string with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create(mode: string) : Options = jsNative
-
     [<Interface>]
     type BlobPropertyBag =
         abstract endings: EndingType option with get, set
@@ -24100,10 +24087,6 @@ module Dom =
             (?alpha: bool, ?colorSpace: PredefinedColorSpace, ?desynchronized: bool, ?willReadFrequently: bool)
             : CanvasRenderingContext2DSettings =
             jsNative
-
-    module AudioParamMap =
-        module ForEach =
-            type Callbackfn = delegate of value: AudioParam * key: string * parent: AudioParamMap -> unit
 
     type CSS =
         /// <summary>
@@ -24361,14 +24344,6 @@ module Dom =
         /// </summary>
         abstract vw: (float -> CSSUnitValue) with get, set
 
-    module CSSTransformValue =
-        module ForEach =
-            type Callbackfn = delegate of value: CSSTransformComponent * key: float * parent: CSSTransformValue -> unit
-
-    module CSSUnparsedValue =
-        module ForEach =
-            type Callbackfn = delegate of value: CSSUnparsedSegment * key: float * parent: CSSUnparsedValue -> unit
-
     [<Interface>]
     type CaretPositionFromPointOptions =
         abstract shadowRoots: ShadowRoot[] option with get, set
@@ -24397,38 +24372,6 @@ module Dom =
         delegate of
             source: U2<Fable.Core.TS.Es.PromiseLike<Response>, Response> * options: WebAssemblyCompileOptions option ->
                 Fable.Core.TS.Es.Promise<obj>
-
-    module CustomStateSet =
-        module ForEach =
-            type Callbackfn = delegate of value: string * key: string * parent: CustomStateSet -> unit
-
-    module DOMTokenList =
-        module ForEach =
-            type Callbackfn = delegate of value: string * key: float * parent: DOMTokenList -> unit
-
-    module DataTransfer =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type DropEffect =
-            | [<CompiledName("copy")>] Copy
-            | [<CompiledName("link")>] Link
-            | [<CompiledName("move")>] Move
-            | [<CompiledName("none")>] None
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type EffectAllowed =
-            | [<CompiledName("all")>] All
-            | [<CompiledName("copy")>] Copy
-            | [<CompiledName("copyLink")>] CopyLink
-            | [<CompiledName("copyMove")>] CopyMove
-            | [<CompiledName("link")>] Link
-            | [<CompiledName("linkMove")>] LinkMove
-            | [<CompiledName("move")>] Move
-            | [<CompiledName("none")>] None
-            | [<CompiledName("uninitialized")>] Uninitialized
-
-    module EventCounts =
-        module ForEach =
-            type Callbackfn = delegate of value: float * key: string * parent: EventCounts -> unit
 
     [<Interface>]
     type Exception =
@@ -24465,24 +24408,6 @@ module Dom =
         [<ParamObject; Emit("$0")>]
         static member Create(?traceStack: bool) : ExceptionOptions = jsNative
 
-    module FileReader =
-        type ReadyState =
-            | N0 = 0
-            | N1 = 1
-            | N2 = 2
-
-    module FontFaceSet =
-        module ForEach =
-            type Callbackfn = delegate of value: FontFace * key: FontFace * parent: FontFaceSet -> unit
-
-    module FormData =
-        module ForEach =
-            type Callbackfn = delegate of value: FormDataEntryValue * key: string * parent: FormData -> unit
-
-    module GPUSupportedFeatures =
-        module ForEach =
-            type Callbackfn = delegate of value: string * key: string * parent: GPUSupportedFeatures -> unit
-
     [<Interface>]
     type Global<'T> =
         abstract value: obj with get, set
@@ -24502,58 +24427,6 @@ module Dom =
 
         [<ParamObject; Emit("$0")>]
         static member Create(value: 'T, ?``mutable``: bool) : GlobalDescriptor<'T> = jsNative
-
-    module HTMLButtonElement =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Type =
-            | [<CompiledName("button")>] Button
-            | [<CompiledName("reset")>] Reset
-            | [<CompiledName("submit")>] Submit
-
-    module HTMLElement =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Hidden =
-            | [<CompiledName("until-found")>] UntilFound
-            | [<CompiledValue(false)>] False
-            | [<CompiledValue(true)>] True
-
-    module HTMLImageElement =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Decoding =
-            | [<CompiledName("async")>] Async
-            | [<CompiledName("auto")>] Auto
-            | [<CompiledName("sync")>] Sync
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Loading =
-            | [<CompiledName("eager")>] Eager
-            | [<CompiledName("lazy")>] Lazy
-
-    module HTMLSelectElement =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Type =
-            | [<CompiledName("select-multiple")>] SelectMultiple
-            | [<CompiledName("select-one")>] SelectOne
-
-    module HTMLVideoElement =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Preload =
-            | [<CompiledName("")>] Empty
-            | [<CompiledName("auto")>] Auto
-            | [<CompiledName("metadata")>] Metadata
-            | [<CompiledName("none")>] None
-
-    module Headers =
-        module ForEach =
-            type Callbackfn = delegate of value: string * key: string * parent: Headers -> unit
-
-    module Highlight =
-        module ForEach =
-            type Callbackfn = delegate of value: AbstractRange * key: AbstractRange * parent: Highlight -> unit
-
-    module HighlightRegistry =
-        module ForEach =
-            type Callbackfn = delegate of value: Highlight * key: string * parent: HighlightRegistry -> unit
 
     [<Interface>]
     type Instance =
@@ -24634,18 +24507,6 @@ module Dom =
         [<Emit("$0($1...)")>]
         abstract Invoke: ?message: string -> LinkError
 
-    module MIDIInputMap =
-        module ForEach =
-            type Callbackfn = delegate of value: MIDIInput * key: string * parent: MIDIInputMap -> unit
-
-    module MIDIOutputMap =
-        module ForEach =
-            type Callbackfn = delegate of value: MIDIOutput * key: string * parent: MIDIOutputMap -> unit
-
-    module MediaKeyStatusMap =
-        module ForEach =
-            type Callbackfn = delegate of value: MediaKeyStatus * key: BufferSource * parent: MediaKeyStatusMap -> unit
-
     [<Interface>]
     type Memory =
         /// <summary>
@@ -24690,12 +24551,6 @@ module Dom =
             : MemoryDescriptor =
             jsNative
 
-    module MemoryDescriptor =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Address =
-            | [<CompiledName("i32")>] I32
-            | [<CompiledName("i64")>] I64
-
     [<Interface>]
     type ModuleExportDescriptor =
         abstract kind: ModuleExportDescriptor.Kind with get, set
@@ -24703,15 +24558,6 @@ module Dom =
 
         [<ParamObject; Emit("$0")>]
         static member Create(kind: ModuleExportDescriptor.Kind, name: string) : ModuleExportDescriptor = jsNative
-
-    module ModuleExportDescriptor =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Kind =
-            | [<CompiledName("function")>] Function
-            | [<CompiledName("global")>] Global
-            | [<CompiledName("memory")>] Memory
-            | [<CompiledName("table")>] Table
-            | [<CompiledName("tag")>] Tag
 
     [<Interface>]
     type ModuleImportDescriptor =
@@ -24724,24 +24570,6 @@ module Dom =
             (kind: ModuleExportDescriptor.Kind, ``module``: string, name: string)
             : ModuleImportDescriptor =
             jsNative
-
-    module NodeList =
-        module ForEach =
-            type Callbackfn = delegate of value: Node * key: float * parent: NodeList -> unit
-
-    module NodeListOf =
-        module ForEach =
-            type Callbackfn<'TNode when 'TNode :> Node> =
-                delegate of value: 'TNode * key: float * parent: NodeListOf<'TNode> -> unit
-
-    module RTCStatsReport =
-        module ForEach =
-            type Callbackfn = delegate of value: obj * key: string * parent: RTCStatsReport -> unit
-
-    module RadioNodeList =
-        module ForEach =
-            type Callbackfn =
-                delegate of value: HTMLInputElement * key: float * parent: NodeListOf<HTMLInputElement> -> unit
 
     [<Interface>]
     type RuntimeError =
@@ -24756,59 +24584,6 @@ module Dom =
 
         [<Emit("$0($1...)")>]
         abstract Invoke: ?message: string -> RuntimeError
-
-    module StylePropertyMapReadOnly =
-        module ForEach =
-            type Callbackfn =
-                delegate of value: CSSStyleValue[] * key: string * parent: StylePropertyMapReadOnly -> unit
-
-    module SubtleCrypto =
-        module ExportKey =
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type Format =
-                | [<CompiledName("pkcs8")>] Pkcs8
-                | [<CompiledName("raw")>] Raw
-                | [<CompiledName("spki")>] Spki
-
-        module GenerateKey =
-            [<Interface>]
-            type Algorithm =
-                abstract name: string with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create(name: string) : Algorithm = jsNative
-
-            [<Interface>]
-            type Algorithm2 =
-                abstract name: string with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create(name: string) : Algorithm2 = jsNative
-
-            [<Interface>]
-            type Algorithm3 =
-                abstract name: string with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create(name: string) : Algorithm3 = jsNative
-
-            [<Interface>]
-            type Algorithm4 =
-                abstract name: string with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create(name: string) : Algorithm4 = jsNative
-
-            module KeyUsages =
-                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                type Item =
-                    | [<CompiledName("sign")>] Sign
-                    | [<CompiledName("verify")>] Verify
-
-                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                type Item2 =
-                    | [<CompiledName("deriveBits")>] DeriveBits
-                    | [<CompiledName("deriveKey")>] DeriveKey
 
     type Supports = delegate of property: string * value: string -> bool
 
@@ -24862,12 +24637,6 @@ module Dom =
             : TableDescriptor =
             jsNative
 
-    module TableDescriptor =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Element =
-            | [<CompiledName("anyfunc")>] Anyfunc
-            | [<CompiledName("externref")>] Externref
-
     [<Interface>]
     type TagType =
         abstract parameters: WebAssembly.Global.Prototype.Item[] with get, set
@@ -24875,19 +24644,7 @@ module Dom =
         [<ParamObject; Emit("$0")>]
         static member Create(parameters: WebAssembly.Global.Prototype.Item[]) : TagType = jsNative
 
-    module URLSearchParams =
-        module ForEach =
-            type Callbackfn = delegate of value: string * key: string * parent: URLSearchParams -> unit
-
     type Validate = delegate of bytes: BufferSource * options: WebAssemblyCompileOptions option -> bool
-
-    module ViewTransitionTypeSet =
-        module ForEach =
-            type Callbackfn = delegate of value: string * key: string * parent: ViewTransitionTypeSet -> unit
-
-    module WGSLLanguageFeatures =
-        module ForEach =
-            type Callbackfn = delegate of value: string * key: string * parent: WGSLLanguageFeatures -> unit
 
     type WebAssembly =
         /// <summary>
@@ -24994,46 +24751,6 @@ module Dom =
         /// </summary>
         abstract validate: Validate with get, set
 
-    module WebAssembly =
-        module Global =
-            module Prototype =
-                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                type Item =
-                    | [<CompiledName("anyfunc")>] Anyfunc
-                    | [<CompiledName("externref")>] Externref
-                    | [<CompiledName("f32")>] F32
-                    | [<CompiledName("f64")>] F64
-                    | [<CompiledName("i32")>] I32
-                    | [<CompiledName("i64")>] I64
-                    | [<CompiledName("v128")>] V128
-
-        type ModuleConstructor =
-            /// <summary>
-            /// The WebAssembly.<b><c>Module.customSections()</c></b> static method returns a copy of the contents of all custom sections in the given module with the given string name.
-            /// <br /><br />
-            /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Module/customSections_static">MDN Reference</a>
-            /// </summary>
-            abstract customSections: moduleObject: obj * sectionName: string -> Fable.Core.TS.Es.ArrayBuffer[]
-            /// <summary>
-            /// The WebAssembly.<b><c>Module.exports()</c></b> static method returns an array containing descriptions of all the declared exports of the given Module.
-            /// <br /><br />
-            /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Module/exports_static">MDN Reference</a>
-            /// </summary>
-            abstract exports: moduleObject: obj -> ModuleExportDescriptor[]
-            /// <summary>
-            /// The WebAssembly.<b><c>Module.imports()</c></b> static method returns an array containing descriptions of all the declared imports of the given Module.
-            /// <br /><br />
-            /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Module/imports_static">MDN Reference</a>
-            /// </summary>
-            abstract imports: moduleObject: obj -> ModuleImportDescriptor[]
-
-            [<EmitConstructor>]
-            abstract Create: bytes: BufferSource * ?options: WebAssemblyCompileOptions -> obj
-
-        type TagConstructor =
-            [<EmitConstructor>]
-            abstract Create: ``type``: TagType -> obj
-
     [<Interface>]
     type WebAssemblyCompileOptions =
         abstract builtins: string[] option with get, set
@@ -25050,85 +24767,6 @@ module Dom =
 
         [<ParamObject; Emit("$0")>]
         static member Create(instance: Instance, ``module``: obj) : WebAssemblyInstantiatedSource = jsNative
-
-    module WebSocket =
-        type ReadyState =
-            | N0 = 0
-            | N1 = 1
-            | N2 = 2
-            | N3 = 3
-
-    module Window =
-        type Self =
-            inherit Window
-            inherit Fable.Core.TS.Es.GlobalThis
-
-        module Self =
-            [<Interface>]
-            type NodeFilter =
-                abstract FILTER_ACCEPT: float
-                abstract FILTER_REJECT: float
-                abstract FILTER_SKIP: float
-                abstract SHOW_ALL: float
-                abstract SHOW_ELEMENT: float
-                abstract SHOW_ATTRIBUTE: float
-                abstract SHOW_TEXT: float
-                abstract SHOW_CDATA_SECTION: float
-                abstract SHOW_ENTITY_REFERENCE: float
-                abstract SHOW_ENTITY: float
-                abstract SHOW_PROCESSING_INSTRUCTION: float
-                abstract SHOW_COMMENT: float
-                abstract SHOW_DOCUMENT: float
-                abstract SHOW_DOCUMENT_TYPE: float
-                abstract SHOW_DOCUMENT_FRAGMENT: float
-                abstract SHOW_NOTATION: float
-
-                [<ParamObject; Emit("$0")>]
-                static member Create
-                    (
-                        FILTER_ACCEPT: float,
-                        FILTER_REJECT: float,
-                        FILTER_SKIP: float,
-                        SHOW_ALL: float,
-                        SHOW_ELEMENT: float,
-                        SHOW_ATTRIBUTE: float,
-                        SHOW_TEXT: float,
-                        SHOW_CDATA_SECTION: float,
-                        SHOW_ENTITY_REFERENCE: float,
-                        SHOW_ENTITY: float,
-                        SHOW_PROCESSING_INSTRUCTION: float,
-                        SHOW_COMMENT: float,
-                        SHOW_DOCUMENT: float,
-                        SHOW_DOCUMENT_TYPE: float,
-                        SHOW_DOCUMENT_FRAGMENT: float,
-                        SHOW_NOTATION: float
-                    ) : NodeFilter =
-                    jsNative
-
-            module ReadableStream =
-                [<Interface>]
-                type Strategy =
-                    abstract highWaterMark: float option with get, set
-
-                    [<ParamObject; Emit("$0")>]
-                    static member Create(?highWaterMark: float) : Strategy = jsNative
-
-    module XMLDocument =
-        module CreateExpression =
-            [<Interface>]
-            type Resolver =
-                abstract lookupNamespaceURI: ?prefix: string -> string option
-
-                [<ParamObject; Emit("$0")>]
-                static member Create(lookupNamespaceURI: (string option -> string option)) : Resolver = jsNative
-
-        module CreateNodeIterator =
-            [<Interface>]
-            type Filter =
-                abstract acceptNode: node: Node -> float
-
-                [<ParamObject; Emit("$0")>]
-                static member Create(acceptNode: (Node -> float)) : Filter = jsNative
 
     [<Interface>]
     type ChannelMergerOptions =
@@ -85501,6 +85139,368 @@ module Dom =
                                 >)
             ) : ReadableStreamAsyncIterator<'T> =
             jsNative
+
+    module AudioParamMap =
+        module ForEach =
+            type Callbackfn = delegate of value: AudioParam * key: string * parent: AudioParamMap -> unit
+
+    module CSSNumericArray =
+        module ForEach =
+            type Callbackfn = delegate of value: CSSNumericValue * key: float * parent: CSSNumericArray -> unit
+
+    module CSSTransformValue =
+        module ForEach =
+            type Callbackfn = delegate of value: CSSTransformComponent * key: float * parent: CSSTransformValue -> unit
+
+    module CSSUnparsedValue =
+        module ForEach =
+            type Callbackfn = delegate of value: CSSUnparsedSegment * key: float * parent: CSSUnparsedValue -> unit
+
+    module CustomStateSet =
+        module ForEach =
+            type Callbackfn = delegate of value: string * key: string * parent: CustomStateSet -> unit
+
+    module DOMTokenList =
+        module ForEach =
+            type Callbackfn = delegate of value: string * key: float * parent: DOMTokenList -> unit
+
+    module DataTransfer =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type DropEffect =
+            | [<CompiledName("copy")>] Copy
+            | [<CompiledName("link")>] Link
+            | [<CompiledName("move")>] Move
+            | [<CompiledName("none")>] None
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type EffectAllowed =
+            | [<CompiledName("all")>] All
+            | [<CompiledName("copy")>] Copy
+            | [<CompiledName("copyLink")>] CopyLink
+            | [<CompiledName("copyMove")>] CopyMove
+            | [<CompiledName("link")>] Link
+            | [<CompiledName("linkMove")>] LinkMove
+            | [<CompiledName("move")>] Move
+            | [<CompiledName("none")>] None
+            | [<CompiledName("uninitialized")>] Uninitialized
+
+    module EventCounts =
+        module ForEach =
+            type Callbackfn = delegate of value: float * key: string * parent: EventCounts -> unit
+
+    module FileReader =
+        type ReadyState =
+            | N0 = 0
+            | N1 = 1
+            | N2 = 2
+
+    module FontFaceSet =
+        module ForEach =
+            type Callbackfn = delegate of value: FontFace * key: FontFace * parent: FontFaceSet -> unit
+
+    module FormData =
+        module ForEach =
+            type Callbackfn = delegate of value: FormDataEntryValue * key: string * parent: FormData -> unit
+
+    module GPUSupportedFeatures =
+        module ForEach =
+            type Callbackfn = delegate of value: string * key: string * parent: GPUSupportedFeatures -> unit
+
+    module HTMLButtonElement =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Type =
+            | [<CompiledName("button")>] Button
+            | [<CompiledName("reset")>] Reset
+            | [<CompiledName("submit")>] Submit
+
+    module HTMLElement =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Hidden =
+            | [<CompiledName("until-found")>] UntilFound
+            | [<CompiledValue(false)>] False
+            | [<CompiledValue(true)>] True
+
+    module HTMLImageElement =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Decoding =
+            | [<CompiledName("async")>] Async
+            | [<CompiledName("auto")>] Auto
+            | [<CompiledName("sync")>] Sync
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Loading =
+            | [<CompiledName("eager")>] Eager
+            | [<CompiledName("lazy")>] Lazy
+
+    module HTMLSelectElement =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Type =
+            | [<CompiledName("select-multiple")>] SelectMultiple
+            | [<CompiledName("select-one")>] SelectOne
+
+    module HTMLVideoElement =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Preload =
+            | [<CompiledName("")>] Empty
+            | [<CompiledName("auto")>] Auto
+            | [<CompiledName("metadata")>] Metadata
+            | [<CompiledName("none")>] None
+
+    module Headers =
+        module ForEach =
+            type Callbackfn = delegate of value: string * key: string * parent: Headers -> unit
+
+    module Highlight =
+        module ForEach =
+            type Callbackfn = delegate of value: AbstractRange * key: AbstractRange * parent: Highlight -> unit
+
+    module HighlightRegistry =
+        module ForEach =
+            type Callbackfn = delegate of value: Highlight * key: string * parent: HighlightRegistry -> unit
+
+    module MIDIInputMap =
+        module ForEach =
+            type Callbackfn = delegate of value: MIDIInput * key: string * parent: MIDIInputMap -> unit
+
+    module MIDIOutputMap =
+        module ForEach =
+            type Callbackfn = delegate of value: MIDIOutput * key: string * parent: MIDIOutputMap -> unit
+
+    module MediaKeyStatusMap =
+        module ForEach =
+            type Callbackfn = delegate of value: MediaKeyStatus * key: BufferSource * parent: MediaKeyStatusMap -> unit
+
+    module MemoryDescriptor =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Address =
+            | [<CompiledName("i32")>] I32
+            | [<CompiledName("i64")>] I64
+
+    module ModuleExportDescriptor =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Kind =
+            | [<CompiledName("function")>] Function
+            | [<CompiledName("global")>] Global
+            | [<CompiledName("memory")>] Memory
+            | [<CompiledName("table")>] Table
+            | [<CompiledName("tag")>] Tag
+
+    module NodeList =
+        module ForEach =
+            type Callbackfn = delegate of value: Node * key: float * parent: NodeList -> unit
+
+    module NodeListOf =
+        module ForEach =
+            type Callbackfn<'TNode when 'TNode :> Node> =
+                delegate of value: 'TNode * key: float * parent: NodeListOf<'TNode> -> unit
+
+    module RTCStatsReport =
+        module ForEach =
+            type Callbackfn = delegate of value: obj * key: string * parent: RTCStatsReport -> unit
+
+    module RadioNodeList =
+        module ForEach =
+            type Callbackfn =
+                delegate of value: HTMLInputElement * key: float * parent: NodeListOf<HTMLInputElement> -> unit
+
+    module ReadableStream =
+        module GetReader =
+            [<Interface>]
+            type Options =
+                abstract mode: string with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create(mode: string) : Options = jsNative
+
+    module StylePropertyMapReadOnly =
+        module ForEach =
+            type Callbackfn =
+                delegate of value: CSSStyleValue[] * key: string * parent: StylePropertyMapReadOnly -> unit
+
+    module SubtleCrypto =
+        module ExportKey =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Format =
+                | [<CompiledName("pkcs8")>] Pkcs8
+                | [<CompiledName("raw")>] Raw
+                | [<CompiledName("spki")>] Spki
+
+        module GenerateKey =
+            [<Interface>]
+            type Algorithm =
+                abstract name: string with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create(name: string) : Algorithm = jsNative
+
+            [<Interface>]
+            type Algorithm2 =
+                abstract name: string with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create(name: string) : Algorithm2 = jsNative
+
+            [<Interface>]
+            type Algorithm3 =
+                abstract name: string with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create(name: string) : Algorithm3 = jsNative
+
+            [<Interface>]
+            type Algorithm4 =
+                abstract name: string with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create(name: string) : Algorithm4 = jsNative
+
+            module KeyUsages =
+                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                type Item =
+                    | [<CompiledName("sign")>] Sign
+                    | [<CompiledName("verify")>] Verify
+
+                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                type Item2 =
+                    | [<CompiledName("deriveBits")>] DeriveBits
+                    | [<CompiledName("deriveKey")>] DeriveKey
+
+    module TableDescriptor =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Element =
+            | [<CompiledName("anyfunc")>] Anyfunc
+            | [<CompiledName("externref")>] Externref
+
+    module URLSearchParams =
+        module ForEach =
+            type Callbackfn = delegate of value: string * key: string * parent: URLSearchParams -> unit
+
+    module ViewTransitionTypeSet =
+        module ForEach =
+            type Callbackfn = delegate of value: string * key: string * parent: ViewTransitionTypeSet -> unit
+
+    module WGSLLanguageFeatures =
+        module ForEach =
+            type Callbackfn = delegate of value: string * key: string * parent: WGSLLanguageFeatures -> unit
+
+    module WebAssembly =
+        type ModuleConstructor =
+            /// <summary>
+            /// The WebAssembly.<b><c>Module.customSections()</c></b> static method returns a copy of the contents of all custom sections in the given module with the given string name.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Module/customSections_static">MDN Reference</a>
+            /// </summary>
+            abstract customSections: moduleObject: obj * sectionName: string -> Fable.Core.TS.Es.ArrayBuffer[]
+            /// <summary>
+            /// The WebAssembly.<b><c>Module.exports()</c></b> static method returns an array containing descriptions of all the declared exports of the given Module.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Module/exports_static">MDN Reference</a>
+            /// </summary>
+            abstract exports: moduleObject: obj -> ModuleExportDescriptor[]
+            /// <summary>
+            /// The WebAssembly.<b><c>Module.imports()</c></b> static method returns an array containing descriptions of all the declared imports of the given Module.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Module/imports_static">MDN Reference</a>
+            /// </summary>
+            abstract imports: moduleObject: obj -> ModuleImportDescriptor[]
+
+            [<EmitConstructor>]
+            abstract Create: bytes: BufferSource * ?options: WebAssemblyCompileOptions -> obj
+
+        type TagConstructor =
+            [<EmitConstructor>]
+            abstract Create: ``type``: TagType -> obj
+
+        module Global =
+            module Prototype =
+                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                type Item =
+                    | [<CompiledName("anyfunc")>] Anyfunc
+                    | [<CompiledName("externref")>] Externref
+                    | [<CompiledName("f32")>] F32
+                    | [<CompiledName("f64")>] F64
+                    | [<CompiledName("i32")>] I32
+                    | [<CompiledName("i64")>] I64
+                    | [<CompiledName("v128")>] V128
+
+    module WebSocket =
+        type ReadyState =
+            | N0 = 0
+            | N1 = 1
+            | N2 = 2
+            | N3 = 3
+
+    module Window =
+        type Self =
+            inherit Window
+            inherit Fable.Core.TS.Es.GlobalThis
+
+        module Self =
+            [<Interface>]
+            type NodeFilter =
+                abstract FILTER_ACCEPT: float
+                abstract FILTER_REJECT: float
+                abstract FILTER_SKIP: float
+                abstract SHOW_ALL: float
+                abstract SHOW_ELEMENT: float
+                abstract SHOW_ATTRIBUTE: float
+                abstract SHOW_TEXT: float
+                abstract SHOW_CDATA_SECTION: float
+                abstract SHOW_ENTITY_REFERENCE: float
+                abstract SHOW_ENTITY: float
+                abstract SHOW_PROCESSING_INSTRUCTION: float
+                abstract SHOW_COMMENT: float
+                abstract SHOW_DOCUMENT: float
+                abstract SHOW_DOCUMENT_TYPE: float
+                abstract SHOW_DOCUMENT_FRAGMENT: float
+                abstract SHOW_NOTATION: float
+
+                [<ParamObject; Emit("$0")>]
+                static member Create
+                    (
+                        FILTER_ACCEPT: float,
+                        FILTER_REJECT: float,
+                        FILTER_SKIP: float,
+                        SHOW_ALL: float,
+                        SHOW_ELEMENT: float,
+                        SHOW_ATTRIBUTE: float,
+                        SHOW_TEXT: float,
+                        SHOW_CDATA_SECTION: float,
+                        SHOW_ENTITY_REFERENCE: float,
+                        SHOW_ENTITY: float,
+                        SHOW_PROCESSING_INSTRUCTION: float,
+                        SHOW_COMMENT: float,
+                        SHOW_DOCUMENT: float,
+                        SHOW_DOCUMENT_TYPE: float,
+                        SHOW_DOCUMENT_FRAGMENT: float,
+                        SHOW_NOTATION: float
+                    ) : NodeFilter =
+                    jsNative
+
+            module ReadableStream =
+                [<Interface>]
+                type Strategy =
+                    abstract highWaterMark: float option with get, set
+
+                    [<ParamObject; Emit("$0")>]
+                    static member Create(?highWaterMark: float) : Strategy = jsNative
+
+    module XMLDocument =
+        module CreateExpression =
+            [<Interface>]
+            type Resolver =
+                abstract lookupNamespaceURI: ?prefix: string -> string option
+
+                [<ParamObject; Emit("$0")>]
+                static member Create(lookupNamespaceURI: (string option -> string option)) : Resolver = jsNative
+
+        module CreateNodeIterator =
+            [<Interface>]
+            type Filter =
+                abstract acceptNode: node: Node -> float
+
+                [<ParamObject; Emit("$0")>]
+                static member Create(acceptNode: (Node -> float)) : Filter = jsNative
 
 [<Erase>]
 type U11<'t1, 't2, 't3, 't4, 't5, 't6, 't7, 't8, 't9, 't10, 't11> =
