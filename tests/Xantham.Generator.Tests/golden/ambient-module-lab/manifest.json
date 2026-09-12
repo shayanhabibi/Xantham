@@ -16,9 +16,9 @@
       "escape": 2
     },
     {
-      "pass": "name-exports",
-      "total": 1,
-      "exact": 1
+      "pass": "NE - name-exports",
+      "total": 4,
+      "exact": 4
     },
     {
       "pass": "SI - shape-interfaces",
