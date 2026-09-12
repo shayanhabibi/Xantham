@@ -71,6 +71,13 @@ let nameExports: Pass<ShapeModel> =
                         |> Option.bind (fun parent -> Map.tryFind parent model.Harvest.Namespaces)
                         |> Option.map (fun value -> Naming.pascalSegment (value / uom<symbolName>))
 
+                    /// Where a declaration was harvested from, in the words a manifest reads.
+                    let originOf (export: HarvestedExport) =
+                        match export.Origin with
+                        | FromModule -> "the entry module"
+                        | FromGlobal -> "global scope"
+                        | FromAmbientModule specifier -> $"ambient module \"{specifier / uom<importSpecifier>}\""
+
                     // The claim every export makes, in harvest order, read before any of them is
                     // granted. A contested name is visible only from the whole list, and the
                     // namespaced declaration is as often the first claimant as the second - it is
@@ -79,13 +86,13 @@ let nameExports: Pass<ShapeModel> =
                         declarationExports ctx model
                         |> List.filter (fun (typeId, _) -> not (Map.containsKey typeId model.DeclNames))
                         |> List.map (fun (typeId, export) ->
-                            typeId, export.Order, fsName fallback export, namespaceOf export)
+                            typeId, export.Order, fsName fallback export, namespaceOf export, originOf export)
 
                     let declared = model.DeclNames |> Map.toList |> List.map snd |> Set.ofList
 
                     let contested =
                         claimants
-                        |> List.countBy (fun (_, _, preferred, _) -> preferred)
+                        |> List.countBy (fun (_, _, preferred, _, _) -> preferred)
                         |> List.filter (fun (preferred, count) -> count > 1 || Set.contains preferred declared)
                         |> List.map fst
                         |> Set.ofList
@@ -93,7 +100,7 @@ let nameExports: Pass<ShapeModel> =
                     let names, orders, _, findings =
                         claimants
                         |> List.fold
-                            (fun (names, orders, taken, findings) (typeId, order, preferred, owner) ->
+                            (fun (names, orders, taken, findings) (typeId, order, preferred, owner, origin) ->
                                 let wanted =
                                     match owner with
                                     | Some ns when Set.contains preferred contested -> nestUnder ns preferred
@@ -101,13 +108,21 @@ let nameExports: Pass<ShapeModel> =
 
                                 let name = claim taken wanted
 
-                                Map.add typeId name names,
-                                Map.add typeId order orders,
-                                Set.add name taken,
-                                if name.Contains "." then
-                                    findings @ [ Finding.make name (SynthesizeAnonymous.NameNestedUnderOwner name) ]
-                                else
-                                    findings)
+                                let findings =
+                                    if name.Contains "." then
+                                        findings
+                                        @ [ Finding.make name (SynthesizeAnonymous.NameNestedUnderOwner name) ]
+                                    else
+                                        findings
+
+                                let findings =
+                                    if name <> wanted then
+                                        findings
+                                        @ [ Finding.make name (NameExports.TypeNameSuffixed(wanted, name, origin)) ]
+                                    else
+                                        findings
+
+                                Map.add typeId name names, Map.add typeId order orders, Set.add name taken, findings)
                             (model.DeclNames, model.DeclOrders, declared, [])
 
                     let model =

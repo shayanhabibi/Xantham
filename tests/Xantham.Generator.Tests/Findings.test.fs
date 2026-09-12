@@ -124,6 +124,7 @@ let findingsTests =
                     "MB.OptionalHookAsInterface MB005 ergonomic"
                     "MB.OptionalParameterFromUnion MB006 ergonomic"
                     "MB.UnspellableMemberDropped MB007 widened"
+                    "NE.TypeNameSuffixed NE001 exact"
                     "HG.AmbientModuleDropped HG001 escape"
                     "HG.UnwritableGlobalDropped HG002 escape"
                     "HG.NothingHarvested HG003 escape"
@@ -206,10 +207,10 @@ let findingsTests =
 
           testCase "a pass is labelled with the prefix of the union it owns" <| fun _ ->
               Expect.equal (FindingCatalogue.passLabel "shape-interfaces") "SI - shape-interfaces" "a pass with a union"
-              Expect.equal (FindingCatalogue.passLabel "name-exports") "name-exports" "a pass without one stays bare"
+              Expect.equal (FindingCatalogue.passLabel "name-exports") "NE - name-exports" "a pass with a union"
 
               let passes = FindingCatalogue.passPrefixes |> Map.toList |> List.map fst
-              Expect.equal passes.Length 14 "every per-pass union names its pass"
+              Expect.equal passes.Length 15 "every per-pass union names its pass"
 
           testCase "a finding derives name, key, tier, payload and message from its kind" <| fun _ ->
               let finding = Finding.make "Options.legacy" (TypeReference.UnionTooWide(10, 9))
