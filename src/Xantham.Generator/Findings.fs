@@ -160,12 +160,14 @@ module FindingCodes =
             "MB.OptionalHookAsInterface", "MB005"
             "MB.OptionalParameterFromUnion", "MB006"
             "MB.UnspellableMemberDropped", "MB007"
+            "NE.TypeNameSuffixed", "NE001"
             "HG.AmbientModuleDropped", "HG001"
             "HG.UnwritableGlobalDropped", "HG002"
             "HG.NothingHarvested", "HG003"
             "HG.AmbientModuleHarvested", "HG004"
             "HG.AmbientModuleWildcard", "HG005"
             "HG.NamespaceIsModuleBody", "HG006"
+            "HG.AmbientModuleAliasDivergent", "HG007"
             "RE.FacetNotResolved", "RE001"
             "RT.FrontierNotResolved", "RT001"
             "RT.TypeNotResolved", "RT002"
@@ -696,6 +698,7 @@ type HarvestGlobals =
     | [<Exact>] AmbientModuleHarvested of specifier: string * exports: int
     | [<Escape>] AmbientModuleWildcard of specifier: string
     | [<Exact>] NamespaceIsModuleBody of ns: string * specifier: string
+    | [<Widened>] AmbientModuleAliasDivergent of name: string * spellings: string list
 
     interface IFindingKind with
         member this.Message =
@@ -713,6 +716,9 @@ type HarvestGlobals =
                 $"ambient module \"{specifier}\" dropped - a wildcard specifier names no module an import can resolve"
             | NamespaceIsModuleBody(ns, specifier) ->
                 $"{ns} is the body of ambient module \"{specifier}\" (export =) rather than a global"
+            | AmbientModuleAliasDivergent(name, spellings) ->
+                let spellings = spellings |> List.map (sprintf "\"%s\"") |> String.concat ", "
+                $"\"node:{name}\" collapses {spellings}, whose export sets disagree"
 
 /// `resolve-export-types`.
 [<Prefix("RE", "resolve-export-types")>]
@@ -779,6 +785,19 @@ type DetectTaggedUnions =
                 $"discriminated by '{tag}', but two arms carry '{value}'; left as an erased union"
             | ArmsMergedOnSharedTag(tag, value) ->
                 $"arms sharing '{tag}' = '{value}' merged into one case, carrying the members they agree on"
+
+/// `name-exports`.
+[<Prefix("NE", "name-exports")>]
+type NameExports =
+    /// A declaration whose preferred name a sibling declaration already claimed under this pass;
+    /// it keeps a numeric suffix instead.
+    | [<Exact>] TypeNameSuffixed of original: string * suffixed: string * origin: string
+
+    interface IFindingKind with
+        member this.Message =
+            match this with
+            | TypeNameSuffixed(original, suffixed, origin) ->
+                $"name '{original}' already claimed; this declaration, from {origin}, is written as '{suffixed}'"
 
 /// `shape-interfaces`.
 /// `synthesize-anonymous`. Wave two, lane A: the pass had no findings of its own, because until
@@ -921,6 +940,7 @@ type ShapeClasses =
     ///emitted under the specifier the class's own binding uses, or the first harvested path when
     /// the class carries none; the dropped path's specifier is recorded here.
     | [<Exact>] StaticAliasPathCollapsed of specifier: string
+
     interface IFindingKind with
         member this.Message =
             match this with
@@ -1112,6 +1132,7 @@ module FindingCatalogue =
             typeof<TypeReference>
             typeof<TypeParameters>
             typeof<Members>
+            typeof<NameExports>
             typeof<HarvestGlobals>
             typeof<ResolveExportTypes>
             typeof<ResolveTypeTable>

@@ -127,28 +127,47 @@ module AmbientLabRuntime =
         [<ParamObject; Emit("$0")>]
         static member Create (label: string) : Session = jsNative
 
-/// <summary>The package's value exports, each bound to its import.</summary>
-[<Erase>]
-type Exports =
-    /// <summary>
-    /// A namespace declaring a value: <c>globalThis.Telemetry</c> is real, so it keeps <c>[&lt;Global&gt;]</c>.
-    /// </summary>
-    [<Global("Telemetry")>]
-    static member Telemetry: Telemetry = jsNative
-    /// <summary>
-    /// A global class sharing its name with <c>ambient-lab:runtime</c>'s. Two declarations, two types.
-    /// </summary>
-    [<Global("Session"); EmitConstructor>]
-    static member Session () : Session = jsNative
-    /// <summary>
-    /// An abstract class no specifier exports: <c>globalThis.Anvil</c> is not a module entrypoint, so it
-    /// keeps the interface form and its <c>Create</c>.
-    /// </summary>
-    [<Global("Anvil"); EmitConstructor>]
-    static member Anvil () : Anvil = jsNative
+[<Interface>]
+type Session2 =
+    abstract id: string
+    [<ParamObject; Emit("$0")>]
+    static member Create (id: string) : Session2 = jsNative
+
+[<Interface>]
+type Constants =
+    abstract epoch: float
+    [<ParamObject; Emit("$0")>]
+    static member Create (epoch: float) : Constants = jsNative
+
+[<Interface>]
+type Session3 =
+    abstract id: string
+    [<ParamObject; Emit("$0")>]
+    static member Create (id: string) : Session3 = jsNative
+
+[<Interface>]
+type Constants2 =
+    abstract epoch: float
+    [<ParamObject; Emit("$0")>]
+    static member Create (epoch: float) : Constants2 = jsNative
 
 module AmbientLab =
-    /// <summary>ambient-lab:runtime</summary>
+    module Lab =
+        /// <summary>The package's value exports, each bound to its import.</summary>
+        [<Erase>]
+        type Exports =
+            [<Import("Session", "ambient-lab:lab"); EmitConstructor>]
+            static member Session (id: string) : Session2 = jsNative
+
+        module Promises =
+            /// <summary>The package's value exports, each bound to its import.</summary>
+            [<Erase>]
+            type Exports =
+                [<Import("Session", "ambient-lab:lab/promises"); EmitConstructor>]
+                static member Session (id: string) : Session3 = jsNative
+                [<Import("describe", "ambient-lab:lab/promises")>]
+                static member describe (session: Session2) : string = jsNative
+
     module Runtime =
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]
@@ -165,7 +184,6 @@ module AmbientLab =
             [<Import("connect", "ambient-lab:sockets")>]
             static member connect (label: string) : Payload = jsNative
 
-    /// <summary>ambient-lab:tools</summary>
     module Tools =
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]
@@ -198,3 +216,23 @@ module AmbientLab =
             /// </summary>
             [<Import("Vise", "ambient-lab:tools"); EmitConstructor>]
             static member Vise (weight: float, jaw: float) : Vise = jsNative
+
+/// <summary>The package's value exports, each bound to its import.</summary>
+[<Erase>]
+type Exports =
+    /// <summary>
+    /// A namespace declaring a value: <c>globalThis.Telemetry</c> is real, so it keeps <c>[&lt;Global&gt;]</c>.
+    /// </summary>
+    [<Global("Telemetry")>]
+    static member Telemetry: Telemetry = jsNative
+    /// <summary>
+    /// A global class sharing its name with <c>ambient-lab:runtime</c>'s. Two declarations, two types.
+    /// </summary>
+    [<Global("Session"); EmitConstructor>]
+    static member Session () : Session = jsNative
+    /// <summary>
+    /// An abstract class no specifier exports: <c>globalThis.Anvil</c> is not a module entrypoint, so it
+    /// keeps the interface form and its <c>Create</c>.
+    /// </summary>
+    [<Global("Anvil"); EmitConstructor>]
+    static member Anvil () : Anvil = jsNative

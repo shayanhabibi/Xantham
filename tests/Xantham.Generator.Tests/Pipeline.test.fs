@@ -103,6 +103,31 @@ let private inheritsOf (source: string) (name: string) =
                 None)
         |> List.ofArray
 
+/// The body of a `module Name =` block: every line more indented than the header, dedented text
+/// unchanged. Scopes an assertion to one specifier module regardless of how deeply it nests.
+let private moduleBodyOf (source: string) (name: string) =
+    let lines = source.Replace("\r\n", "\n").Split '\n'
+    let header = $"module {name} ="
+
+    match lines |> Array.tryFindIndex (fun line -> line.TrimStart() = header) with
+    | None -> failtest $"no module named {name} in the rendered source"
+    | Some start ->
+        let indent = lines[start].Length - lines[start].TrimStart().Length
+
+        lines
+        |> Array.skip (start + 1)
+        |> Array.takeWhile (fun line ->
+            String.IsNullOrWhiteSpace line || line.Length - line.TrimStart().Length > indent)
+        |> String.concat "\n"
+
+/// The doc comment line immediately above a declaration line, trimmed.
+let private summaryBefore (source: string) (declaration: string) =
+    let lines = source.Replace("\r\n", "\n").Split '\n'
+
+    match lines |> Array.tryFindIndex (fun line -> line.TrimStart() = declaration) with
+    | None -> failtest $"no line \"{declaration}\" in the rendered source"
+    | Some idx -> lines[idx - 1].Trim()
+
 /// The absence facts a site carries: whether it was written with a `?` marker, and the
 /// spellings its hoist to `option` reported. TypeScript writes absence five ways and F# has
 /// `option` and `unit` for all five, so this pair is the whole distinction a consumer reads.
@@ -667,7 +692,9 @@ let pipelineTests =
                         "static member Session (label: string) : AmbientLabRuntime.Session"
                         "and the constructor hands back the nested declaration"
 
-                    Expect.isFalse (source.Contains "Session2") "so neither declaration takes a suffix"
+                    let runtime = moduleBodyOf source "AmbientLabRuntime"
+                    Expect.stringContains runtime "type Session =" "the nested declaration keeps its plain name"
+                    Expect.isFalse (runtime.Contains "Session2") "so neither declaration takes a suffix"
 
                   testCase "a class an ambient module exports to be derived from is an F# class" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -721,7 +748,62 @@ let pipelineTests =
                         |> List.map (fun finding -> finding.Key, finding.Symbol)
 
                     Expect.contains harvest ("HG005", "\"ambient-lab:*\"") "a wildcard names no importable module"
-                    Expect.contains harvest ("HG001", "\"ambient-lab:empty\"") "a module exporting nothing is still dropped" ])
+                    Expect.contains harvest ("HG001", "\"ambient-lab:empty\"") "a module exporting nothing is still dropped"
+
+                  // Specifier-scoped modules: `ambient-lab:lab` and its nested `ambient-lab:lab/promises`
+                  // each declare a `Session` class and a `Constants` interface under the same name, so
+                  // nesting rather than a numeric suffix is what keeps them apart.
+                  testCase "same-named types in different specifier modules nest instead of taking a number" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.isFalse (source.Contains "Session2") "the lab specifier module's Session needs no suffix"
+                    Expect.isFalse (source.Contains "Session3") "the nested promises specifier module's Session needs no suffix"
+                    Expect.isFalse (source.Contains "Constants2") "the lab specifier module's Constants needs no suffix"
+
+                    let lab = moduleBodyOf source "Lab"
+                    Expect.stringContains lab "type Session =" "Lab nests its own Session"
+                    Expect.stringContains lab "type Constants =" "Lab nests its own Constants"
+
+                    let promises = moduleBodyOf source "Promises"
+                    Expect.stringContains promises "type Session =" "Lab.Promises nests a Session distinct from Lab's"
+                    Expect.stringContains promises "type Constants =" "Lab.Promises nests a Constants distinct from Lab's"
+
+                  testCase "a signature referencing another specifier module's export spells it fully qualified" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    // `describe` takes `ambient-lab:lab`'s `Session`, not `ambient-lab:lab/promises`'s
+                    // own same-named type, so the parameter needs the qualified path from the root
+                    // rather than the bare name its own module shadows.
+                    Expect.stringContains
+                        source
+                        "static member describe (session: Lab.Session) : string = jsNative"
+                        "a cross-module reference is qualified relative to the root module"
+
+                  testCase "each specifier module documents the specifier it groups" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    let labSummary = summaryBefore source "module Lab ="
+                    Expect.stringContains labSummary "ambient-lab:lab" "the summary names the exact specifier"
+                    Expect.isFalse (labSummary.Contains "\n") "the summary is one line"
+
+                    let promisesSummary = summaryBefore source "module Promises ="
+                    Expect.stringContains promisesSummary "ambient-lab:lab/promises" "the nested specifier's summary names its own specifier"
+                    Expect.isFalse (promisesSummary.Contains "\n") "the summary is one line"
+
+                  testCase "root globals render before any specifier module" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    // `Anvil`'s companion `Create` is the last root global this fixture declares.
+                    let lastRootGlobal = source.IndexOf "[<Global(\"Anvil\"); EmitConstructor>]"
+                    let firstSpecifierModule = source.IndexOf "module Lab ="
+
+                    Expect.isGreaterThan lastRootGlobal 0 "the root global companion is in the rendered source"
+                    Expect.isGreaterThan firstSpecifierModule 0 "the specifier module is in the rendered source"
+                    Expect.isLessThan lastRootGlobal firstSpecifierModule "every root global renders before the first specifier module" ])
                 
 
         yield!

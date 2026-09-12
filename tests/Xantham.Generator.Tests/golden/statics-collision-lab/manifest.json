@@ -15,6 +15,11 @@
       "exact": 1
     },
     {
+      "pass": "NE - name-exports",
+      "total": 1,
+      "exact": 1
+    },
+    {
       "pass": "SA - shape-aliases",
       "total": 1,
       "widened": 1
