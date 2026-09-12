@@ -701,9 +701,9 @@ type HarvestGlobals =
     | [<Escape>] AmbientModuleWildcard of specifier: string
     | [<Exact>] NamespaceIsModuleBody of ns: string * specifier: string
     | [<Widened>] AmbientModuleAliasDivergent of name: string * spellings: string list
-    /// public subpath key containing `*`. No module generated it.
+    /// A public subpath key containing `*`. No module is generated for it.
     | [<Escape>] SubpathWildcardSkipped of key: string
-    /// public subpath key conditions supply no declaration file. No module
+    /// A public subpath key whose conditions supply no declaration file. No module is
     /// generated for it.
     | [<Escape>] SubpathWithoutDeclarations of key: string
 
@@ -727,7 +727,7 @@ type HarvestGlobals =
                 let spellings = spellings |> List.map (sprintf "\"%s\"") |> String.concat ", "
                 $"\"node:{name}\" collapses {spellings}, whose export sets disagree"
             | SubpathWildcardSkipped key ->
-                $"exports key \"{key}\" skipped - wildcard names no subpath import resolve"
+                $"exports key \"{key}\" skipped - a wildcard names no subpath an import can resolve"
             | SubpathWithoutDeclarations key ->
                 $"exports key \"{key}\" skipped - its conditions supply no declaration file"
 
