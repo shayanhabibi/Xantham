@@ -132,6 +132,8 @@ let findingsTests =
                     "HG.AmbientModuleWildcard HG005 escape"
                     "HG.NamespaceIsModuleBody HG006 exact"
                     "HG.AmbientModuleAliasDivergent HG007 widened"
+                    "HG.SubpathWildcardSkipped HG008 escape"
+                    "HG.SubpathWithoutDeclarations HG009 escape"
                     "RE.FacetNotResolved RE001 escape"
                     "RT.FrontierNotResolved RT001 widened"
                     "RT.TypeNotResolved RT002 widened"

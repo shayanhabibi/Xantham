@@ -168,6 +168,8 @@ module FindingCodes =
             "HG.AmbientModuleWildcard", "HG005"
             "HG.NamespaceIsModuleBody", "HG006"
             "HG.AmbientModuleAliasDivergent", "HG007"
+            "HG.SubpathWildcardSkipped", "HG008"
+            "HG.SubpathWithoutDeclarations", "HG009"
             "RE.FacetNotResolved", "RE001"
             "RT.FrontierNotResolved", "RT001"
             "RT.TypeNotResolved", "RT002"
@@ -699,6 +701,10 @@ type HarvestGlobals =
     | [<Escape>] AmbientModuleWildcard of specifier: string
     | [<Exact>] NamespaceIsModuleBody of ns: string * specifier: string
     | [<Widened>] AmbientModuleAliasDivergent of name: string * spellings: string list
+    /// public subpath key `*`. No module can import from it.
+    | [<Escape>] SubpathWildcardSkipped of key: string
+    /// public subpath key conditions supply no declaration file. No module generated it.
+    | [<Escape>] SubpathWithoutDeclarations of key: string
 
     interface IFindingKind with
         member this.Message =
@@ -719,6 +725,10 @@ type HarvestGlobals =
             | AmbientModuleAliasDivergent(name, spellings) ->
                 let spellings = spellings |> List.map (sprintf "\"%s\"") |> String.concat ", "
                 $"\"node:{name}\" collapses {spellings}, whose export sets disagree"
+            | SubpathWildcardSkipped key ->
+                $"public subpath key \"{key}\" skipped - wildcard names no subpath import can resolve"
+            | SubpathWithoutDeclarations key ->
+                $"public subpath key \"{key}\" - conditions supply no declaration file, no module generated"
 
 /// `resolve-export-types`.
 [<Prefix("RE", "resolve-export-types")>]
