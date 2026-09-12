@@ -701,9 +701,10 @@ type HarvestGlobals =
     | [<Escape>] AmbientModuleWildcard of specifier: string
     | [<Exact>] NamespaceIsModuleBody of ns: string * specifier: string
     | [<Widened>] AmbientModuleAliasDivergent of name: string * spellings: string list
-    /// public subpath key `*`. No module can import from it.
+    /// public subpath key containing `*`. No module generated it.
     | [<Escape>] SubpathWildcardSkipped of key: string
-    /// public subpath key conditions supply no declaration file. No module generated it.
+    /// public subpath key conditions supply no declaration file. No module
+    /// generated for it.
     | [<Escape>] SubpathWithoutDeclarations of key: string
 
     interface IFindingKind with
@@ -726,9 +727,9 @@ type HarvestGlobals =
                 let spellings = spellings |> List.map (sprintf "\"%s\"") |> String.concat ", "
                 $"\"node:{name}\" collapses {spellings}, whose export sets disagree"
             | SubpathWildcardSkipped key ->
-                $"public subpath key \"{key}\" skipped - wildcard names no subpath import can resolve"
+                $"exports key \"{key}\" skipped - wildcard names no subpath import resolve"
             | SubpathWithoutDeclarations key ->
-                $"public subpath key \"{key}\" - conditions supply no declaration file, no module generated"
+                $"exports key \"{key}\" skipped - its conditions supply no declaration file"
 
 /// `resolve-export-types`.
 [<Prefix("RE", "resolve-export-types")>]
