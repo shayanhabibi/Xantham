@@ -1,4 +1,4 @@
-/// The facts and mappings every shaping pass is written against: what a resolved type *is*
+﻿/// The facts and mappings every shaping pass is written against: what a resolved type *is*
 /// (literal, tuple, callback, branded primitive, constructor object, tagged union), the F#
 /// reference it maps to, its declared type parameters, and shared member and signature shaping.
 module Xantham.Generator.Shape.Spec
@@ -1061,8 +1061,7 @@ let private ownedByEntry (facts: TypeFacts) =
 let private literalOverloadSets (model: ShapeModel) : LiteralOverloadSet list =
     let existing = model.DeclNames |> Map.toList |> List.map snd |> Set.ofList
 
-    let setsOf (typeId: int<Measure.typeId>) (owner: string) (facts: TypeFacts) =
-        let order = Map.tryFind typeId model.DeclOrders |> Option.defaultValue None
+    let setsFor (owner: string) (order: DeclOrder option) (members: (string * ResolvedSignature list) list) =
         let mutable taken = existing
         // One declaration per literal per owner: `get` and `getWithMetadata` both keep `"text"`,
         // and both read it as the same type.
@@ -1085,11 +1084,11 @@ let private literalOverloadSets (model: ShapeModel) : LiteralOverloadSet list =
                 declarations <- Map.add text name declarations
                 name
 
-        facts.Members
-        |> List.choose (fun m ->
-            match Map.tryFind m.TypeId model.Types with
-            | Some memberFacts when memberFacts.CallSignatures.Length > 1 ->
-                let signatures = memberFacts.CallSignatures
+        members
+        |> List.choose (fun (memberName, signatures) ->
+            if signatures.Length < 2 then
+                None
+            else
 
                 let colliding =
                     signatures
@@ -1140,30 +1139,81 @@ let private literalOverloadSets (model: ShapeModel) : LiteralOverloadSet list =
                     let sites =
                         kept
                         |> List.collect (fun (p, literalId, _, name) ->
-                            [ m.Symbol.Name; Naming.memberName m.Symbol.Name ]
+                            [ memberName; Naming.memberName memberName ]
                             |> List.distinct
                             |> List.map (fun spelling -> $"{owner}.{spelling}({p.Symbol.Name})", literalId, name))
 
+                    // The return position keeps the literal too, where a signature of the set
+                    // returns one of the literals it was separated on.
+                    let returnSites =
+                        signatures
+                        |> List.collect (fun s ->
+                            match literalsCarried model 0 s.ReturnTypeId with
+                            | [ literalId, text ] when
+                                kept |> List.exists (fun (_, _, keptText, _) -> keptText = text)
+                                ->
+                                [ memberName; Naming.memberName memberName ]
+                                |> List.distinct
+                                |> List.map (fun spelling -> $"{owner}.{spelling}()", literalId, declarationOf text)
+                            | _ -> [])
+
                     Some
                         {
-                            Member = $"{owner}.{Naming.memberName m.Symbol.Name}"
+                            Member = $"{owner}.{Naming.memberName memberName}"
                             Parameter = (separating |> List.head |> fst).Symbol.Name
-                            Sites = sites
+                            Sites = sites @ returnSites
                             Declared =
                                 kept
                                 |> List.map (fun (_, _, text, name) -> name, text, order)
                                 |> List.distinctBy (fun (name, _, _) -> name)
-                        }
-            | _ -> None)
+                        })
 
-    model.DeclNames
-    |> Map.toList
-    |> List.sortBy fst
-    |> List.collect (fun (typeId, owner) ->
-        match Map.tryFind typeId model.Types with
-        | Some facts when ownedByEntry facts -> setsOf typeId owner facts
-        | _ -> [])
-    |> List.distinctBy _.Member
+    let typeSets =
+        model.DeclNames
+        |> Map.toList
+        |> List.sortBy fst
+        |> List.collect (fun (typeId, owner) ->
+            match Map.tryFind typeId model.Types with
+            | Some facts when ownedByEntry facts ->
+                let order = Map.tryFind typeId model.DeclOrders |> Option.defaultValue None
+
+                let members =
+                    facts.Members
+                    |> List.choose (fun m ->
+                        Map.tryFind m.TypeId model.Types
+                        |> Option.map (fun memberFacts -> m.Symbol.Name, memberFacts.CallSignatures))
+
+                setsFor owner order members
+            | _ -> [])
+
+    // An exported function's overloads separate the same way, under the container that binds
+    // them: `Exports.dispatch(kind)` keeps `"left"` as `Exports.Left`.
+    let exportSets =
+        let containers = ExportLayout.containers model
+
+        model.Harvest.Exports
+        |> List.choose (fun export ->
+            if
+                not export.HasValueExport
+                || hasAny SymbolFlags.Class export.Symbol.Flags
+                || export.ExportName = "default"
+            then
+                None
+            else
+                let owner = ExportLayout.ownerOf model.RuntimePackage export.Origin
+
+                Map.tryFind owner containers
+                |> Option.bind (fun container ->
+                    Map.tryFind export.Symbol.SymbolId model.ExportTypes
+                    |> Option.bind _.Value
+                    |> Option.bind (fun typeId -> Map.tryFind typeId model.Types)
+                    |> Option.map (fun facts -> container, export.Order, export.ExportName, facts.CallSignatures)))
+        |> List.groupBy (fun (container, _, _, _) -> container)
+        |> List.collect (fun (container, exports) ->
+            let order = exports |> List.tryPick (fun (_, order, _, _) -> order)
+            setsFor container order (exports |> List.map (fun (_, _, name, signatures) -> name, signatures)))
+
+    typeSets @ exportSets |> List.distinctBy _.Member
 
 /// The analysis is a function of the type table and the names the run declares, both of which
 /// are fixed before any reference is written, so it is computed once per run rather than at

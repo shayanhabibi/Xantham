@@ -6,6 +6,8 @@ open System.Security.Cryptography
 open System.Text
 open Xantham.Generator
 open Xantham.Generator.Measure
+open Xantham.TypeScript.Wire
+open Xantham.TypeScript.Wire.Proto
 
 /// Determine the export owner of a declaration from its export origin;
 /// delineates between ambient modules from the runtime package and ambient modules from other packages.
@@ -173,3 +175,46 @@ let containerName declaredNames owner path =
                 candidate
 
         claim 12
+
+/// The owners whose value exports become bound members: every non-class value export with a
+/// resolved value type.
+let private memberOwners (model: ShapeModel) : ExportOwner list =
+    model.Harvest.Exports
+    |> List.filter (fun export ->
+        export.HasValueExport
+        && uint32 (export.Symbol.Flags &&& SymbolFlags.Class) = 0u
+        && (Map.tryFind export.Symbol.SymbolId model.ExportTypes
+            |> Option.bind _.Value
+            |> Option.exists (fun typeId -> Map.containsKey typeId model.Types)))
+    |> List.map (fun export -> ownerOf model.RuntimePackage export.Origin)
+    |> List.distinct
+
+/// Each owner's container name, `Exports`, `Strict.Exports` or `Globals.Exports`, for the owners
+/// given. Deterministic for one model and owner set, so shaping, literal retention and ordering
+/// share one map.
+let containersFor (model: ShapeModel) (owners: ExportOwner list) : Map<ExportOwner, string> =
+    let owners =
+        owners |> List.map (normalizeOwner model.RuntimePackage) |> List.distinct
+
+    let declared = model.DeclNames |> Map.toList |> List.map snd |> List.distinct
+
+    // Declarations are types, which may share a name with a companion module in the same
+    // generated file. Reserving them as module paths would split cloudflare:email and
+    // cloudflare:workers into hashed parents merely because the package also declares a type
+    // Cloudflare. Container leaves still reserve every declaration name.
+    let allocated = allocate model.RuntimePackage [] owners
+
+    owners
+    |> List.map (fun owner ->
+        let owner = normalizeOwner model.RuntimePackage owner
+
+        owner,
+        allocated
+        |> Map.tryFind owner
+        |> Option.defaultValue []
+        |> containerName declared owner)
+    |> Map.ofList
+
+/// The container names of the owners whose harvested value exports become bound members.
+let containers (model: ShapeModel) : Map<ExportOwner, string> =
+    containersFor model (memberOwners model)

@@ -3,10 +3,10 @@
   "package": "@cloudflare/workers-types",
   "module": "Cloudflare.WorkersTypes",
   "counts": {
-    "exact": 430,
-    "ergonomic": 1065,
-    "widened": 360,
-    "escape": 106
+    "exact": 408,
+    "ergonomic": 1069,
+    "widened": 369,
+    "escape": 111
   },
   "passes": [
     {

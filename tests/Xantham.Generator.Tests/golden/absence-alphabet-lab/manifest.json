@@ -3,8 +3,8 @@
   "package": "absence-alphabet-lab",
   "module": "AbsenceAlphabetLab",
   "counts": {
-    "exact": 6,
-    "ergonomic": 2,
+    "exact": 1,
+    "ergonomic": 6,
     "widened": 1,
     "escape": 0
   },

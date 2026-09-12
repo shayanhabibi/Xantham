@@ -3,7 +3,7 @@
   "package": "callback-function-lab",
   "module": "CallbackFunctionLab",
   "counts": {
-    "exact": 33,
+    "exact": 32,
     "ergonomic": 22,
     "widened": 2,
     "escape": 0

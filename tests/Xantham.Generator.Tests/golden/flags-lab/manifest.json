@@ -3,9 +3,9 @@
   "package": "flags-lab",
   "module": "FlagsLab",
   "counts": {
-    "exact": 9,
+    "exact": 4,
     "ergonomic": 1,
-    "widened": 8,
+    "widened": 12,
     "escape": 0
   },
   "passes": [

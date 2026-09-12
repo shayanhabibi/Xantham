@@ -52,6 +52,5 @@
 {"name":"Exports.optionUnionHandlersSome","tier":"exact","findings":[]}
 {"name":"Exports.optionUnionHandlersNone","tier":"exact","findings":[]}
 {"name":"Exports.addListener","tier":"exact","findings":[]}
-{"name":"Exports.keepFunction","tier":"exact","findings":[]}
+{"name":"Exports.keepFunction","tier":"widened","findings":[{"name":"TP.FunctionConstraintDropped","key":"TP010","pass":"shape-exports","tier":"widened","symbol":"Exports.keepFunction","fields":{"name":"T"},"message":"JS.Function constraint on \u0027T\u0027 is dropped so F# functions can be type arguments; callability is no longer checked"}]}
 {"name":"Exports.boxedFunction","tier":"exact","findings":[]}
-{"name":"entry","tier":"widened","findings":[{"name":"TP.FunctionConstraintDropped","key":"TP010","pass":"shape-exports","tier":"widened","symbol":"entry.keepFunction","fields":{"name":"T"},"message":"JS.Function constraint on \u0027T\u0027 is dropped so F# functions can be type arguments; callability is no longer checked"}]}

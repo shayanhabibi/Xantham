@@ -4,7 +4,6 @@
 {"name":"Exports.compile","tier":"exact","findings":[]}
 {"name":"Exports.hold","tier":"exact","findings":[]}
 {"name":"Exports.respond","tier":"exact","findings":[]}
-{"name":"Exports.walk","tier":"exact","findings":[]}
+{"name":"Exports.walk","tier":"widened","findings":[{"name":"TR.MappedNameArityMismatch","key":"TR053","pass":"shape-exports","tier":"widened","symbol":"Exports.walk(over)","fields":{"name":"Iterator","given":3},"message":"Iterator is applied to 3 type arguments that its mapped destination does not take; widened to obj"}]}
 {"name":"Exports.fetchOne","tier":"exact","findings":[]}
 {"name":"Exports.handle","tier":"exact","findings":[]}
-{"name":"entry","tier":"widened","findings":[{"name":"TR.MappedNameArityMismatch","key":"TR053","pass":"shape-exports","tier":"widened","symbol":"entry.walk(over)","fields":{"name":"Iterator","given":3},"message":"Iterator is applied to 3 type arguments that its mapped destination does not take; widened to obj"}]}

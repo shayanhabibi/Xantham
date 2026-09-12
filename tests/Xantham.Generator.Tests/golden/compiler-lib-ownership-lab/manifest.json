@@ -3,10 +3,10 @@
   "package": "compiler-lib-ownership-lab",
   "module": "CompilerLibOwnershipLab",
   "counts": {
-    "exact": 71,
-    "ergonomic": 72,
+    "exact": 56,
+    "ergonomic": 82,
     "widened": 152,
-    "escape": 54
+    "escape": 58
   },
   "passes": [
     {

@@ -4,7 +4,6 @@
 {"name":"ReadonlyTuple","file":"index.d.ts","tier":"widened","findings":[{"name":"TR.TypeParameterOutOfScope","key":"TR013","pass":"shape-aliases","tier":"widened","symbol":"ReadonlyTuple","message":"type parameter is not in scope here; widened to obj"}]}
 {"name":"Register","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"MB.IndexSignatureAsIndexer","key":"MB004","pass":"shape-interfaces","tier":"ergonomic","symbol":"Register.[]","message":"index signature reads as an EmitIndexer Item member (\u00A74.10)"},{"name":"SP.CreateNotSynthesized","key":"SP003","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Register","fields":{"reason":"an index signature has no name to bind a parameter to"},"message":"no ParamObject Create synthesized: an index signature has no name to bind a parameter to"}]}
 {"name":"Exports.chapters","tier":"exact","findings":[]}
-{"name":"Exports.tagged","tier":"exact","findings":[]}
+{"name":"Exports.tagged","tier":"widened","findings":[{"name":"TR.ArrayIntersectionMembersDropped","key":"TR048","pass":"shape-exports","tier":"widened","symbol":"Exports.tagged","fields":{"dropped":1},"message":"array-shaped intersection maps to its element array; 1 members from the other operands are dropped"}]}
 {"name":"Exports.pair","tier":"exact","findings":[]}
 {"name":"Exports.register","tier":"exact","findings":[]}
-{"name":"entry","tier":"widened","findings":[{"name":"TR.ArrayIntersectionMembersDropped","key":"TR048","pass":"shape-exports","tier":"widened","symbol":"entry.tagged","fields":{"dropped":1},"message":"array-shaped intersection maps to its element array; 1 members from the other operands are dropped"}]}

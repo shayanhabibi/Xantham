@@ -11,11 +11,6 @@ open Xantham.Generator.Shape.ExportLayout
 /// through.
 let private globalObject = "globalThis"
 
-let private findingSymbol owner exportName =
-    match owner with
-    | EntryModule -> $"entry.{exportName}"
-    | GlobalScope -> $"global.{exportName}"
-    | AmbientModule specifier -> $"ambient:{specifier / uom<importSpecifier>}.{exportName}"
 
 /// `Exports` members from the value exports that are not classes: functions (every overload
 /// emitted), and values - `const`/`let`/`var` and namespace objects - as properties, settable
@@ -50,6 +45,10 @@ let shapeExports: Pass<ShapeModel> =
 
                     let fallback = defaultExportName ctx
 
+                    // A member's findings carry the name its manifest row will: the container
+                    // that binds it, then its F# name.
+                    let containers = ExportLayout.containers model
+
                     let members =
                         model.Harvest.Exports
                         |> List.indexed
@@ -59,7 +58,7 @@ let shapeExports: Pass<ShapeModel> =
                             else
                                 let name = fsName fallback export
                                 let owner = ownerOf runtimePackage export.Origin
-                                let findingName = findingSymbol owner export.ExportName
+                                let findingName = $"{containers[owner]}.{name}"
 
                                 let binding = bindingOf export
 

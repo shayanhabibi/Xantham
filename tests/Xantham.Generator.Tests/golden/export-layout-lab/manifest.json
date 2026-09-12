@@ -3,7 +3,7 @@
   "package": "layout-lab",
   "module": "LayoutLab",
   "counts": {
-    "exact": 13,
+    "exact": 15,
     "ergonomic": 1,
     "widened": 1,
     "escape": 0
@@ -15,9 +15,19 @@
       "exact": 3
     },
     {
+      "pass": "SE - shape-exports",
+      "total": 4,
+      "exact": 4
+    },
+    {
       "pass": "SP - synthesize-paramobjects",
       "total": 1,
       "ergonomic": 1
+    },
+    {
+      "pass": "DO - dedupe-overloads",
+      "total": 1,
+      "exact": 1
     },
     {
       "pass": "resolve-export-collisions",

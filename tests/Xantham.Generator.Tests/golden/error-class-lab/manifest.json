@@ -3,8 +3,8 @@
   "package": "error-class-lab",
   "module": "ErrorClassLab",
   "counts": {
-    "exact": 6,
-    "ergonomic": 2,
+    "exact": 5,
+    "ergonomic": 3,
     "widened": 4,
     "escape": 0
   },
@@ -36,6 +36,11 @@
       "pass": "SP - synthesize-paramobjects",
       "total": 5,
       "ergonomic": 5
+    },
+    {
+      "pass": "resolve-export-collisions",
+      "total": 1,
+      "ergonomic": 1
     }
   ]
 }

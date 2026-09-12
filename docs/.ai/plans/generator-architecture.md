@@ -1325,6 +1325,43 @@ also builds with zero errors (one FSharp.Core version warning). This is a focuse
 layout correction; the remaining export-collision and
 runtime acceptance tasks in the export-module plan are still pending.
 
+## Export collision resolution (2026-09-12)
+
+The late `resolve-export-collisions` pass keeps every candidate an owner's value exports
+produce. Under one exported name: repeated occurrences of one declaration consolidate
+(`DO006`, Exact); different declarations mapping to one F# signature, return included,
+consolidate (`DO009`, Ergonomic); candidates with one compiled parameter signature and
+different returns become one member returning the erased union of every return, in harvest
+order (`DO008`, Widened); an ambiguous call form or a member-kind conflict takes a numbered
+`<name>_OverloadN` name that skips every original member and accessor (`DO007`, Ergonomic).
+`DO004` stays defined and unused. The dispatch brief's original `pick_Overload2` contract
+was corrected to the union: two F# names for one JavaScript function with identical
+parameters give the call site nothing to choose on.
+
+Export functions share the interface members' literal-overload retention: a literal
+parameter that separates an exported overload set keeps its single-case `StringEnum`
+type under the container (`Exports.Left`), and a signature returning one of those literals
+keeps it at the return position too.
+
+Findings raised for an export member carry its container-qualified name
+(`Exports.check()`, `Strict.Exports.check(value)`), identical to its manifest row, so the
+row's tier follows its own findings. The `entry`, `global` and `ambient:<specifier>`
+pseudo-symbols are retired, which is why every manifest's `exact` count fell by the
+number of pseudo-rows it carried. Container names are allocated once
+(`ExportLayout.containersFor`) and read by shaping, literal retention and ordering alike;
+`ShapeModel.RuntimePackage` carries the specifier that allocation needs.
+
+Migration impact: consumers of a return-only overload pair now call one member and match
+on `U2`/`U3` rather than choosing a member; `dispatch`-style literal overloads gain typed
+arguments; the `layout-lab` fixture merged into `export-layout-lab` with a runtime and run
+gate checks. Known consequence: a constructor's own call signature and the one it inherits
+(`EvalErrorConstructor` over `ErrorConstructor`) now union to `U2<EvalError, Error>` where
+the old pass dropped the inherited one.
+
+Verification: 689 Expecto tests, the solution compile gate over every golden, and the run
+gate's 443 checks pass. Findings moved `DO004` 8 -> 0, `DO008` 0 -> 8, `DO007` 0 -> 1
+(`error-class-lab` `Mishap(?message)` beside `Mishap(?message, ?options)`), `TR056` +4.
+
 # Easy Nits 
 
 To include in scope when a phases implementation/attempt ends up being small/quick.

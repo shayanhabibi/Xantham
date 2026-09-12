@@ -9,8 +9,7 @@
 {"name":"Exports.widget","tier":"exact","findings":[]}
 {"name":"Exports.trigger","tier":"exact","findings":[]}
 {"name":"Exports.multi","tier":"exact","findings":[]}
-{"name":"Exports.ambiguous","tier":"exact","findings":[]}
+{"name":"Exports.ambiguous","tier":"widened","findings":[{"name":"DO.ExportReturnTypesUnioned","key":"DO008","pass":"resolve-export-collisions","tier":"widened","symbol":"Exports.ambiguous","fields":{"owner":"Exports","exportName":"ambiguous","arms":"float, string"},"message":"export ambiguous under Exports returns the union of its overloads\u0027 returns (float, string)"}]}
 {"name":"Exports.identity","tier":"exact","findings":[]}
 {"name":"Exports.boxedNumber","tier":"exact","findings":[]}
 {"name":"Exports.collides","tier":"exact","findings":[]}
-{"name":"ambiguous","tier":"widened","findings":[{"name":"DO.ExportFunctionOverloadDropped","key":"DO004","pass":"resolve-export-collisions","tier":"widened","symbol":"ambiguous","message":"exported function overload dropped: no parameter separates from earlier one"}]}

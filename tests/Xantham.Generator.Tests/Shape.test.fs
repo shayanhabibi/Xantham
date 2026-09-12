@@ -1,4 +1,4 @@
-/// The shape tier's nano-pass payoff: each pass exercised on a hand-built model, asserted on
+﻿/// The shape tier's nano-pass payoff: each pass exercised on a hand-built model, asserted on
 /// the output model and its findings. No wire, no fixtures.
 module Xantham.Generator.Tests.ShapeTests
 
@@ -1291,7 +1291,7 @@ let shapePassTests =
 
                 Expect.equal
                     (findings |> List.map (fun f -> f.Tier, f.Symbol))
-                    [ Ergonomic, "entry.default(options)"; Widened, "entry.default()" ]
+                    [ Ergonomic, "Exports.ansiRegex(options)"; Widened, "Exports.ansiRegex()" ]
                     "the hoist and the widening are both findings"
             | decls -> failtest $"expected the Exports group, got %A{decls}"
 

@@ -112,6 +112,15 @@ type Widen =
 type Blend =
     abstract pick: kind: string -> unit
 
+module Exports =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Start =
+        | [<CompiledName("start")>] Start
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Stop =
+        | [<CompiledName("stop")>] Stop
+
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
@@ -120,4 +129,10 @@ type Exports =
     /// so an exported function reaches deduplication widened. The second drops as <c>DO004</c>.
     /// </summary>
     [<Import("emit", "literal-overload-lab")>]
-    static member emit (kind: string) : unit = jsNative
+    static member emit (kind: Exports.Start) : unit = jsNative
+    /// <summary>
+    /// Negative: a literal tells these two apart, and retention reads the members of a declaration,
+    /// so an exported function reaches deduplication widened. The second drops as <c>DO004</c>.
+    /// </summary>
+    [<Import("emit", "literal-overload-lab")>]
+    static member emit (kind: Exports.Stop) : unit = jsNative

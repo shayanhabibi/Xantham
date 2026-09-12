@@ -44,15 +44,7 @@ let orderDeclarations: Pass<ShapeModel> =
             model.ExportMembers
             |> List.sortBy (fun owned -> owned.HarvestIndex, owned.Member.Name)
 
-        let allocatedExports =
-            exports
-            |> List.map _.Owner
-            // These declarations are types, which may share a name with a companion
-            // module in the same generated file. Reserving them as module paths would
-            // split cloudflare:email and cloudflare:workers into hashed parents merely
-            // because the package also declares a type Cloudflare. Actual container
-            // leaves still reserve all declaration names below.
-            |> ExportLayout.allocate (GeneratorConfig.runtimePackage ctx.Config ctx.PackageName) []
+        let containers = ExportLayout.containersFor model (exports |> List.map _.Owner)
 
         let exportDecls =
             exports
@@ -64,10 +56,9 @@ let orderDeclarations: Pass<ShapeModel> =
                     <| FsExports
                         {
                             Name =
-                                allocatedExports
+                                containers
                                 |> Map.tryFind owner
-                                |> Option.defaultValue []
-                                |> ExportLayout.containerName declarationNames owner
+                                |> Option.defaultWith (fun () -> ExportLayout.containerName declarationNames owner [])
                             FsExportContainer.Owner = owner
                             Members = exports
                         })

@@ -1,4 +1,4 @@
-namespace Xantham.Generator
+﻿namespace Xantham.Generator
 
 open System
 open System.ComponentModel.DataAnnotations
@@ -1477,6 +1477,8 @@ type ShapeModel =
         /// reason: `K extends keyof T` binds nothing outside the signature that declared it.
         KeyVars: Map<int<typeId>, KeyBinding>
         Decls: FsDecl list
+        /// The specifier value exports import from; ambient modules under it are entry owners.
+        RuntimePackage: string<importSpecifier>
     }
 
 // ---------------------------------------------------------------------------------------------

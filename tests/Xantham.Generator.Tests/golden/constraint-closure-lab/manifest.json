@@ -3,7 +3,7 @@
   "package": "constraint-closure-lab",
   "module": "ConstraintClosureLab",
   "counts": {
-    "exact": 3,
+    "exact": 2,
     "ergonomic": 2,
     "widened": 1,
     "escape": 0

@@ -1,4 +1,4 @@
-module Xantham.Generator.Tests.ExportLayoutTests
+﻿module Xantham.Generator.Tests.ExportLayoutTests
 
 open System
 open System.IO
@@ -101,23 +101,54 @@ let tests =
               let rendered = generate ()
               let source = sourceOf rendered
 
-              // Expect.equal (occurrences "static member convert " source) 2 "the legal overload set remains intact"
-              // // TODO - this should result in an erased union return value
-              // // Expect.equal (occurrences "[<Import(\"pick\", \"layout-lab\")>]" source) 2 "both return-only candidates bind pick"
-              // Expect.stringContains source "static member pick " "the first return-only candidate keeps its public name"
-              // // TODO - this should result in an erased union return value
-              // // Expect.stringContains source "static member pick_Overload2 " "the second candidate receives a callable F# name"
-              // Expect.equal (occurrences "[<Import(\"dispatch\", \"layout-lab\")>]" source) 2 "both collapsed literal candidates bind dispatch"
-              // // TODO - this should result in an erased union return value
-              // // Expect.stringContains source "static member dispatch_Overload2 " "the collapsed literal candidate is retained"
+              Expect.equal (occurrences "static member convert " source) 2 "the legal overload set remains intact"
+
+              Expect.equal (occurrences "[<Import(\"pick\", \"layout-lab\")>]" source) 1 "the return-only pair binds pick once"
+
+              Expect.stringContains
+                  source
+                  "static member pick (value: string) : U2<string, float> = jsNative"
+                  "the return-only pair reads as one member returning the union of both returns"
+
+              Expect.isFalse (source.Contains "pick_Overload2") "a return-only pair is unioned, not renamed"
+
+              Expect.equal
+                  (occurrences "[<Import(\"dispatch\", \"layout-lab\")>]" source)
+                  2
+                  "both literal-separated overloads bind dispatch"
+
+              Expect.equal (occurrences "static member dispatch " source) 2 "each literal overload is its own member"
+
+              Expect.stringContains
+                  source
+                  "static member dispatch (kind: Exports.Left) : Exports.Left = jsNative"
+                  "the literal is kept at the parameter and at the return"
+              Expect.stringContains source "[<CompiledName(\"left\")>] Left" "the left literal is declared beside its owner"
+              Expect.stringContains source "[<CompiledName(\"right\")>] Right" "the right literal is declared beside its owner"
+
+              let unioned =
+                  rendered.Findings
+                  |> List.filter (fun finding -> finding.Key = "DO008")
+                  |> List.map _.Symbol
+
+              Expect.equal unioned [ "Exports.pick" ] "the union is recorded against the container-qualified member"
 
               let dropped =
                   rendered.Findings
                   |> List.filter (fun finding -> finding.Key = "DO004")
                   |> List.map _.Symbol
-              ()
-              // TODO - repair tests
-              // Expect.isEmpty dropped "owner separation and final collision repair replace the old export-drop baseline"
+
+              Expect.isEmpty dropped "owner separation and final collision repair replace the old export-drop baseline"
+
+          testCase "export member findings attribute to the member's manifest row" <| fun _ ->
+              let rendered = generate ()
+              let rows = Render.symbolTiers rendered |> List.map (fun (name, tier, _) -> name, tier)
+
+              Expect.contains rows ("Exports.pick", Widened) "the unioned member grades widened on its own row"
+
+              Expect.isFalse
+                  (rows |> List.exists (fun (name, _) -> name = "entry" || name = "global" || name.StartsWith "ambient:"))
+                  "owner-tagged pseudo-symbols are retired"
 
           testCase "type-only aliases do not create runtime members" <| fun _ ->
               let source = generate () |> sourceOf

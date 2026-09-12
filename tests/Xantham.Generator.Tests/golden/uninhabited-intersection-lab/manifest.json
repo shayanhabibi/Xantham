@@ -3,7 +3,7 @@
   "package": "uninhabited-intersection-lab",
   "module": "UninhabitedIntersectionLab",
   "counts": {
-    "exact": 5,
+    "exact": 4,
     "ergonomic": 3,
     "widened": 1,
     "escape": 6

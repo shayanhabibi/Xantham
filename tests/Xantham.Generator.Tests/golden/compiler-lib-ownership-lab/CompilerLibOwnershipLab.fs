@@ -352,17 +352,17 @@ type Exports =
     [<Global("Error")>]
     static member Error (?message: string) : TypeScript.Lib.Es.Error = jsNative
     [<Global("EvalError")>]
-    static member EvalError (?message: string) : TypeScript.Lib.Es.EvalError = jsNative
+    static member EvalError (?message: string) : U2<TypeScript.Lib.Es.EvalError, TypeScript.Lib.Es.Error> = jsNative
     [<Global("RangeError")>]
-    static member RangeError (?message: string) : TypeScript.Lib.Es.RangeError = jsNative
+    static member RangeError (?message: string) : U2<TypeScript.Lib.Es.RangeError, TypeScript.Lib.Es.Error> = jsNative
     [<Global("ReferenceError")>]
-    static member ReferenceError (?message: string) : TypeScript.Lib.Es.ReferenceError = jsNative
+    static member ReferenceError (?message: string) : U2<TypeScript.Lib.Es.ReferenceError, TypeScript.Lib.Es.Error> = jsNative
     [<Global("SyntaxError")>]
-    static member SyntaxError (?message: string) : TypeScript.Lib.Es.SyntaxError = jsNative
+    static member SyntaxError (?message: string) : U2<TypeScript.Lib.Es.SyntaxError, TypeScript.Lib.Es.Error> = jsNative
     [<Global("TypeError")>]
-    static member TypeError (?message: string) : TypeScript.Lib.Es.TypeError = jsNative
+    static member TypeError (?message: string) : U2<TypeScript.Lib.Es.TypeError, TypeScript.Lib.Es.Error> = jsNative
     [<Global("URIError")>]
-    static member URIError (?message: string) : TypeScript.Lib.Es.URIError = jsNative
+    static member URIError (?message: string) : U2<TypeScript.Lib.Es.URIError, TypeScript.Lib.Es.Error> = jsNative
     /// <summary>
     /// An intrinsic object that provides functions to convert JavaScript values to and from the JavaScript Object Notation (JSON) format.
     /// </summary>

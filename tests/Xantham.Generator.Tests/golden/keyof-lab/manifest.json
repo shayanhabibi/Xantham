@@ -3,8 +3,8 @@
   "package": "keyof-lab",
   "module": "KeyofLab",
   "counts": {
-    "exact": 8,
-    "ergonomic": 11,
+    "exact": 5,
+    "ergonomic": 13,
     "widened": 7,
     "escape": 0
   },

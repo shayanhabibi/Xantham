@@ -3,9 +3,9 @@
   "package": "literal-overload-lab",
   "module": "LiteralOverloadLab",
   "counts": {
-    "exact": 6,
+    "exact": 8,
     "ergonomic": 3,
-    "widened": 7,
+    "widened": 5,
     "escape": 1
   },
   "passes": [
@@ -25,7 +25,7 @@
     {
       "pass": "SE - shape-exports",
       "total": 2,
-      "widened": 2
+      "exact": 2
     },
     {
       "pass": "SP - synthesize-paramobjects",
@@ -34,14 +34,9 @@
     },
     {
       "pass": "DO - dedupe-overloads",
-      "total": 3,
-      "exact": 1,
+      "total": 4,
+      "exact": 2,
       "widened": 2
-    },
-    {
-      "pass": "resolve-export-collisions",
-      "total": 1,
-      "widened": 1
     }
   ]
 }

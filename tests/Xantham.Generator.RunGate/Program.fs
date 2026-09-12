@@ -1938,9 +1938,9 @@ let private callableHybrids () =
     equal "and the one-argument arity" 4.0 (CallableHybridLab.Exports.multi 3.0)
 
     equal
-        "a hybrid whose overloads collided still calls the surviving arity"
+        "a hybrid whose overloads collided on their parameters calls the one function, under the union of their returns"
         30.0
-        (CallableHybridLab.Exports.ambiguous 3.0)
+        (unbox<float>(CallableHybridLab.Exports.ambiguous 3.0))
 
     equal
         "a call signature's own type parameter reaches through generically"
@@ -1956,6 +1956,36 @@ let private callableHybrids () =
         "a hybrid whose member is already named Invoke keeps the plain call"
         6.0
         (CallableHybridLab.Exports.collides 5.0)
+
+/// Export owners reach their own containers: the root ambient module, a subpath, a re-export
+/// alias and a mutable global each bind to their own JavaScript target, and a unioned or
+/// literal-separated overload still selects the one exported function.
+let private exportLayout () =
+    equal "the root module's export reaches the root runtime" "root:x" (LayoutLab.Exports.check "x")
+
+    equal
+        "a subpath's export of the same name reaches the subpath runtime"
+        "strict:x"
+        (LayoutLab.Strict.Exports.check "x")
+
+    equal "a renamed re-export reaches the root export" "root:x" (LayoutLab.Aliases.Exports.renamedCheck "x")
+    equal "the root value reads its own module" "root" LayoutLab.Exports.mode
+    equal "the subpath value reads its own module" "strict" LayoutLab.Strict.Exports.mode
+
+    LayoutLab.Globals.Exports.sharedFlag <- true
+    check "a mutable global writes through to globalThis" (emitJsExpr () "globalThis.sharedFlag === true")
+
+    equal
+        "a return-only overload pair is one member whose union carries what the function returns"
+        "x"
+        (unbox<string>(LayoutLab.Exports.pick "x"))
+
+    equal
+        "a literal-separated overload selects the one exported function"
+        "left"
+        (unbox<string>(LayoutLab.Exports.dispatch LayoutLab.Exports.Left.Left))
+
+    equal "and so does its sibling" "right" (unbox<string>(LayoutLab.Exports.dispatch LayoutLab.Exports.Right.Right))
 
 [<EntryPoint>]
 let main _ =
@@ -1990,6 +2020,7 @@ let main _ =
     recordIndex ()
     callableHybrids ()
     patternParameters ()
+    exportLayout ()
 
     match failures with
     | [] ->

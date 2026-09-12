@@ -16,6 +16,15 @@ type LayoutPayload =
     [<ParamObject; Emit("$0")>]
     static member Create (value: string) : LayoutPayload = jsNative
 
+module Exports =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Left =
+        | [<CompiledName("left")>] Left
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Right =
+        | [<CompiledName("right")>] Right
+
 module Aliases =
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
@@ -37,7 +46,11 @@ type Exports =
     [<Import("convert", "layout-lab")>]
     static member convert (value: float) : float = jsNative
     [<Import("pick", "layout-lab")>]
-    static member pick (value: string) : string = jsNative
+    static member pick (value: string) : U2<string, float> = jsNative
+    [<Import("dispatch", "layout-lab")>]
+    static member dispatch (kind: Exports.Left) : Exports.Left = jsNative
+    [<Import("dispatch", "layout-lab")>]
+    static member dispatch (kind: Exports.Right) : Exports.Right = jsNative
 
 module Globals =
     /// <summary>The package's value exports, each bound to its import.</summary>

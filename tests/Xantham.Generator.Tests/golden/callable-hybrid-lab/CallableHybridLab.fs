@@ -110,7 +110,7 @@ type Exports =
     [<Import("multi", "callable-hybrid-lab")>]
     static member multi (x: float, y: float) : float = jsNative
     [<Import("ambiguous", "callable-hybrid-lab")>]
-    static member ambiguous (x: float) : float = jsNative
+    static member ambiguous (x: float) : U2<float, string> = jsNative
     [<Import("identity", "callable-hybrid-lab")>]
     static member identity<'T> (value: 'T) : 'T = jsNative
     [<Import("boxedNumber", "callable-hybrid-lab")>]

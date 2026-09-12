@@ -103,6 +103,7 @@ let shapeModel (table: TypeFacts list) : ShapeModel =
         TypeVars = Map.empty
         KeyVars = Map.empty
         Decls = []
+        RuntimePackage = "lab" * Measure.uom<Measure.importSpecifier>
     }
 
 /// A call or construct signature over the given parameters, no rest tail.

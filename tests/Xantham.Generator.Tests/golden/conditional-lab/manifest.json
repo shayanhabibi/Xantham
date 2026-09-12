@@ -3,8 +3,8 @@
   "package": "conditional-lab",
   "module": "ConditionalLab",
   "counts": {
-    "exact": 4,
-    "ergonomic": 5,
+    "exact": 1,
+    "ergonomic": 7,
     "widened": 3,
     "escape": 0
   },

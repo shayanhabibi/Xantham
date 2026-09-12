@@ -3,8 +3,8 @@
   "package": "indexed-access-lab",
   "module": "IndexedAccessLab",
   "counts": {
-    "exact": 6,
-    "ergonomic": 23,
+    "exact": 2,
+    "ergonomic": 26,
     "widened": 2,
     "escape": 0
   },

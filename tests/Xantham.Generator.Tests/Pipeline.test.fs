@@ -1,4 +1,4 @@
-/// End-to-end against the live compiler: fixtures through the whole pipeline, diffed against
+﻿/// End-to-end against the live compiler: fixtures through the whole pipeline, diffed against
 /// the committed goldens, plus the run-twice determinism property.
 ///
 /// The npm fixture packages are installed and therefore untracked: a linked worktree carries
@@ -1157,11 +1157,11 @@ let pipelineTests =
                              |> List.filter (fun finding -> finding.Key = "TR058")
                              |> List.map (fun finding -> finding.Symbol, finding.Message)
                              |> List.sort)
-                            [ "Reduced",
+                            [ "Exports.reduced",
+                              "'then' collides across the intersection's operands and TypeScript reduces the whole type to never; the operand that does not mark 'then' nullable is the type"
+                              "Reduced",
                               "'then' collides across the intersection's operands and TypeScript reduces the whole type to never; the operand that does not mark 'then' nullable is the type"
                               "Timer.then(callback)(self)",
-                              "'then' collides across the intersection's operands and TypeScript reduces the whole type to never; the operand that does not mark 'then' nullable is the type"
-                              "entry.reduced",
                               "'then' collides across the intersection's operands and TypeScript reduces the whole type to never; the operand that does not mark 'then' nullable is the type" ]
                             "the alias, its use and the member position are each owned once"
 
@@ -1522,11 +1522,15 @@ let pipelineTests =
                         "static member values<'T> (source: 'T) : obj[] = jsNative"
                         "the value-of idiom has no F# form"
 
-                    // TODO - repair test
-                    // Expect.isTrue
-                    //     (rendered.Findings
-                    //      |> List.exists (fun f -> f.Symbol.StartsWith "values" && f.Tier = Widened))
-                    //     "and the widening is recorded"
+                    Expect.isTrue
+                        (rendered.Findings
+                         |> List.exists (fun f -> f.Symbol = "Exports.values()" && f.Tier = Widened))
+                        "and the widening is recorded against the member"
+
+                    Expect.contains
+                        (Render.symbolTiers rendered |> List.map (fun (name, tier, _) -> name, tier))
+                        ("Exports.values", Widened)
+                        "so the member's manifest row grades widened"
 
                   testCase "a type-level computation over an open operand emits an erased phantom" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -2283,7 +2287,7 @@ let pipelineTests =
                       // land in - `never` is the only branch this drops.
                       Expect.equal
                           deferred
-                          [ "Divergent"; "OrUndefined"; "entry.divergent(value)" ]
+                          [ "Divergent"; "Exports.divergent(value)"; "OrUndefined" ]
                           "both divergent pairs and the use site of one"
 
                       Expect.isEmpty
@@ -2603,35 +2607,39 @@ let pipelineTests =
 
                       testCase "the alphabet reads the same at return and parameter positions" <| fun _ ->
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
-                          ()
-                          // TODO - FIX FINDINGS
-                          // Expect.equal (absenceAt rendered "getOrNull()") (false, [ "fromNull" ]) "the KV miss"
-                          //
-                          // Expect.equal
-                          //     (absenceAt rendered "getOrUndefined()")
-                          //     (false, [ "fromUndefined" ])
-                          //     "the Durable Object storage miss"
-                          //
-                          // Expect.equal
-                          //     (absenceAt rendered "voidOrValue()")
-                          //     (false, [ "fromVoid" ])
-                          //     "void inside a union hoists like the other two"
-                          //
-                          // Expect.equal (absenceAt rendered "fireAndForget") (false, []) "a void return, again"
-                          //
-                          // // Wave seven, lane AG: the `?` marker reads the same at a parameter as
-                          // // at a property. The checker leaves it off the parameter symbol, so the
-                          // // resolve tier follows the symbol's declaration handle into the blob and
-                          // // reads the token there.
-                          // Expect.equal
-                          //     (absenceAt rendered "withOptional(fallback)")
-                          //     (true, [ "fromUndefined" ])
-                          //     "an optional parameter reports its ? marker beside its hoist"
-                          //
-                          // Expect.equal
-                          //     (absenceAt rendered "withNullable(fallback)")
-                          //     (false, [ "fromNull" ])
-                          //     "and a nullable parameter reports only its spelling"
+                          // An export member's findings carry its container-qualified name, the
+                          // same name as its manifest row.
+                          Expect.equal (absenceAt rendered "Exports.getOrNull()") (false, [ "fromNull" ]) "the KV miss"
+
+                          Expect.equal
+                              (absenceAt rendered "Exports.getOrUndefined()")
+                              (false, [ "fromUndefined" ])
+                              "the Durable Object storage miss"
+
+                          Expect.equal
+                              (absenceAt rendered "Exports.voidOrValue()")
+                              (false, [ "fromVoid" ])
+                              "void inside a union hoists like the other two"
+
+                          Expect.equal (absenceAt rendered "Exports.fireAndForget") (false, []) "a void return, again"
+
+                          // Wave seven, lane AG: the `?` marker reads the same at a parameter as
+                          // at a property. The checker leaves it off the parameter symbol, so the
+                          // resolve tier follows the symbol's declaration handle into the blob and
+                          // reads the token there.
+                          Expect.equal
+                              (absenceAt rendered "Exports.withOptional(fallback)")
+                              (true, [ "fromUndefined" ])
+                              "an optional parameter reports its ? marker beside its hoist"
+
+                          Expect.equal
+                              (absenceAt rendered "Exports.withNullable(fallback)")
+                              (false, [ "fromNull" ])
+                              "and a nullable parameter reports only its spelling"
+
+                          Expect.isFalse
+                              (rendered.Findings |> List.exists (fun f -> f.Symbol.StartsWith "entry."))
+                              "the owner-tagged pseudo-symbol is retired"
 
                       testCase "all five shapes render as the same two F# forms" <| fun _ ->
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -3019,24 +3027,25 @@ let pipelineTests =
                               (source.Contains "Blend.Pick")
                               "and neither arm-set earns a declaration"
 
-                      // Wave eight lane AO, item 3. Retention reads a declaration's members, and
-                      // an exported function has none, so a literal that would have separated the
-                      // set at a member position separates nothing here.
-                      testCase "an exported function's overloads reach deduplication widened" <| fun _ ->
+                      // An exported function's overloads separate on a literal parameter the same way
+                      // a member's do, under the container that binds them.
+                      testCase "an exported function's overloads keep the literal that separates them" <| fun _ ->
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                           let source = rendered.Files |> List.head |> snd
 
                           Expect.stringContains
                               source
-                              "static member emit (kind: string) : unit"
-                              "the literal widens at the exported position"
+                              "static member emit (kind: Exports.Start) : unit"
+                              "the literal is kept at the exported position"
 
-                          Expect.equal
-                              (rendered.Findings
-                               |> List.filter (fun finding -> finding.Key = "DO004")
-                               |> List.map _.Symbol)
-                              [ "emit" ]
-                              "and the drop reports as an export-function loss rather than DO001"
+                          Expect.stringContains
+                              source
+                              "static member emit (kind: Exports.Stop) : unit"
+                              "and the second overload keeps its own literal"
+
+                          Expect.isEmpty
+                              (rendered.Findings |> List.filter (fun finding -> finding.Key = "DO004"))
+                              "nothing is dropped"
 
                       testCase "the findings say which literals were kept and which overload sets they separate"
                       <| fun _ ->
@@ -3049,11 +3058,11 @@ let pipelineTests =
                               |> List.distinct
                               |> List.sort
 
-                          Expect.equal (symbolsOf "DO002") [ "Store.read" ] "one finding per overload set a literal separates"
+                          Expect.equal (symbolsOf "DO002") [ "Exports.emit"; "Store.read" ] "one finding per overload set a literal separates"
 
                           Expect.equal
                               (symbolsOf "TR056")
-                              [ "Store.read(kind)"; "Store.read(options)" ]
+                              [ "Exports.emit(kind)"; "Store.read(kind)"; "Store.read(options)" ]
                               "and one per position the literal is kept at"
 
                           Expect.equal
@@ -3133,12 +3142,12 @@ let pipelineTests =
 
                           Expect.equal
                               (symbolsOf "MB001")
-                              [ "Station.marked(b)"; "entry.marked(b)"; "entry.markedAny(b)" ]
+                              [ "Exports.marked(b)"; "Exports.markedAny(b)"; "Station.marked(b)" ]
                               "every ? in the fixture, at a bare function and at a method"
 
                           Expect.equal
                               (symbolsOf "MB006")
-                              [ "Station.unioned(b)"; "entry.unioned(b)" ]
+                              [ "Exports.unioned(b)"; "Station.unioned(b)" ]
                               "and the parameters whose type admits undefined without one"
 
                       testCase "a required parameter carries neither finding" <| fun _ ->
@@ -3658,7 +3667,7 @@ let pipelineTests =
                               (rendered.Findings
                                |> List.filter (fun finding -> finding.Message.Contains "not among the generated")
                                |> List.map _.Symbol)
-                              [ "Panel.widget"; "Panel.boxed"; "Panel.pair"; "entry.mount(widget)"; "entry.mount()" ]
+                              [ "Panel.widget"; "Panel.boxed"; "Panel.pair"; "Exports.mount(widget)"; "Exports.mount()" ]
                               "every reference into the dependency is a widening with a name" ])
 
         // Wave five lane S (O7's `ship` disposition). Two dependencies are installed beside the
@@ -4059,7 +4068,7 @@ let pipelineTests =
                            |> List.filter (fun f -> f.Key = "TR020")
                            |> List.map _.Symbol
                            |> List.sort)
-                          [ "Feed.take(event)"; "entry.runModel()"; "entry.runModel(input)" ]
+                          [ "Exports.runModel()"; "Exports.runModel(input)"; "Feed.take(event)" ]
                           "and these three are the only accesses left widened" ])
 
         // Wave thirteen lane CH. A pure index signature reached anonymously resolves
@@ -4314,7 +4323,7 @@ let pipelineTests =
                             "| [<CompiledName(\"ok\")>] Ok of value: string"
                             "the generic arm's members were read after it was met as a reference" ])
         yield!
-            fixtureTests "layout-lab" (handFixture "layout-lab") GeneratorConfig.Default <| fun package -> [
+            fixtureTests "export-layout-lab" (handFixture "export-layout-lab") GeneratorConfig.Default <| fun package -> [
                 testCase "Nested modules are created for exported values" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                     let source = rendered.Files |> List.head |> snd

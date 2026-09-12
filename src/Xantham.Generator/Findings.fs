@@ -213,6 +213,10 @@ module FindingCodes =
             "DO.OverloadsDistinguishedByLiteralUnion", "DO003"
             "DO.ExportFunctionOverloadDropped", "DO004"
             "DO.KeyofConstrainedOverloadDropped", "DO005"
+            "DO.ExportOccurrenceConsolidated", "DO006"
+            "DO.ExportMemberRenamed", "DO007"
+            "DO.ExportReturnTypesUnioned", "DO008"
+            "DO.ExportDeclarationsConsolidated", "DO009"
             "RA.GenericAliasDropped", "RA001"
             "RA.ReferenceToDroppedAlias", "RA002"
             "RA.GenericWithoutArguments", "RA003"
@@ -986,11 +990,32 @@ type DedupeOverloads =
     /// Wave nine, item 2. An overload dropped where the separating parameter takes a type
     /// parameter constrained by `keyof`. Every overload in the set maps to one F# parameter type.
     | [<Widened>] KeyofConstrainedOverloadDropped of parameter: string
+    /// Export layout, task 5. Repeated occurrences of one export signature consolidated to the
+    /// earliest; provenance agreed on every field.
+    | [<Exact>] ExportOccurrenceConsolidated of owner: string * exportName: string * occurrences: int
+    /// Export layout, task 5. An export member renamed to keep it callable beside a sibling the
+    /// compiler cannot tell it from: an ambiguous call form, or a member-kind conflict.
+    | [<Ergonomic>] ExportMemberRenamed of owner: string * exportName: string * memberName: string * reason: string
+    /// Export layout, task 5. Overloads with one compiled parameter signature and different
+    /// returns read as one member returning the erased union of every return.
+    | [<Widened>] ExportReturnTypesUnioned of owner: string * exportName: string * arms: string
+    /// Export layout, task 5. Different declarations mapped to one F# signature, return
+    /// included, consolidated to one member; the erased constraint or alias is recorded on the
+    /// member's own mapping findings.
+    | [<Ergonomic>] ExportDeclarationsConsolidated of owner: string * exportName: string * declarations: int
 
     interface IFindingKind with
         member this.Message =
             match this with
             | OverloadDropped -> "overload dropped: identical to an earlier one after widening"
+            | ExportOccurrenceConsolidated(owner, exportName, occurrences) ->
+                $"{occurrences} occurrences of export {exportName} under {owner} consolidated to one member"
+            | ExportMemberRenamed(owner, exportName, memberName, reason) ->
+                $"export {exportName} under {owner} renamed {memberName}: {reason}"
+            | ExportReturnTypesUnioned(owner, exportName, arms) ->
+                $"export {exportName} under {owner} returns the union of its overloads' returns ({arms})"
+            | ExportDeclarationsConsolidated(owner, exportName, declarations) ->
+                $"{declarations} declarations of export {exportName} under {owner} map to one signature; consolidated to one member"
             | OverloadsDistinguishedByLiteral parameter ->
                 $"overload kept; parameter {parameter} is literal-typed and separates it"
             | OverloadsDistinguishedByLiteralUnion parameter ->

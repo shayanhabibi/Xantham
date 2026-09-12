@@ -4358,6 +4358,8 @@ type Exports =
     static member wrap (min: float, max: float) : ChainableUtil = jsNative
     [<Import("mapRange", "animejs")>]
     static member mapRange (value: float, inLow: float, inHigh: float, outLow: float, outHigh: float) : float = jsNative
+    [<Import("mapRange", "animejs")>]
+    static member mapRange (inLow: float, inHigh: float, outLow: float, outHigh: float) : ChainableUtil = jsNative
     [<Import("degToRad", "animejs")>]
     static member degToRad (degrees: float) : float = jsNative
     [<Import("degToRad", "animejs")>]

@@ -3,7 +3,7 @@
   "package": "callable-hybrid-lab",
   "module": "CallableHybridLab",
   "counts": {
-    "exact": 7,
+    "exact": 6,
     "ergonomic": 6,
     "widened": 3,
     "escape": 0

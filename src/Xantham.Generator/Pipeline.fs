@@ -84,7 +84,7 @@ let toResolve (harvest: HarvestModel) : ResolveModel =
     }
 
 /// Resolve -> Shape: everything resolved is carried, the declarations start empty.
-let toShape (resolve: ResolveModel) : ShapeModel =
+let toShape (runtimePackage: string<importSpecifier>) (resolve: ResolveModel) : ShapeModel =
     {
         Harvest = resolve.Harvest
         ExportTypes = resolve.ExportTypes
@@ -98,6 +98,7 @@ let toShape (resolve: ResolveModel) : ShapeModel =
         TypeVars = Map.empty
         KeyVars = Map.empty
         Decls = []
+        RuntimePackage = runtimePackage
     }
 
 /// The generated module's name: the config override, the configured namespace, or the entry
@@ -368,7 +369,13 @@ let generate (config: GeneratorConfig) (packageDir: string) : Async<RenderModel>
 
         let! harvest, harvestFindings = runTier ctx Harvest.passes HarvestModel.Empty
         let! resolve, resolveFindings = runTier ctx Resolve.passes (toResolve harvest)
-        let! shape, shapeFindings = runTier ctx Shape.Passes.passes (toShape resolve)
+
+        let! shape, shapeFindings =
+            runTier
+                ctx
+                Shape.Passes.passes
+                (toShape (GeneratorConfig.runtimePackage ctx.Config ctx.PackageName) resolve)
+
         let! compilerOnly = compilerOnlyScope ctx
 
         let! shape, catalog =
