@@ -1362,6 +1362,40 @@ Verification: 689 Expecto tests, the solution compile gate over every golden, an
 gate's 443 checks pass. Findings moved `DO004` 8 -> 0, `DO008` 0 -> 8, `DO007` 0 -> 1
 (`error-class-lab` `Mishap(?message)` beside `Mishap(?message, ?options)`), `TR056` +4.
 
+## 0.1.0 release wave (2026-09-12)
+
+Single-case string enums render without `RequireQualifiedAccess` (#75). The attribute stays
+when the single case is a reserved F# name (`Ok`, `Error`, `Some`, `None`, `ValueSome`,
+`ValueNone`; `Shape.Spec.reservedCaseNames`), recorded as `LU002` (Ergonomic) at the mint site
+in `dedupe-overloads`; `classify-literal-unions` mints no single-case enum. Consumer impact: a
+single-case enum is written `Exports.Left`, and the previous `Exports.Left.Left` form is a
+compile error (FS0812). Multi-case enums and tagged unions are unchanged.
+
+`autoOpenExports` (#74), a `xantham.json` boolean, default `false`, places `[<AutoOpen>]`
+before `[<Erase>]` on every generated `Exports` type, root and nested. With the flag off the
+output is byte-identical to before.
+
+A class reachable through an `export * from` alias path (`declare module "node:crypto"
+{ export * from "crypto" }`) emits each static member once (#73). Static occurrences group by
+declaration identity and member signature; the kept occurrence uses the specifier the class's
+own binding uses, or the first harvested path when the class carries none; each dropped
+occurrence records `SC010` (Exact) with its specifier on `Class.member`. The type is never
+relocated or duplicated. Two distinct same-named classes in different ambient modules are not
+this case and remain broken by `SA.AbbreviationNameTaken` (recorded, out of scope).
+
+Manifest `file` paths for compiler-library declarations read `node_modules/typescript/lib/...`
+on every platform (#67). The declaration-catalog suite runs behind the `Tsc.locate` guard for
+its two nullable-alias lists; four lists stay disabled on one defect, `Exports has no stable
+declaration or parent role`, 22/38 cases (#66). `build.fsx -- test` runs the Expecto
+executables directly, and the nested consumer builds in the catalog and export-provenance
+suites carry the repository `global.json`.
+
+Verification: 711 Expecto tests, the compile gate, and the run gate pass. Findings moved
+`LU002` 0 -> 2 (`single-case-enum-lab`), `SC010` 0 -> 1 (`static-reexport-lab`); four
+goldens moved by the attribute line only. Regenerating `@types/node` compiles with zero
+errors (previously 50x FS0438): 1677 exact / 1924 ergonomic / 867 widened / 356 escape,
+`SC010` x1495, 289,053 lines. The Node project stays out of the solution (#71 open).
+
 # Easy Nits 
 
 To include in scope when a phases implementation/attempt ends up being small/quick.
