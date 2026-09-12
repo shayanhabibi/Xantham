@@ -244,9 +244,8 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
 
     let aliasForms = aliasDeclarationForms model
 
-    /// Type ids a public path exports directly, by name. A type outside this set reaches a
-    /// declaration only through some export's signature, and homes at the root regardless of
-    /// which export's module is walked first to reach it.
+    /// Type ids a public path exports directly, by name. A type outside this set is declared
+    /// at the root, independent of walk order.
     let publiclyExportedTypeIds =
         model.Harvest.Exports
         |> List.choose (fun export ->
@@ -474,8 +473,8 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
 
                     let claimed =
                         // A named type no public path exports directly stays at the root
-                        // (decision 10): the export whose signature happens to reach it first
-                        // during this walk does not decide its home.
+                        // (decision 10): its own name and namespace decide its home, not the
+                        // export whose signature happens to reach it first during this walk.
                         if Set.contains typeId publiclyExportedTypeIds then
                             claim owner preferred typeId order
                         else
