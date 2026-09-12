@@ -26,6 +26,19 @@ let private stringField (name: string) (el: JsonElement) =
     | true, v when v.ValueKind = JsonValueKind.String -> Some(v.GetString())
     | _ -> None
 
+/// The `types` string found under `types`, then `import`, then `default`, then any other
+/// non-`.` condition, in that order.
+let rec private declarationOf (el: JsonElement) : string option =
+    match el.ValueKind with
+    | JsonValueKind.Object ->
+        match stringField "types" el with
+        | Some t -> Some t
+        | None ->
+            el.EnumerateObject()
+            |> Seq.filter (fun p -> not (p.Name.StartsWith '.'))
+            |> Seq.tryPick (fun p -> declarationOf p.Value)
+    | _ -> None
+
 /// The default root declaration: `types`, `typings`, a root-export `types` string, then
 /// `index.d.ts`. A missing or blocked root in an exports map requires an explicit input.
 let entryFile (packageDir: string) : string =
@@ -56,19 +69,7 @@ let entryFile (packageDir: string) : string =
         match el.TryGetProperty "exports" with
         | true, exports when exports.ValueKind <> JsonValueKind.Null ->
             let root = rootExport exports
-
-            let rec findTypes (el: JsonElement) =
-                match el.ValueKind with
-                | JsonValueKind.Object ->
-                    match stringField "types" el with
-                    | Some t -> Some t
-                    | None ->
-                        el.EnumerateObject()
-                        |> Seq.filter (fun p -> not (p.Name.StartsWith '.'))
-                        |> Seq.tryPick (fun p -> findTypes p.Value)
-                | _ -> None
-
-            findTypes root
+            declarationOf root
         | _ -> None
 
     let declared =
@@ -122,6 +123,103 @@ let resolveEntryFile (config: GeneratorConfig) (packageDir: string) : string =
 
     entry
 
+/// The public paths a run generates. See `Context.PublicPaths`. With `entry` configured, the
+/// root alone over that file. Otherwise the manifest root (`entryFile`) plus every `./` key of
+/// the `exports` map, filtered by `Subpaths` when configured. Skipped keys are returned with
+/// their finding. A root-less map yields no root path.
+let publicPaths (config: GeneratorConfig) (packageDir: string) : PublicPath list * (string * HarvestGlobals) list =
+    let packageDir = Path.GetFullPath packageDir
+
+    let inside (relative: string) =
+        let path = Path.GetFullPath(Path.Combine(packageDir, relative))
+        let rel = Path.GetRelativePath(packageDir, path)
+
+        if rel = ".." || rel.StartsWith(".." + string Path.DirectorySeparatorChar) then
+            failwith $"package.json: exports entry {relative} leaves the package directory"
+
+        path
+
+    match config.Entry with
+    | Some _ ->
+        [
+            {
+                Key = "."
+                File = resolveEntryFile config packageDir * uom<declFile>
+            }
+        ],
+        []
+    | None ->
+        let keys =
+            readManifest packageDir (fun root ->
+                match root.TryGetProperty "exports" with
+                | true, exports when exports.ValueKind = JsonValueKind.Object ->
+                    exports.EnumerateObject()
+                    |> Seq.filter (fun p -> p.Name.StartsWith "./")
+                    |> Seq.map (fun p -> p.Name, declarationOf p.Value)
+                    |> Seq.toList
+                    |> Some
+                | _ -> None)
+            |> Option.defaultValue []
+
+        let hasRoot =
+            readManifest packageDir (fun root ->
+                match root.TryGetProperty "exports" with
+                | true, exports when exports.ValueKind = JsonValueKind.Object ->
+                    match exports.TryGetProperty "." with
+                    | true, r -> Some(r.ValueKind <> JsonValueKind.Null)
+                    | _ -> Some(List.isEmpty keys)
+                | _ -> Some true)
+            |> Option.defaultValue true
+
+        let selected =
+            match config.Subpaths with
+            | None -> keys
+            | Some wanted ->
+                for key in wanted do
+                    if not (keys |> List.exists (fun (k, _) -> k = key)) then
+                        failwith $"xantham.json: subpaths names \"{key}\", which the exports map does not declare"
+
+                keys |> List.filter (fun (k, _) -> List.contains k wanted)
+
+        let skipped, taken =
+            selected
+            |> List.sortBy (fun (key, _) -> key)
+            |> List.fold
+                (fun (skipped, taken) (key, declared) ->
+                    if key.Contains '*' then
+                        skipped @ [ key, HarvestGlobals.SubpathWildcardSkipped key ], taken
+                    else
+                        match declared with
+                        | None -> skipped @ [ key, HarvestGlobals.SubpathWithoutDeclarations key ], taken
+                        | Some file ->
+                            let path = inside file
+
+                            if not (File.Exists path) then
+                                failwith $"package.json: exports key \"{key}\" names a missing declaration file {file}"
+
+                            skipped,
+                            taken
+                            @ [
+                                {
+                                    Key = key
+                                    File = path * uom<declFile>
+                                }
+                            ])
+                ([], [])
+
+        let root =
+            if hasRoot then
+                [
+                    {
+                        Key = "."
+                        File = resolveEntryFile config packageDir * uom<declFile>
+                    }
+                ]
+            else
+                []
+
+        root @ taken, skipped
+
 /// The manifest's `name`, or the directory name when the manifest lacks one.
 let packageName (packageDir: string) : string =
     readManifest packageDir (stringField "name")
@@ -132,7 +230,12 @@ let packageName (packageDir: string) : string =
 let start (config: GeneratorConfig) (packageDir: string) : Async<TscMailbox * Context> =
     async {
         let packageDir = Path.GetFullPath packageDir
-        let entry = resolveEntryFile config packageDir
+        let paths, skipped = publicPaths config packageDir
+
+        let entry =
+            match paths with
+            | [] -> failwith $"package at {packageDir} exposes no public path - set \"entry\" in xantham.json"
+            | first :: _ -> first.File / uom<declFile>
 
         let exe =
             match Tsc.locate packageDir with
@@ -153,12 +256,17 @@ let start (config: GeneratorConfig) (packageDir: string) : Async<TscMailbox * Co
                     Types = config.Types |> Option.map List.toArray |> ValueOption.ofOption
                 }
 
+            let rootFiles =
+                paths
+                |> List.map (fun p -> DocumentIdentifier.FileName(p.File / uom<declFile>))
+                |> List.toArray
+
             let! program =
                 mailbox.createProgram (
                     { CreateProgramOptions.Default with
                         CompilerOptions = compilerOptions
                     },
-                    rootFiles = [| DocumentIdentifier.FileName entry |]
+                    rootFiles = rootFiles
                 )
 
             let session = mailbox.Session program
@@ -205,6 +313,8 @@ let start (config: GeneratorConfig) (packageDir: string) : Async<TscMailbox * Co
                     PackageDir = packageDir * uom<dirPath>
                     PackageName = packageName packageDir * uom<npmDependency>
                     EntryFile = entry * uom<declFile>
+                    PublicPaths = paths
+                    SkippedPaths = skipped
                 }
         with e ->
             (mailbox :> IDisposable).Dispose()

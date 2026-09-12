@@ -88,6 +88,13 @@
     "autoOpenExports": {
       "type": "boolean",
       "description": "Mark every generated `Exports` type [<AutoOpen>], so a package's value exports resolve unqualified. Defaults false."
+    },
+    "subpaths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "The package.json exports keys generated as nested modules, each written as in the map (\"./client\"). Omitted, every non-wildcard ./ key is generated. A key absent from the map fails generation."
     }
   },
   "$defs": {
