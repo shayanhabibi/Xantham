@@ -1,6 +1,6 @@
 # Export layout: dispatch brief
 
-**Status:** finalized for dispatch, 2026-09-10. Implementation has not started.
+**Status:** tasks 1 through 5 landed by hand through commit 2e815c9; finishing pass in progress 2026-09-12 under the corrected return-only contract.
 
 **Authority:** [implementation specification](2026-09-10-export-module-layout.md). This brief routes workers to that specification; it does not replace its contracts.
 
@@ -53,7 +53,7 @@ declare module "layout-lab/aliases" {
 }
 ```
 
-Use package runtime `layout-lab`, generated module `LayoutLab`. Required access paths: `LayoutLab.Exports.check`, `LayoutLab.Strict.Exports.check`, `LayoutLab.Aliases.Exports.renamedCheck`, and `LayoutLab.Globals.Exports.sharedFlag`. `convert` keeps two overloads; `pick` keeps `pick` and gains `pick_Overload2`; `typeOnlyCheck` produces no runtime member.
+Use package runtime `layout-lab`, generated module `LayoutLab`. Required access paths: `LayoutLab.Exports.check`, `LayoutLab.Strict.Exports.check`, `LayoutLab.Aliases.Exports.renamedCheck`, and `LayoutLab.Globals.Exports.sharedFlag`. `convert` keeps two overloads; `pick` becomes one member returning `U2<string, float>` with a Widened finding; `dispatch` keeps two overloads separated by their literal parameter types; `typeOnlyCheck` produces no runtime member.
 
 Review gate: failure comes from old layout/drop behavior, not skipped compiler or invalid fixture configuration.
 
@@ -110,7 +110,7 @@ LayoutLab.Globals.Exports.sharedFlag <- true
 original globalThis.sharedFlag       => true
 ```
 
-Add the task 6 renamed-overload/runtime cases separately. A return-only pair proves two typed F# entrypoints and unchanged target selection; it cannot prove contradictory TypeScript return promises are simultaneously true for one argument.
+Add the task 6 union-return/runtime cases separately. A return-only pair proves one typed F# entrypoint whose union return carries whatever the JavaScript function hands back; it cannot prove contradictory TypeScript return promises are simultaneously true for one argument.
 
 Review gate: full compiler/live/runtime evidence recorded, no unexplained declaration-catalog changes, no old export-drop findings for candidates now retained, existing losses remain visible. If Node input is absent or unrelated Node failures remain, report that limitation without relabeling the lab acceptance as a full Node success.
 
