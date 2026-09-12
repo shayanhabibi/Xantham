@@ -3,10 +3,10 @@
   "package": "@types/node",
   "module": "Node",
   "counts": {
-    "exact": 1677,
-    "ergonomic": 1924,
-    "widened": 867,
-    "escape": 356
+    "exact": 1253,
+    "ergonomic": 1801,
+    "widened": 636,
+    "escape": 332
   },
   "passes": [
     {
@@ -48,26 +48,26 @@
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 245,
+      "total": 164,
       "ergonomic": 87,
-      "widened": 155,
+      "widened": 74,
       "escape": 3
     },
     {
       "pass": "SC - shape-classes",
-      "total": 8347,
-      "exact": 3079,
-      "ergonomic": 2122,
-      "widened": 2192,
-      "escape": 954
+      "total": 3430,
+      "exact": 795,
+      "ergonomic": 1062,
+      "widened": 1096,
+      "escape": 477
     },
     {
       "pass": "SE - shape-exports",
-      "total": 4054,
-      "exact": 16,
-      "ergonomic": 2740,
-      "widened": 1202,
-      "escape": 96
+      "total": 2113,
+      "exact": 8,
+      "ergonomic": 1452,
+      "widened": 604,
+      "escape": 49
     },
     {
       "pass": "SP - synthesize-paramobjects",
@@ -76,8 +76,8 @@
     },
     {
       "pass": "DO - dedupe-overloads",
-      "total": 2009,
-      "exact": 88,
+      "total": 2008,
+      "exact": 87,
       "ergonomic": 1,
       "widened": 1920
     },
@@ -89,14 +89,14 @@
     },
     {
       "pass": "resolve-export-collisions",
-      "total": 78,
-      "ergonomic": 18,
-      "widened": 60
+      "total": 39,
+      "ergonomic": 9,
+      "widened": 30
     },
     {
       "pass": "AC - audit-coverage",
-      "total": 41,
-      "escape": 41
+      "total": 21,
+      "escape": 21
     }
   ]
 }

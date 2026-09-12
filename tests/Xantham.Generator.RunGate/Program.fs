@@ -1,4 +1,4 @@
-﻿/// The run gate's checks: each one exercises a generated binding and reads the JavaScript
+/// The run gate's checks: each one exercises a generated binding and reads the JavaScript
 /// side back through `emitJsExpr` or a fixture runtime hook, so the claim under test is what
 /// the erasure *did*, not what the F# type said. Node exits non-zero when any check failed,
 /// after printing all of them.
@@ -487,7 +487,7 @@ let private workarounds () =
 /// `inherit` is a source construct: this type existing at all is the check the interface form
 /// could not pass (FS0946), and its behaviour is what the checks below read.
 type private Bench(label: string) =
-    inherit AmbientModuleLab.Workbench(label)
+    inherit AmbientModuleLab.AmbientLab.Tools.Workbench(label)
 
     override this.run(payload) = $"derived:{this.label}:{payload.label}"
 
@@ -510,7 +510,7 @@ let private ambientModules () =
         (emitJsExpr (hammer, hammerClass) "$0 instanceof $1")
 
     equal "and its method runs" "socket:4" (hammer.strike payload)
-    equal "a static dots off the imported name" 12.0 AmbientModuleLab.Hammer.LIMIT
+    equal "a static dots off the imported name" 12.0 AmbientModuleLab.AmbientLab.Tools.Hammer.LIMIT
 
     // `declare module "ambient-lab:runtime" { export = AmbientLabRuntime }`. Nothing puts the
     // namespace on `globalThis`, so a `[<Global>]` binding to it would read `undefined`.
@@ -554,7 +554,7 @@ let private entrypointClasses () =
     equal "a global abstract class keeps its ParamObject Create" 9.0 anvil.mass
 
     let vise =
-        AmbientModuleLab.Vise.Create(2.0, 5.0, (fun (p: AmbientModuleLab.Payload) -> p.label))
+        AmbientModuleLab.AmbientLab.Tools.Vise.Create(2.0, 5.0, (fun (p: AmbientModuleLab.Payload) -> p.label))
 
     equal "and so does a class whose base this run declares" 2.0 vise.jaw
 
@@ -563,37 +563,37 @@ let private entrypointClasses () =
 /// `interface … with` are source constructs, and this type compiling is half of what the
 /// emission claims.
 type private Handled(label: string) =
-    inherit HookInterfaceLab.Station(label)
+    inherit HookInterfaceLab.HookLab.Runtime.Station(label)
 
     override this.run(signal) = $"run:{this.label}:{signal.label}"
 
-    interface HookInterfaceLab.Station.IFetchHandler with
+    interface HookInterfaceLab.HookLab.Runtime.Station.IFetchHandler with
         member this.fetch(signal) = $"fetch:{this.label}:{signal.label}"
 
 /// The negative of the same claim: a subclass providing no hook at all.
 type private Unhandled(label: string) =
-    inherit HookInterfaceLab.Station(label)
+    inherit HookInterfaceLab.HookLab.Runtime.Station(label)
 
     override this.run(signal) = $"run:{this.label}:{signal.label}"
 
 /// A subclass opting into both hooks, so a check can read what Fable emits for a class carrying
 /// more than one interface implementation at once.
 type private HandledBoth(label: string) =
-    inherit HookInterfaceLab.Station(label)
+    inherit HookInterfaceLab.HookLab.Runtime.Station(label)
 
     override this.run(signal) = $"run:{this.label}:{signal.label}"
 
-    interface HookInterfaceLab.Station.IFetchHandler with
+    interface HookInterfaceLab.HookLab.Runtime.Station.IFetchHandler with
         member this.fetch(signal) = $"fetch:{this.label}:{signal.label}"
 
-    interface HookInterfaceLab.Station.IAlarmHandler with
+    interface HookInterfaceLab.HookLab.Runtime.Station.IAlarmHandler with
         member this.alarm() = $"alarm:{this.label}"
 
 /// A hook whose interface carries its owner's type parameter.
 type private Forwarder(seed: string) =
-    inherit HookInterfaceLab.Relay<string>(seed)
+    inherit HookInterfaceLab.HookLab.Runtime.Relay<string>(seed)
 
-    interface HookInterfaceLab.Relay.IForwardHandler<string> with
+    interface HookInterfaceLab.HookLab.Runtime.Relay.IForwardHandler<string> with
         member _.forward value = $"forward:{value}"
 
 /// An optional method of an entrypoint class, emitted as an interface a subclass opts into. The
@@ -639,7 +639,7 @@ let private optionalHooks () =
     equal "and the base constructor's argument arrived" "seed" forwarder.seed
 
     let asData =
-        HookInterfaceLab.Station.IFetchHandler.Create(fun (s: HookInterfaceLab.Signal) -> s.label)
+        HookInterfaceLab.HookLab.Runtime.Station.IFetchHandler.Create(fun (s: HookInterfaceLab.Signal) -> s.label)
 
     equal
         "the hook interface's Create is the object literal a handler map is"
@@ -708,12 +708,15 @@ let private optionalHooks () =
         "and the class overriding an abstract base member emits that name too"
         (emitJsExpr unhandled "Object.getOwnPropertyNames(Object.getPrototypeOf($0)).indexOf(\"run\") >= 0")
 
-/// A class renamed by a name clash: its statics bind through the *export* name and are declared
-/// on the type the instance side took.
+/// A class sharing a global interface's name: it declares inside its specifier's module, and its
+/// statics bind through the export name onto that declaration.
 let private renamedStatics () =
-    equal "a renamed class's static reads off the selector its export name spells" 7.0 StaticsCollisionLab.Depot2.LIMIT
+    equal
+        "a specifier-scoped class's static reads off its export name"
+        7.0
+        StaticsCollisionLab.StaticsLab.Depot.Depot.LIMIT
 
-    let depot = StaticsCollisionLab.Depot2.``open`` "a"
+    let depot = StaticsCollisionLab.StaticsLab.Depot.Depot.``open`` "a"
     equal "and its static method reaches the same object" "a" depot.slot
 
 /// Wave six's remaining probe, over the hand-written forms in `Probes.fs` that no lab golden yet
@@ -785,7 +788,7 @@ let private paramObjectOverloads () =
 /// what the flattened form could not reach. `Fault` inherits `exn`, so `Retry` is an F# exception
 /// and the checks below raise it.
 type private Retry(message: string) =
-    inherit ErrorClassLab.Fault(message)
+    inherit ErrorClassLab.ErrorLab.Faults.Fault(message)
 
     override this.describe(detail) = $"retry:{this.message}:{detail}"
 
@@ -802,7 +805,7 @@ let private errorClasses () =
     let caught =
         try
             raise imported
-        with :? ErrorClassLab.Fault as fault ->
+        with :? ErrorClassLab.ErrorLab.Faults.Fault as fault ->
             fault.message
 
     equal "an entrypoint class over Error is raised and caught by its own type" "torn" caught
@@ -813,7 +816,7 @@ let private errorClasses () =
     let byBase =
         try
             raise derived
-        with :? ErrorClassLab.Fault as fault ->
+        with :? ErrorClassLab.ErrorLab.Faults.Fault as fault ->
             fault.describe "twice"
 
     equal "and a consumer's subclass is caught as the base it derives" "retry:stalled:twice" byBase
@@ -823,7 +826,7 @@ let private errorClasses () =
             raise derived
         with
         | :? Retry as retry -> $"own:{retry.message}"
-        | :? ErrorClassLab.Fault -> "base"
+        | :? ErrorClassLab.ErrorLab.Faults.Fault -> "base"
 
     equal "the subclass's own type is what the narrower handler matches" "own:stalled" byOwnType
 

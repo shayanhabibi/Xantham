@@ -16,13 +16,6 @@ type EventMap =
     [<ParamObject; Emit("$0")>]
     static member Create (click: EventMap.Click) : EventMap = jsNative
 
-module EventMap =
-    [<Interface>]
-    type Click =
-        abstract at: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (at: float) : Click = jsNative
-
 [<Interface>]
 type Object3D<'TEventMap> =
     abstract id: float
@@ -55,3 +48,10 @@ type Plain =
 type Exports =
     [<Import("Caster", "parse-lab"); EmitConstructor>]
     static member Caster () : Caster = jsNative
+
+module EventMap =
+    [<Interface>]
+    type Click =
+        abstract at: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (at: float) : Click = jsNative

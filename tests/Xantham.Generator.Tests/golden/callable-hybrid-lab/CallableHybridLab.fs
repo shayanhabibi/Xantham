@@ -20,15 +20,6 @@ type Widget =
     [<ParamObject; Emit("$0")>]
     static member Create (handler: Widget.Handler) : Widget = jsNative
 
-module Widget =
-    [<Interface>]
-    type Handler =
-        abstract enabled: bool with get, set
-        [<Emit("$0($1...)")>]
-        abstract Invoke: ``event``: string -> string
-        [<ParamObject; Emit("$0")>]
-        static member Create (enabled: bool) : Handler = jsNative
-
 /// <summary>
 /// The same shape, written as a named declaration directly.
 /// </summary>
@@ -117,3 +108,12 @@ type Exports =
     static member boxedNumber () : float = jsNative
     [<Import("collides", "callable-hybrid-lab")>]
     static member collides (x: float) : float = jsNative
+
+module Widget =
+    [<Interface>]
+    type Handler =
+        abstract enabled: bool with get, set
+        [<Emit("$0($1...)")>]
+        abstract Invoke: ``event``: string -> string
+        [<ParamObject; Emit("$0")>]
+        static member Create (enabled: bool) : Handler = jsNative

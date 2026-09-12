@@ -10,21 +10,24 @@ open Fable.Core.JsInterop
 open Fable.Core.JS
 open Fable.Core.TS.Dom
 
-[<Interface>]
-type Certificate =
-    abstract verify: spkac: string -> bool
-    [<ParamObject; Emit("$0")>]
-    static member Create (verify: (string -> bool)) : Certificate = jsNative
-    [<Import("Certificate.exportChallenge", "node:static-reexport-lab")>]
-    static member exportChallenge (spkac: string) : string = jsNative
+type Certificate = StaticReexportLab.Certificate
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
     [<Import("Certificate", "static-reexport-lab"); EmitConstructor>]
-    static member Certificate () : Certificate = jsNative
+    static member Certificate () : StaticReexportLab.Certificate = jsNative
 
+/// <summary>node:static-reexport-lab</summary>
 module StaticReexportLab =
+    [<Interface>]
+    type Certificate =
+        abstract verify: spkac: string -> bool
+        [<ParamObject; Emit("$0")>]
+        static member Create (verify: (string -> bool)) : Certificate = jsNative
+        [<Import("Certificate.exportChallenge", "node:static-reexport-lab")>]
+        static member exportChallenge (spkac: string) : string = jsNative
+
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
     type Exports =

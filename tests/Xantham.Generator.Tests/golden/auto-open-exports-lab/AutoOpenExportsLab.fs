@@ -11,6 +11,7 @@ open Fable.Core.JS
 open Fable.Core.TS.Dom
 
 /// <summary>The package's value exports, each bound to its import.</summary>
+[<AutoOpen>]
 [<Erase>]
 type Exports =
     [<Import("greet", "auto-open-exports-lab")>]

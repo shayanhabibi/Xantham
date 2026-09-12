@@ -16,22 +16,6 @@ type LayoutPayload =
     [<ParamObject; Emit("$0")>]
     static member Create (value: string) : LayoutPayload = jsNative
 
-module Exports =
-    [<StringEnum(CaseRules.None)>]
-    type Left =
-        | [<CompiledName("left")>] Left
-
-    [<StringEnum(CaseRules.None)>]
-    type Right =
-        | [<CompiledName("right")>] Right
-
-module Aliases =
-    /// <summary>The package's value exports, each bound to its import.</summary>
-    [<Erase>]
-    type Exports =
-        [<Import("renamedCheck", "layout-lab/aliases")>]
-        static member renamedCheck (value: string) : string = jsNative
-
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
@@ -51,6 +35,22 @@ type Exports =
     static member dispatch (kind: Exports.Left) : Exports.Left = jsNative
     [<Import("dispatch", "layout-lab")>]
     static member dispatch (kind: Exports.Right) : Exports.Right = jsNative
+
+module Aliases =
+    /// <summary>The package's value exports, each bound to its import.</summary>
+    [<Erase>]
+    type Exports =
+        [<Import("renamedCheck", "layout-lab/aliases")>]
+        static member renamedCheck (value: string) : string = jsNative
+
+module Exports =
+    [<StringEnum(CaseRules.None)>]
+    type Left =
+        | [<CompiledName("left")>] Left
+
+    [<StringEnum(CaseRules.None)>]
+    type Right =
+        | [<CompiledName("right")>] Right
 
 module Globals =
     /// <summary>The package's value exports, each bound to its import.</summary>

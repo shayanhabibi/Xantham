@@ -974,6 +974,10 @@ type GroupModule =
         /// Present only for one of the compiler library's two child modules.
         CompilerLib: CompilerLibFamily option
         Decls: FsDecl list
+        /// The runtime import specifier of each nested module path that groups declarations by
+        /// their ambient module owner - `["Inspector"; "Promises"]` for `node:inspector/promises`.
+        /// A companion module a TS `namespace` nests inside one of these carries no entry here.
+        ModuleSpecifiers: Map<string list, string<importSpecifier>>
     }
 
 /// The name a declaration is written under. `Exports` gathers the module's value exports and
@@ -1013,10 +1017,14 @@ let private indented (indent: string) (line: string) = if line = "" then "" else
 
 /// One module level's blocks of source text. A declaration with no modules left to enter is
 /// rendered here; a nested module opens at the first declaration that reaches into it and takes
-/// every later one. Order within a level is the order `order-declarations` fixed.
+/// every later one. Order within a level is the order `order-declarations` fixed. `entered`
+/// carries the module path already opened, so a specifier module's summary (rule 13) can key
+/// off the full path rather than its own last segment.
 let rec private nestedBlocks
+    (specifiers: Map<string list, string<importSpecifier>>)
     (render: FsDecl -> string list)
     (indent: string)
+    (entered: string list)
     (entries: (string list * FsDecl) list)
     : string list list =
     let opensAt =
@@ -1042,9 +1050,21 @@ let rec private nestedBlocks
                     | segment :: rest when segment = head -> Some(rest, nested)
                     | _ -> None)
 
-            match nestedBlocks render (indent + "    ") children with
+            let modulePath = entered @ [ head ]
+
+            match nestedBlocks specifiers render (indent + "    ") modulePath children with
             | [] -> []
-            | first :: rest -> ($"{indent}module {ident head} =" :: first) :: rest
+            | first :: rest ->
+                let opening =
+                    match Map.tryFind modulePath specifiers with
+                    | Some specifier ->
+                        [
+                            $"{indent}/// <summary>{specifier / uom<importSpecifier>}</summary>"
+                            $"{indent}module {ident head} ="
+                        ]
+                    | None -> [ $"{indent}module {ident head} =" ]
+
+                (opening @ first) :: rest
         | _ -> [])
 
 let private qualifyName (foreign: Map<string, string>) (name: string) =
@@ -1329,6 +1349,31 @@ let private fileHeader (openDom: bool) (source: string) (declaration: string) =
         ""
     ]
 
+/// The shortest spelling of `target`, a full dotted declaration name, that resolves
+/// unambiguously from `scope`, the module path of the referencing declaration.
+let private relativeQualification (scope: string list) (target: string) =
+    let segments = target.Split '.' |> Array.toList
+    let ownerPath = segments[.. segments.Length - 2]
+
+    let sharedPrefix (a: string list) (b: string list) =
+        List.zip (List.truncate (min a.Length b.Length) a) (List.truncate (min a.Length b.Length) b)
+        |> List.takeWhile (fun (x, y) -> x = y)
+        |> List.length
+
+    let kept =
+        if
+            ownerPath.Length <= scope.Length
+            && ownerPath = List.truncate ownerPath.Length scope
+        then
+            if scope.Length = ownerPath.Length then
+                ownerPath.Length
+            else
+                max 0 (ownerPath.Length - 1)
+        else
+            sharedPrefix ownerPath scope
+
+    segments[kept..] |> String.concat "."
+
 /// A group's declarations, each reference to another module's name qualified, rendered at
 /// `indent` in the order the shape tier fixed.
 let private renderBody (autoOpenExports: bool) (group: GroupModule) (foreign: Map<string, string>) (indent: string) =
@@ -1343,8 +1388,11 @@ let private renderBody (autoOpenExports: bool) (group: GroupModule) (foreign: Ma
 
     let names = group.Decls |> List.map declName
 
-    let namesByHead =
-        names |> List.groupBy (fun name -> name.Split('.')[0]) |> Map.ofList
+    // Every dotted name's trailing segment: the bare identifier F# binds it to at the module it
+    // nests in. A reference is ambiguous exactly where that identifier is also bound somewhere
+    // between it and the referencing scope.
+    let namesByLeaf =
+        names |> List.groupBy (fun name -> (name.Split '.') |> Array.last) |> Map.ofList
 
     let localBindings =
         names
@@ -1358,6 +1406,11 @@ let private renderBody (autoOpenExports: bool) (group: GroupModule) (foreign: Ma
         |> List.groupBy fst
         |> List.map (fun (scope, bindings) -> scope, bindings |> List.map snd |> Set.ofList)
         |> Map.ofList
+
+    // `group.Module :: scope` is the path a reference resolves against; the file's own module
+    // is the root of every nested path.
+    let qualify (scope: string list) (name: string) =
+        relativeQualification (group.Module :: scope) $"{group.Module}.{name}"
 
     let scopedReferences =
         names
@@ -1376,8 +1429,9 @@ let private renderBody (autoOpenExports: bool) (group: GroupModule) (foreign: Ma
             let references =
                 shadowed
                 |> Set.toList
-                |> List.collect (fun head -> Map.tryFind head namesByHead |> Option.defaultValue [])
-                |> List.map (fun name -> name, $"{group.Module}.{name}")
+                |> List.collect (fun leaf -> Map.tryFind leaf namesByLeaf |> Option.defaultValue [])
+                |> List.map (fun name -> name, qualify scope name)
+                |> List.filter (fun (name, qualified) -> qualified <> name)
                 |> Map.ofList
 
             scope, references)
@@ -1409,7 +1463,7 @@ let private renderBody (autoOpenExports: bool) (group: GroupModule) (foreign: Ma
                 let modules, leaf = nestingOf name
                 let scoped = qualifyDecl (Map.find modules scopedReferences) decl
                 modules, underLeaf leaf scoped)
-        |> nestedBlocks render indent
+        |> nestedBlocks group.ModuleSpecifiers render indent []
         |> List.map (String.concat "\n")
         |> String.concat "\n\n"
 
@@ -1545,6 +1599,7 @@ let renderSources (modules: GroupModule list) : Pass<RenderModel> =
                                     Namespace = None
                                     RuntimePackage = model.RuntimePackage
                                     CompilerLib = None
+                                    ModuleSpecifiers = Map.empty
                                     Decls = model.Decls
                                 }
                             ]

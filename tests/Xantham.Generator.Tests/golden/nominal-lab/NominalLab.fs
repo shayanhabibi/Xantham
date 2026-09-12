@@ -26,12 +26,6 @@ type Narrow = Record<string, Attr>
 
 type Wide = Record<string, Wide.Item>
 
-module Wide =
-    [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
-    type Item =
-        | [<CompiledName("attr")>] Attr
-        | [<CompiledName("gl")>] Gl
-
 [<Interface>]
 type Geometry<'Attributes> =
     abstract attributes: 'Attributes with get, set
@@ -62,3 +56,9 @@ type Exports =
     static member exact<'T when 'T :> Base> (value: 'T) : 'T = jsNative
     [<Import("derived", "nominal-lab")>]
     static member derived: Derived = jsNative
+
+module Wide =
+    [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
+    type Item =
+        | [<CompiledName("attr")>] Attr
+        | [<CompiledName("gl")>] Gl

@@ -40,13 +40,6 @@ type RegistryCfMeta =
     [<ParamObject; Emit("$0")>]
     static member Create (model: string, limits: RegistryCfMeta.Limits) : RegistryCfMeta = jsNative
 
-module RegistryCfMeta =
-    [<Interface>]
-    type Limits =
-        abstract tokens: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (tokens: float) : Limits = jsNative
-
 [<Interface>]
 type RegistryCfMetaLlama3 =
     abstract model: string with get, set
@@ -75,13 +68,6 @@ type Settings =
     [<ParamObject; Emit("$0")>]
     static member Create (``2fa``: Settings2fa, timeouts: Settings.Timeouts) : Settings = jsNative
 
-module Settings =
-    [<Interface>]
-    type Timeouts =
-        abstract connectMs: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (connectMs: float) : Timeouts = jsNative
-
 [<Interface>]
 type Settings2fa =
     abstract enabled: bool with get, set
@@ -96,3 +82,17 @@ type Exports =
     /// </summary>
     [<Import("modelOf", "key-sanitise-lab")>]
     static member modelOf (entry: RegistryCfMeta) : string = jsNative
+
+module RegistryCfMeta =
+    [<Interface>]
+    type Limits =
+        abstract tokens: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (tokens: float) : Limits = jsNative
+
+module Settings =
+    [<Interface>]
+    type Timeouts =
+        abstract connectMs: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (connectMs: float) : Timeouts = jsNative

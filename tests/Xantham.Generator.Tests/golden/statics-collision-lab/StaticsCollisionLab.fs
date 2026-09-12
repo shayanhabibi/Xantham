@@ -21,21 +21,22 @@ type Depot =
     [<ParamObject; Emit("$0")>]
     static member Create (slot: string) : Depot = jsNative
 
-/// <summary>
-/// An exported class sharing its name with the global interface above.
-/// </summary>
-[<Interface>]
-type Depot2 =
-    abstract slot: string
-    [<ParamObject; Emit("$0")>]
-    static member Create (slot: string) : Depot2 = jsNative
-    [<Import("Depot.LIMIT", "statics-lab:depot")>]
-    static member LIMIT: float = jsNative
-    [<Import("Depot.open", "statics-lab:depot")>]
-    static member ``open`` (slot: string) : Depot2 = jsNative
-
 module StaticsLab =
+    /// <summary>statics-lab:depot</summary>
     module Depot =
+        /// <summary>
+        /// An exported class sharing its name with the global interface above.
+        /// </summary>
+        [<Interface>]
+        type Depot =
+            abstract slot: string
+            [<ParamObject; Emit("$0")>]
+            static member Create (slot: string) : Depot = jsNative
+            [<Import("Depot.LIMIT", "statics-lab:depot")>]
+            static member LIMIT: float = jsNative
+            [<Import("Depot.open", "statics-lab:depot")>]
+            static member ``open`` (slot: string) : Depot = jsNative
+
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]
         type Exports =
@@ -43,4 +44,4 @@ module StaticsLab =
             /// An exported class sharing its name with the global interface above.
             /// </summary>
             [<Import("Depot", "statics-lab:depot"); EmitConstructor>]
-            static member Depot (slot: string) : Depot2 = jsNative
+            static member Depot (slot: string) : Depot = jsNative

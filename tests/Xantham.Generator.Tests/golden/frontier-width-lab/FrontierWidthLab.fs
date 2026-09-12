@@ -19,6 +19,12 @@ type Frontier<'T> =
     [<EmitIndexer>]
     abstract Item: float -> 'T with get, set
 
+/// <summary>The package's value exports, each bound to its import.</summary>
+[<Erase>]
+type Exports =
+    [<Import("frontier", "frontier-width-lab")>]
+    static member frontier: Frontier<float> = jsNative
+
 module Frontier =
     module Every =
         type Predicate<'T> = delegate of value: 'T * index: float * array: Frontier<'T> -> bool
@@ -34,9 +40,3 @@ module Frontier =
 
     module ReduceRight =
         type Callbackfn<'U, 'T> = delegate of previousValue: 'U * currentValue: 'T * currentIndex: float * array: Frontier<'T> -> 'U
-
-/// <summary>The package's value exports, each bound to its import.</summary>
-[<Erase>]
-type Exports =
-    [<Import("frontier", "frontier-width-lab")>]
-    static member frontier: Frontier<float> = jsNative

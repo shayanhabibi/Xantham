@@ -120,6 +120,7 @@ let renderTests =
                   Namespace = Some "Fable.Core.TS"
                   RuntimePackage = "typescript/lib" * uom<importSpecifier>
                   CompilerLib = Some Render.Es
+                  ModuleSpecifiers = Map.empty
                   Decls =
                     [ interface' "EsName"
                         [ FsProperty { Name = "dom"; Docs = ""; Tags = []; ReadOnly = true; Type = FsNamed "DomName" } ] ] }
@@ -131,6 +132,7 @@ let renderTests =
                   Namespace = Some "Fable.Core.TS"
                   RuntimePackage = "typescript/lib" * uom<importSpecifier>
                   CompilerLib = Some Render.Dom
+                  ModuleSpecifiers = Map.empty
                   Decls =
                     [ interface' "DomName"
                         [ FsProperty { Name = "es"; Docs = ""; Tags = []; ReadOnly = true; Type = FsNamed "EsName" } ] ] }
@@ -855,6 +857,7 @@ let renderTests =
                 { Group = "test-pkg" * uom<npmDependency>; Module = "TestPkg"; IsEntry = true; Namespace = None
                   CompilerLib = None
                   RuntimePackage = "test-pkg" * uom<importSpecifier>
+                  ModuleSpecifiers = Map.empty
                   Decls =
                     [ interface_ "Message"
                       interface_ "Strict.Message"
@@ -864,7 +867,8 @@ let renderTests =
             let remote: Render.GroupModule =
                 { Group = "remote" * uom<npmDependency>; Module = "RemotePkg"; IsEntry = false; Namespace = None
                   CompilerLib = None
-                  RuntimePackage = "remote" * uom<importSpecifier>; Decls = [ interface_ "Remote" ] }
+                  RuntimePackage = "remote" * uom<importSpecifier>; ModuleSpecifiers = Map.empty
+                  Decls = [ interface_ "Remote" ] }
             let ctx =
                 { Build.context with
                     Config = { Build.context.Config with Groups = Map.ofList [ ("remote" * uom<npmDependency>, Ship) ] } }

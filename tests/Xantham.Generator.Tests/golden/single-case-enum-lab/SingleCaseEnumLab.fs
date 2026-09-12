@@ -15,6 +15,20 @@ type Level =
     | [<CompiledName("high")>] High
     | [<CompiledName("low")>] Low
 
+/// <summary>The package's value exports, each bound to its import.</summary>
+[<Erase>]
+type Exports =
+    [<Import("pick", "single-case-enum-lab")>]
+    static member pick (kind: Exports.Fast) : float = jsNative
+    [<Import("pick", "single-case-enum-lab")>]
+    static member pick (kind: Exports.Slow) : string = jsNative
+    [<Import("run", "single-case-enum-lab")>]
+    static member run (mode: Exports.Ok) : string = jsNative
+    [<Import("run", "single-case-enum-lab")>]
+    static member run (mode: Exports.Error) : float = jsNative
+    [<Import("level", "single-case-enum-lab")>]
+    static member level (value: Level) : Level = jsNative
+
 module Exports =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
     type Error =
@@ -31,17 +45,3 @@ module Exports =
     [<StringEnum(CaseRules.None)>]
     type Slow =
         | [<CompiledName("slow")>] Slow
-
-/// <summary>The package's value exports, each bound to its import.</summary>
-[<Erase>]
-type Exports =
-    [<Import("pick", "single-case-enum-lab")>]
-    static member pick (kind: Exports.Fast) : float = jsNative
-    [<Import("pick", "single-case-enum-lab")>]
-    static member pick (kind: Exports.Slow) : string = jsNative
-    [<Import("run", "single-case-enum-lab")>]
-    static member run (mode: Exports.Ok) : string = jsNative
-    [<Import("run", "single-case-enum-lab")>]
-    static member run (mode: Exports.Error) : float = jsNative
-    [<Import("level", "single-case-enum-lab")>]
-    static member level (value: Level) : Level = jsNative

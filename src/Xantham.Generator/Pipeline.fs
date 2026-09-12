@@ -113,6 +113,26 @@ let private exportedDeclarations (ctx: Context) (shape: ShapeModel) =
     |> List.choose (fun (typeId, export) -> Map.tryFind typeId shape.DeclNames |> Option.map (fun name -> name, export))
     |> Map.ofList
 
+/// The runtime specifier of each nested module path the entry module writes for an ambient
+/// module owner - the one-line summary `Render.renderSources` places above that module's
+/// opening line (rule 13). A path a TS `namespace` nests a companion module under carries no
+/// entry here, since only `Shape.ExportLayout.preferredPath` reaches an owner directly.
+let private moduleSpecifiers (ctx: Context) (shape: ShapeModel) : Map<string list, string<importSpecifier>> =
+    let owners =
+        exportedDeclarations ctx shape
+        |> Map.toList
+        |> List.map (fun (_, export) -> Shape.ExportLayout.ownerOf shape.RuntimePackage export.Origin)
+        |> List.distinct
+
+    let hasEntryOwner = owners |> List.contains EntryModule
+
+    owners
+    |> List.choose (fun owner ->
+        match owner, Shape.ExportLayout.preferredPath shape.RuntimePackage hasEntryOwner owner with
+        | AmbientModule specifier, (_ :: _ as path) -> Some(path, specifier)
+        | _ -> None)
+    |> Map.ofList
+
 /// Origin of each named type that was reached while shaping declarations. Explicit exports
 /// supply their declaration ownership; other named types keep their own symbol origin.
 let private declOrigins compilerOnly (ctx: Context) (shape: ShapeModel) : Map<string, PackageId> =
@@ -268,6 +288,7 @@ let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel)
         | origin -> origin, ""
 
     let placed = shape.Decls |> List.groupBy placementOf |> Map.ofList
+    let entrySpecifiers = moduleSpecifiers ctx shape
 
     let moduleOf (origin: PackageId, family: string) : Render.GroupModule =
         let decls = placed |> Map.tryFind (origin, family) |> Option.defaultValue []
@@ -281,6 +302,7 @@ let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel)
                 Namespace = None
                 RuntimePackage = GeneratorConfig.runtimePackage ctx.Config ctx.PackageName
                 CompilerLib = None
+                ModuleSpecifiers = entrySpecifiers
                 Decls = decls
             }
         | Some key ->
@@ -304,6 +326,7 @@ let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel)
                     match origin with
                     | CompilerLib -> Some(if family = "Dom" then Render.Dom else Render.Es)
                     | _ -> None
+                ModuleSpecifiers = Map.empty
                 Decls = decls
             }
 

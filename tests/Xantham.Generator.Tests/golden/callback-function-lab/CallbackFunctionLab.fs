@@ -10,15 +10,6 @@ open Fable.Core.JsInterop
 open Fable.Core.JS
 open Fable.Core.TS.Dom
 
-module CallTwo =
-    type Callback = delegate of a: float * b: float -> string
-
-module CallThree =
-    type Callback = delegate of a: float * b: float * c: float -> string
-
-module CallVoidTwo =
-    type Callback = delegate of a: float * b: float -> unit
-
 type Formatter = delegate of value: float * digits: float -> string
 
 /// <summary>
@@ -30,9 +21,6 @@ type Handlers =
     abstract onDone: (float -> unit) option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (onTick: Handlers.OnTick, ?onDone: (float -> unit)) : Handlers = jsNative
-
-module Handlers =
-    type OnTick = delegate of a: float * b: float -> string
 
 /// <summary>
 /// A method member, which the ParamObject pass binds as a callback-typed Create parameter.
@@ -59,34 +47,12 @@ type Factory =
     [<ParamObject; Emit("$0")>]
     static member Create (make: (float -> Factory.Make.Result), makeOne: Func<float, (float -> string)>, makeNone: Func<float, (unit -> string)>, makeThree: (float -> Factory.MakeThree.Result), ready: (unit -> string), pair: Factory.Pair) : Factory = jsNative
 
-module Factory =
-    module Make =
-        type Result = delegate of a: float * b: float -> string
-
-    module MakeThree =
-        type Result = delegate of a: float * b: float * c: float -> string
-
-    type Pair = delegate of a: float * b: float -> string
-
-module CallNesting =
-    module Outer =
-        type Result = delegate of a: float * b: float -> string
-
-module CallNestingOne =
-    type Outer = delegate of seed: float -> (float -> string)
-
 /// <summary>
 /// A union of a callback arm and a non-callback arm, the shape the corpus carries as
 /// <c>EventListenerOrEventListenerObject</c>. The erased union unwraps at runtime, so what crosses is
 /// whichever arm was supplied.
 /// </summary>
 type Listener = U2<string, (float -> string)>
-
-module CallUnionTwo =
-    type Listener = delegate of a: float * b: float -> string
-
-module MakeUnionTwo =
-    type Result = delegate of a: float * b: float -> string
 
 /// <summary>
 /// Union-typed members, at both arities and with the non-callback arm supplied.
@@ -98,9 +64,6 @@ type UnionHandlers =
     abstract text: U2<string, (float -> string)> with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (one: U2<string, (float -> string)>, two: U2<string, UnionHandlers.Two>, text: U2<string, (float -> string)>) : UnionHandlers = jsNative
-
-module UnionHandlers =
-    type Two = delegate of a: float * b: float -> string
 
 /// <summary>
 /// The object arm of <c>EventListenerOrEventListenerObject</c>, whose method carries the same arity.
@@ -139,9 +102,6 @@ type UnionListenerObject =
     abstract handleEvent: x: float -> unit
     [<ParamObject; Emit("$0")>]
     static member Create (handleEvent: (float -> unit)) : UnionListenerObject = jsNative
-
-module AddListener =
-    type Register = delegate of kind: string * listener: U2<UnionListenerObject, (float -> unit)> -> unit
 
 /// <summary>
 /// The same bound on a generic interface and one of its methods.
@@ -318,3 +278,43 @@ type Exports =
     /// </summary>
     [<Import("boxedFunction", "callback-function-lab")>]
     static member boxedFunction (box: CallbackBox<(float -> float)>) : float = jsNative
+
+module AddListener =
+    type Register = delegate of kind: string * listener: U2<UnionListenerObject, (float -> unit)> -> unit
+
+module CallNesting =
+    module Outer =
+        type Result = delegate of a: float * b: float -> string
+
+module CallNestingOne =
+    type Outer = delegate of seed: float -> (float -> string)
+
+module CallThree =
+    type Callback = delegate of a: float * b: float * c: float -> string
+
+module CallTwo =
+    type Callback = delegate of a: float * b: float -> string
+
+module CallUnionTwo =
+    type Listener = delegate of a: float * b: float -> string
+
+module CallVoidTwo =
+    type Callback = delegate of a: float * b: float -> unit
+
+module Factory =
+    type Pair = delegate of a: float * b: float -> string
+
+    module Make =
+        type Result = delegate of a: float * b: float -> string
+
+    module MakeThree =
+        type Result = delegate of a: float * b: float * c: float -> string
+
+module Handlers =
+    type OnTick = delegate of a: float * b: float -> string
+
+module MakeUnionTwo =
+    type Result = delegate of a: float * b: float -> string
+
+module UnionHandlers =
+    type Two = delegate of a: float * b: float -> string

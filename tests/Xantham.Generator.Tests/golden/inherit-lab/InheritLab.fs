@@ -165,14 +165,6 @@ type Slim =
     [<ParamObject; Emit("$0")>]
     static member Create (slim: bool, ?name: string, ?at: float) : Slim = jsNative
 
-module Slim =
-    [<Interface>]
-    type Base =
-        abstract name: string option with get, set
-        abstract at: float option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?name: string, ?at: float) : Base = jsNative
-
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
@@ -183,3 +175,11 @@ type Exports =
     static member Node (id: float) : Node = jsNative
     [<Import("Leaf", "inherit-lab"); EmitConstructor>]
     static member Leaf (id: float) : Leaf = jsNative
+
+module Slim =
+    [<Interface>]
+    type Base =
+        abstract name: string option with get, set
+        abstract at: float option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?name: string, ?at: float) : Base = jsNative

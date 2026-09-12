@@ -251,6 +251,22 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
         |> Option.bind (fun parent -> Map.tryFind parent model.Harvest.Namespaces)
         |> Option.map (fun value -> Naming.pascalSegment (value / uom<symbolName>))
 
+    /// The specifier module path of the export whose types are being walked, dotted; empty at
+    /// the root.
+    let mutable modulePrefix = ""
+
+    let underPrefix (name: string) =
+        if modulePrefix = "" || name.StartsWith(modulePrefix + ".") then
+            name
+        else
+            $"{modulePrefix}.{name}"
+
+    let withoutPrefix (name: string) =
+        if modulePrefix <> "" && name.StartsWith(modulePrefix + ".") then
+            name.Substring(modulePrefix.Length + 1)
+        else
+            name
+
     let claim (owner: string option) (preferred: string) typeId order =
         // A member key reaches here verbatim, and a declaration name admits less than a member
         // name does: `Registry@cf/meta` is FS0883 with or without backticks.
@@ -262,8 +278,8 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
         // beside the global class of that name.
         let wanted =
             match owner with
-            | Some ns when Set.contains admitted taken -> nestUnder ns admitted
-            | _ -> admitted
+            | Some ns when Set.contains (underPrefix admitted) taken -> underPrefix (nestUnder ns admitted)
+            | _ -> underPrefix admitted
 
         let unique =
             if not (Set.contains wanted taken) then
@@ -283,7 +299,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                     Finding.make unique (SynthesizeAnonymous.NameSanitisedForIdentifier(preferred, unique))
                 ]
 
-        if unique.Contains "." then
+        if (withoutPrefix unique).Contains "." then
             findings <-
                 findings
                 @ [ Finding.make unique (SynthesizeAnonymous.NameNestedUnderOwner unique) ]
@@ -544,9 +560,11 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                             | _ -> ()
 
     let fallback = defaultExportName ctx
+    let pathOf = ExportLayout.declPath (ExportLayout.modulePaths model) model
 
     for export in model.Harvest.Exports do
-        let root = Naming.pascalSegment (fsName fallback export)
+        modulePrefix <- pathOf export |> String.concat "."
+        let root = underPrefix (Naming.pascalSegment (fsName fallback export))
 
         match Map.tryFind export.Symbol.SymbolId model.ExportTypes with
         | Some ids ->

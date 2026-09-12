@@ -207,20 +207,6 @@ type Wide =
     [<ParamObject; Emit("$0")>]
     static member Create (``event``: Wide.Event) : Wide = jsNative
 
-module Wide =
-    [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-    type Event =
-        | [<CompiledName("alarm")>] Alarm of scheduledTime: float
-        | [<CompiledName("connect")>] Connect
-        | [<CompiledName("custom")>] Custom
-        | [<CompiledName("email")>] Email
-        | [<CompiledName("fetch")>] Fetch of url: string
-        | [<CompiledName("jsrpc")>] Jsrpc of methodName: string
-        | [<CompiledName("queue")>] Queue
-        | [<CompiledName("scheduled")>] Scheduled
-        | [<CompiledName("socket")>] Socket
-        | [<CompiledName("trace")>] Trace
-
 type OnWide = (Wide.Event -> unit)
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
@@ -241,14 +227,14 @@ type Narrow =
     [<ParamObject; Emit("$0")>]
     static member Create (``event``: Narrow.Event) : Narrow = jsNative
 
+type OnEvent = (OnEvent.Event -> unit)
+
 module Narrow =
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type Event =
         | [<CompiledName("email")>] Email
         | [<CompiledName("queue")>] Queue
         | [<CompiledName("scheduled")>] Scheduled
-
-type OnEvent = (OnEvent.Event -> unit)
 
 module OnEvent =
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
@@ -263,3 +249,17 @@ module OnEvent =
         | [<CompiledName("socket")>] Socket
         | [<CompiledName("trace")>] Trace
         | [<CompiledName("log")>] Log of level: string
+
+module Wide =
+    [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+    type Event =
+        | [<CompiledName("alarm")>] Alarm of scheduledTime: float
+        | [<CompiledName("connect")>] Connect
+        | [<CompiledName("custom")>] Custom
+        | [<CompiledName("email")>] Email
+        | [<CompiledName("fetch")>] Fetch of url: string
+        | [<CompiledName("jsrpc")>] Jsrpc of methodName: string
+        | [<CompiledName("queue")>] Queue
+        | [<CompiledName("scheduled")>] Scheduled
+        | [<CompiledName("socket")>] Socket
+        | [<CompiledName("trace")>] Trace

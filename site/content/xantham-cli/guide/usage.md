@@ -277,6 +277,35 @@ findings:
 `symbols.jsonl` with the finding code accounting for it, so a binding's losses are enumerable
 before you build on it.
 
+## Where a type lives in the binding
+
+A binding is one `module rec <Module>`. Where a declaration is written inside it follows where
+the package declares it:
+
+| Declared in TypeScript | Written in F# |
+|---|---|
+| Global scope (`declare class Buffer`) | The root: `Node.Buffer`. |
+| An ambient module (`declare module "inspector"`) | A nested module named for the specifier: `Node.Inspector.Session`. |
+| A subpath (`declare module "inspector/promises"`) | One nested module per `/` segment: `Node.Inspector.Promises.Session`. |
+| A value export (`export function readFile`) | The module's `Exports` type: `Node.Fs.Exports.readFile`. |
+| A TypeScript `namespace` inside a module | A module nested under the specifier's: `Node.Fs.Constants`. |
+| An options object or callback with no name of its own | Under the member it was read from: `Node.ChildProcess.Exec.Callback`. |
+
+Module names are the specifier's segments in PascalCase, so `worker_threads` reads
+`WorkerThreads` and `stream/web` reads `Stream.Web`. Each nested module's summary carries the
+specifier it binds, and every `[<Import>]` inside it names that specifier. For `@types/node`,
+`node:fs` and `fs` are one module, imported as `node:fs`.
+
+Two declarations sharing a name in different modules both keep it. A numeric suffix appears only
+where one module declares the same name twice, and the manifest reports each such site.
+
+```fsharp
+open Node
+
+// inspector and inspector/promises each export a Session; the module tells them apart.
+let attach (session: Inspector.Session) (promised: Inspector.Promises.Session) = ()
+```
+
 ## Share types across generated subpaths
 
 Generate a producer with `"declarationCatalog": true` to write `declarations.json` beside its

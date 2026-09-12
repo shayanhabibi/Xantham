@@ -30,12 +30,6 @@ let resolveExportCollisions: Pass<ShapeModel> =
                     let mutable findings: Finding list = []
                     let emit finding = findings <- findings @ [ finding ]
 
-                    let exportContainers, others =
-                        model.Decls
-                        |> List.partitionWith (function
-                            | FsExports container -> Choice1Of2 container
-                            | other -> Choice2Of2 other)
-
                     let abbrevs =
                         model.Decls
                         |> List.choose (function
@@ -308,7 +302,11 @@ let resolveExportCollisions: Pass<ShapeModel> =
 
                     let model =
                         { model with
-                            Decls = others @ (exportContainers |> List.map resolveContainer)
+                            Decls =
+                                model.Decls
+                                |> List.map (function
+                                    | FsExports container -> resolveContainer container
+                                    | other -> other)
                         }
 
                     return

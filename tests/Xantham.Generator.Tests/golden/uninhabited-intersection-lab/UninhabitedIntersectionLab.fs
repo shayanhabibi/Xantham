@@ -39,16 +39,6 @@ type Ticking =
     [<ParamObject; Emit("$0")>]
     static member Create (``then``: ((Ticking.Then.Callback.Self -> obj) option -> JS.Promise<obj>)) : Ticking = jsNative
 
-module Ticking =
-    module Then =
-        module Callback =
-            [<Interface>]
-            type Self =
-                inherit Ticking
-                abstract paused: bool with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``then``: ((Ticking.Then.Callback.Self -> obj) option -> JS.Promise<obj>), paused: bool) : Self = jsNative
-
 /// <summary>
 /// The collided name is not a member of the operand it is intersected against.
 /// </summary>
@@ -57,16 +47,6 @@ type Player =
     abstract play: ?callback: (Player.Play.Callback.Self -> obj) -> unit
     [<ParamObject; Emit("$0")>]
     static member Create (play: ((Player.Play.Callback.Self -> obj) option -> unit)) : Player = jsNative
-
-module Player =
-    module Play =
-        module Callback =
-            [<Interface>]
-            type Self =
-                inherit Player
-                abstract ``then``: obj with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (play: ((Player.Play.Callback.Self -> obj) option -> unit), ``then``: obj) : Self = jsNative
 
 /// <summary>
 /// The collision is not unit-typed: TypeScript does not empty the whole intersection, so the
@@ -77,16 +57,6 @@ type Chained =
     abstract ``then``: ?callback: (Chained.Then.Callback.Self -> obj) -> JS.Promise<obj>
     [<ParamObject; Emit("$0")>]
     static member Create (``then``: ((Chained.Then.Callback.Self -> obj) option -> JS.Promise<obj>)) : Chained = jsNative
-
-module Chained =
-    module Then =
-        module Callback =
-            [<Interface>]
-            type Self =
-                inherit Chained
-                abstract ``then``: obj with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``then``: obj) : Self = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
@@ -114,3 +84,33 @@ type Exports =
     /// </summary>
     [<Import("Chained", "uninhabited-intersection-lab"); EmitConstructor>]
     static member Chained () : Chained = jsNative
+
+module Chained =
+    module Then =
+        module Callback =
+            [<Interface>]
+            type Self =
+                inherit Chained
+                abstract ``then``: obj with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (``then``: obj) : Self = jsNative
+
+module Player =
+    module Play =
+        module Callback =
+            [<Interface>]
+            type Self =
+                inherit Player
+                abstract ``then``: obj with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (play: ((Self -> obj) option -> unit), ``then``: obj) : Self = jsNative
+
+module Ticking =
+    module Then =
+        module Callback =
+            [<Interface>]
+            type Self =
+                inherit Ticking
+                abstract paused: bool with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (``then``: ((Self -> obj) option -> JS.Promise<obj>), paused: bool) : Self = jsNative
