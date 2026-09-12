@@ -1835,7 +1835,16 @@ let pipelineTests =
 
                           Expect.stringContains source "module rec Fable.Core.TS" "the configured root owns the combined file"
                           Expect.stringContains source "[<AutoOpen>]\nmodule Browser =" "the configured DOM child keeps its own opening policy"
-                          Expect.stringContains source "Fable.Core.TS.Browser." "compiler-library references use the configured fully qualified family" ])
+                          Expect.stringContains source "Fable.Core.TS.Browser." "compiler-library references use the configured fully qualified family"
+
+                      testCase "symbols report compiler libs without a platform rid" <| fun _ ->
+                          let rendered =
+                              Async.RunSynchronously(Pipeline.generate (handConfig (handFixture "lib-ship-lab")) package)
+
+                          let symbols = rendered.Files |> List.find (fun (path, _) -> path = "symbols.jsonl") |> snd
+
+                          Expect.isFalse (symbols.Contains "@typescript/typescript-") "rid stripped"
+                          Expect.stringContains symbols "node_modules/typescript/lib/" "neutral path" ])
 
         yield!
             fixtureTests

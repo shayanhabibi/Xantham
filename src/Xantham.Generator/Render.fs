@@ -1881,9 +1881,16 @@ let private sourceFile (packageDir: string) (order: DeclOrder option) : string =
         if path.StartsWith(root, StringComparison.OrdinalIgnoreCase) then
             path.Substring root.Length
         else
-            match path.LastIndexOf "/node_modules/" with
-            | -1 -> path.Substring(path.LastIndexOf '/' + 1)
-            | at -> path.Substring(at + 1)
+            let relative =
+                match path.LastIndexOf "/node_modules/" with
+                | -1 -> path.Substring(path.LastIndexOf '/' + 1)
+                | at -> path.Substring(at + 1)
+
+            System.Text.RegularExpressions.Regex.Replace(
+                relative,
+                "^node_modules/@typescript/typescript-[a-z0-9]+-[a-z0-9]+/",
+                "node_modules/typescript/"
+            )
 
 /// Declaration name -> the file it was declared in, for every declaration that carries an order.
 let private declFiles (model: RenderModel) : Map<string, string> =
