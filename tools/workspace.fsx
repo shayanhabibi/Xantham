@@ -156,7 +156,6 @@ let ensureTsc (root: string) : string option =
     | existing when not (String.IsNullOrWhiteSpace existing) && File.Exists existing ->
         requireTsc ()
         Some existing
-    | _ when not (isLinkedWorktree root) -> None
     | _ ->
         match searchRoots root |> List.tryPick tscExeIn with
         | None -> None
