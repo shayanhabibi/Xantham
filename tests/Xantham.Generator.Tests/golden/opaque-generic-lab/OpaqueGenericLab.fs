@@ -64,13 +64,6 @@ type Agent =
     [<ParamObject; Emit("$0")>]
     static member Create (manager: Manager) : Agent = jsNative
 
-module Connection =
-    [<Interface>]
-    type Options =
-        abstract transport: Transport with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (transport: Transport) : Options = jsNative
-
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
@@ -80,3 +73,10 @@ type Exports =
     static member Manager () : Manager = jsNative
     [<Import("Agent", "opaque-generic-lab"); EmitConstructor>]
     static member Agent () : Agent = jsNative
+
+module Connection =
+    [<Interface>]
+    type Options =
+        abstract transport: Transport with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (transport: Transport) : Options = jsNative

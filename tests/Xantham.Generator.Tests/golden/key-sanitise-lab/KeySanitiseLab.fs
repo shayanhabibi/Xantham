@@ -74,6 +74,15 @@ type Settings2fa =
     [<ParamObject; Emit("$0")>]
     static member Create (enabled: bool) : Settings2fa = jsNative
 
+/// <summary>The package's value exports, each bound to its import.</summary>
+[<Erase>]
+type Exports =
+    /// <summary>
+    /// Reads the sanitised shape back, so the reference position is gated too.
+    /// </summary>
+    [<Import("modelOf", "key-sanitise-lab")>]
+    static member modelOf (entry: RegistryCfMeta) : string = jsNative
+
 module RegistryCfMeta =
     [<Interface>]
     type Limits =
@@ -87,12 +96,3 @@ module Settings =
         abstract connectMs: float with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (connectMs: float) : Timeouts = jsNative
-
-/// <summary>The package's value exports, each bound to its import.</summary>
-[<Erase>]
-type Exports =
-    /// <summary>
-    /// Reads the sanitised shape back, so the reference position is gated too.
-    /// </summary>
-    [<Import("modelOf", "key-sanitise-lab")>]
-    static member modelOf (entry: RegistryCfMeta) : string = jsNative

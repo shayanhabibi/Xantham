@@ -87,6 +87,22 @@ type Widen =
 type Blend =
     abstract pick: kind: string -> unit
 
+/// <summary>The package's value exports, each bound to its import.</summary>
+[<Erase>]
+type Exports =
+    /// <summary>
+    /// Negative: a literal tells these two apart, and retention reads the members of a declaration,
+    /// so an exported function reaches deduplication widened. The second drops as <c>DO004</c>.
+    /// </summary>
+    [<Import("emit", "literal-overload-lab")>]
+    static member emit (kind: Exports.Start) : unit = jsNative
+    /// <summary>
+    /// Negative: a literal tells these two apart, and retention reads the members of a declaration,
+    /// so an exported function reaches deduplication widened. The second drops as <c>DO004</c>.
+    /// </summary>
+    [<Import("emit", "literal-overload-lab")>]
+    static member emit (kind: Exports.Stop) : unit = jsNative
+
 module Choice =
     module Pick =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -120,19 +136,3 @@ module Store =
     [<StringEnum(CaseRules.None)>]
     type Text =
         | [<CompiledName("text")>] Text
-
-/// <summary>The package's value exports, each bound to its import.</summary>
-[<Erase>]
-type Exports =
-    /// <summary>
-    /// Negative: a literal tells these two apart, and retention reads the members of a declaration,
-    /// so an exported function reaches deduplication widened. The second drops as <c>DO004</c>.
-    /// </summary>
-    [<Import("emit", "literal-overload-lab")>]
-    static member emit (kind: Exports.Start) : unit = jsNative
-    /// <summary>
-    /// Negative: a literal tells these two apart, and retention reads the members of a declaration,
-    /// so an exported function reaches deduplication widened. The second drops as <c>DO004</c>.
-    /// </summary>
-    [<Import("emit", "literal-overload-lab")>]
-    static member emit (kind: Exports.Stop) : unit = jsNative

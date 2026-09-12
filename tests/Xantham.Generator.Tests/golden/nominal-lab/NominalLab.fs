@@ -45,12 +45,6 @@ type Derived =
     [<ParamObject; Emit("$0")>]
     static member Create (extra: float, tag: string) : Derived = jsNative
 
-module Wide =
-    [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
-    type Item =
-        | [<CompiledName("attr")>] Attr
-        | [<CompiledName("gl")>] Gl
-
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
@@ -62,3 +56,9 @@ type Exports =
     static member exact<'T when 'T :> Base> (value: 'T) : 'T = jsNative
     [<Import("derived", "nominal-lab")>]
     static member derived: Derived = jsNative
+
+module Wide =
+    [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
+    type Item =
+        | [<CompiledName("attr")>] Attr
+        | [<CompiledName("gl")>] Gl

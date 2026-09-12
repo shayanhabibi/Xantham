@@ -1,4 +1,4 @@
-﻿/// Functions to allocate export paths and owners for declarations.
+/// Functions to allocate export paths and owners for declarations.
 module Xantham.Generator.Shape.ExportLayout
 
 open System
@@ -210,6 +210,25 @@ let private memberOwners (model: ShapeModel) : ExportOwner list =
             |> Option.exists (fun typeId -> Map.containsKey typeId model.Types)))
     |> List.map (fun export -> ownerOf model.RuntimePackage export.Origin)
     |> List.distinct
+
+/// Every owner referenced by a harvested export, across value exports and declared types.
+let allOwners (model: ShapeModel) : ExportOwner list =
+    model.Harvest.Exports
+    |> List.map (fun export -> ownerOf model.RuntimePackage export.Origin)
+    |> List.distinct
+
+/// The nested-module path each owner's declared types render under, unique across owners.
+/// Empty for an entry-module or global-scope owner.
+let modulePaths (model: ShapeModel) : Map<ExportOwner, string list> =
+    allocate model.RuntimePackage [] (allOwners model)
+
+/// The nested-module path an export's declared type, and every type synthesized beneath it,
+/// renders under. Empty for an entry-module or global-scope export.
+let declPath (modulePaths: Map<ExportOwner, string list>) (model: ShapeModel) (export: HarvestedExport) =
+    match ownerOf model.RuntimePackage export.Origin with
+    | AmbientModule _ as owner -> modulePaths |> Map.tryFind owner |> Option.defaultValue []
+    | EntryModule
+    | GlobalScope -> []
 
 /// Each owner's container name, `Exports`, `Strict.Exports` or `Globals.Exports`, for the owners
 /// given. Deterministic for one model and owner set, so shaping, literal retention and ordering

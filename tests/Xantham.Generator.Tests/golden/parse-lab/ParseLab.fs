@@ -43,15 +43,15 @@ type Plain =
     [<ParamObject; Emit("$0")>]
     static member Create (ping: (float -> unit), echo: ('T -> 'T), on: ('T -> unit)) : Plain = jsNative
 
+/// <summary>The package's value exports, each bound to its import.</summary>
+[<Erase>]
+type Exports =
+    [<Import("Caster", "parse-lab"); EmitConstructor>]
+    static member Caster () : Caster = jsNative
+
 module EventMap =
     [<Interface>]
     type Click =
         abstract at: float with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (at: float) : Click = jsNative
-
-/// <summary>The package's value exports, each bound to its import.</summary>
-[<Erase>]
-type Exports =
-    [<Import("Caster", "parse-lab"); EmitConstructor>]
-    static member Caster () : Caster = jsNative

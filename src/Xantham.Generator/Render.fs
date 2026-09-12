@@ -1349,6 +1349,31 @@ let private fileHeader (openDom: bool) (source: string) (declaration: string) =
         ""
     ]
 
+/// The shortest spelling of `target`, a full dotted declaration name, that resolves
+/// unambiguously from `scope`, the module path of the referencing declaration.
+let private relativeQualification (scope: string list) (target: string) =
+    let segments = target.Split '.' |> Array.toList
+    let ownerPath = segments[.. segments.Length - 2]
+
+    let sharedPrefix (a: string list) (b: string list) =
+        List.zip (List.truncate (min a.Length b.Length) a) (List.truncate (min a.Length b.Length) b)
+        |> List.takeWhile (fun (x, y) -> x = y)
+        |> List.length
+
+    let kept =
+        if
+            ownerPath.Length <= scope.Length
+            && ownerPath = List.truncate ownerPath.Length scope
+        then
+            if scope.Length = ownerPath.Length then
+                ownerPath.Length
+            else
+                max 0 (ownerPath.Length - 1)
+        else
+            sharedPrefix ownerPath scope
+
+    segments[kept..] |> String.concat "."
+
 /// A group's declarations, each reference to another module's name qualified, rendered at
 /// `indent` in the order the shape tier fixed.
 let private renderBody (autoOpenExports: bool) (group: GroupModule) (foreign: Map<string, string>) (indent: string) =
@@ -1363,8 +1388,11 @@ let private renderBody (autoOpenExports: bool) (group: GroupModule) (foreign: Ma
 
     let names = group.Decls |> List.map declName
 
-    let namesByHead =
-        names |> List.groupBy (fun name -> name.Split('.')[0]) |> Map.ofList
+    // Every dotted name's trailing segment: the bare identifier F# binds it to at the module it
+    // nests in. A reference is ambiguous exactly where that identifier is also bound somewhere
+    // between it and the referencing scope.
+    let namesByLeaf =
+        names |> List.groupBy (fun name -> (name.Split '.') |> Array.last) |> Map.ofList
 
     let localBindings =
         names
@@ -1378,6 +1406,11 @@ let private renderBody (autoOpenExports: bool) (group: GroupModule) (foreign: Ma
         |> List.groupBy fst
         |> List.map (fun (scope, bindings) -> scope, bindings |> List.map snd |> Set.ofList)
         |> Map.ofList
+
+    // `group.Module :: scope` is the path a reference resolves against; the file's own module
+    // is the root of every nested path.
+    let qualify (scope: string list) (name: string) =
+        relativeQualification (group.Module :: scope) $"{group.Module}.{name}"
 
     let scopedReferences =
         names
@@ -1396,8 +1429,9 @@ let private renderBody (autoOpenExports: bool) (group: GroupModule) (foreign: Ma
             let references =
                 shadowed
                 |> Set.toList
-                |> List.collect (fun head -> Map.tryFind head namesByHead |> Option.defaultValue [])
-                |> List.map (fun name -> name, $"{group.Module}.{name}")
+                |> List.collect (fun leaf -> Map.tryFind leaf namesByLeaf |> Option.defaultValue [])
+                |> List.map (fun name -> name, qualify scope name)
+                |> List.filter (fun (name, qualified) -> qualified <> name)
                 |> Map.ofList
 
             scope, references)

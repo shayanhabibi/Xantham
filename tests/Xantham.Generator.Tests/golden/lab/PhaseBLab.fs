@@ -167,14 +167,6 @@ type Utils =
     [<ParamObject; Emit("$0")>]
     static member Create (clamp: Clamp, epsilon: float) : Utils = jsNative
 
-module Configure =
-    [<Interface>]
-    type Settings =
-        abstract fps: float with get, set
-        abstract muted: bool option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (fps: float, ?muted: bool) : Settings = jsNative
-
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
@@ -225,3 +217,11 @@ type Exports =
     static member makeRoundRect (width: float, height: float, radius: float) : Shape = jsNative
     [<Import("utils", "phase-b-lab")>]
     static member utils: Utils = jsNative
+
+module Configure =
+    [<Interface>]
+    type Settings =
+        abstract fps: float with get, set
+        abstract muted: bool option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (fps: float, ?muted: bool) : Settings = jsNative

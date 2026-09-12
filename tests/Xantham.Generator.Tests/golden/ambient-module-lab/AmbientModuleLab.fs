@@ -54,128 +54,84 @@ type Anvil =
     [<ParamObject; Emit("$0")>]
     static member Create (mass: float) : Anvil = jsNative
 
-/// <summary>
-/// A class exported from a specifier rather than from <c>globalThis</c>.
-/// </summary>
-[<Interface>]
-type Hammer =
-    abstract weight: float
-    abstract strike: payload: Payload -> string
-    [<ParamObject; Emit("$0")>]
-    static member Create (weight: float, strike: (Payload -> string)) : Hammer = jsNative
-    [<Import("Hammer.LIMIT", "ambient-lab:tools")>]
-    static member LIMIT: float = jsNative
-
-/// <summary>
-/// A type declared inside the module block.
-/// </summary>
-[<Interface>]
-type Reading =
-    abstract depth: float with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (depth: float) : Reading = jsNative
-
-/// <summary>
-/// A class written to be derived from: <c>abstract</c>, and exported from a specifier. F# reaches
-/// this one as a class, because an interface admits no <c>inherit</c>.
-/// </summary>
-[<Import("Workbench", "ambient-lab:tools"); AbstractClass>]
-type Workbench (label: string) =
-    member _.label: string = jsNative
+/// <summary>The package's value exports, each bound to its import.</summary>
+[<Erase>]
+type Exports =
     /// <summary>
-    /// The slot a derived class fills.
+    /// A namespace declaring a value: <c>globalThis.Telemetry</c> is real, so it keeps <c>[&lt;Global&gt;]</c>.
     /// </summary>
-    abstract run: payload: Payload -> string
-
-/// <summary>
-/// A class with a base the compiler library owns. Not abstract, and still the class form:
-/// <c>extends</c> is what says a consumer derives from it.
-/// </summary>
-[<Import("Snag", "ambient-lab:tools"); AbstractClass>]
-type Snag (message: string) =
-    inherit exn()
-    member _.name
-        with get (): string = jsNative
-        and set (_: string): unit = jsNative
-    member _.message
-        with get (): string = jsNative
-        and set (_: string): unit = jsNative
-    member _.stack
-        with get (): string option = jsNative
-        and set (_: string option): unit = jsNative
-    member _.cause
-        with get (): obj option = jsNative
-        and set (_: obj option): unit = jsNative
-
-/// <summary>
-/// A class whose base this run declares. An F# class reaches its base through a constructor
-/// call, and an interface has none, so this keeps the interface form.
-/// </summary>
-[<Interface>]
-type Vise =
-    inherit Hammer
-    abstract jaw: float
-    [<ParamObject; Emit("$0")>]
-    static member Create (jaw: float, weight: float, strike: (Payload -> string)) : Vise = jsNative
-    [<Import("Vise.LIMIT", "ambient-lab:tools")>]
-    static member LIMIT: float = jsNative
-
-module AmbientLabRuntime =
-    [<Interface>]
-    type Session =
-        abstract label: string
-        [<ParamObject; Emit("$0")>]
-        static member Create (label: string) : Session = jsNative
-
-[<Interface>]
-type Session2 =
-    abstract id: string
-    [<ParamObject; Emit("$0")>]
-    static member Create (id: string) : Session2 = jsNative
-
-[<Interface>]
-type Constants =
-    abstract epoch: float
-    [<ParamObject; Emit("$0")>]
-    static member Create (epoch: float) : Constants = jsNative
-
-[<Interface>]
-type Session3 =
-    abstract id: string
-    [<ParamObject; Emit("$0")>]
-    static member Create (id: string) : Session3 = jsNative
-
-[<Interface>]
-type Constants2 =
-    abstract epoch: float
-    [<ParamObject; Emit("$0")>]
-    static member Create (epoch: float) : Constants2 = jsNative
+    [<Global("Telemetry")>]
+    static member Telemetry: Telemetry = jsNative
+    /// <summary>
+    /// A global class sharing its name with <c>ambient-lab:runtime</c>'s. Two declarations, two types.
+    /// </summary>
+    [<Global("Session"); EmitConstructor>]
+    static member Session () : Session = jsNative
+    /// <summary>
+    /// An abstract class no specifier exports: <c>globalThis.Anvil</c> is not a module entrypoint, so it
+    /// keeps the interface form and its <c>Create</c>.
+    /// </summary>
+    [<Global("Anvil"); EmitConstructor>]
+    static member Anvil () : Anvil = jsNative
 
 module AmbientLab =
+    /// <summary>ambient-lab:lab</summary>
     module Lab =
+        [<Interface>]
+        type Session =
+            abstract id: string
+            [<ParamObject; Emit("$0")>]
+            static member Create (id: string) : Session = jsNative
+
+        [<Interface>]
+        type Constants =
+            abstract epoch: float
+            [<ParamObject; Emit("$0")>]
+            static member Create (epoch: float) : Constants = jsNative
+
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]
         type Exports =
             [<Import("Session", "ambient-lab:lab"); EmitConstructor>]
-            static member Session (id: string) : Session2 = jsNative
+            static member Session (id: string) : Session = jsNative
 
+        /// <summary>ambient-lab:lab/promises</summary>
         module Promises =
+            [<Interface>]
+            type Session =
+                abstract id: string
+                [<ParamObject; Emit("$0")>]
+                static member Create (id: string) : Session = jsNative
+
+            [<Interface>]
+            type Constants =
+                abstract epoch: float
+                [<ParamObject; Emit("$0")>]
+                static member Create (epoch: float) : Constants = jsNative
+
             /// <summary>The package's value exports, each bound to its import.</summary>
             [<Erase>]
             type Exports =
                 [<Import("Session", "ambient-lab:lab/promises"); EmitConstructor>]
-                static member Session (id: string) : Session3 = jsNative
+                static member Session (id: string) : Session = jsNative
                 [<Import("describe", "ambient-lab:lab/promises")>]
-                static member describe (session: Session2) : string = jsNative
+                static member describe (session: Lab.Session) : string = jsNative
 
+    /// <summary>ambient-lab:runtime</summary>
     module Runtime =
+        [<Interface>]
+        type Session =
+            abstract label: string
+            [<ParamObject; Emit("$0")>]
+            static member Create (label: string) : Session = jsNative
+
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]
         type Exports =
             [<Import("version", "ambient-lab:runtime")>]
             static member version: string = jsNative
             [<Import("Session", "ambient-lab:runtime"); EmitConstructor>]
-            static member Session (label: string) : AmbientLabRuntime.Session = jsNative
+            static member Session (label: string) : Session = jsNative
 
     module Sockets =
         /// <summary>The package's value exports, each bound to its import.</summary>
@@ -184,7 +140,74 @@ module AmbientLab =
             [<Import("connect", "ambient-lab:sockets")>]
             static member connect (label: string) : Payload = jsNative
 
+    /// <summary>ambient-lab:tools</summary>
     module Tools =
+        /// <summary>
+        /// A class exported from a specifier rather than from <c>globalThis</c>.
+        /// </summary>
+        [<Interface>]
+        type Hammer =
+            abstract weight: float
+            abstract strike: payload: Payload -> string
+            [<ParamObject; Emit("$0")>]
+            static member Create (weight: float, strike: (Payload -> string)) : Hammer = jsNative
+            [<Import("Hammer.LIMIT", "ambient-lab:tools")>]
+            static member LIMIT: float = jsNative
+
+        /// <summary>
+        /// A type declared inside the module block.
+        /// </summary>
+        [<Interface>]
+        type Reading =
+            abstract depth: float with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (depth: float) : Reading = jsNative
+
+        /// <summary>
+        /// A class written to be derived from: <c>abstract</c>, and exported from a specifier. F# reaches
+        /// this one as a class, because an interface admits no <c>inherit</c>.
+        /// </summary>
+        [<Import("Workbench", "ambient-lab:tools"); AbstractClass>]
+        type Workbench (label: string) =
+            member _.label: string = jsNative
+            /// <summary>
+            /// The slot a derived class fills.
+            /// </summary>
+            abstract run: payload: Payload -> string
+
+        /// <summary>
+        /// A class with a base the compiler library owns. Not abstract, and still the class form:
+        /// <c>extends</c> is what says a consumer derives from it.
+        /// </summary>
+        [<Import("Snag", "ambient-lab:tools"); AbstractClass>]
+        type Snag (message: string) =
+            inherit exn()
+            member _.name
+                with get (): string = jsNative
+                and set (_: string): unit = jsNative
+            member _.message
+                with get (): string = jsNative
+                and set (_: string): unit = jsNative
+            member _.stack
+                with get (): string option = jsNative
+                and set (_: string option): unit = jsNative
+            member _.cause
+                with get (): obj option = jsNative
+                and set (_: obj option): unit = jsNative
+
+        /// <summary>
+        /// A class whose base this run declares. An F# class reaches its base through a constructor
+        /// call, and an interface has none, so this keeps the interface form.
+        /// </summary>
+        [<Interface>]
+        type Vise =
+            inherit Hammer
+            abstract jaw: float
+            [<ParamObject; Emit("$0")>]
+            static member Create (jaw: float, weight: float, strike: (Payload -> string)) : Vise = jsNative
+            [<Import("Vise.LIMIT", "ambient-lab:tools")>]
+            static member LIMIT: float = jsNative
+
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]
         type Exports =
@@ -216,23 +239,3 @@ module AmbientLab =
             /// </summary>
             [<Import("Vise", "ambient-lab:tools"); EmitConstructor>]
             static member Vise (weight: float, jaw: float) : Vise = jsNative
-
-/// <summary>The package's value exports, each bound to its import.</summary>
-[<Erase>]
-type Exports =
-    /// <summary>
-    /// A namespace declaring a value: <c>globalThis.Telemetry</c> is real, so it keeps <c>[&lt;Global&gt;]</c>.
-    /// </summary>
-    [<Global("Telemetry")>]
-    static member Telemetry: Telemetry = jsNative
-    /// <summary>
-    /// A global class sharing its name with <c>ambient-lab:runtime</c>'s. Two declarations, two types.
-    /// </summary>
-    [<Global("Session"); EmitConstructor>]
-    static member Session () : Session = jsNative
-    /// <summary>
-    /// An abstract class no specifier exports: <c>globalThis.Anvil</c> is not a module entrypoint, so it
-    /// keeps the interface form and its <c>Create</c>.
-    /// </summary>
-    [<Global("Anvil"); EmitConstructor>]
-    static member Anvil () : Anvil = jsNative

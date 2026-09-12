@@ -85,15 +85,19 @@ let private inheritsOf (source: string) (name: string) =
     match
         lines
         |> Array.tryFindIndex (fun line ->
-            line.StartsWith $"type {name} ="
-            || line.StartsWith $"type {name}<"
-            || line.StartsWith $"type {name} (")
+            let trimmed = line.TrimStart()
+
+            trimmed.StartsWith $"type {name} ="
+            || trimmed.StartsWith $"type {name}<"
+            || trimmed.StartsWith $"type {name} (")
     with
     | None -> failtest $"no declaration named {name} in the rendered source"
     | Some start ->
+        let indent = lines[start].Length - lines[start].TrimStart().Length
+
         lines
         |> Array.skip (start + 1)
-        |> Array.takeWhile (fun line -> line.StartsWith "    ")
+        |> Array.takeWhile (fun line -> line.Length > indent && line.StartsWith(String.replicate (indent + 1) " "))
         |> Array.choose (fun line ->
             let trimmed = line.Trim()
 
@@ -679,20 +683,21 @@ let pipelineTests =
                     Expect.isFalse (source.Contains "[<Global(\"Shapes\")>]") "one with only types is not"
 
                   // Wave seven lane AI, item 3. `AmbientLabRuntime.Session` and the top-level
-                  // `Session` are two declarations of one name, and the namespace is what
-                  // separates them.
+                  // `Session` are two declarations of one name. `AmbientLabRuntime` is exported
+                  // as `ambient-lab:runtime`'s body (`export =`), so the specifier it groups
+                  // under is what separates them, ahead of the namespace it is also written in.
                   testCase "a namespaced declaration nests rather than taking a number" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                     let source = rendered.Files |> List.head |> snd
 
-                    Expect.stringContains source "module AmbientLabRuntime =" "the namespace opens a module"
+                    Expect.stringContains source "module Runtime =" "its specifier opens a module"
 
                     Expect.stringContains
                         source
-                        "static member Session (label: string) : AmbientLabRuntime.Session"
+                        "static member Session (label: string) : Session"
                         "and the constructor hands back the nested declaration"
 
-                    let runtime = moduleBodyOf source "AmbientLabRuntime"
+                    let runtime = moduleBodyOf source "Runtime"
                     Expect.stringContains runtime "type Session =" "the nested declaration keeps its plain name"
                     Expect.isFalse (runtime.Contains "Session2") "so neither declaration takes a suffix"
 
@@ -737,7 +742,10 @@ let pipelineTests =
                         |> List.filter (fun finding -> finding.Key = "SC008")
                         |> List.map _.Symbol
 
-                    Expect.equal refused [ "Vise" ] "a base this run declares is the one refusal the lab reaches"
+                    Expect.equal
+                        refused
+                        [ "AmbientLab.Tools.Vise" ]
+                        "a base this run declares is the one refusal the lab reaches"
 
                   testCase "a wildcard specifier and an empty module are escapes" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -837,8 +845,10 @@ let pipelineTests =
                     Expect.equal
                         raised
                         [
-                            "Fault", "entrypoint class derives from Error as exn; a consumer raises it and catches it by type"
-                            "Halt", "entrypoint class derives from Error as exn; a consumer raises it and catches it by type"
+                            "ErrorLab.Faults.Fault",
+                            "entrypoint class derives from Error as exn; a consumer raises it and catches it by type"
+                            "ErrorLab.Faults.Halt",
+                            "entrypoint class derives from Error as exn; a consumer raises it and catches it by type"
                         ]
                         "and each one is reported under the TypeScript base it was mapped from"
 
@@ -2970,15 +2980,20 @@ let pipelineTests =
 
                           Expect.equal
                               (symbolsOf "MB005")
-                              [ "Relay.forward"; "Station.alarm"; "Station.fetch" ]
+                              [ "HookLab.Runtime.Relay.forward"; "HookLab.Runtime.Station.alarm"; "HookLab.Runtime.Station.fetch" ]
                               "one finding per hook, at the member it was declared as"
 
                           let options = symbolsOf "MB003"
-                          Expect.contains options "Station.tag" "the optional data member still reports as an option"
+
+                          Expect.contains
+                              options
+                              "HookLab.Runtime.Station.tag"
+                              "the optional data member still reports as an option"
+
                           Expect.contains options "Listener.ping" "and so does a plain interface's optional method"
 
                           Expect.isFalse
-                              (options |> List.exists (fun symbol -> symbol = "Station.fetch"))
+                              (options |> List.exists (fun symbol -> symbol = "HookLab.Runtime.Station.fetch"))
                               "a hook is reported once, as a hook" ])
 
         // Wave six lane AA's second fixture. `shape-classes` keys its statics side table by the
@@ -2993,27 +3008,34 @@ let pipelineTests =
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                           let source = rendered.Files |> List.head |> snd
 
-                          let declaration (name: string) =
-                              let start = source.IndexOf $"type {name} ="
+                          let declaration (body: string) (name: string) =
+                              let start = body.IndexOf $"type {name} ="
                               Expect.isGreaterThan start -1 $"{name} is declared"
 
-                              let next =
-                                  source.IndexOf("\ntype ", start + 1) |> fun i -> if i < 0 then source.Length else i
+                              let boundary (marker: string) =
+                                  body.IndexOf(marker, start + 1) |> fun i -> if i < 0 then body.Length else i
 
-                              source.Substring(start, next - start)
+                              let next = min (boundary "\ntype ") (boundary "\nmodule ")
+
+                              body.Substring(start, next - start)
+
+                          // The exported class shares its bare name with the global interface, so
+                          // its declaration is only reachable through the specifier module it now
+                          // nests under.
+                          let nested = moduleBodyOf source "Depot"
 
                           Expect.stringContains
-                              (declaration "Depot2")
+                              (declaration nested "Depot")
                               "static member LIMIT"
                               "the static reaches the declaration the class's instance side took"
 
                           Expect.stringContains
-                              (declaration "Depot2")
+                              (declaration nested "Depot")
                               "static member ``open``"
                               "and so does the static method"
 
                           Expect.isFalse
-                              ((declaration "Depot").Contains "LIMIT")
+                              ((declaration source "Depot").Contains "LIMIT")
                               "the global interface that kept the export name carries none of them" ])
 
         // Wave seven lane AF's fixture. A string-literal parameter type is what tells an overload
@@ -3963,7 +3985,7 @@ let pipelineTests =
 
                           Expect.equal
                               (declarationsIn rendered)
-                              [ "Panel"; "PanelPair"; "Draft.Panel"; "Exports" ]
+                              [ "Panel"; "PanelPair"; "Exports"; "Draft.Panel" ]
                               "and the dependency's shape is not re-derived under a second name"
 
                       testCase "the entry package's own alias over an object literal is declared here" <| fun _ ->

@@ -55,6 +55,7 @@ let nameExports: Pass<ShapeModel> =
             fun ctx model ->
                 async {
                     let fallback = defaultExportName ctx
+                    let pathOf = ExportLayout.declPath (ExportLayout.modulePaths model) model
 
                     let claim (taken: Set<string>) (preferred: string) =
                         if not (Set.contains preferred taken) then
@@ -86,13 +87,18 @@ let nameExports: Pass<ShapeModel> =
                         declarationExports ctx model
                         |> List.filter (fun (typeId, _) -> not (Map.containsKey typeId model.DeclNames))
                         |> List.map (fun (typeId, export) ->
-                            typeId, export.Order, fsName fallback export, namespaceOf export, originOf export)
+                            typeId,
+                            export.Order,
+                            fsName fallback export,
+                            namespaceOf export,
+                            originOf export,
+                            pathOf export)
 
                     let declared = model.DeclNames |> Map.toList |> List.map snd |> Set.ofList
 
                     let contested =
                         claimants
-                        |> List.countBy (fun (_, _, preferred, _, _) -> preferred)
+                        |> List.countBy (fun (_, _, preferred, _, _, _) -> preferred)
                         |> List.filter (fun (preferred, count) -> count > 1 || Set.contains preferred declared)
                         |> List.map fst
                         |> Set.ofList
@@ -100,16 +106,17 @@ let nameExports: Pass<ShapeModel> =
                     let names, orders, _, findings =
                         claimants
                         |> List.fold
-                            (fun (names, orders, taken, findings) (typeId, order, preferred, owner, origin) ->
-                                let wanted =
-                                    match owner with
-                                    | Some ns when Set.contains preferred contested -> nestUnder ns preferred
-                                    | _ -> preferred
+                            (fun (names, orders, taken, findings) (typeId, order, preferred, owner, origin, path) ->
+                                let wanted, nestedUnderNamespace =
+                                    match path, owner with
+                                    | (_ :: _ as path), _ -> (path @ [ preferred ]) |> String.concat ".", false
+                                    | [], Some ns when Set.contains preferred contested -> nestUnder ns preferred, true
+                                    | [], _ -> preferred, false
 
                                 let name = claim taken wanted
 
                                 let findings =
-                                    if name.Contains "." then
+                                    if nestedUnderNamespace && name.Contains "." then
                                         findings
                                         @ [ Finding.make name (SynthesizeAnonymous.NameNestedUnderOwner name) ]
                                     else

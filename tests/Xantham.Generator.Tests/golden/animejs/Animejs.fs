@@ -3752,467 +3752,6 @@ type Waapi =
     [<ParamObject; Emit("$0")>]
     static member Create (animate: Animate, convertEase: EasingToLinear) : Waapi = jsNative
 
-module AutoLayoutParams =
-    type Delay =
-        inherit Spring
-        [<Emit("$0($1...)")>]
-        abstract Invoke: ?target: Target * ?index: float * ?targets: Target[] * ?prevTween: Tween -> FunctionValueReturn
-
-    [<Interface>]
-    type Delay2 =
-        inherit TweakRegister
-        [<Emit("$0($1...)")>]
-        abstract Invoke: ?target: Target * ?index: float * ?targets: Target[] * ?prevTween: Tween -> FunctionValueReturn
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, defaultValue: obj) : Delay2 = jsNative
-
-    type Ease = delegate of target: Target option * index: float option * targets: Target[] option * prevTween: Tween option -> FunctionValueReturn
-
-module CallbackArgument =
-    type Head =
-        inherit JSAnimation
-        inherit Tween
-        /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-        abstract onRender: (CallbackArgument.Head -> obj) with get, set
-        abstract stretch: newDuration: float -> CallbackArgument.Head
-        abstract refresh: unit -> CallbackArgument.Head
-        /// <summary>
-        /// Cancel the animation and revert all the values affected by this animation to their original state
-        /// </summary>
-        abstract revert: unit -> CallbackArgument.Head
-        /// <remarks>@type {Timeline}</remarks>
-        abstract parent: CallbackArgument.Head.Parent with get, set
-        /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-        abstract onBegin: (CallbackArgument.Head -> obj) with get, set
-        /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-        abstract onBeforeUpdate: (CallbackArgument.Head -> obj) with get, set
-        /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-        abstract onUpdate: (CallbackArgument.Head -> obj) with get, set
-        /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-        abstract onLoop: (CallbackArgument.Head -> obj) with get, set
-        /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-        abstract onPause: (CallbackArgument.Head -> obj) with get, set
-        /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-        abstract onComplete: (CallbackArgument.Head -> obj) with get, set
-        /// <remarks>@type {Renderable}</remarks>
-        abstract _prev: U2<CallbackArgument.Head, CallbackArgument.Head.Prev> with get, set
-        /// <remarks>@type {Renderable}</remarks>
-        abstract _next: U2<CallbackArgument.Head, CallbackArgument.Head.Prev> with get, set
-        abstract reset: ?softReset: bool -> CallbackArgument.Head
-        abstract init: ?internalRender: bool -> CallbackArgument.Head
-        abstract resetTime: unit -> CallbackArgument.Head
-        abstract pause: unit -> CallbackArgument.Head
-        abstract resume: unit -> CallbackArgument.Head
-        abstract restart: unit -> CallbackArgument.Head
-        abstract seek: time: float * ?muteCallbacks: U2<float, bool> * ?internalRender: U2<float, bool> -> CallbackArgument.Head
-        abstract alternate: unit -> CallbackArgument.Head
-        abstract play: unit -> CallbackArgument.Head
-        abstract reverse: unit -> CallbackArgument.Head
-        abstract cancel: unit -> CallbackArgument.Head
-        /// <summary>
-        /// Imediatly completes the timer, cancels it and triggers the onComplete callback
-        /// </summary>
-        abstract complete: ?muteCallbacks: U2<float, bool> -> CallbackArgument.Head
-
-    type Head2 =
-        inherit Timer
-        inherit Tween
-        /// <remarks>@type {Timeline}</remarks>
-        abstract parent: CallbackArgument.Head.Parent with get, set
-        /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-        abstract onBegin: (CallbackArgument.Head2 -> obj) with get, set
-        /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-        abstract onBeforeUpdate: (CallbackArgument.Head2 -> obj) with get, set
-        /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-        abstract onUpdate: (CallbackArgument.Head2 -> obj) with get, set
-        /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-        abstract onLoop: (CallbackArgument.Head2 -> obj) with get, set
-        /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-        abstract onPause: (CallbackArgument.Head2 -> obj) with get, set
-        /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-        abstract onComplete: (CallbackArgument.Head2 -> obj) with get, set
-        /// <remarks>@type {Renderable}</remarks>
-        abstract _prev: U2<CallbackArgument.Head, CallbackArgument.Head.Prev> with get, set
-        /// <remarks>@type {Renderable}</remarks>
-        abstract _next: U2<CallbackArgument.Head, CallbackArgument.Head.Prev> with get, set
-        abstract reset: ?softReset: bool -> CallbackArgument.Head2
-        abstract init: ?internalRender: bool -> CallbackArgument.Head2
-        abstract resetTime: unit -> CallbackArgument.Head2
-        abstract pause: unit -> CallbackArgument.Head2
-        abstract resume: unit -> CallbackArgument.Head2
-        abstract restart: unit -> CallbackArgument.Head2
-        abstract seek: time: float * ?muteCallbacks: U2<float, bool> * ?internalRender: U2<float, bool> -> CallbackArgument.Head2
-        abstract alternate: unit -> CallbackArgument.Head2
-        abstract play: unit -> CallbackArgument.Head2
-        abstract reverse: unit -> CallbackArgument.Head2
-        abstract cancel: unit -> CallbackArgument.Head2
-        abstract stretch: newDuration: float -> CallbackArgument.Head2
-        /// <summary>
-        /// Cancels the timer by seeking it back to 0 and reverting the attached scroller if necessary
-        /// </summary>
-        abstract revert: unit -> CallbackArgument.Head2
-        /// <summary>
-        /// Imediatly completes the timer, cancels it and triggers the onComplete callback
-        /// </summary>
-        abstract complete: ?muteCallbacks: U2<float, bool> -> CallbackArgument.Head2
-
-    module Head =
-        type Parent =
-            inherit Timeline
-            inherit JSAnimation
-            /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-            /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-            abstract onRender: (CallbackArgument.Head.Parent -> obj) with get, set
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            abstract add: a1: TargetsParam * a2: AnimationParams * ?a3: TimelineAnimationPosition -> CallbackArgument.Head.Parent
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            abstract add: a1: TimerParams * ?a2: TimelinePosition -> CallbackArgument.Head.Parent
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            abstract sync: ?synced: Tickable * ?position: TimelinePosition -> CallbackArgument.Head.Parent
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            abstract sync: ?synced: Fable.Core.TS.Dom.Animation * ?position: TimelinePosition -> CallbackArgument.Head.Parent
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            abstract sync: ?synced: WAAPIAnimation * ?position: TimelinePosition -> CallbackArgument.Head.Parent
-            abstract set: targets: TargetsParam * parameters: AnimationParams * ?position: TimelineAnimationPosition -> CallbackArgument.Head.Parent
-            abstract call: callback: (Timer -> obj) * ?position: TimelinePosition -> CallbackArgument.Head.Parent
-            abstract label: labelName: string * ?position: TimelinePosition -> CallbackArgument.Head.Parent
-            abstract remove: targets: TargetsParam * ?propertyName: string -> CallbackArgument.Head.Parent
-            abstract stretch: (float -> CallbackArgument.Head.Parent) with get, set
-            abstract refresh: (unit -> CallbackArgument.Head.Parent) with get, set
-            /// <summary>
-            /// Cancel the animation and revert all the values affected by this animation to their original state
-            /// </summary>
-            abstract revert: (unit -> CallbackArgument.Head.Parent) with get, set
-            /// <returns>Promise&lt;this&gt;</returns>
-            /// <returns>Promise&lt;this&gt;</returns>
-            abstract ``then``: ((obj -> obj) option -> JS.Promise<obj>) with get, set
-            /// <remarks>@type {Tickable|Tween}</remarks>
-            /// <remarks>@type {Tween}</remarks>
-            abstract _head: U4<Tween, CallbackArgument.Head, CallbackArgument.Head.Prev, CallbackArgument.Head2> with get, set
-            /// <remarks>@type {Tickable|Tween}</remarks>
-            /// <remarks>@type {Tween}</remarks>
-            abstract _tail: U4<Tween, CallbackArgument.Head, CallbackArgument.Head.Prev, CallbackArgument.Head2> with get, set
-            /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-            abstract onBegin: (CallbackArgument.Head.Parent -> obj) with get, set
-            /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-            abstract onBeforeUpdate: (CallbackArgument.Head.Parent -> obj) with get, set
-            /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-            abstract onUpdate: (CallbackArgument.Head.Parent -> obj) with get, set
-            /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-            abstract onLoop: (CallbackArgument.Head.Parent -> obj) with get, set
-            /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-            abstract onPause: (CallbackArgument.Head.Parent -> obj) with get, set
-            /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-            abstract onComplete: (CallbackArgument.Head.Parent -> obj) with get, set
-            abstract reset: ?softReset: bool -> CallbackArgument.Head.Parent
-            abstract init: ?internalRender: bool -> CallbackArgument.Head.Parent
-            abstract resetTime: unit -> CallbackArgument.Head.Parent
-            abstract pause: unit -> CallbackArgument.Head.Parent
-            abstract resume: unit -> CallbackArgument.Head.Parent
-            abstract restart: unit -> CallbackArgument.Head.Parent
-            abstract seek: time: float * ?muteCallbacks: U2<float, bool> * ?internalRender: U2<float, bool> -> CallbackArgument.Head.Parent
-            abstract alternate: unit -> CallbackArgument.Head.Parent
-            abstract play: unit -> CallbackArgument.Head.Parent
-            abstract reverse: unit -> CallbackArgument.Head.Parent
-            abstract cancel: unit -> CallbackArgument.Head.Parent
-            /// <summary>
-            /// Imediatly completes the timer, cancels it and triggers the onComplete callback
-            /// </summary>
-            abstract complete: ?muteCallbacks: U2<float, bool> -> CallbackArgument.Head.Parent
-
-        type Prev =
-            inherit Timeline
-            inherit Tween
-            /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-            abstract onRender: (CallbackArgument.Head.Prev -> obj) with get, set
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            abstract add: a1: TargetsParam * a2: AnimationParams * ?a3: TimelineAnimationPosition -> CallbackArgument.Head.Prev
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            abstract add: a1: TimerParams * ?a2: TimelinePosition -> CallbackArgument.Head.Prev
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            abstract sync: ?synced: Tickable * ?position: TimelinePosition -> CallbackArgument.Head.Prev
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            abstract sync: ?synced: Fable.Core.TS.Dom.Animation * ?position: TimelinePosition -> CallbackArgument.Head.Prev
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            /// <remarks>@overload</remarks>
-            abstract sync: ?synced: WAAPIAnimation * ?position: TimelinePosition -> CallbackArgument.Head.Prev
-            abstract set: targets: TargetsParam * parameters: AnimationParams * ?position: TimelineAnimationPosition -> CallbackArgument.Head.Prev
-            abstract call: callback: (Timer -> obj) * ?position: TimelinePosition -> CallbackArgument.Head.Prev
-            abstract label: labelName: string * ?position: TimelinePosition -> CallbackArgument.Head.Prev
-            abstract remove: targets: TargetsParam * ?propertyName: string -> CallbackArgument.Head.Prev
-            abstract stretch: newDuration: float -> CallbackArgument.Head.Prev
-            abstract refresh: unit -> CallbackArgument.Head.Prev
-            abstract revert: unit -> CallbackArgument.Head.Prev
-            /// <remarks>@type {Timeline}</remarks>
-            abstract parent: CallbackArgument.Head.Parent with get, set
-            /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-            abstract onBegin: (CallbackArgument.Head.Prev -> obj) with get, set
-            /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-            abstract onBeforeUpdate: (CallbackArgument.Head.Prev -> obj) with get, set
-            /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-            abstract onUpdate: (CallbackArgument.Head.Prev -> obj) with get, set
-            /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-            abstract onLoop: (CallbackArgument.Head.Prev -> obj) with get, set
-            /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-            abstract onPause: (CallbackArgument.Head.Prev -> obj) with get, set
-            /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-            abstract onComplete: (CallbackArgument.Head.Prev -> obj) with get, set
-            /// <remarks>@type {Renderable}</remarks>
-            abstract _prev: U2<CallbackArgument.Head, CallbackArgument.Head.Prev> with get, set
-            /// <remarks>@type {Renderable}</remarks>
-            abstract _next: U2<CallbackArgument.Head, CallbackArgument.Head.Prev> with get, set
-            abstract reset: ?softReset: bool -> CallbackArgument.Head.Prev
-            abstract init: ?internalRender: bool -> CallbackArgument.Head.Prev
-            abstract resetTime: unit -> CallbackArgument.Head.Prev
-            abstract pause: unit -> CallbackArgument.Head.Prev
-            abstract resume: unit -> CallbackArgument.Head.Prev
-            abstract restart: unit -> CallbackArgument.Head.Prev
-            abstract seek: time: float * ?muteCallbacks: U2<float, bool> * ?internalRender: U2<float, bool> -> CallbackArgument.Head.Prev
-            abstract alternate: unit -> CallbackArgument.Head.Prev
-            abstract play: unit -> CallbackArgument.Head.Prev
-            abstract reverse: unit -> CallbackArgument.Head.Prev
-            abstract cancel: unit -> CallbackArgument.Head.Prev
-            /// <summary>
-            /// Imediatly completes the timer, cancels it and triggers the onComplete callback
-            /// </summary>
-            abstract complete: ?muteCallbacks: U2<float, bool> -> CallbackArgument.Head.Prev
-
-module DOMProxy =
-    [<Interface>]
-    type ClassList =
-        abstract add: (unit -> unit) with get, set
-        abstract remove: (unit -> unit) with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (add: (unit -> unit), remove: (unit -> unit)) : ClassList = jsNative
-
-    module GetBoundingClientRect =
-        [<Interface>]
-        type Result =
-            abstract top: obj with get, set
-            abstract right: obj with get, set
-            abstract bottom: obj with get, set
-            abstract left: obj with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (top: obj, right: obj, bottom: obj, left: obj) : Result = jsNative
-
-module Draggable =
-    [<Interface>]
-    type OvershootCoords =
-        abstract x: float with get, set
-        abstract y: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (x: float, y: float) : OvershootCoords = jsNative
-
-    [<Interface>]
-    type Scroll =
-        abstract x: float with get, set
-        abstract y: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (x: float, y: float) : Scroll = jsNative
-
-module DrawableSVGGeometry =
-    [<StringEnum(CaseRules.None)>]
-    type HttpWwwW3Org1998MathMathML =
-        | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
-
-    [<StringEnum(CaseRules.None)>]
-    type HttpWwwW3Org1999Xhtml =
-        | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
-
-    [<StringEnum(CaseRules.None)>]
-    type HttpWwwW3Org2000Svg =
-        | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
-
-    module InsertAdjacentElement =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Where =
-            | [<CompiledName("afterbegin")>] Afterbegin
-            | [<CompiledName("afterend")>] Afterend
-            | [<CompiledName("beforebegin")>] Beforebegin
-            | [<CompiledName("beforeend")>] Beforeend
-
-module DurationKeyframes =
-    type Item =
-        inherit TweenParamsOptions
-        [<EmitIndexer>]
-        abstract Item: string -> U10<string, float, bool, U8<string, float, EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister, (TweenParamValue * TweenParamValue), TweenKeyValue>[], EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister, TweenModifier, TweenKeyValue> with get, set
-
-    module Item =
-        type Duration = delegate of target: Target option * index: float option * targets: Target[] option * prevTween: Tween option -> FunctionValueReturn
-
-module Engine =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type TimeUnit =
-        | [<CompiledName("ms")>] Ms
-        | [<CompiledName("s")>] S
-
-module Globals =
-    [<Interface>]
-    type Editor =
-        abstract showPanel: bool with get, set
-        abstract addAnimation: JS.Function with get, set
-        abstract addSet: JS.Function with get, set
-        abstract addTimeline: JS.Function with get, set
-        abstract addTimelineChild: JS.Function with get, set
-        abstract addTimelineLabel: JS.Function with get, set
-        abstract addTimelineCall: JS.Function with get, set
-        abstract addTimelineSync: JS.Function with get, set
-        abstract resolveStagger: JS.Function with get, set
-        abstract _head: obj with get, set
-        abstract _tail: obj with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (showPanel: bool, addAnimation: JS.Function, addSet: JS.Function, addTimeline: JS.Function, addTimelineChild: JS.Function, addTimelineLabel: JS.Function, addTimelineCall: JS.Function, addTimelineSync: JS.Function, resolveStagger: JS.Function, _head: obj, _tail: obj) : Editor = jsNative
-
-module PercentageKeyframes =
-    type Item =
-        inherit PercentageKeyframeOptions
-        [<EmitIndexer>]
-        abstract Item: string -> TweenParamValue with get, set
-
-module ScrambleTextParams =
-    type Chars = delegate of arg0: Target * arg1: float * arg2: Target[] -> string
-
-    type Delay = delegate of arg0: Target * arg1: float * arg2: Target[] -> float
-
-    type Duration = delegate of arg0: Target * arg1: float * arg2: Target[] -> float
-
-    type OnChange = delegate of arg0: string * arg1: float -> unit
-
-    type RevealDelay = delegate of arg0: Target * arg1: float * arg2: Target[] -> float
-
-    type Text = delegate of arg0: Target * arg1: float * arg2: Target[] -> string
-
-module ScrollObserverAxisCallback =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Result =
-        | [<CompiledName("x")>] X
-        | [<CompiledName("y")>] Y
-
-module SplitTemplateParams =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Clone =
-        | [<CompiledName("bottom")>] Bottom
-        | [<CompiledName("center")>] Center
-        | [<CompiledName("left")>] Left
-        | [<CompiledName("right")>] Right
-        | [<CompiledName("top")>] Top
-        | [<CompiledValue(false)>] False
-        | [<CompiledValue(true)>] True
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Wrap =
-        | [<CompiledName("auto")>] Auto
-        | [<CompiledName("clip")>] Clip
-        | [<CompiledName("hidden")>] Hidden
-        | [<CompiledName("scroll")>] Scroll
-        | [<CompiledName("visible")>] Visible
-        | [<CompiledValue(false)>] False
-        | [<CompiledValue(true)>] True
-
-module StaggerParams =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Axis =
-        | [<CompiledName("x")>] X
-        | [<CompiledName("y")>] Y
-        | [<CompiledName("z")>] Z
-
-module Svg =
-    module CreateMotionPath =
-        [<Interface>]
-        type Result =
-            abstract translateX: AutoLayoutParams.Ease with get, set
-            abstract translateY: AutoLayoutParams.Ease with get, set
-            abstract rotate: AutoLayoutParams.Ease with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (translateX: AutoLayoutParams.Ease, translateY: AutoLayoutParams.Ease, rotate: AutoLayoutParams.Ease) : Result = jsNative
-
-module Text =
-    module ScrambleText =
-        type Result = delegate of target: Target option * index: float option * targets: Target[] option * prevTween: Tween option -> ScrambleTextTween
-
-module Timeline =
-    module Add =
-        type A3 = delegate of target: Target option * index: float option * targets: Target[] option * prevTween: Tween option * tl: Timeline option -> TimelinePosition
-
-module Transforms =
-    module TraverseUp =
-        type Cb = delegate of ``$el``: DOMTarget * i: float -> obj
-
-module Tween =
-    type Setter = delegate of target: obj * value: float * tween: Tween -> unit
-
-module Utils =
-    module Stagger =
-        type Result = delegate of target: Target option * index: float option * targets: Target[] option * prevTween: Tween option * tl: Timeline option -> float
-
-        type Result2 = delegate of target: Target option * index: float option * targets: Target[] option * prevTween: Tween option * tl: Timeline option -> string
-
-module WAAPITweenOptions =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Composition =
-        | [<CompiledName("accumulate")>] Accumulate
-        | [<CompiledName("add")>] Add
-        | [<CompiledName("replace")>] Replace
-
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
@@ -4510,6 +4049,467 @@ type Exports =
     static member WAAPIAnimation (targets: DOMTargetsParam, ``params``: WAAPIAnimationParams) : WAAPIAnimation = jsNative
     [<Import("waapi", "animejs")>]
     static member waapi: Waapi = jsNative
+
+module AutoLayoutParams =
+    type Delay =
+        inherit Spring
+        [<Emit("$0($1...)")>]
+        abstract Invoke: ?target: Target * ?index: float * ?targets: Target[] * ?prevTween: Tween -> FunctionValueReturn
+
+    [<Interface>]
+    type Delay2 =
+        inherit TweakRegister
+        [<Emit("$0($1...)")>]
+        abstract Invoke: ?target: Target * ?index: float * ?targets: Target[] * ?prevTween: Tween -> FunctionValueReturn
+        [<ParamObject; Emit("$0")>]
+        static member Create (``type``: string, defaultValue: obj) : Delay2 = jsNative
+
+    type Ease = delegate of target: Target option * index: float option * targets: Target[] option * prevTween: Tween option -> FunctionValueReturn
+
+module CallbackArgument =
+    type Head =
+        inherit JSAnimation
+        inherit Tween
+        /// <remarks>@type {Callback&lt;this&gt;}</remarks>
+        abstract onRender: (Head -> obj) with get, set
+        abstract stretch: newDuration: float -> Head
+        abstract refresh: unit -> Head
+        /// <summary>
+        /// Cancel the animation and revert all the values affected by this animation to their original state
+        /// </summary>
+        abstract revert: unit -> Head
+        /// <remarks>@type {Timeline}</remarks>
+        abstract parent: CallbackArgument.Head.Parent with get, set
+        /// <remarks>@type {Callback&lt;this&gt;}</remarks>
+        abstract onBegin: (Head -> obj) with get, set
+        /// <remarks>@type {Callback&lt;this&gt;}</remarks>
+        abstract onBeforeUpdate: (Head -> obj) with get, set
+        /// <remarks>@type {Callback&lt;this&gt;}</remarks>
+        abstract onUpdate: (Head -> obj) with get, set
+        /// <remarks>@type {Callback&lt;this&gt;}</remarks>
+        abstract onLoop: (Head -> obj) with get, set
+        /// <remarks>@type {Callback&lt;this&gt;}</remarks>
+        abstract onPause: (Head -> obj) with get, set
+        /// <remarks>@type {Callback&lt;this&gt;}</remarks>
+        abstract onComplete: (Head -> obj) with get, set
+        /// <remarks>@type {Renderable}</remarks>
+        abstract _prev: U2<Head, CallbackArgument.Head.Prev> with get, set
+        /// <remarks>@type {Renderable}</remarks>
+        abstract _next: U2<Head, CallbackArgument.Head.Prev> with get, set
+        abstract reset: ?softReset: bool -> Head
+        abstract init: ?internalRender: bool -> Head
+        abstract resetTime: unit -> Head
+        abstract pause: unit -> Head
+        abstract resume: unit -> Head
+        abstract restart: unit -> Head
+        abstract seek: time: float * ?muteCallbacks: U2<float, bool> * ?internalRender: U2<float, bool> -> Head
+        abstract alternate: unit -> Head
+        abstract play: unit -> Head
+        abstract reverse: unit -> Head
+        abstract cancel: unit -> Head
+        /// <summary>
+        /// Imediatly completes the timer, cancels it and triggers the onComplete callback
+        /// </summary>
+        abstract complete: ?muteCallbacks: U2<float, bool> -> Head
+
+    type Head2 =
+        inherit Timer
+        inherit Tween
+        /// <remarks>@type {Timeline}</remarks>
+        abstract parent: CallbackArgument.Head.Parent with get, set
+        /// <remarks>@type {Callback&lt;this&gt;}</remarks>
+        abstract onBegin: (Head2 -> obj) with get, set
+        /// <remarks>@type {Callback&lt;this&gt;}</remarks>
+        abstract onBeforeUpdate: (Head2 -> obj) with get, set
+        /// <remarks>@type {Callback&lt;this&gt;}</remarks>
+        abstract onUpdate: (Head2 -> obj) with get, set
+        /// <remarks>@type {Callback&lt;this&gt;}</remarks>
+        abstract onLoop: (Head2 -> obj) with get, set
+        /// <remarks>@type {Callback&lt;this&gt;}</remarks>
+        abstract onPause: (Head2 -> obj) with get, set
+        /// <remarks>@type {Callback&lt;this&gt;}</remarks>
+        abstract onComplete: (Head2 -> obj) with get, set
+        /// <remarks>@type {Renderable}</remarks>
+        abstract _prev: U2<Head, CallbackArgument.Head.Prev> with get, set
+        /// <remarks>@type {Renderable}</remarks>
+        abstract _next: U2<Head, CallbackArgument.Head.Prev> with get, set
+        abstract reset: ?softReset: bool -> Head2
+        abstract init: ?internalRender: bool -> Head2
+        abstract resetTime: unit -> Head2
+        abstract pause: unit -> Head2
+        abstract resume: unit -> Head2
+        abstract restart: unit -> Head2
+        abstract seek: time: float * ?muteCallbacks: U2<float, bool> * ?internalRender: U2<float, bool> -> Head2
+        abstract alternate: unit -> Head2
+        abstract play: unit -> Head2
+        abstract reverse: unit -> Head2
+        abstract cancel: unit -> Head2
+        abstract stretch: newDuration: float -> Head2
+        /// <summary>
+        /// Cancels the timer by seeking it back to 0 and reverting the attached scroller if necessary
+        /// </summary>
+        abstract revert: unit -> Head2
+        /// <summary>
+        /// Imediatly completes the timer, cancels it and triggers the onComplete callback
+        /// </summary>
+        abstract complete: ?muteCallbacks: U2<float, bool> -> Head2
+
+    module Head =
+        type Parent =
+            inherit Timeline
+            inherit JSAnimation
+            /// <remarks>@type {Callback&lt;this&gt;}</remarks>
+            /// <remarks>@type {Callback&lt;this&gt;}</remarks>
+            abstract onRender: (Parent -> obj) with get, set
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            abstract add: a1: TargetsParam * a2: AnimationParams * ?a3: TimelineAnimationPosition -> Parent
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            abstract add: a1: TimerParams * ?a2: TimelinePosition -> Parent
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            abstract sync: ?synced: Tickable * ?position: TimelinePosition -> Parent
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            abstract sync: ?synced: Fable.Core.TS.Dom.Animation * ?position: TimelinePosition -> Parent
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            abstract sync: ?synced: WAAPIAnimation * ?position: TimelinePosition -> Parent
+            abstract set: targets: TargetsParam * parameters: AnimationParams * ?position: TimelineAnimationPosition -> Parent
+            abstract call: callback: (Timer -> obj) * ?position: TimelinePosition -> Parent
+            abstract label: labelName: string * ?position: TimelinePosition -> Parent
+            abstract remove: targets: TargetsParam * ?propertyName: string -> Parent
+            abstract stretch: (float -> Parent) with get, set
+            abstract refresh: (unit -> Parent) with get, set
+            /// <summary>
+            /// Cancel the animation and revert all the values affected by this animation to their original state
+            /// </summary>
+            abstract revert: (unit -> Parent) with get, set
+            /// <returns>Promise&lt;this&gt;</returns>
+            /// <returns>Promise&lt;this&gt;</returns>
+            abstract ``then``: ((obj -> obj) option -> JS.Promise<obj>) with get, set
+            /// <remarks>@type {Tickable|Tween}</remarks>
+            /// <remarks>@type {Tween}</remarks>
+            abstract _head: U4<Tween, CallbackArgument.Head, Prev, CallbackArgument.Head2> with get, set
+            /// <remarks>@type {Tickable|Tween}</remarks>
+            /// <remarks>@type {Tween}</remarks>
+            abstract _tail: U4<Tween, CallbackArgument.Head, Prev, CallbackArgument.Head2> with get, set
+            /// <remarks>@type {Callback&lt;this&gt;}</remarks>
+            abstract onBegin: (Parent -> obj) with get, set
+            /// <remarks>@type {Callback&lt;this&gt;}</remarks>
+            abstract onBeforeUpdate: (Parent -> obj) with get, set
+            /// <remarks>@type {Callback&lt;this&gt;}</remarks>
+            abstract onUpdate: (Parent -> obj) with get, set
+            /// <remarks>@type {Callback&lt;this&gt;}</remarks>
+            abstract onLoop: (Parent -> obj) with get, set
+            /// <remarks>@type {Callback&lt;this&gt;}</remarks>
+            abstract onPause: (Parent -> obj) with get, set
+            /// <remarks>@type {Callback&lt;this&gt;}</remarks>
+            abstract onComplete: (Parent -> obj) with get, set
+            abstract reset: ?softReset: bool -> Parent
+            abstract init: ?internalRender: bool -> Parent
+            abstract resetTime: unit -> Parent
+            abstract pause: unit -> Parent
+            abstract resume: unit -> Parent
+            abstract restart: unit -> Parent
+            abstract seek: time: float * ?muteCallbacks: U2<float, bool> * ?internalRender: U2<float, bool> -> Parent
+            abstract alternate: unit -> Parent
+            abstract play: unit -> Parent
+            abstract reverse: unit -> Parent
+            abstract cancel: unit -> Parent
+            /// <summary>
+            /// Imediatly completes the timer, cancels it and triggers the onComplete callback
+            /// </summary>
+            abstract complete: ?muteCallbacks: U2<float, bool> -> Parent
+
+        type Prev =
+            inherit Timeline
+            inherit Tween
+            /// <remarks>@type {Callback&lt;this&gt;}</remarks>
+            abstract onRender: (Prev -> obj) with get, set
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            abstract add: a1: TargetsParam * a2: AnimationParams * ?a3: TimelineAnimationPosition -> Prev
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            abstract add: a1: TimerParams * ?a2: TimelinePosition -> Prev
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            abstract sync: ?synced: Tickable * ?position: TimelinePosition -> Prev
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            abstract sync: ?synced: Fable.Core.TS.Dom.Animation * ?position: TimelinePosition -> Prev
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            /// <remarks>@overload</remarks>
+            abstract sync: ?synced: WAAPIAnimation * ?position: TimelinePosition -> Prev
+            abstract set: targets: TargetsParam * parameters: AnimationParams * ?position: TimelineAnimationPosition -> Prev
+            abstract call: callback: (Timer -> obj) * ?position: TimelinePosition -> Prev
+            abstract label: labelName: string * ?position: TimelinePosition -> Prev
+            abstract remove: targets: TargetsParam * ?propertyName: string -> Prev
+            abstract stretch: newDuration: float -> Prev
+            abstract refresh: unit -> Prev
+            abstract revert: unit -> Prev
+            /// <remarks>@type {Timeline}</remarks>
+            abstract parent: Parent with get, set
+            /// <remarks>@type {Callback&lt;this&gt;}</remarks>
+            abstract onBegin: (Prev -> obj) with get, set
+            /// <remarks>@type {Callback&lt;this&gt;}</remarks>
+            abstract onBeforeUpdate: (Prev -> obj) with get, set
+            /// <remarks>@type {Callback&lt;this&gt;}</remarks>
+            abstract onUpdate: (Prev -> obj) with get, set
+            /// <remarks>@type {Callback&lt;this&gt;}</remarks>
+            abstract onLoop: (Prev -> obj) with get, set
+            /// <remarks>@type {Callback&lt;this&gt;}</remarks>
+            abstract onPause: (Prev -> obj) with get, set
+            /// <remarks>@type {Callback&lt;this&gt;}</remarks>
+            abstract onComplete: (Prev -> obj) with get, set
+            /// <remarks>@type {Renderable}</remarks>
+            abstract _prev: U2<CallbackArgument.Head, Prev> with get, set
+            /// <remarks>@type {Renderable}</remarks>
+            abstract _next: U2<CallbackArgument.Head, Prev> with get, set
+            abstract reset: ?softReset: bool -> Prev
+            abstract init: ?internalRender: bool -> Prev
+            abstract resetTime: unit -> Prev
+            abstract pause: unit -> Prev
+            abstract resume: unit -> Prev
+            abstract restart: unit -> Prev
+            abstract seek: time: float * ?muteCallbacks: U2<float, bool> * ?internalRender: U2<float, bool> -> Prev
+            abstract alternate: unit -> Prev
+            abstract play: unit -> Prev
+            abstract reverse: unit -> Prev
+            abstract cancel: unit -> Prev
+            /// <summary>
+            /// Imediatly completes the timer, cancels it and triggers the onComplete callback
+            /// </summary>
+            abstract complete: ?muteCallbacks: U2<float, bool> -> Prev
+
+module DOMProxy =
+    [<Interface>]
+    type ClassList =
+        abstract add: (unit -> unit) with get, set
+        abstract remove: (unit -> unit) with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (add: (unit -> unit), remove: (unit -> unit)) : ClassList = jsNative
+
+    module GetBoundingClientRect =
+        [<Interface>]
+        type Result =
+            abstract top: obj with get, set
+            abstract right: obj with get, set
+            abstract bottom: obj with get, set
+            abstract left: obj with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (top: obj, right: obj, bottom: obj, left: obj) : Result = jsNative
+
+module Draggable =
+    [<Interface>]
+    type OvershootCoords =
+        abstract x: float with get, set
+        abstract y: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (x: float, y: float) : OvershootCoords = jsNative
+
+    [<Interface>]
+    type Scroll =
+        abstract x: float with get, set
+        abstract y: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (x: float, y: float) : Scroll = jsNative
+
+module DrawableSVGGeometry =
+    [<StringEnum(CaseRules.None)>]
+    type HttpWwwW3Org1998MathMathML =
+        | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+    [<StringEnum(CaseRules.None)>]
+    type HttpWwwW3Org1999Xhtml =
+        | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+    [<StringEnum(CaseRules.None)>]
+    type HttpWwwW3Org2000Svg =
+        | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module InsertAdjacentElement =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Where =
+            | [<CompiledName("afterbegin")>] Afterbegin
+            | [<CompiledName("afterend")>] Afterend
+            | [<CompiledName("beforebegin")>] Beforebegin
+            | [<CompiledName("beforeend")>] Beforeend
+
+module DurationKeyframes =
+    type Item =
+        inherit TweenParamsOptions
+        [<EmitIndexer>]
+        abstract Item: string -> U10<string, float, bool, U8<string, float, EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister, (TweenParamValue * TweenParamValue), TweenKeyValue>[], EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister, TweenModifier, TweenKeyValue> with get, set
+
+    module Item =
+        type Duration = delegate of target: Target option * index: float option * targets: Target[] option * prevTween: Tween option -> FunctionValueReturn
+
+module Engine =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type TimeUnit =
+        | [<CompiledName("ms")>] Ms
+        | [<CompiledName("s")>] S
+
+module Globals =
+    [<Interface>]
+    type Editor =
+        abstract showPanel: bool with get, set
+        abstract addAnimation: JS.Function with get, set
+        abstract addSet: JS.Function with get, set
+        abstract addTimeline: JS.Function with get, set
+        abstract addTimelineChild: JS.Function with get, set
+        abstract addTimelineLabel: JS.Function with get, set
+        abstract addTimelineCall: JS.Function with get, set
+        abstract addTimelineSync: JS.Function with get, set
+        abstract resolveStagger: JS.Function with get, set
+        abstract _head: obj with get, set
+        abstract _tail: obj with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (showPanel: bool, addAnimation: JS.Function, addSet: JS.Function, addTimeline: JS.Function, addTimelineChild: JS.Function, addTimelineLabel: JS.Function, addTimelineCall: JS.Function, addTimelineSync: JS.Function, resolveStagger: JS.Function, _head: obj, _tail: obj) : Editor = jsNative
+
+module PercentageKeyframes =
+    type Item =
+        inherit PercentageKeyframeOptions
+        [<EmitIndexer>]
+        abstract Item: string -> TweenParamValue with get, set
+
+module ScrambleTextParams =
+    type Chars = delegate of arg0: Target * arg1: float * arg2: Target[] -> string
+
+    type Delay = delegate of arg0: Target * arg1: float * arg2: Target[] -> float
+
+    type Duration = delegate of arg0: Target * arg1: float * arg2: Target[] -> float
+
+    type OnChange = delegate of arg0: string * arg1: float -> unit
+
+    type RevealDelay = delegate of arg0: Target * arg1: float * arg2: Target[] -> float
+
+    type Text = delegate of arg0: Target * arg1: float * arg2: Target[] -> string
+
+module ScrollObserverAxisCallback =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Result =
+        | [<CompiledName("x")>] X
+        | [<CompiledName("y")>] Y
+
+module SplitTemplateParams =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Clone =
+        | [<CompiledName("bottom")>] Bottom
+        | [<CompiledName("center")>] Center
+        | [<CompiledName("left")>] Left
+        | [<CompiledName("right")>] Right
+        | [<CompiledName("top")>] Top
+        | [<CompiledValue(false)>] False
+        | [<CompiledValue(true)>] True
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Wrap =
+        | [<CompiledName("auto")>] Auto
+        | [<CompiledName("clip")>] Clip
+        | [<CompiledName("hidden")>] Hidden
+        | [<CompiledName("scroll")>] Scroll
+        | [<CompiledName("visible")>] Visible
+        | [<CompiledValue(false)>] False
+        | [<CompiledValue(true)>] True
+
+module StaggerParams =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Axis =
+        | [<CompiledName("x")>] X
+        | [<CompiledName("y")>] Y
+        | [<CompiledName("z")>] Z
+
+module Svg =
+    module CreateMotionPath =
+        [<Interface>]
+        type Result =
+            abstract translateX: AutoLayoutParams.Ease with get, set
+            abstract translateY: AutoLayoutParams.Ease with get, set
+            abstract rotate: AutoLayoutParams.Ease with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (translateX: AutoLayoutParams.Ease, translateY: AutoLayoutParams.Ease, rotate: AutoLayoutParams.Ease) : Result = jsNative
+
+module Text =
+    module ScrambleText =
+        type Result = delegate of target: Target option * index: float option * targets: Target[] option * prevTween: Tween option -> ScrambleTextTween
+
+module Timeline =
+    module Add =
+        type A3 = delegate of target: Target option * index: float option * targets: Target[] option * prevTween: Tween option * tl: Timeline option -> TimelinePosition
+
+module Transforms =
+    module TraverseUp =
+        type Cb = delegate of ``$el``: DOMTarget * i: float -> obj
+
+module Tween =
+    type Setter = delegate of target: obj * value: float * tween: Tween -> unit
+
+module Utils =
+    module Stagger =
+        type Result = delegate of target: Target option * index: float option * targets: Target[] option * prevTween: Tween option * tl: Timeline option -> float
+
+        type Result2 = delegate of target: Target option * index: float option * targets: Target[] option * prevTween: Tween option * tl: Timeline option -> string
+
+module WAAPITweenOptions =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Composition =
+        | [<CompiledName("accumulate")>] Accumulate
+        | [<CompiledName("add")>] Add
+        | [<CompiledName("replace")>] Replace
 
 [<Erase>]
 type U10<'t1, 't2, 't3, 't4, 't5, 't6, 't7, 't8, 't9, 't10> =

@@ -28,15 +28,6 @@ type Timers =
     [<ParamObject; Emit("$0")>]
     static member Create (schedule: Timers.Schedule) : Timers = jsNative
 
-module Timers =
-    [<Interface>]
-    type Schedule =
-        abstract cancel: unit -> unit
-        [<Emit("$0($1...)")>]
-        abstract Invoke: unit -> unit
-        [<ParamObject; Emit("$0")>]
-        static member Create (cancel: (unit -> unit)) : Schedule = jsNative
-
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
@@ -54,3 +45,12 @@ type Exports =
     /// </summary>
     [<Import("roundPad", "intersection-callable-lab")>]
     static member roundPad (length: float) : float = jsNative
+
+module Timers =
+    [<Interface>]
+    type Schedule =
+        abstract cancel: unit -> unit
+        [<Emit("$0($1...)")>]
+        abstract Invoke: unit -> unit
+        [<ParamObject; Emit("$0")>]
+        static member Create (cancel: (unit -> unit)) : Schedule = jsNative

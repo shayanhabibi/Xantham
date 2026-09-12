@@ -75,6 +75,30 @@ type Node =
     [<ParamObject; Emit("$0")>]
     static member Create (id: string) : Node = jsNative
 
+/// <summary>The package's value exports, each bound to its import.</summary>
+[<Erase>]
+type Exports =
+    /// <summary>
+    /// Reads the nested StringEnum off a nested shape.
+    /// </summary>
+    [<Import("backoffOf", "nested-name-lab")>]
+    static member backoffOf (retry: Widget.Options.Retry) : string = jsNative
+    /// <summary>
+    /// Hands back a nested shape built on the JavaScript side.
+    /// </summary>
+    [<Import("defaultRetry", "nested-name-lab")>]
+    static member defaultRetry () : Widget.Options.Retry = jsNative
+    /// <summary>
+    /// The parameter shape nests as <c>Configure.Settings</c>, under a module and no type.
+    /// </summary>
+    [<Import("configure", "nested-name-lab")>]
+    static member configure (settings: Configure.Settings) : unit = jsNative
+    /// <summary>
+    /// Reaches the namespaced declaration, so the reference position is pinned too.
+    /// </summary>
+    [<Import("joinCluster", "nested-name-lab")>]
+    static member joinCluster (node: Cluster.Node) : Node = jsNative
+
 module Choice =
     [<Interface>]
     type Either =
@@ -150,27 +174,3 @@ module Widget =
             type Backoff =
                 | [<CompiledName("exponential")>] Exponential
                 | [<CompiledName("linear")>] Linear
-
-/// <summary>The package's value exports, each bound to its import.</summary>
-[<Erase>]
-type Exports =
-    /// <summary>
-    /// Reads the nested StringEnum off a nested shape.
-    /// </summary>
-    [<Import("backoffOf", "nested-name-lab")>]
-    static member backoffOf (retry: Widget.Options.Retry) : string = jsNative
-    /// <summary>
-    /// Hands back a nested shape built on the JavaScript side.
-    /// </summary>
-    [<Import("defaultRetry", "nested-name-lab")>]
-    static member defaultRetry () : Widget.Options.Retry = jsNative
-    /// <summary>
-    /// The parameter shape nests as <c>Configure.Settings</c>, under a module and no type.
-    /// </summary>
-    [<Import("configure", "nested-name-lab")>]
-    static member configure (settings: Configure.Settings) : unit = jsNative
-    /// <summary>
-    /// Reaches the namespaced declaration, so the reference position is pinned too.
-    /// </summary>
-    [<Import("joinCluster", "nested-name-lab")>]
-    static member joinCluster (node: Cluster.Node) : Node = jsNative

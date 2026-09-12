@@ -1,4 +1,4 @@
-﻿module Xantham.Generator.Shape.Aliases
+module Xantham.Generator.Shape.Aliases
 
 open Xantham.Generator
 open Xantham.TypeScript.Wire
@@ -101,6 +101,11 @@ let shapeAliases: Pass<ShapeModel> =
                     let mutable claimed =
                         Set.union declaredNames (model.DeclNames |> Map.toList |> List.map snd |> Set.ofList)
 
+                    // The export owning each declared type's definition. Its F# name may differ from
+                    // `fsName`'s bare spelling for that very export.
+                    let definingExports =
+                        Xantham.Generator.Shape.ExportNames.declarationExports ctx model |> Map.ofList
+
                     let aliasDecls =
                         model.Harvest.Exports
                         |> List.choose (fun export ->
@@ -115,6 +120,7 @@ let shapeAliases: Pass<ShapeModel> =
                                 | Some typeId ->
                                     match Map.tryFind typeId model.DeclNames with
                                     | Some primary when primary = name -> None
+                                    | Some _ when Map.tryFind typeId definingExports = Some export -> None
                                     | Some primary when Set.contains name claimed ->
                                         if primary <> name then
                                             findings <-

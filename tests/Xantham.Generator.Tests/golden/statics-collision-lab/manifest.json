@@ -4,8 +4,8 @@
   "module": "StaticsCollisionLab",
   "counts": {
     "exact": 2,
-    "ergonomic": 1,
-    "widened": 1,
+    "ergonomic": 2,
+    "widened": 0,
     "escape": 0
   },
   "passes": [
@@ -13,16 +13,6 @@
       "pass": "HG - harvest-globals",
       "total": 1,
       "exact": 1
-    },
-    {
-      "pass": "NE - name-exports",
-      "total": 1,
-      "exact": 1
-    },
-    {
-      "pass": "SA - shape-aliases",
-      "total": 1,
-      "widened": 1
     },
     {
       "pass": "SP - synthesize-paramobjects",

@@ -202,20 +202,6 @@ type WindowLike =
     [<ParamObject; Emit("$0")>]
     static member Create (self: WindowLike.Self) : WindowLike = jsNative
 
-module Store =
-    module Update =
-        [<Interface>]
-        type Value =
-            abstract ``when``: TypeScript.Lib.Es.Date option with get, set
-            abstract value: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?``when``: TypeScript.Lib.Es.Date, ?value: string) : Value = jsNative
-
-module WindowLike =
-    type Self =
-        inherit WindowLike
-        inherit GlobalThis
-
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 [<Global("globalThis")>]
@@ -454,3 +440,17 @@ type Exports =
     static member Intl: TypeScript.Lib.Es.Intl = jsNative
     [<Global("globalThis")>]
     static member globalThis: GlobalThis = jsNative
+
+module Store =
+    module Update =
+        [<Interface>]
+        type Value =
+            abstract ``when``: TypeScript.Lib.Es.Date option with get, set
+            abstract value: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?``when``: TypeScript.Lib.Es.Date, ?value: string) : Value = jsNative
+
+module WindowLike =
+    type Self =
+        inherit WindowLike
+        inherit GlobalThis

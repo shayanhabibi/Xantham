@@ -1,4 +1,4 @@
-﻿module Xantham.Generator.Shape.Ordering
+module Xantham.Generator.Shape.Ordering
 
 open Xantham.Generator
 open Xantham.Generator.Measure
@@ -9,7 +9,11 @@ open Xantham.Generator.Shape.Spec
 /// The nested-module path a dotted declaration name renders under - `[]` for a root name.
 let private modulePath (name: string) =
     let segments = name.Split '.'
-    if segments.Length <= 1 then [] else List.ofArray segments[.. segments.Length - 2]
+
+    if segments.Length <= 1 then
+        []
+    else
+        List.ofArray segments[.. segments.Length - 2]
 
 /// A declaration's name, for ordering purposes: the `Exports` container's own name stands in
 /// for a type declaration's.
@@ -28,7 +32,8 @@ let private nameFor =
 /// Root declarations first, then every nested module in alphabetical order of its path,
 /// preserving the order already fixed within each.
 let private byModulePath decls =
-    decls |> List.sortBy (nameFor >> modulePath >> fun path -> (List.isEmpty path |> not), path)
+    decls
+    |> List.sortBy (nameFor >> modulePath >> fun path -> (List.isEmpty path |> not), path)
 
 /// Fixes the output order the renderer will follow verbatim: declarations in source order with
 /// name as the tiebreak, then the `Exports` type - its members in harvest order - last; root
@@ -69,7 +74,13 @@ let orderDeclarations: Pass<ShapeModel> =
             model.ExportMembers
             |> List.sortBy (fun owned -> owned.HarvestIndex, owned.Member.Name)
 
-        let containers = ExportLayout.containersFor model (exports |> List.map _.Owner)
+        // Owners of value-export containers and owners of declared types share one path allocation.
+        let owners =
+            (exports |> List.map _.Owner)
+            @ (Xantham.Generator.Shape.ExportNames.declarationExports ctx model
+               |> List.map (fun (_, export) -> ExportLayout.ownerOf model.RuntimePackage export.Origin))
+
+        let containers = ExportLayout.containersFor model owners
 
         let exportDecls =
             exports

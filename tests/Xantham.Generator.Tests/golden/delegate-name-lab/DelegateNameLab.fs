@@ -33,29 +33,6 @@ type Factory =
     [<ParamObject; Emit("$0")>]
     static member Create (pair: Factory.Pair, make: (float -> Factory.Make.Result)) : Factory = jsNative
 
-module CallNesting =
-    type Outer = delegate of seed: float -> (float -> string)
-
-module CallThree =
-    type Handler = delegate of x: float * y: float * label: string -> string
-
-module CallTwo =
-    type Handler = delegate of x: float * y: float -> string
-
-module CallVoidTwo =
-    type Handler = delegate of x: float * y: float -> unit
-
-module EventTarget =
-    type OnDrag = delegate of x: float * y: float -> string
-
-    type OnTick = delegate of x: float * y: float -> string
-
-module Factory =
-    type Pair = delegate of x: float * y: float -> string
-
-    module Make =
-        type Result = delegate of x: float * y: float -> string
-
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
@@ -104,3 +81,26 @@ type Exports =
     /// </summary>
     [<Import("callNesting", "delegate-name-lab")>]
     static member callNesting (outer: CallNesting.Outer) : string = jsNative
+
+module CallNesting =
+    type Outer = delegate of seed: float -> (float -> string)
+
+module CallThree =
+    type Handler = delegate of x: float * y: float * label: string -> string
+
+module CallTwo =
+    type Handler = delegate of x: float * y: float -> string
+
+module CallVoidTwo =
+    type Handler = delegate of x: float * y: float -> unit
+
+module EventTarget =
+    type OnDrag = delegate of x: float * y: float -> string
+
+    type OnTick = delegate of x: float * y: float -> string
+
+module Factory =
+    type Pair = delegate of x: float * y: float -> string
+
+    module Make =
+        type Result = delegate of x: float * y: float -> string

@@ -113,46 +113,6 @@ type CallbackBox<'T> =
     [<ParamObject; Emit("$0")>]
     static member Create (callback: 'T, keep: ('U -> 'U)) : CallbackBox<'T> = jsNative
 
-module AddListener =
-    type Register = delegate of kind: string * listener: U2<UnionListenerObject, (float -> unit)> -> unit
-
-module CallNesting =
-    module Outer =
-        type Result = delegate of a: float * b: float -> string
-
-module CallNestingOne =
-    type Outer = delegate of seed: float -> (float -> string)
-
-module CallThree =
-    type Callback = delegate of a: float * b: float * c: float -> string
-
-module CallTwo =
-    type Callback = delegate of a: float * b: float -> string
-
-module CallUnionTwo =
-    type Listener = delegate of a: float * b: float -> string
-
-module CallVoidTwo =
-    type Callback = delegate of a: float * b: float -> unit
-
-module Factory =
-    type Pair = delegate of a: float * b: float -> string
-
-    module Make =
-        type Result = delegate of a: float * b: float -> string
-
-    module MakeThree =
-        type Result = delegate of a: float * b: float * c: float -> string
-
-module Handlers =
-    type OnTick = delegate of a: float * b: float -> string
-
-module MakeUnionTwo =
-    type Result = delegate of a: float * b: float -> string
-
-module UnionHandlers =
-    type Two = delegate of a: float * b: float -> string
-
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
@@ -318,3 +278,43 @@ type Exports =
     /// </summary>
     [<Import("boxedFunction", "callback-function-lab")>]
     static member boxedFunction (box: CallbackBox<(float -> float)>) : float = jsNative
+
+module AddListener =
+    type Register = delegate of kind: string * listener: U2<UnionListenerObject, (float -> unit)> -> unit
+
+module CallNesting =
+    module Outer =
+        type Result = delegate of a: float * b: float -> string
+
+module CallNestingOne =
+    type Outer = delegate of seed: float -> (float -> string)
+
+module CallThree =
+    type Callback = delegate of a: float * b: float * c: float -> string
+
+module CallTwo =
+    type Callback = delegate of a: float * b: float -> string
+
+module CallUnionTwo =
+    type Listener = delegate of a: float * b: float -> string
+
+module CallVoidTwo =
+    type Callback = delegate of a: float * b: float -> unit
+
+module Factory =
+    type Pair = delegate of a: float * b: float -> string
+
+    module Make =
+        type Result = delegate of a: float * b: float -> string
+
+    module MakeThree =
+        type Result = delegate of a: float * b: float * c: float -> string
+
+module Handlers =
+    type OnTick = delegate of a: float * b: float -> string
+
+module MakeUnionTwo =
+    type Result = delegate of a: float * b: float -> string
+
+module UnionHandlers =
+    type Two = delegate of a: float * b: float -> string

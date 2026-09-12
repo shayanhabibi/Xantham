@@ -10621,7 +10621,7 @@ module PackageJson =
 
     type Overrides =
         [<EmitIndexer>]
-        abstract Item: string -> U2<string, PackageJson.Overrides> option with get, set
+        abstract Item: string -> U2<string, Overrides> option with get, set
 
     type PublishConfig =
         /// <summary>
@@ -10814,7 +10814,7 @@ module PackageJson =
     module Exports =
         type Item =
             [<EmitIndexer>]
-            abstract Item: string -> U3<string, U2<string, PackageJson.Exports.Item>[], PackageJson.Exports.Item> option with get, set
+            abstract Item: string -> U3<string, U2<string, Item>[], Item> option with get, set
 
     module Licenses =
         [<Interface>]

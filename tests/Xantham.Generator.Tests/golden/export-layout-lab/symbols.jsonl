@@ -1,6 +1,4 @@
 {"name":"LayoutPayload","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"LayoutPayload","message":"ParamObject Create synthesized (D3)"}]}
-{"name":"Exports.Left","file":"index.d.ts","tier":"exact","findings":[]}
-{"name":"Exports.Right","file":"index.d.ts","tier":"exact","findings":[]}
 {"name":"Exports.check","tier":"exact","findings":[]}
 {"name":"Exports.mode","tier":"exact","findings":[]}
 {"name":"Exports.echo","tier":"exact","findings":[]}
@@ -8,6 +6,8 @@
 {"name":"Exports.pick","tier":"widened","findings":[{"name":"DO.ExportReturnTypesUnioned","key":"DO008","pass":"resolve-export-collisions","tier":"widened","symbol":"Exports.pick","fields":{"owner":"Exports","exportName":"pick","arms":"string, float"},"message":"export pick under Exports returns the union of its overloads\u0027 returns (string, float)"}]}
 {"name":"Exports.dispatch","tier":"exact","findings":[{"name":"DO.OverloadsDistinguishedByLiteral","key":"DO002","pass":"dedupe-overloads","tier":"exact","symbol":"Exports.dispatch","fields":{"parameter":"kind"},"message":"overload kept; parameter kind is literal-typed and separates it"},{"name":"TR.StringLiteralKeptForOverload","key":"TR056","pass":"shape-exports","tier":"exact","symbol":"Exports.dispatch()","fields":{"literal":"left"},"message":"string literal left kept as a literal type; it separates an overload"},{"name":"TR.StringLiteralKeptForOverload","key":"TR056","pass":"shape-exports","tier":"exact","symbol":"Exports.dispatch()","fields":{"literal":"right"},"message":"string literal right kept as a literal type; it separates an overload"},{"name":"TR.StringLiteralKeptForOverload","key":"TR056","pass":"shape-exports","tier":"exact","symbol":"Exports.dispatch(kind)","fields":{"literal":"left"},"message":"string literal left kept as a literal type; it separates an overload"},{"name":"TR.StringLiteralKeptForOverload","key":"TR056","pass":"shape-exports","tier":"exact","symbol":"Exports.dispatch(kind)","fields":{"literal":"right"},"message":"string literal right kept as a literal type; it separates an overload"}]}
 {"name":"Aliases.Exports.renamedCheck","tier":"exact","findings":[]}
+{"name":"Exports.Left","file":"index.d.ts","tier":"exact","findings":[]}
+{"name":"Exports.Right","file":"index.d.ts","tier":"exact","findings":[]}
 {"name":"Globals.Exports.sharedFlag","tier":"exact","findings":[]}
 {"name":"Strict.Exports.check","tier":"exact","findings":[]}
 {"name":"Strict.Exports.mode","tier":"exact","findings":[]}

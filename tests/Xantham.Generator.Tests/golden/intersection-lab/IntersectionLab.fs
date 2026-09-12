@@ -112,14 +112,6 @@ type Cancelable =
     [<ParamObject; Emit("$0")>]
     static member Create (cancel: (unit -> unit)) : Cancelable = jsNative
 
-module Label =
-    [<Interface>]
-    type Target =
-        inherit Named
-        abstract id: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (name: string, id: float) : Target = jsNative
-
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
@@ -133,3 +125,11 @@ type Exports =
     /// </summary>
     [<Import("merge", "intersection-lab")>]
     static member merge<'T> (``base``: obj) : 'T = jsNative
+
+module Label =
+    [<Interface>]
+    type Target =
+        inherit Named
+        abstract id: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string, id: float) : Target = jsNative

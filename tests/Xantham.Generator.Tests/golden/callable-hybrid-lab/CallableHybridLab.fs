@@ -89,15 +89,6 @@ type Collides =
     [<ParamObject; Emit("$0")>]
     static member Create (Invoke: string) : Collides = jsNative
 
-module Widget =
-    [<Interface>]
-    type Handler =
-        abstract enabled: bool with get, set
-        [<Emit("$0($1...)")>]
-        abstract Invoke: ``event``: string -> string
-        [<ParamObject; Emit("$0")>]
-        static member Create (enabled: bool) : Handler = jsNative
-
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
@@ -117,3 +108,12 @@ type Exports =
     static member boxedNumber () : float = jsNative
     [<Import("collides", "callable-hybrid-lab")>]
     static member collides (x: float) : float = jsNative
+
+module Widget =
+    [<Interface>]
+    type Handler =
+        abstract enabled: bool with get, set
+        [<Emit("$0($1...)")>]
+        abstract Invoke: ``event``: string -> string
+        [<ParamObject; Emit("$0")>]
+        static member Create (enabled: bool) : Handler = jsNative

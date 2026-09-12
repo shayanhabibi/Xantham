@@ -268,6 +268,11 @@ let private collapseNodeAliases (ctx: Context) (exports: HarvestedExport list) =
                             FromAmbientModule($"node:{bare (specifier / uom<importSpecifier>)}" * uom<importSpecifier>)
                     }
                 | _ -> export)
+            |> List.groupBy (fun export -> export.Origin, export.ExportName)
+            |> List.map (fun (_, occurrences) ->
+                occurrences
+                |> List.tryFind _.HasValueExport
+                |> Option.defaultValue (List.head occurrences))
 
         collapsed, findings
 

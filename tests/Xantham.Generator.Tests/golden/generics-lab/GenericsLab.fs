@@ -91,6 +91,20 @@ type Manifest =
     [<ParamObject; Emit("$0")>]
     static member Create (flags: Record<string, bool>) : Manifest = jsNative
 
+/// <summary>The package's value exports, each bound to its import.</summary>
+[<Erase>]
+type Exports =
+    /// <summary>
+    /// An anonymous object type inside a generic function - it binds nothing itself and reads the function's parameters.
+    /// </summary>
+    [<Import("each", "generics-lab")>]
+    static member each<'T, 'U> (props: Each.Props<'T, 'U>) : 'U[] = jsNative
+    /// <summary>
+    /// An optional parameter ahead of a rest parameter: F# has no tail for the <c>?</c>, so it stays required, of option type.
+    /// </summary>
+    [<Import("schedule", "generics-lab")>]
+    static member schedule (callback: (float[] -> unit), delay: float option, [<ParamArray>] args: float[]) : float = jsNative
+
 module Each =
     [<Interface>]
     type Props<'T, 'U> =
@@ -110,17 +124,3 @@ module Handle =
         abstract reset: unit -> unit
         [<ParamObject; Emit("$0")>]
         static member Create (set: ('T -> unit), reset: (unit -> unit)) : Item<'T> = jsNative
-
-/// <summary>The package's value exports, each bound to its import.</summary>
-[<Erase>]
-type Exports =
-    /// <summary>
-    /// An anonymous object type inside a generic function - it binds nothing itself and reads the function's parameters.
-    /// </summary>
-    [<Import("each", "generics-lab")>]
-    static member each<'T, 'U> (props: Each.Props<'T, 'U>) : 'U[] = jsNative
-    /// <summary>
-    /// An optional parameter ahead of a rest parameter: F# has no tail for the <c>?</c>, so it stays required, of option type.
-    /// </summary>
-    [<Import("schedule", "generics-lab")>]
-    static member schedule (callback: (float[] -> unit), delay: float option, [<ParamArray>] args: float[]) : float = jsNative

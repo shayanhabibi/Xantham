@@ -3,7 +3,7 @@
   "package": "static-reexport-lab",
   "module": "StaticReexportLab",
   "counts": {
-    "exact": 4,
+    "exact": 5,
     "ergonomic": 1,
     "widened": 0,
     "escape": 0

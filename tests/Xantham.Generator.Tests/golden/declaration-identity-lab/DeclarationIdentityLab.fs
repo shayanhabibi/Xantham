@@ -75,6 +75,14 @@ type LeftCallback =
     [<ParamObject; Emit("$0")>]
     static member Create (run: ('U -> 'U)) : LeftCallback = jsNative
 
+/// <summary>The package's value exports, each bound to its import.</summary>
+[<Erase>]
+type Exports =
+    [<Import("PublicClient", "declaration-identity-lab"); EmitConstructor>]
+    static member PublicClient () : PublicClient = jsNative
+    [<Import("GenericClient", "declaration-identity-lab"); EmitConstructor>]
+    static member GenericClient<'T> (value: 'T) : GenericClient<'T> = jsNative
+
 module Holder =
     [<Interface>]
     type Config =
@@ -88,11 +96,3 @@ module PublicBox =
         abstract retry: bool with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (retry: bool) : Options = jsNative
-
-/// <summary>The package's value exports, each bound to its import.</summary>
-[<Erase>]
-type Exports =
-    [<Import("PublicClient", "declaration-identity-lab"); EmitConstructor>]
-    static member PublicClient () : PublicClient = jsNative
-    [<Import("GenericClient", "declaration-identity-lab"); EmitConstructor>]
-    static member GenericClient<'T> (value: 'T) : GenericClient<'T> = jsNative
