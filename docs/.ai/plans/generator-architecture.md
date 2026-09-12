@@ -1367,7 +1367,7 @@ gate's 443 checks pass. Findings moved `DO004` 8 -> 0, `DO008` 0 -> 8, `DO007` 0
 Single-case string enums render without `RequireQualifiedAccess` (#75). The attribute stays
 when the single case is a reserved F# name (`Ok`, `Error`, `Some`, `None`, `ValueSome`,
 `ValueNone`; `Shape.Spec.reservedCaseNames`), recorded as `LU002` (Ergonomic) at the mint site
-in `dedupe-overloads`; `classify-literal-unions` mints no single-case enum. Consumer impact: a
+in `dedupe-overloads`, the only pass that mints one. Consumer impact: a
 single-case enum is written `Exports.Left`, and the previous `Exports.Left.Left` form is a
 compile error (FS0812). Multi-case enums and tagged unions are unchanged.
 
@@ -1377,10 +1377,10 @@ output is byte-identical to before.
 
 A class reachable through an `export * from` alias path (`declare module "node:crypto"
 { export * from "crypto" }`) emits each static member once (#73). Static occurrences group by
-declaration identity and member signature; the kept occurrence uses the specifier the class's
+declaration identity; the kept occurrence uses the specifier the class's
 own binding uses, or the first harvested path when the class carries none; each dropped
-occurrence records `SC010` (Exact) with its specifier on `Class.member`. The type is never
-relocated or duplicated. Two distinct same-named classes in different ambient modules are not
+occurrence records `SC010` (Exact) with its specifier on `Class.member`. The type keeps its
+single declaration site. Two distinct same-named classes in different ambient modules are not
 this case and remain broken by `SA.AbbreviationNameTaken` (recorded, out of scope).
 
 Manifest `file` paths for compiler-library declarations read `node_modules/typescript/lib/...`

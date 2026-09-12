@@ -47,8 +47,8 @@ let private specifierOfBinding (binding: ImportBinding) =
     | ImportNamed _
     | GlobalName _ -> None
 
-/// The ambient module specifier an export path carries; `None` for the entry module and the
-/// global scope, which bind through the runtime package rather than a specifier of their own.
+/// The ambient-module specifier an export path carries; `None` for the entry module and the
+///global scope.
 let private specifierOfOrigin (origin: ExportOrigin) =
     match origin with
     | FromAmbientModule specifier -> Some specifier
@@ -71,7 +71,7 @@ module private Refusal =
 /// The TypeScript base a class derives that F# reaches as `exn`, if it has one. `Error` is the
 /// only lib name bound to F#'s exception type, and only through the compiler-lib table, so a
 /// class whose base is shipped by this run or by a mapped group is not one of these.
-let private exnBase (ctx: Context) (model: ShapeModel) (bases: int<Measure.typeId> list) =
+let private exnBase (ctx: Context) (model: ShapeModel) (bases: int<typeId> list) =
     if GeneratorConfig.disposition ctx.Config CompilerLib = Ship then
         None
     else
@@ -111,8 +111,7 @@ let shapeClasses: Pass<ShapeModel> =
                             | _ -> None)
                         |> Map.ofList
 
-                    // One entry per export path that reaches the declaration, so a class
-                    // reachable through `export * from` collapses to a single specifier below.
+                    // One entry per export path reaching the declaration.
                     let mutable statics: Map<string, (ExportOrigin * FsExportMember list) list> =
                         Map.empty
 
@@ -226,7 +225,7 @@ let shapeClasses: Pass<ShapeModel> =
                     let admitEntrypoint
                         (export: HarvestedExport)
                         (facts: TypeFacts)
-                        (bases: int<Measure.typeId> list)
+                        (bases: int<typeId> list)
                         (name: string)
                         =
                         let declaration =

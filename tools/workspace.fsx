@@ -140,8 +140,8 @@ let typescriptPackage (root: string) =
 /// `dotnet test` and the live suite all drive one compiler. Idempotent: a value already in the
 /// environment wins, because an agent or CI may have pinned one deliberately.
 ///
-/// Only a worktree gets the redirect. The main checkout has its own install and `Tsc.locate`
-/// finds it unaided; pinning the variable there would outlive the next bump of the pin.
+/// Every checkout exports the nearest install it finds, so the main checkout and its
+/// worktrees drive one compiler.
 ///
 /// Borrowing also sets `XANTHAM_REQUIRE_TSC`, because once a compiler is known to be on disk a
 /// skipped live suite is a broken run rather than an unconfigured one. Export

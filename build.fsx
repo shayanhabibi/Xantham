@@ -387,12 +387,8 @@ module Stages =
             and! filter = Options.testFilter
             and! runGate = Options.runGate
 
-            // Each test project is an Expecto console app whose entry point is
-            // `runTestsInAssemblyWithCLIArgs`, so the suite runs as the built executable rather
-            // than under `dotnet test`: no vstest host or adapter in between, the suite's output
-            // streams as it is written, and a stalled child process is visible in the run.
-            // `--filter` is Expecto's own hint: a substring of the full test name.
-            //
+            // Each test project is an Expecto console app and runs as its built executable, with
+            // output streamed as written. `--filter` is Expecto's own hint: a substring of the full test name.
             // `cmd` quotes each interpolation hole as one argument, so the flag and its value
             // have to be part of the format string rather than a pre-baked `" --filter ..."` hole.
             let suites = Spec.testProjects |> List.filter _.Name.EndsWith(".Tests")

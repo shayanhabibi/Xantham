@@ -918,9 +918,9 @@ type ShapeClasses =
     | [<Widened>] EntrypointClassRefused of reason: string
     | [<Ergonomic>] EntrypointClassInheritsExn of baseName: string
     /// A class static reachable through a second export path (`export * from`). One member is
-    /// emitted under the declaring module's specifier; the alias specifier is recorded here.
+    ///emitted under the specifier the class's own binding uses, or the first harvested path when
+    /// the class carries none; the dropped path's specifier is recorded here.
     | [<Exact>] StaticAliasPathCollapsed of specifier: string
-
     interface IFindingKind with
         member this.Message =
             match this with
@@ -940,7 +940,7 @@ type ShapeClasses =
             | EntrypointClassInheritsExn baseName ->
                 $"entrypoint class derives from {baseName} as exn; a consumer raises it and catches it by type"
             | StaticAliasPathCollapsed specifier ->
-                $"static also exported from {specifier}; one member emitted under the declaring module's specifier"
+                $"static also exported from {specifier}; one member emitted under the class's own specifier"
 
 /// `shape-exports`.
 [<Prefix("SE", "shape-exports")>]

@@ -4353,7 +4353,7 @@ let pipelineTests =
                     let symbols = rendered.Files |> List.find (fst >> (=) "symbols.jsonl") |> snd
                     Expect.stringContains symbols "\"key\":\"LU002\"" "finding recorded" ])
         yield!
-            fixtureTests "auto-open-exports-lab" (handFixture "auto-open-exports-lab") GeneratorConfig.Default (fun package ->
+            fixtureTests "auto-open-exports-lab" (handFixture "auto-open-exports-lab") { GeneratorConfig.Default with AutoOpenExports = true } (fun package ->
                 [ testCase "autoOpenExports marks the generated Exports type AutoOpen" <| fun _ ->
                     let config =
                         { GeneratorConfig.Default with
@@ -4390,8 +4390,7 @@ let staticReexportTests =
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                     let source = rendered.Files |> List.head |> snd
 
-                    // `Certificate` carries no type-level `[<Import>]`, so the collapse keeps the
-                    // first export path in harvest order: "node:static-reexport-lab".
+                    // The collapse keeps the first harvested export path, "node:static-reexport-lab".
                     let hits =
                         System.Text.RegularExpressions.Regex.Matches(
                             source,
