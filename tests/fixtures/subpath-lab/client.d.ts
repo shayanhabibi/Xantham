@@ -1,4 +1,4 @@
-import { Internal } from "./shared.js";
+import { Internal, Payload } from "./shared.js";
 export { Payload, Session } from "./shared.js";
 export interface ClientOptions { retries: number; }
 export declare function connect(options: ClientOptions): Internal;

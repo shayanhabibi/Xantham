@@ -32,7 +32,7 @@ type RootSession =
 [<Erase>]
 type Exports =
     [<Import("describe", "subpath-lab")>]
-    static member describe (payload: obj) : string = jsNative
+    static member describe (payload: Payload) : string = jsNative
     [<Import("RootSession", "subpath-lab"); EmitConstructor>]
     static member RootSession () : RootSession = jsNative
 
@@ -64,7 +64,7 @@ module Client =
         [<Import("connect", "subpath-lab/client")>]
         static member connect (options: ClientOptions) : Internal = jsNative
         [<Import("describe", "subpath-lab/client")>]
-        static member describe (payload: obj) : string = jsNative
+        static member describe (payload: Payload) : string = jsNative
         [<Import("Session", "subpath-lab/client"); EmitConstructor>]
         static member Session () : RootSession = jsNative
 
@@ -89,7 +89,7 @@ module Legacy =
         [<Import("connect", "subpath-lab/legacy/index.js")>]
         static member connect (options: Client.ClientOptions) : Internal = jsNative
         [<Import("describe", "subpath-lab/legacy/index.js")>]
-        static member describe (payload: obj) : string = jsNative
+        static member describe (payload: Payload) : string = jsNative
         [<Import("Session", "subpath-lab/legacy/index.js"); EmitConstructor>]
         static member Session () : RootSession = jsNative
 
