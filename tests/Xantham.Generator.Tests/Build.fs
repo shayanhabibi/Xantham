@@ -16,6 +16,14 @@ let context =
         PackageDir = "." * Measure.uom<Measure.dirPath>
         PackageName = "test-pkg" * Measure.uom<Measure.npmDependency>
         EntryFile = "index.d.ts" * Measure.uom<Measure.declFile>
+        PublicPaths =
+            [
+                {
+                    Key = "."
+                    File = "index.d.ts" * Measure.uom<Measure.declFile>
+                }
+            ]
+        SkippedPaths = []
     }
 
 let symbol (id: int) (name: string) (flags: SymbolFlags) : SymbolResponse =

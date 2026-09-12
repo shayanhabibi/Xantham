@@ -91,4 +91,18 @@ let tests =
               let owner = ambient "other"
               let allocated =
                   ExportLayout.allocate (runtime "pkg") [ "Other"; "Other_f60acb6ef7d5" ] [ owner ]
-              Expect.notEqual allocated[owner] [ "Other_f60acb6ef7d5" ] "candidate reserved" ]
+              Expect.notEqual allocated[owner] [ "Other_f60acb6ef7d5" ] "candidate reserved"
+
+          testCase "depth counts preferred-path segments and the entry is shallowest" <| fun _ ->
+              let depth = ExportLayout.depthOf (runtime "pkg")
+              Expect.equal (depth EntryModule) 0 "entry"
+              Expect.equal (depth GlobalScope) 0 "global"
+              Expect.equal (depth (ambient "pkg/client")) 1 "child"
+              Expect.equal (depth (ambient "pkg/client/deep")) 2 "grandchild"
+              Expect.equal (depth (ambient "pkg/client/index.js")) 1 "trailing index"
+              Expect.equal (depth (ambient "node:stream/web")) 2 "unrelated"
+
+          testCase "owner specifiers order ordinally" <| fun _ ->
+              let owners = [ ambient "pkg/mirror"; ambient "pkg/alias" ]
+              let sorted = owners |> List.sortBy ExportLayout.ownerSpecifier
+              Expect.equal sorted [ ambient "pkg/alias"; ambient "pkg/mirror" ] "ordinal" ]

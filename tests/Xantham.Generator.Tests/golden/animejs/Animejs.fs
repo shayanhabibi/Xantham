@@ -10,6 +10,81 @@ open Fable.Core.JsInterop
 open Fable.Core.JS
 open Fable.Core.TS.Dom
 
+[<Interface>]
+type Adapter =
+    /// <remarks>@type {((t: any) =&gt; boolean) | null}</remarks>
+    abstract detect: (obj -> bool) option with get, set
+    /// <remarks>@type {TargetAdapter[]}</remarks>
+    abstract targetAdapters: TargetAdapter[] with get, set
+    /// <remarks>@type {((target: any, name: string) =&gt; TargetAdapterEntry | null)[]}</remarks>
+    abstract propertyResolvers: Adapter.PropertyResolvers.Item[] with get, set
+    /// <summary>
+    /// Creates and registers a <c>TargetAdapter</c> scoped to this Adapter.
+    /// </summary>
+    abstract registerTargetAdapter: detect: (obj -> bool) -> TargetAdapter
+    /// <summary>
+    /// Registers a property resolver scoped to this Adapter. Resolvers are functions invoked at tween creation when no target adapter has claimed the name; the function returns an entry for names it handles or <c>null</c> to defer. Use for runtime-matched patterns (Color / Vector axis detection, name-prefix conventions, etc.).
+    /// </summary>
+    abstract registerPropertyResolver: resolver: Adapter.RegisterPropertyResolver.Resolver -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (targetAdapters: TargetAdapter[], propertyResolvers: Adapter.PropertyResolvers.Item[], registerTargetAdapter: ((obj -> bool) -> TargetAdapter), registerPropertyResolver: (Adapter.RegisterPropertyResolver.Resolver -> unit), ?detect: (obj -> bool)) : Adapter = jsNative
+
+[<Interface>]
+type TargetAdapter =
+    abstract detect: (obj -> bool) with get, set
+    /// <remarks>@type {Record&lt;string, TargetAdapterEntry&gt;}</remarks>
+    abstract props: Record<string, TargetAdapter.Props.Item> with get, set
+    /// <summary>
+    /// Registers a property the adapter handles. <c>setter</c> receives <c>(target, value, tween)</c>. For color and complex tweens <c>value</c> is <c>undefined</c>, read <c>tween._numbers</c> instead. <c>gate(target)</c> scopes the prop to a subset of matching targets.
+    /// </summary>
+    abstract registerProperty: name: string * getter: (obj -> obj) * setter: TargetAdapter.RegisterProperty.Setter * ?gate: (obj -> bool) -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (detect: (obj -> bool), props: Record<string, TargetAdapter.Props.Item>, registerProperty: Action<string, (obj -> obj), TargetAdapter.RegisterProperty.Setter, (obj -> bool) option>) : TargetAdapter = jsNative
+
+type Instance =
+    abstract isAnimejsInstanceProxy: bool with get, set
+    abstract parent: obj with get, set
+    abstract id: float with get, set
+    abstract _position: obj with get, set
+    abstract _rotation: obj with get, set
+    abstract _scale: obj with get, set
+    abstract _matrix: obj with get, set
+    abstract _quat: obj with get, set
+    abstract _color: obj with get, set
+    abstract _dirty: float with get, set
+    abstract _skewX: float with get, set
+    abstract _skewY: float with get, set
+    abstract _skewZ: float with get, set
+    abstract _originX: float with get, set
+    abstract _originY: float with get, set
+    abstract _originZ: float with get, set
+    abstract _hasSkewOrigin: bool with get, set
+    /// <remarks>@type {Instance[]}</remarks>
+    abstract _dirtyList: Instance[] with get, set
+    abstract _hasSetColor: bool with get, set
+    abstract _hasSetVisible: bool with get, set
+    abstract _hasGetVisible: bool with get, set
+    abstract _markDirty: flag: float -> unit
+    abstract _flush: unit -> unit
+    abstract x: float with get, set
+    abstract y: float with get, set
+    abstract z: float with get, set
+    abstract rotateX: float with get, set
+    abstract rotateY: float with get, set
+    abstract rotateZ: float with get, set
+    abstract scaleX: float with get, set
+    abstract scaleY: float with get, set
+    abstract scaleZ: float with get, set
+    abstract scale: float with get, set
+    abstract skewX: float with get, set
+    abstract skewY: float with get, set
+    abstract skewZ: float with get, set
+    abstract transformOriginX: float with get, set
+    abstract transformOriginY: float with get, set
+    abstract transformOriginZ: float with get, set
+    abstract opacity: float with get, set
+    abstract visible: bool with get, set
+
 /// <remarks>@import ;</remarks>
 [<Interface>]
 type Animatable =
@@ -4050,6 +4125,120 @@ type Exports =
     [<Import("waapi", "animejs")>]
     static member waapi: Waapi = jsNative
 
+module Adapter =
+    module PropertyResolvers =
+        type Item = delegate of target: obj * name: string -> TargetAdapter.Props.Item option
+
+    module RegisterPropertyResolver =
+        type Resolver = delegate of target: obj * name: string -> TargetAdapter.Props.Item option
+
+/// <summary>animejs/adapters</summary>
+module Adapters =
+    /// <summary>The package's value exports, each bound to its import.</summary>
+    [<Erase>]
+    type Exports =
+        /// <summary>
+        /// Creates and registers an Adapter. Each library extending <c>animate()</c> calls this once and uses the returned Adapter to wire up its target adapters and property resolvers. The optional <c>detect</c> short-circuits all lookups against the Adapter when the target is unrelated.
+        /// </summary>
+        [<Import("registerAdapter", "animejs/adapters")>]
+        static member registerAdapter (?detect: (obj -> bool)) : Adapter = jsNative
+
+    /// <summary>animejs/adapters/three</summary>
+    module Three =
+        [<Interface>]
+        type ThreeAdapter =
+            abstract detect: (obj -> bool) with get, set
+            abstract targetAdapters: Adapters.Three.ThreeAdapter.TargetAdapters.Item[] with get, set
+            abstract propertyResolvers: Adapters.Three.ThreeAdapter.PropertyResolvers.Item[] with get, set
+            abstract registerTargetAdapter: detect: (obj -> bool) -> Adapters.Three.ThreeAdapter.RegisterTargetAdapter.Result
+            abstract registerPropertyResolver: resolver: Adapters.Three.ThreeAdapter.RegisterPropertyResolver.Resolver -> unit
+            [<ParamObject; Emit("$0")>]
+            static member Create (detect: (obj -> bool), targetAdapters: Adapters.Three.ThreeAdapter.TargetAdapters.Item[], propertyResolvers: Adapters.Three.ThreeAdapter.PropertyResolvers.Item[], registerTargetAdapter: ((obj -> bool) -> Adapters.Three.ThreeAdapter.RegisterTargetAdapter.Result), registerPropertyResolver: (Adapters.Three.ThreeAdapter.RegisterPropertyResolver.Resolver -> unit)) : ThreeAdapter = jsNative
+
+        /// <summary>The package's value exports, each bound to its import.</summary>
+        [<Erase>]
+        type Exports =
+            [<Import("threeAdapter", "animejs/adapters/three")>]
+            static member threeAdapter: ThreeAdapter = jsNative
+            /// <summary>
+            /// Flushes pending matrix writes for every dirty instance of <c>mesh</c>.
+            /// Called automatically before each render. Call it yourself if you read
+            /// <c>mesh.instanceMatrix</c> between an animation tick and the next render.
+            /// </summary>
+            [<Import("commitChanges", "animejs/adapters/three")>]
+            static member commitChanges (mesh: obj) : unit = jsNative
+            /// <summary>
+            /// Returns an array of per-instance adapters for <c>mesh</c>. Index by id, deleted slots on <c>BatchedMesh</c> are <c>null</c>. Pass the array (or a slice / a single element) to <c>animate()</c>.
+            /// <br /><br />
+            /// animate(getInstances(mesh), { x: 100, delay: stagger(5) });
+            /// animate(getInstances(mesh)[42], { scale: 2 });
+            /// <br /><br />
+            /// The same array reference is preserved across <c>mesh.count</c> / <c>addInstance</c> / <c>deleteInstance</c> calls. Entries are pushed, nulled, or truncated in place. Animations bound to an outdated reference keep tweening their original adapters.
+            /// <br /><br />
+            /// <c>mesh.onBeforeRender</c> is replaced with an accessor that flushes
+            /// pending instance writes before each render and forwards to your
+            /// handler. Assigning your own <c>mesh.onBeforeRender = fn</c> keeps the
+            /// auto-flush, but reading <c>mesh.onBeforeRender</c> afterwards returns the
+            /// chained dispatcher rather than <c>fn</c> itself, so identity checks
+            /// (<c>mesh.onBeforeRender === fn</c>) will not match.
+            /// </summary>
+            [<Import("getInstances", "animejs/adapters/three")>]
+            static member getInstances (mesh: obj) : Instance option[] = jsNative
+
+        module ThreeAdapter =
+            module PropertyResolvers =
+                type Item = delegate of target: obj * name: string -> TargetAdapter.Props.Item option
+
+            module RegisterPropertyResolver =
+                type Resolver = delegate of target: obj * name: string -> obj
+
+            module RegisterTargetAdapter =
+                [<Interface>]
+                type Result =
+                    abstract detect: (obj -> bool) with get, set
+                    abstract props: Record<string, TargetAdapter.Props.Item> with get, set
+                    abstract registerProperty: name: string * getter: (obj -> obj) * setter: Adapters.Three.ThreeAdapter.RegisterTargetAdapter.Result.RegisterProperty.Setter * ?gate: (obj -> bool) -> unit
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (detect: (obj -> bool), props: Record<string, TargetAdapter.Props.Item>, registerProperty: Action<string, (obj -> obj), Adapters.Three.ThreeAdapter.RegisterTargetAdapter.Result.RegisterProperty.Setter, (obj -> bool) option>) : Result = jsNative
+
+                module Result =
+                    module RegisterProperty =
+                        type Setter = delegate of target: obj * value: float * tween: obj -> unit
+
+            module TargetAdapters =
+                [<Interface>]
+                type Item =
+                    abstract detect: (obj -> bool) with get, set
+                    abstract props: Record<string, TargetAdapter.Props.Item> with get, set
+                    abstract registerProperty: name: string * getter: (obj -> obj) * setter: Adapters.Three.ThreeAdapter.TargetAdapters.Item.RegisterProperty.Setter * ?gate: (obj -> bool) -> unit
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (detect: (obj -> bool), props: Record<string, TargetAdapter.Props.Item>, registerProperty: Action<string, (obj -> obj), Adapters.Three.ThreeAdapter.TargetAdapters.Item.RegisterProperty.Setter, (obj -> bool) option>) : Item = jsNative
+
+                module Item =
+                    module RegisterProperty =
+                        type Setter = delegate of target: obj * value: float * tween: obj -> unit
+
+/// <summary>animejs/animatable</summary>
+module Animatable =
+    /// <summary>The package's value exports, each bound to its import.</summary>
+    [<Erase>]
+    type Exports =
+        /// <remarks>@import ;</remarks>
+        [<Import("Animatable", "animejs/animatable"); EmitConstructor>]
+        static member Animatable (targets: TargetsParam, parameters: AnimatableParams) : Animatable = jsNative
+        [<Import("createAnimatable", "animejs/animatable")>]
+        static member createAnimatable (targets: TargetsParam, parameters: AnimatableParams) : AnimatableObject = jsNative
+
+/// <summary>animejs/animation</summary>
+module Animation =
+    /// <summary>The package's value exports, each bound to its import.</summary>
+    [<Erase>]
+    type Exports =
+        [<Import("JSAnimation", "animejs/animation"); EmitConstructor>]
+        static member JSAnimation (targets: TargetsParam, parameters: AnimationParams, ?parent: Timeline, ?parentPosition: float, ?fastSet: bool, ?index: float, ?allTargets: Target[]) : JSAnimation = jsNative
+        [<Import("animate", "animejs/animation")>]
+        static member animate (targets: TargetsParam, parameters: AnimationParams) : JSAnimation = jsNative
+
 module AutoLayoutParams =
     type Delay =
         inherit Spring
@@ -4352,6 +4541,7 @@ module DOMProxy =
             [<ParamObject; Emit("$0")>]
             static member Create (top: obj, right: obj, bottom: obj, left: obj) : Result = jsNative
 
+/// <summary>animejs/draggable</summary>
 module Draggable =
     [<Interface>]
     type OvershootCoords =
@@ -4366,6 +4556,14 @@ module Draggable =
         abstract y: float with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (x: float, y: float) : Scroll = jsNative
+
+    /// <summary>The package's value exports, each bound to its import.</summary>
+    [<Erase>]
+    type Exports =
+        [<Import("Draggable", "animejs/draggable"); EmitConstructor>]
+        static member Draggable (target: TargetsParam, ?parameters: DraggableParams) : Draggable = jsNative
+        [<Import("createDraggable", "animejs/draggable")>]
+        static member createDraggable (target: TargetsParam, ?parameters: DraggableParams) : Draggable = jsNative
 
 module DrawableSVGGeometry =
     [<StringEnum(CaseRules.None)>]
@@ -4397,11 +4595,104 @@ module DurationKeyframes =
     module Item =
         type Duration = delegate of target: Target option * index: float option * targets: Target[] option * prevTween: Tween option -> FunctionValueReturn
 
+/// <summary>animejs/easings</summary>
+module Easings =
+    /// <summary>The package's value exports, each bound to its import.</summary>
+    [<Erase>]
+    type Exports =
+        [<Import("cubicBezier", "animejs/easings")>]
+        static member cubicBezier (?mX1: float, ?mY1: float, ?mX2: float, ?mY2: float) : EasingFunction = jsNative
+        [<Import("eases", "animejs/easings")>]
+        static member eases: Animejs.Eases = jsNative
+        [<Import("irregular", "animejs/easings")>]
+        static member irregular (?length: float, ?randomness: float) : EasingFunction = jsNative
+        [<Import("linear", "animejs/easings")>]
+        static member linear ([<ParamArray>] args: TimelinePosition[]) : EasingFunction = jsNative
+        [<Import("Spring", "animejs/easings"); EmitConstructor>]
+        static member Spring (?parameters: SpringParams) : Animejs.Spring = jsNative
+        [<Import("spring", "animejs/easings")>]
+        static member spring (?parameters: SpringParams) : Animejs.Spring = jsNative
+        [<Import("createSpring", "animejs/easings")>]
+        static member createSpring (?parameters: SpringParams) : Animejs.Spring = jsNative
+        [<Import("steps", "animejs/easings")>]
+        static member steps (?steps: float, ?fromStart: bool) : EasingFunction = jsNative
+
+    /// <summary>animejs/easings/cubic-bezier</summary>
+    module CubicBezier =
+        /// <summary>The package's value exports, each bound to its import.</summary>
+        [<Erase>]
+        type Exports =
+            [<Import("cubicBezier", "animejs/easings/cubic-bezier")>]
+            static member cubicBezier (?mX1: float, ?mY1: float, ?mX2: float, ?mY2: float) : EasingFunction = jsNative
+
+    /// <summary>animejs/easings/eases</summary>
+    module Eases =
+        /// <summary>The package's value exports, each bound to its import.</summary>
+        [<Erase>]
+        type Exports =
+            [<Import("eases", "animejs/easings/eases")>]
+            static member eases: Animejs.Eases = jsNative
+
+    /// <summary>animejs/easings/irregular</summary>
+    module Irregular =
+        /// <summary>The package's value exports, each bound to its import.</summary>
+        [<Erase>]
+        type Exports =
+            [<Import("irregular", "animejs/easings/irregular")>]
+            static member irregular (?length: float, ?randomness: float) : EasingFunction = jsNative
+
+    /// <summary>animejs/easings/linear</summary>
+    module Linear =
+        /// <summary>The package's value exports, each bound to its import.</summary>
+        [<Erase>]
+        type Exports =
+            [<Import("linear", "animejs/easings/linear")>]
+            static member linear ([<ParamArray>] args: TimelinePosition[]) : EasingFunction = jsNative
+
+    /// <summary>animejs/easings/spring</summary>
+    module Spring =
+        /// <summary>The package's value exports, each bound to its import.</summary>
+        [<Erase>]
+        type Exports =
+            [<Import("Spring", "animejs/easings/spring"); EmitConstructor>]
+            static member Spring (?parameters: SpringParams) : Animejs.Spring = jsNative
+            [<Import("spring", "animejs/easings/spring")>]
+            static member spring (?parameters: SpringParams) : Animejs.Spring = jsNative
+            [<Import("createSpring", "animejs/easings/spring")>]
+            static member createSpring (?parameters: SpringParams) : Animejs.Spring = jsNative
+
+    /// <summary>animejs/easings/steps</summary>
+    module Steps =
+        /// <summary>The package's value exports, each bound to its import.</summary>
+        [<Erase>]
+        type Exports =
+            [<Import("steps", "animejs/easings/steps")>]
+            static member steps (?steps: float, ?fromStart: bool) : EasingFunction = jsNative
+
+/// <summary>animejs/engine</summary>
 module Engine =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
     type TimeUnit =
         | [<CompiledName("ms")>] Ms
         | [<CompiledName("s")>] S
+
+    /// <summary>The package's value exports, each bound to its import.</summary>
+    [<Erase>]
+    type Exports =
+        [<Import("engine", "animejs/engine")>]
+        static member engine: Engine = jsNative
+
+/// <summary>animejs/events</summary>
+module Events =
+    /// <summary>The package's value exports, each bound to its import.</summary>
+    [<Erase>]
+    type Exports =
+        [<Import("scrollContainers", "animejs/events")>]
+        static member scrollContainers: JS.Map<obj, obj> = jsNative
+        [<Import("ScrollObserver", "animejs/events"); EmitConstructor>]
+        static member ScrollObserver (?parameters: ScrollObserverParams) : ScrollObserver = jsNative
+        [<Import("onScroll", "animejs/events")>]
+        static member onScroll (?parameters: ScrollObserverParams) : ScrollObserver = jsNative
 
 module Globals =
     [<Interface>]
@@ -4420,11 +4711,32 @@ module Globals =
         [<ParamObject; Emit("$0")>]
         static member Create (showPanel: bool, addAnimation: JS.Function, addSet: JS.Function, addTimeline: JS.Function, addTimelineChild: JS.Function, addTimelineLabel: JS.Function, addTimelineCall: JS.Function, addTimelineSync: JS.Function, resolveStagger: JS.Function, _head: obj, _tail: obj) : Editor = jsNative
 
+/// <summary>animejs/layout</summary>
+module Layout =
+    /// <summary>The package's value exports, each bound to its import.</summary>
+    [<Erase>]
+    type Exports =
+        [<Import("AutoLayout", "animejs/layout"); EmitConstructor>]
+        static member AutoLayout (root: DOMTargetSelector, ?``params``: AutoLayoutParams) : AutoLayout = jsNative
+        [<Import("createLayout", "animejs/layout")>]
+        static member createLayout (root: DOMTargetSelector, ?``params``: AutoLayoutParams) : AutoLayout = jsNative
+
 module PercentageKeyframes =
     type Item =
         inherit PercentageKeyframeOptions
         [<EmitIndexer>]
         abstract Item: string -> TweenParamValue with get, set
+
+/// <summary>animejs/scope</summary>
+module Scope =
+    /// <summary>The package's value exports, each bound to its import.</summary>
+    [<Erase>]
+    type Exports =
+        /// <remarks>@import</remarks>
+        [<Import("Scope", "animejs/scope"); EmitConstructor>]
+        static member Scope (?parameters: ScopeParams) : Scope = jsNative
+        [<Import("createScope", "animejs/scope")>]
+        static member createScope (?``params``: ScopeParams) : Scope = jsNative
 
 module ScrambleTextParams =
     type Chars = delegate of arg0: Target * arg1: float * arg2: Target[] -> string
@@ -4473,7 +4785,18 @@ module StaggerParams =
         | [<CompiledName("y")>] Y
         | [<CompiledName("z")>] Z
 
+/// <summary>animejs/svg</summary>
 module Svg =
+    /// <summary>The package's value exports, each bound to its import.</summary>
+    [<Erase>]
+    type Exports =
+        [<Import("createDrawable", "animejs/svg")>]
+        static member createDrawable (selector: TargetsParam, ?start: float, ?``end``: float) : DrawableSVGGeometry[] = jsNative
+        [<Import("morphTo", "animejs/svg")>]
+        static member morphTo (path2: TargetsParam, ?precision: float) : AutoLayoutParams.Ease = jsNative
+        [<Import("createMotionPath", "animejs/svg")>]
+        static member createMotionPath (path: TargetsParam, ?offset: float) : Svg.CreateMotionPath.Result = jsNative
+
     module CreateMotionPath =
         [<Interface>]
         type Result =
@@ -4483,13 +4806,68 @@ module Svg =
             [<ParamObject; Emit("$0")>]
             static member Create (translateX: AutoLayoutParams.Ease, translateY: AutoLayoutParams.Ease, rotate: AutoLayoutParams.Ease) : Result = jsNative
 
+module TargetAdapter =
+    module Props =
+        [<Interface>]
+        type Item =
+            abstract get: (obj -> obj) with get, set
+            abstract set: TargetAdapter.Props.Item.Set with get, set
+            abstract gate: (obj -> bool) option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (get: (obj -> obj), set: TargetAdapter.Props.Item.Set, ?gate: (obj -> bool)) : Item = jsNative
+
+        module Item =
+            type Set = delegate of target: obj * value: float * tween: obj -> unit
+
+    module RegisterProperty =
+        type Setter = delegate of target: obj * value: float * tween: obj -> unit
+
+/// <summary>animejs/text</summary>
 module Text =
+    /// <summary>The package's value exports, each bound to its import.</summary>
+    [<Erase>]
+    type Exports =
+        [<Import("scrambleText", "animejs/text")>]
+        static member scrambleText (?``params``: ScrambleTextParams) : Text.ScrambleText.Result = jsNative
+        /// <summary>
+        /// A class that splits text into words and wraps them in span elements while preserving the original HTML structure.
+        /// </summary>
+        /// <remarks>@class</remarks>
+        [<Import("TextSplitter", "animejs/text"); EmitConstructor>]
+        static member TextSplitter (target: U4<string, Fable.Core.TS.Dom.Element[], Fable.Core.TS.Dom.Element, Fable.Core.TS.Dom.NodeList>, ?parameters: TextSplitterParams) : TextSplitter = jsNative
+        [<Import("splitText", "animejs/text")>]
+        static member splitText (target: U4<string, Fable.Core.TS.Dom.Element[], Fable.Core.TS.Dom.Element, Fable.Core.TS.Dom.NodeList>, ?parameters: TextSplitterParams) : TextSplitter = jsNative
+        [<Import("split", "animejs/text")>]
+        static member split (target: U4<string, Fable.Core.TS.Dom.HTMLElement[], Fable.Core.TS.Dom.HTMLElement, Fable.Core.TS.Dom.NodeList>, ?parameters: TextSplitterParams) : TextSplitter = jsNative
+
     module ScrambleText =
         type Result = delegate of target: Target option * index: float option * targets: Target[] option * prevTween: Tween option -> ScrambleTextTween
 
+/// <summary>animejs/timeline</summary>
 module Timeline =
+    /// <summary>The package's value exports, each bound to its import.</summary>
+    [<Erase>]
+    type Exports =
+        [<Import("Timeline", "animejs/timeline"); EmitConstructor>]
+        static member Timeline (?parameters: TimelineParams) : Timeline = jsNative
+        [<Import("createTimeline", "animejs/timeline")>]
+        static member createTimeline (?parameters: TimelineParams) : Timeline = jsNative
+
     module Add =
         type A3 = delegate of target: Target option * index: float option * targets: Target[] option * prevTween: Tween option * tl: Timeline option -> TimelinePosition
+
+/// <summary>animejs/timer</summary>
+module Timer =
+    /// <summary>The package's value exports, each bound to its import.</summary>
+    [<Erase>]
+    type Exports =
+        /// <summary>
+        /// Base class used to create Timers, Animations and Timelines
+        /// </summary>
+        [<Import("Timer", "animejs/timer"); EmitConstructor>]
+        static member Timer (?parameters: TimerParams, ?parent: Timeline, ?parentPosition: float) : Timer = jsNative
+        [<Import("createTimer", "animejs/timer")>]
+        static member createTimer (?parameters: TimerParams) : Timer = jsNative
 
 module Transforms =
     module TraverseUp =
@@ -4498,7 +4876,217 @@ module Transforms =
 module Tween =
     type Setter = delegate of target: obj * value: float * tween: Tween -> unit
 
+/// <summary>animejs/utils</summary>
 module Utils =
+    /// <summary>The package's value exports, each bound to its import.</summary>
+    [<Erase>]
+    type Exports =
+        [<Import("forEachChildren", "animejs/utils")>]
+        static member forEachChildren (parent: obj, callback: JS.Function, ?reverse: bool, ?prevProp: string, ?nextProp: string) : unit = jsNative
+        [<Import("removeChild", "animejs/utils")>]
+        static member removeChild (parent: obj, child: obj, ?prevProp: string, ?nextProp: string) : unit = jsNative
+        [<Import("addChild", "animejs/utils")>]
+        static member addChild (parent: obj, child: obj, ?sortMethod: JS.Function, ?prevProp: string, ?nextProp: string) : unit = jsNative
+        [<Import("cleanInlineStyles", "animejs/utils")>]
+        static member cleanInlineStyles<'T> (renderable: 'T) : 'T = jsNative
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        [<Import("$", "animejs/utils")>]
+        static member ``$`` (targets: DOMTargetsParam) : DOMTarget[] = jsNative
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        [<Import("$", "animejs/utils")>]
+        static member ``$`` (targets: JSTargetsParam) : JSTarget[] = jsNative
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        [<Import("$", "animejs/utils")>]
+        static member ``$`` (targets: TargetsParam) : Target[] = jsNative
+        [<Import("roundPad", "animejs/utils")>]
+        static member roundPad (v: TimelinePosition, decimalLength: float) : string = jsNative
+        [<Import("roundPad", "animejs/utils")>]
+        static member roundPad (decimalLength: float) : ChainableUtil = jsNative
+        [<Import("padStart", "animejs/utils")>]
+        static member padStart (v: float, totalLength: float, padString: string) : string = jsNative
+        [<Import("padStart", "animejs/utils")>]
+        static member padStart (totalLength: float, padString: string) : ChainableUtil = jsNative
+        [<Import("padEnd", "animejs/utils")>]
+        static member padEnd (v: float, totalLength: float, padString: string) : string = jsNative
+        [<Import("padEnd", "animejs/utils")>]
+        static member padEnd (totalLength: float, padString: string) : ChainableUtil = jsNative
+        [<Import("wrap", "animejs/utils")>]
+        static member wrap (v: float, min: float, max: float) : float = jsNative
+        [<Import("wrap", "animejs/utils")>]
+        static member wrap (min: float, max: float) : ChainableUtil = jsNative
+        [<Import("mapRange", "animejs/utils")>]
+        static member mapRange (value: float, inLow: float, inHigh: float, outLow: float, outHigh: float) : float = jsNative
+        [<Import("mapRange", "animejs/utils")>]
+        static member mapRange (inLow: float, inHigh: float, outLow: float, outHigh: float) : ChainableUtil = jsNative
+        [<Import("degToRad", "animejs/utils")>]
+        static member degToRad (degrees: float) : float = jsNative
+        [<Import("degToRad", "animejs/utils")>]
+        static member degToRad () : ChainableUtil = jsNative
+        [<Import("radToDeg", "animejs/utils")>]
+        static member radToDeg (radians: float) : float = jsNative
+        [<Import("radToDeg", "animejs/utils")>]
+        static member radToDeg () : ChainableUtil = jsNative
+        [<Import("snap", "animejs/utils")>]
+        static member snap (v: float, increment: U2<float, float[]>) : float = jsNative
+        [<Import("snap", "animejs/utils")>]
+        static member snap (increment: U2<float, float[]>) : ChainableUtil = jsNative
+        [<Import("clamp", "animejs/utils")>]
+        static member clamp (v: float, min: float, max: float) : float = jsNative
+        [<Import("clamp", "animejs/utils")>]
+        static member clamp (min: float, max: float) : ChainableUtil = jsNative
+        [<Import("round", "animejs/utils")>]
+        static member round (v: float, decimalLength: float) : float = jsNative
+        [<Import("round", "animejs/utils")>]
+        static member round (decimalLength: float) : ChainableUtil = jsNative
+        [<Import("lerp", "animejs/utils")>]
+        static member lerp (start: float, ``end``: float, factor: float) : float = jsNative
+        [<Import("lerp", "animejs/utils")>]
+        static member lerp (start: float, ``end``: float) : ChainableUtil = jsNative
+        [<Import("damp", "animejs/utils")>]
+        static member damp (start: float, ``end``: float, deltaTime: float, factor: float) : float = jsNative
+        [<Import("damp", "animejs/utils")>]
+        static member damp (start: float, ``end``: float, deltaTime: float) : ChainableUtil = jsNative
+        /// <summary>
+        /// Generates a random number between min and max (inclusive) with optional decimal precision
+        /// </summary>
+        /// <remarks>@type {RandomNumberGenerator}</remarks>
+        [<Import("random", "animejs/utils")>]
+        static member random (?min: float, ?max: float, ?decimalLength: float) : float = jsNative
+        [<Import("createSeededRandom", "animejs/utils")>]
+        static member createSeededRandom (?seed: float, ?seededMin: float, ?seededMax: float, ?seededDecimalLength: float) : RandomNumberGenerator = jsNative
+        [<Import("randomPick", "animejs/utils")>]
+        static member randomPick<'T> (items: U2<string, 'T[]>) : U2<string, 'T> = jsNative
+        [<Import("shuffle", "animejs/utils")>]
+        static member shuffle (items: obj[], ?rnd: RandomNumberGenerator) : obj[] = jsNative
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        [<Import("stagger", "animejs/utils")>]
+        static member stagger (``val``: float, ?``params``: StaggerParams) : Utils.Stagger.Result = jsNative
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        [<Import("stagger", "animejs/utils")>]
+        static member stagger (``val``: string, ?``params``: StaggerParams) : Utils.Stagger.Result2 = jsNative
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        [<Import("stagger", "animejs/utils")>]
+        static member stagger (``val``: float * float, ?``params``: StaggerParams) : Utils.Stagger.Result = jsNative
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        [<Import("stagger", "animejs/utils")>]
+        static member stagger (``val``: string * string, ?``params``: StaggerParams) : Utils.Stagger.Result2 = jsNative
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        [<Import("get", "animejs/utils")>]
+        static member get (targetSelector: DOMTargetSelector, propName: string) : string = jsNative
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        [<Import("get", "animejs/utils")>]
+        static member get (targetSelector: JSTargetsParam, propName: string) : TimelinePosition = jsNative
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        [<Import("get", "animejs/utils")>]
+        static member get (targetSelector: DOMTargetsParam, propName: string, unit: string) : string = jsNative
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        /// <remarks>@overload</remarks>
+        [<Import("get", "animejs/utils")>]
+        static member get (targetSelector: TargetsParam, propName: string, unit: bool) : float = jsNative
+        [<Import("set", "animejs/utils")>]
+        static member set (targets: TargetsParam, parameters: AnimationParams) : JSAnimation = jsNative
+        [<Import("remove", "animejs/utils")>]
+        static member remove (targets: TargetsParam, ?renderable: U3<JSAnimation, Timeline, WAAPIAnimation>, ?propertyName: string) : Target[] = jsNative
+        [<Import("sync", "animejs/utils")>]
+        static member sync (?callback: (Timer -> obj)) : Timer = jsNative
+        [<Import("keepTime", "animejs/utils")>]
+        static member keepTime<'T> (``constructor``: (obj[] -> 'T)) : (obj[] -> obj) = jsNative
+
     module Stagger =
         type Result = delegate of target: Target option * index: float option * targets: Target[] option * prevTween: Tween option * tl: Timeline option -> float
 
@@ -4510,6 +5098,16 @@ module WAAPITweenOptions =
         | [<CompiledName("accumulate")>] Accumulate
         | [<CompiledName("add")>] Add
         | [<CompiledName("replace")>] Replace
+
+/// <summary>animejs/waapi</summary>
+module Waapi =
+    /// <summary>The package's value exports, each bound to its import.</summary>
+    [<Erase>]
+    type Exports =
+        [<Import("WAAPIAnimation", "animejs/waapi"); EmitConstructor>]
+        static member WAAPIAnimation (targets: DOMTargetsParam, ``params``: WAAPIAnimationParams) : WAAPIAnimation = jsNative
+        [<Import("waapi", "animejs/waapi")>]
+        static member waapi: Waapi = jsNative
 
 [<Erase>]
 type U10<'t1, 't2, 't3, 't4, 't5, 't6, 't7, 't8, 't9, 't10> =

@@ -4444,6 +4444,77 @@ let pipelineTests =
                     Expect.stringContains source "module Aliases" "the nested module Aliases for `(layout-lab/aliases).renamedCheck` is created"
             ]
         yield!
+            fixtureTests "subpath-lab" (handFixture "subpath-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "each public subpath is a nested module with its own Exports" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+                      Expect.stringContains source "[<Import(\"describe\", \"subpath-lab\")>]" "root value imports the root"
+                      Expect.stringContains source "[<Import(\"describe\", \"subpath-lab/client\")>]" "client value imports the subpath"
+                      Expect.stringContains source "[<Import(\"depth\", \"subpath-lab/client/deep\")>]" "deep value imports its subpath"
+                      Expect.stringContains source "module Client =" "client module"
+                      Expect.stringContains source "module Deep =" "deep module nests under client"
+                      Expect.stringContains source "module Legacy =" "trailing index.js key strips to Legacy"
+
+                  testCase "two keys over one file both carry the value surface" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+                      Expect.stringContains source "[<Import(\"whoami\", \"subpath-lab/alias\")>]" "alias key"
+                      Expect.stringContains source "[<Import(\"whoami\", \"subpath-lab/mirror\")>]" "mirror key"
+
+                  testCase "a value-only subpath still carries the rule-13 summary" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+                      Expect.stringContains
+                          source
+                          "/// <summary>subpath-lab/legacy/index.js</summary>\nmodule Legacy ="
+                          "Legacy owns only value exports, so the summary comes from allOwners, not exportedDeclarations"
+                      Expect.stringContains
+                          source
+                          "/// <summary>subpath-lab/mirror</summary>\nmodule Mirror ="
+                          "Mirror owns only value exports, so the summary comes from allOwners, not exportedDeclarations"
+
+                  testCase "wildcard and untyped keys are skipped with findings" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let symbols = rendered.Files |> List.find (fst >> (=) "symbols.jsonl") |> snd
+                      Expect.stringContains symbols "\"key\":\"HG008\"" "wildcard skipped"
+                      Expect.stringContains symbols "\"key\":\"HG009\"" "untyped skipped"
+                      let source = rendered.Files |> List.head |> snd
+                      Expect.isFalse (source.Contains "module Features") "no wildcard module"
+                      Expect.isFalse (source.Contains "module Untyped") "no untyped module"
+
+                  testCase "a type exported from root and a subpath is declared at the root" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+                      Expect.stringContains source "\ntype Payload =" "root declaration"
+                      Expect.isFalse (source.Contains "    type Payload =") "no nested redeclaration"
+                      Expect.isFalse (source.Contains "type Payload = Payload") "no abbreviation under the subpath"
+
+                  testCase "the shallowest path's exported name wins" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+                      Expect.stringContains source "\ntype RootSession" "root exports Session as RootSession"
+                      Expect.isFalse (source.Contains "    type Session") "client does not redeclare it"
+
+                  testCase "a type exported by a subpath alone nests under it" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+                      Expect.stringContains source "    type ClientOptions" "ClientOptions declared under Client"
+                      Expect.stringContains source "abstract level: " "DeepOnly declared"
+                      Expect.stringContains source "(options: ClientOptions)" "client signature reads its own module"
+
+                  testCase "an unexported shared type stays at the root" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+                      Expect.stringContains source "\ntype Internal =" "root"
+
+                  testCase "equal-depth keys over one file home types under the ordinal-first key" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+                      let aliasAt = source.IndexOf "module Alias ="
+                      let shapeAt = source.IndexOf "type AliasShape"
+                      let mirrorAt = source.IndexOf "module Mirror ="
+                      Expect.isTrue (aliasAt >= 0 && shapeAt > aliasAt && (mirrorAt < 0 || shapeAt < mirrorAt)) "AliasShape under Alias, not Mirror" ])
+        yield!
             fixtureTests "single-case-enum-lab" (handFixture "single-case-enum-lab") GeneratorConfig.Default (fun package -> [
                 testCase "a single-case string enum is not RequireQualifiedAccess" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)

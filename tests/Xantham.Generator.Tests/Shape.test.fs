@@ -4204,6 +4204,49 @@ let shapePassTests =
                 [ "RA001", "DivergentBound" ]
                 "the drop is reported, not the phantom"
 
+        testCase "repair-arity drops a delegate whose head names one variable twice" <| fun _ ->
+            // `solid-js`'s `SetStoreFunction` binds a same-named type parameter under two
+            // different constraints across its call-signature overloads: `alias-type-params`
+            // collapses the overloads into one head, and the collision survives into it even
+            // though every parameter is used - `DivergentBound`'s `unused` gate never sees this
+            // one, so it needs its own drop.
+            let repeated =
+                FsDelegateType
+                    { Name = "SetStoreFunction"
+                      Docs = ""
+                      Tags = []
+                      Order = None
+                      TypeParameters =
+                          [ { Name = "K1"; Constraint = None }
+                            { Name = "K2"; Constraint = None }
+                            { Name = "K2"; Constraint = None } ]
+                      Parameters =
+                          [ { Name = "k1"; Type = FsTypeVar "K1" }
+                            { Name = "k2"; Type = FsTypeVar "K2" } ]
+                      Return = FsUnit }
+
+            let referrer =
+                FsAbbrev
+                    { Value = None; Name = "Setters"
+                      Docs = ""
+                      Tags = []
+                      Order = None
+                      TypeParameters = []
+                      Target = FsNamed "SetStoreFunction" }
+
+            let model = { Build.shapeModel [] with Decls = [ repeated; referrer ] }
+
+            let repaired, findings = Build.runPass Arity.repairArity model
+
+            match repaired.Decls with
+            | [ FsAbbrev decl ] -> Expect.equal decl.Target FsObj "the reference to the dropped delegate widens"
+            | decls -> failtest $"expected only the referring alias, got %A{decls}"
+
+            Expect.equal
+                (findings |> List.map (fun f -> f.Key, f.Symbol))
+                [ "RA007", "SetStoreFunction"; "RA002", "Setters" ]
+                "the head drop is reported by name, and the reference to it widens"
+
         testCase "repair-arity widens a generic named without its arguments" <| fun _ ->
             // FS0033: `PagesFunctionContext` takes three arguments and this position has none.
             let generic =

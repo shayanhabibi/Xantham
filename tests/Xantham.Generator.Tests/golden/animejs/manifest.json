@@ -3,16 +3,16 @@
   "package": "animejs",
   "module": "Animejs",
   "counts": {
-    "exact": 92,
-    "ergonomic": 102,
+    "exact": 129,
+    "ergonomic": 129,
     "widened": 14,
-    "escape": 54
+    "escape": 79
   },
   "passes": [
     {
       "pass": "SY - synthesize-anonymous",
-      "total": 52,
-      "exact": 52
+      "total": 72,
+      "exact": 72
     },
     {
       "pass": "LU - classify-literal-unions",
@@ -21,18 +21,18 @@
     },
     {
       "pass": "shape-callbacks",
-      "total": 139,
+      "total": 163,
       "exact": 1,
-      "ergonomic": 130,
-      "escape": 8
+      "ergonomic": 141,
+      "escape": 21
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 1879,
+      "total": 1917,
       "exact": 27,
-      "ergonomic": 1423,
+      "ergonomic": 1435,
       "widened": 100,
-      "escape": 329
+      "escape": 355
     },
     {
       "pass": "SA - shape-aliases",
@@ -44,20 +44,21 @@
     },
     {
       "pass": "SC - shape-classes",
-      "total": 30,
-      "ergonomic": 30
+      "total": 65,
+      "ergonomic": 62,
+      "widened": 3
     },
     {
       "pass": "SE - shape-exports",
-      "total": 107,
-      "ergonomic": 94,
-      "widened": 1,
-      "escape": 12
+      "total": 240,
+      "ergonomic": 211,
+      "widened": 2,
+      "escape": 27
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 124,
-      "ergonomic": 124
+      "total": 141,
+      "ergonomic": 141
     },
     {
       "pass": "DO - dedupe-overloads",

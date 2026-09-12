@@ -88,6 +88,11 @@ let private configKeys =
             ("autoOpenExports",
              "Mark every generated `Exports` type [<AutoOpen>], so a package's value exports resolve unqualified. \
           Defaults false.")
+
+            "Subpaths",
+            ("subpaths",
+             "The package.json exports keys generated as nested modules, each written as in the map (\"./client\"). \
+          Omitted, every non-wildcard ./ key is generated. A key absent from the map fails generation.")
         ]
 
 /// The JSON key and description of one `CompilerLibConfig` field.

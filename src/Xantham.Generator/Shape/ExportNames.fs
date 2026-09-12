@@ -6,8 +6,9 @@ open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator.Shape.Spec
 
-/// The export that owns each declared type's generated definition. Keep harvest order within
-/// one group; across shipped groups, prefer the defining symbol over an alias of it.
+/// The export that owns each declared type's generated definition. Across shipped groups, the
+/// defining symbol takes precedence over an alias of it; within one group, the export whose
+/// owner path is shallowest, ordinal owner specifier and then harvest order breaking ties.
 let declarationExports (ctx: Context) (model: ShapeModel) =
     model.Harvest.Exports
     |> List.choose (fun export ->
@@ -32,15 +33,22 @@ let declarationExports (ctx: Context) (model: ShapeModel) =
                 && GeneratorConfig.disposition ctx.Config origin = Ship
                 && (Map.tryFind typeId model.Types
                     |> Option.exists (fun facts -> facts.Response.Symbol = ValueSome export.Symbol.Id)))
-            |> Option.defaultValue first
+            |> Option.defaultValue (
+                exports
+                |> List.indexed
+                |> List.minBy (fun (index, export) ->
+                    let owner = ExportLayout.ownerOf model.RuntimePackage export.Origin
+                    ExportLayout.depthOf model.RuntimePackage owner, ExportLayout.ownerSpecifier owner, index)
+                |> snd
+            )
 
         typeId, defining)
 
 /// Names every type-like export before anything refers to one, so later passes see references
 /// as `FsNamed` instead of expansions. Keys are type ids; when two exports share a declared
-/// type the first in harvest order names it and `shape-aliases` abbreviates the rest. Across
-/// shipped groups, the defining symbol takes precedence so an entry alias cannot make the
-/// shared declaration depend on its consumer.
+/// type, `declarationExports` names it under the defining symbol across shipped groups, or
+/// otherwise under the shallowest owner path (ordinal owner specifier, then harvest order,
+/// breaking ties), and `shape-aliases` abbreviates the rest.
 ///
 /// Two exports of two *different* types under one name are two declarations, and F# admits one
 /// name per declaration. Where TypeScript separates them by the namespace one of them is

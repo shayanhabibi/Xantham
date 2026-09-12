@@ -232,6 +232,11 @@ type GeneratorConfig =
         [<Description("Mark every generated `Exports` type [<AutoOpen>], so package's value exports resolve unqualified. \
         Defaults to false.")>]
         AutoOpenExports: bool
+        /// The `exports` keys generated as nested modules. `None` generates every
+        /// non-wildcard `./` key.
+        [<Description("The package.json exports keys generated as nested modules, each written as in the map \
+        (\"./client\"). Omitted, every non-wildcard ./ key is generated. A key absent from the map fails generation.")>]
+        Subpaths: string list option
     }
 
     static member Default =
@@ -248,6 +253,7 @@ type GeneratorConfig =
             ResolveNoInfer = false
             CompilerLib = CompilerLibConfig.Default
             AutoOpenExports = false
+            Subpaths = None
         }
 
 module GeneratorConfig =
@@ -399,6 +405,23 @@ module GeneratorConfig =
                 | true, _ -> failwith "xantham.json: declarationReferences must be an array of nonempty paths"
                 | _ -> []
 
+            let subpaths =
+                match doc.RootElement.TryGetProperty "subpaths" with
+                | true, value when value.ValueKind = JsonValueKind.Array ->
+                    value.EnumerateArray()
+                    |> Seq.map (fun item ->
+                        if
+                            item.ValueKind <> JsonValueKind.String
+                            || not (item.GetString().StartsWith("./", StringComparison.Ordinal))
+                        then
+                            failwith "xantham.json: subpaths must be an array of exports keys beginning with ./"
+
+                        item.GetString())
+                    |> Seq.toList
+                    |> Some
+                | true, _ -> failwith "xantham.json: subpaths must be an array of exports keys beginning with ./"
+                | _ -> None
+
             let compilerLib =
                 match doc.RootElement.TryGetProperty "compilerLib" with
                 | false, _ -> CompilerLibConfig.Default
@@ -441,6 +464,7 @@ module GeneratorConfig =
                 ResolveNoInfer = boolField "resolveNoInfer" GeneratorConfig.Default.ResolveNoInfer
                 CompilerLib = compilerLib
                 AutoOpenExports = boolField "autoOpenExports" GeneratorConfig.Default.AutoOpenExports
+                Subpaths = subpaths
             }
 
     /// Loads `<packageDir>/xantham.json`.
@@ -768,6 +792,10 @@ module Naming =
                 capitalize part)
         |> String.concat ""
 
+/// One public import surface of the package: an `exports` map key and the declaration
+/// file its conditions select. `Key` is `"."` for the root.
+type PublicPath = { Key: string; File: string<declFile> }
+
 /// Everything a pass may reach for, created once per run by `Bootstrap.start`. Passes never
 /// create programs; the session here is the only wire access they have.
 type Context =
@@ -782,6 +810,11 @@ type Context =
         PackageName: string<npmDependency>
         /// Absolute path of the declaration entry point the program was created over.
         EntryFile: string<declFile>
+        /// Every public path the run generates, root first, then subpaths in ordinal key
+        /// order. A configured `entry` yields the root alone.
+        PublicPaths: PublicPath list
+        /// `exports` keys the run skipped, with the finding each raises.
+        SkippedPaths: (string * HarvestGlobals) list
     }
 
 /// What a pass produced: the advanced model, or the model plus the findings that say where the

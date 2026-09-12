@@ -168,6 +168,8 @@ module FindingCodes =
             "HG.AmbientModuleWildcard", "HG005"
             "HG.NamespaceIsModuleBody", "HG006"
             "HG.AmbientModuleAliasDivergent", "HG007"
+            "HG.SubpathWildcardSkipped", "HG008"
+            "HG.SubpathWithoutDeclarations", "HG009"
             "RE.FacetNotResolved", "RE001"
             "RT.FrontierNotResolved", "RT001"
             "RT.TypeNotResolved", "RT002"
@@ -227,6 +229,7 @@ module FindingCodes =
             "RA.ArityMismatch", "RA004"
             "RA.ReadWithoutWrite", "RA005"
             "RA.AliasKeptAsPhantom", "RA006"
+            "RA.DuplicateTypeParameterUnwritable", "RA007"
             "AC.ExportNotRepresented", "AC001"
             "GE.GroupShipped", "GE001"
             "GE.ShippedGroupWithoutDeclarations", "GE002"
@@ -699,6 +702,11 @@ type HarvestGlobals =
     | [<Escape>] AmbientModuleWildcard of specifier: string
     | [<Exact>] NamespaceIsModuleBody of ns: string * specifier: string
     | [<Widened>] AmbientModuleAliasDivergent of name: string * spellings: string list
+    /// A public subpath key containing `*`. No module is generated for it.
+    | [<Escape>] SubpathWildcardSkipped of key: string
+    /// A public subpath key whose conditions supply no declaration file. No module is
+    /// generated for it.
+    | [<Escape>] SubpathWithoutDeclarations of key: string
 
     interface IFindingKind with
         member this.Message =
@@ -719,6 +727,10 @@ type HarvestGlobals =
             | AmbientModuleAliasDivergent(name, spellings) ->
                 let spellings = spellings |> List.map (sprintf "\"%s\"") |> String.concat ", "
                 $"\"node:{name}\" collapses {spellings}, whose export sets disagree"
+            | SubpathWildcardSkipped key ->
+                $"exports key \"{key}\" skipped - a wildcard names no subpath an import can resolve"
+            | SubpathWithoutDeclarations key ->
+                $"exports key \"{key}\" skipped - its conditions supply no declaration file"
 
 /// `resolve-export-types`.
 [<Prefix("RE", "resolve-export-types")>]
@@ -1069,6 +1081,9 @@ type RepairArity =
     /// head declares. The alias is written with the surplus parameters erased as phantoms, so
     /// references keep their arity; the erased parameters carry no value.
     | [<Widened>] AliasKeptAsPhantom of name: string
+    /// A declaration whose head repeats one type parameter's name under two different bounds.
+    /// The declaration is dropped, and every reference to it widens.
+    | [<Widened>] DuplicateTypeParameterUnwritable of name: string
 
     interface IFindingKind with
         member this.Message =
@@ -1084,6 +1099,8 @@ type RepairArity =
                 $"{name} reads but does not write: its type holds no value, and F# has no setter of type unit"
             | AliasKeptAsPhantom name ->
                 $"{name} resolves to a target using fewer type parameters than its head; the surplus are erased phantoms"
+            | DuplicateTypeParameterUnwritable name ->
+                $"{name} dropped: two of its type parameters share a name under different bounds"
 
 /// `audit-coverage`.
 [<Prefix("AC", "audit-coverage")>]

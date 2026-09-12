@@ -76,7 +76,7 @@ is the specification; there is no separate spec document.
 - Worker context budget: assignment text under 2,000 tokens. Load only the task section
   below plus the named source anchors.
 
-## Module-path rules (reconstructed 2026-09-12)
+## Module-path rules (authoritative from commit cab5922)
 
 Earlier commits cite "rules 4/5" and "rule 13" from a list that was never written down. This
 list is reconstructed from `Shape/ExportLayout.fs`, `Shape/ExportNames.fs`,

@@ -115,21 +115,15 @@ let private exportedDeclarations (ctx: Context) (shape: ShapeModel) =
 
 /// The runtime specifier of each nested module path the entry module writes for an ambient
 /// module owner - the one-line summary `Render.renderSources` places above that module's
-/// opening line (rule 13). A path a TS `namespace` nests a companion module under carries no
-/// entry here, since only `Shape.ExportLayout.preferredPath` reaches an owner directly.
-let private moduleSpecifiers (ctx: Context) (shape: ShapeModel) : Map<string list, string<importSpecifier>> =
-    let owners =
-        exportedDeclarations ctx shape
-        |> Map.toList
-        |> List.map (fun (_, export) -> Shape.ExportLayout.ownerOf shape.RuntimePackage export.Origin)
-        |> List.distinct
+/// opening line (rule 13). Keyed by `Shape.ExportLayout.modulePaths`, which resolves hashed
+/// path collisions across owners; entry-module and global-scope owners carry no entry here.
+let private moduleSpecifiers (shape: ShapeModel) : Map<string list, string<importSpecifier>> =
+    let paths = Shape.ExportLayout.modulePaths shape
 
-    let hasEntryOwner = owners |> List.contains EntryModule
-
-    owners
+    Shape.ExportLayout.allOwners shape
     |> List.choose (fun owner ->
-        match owner, Shape.ExportLayout.preferredPath shape.RuntimePackage hasEntryOwner owner with
-        | AmbientModule specifier, (_ :: _ as path) -> Some(path, specifier)
+        match owner, Map.tryFind owner paths with
+        | AmbientModule specifier, Some(_ :: _ as path) -> Some(path, specifier)
         | _ -> None)
     |> Map.ofList
 
@@ -288,7 +282,7 @@ let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel)
         | origin -> origin, ""
 
     let placed = shape.Decls |> List.groupBy placementOf |> Map.ofList
-    let entrySpecifiers = moduleSpecifiers ctx shape
+    let entrySpecifiers = moduleSpecifiers shape
 
     let moduleOf (origin: PackageId, family: string) : Render.GroupModule =
         let decls = placed |> Map.tryFind (origin, family) |> Option.defaultValue []

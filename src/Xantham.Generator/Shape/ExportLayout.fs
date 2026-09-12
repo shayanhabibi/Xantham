@@ -93,6 +93,21 @@ let preferredPath (runtimePackage: string<importSpecifier>) hasEntryOwner =
         else
             segments ambient
 
+/// The nesting depth of an owner's preferred path: 0 for the entry module and globals.
+let depthOf (runtimePackage: string<importSpecifier>) (owner: ExportOwner) : int =
+    match owner with
+    | EntryModule
+    | GlobalScope -> 0
+    | AmbientModule _ -> rawPreferredPath runtimePackage true owner |> List.length
+
+/// The ordinal tie-break key of an owner: its specifier, or `""` for the entry module and
+/// globals.
+let ownerSpecifier (owner: ExportOwner) : string =
+    match owner with
+    | EntryModule
+    | GlobalScope -> ""
+    | AmbientModule specifier -> specifier / uom<importSpecifier>
+
 let private digest owner length =
     SHA256.HashData(Encoding.UTF8.GetBytes(ownerKey owner))
     |> Convert.ToHexString

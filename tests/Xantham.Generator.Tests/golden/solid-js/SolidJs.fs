@@ -10,6 +10,12 @@ open Fable.Core.JsInterop
 open Fable.Core.JS
 open Fable.Core.TS.Dom
 
+[<Interface>]
+type JSX =
+    abstract SERIALIZABLE: obj
+    [<ParamObject; Emit("$0")>]
+    static member Create (SERIALIZABLE: obj) : JSX = jsNative
+
 type JSXElement = U5<float, bool, obj[], Fable.Core.TS.Dom.Node, string> option
 
 [<Interface>]
@@ -71,10 +77,10 @@ type SourceMapValue =
 type WriteSignal = delegate of node: U2<Memo<obj, obj>, SignalState<obj>> * value: obj * isComp: bool option -> obj
 
 [<Interface>]
-type JSX =
+type JSX2 =
     abstract SERIALIZABLE: obj
     [<ParamObject; Emit("$0")>]
-    static member Create (SERIALIZABLE: obj) : JSX = jsNative
+    static member Create (SERIALIZABLE: obj) : JSX2 = jsNative
 
 type ObservableObserver<'T> = U2<('T -> unit), ObservableObserver2<'T>>
 
@@ -400,14 +406,14 @@ type SharedConfig =
     abstract load: (string -> obj) option with get, set
     abstract has: (string -> bool) option with get, set
     abstract gather: (string -> unit) option with get, set
-    abstract registry: JS.Map<string, Fable.Core.TS.Dom.Element> option with get, set
+    abstract registry: JS.Map<string, JsxDevRuntime.DOMElement> option with get, set
     abstract ``done``: bool option with get, set
     abstract count: float option with get, set
     abstract effects: Computation<obj, obj>[] option with get, set
     abstract getContextId: unit -> string
     abstract getNextContextId: unit -> string
     [<ParamObject; Emit("$0")>]
-    static member Create (getContextId: (unit -> string), getNextContextId: (unit -> string), ?context: SharedConfig.Context, ?resources: Record<string, obj>, ?load: (string -> obj), ?has: (string -> bool), ?gather: (string -> unit), ?registry: JS.Map<string, Fable.Core.TS.Dom.Element>, ?``done``: bool, ?count: float, ?effects: Computation<obj, obj>[]) : SharedConfig = jsNative
+    static member Create (getContextId: (unit -> string), getNextContextId: (unit -> string), ?context: SharedConfig.Context, ?resources: Record<string, obj>, ?load: (string -> obj), ?has: (string -> bool), ?gather: (string -> unit), ?registry: JS.Map<string, JsxDevRuntime.DOMElement>, ?``done``: bool, ?count: float, ?effects: Computation<obj, obj>[]) : SharedConfig = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
@@ -1404,6 +1410,838 @@ module From =
                 [<ParamObject; Emit("$0")>]
                 static member Create (unsubscribe: (unit -> unit)) : Result = jsNative
 
+/// <summary>solid-js/h</summary>
+module H =
+    [<Interface>]
+    type H =
+        abstract Fragment: (H.H.Fragment.Props -> H.H.Fragment.Props.Children.Item.Result[]) with get, set
+        [<Emit("$0($1...)")>]
+        abstract Invoke: [<ParamArray>] args: obj[] -> (unit -> U2<H.H.Fragment.Props.Children.Item.Result[], H.H.Fragment.Props.Children.Item.Result>)
+        [<ParamObject; Emit("$0")>]
+        static member Create (Fragment: (H.H.Fragment.Props -> H.H.Fragment.Props.Children.Item.Result[])) : H = jsNative
+
+    /// <summary>The package's value exports, each bound to its import.</summary>
+    [<Erase>]
+    type Exports =
+        [<Import("default", "solid-js/h")>]
+        static member h ([<ParamArray>] args: obj[]) : (unit -> U2<H.H.Fragment.Props.Children.Item.Result[], H.H.Fragment.Props.Children.Item.Result>) = jsNative
+
+    module H =
+        module Fragment =
+            [<Interface>]
+            type Props =
+                abstract children: U2<(unit -> H.H.Fragment.Props.Children.Item.Result)[], (unit -> H.H.Fragment.Props.Children.Item.Result)> with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (children: U2<(unit -> H.H.Fragment.Props.Children.Item.Result)[], (unit -> H.H.Fragment.Props.Children.Item.Result)>) : Props = jsNative
+
+            module Props =
+                module Children =
+                    module Item =
+                        type Result =
+                            /// <summary>
+                            /// The read-only <b><c>baseURI</c></b> property of the Node interface returns the absolute base URL of the document containing the node.
+                            /// <br /><br />
+                            /// <a href="https://developer.mozilla.org/docs/Web/API/Node/baseURI">MDN Reference</a>
+                            /// </summary>
+                            abstract baseURI: string
+                            /// <summary>
+                            /// The read-only <b><c>childNodes</c></b> property of the Node interface returns a live NodeList of child nodes of the given element where the first child node is assigned index 0. Child nodes include elements, text and comments.
+                            /// <br /><br />
+                            /// <a href="https://developer.mozilla.org/docs/Web/API/Node/childNodes">MDN Reference</a>
+                            /// </summary>
+                            abstract childNodes: Fable.Core.TS.Dom.NodeListOf<Fable.Core.TS.Dom.ChildNode>
+                            /// <summary>
+                            /// The read-only <b><c>firstChild</c></b> property of the Node interface returns the node's first child in the tree, or null if the node has no children.
+                            /// <br /><br />
+                            /// <a href="https://developer.mozilla.org/docs/Web/API/Node/firstChild">MDN Reference</a>
+                            /// </summary>
+                            abstract firstChild: Fable.Core.TS.Dom.ChildNode option
+                            /// <summary>
+                            /// The read-only <b><c>isConnected</c></b> property of the Node interface returns a boolean indicating whether the node is connected (directly or indirectly) to a Document object.
+                            /// <br /><br />
+                            /// <a href="https://developer.mozilla.org/docs/Web/API/Node/isConnected">MDN Reference</a>
+                            /// </summary>
+                            abstract isConnected: bool
+                            /// <summary>
+                            /// The read-only <b><c>lastChild</c></b> property of the Node interface returns the last child of the node, or null if there are no child nodes.
+                            /// <br /><br />
+                            /// <a href="https://developer.mozilla.org/docs/Web/API/Node/lastChild">MDN Reference</a>
+                            /// </summary>
+                            abstract lastChild: Fable.Core.TS.Dom.ChildNode option
+                            /// <summary>
+                            /// The read-only <b><c>nextSibling</c></b> property of the Node interface returns the node immediately following the specified one in their parent's childNodes, or returns null if the specified node is the last child in the parent element.
+                            /// <br /><br />
+                            /// <a href="https://developer.mozilla.org/docs/Web/API/Node/nextSibling">MDN Reference</a>
+                            /// </summary>
+                            abstract nextSibling: Fable.Core.TS.Dom.ChildNode option
+                            /// <summary>
+                            /// The read-only <b><c>nodeName</c></b> property of Node returns the name of the current node as a string.
+                            /// <br /><br />
+                            /// <a href="https://developer.mozilla.org/docs/Web/API/Node/nodeName">MDN Reference</a>
+                            /// </summary>
+                            abstract nodeName: string
+                            /// <summary>
+                            /// The read-only <b><c>nodeType</c></b> property of a Node interface is an integer that identifies what the node is. It distinguishes different kinds of nodes from each other, such as elements, text, and comments.
+                            /// <br /><br />
+                            /// <a href="https://developer.mozilla.org/docs/Web/API/Node/nodeType">MDN Reference</a>
+                            /// </summary>
+                            abstract nodeType: float
+                            /// <summary>
+                            /// The <b><c>nodeValue</c></b> property of the Node interface returns or sets the value of the current node.
+                            /// <br /><br />
+                            /// <a href="https://developer.mozilla.org/docs/Web/API/Node/nodeValue">MDN Reference</a>
+                            /// </summary>
+                            abstract nodeValue: string option with get, set
+                            /// <summary>
+                            /// The read-only <b><c>ownerDocument</c></b> property of the Node interface returns the top-level document object of the node.
+                            /// <br /><br />
+                            /// <a href="https://developer.mozilla.org/docs/Web/API/Node/ownerDocument">MDN Reference</a>
+                            /// </summary>
+                            abstract ownerDocument: Fable.Core.TS.Dom.Document option
+                            /// <summary>
+                            /// The read-only <b><c>parentElement</c></b> property of Node interface returns the DOM node's parent Element, or null if the node either has no parent, or its parent isn't a DOM Element. Node.parentNode on the other hand returns any kind of parent, regardless of its type.
+                            /// <br /><br />
+                            /// <a href="https://developer.mozilla.org/docs/Web/API/Node/parentElement">MDN Reference</a>
+                            /// </summary>
+                            abstract parentElement: Fable.Core.TS.Dom.HTMLElement option
+                            /// <summary>
+                            /// The read-only <b><c>parentNode</c></b> property of the Node interface returns the parent of the specified node in the DOM tree.
+                            /// <br /><br />
+                            /// <a href="https://developer.mozilla.org/docs/Web/API/Node/parentNode">MDN Reference</a>
+                            /// </summary>
+                            abstract parentNode: Fable.Core.TS.Dom.ParentNode option
+                            /// <summary>
+                            /// The read-only <b><c>previousSibling</c></b> property of the Node interface returns the node immediately preceding the specified one in its parent's childNodes list, or null if the specified node is the first in that list.
+                            /// <br /><br />
+                            /// <a href="https://developer.mozilla.org/docs/Web/API/Node/previousSibling">MDN Reference</a>
+                            /// </summary>
+                            abstract previousSibling: Fable.Core.TS.Dom.ChildNode option
+                            /// <summary>
+                            /// The <b><c>textContent</c></b> property of the Node interface represents the text content of the node and its descendants.
+                            /// <br /><br />
+                            /// <a href="https://developer.mozilla.org/docs/Web/API/Node/textContent">MDN Reference</a>
+                            /// </summary>
+                            abstract textContent: string option with get, set
+                            /// <summary>
+                            /// The <b><c>appendChild()</c></b> method of the Node interface adds a node to the end of the list of children of a specified parent node.
+                            /// <br /><br />
+                            /// <a href="https://developer.mozilla.org/docs/Web/API/Node/appendChild">MDN Reference</a>
+                            /// </summary>
+                            abstract appendChild<'T when 'T :> Fable.Core.TS.Dom.Node>: node: 'T -> 'T
+                            /// <summary>
+                            /// The <b><c>cloneNode()</c></b> method of the Node interface returns a duplicate of the node on which this method was called. Its parameter controls if the subtree contained in the node is also cloned or not.
+                            /// <br /><br />
+                            /// <a href="https://developer.mozilla.org/docs/Web/API/Node/cloneNode">MDN Reference</a>
+                            /// </summary>
+                            abstract cloneNode: ?subtree: bool -> Fable.Core.TS.Dom.Node
+                            /// <summary>
+                            /// The <b><c>compareDocumentPosition()</c></b> method of the Node interface reports the position of its argument node relative to the node on which it is called.
+                            /// <br /><br />
+                            /// <a href="https://developer.mozilla.org/docs/Web/API/Node/compareDocumentPosition">MDN Reference</a>
+                            /// </summary>
+                            abstract compareDocumentPosition: other: Fable.Core.TS.Dom.Node -> float
+                            /// <summary>
+                            /// The <b><c>contains()</c></b> method of the Node interface returns a boolean value indicating whether a node is a descendant of a given node, that is the node itself, one of its direct children (childNodes), one of the children's direct children, and so on.
+                            /// <br /><br />
+                            /// <a href="https://developer.mozilla.org/docs/Web/API/Node/contains">MDN Reference</a>
+                            /// </summary>
+                            abstract contains: ?other: Fable.Core.TS.Dom.Node -> bool
+                            /// <summary>
+                            /// The <b><c>getRootNode()</c></b> method of the Node interface returns the context object's root, which optionally includes the shadow root if it is available.
+                            /// <br /><br />
+                            /// <a href="https://developer.mozilla.org/docs/Web/API/Node/getRootNode">MDN Reference</a>
+                            /// </summary>
+                            abstract getRootNode: ?options: Fable.Core.TS.Dom.GetRootNodeOptions -> Fable.Core.TS.Dom.Node
+                            /// <summary>
+                            /// The <b><c>hasChildNodes()</c></b> method of the Node interface returns a boolean value indicating whether the given Node has child nodes or not.
+                            /// <br /><br />
+                            /// <a href="https://developer.mozilla.org/docs/Web/API/Node/hasChildNodes">MDN Reference</a>
+                            /// </summary>
+                            abstract hasChildNodes: unit -> bool
+                            /// <summary>
+                            /// The <b><c>insertBefore()</c></b> method of the Node interface inserts a node before a reference node as a child of a specified parent node.
+                            /// <br /><br />
+                            /// <a href="https://developer.mozilla.org/docs/Web/API/Node/insertBefore">MDN Reference</a>
+                            /// </summary>
+                            abstract insertBefore<'T when 'T :> Fable.Core.TS.Dom.Node>: node: 'T * ?child: Fable.Core.TS.Dom.Node -> 'T
+                            /// <summary>
+                            /// The <b><c>isDefaultNamespace()</c></b> method of the Node interface accepts a namespace URI as an argument. It returns a boolean value that is true if the namespace is the default namespace on the given node and false if not. The default namespace can be retrieved with Node.lookupNamespaceURI() by passing null as the argument.
+                            /// <br /><br />
+                            /// <a href="https://developer.mozilla.org/docs/Web/API/Node/isDefaultNamespace">MDN Reference</a>
+                            /// </summary>
+                            abstract isDefaultNamespace: ?``namespace``: string -> bool
+                            /// <summary>
+                            /// The <b><c>isEqualNode()</c></b> method of the Node interface tests whether two nodes are equal. Two nodes are equal when they have the same type, defining characteristics (for elements, this would be their ID, number of children, and so forth), its attributes match, and so on. The specific set of data points that must match varies depending on the types of the nodes.
+                            /// <br /><br />
+                            /// <a href="https://developer.mozilla.org/docs/Web/API/Node/isEqualNode">MDN Reference</a>
+                            /// </summary>
+                            abstract isEqualNode: ?otherNode: Fable.Core.TS.Dom.Node -> bool
+                            /// <summary>
+                            /// The <b><c>isSameNode()</c></b> method of the Node interface is a legacy alias the for the === strict equality operator. That is, it tests whether two nodes are the same (in other words, whether they reference the same object).
+                            /// <br /><br />
+                            /// <a href="https://developer.mozilla.org/docs/Web/API/Node/isSameNode">MDN Reference</a>
+                            /// </summary>
+                            abstract isSameNode: ?otherNode: Fable.Core.TS.Dom.Node -> bool
+                            /// <summary>
+                            /// The <b><c>lookupNamespaceURI()</c></b> method of the Node interface takes a prefix as parameter and returns the namespace URI associated with it on the given node if found (and null if not). This method's existence allows Node objects to be passed as a namespace resolver to XPathEvaluator.createExpression() and XPathEvaluator.evaluate().
+                            /// <br /><br />
+                            /// <a href="https://developer.mozilla.org/docs/Web/API/Node/lookupNamespaceURI">MDN Reference</a>
+                            /// </summary>
+                            abstract lookupNamespaceURI: ?prefix: string -> string option
+                            /// <summary>
+                            /// The <b><c>lookupPrefix()</c></b> method of the Node interface returns a string containing the prefix for a given namespace URI, if present, and null if not. When multiple prefixes are possible, the first prefix is returned.
+                            /// <br /><br />
+                            /// <a href="https://developer.mozilla.org/docs/Web/API/Node/lookupPrefix">MDN Reference</a>
+                            /// </summary>
+                            abstract lookupPrefix: ?``namespace``: string -> string option
+                            /// <summary>
+                            /// The <b><c>normalize()</c></b> method of the Node interface puts the specified node and all of its sub-tree into a normalized form. In a normalized sub-tree, no text nodes in the sub-tree are empty and there are no adjacent text nodes.
+                            /// <br /><br />
+                            /// <a href="https://developer.mozilla.org/docs/Web/API/Node/normalize">MDN Reference</a>
+                            /// </summary>
+                            abstract normalize: unit -> unit
+                            /// <summary>
+                            /// The <b><c>removeChild()</c></b> method of the Node interface removes a child node from the DOM and returns the removed node.
+                            /// <br /><br />
+                            /// <a href="https://developer.mozilla.org/docs/Web/API/Node/removeChild">MDN Reference</a>
+                            /// </summary>
+                            abstract removeChild<'T when 'T :> Fable.Core.TS.Dom.Node>: child: 'T -> 'T
+                            /// <summary>
+                            /// The <b><c>replaceChild()</c></b> method of the Node interface replaces a child node within the given (parent) node.
+                            /// <br /><br />
+                            /// <a href="https://developer.mozilla.org/docs/Web/API/Node/replaceChild">MDN Reference</a>
+                            /// </summary>
+                            abstract replaceChild<'T when 'T :> Fable.Core.TS.Dom.Node>: node: Fable.Core.TS.Dom.Node * child: 'T -> 'T
+                            /// <summary>
+                            /// node is an element.
+                            /// </summary>
+                            abstract ELEMENT_NODE: float
+                            abstract ATTRIBUTE_NODE: float
+                            /// <summary>
+                            /// node is a Text node.
+                            /// </summary>
+                            abstract TEXT_NODE: float
+                            /// <summary>
+                            /// node is a CDATASection node.
+                            /// </summary>
+                            abstract CDATA_SECTION_NODE: float
+                            abstract ENTITY_REFERENCE_NODE: float
+                            abstract ENTITY_NODE: float
+                            /// <summary>
+                            /// node is a ProcessingInstruction node.
+                            /// </summary>
+                            abstract PROCESSING_INSTRUCTION_NODE: float
+                            /// <summary>
+                            /// node is a Comment node.
+                            /// </summary>
+                            abstract COMMENT_NODE: float
+                            /// <summary>
+                            /// node is a document.
+                            /// </summary>
+                            abstract DOCUMENT_NODE: float
+                            /// <summary>
+                            /// node is a doctype.
+                            /// </summary>
+                            abstract DOCUMENT_TYPE_NODE: float
+                            /// <summary>
+                            /// node is a DocumentFragment node.
+                            /// </summary>
+                            abstract DOCUMENT_FRAGMENT_NODE: float
+                            abstract NOTATION_NODE: float
+                            /// <summary>
+                            /// Set when node and other are not in the same tree.
+                            /// </summary>
+                            abstract DOCUMENT_POSITION_DISCONNECTED: float
+                            /// <summary>
+                            /// Set when other is preceding node.
+                            /// </summary>
+                            abstract DOCUMENT_POSITION_PRECEDING: float
+                            /// <summary>
+                            /// Set when other is following node.
+                            /// </summary>
+                            abstract DOCUMENT_POSITION_FOLLOWING: float
+                            /// <summary>
+                            /// Set when other is an ancestor of node.
+                            /// </summary>
+                            abstract DOCUMENT_POSITION_CONTAINS: float
+                            /// <summary>
+                            /// Set when other is a descendant of node.
+                            /// </summary>
+                            abstract DOCUMENT_POSITION_CONTAINED_BY: float
+                            abstract DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC: float
+                            /// <summary>
+                            /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
+                            /// <br /><br />
+                            /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
+                            /// </summary>
+                            abstract addEventListener: ``type``: string * ?callback: U2<Fable.Core.TS.Dom.EventListener, Fable.Core.TS.Dom.EventListenerObject> * ?options: U2<bool, Fable.Core.TS.Dom.AddEventListenerOptions> -> unit
+                            /// <summary>
+                            /// The <b><c>dispatchEvent()</c></b> method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
+                            /// <br /><br />
+                            /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent">MDN Reference</a>
+                            /// </summary>
+                            abstract dispatchEvent: ``event``: Fable.Core.TS.Dom.Event -> bool
+                            /// <summary>
+                            /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
+                            /// <br /><br />
+                            /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
+                            /// </summary>
+                            abstract removeEventListener: ``type``: string * ?callback: U2<Fable.Core.TS.Dom.EventListener, Fable.Core.TS.Dom.EventListenerObject> * ?options: U2<bool, Fable.Core.TS.Dom.EventListenerOptions> -> unit
+                            [<EmitIndexer>]
+                            abstract Item: string -> obj with get, set
+
+    /// <summary>solid-js/h/jsx-dev-runtime</summary>
+    module JsxDevRuntime =
+        /// <summary>The package's value exports, each bound to its import.</summary>
+        [<Erase>]
+        type Exports =
+            [<Import("Fragment", "solid-js/h/jsx-dev-runtime")>]
+            static member Fragment (props: H.JsxDevRuntime.Fragment.Props) : U6<float, bool, obj[], (unit -> obj), Fable.Core.TS.Dom.Node, string> option = jsNative
+            [<Import("jsx", "solid-js/h/jsx-dev-runtime")>]
+            static member jsx (``type``: obj, props: obj) : (unit -> U2<H.JsxDevRuntime.Jsx.Result.Result.Item[], H.JsxDevRuntime.Jsx.Result.Result>) = jsNative
+            [<Import("jsxDEV", "solid-js/h/jsx-dev-runtime")>]
+            static member jsxDEV (``type``: obj, props: obj) : (unit -> U2<H.JsxDevRuntime.Jsx.Result.Result.Item[], H.JsxDevRuntime.Jsx.Result.Result>) = jsNative
+            [<Import("jsxs", "solid-js/h/jsx-dev-runtime")>]
+            static member jsxs (``type``: obj, props: obj) : (unit -> U2<H.JsxDevRuntime.Jsx.Result.Result.Item[], H.JsxDevRuntime.Jsx.Result.Result>) = jsNative
+
+        module Fragment =
+            [<Interface>]
+            type Props =
+                abstract children: U6<float, bool, obj[], (unit -> obj), Fable.Core.TS.Dom.Node, string> option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (?children: U6<float, bool, obj[], (unit -> obj), Fable.Core.TS.Dom.Node, string>) : Props = jsNative
+
+        module Jsx =
+            module Result =
+                type Result =
+                    /// <summary>
+                    /// The read-only <b><c>baseURI</c></b> property of the Node interface returns the absolute base URL of the document containing the node.
+                    /// <br /><br />
+                    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/baseURI">MDN Reference</a>
+                    /// </summary>
+                    abstract baseURI: string
+                    /// <summary>
+                    /// The read-only <b><c>childNodes</c></b> property of the Node interface returns a live NodeList of child nodes of the given element where the first child node is assigned index 0. Child nodes include elements, text and comments.
+                    /// <br /><br />
+                    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/childNodes">MDN Reference</a>
+                    /// </summary>
+                    abstract childNodes: Fable.Core.TS.Dom.NodeListOf<Fable.Core.TS.Dom.ChildNode>
+                    /// <summary>
+                    /// The read-only <b><c>firstChild</c></b> property of the Node interface returns the node's first child in the tree, or null if the node has no children.
+                    /// <br /><br />
+                    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/firstChild">MDN Reference</a>
+                    /// </summary>
+                    abstract firstChild: Fable.Core.TS.Dom.ChildNode option
+                    /// <summary>
+                    /// The read-only <b><c>isConnected</c></b> property of the Node interface returns a boolean indicating whether the node is connected (directly or indirectly) to a Document object.
+                    /// <br /><br />
+                    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/isConnected">MDN Reference</a>
+                    /// </summary>
+                    abstract isConnected: bool
+                    /// <summary>
+                    /// The read-only <b><c>lastChild</c></b> property of the Node interface returns the last child of the node, or null if there are no child nodes.
+                    /// <br /><br />
+                    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/lastChild">MDN Reference</a>
+                    /// </summary>
+                    abstract lastChild: Fable.Core.TS.Dom.ChildNode option
+                    /// <summary>
+                    /// The read-only <b><c>nextSibling</c></b> property of the Node interface returns the node immediately following the specified one in their parent's childNodes, or returns null if the specified node is the last child in the parent element.
+                    /// <br /><br />
+                    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/nextSibling">MDN Reference</a>
+                    /// </summary>
+                    abstract nextSibling: Fable.Core.TS.Dom.ChildNode option
+                    /// <summary>
+                    /// The read-only <b><c>nodeName</c></b> property of Node returns the name of the current node as a string.
+                    /// <br /><br />
+                    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/nodeName">MDN Reference</a>
+                    /// </summary>
+                    abstract nodeName: string
+                    /// <summary>
+                    /// The read-only <b><c>nodeType</c></b> property of a Node interface is an integer that identifies what the node is. It distinguishes different kinds of nodes from each other, such as elements, text, and comments.
+                    /// <br /><br />
+                    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/nodeType">MDN Reference</a>
+                    /// </summary>
+                    abstract nodeType: float
+                    /// <summary>
+                    /// The <b><c>nodeValue</c></b> property of the Node interface returns or sets the value of the current node.
+                    /// <br /><br />
+                    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/nodeValue">MDN Reference</a>
+                    /// </summary>
+                    abstract nodeValue: string option with get, set
+                    /// <summary>
+                    /// The read-only <b><c>ownerDocument</c></b> property of the Node interface returns the top-level document object of the node.
+                    /// <br /><br />
+                    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/ownerDocument">MDN Reference</a>
+                    /// </summary>
+                    abstract ownerDocument: Fable.Core.TS.Dom.Document option
+                    /// <summary>
+                    /// The read-only <b><c>parentElement</c></b> property of Node interface returns the DOM node's parent Element, or null if the node either has no parent, or its parent isn't a DOM Element. Node.parentNode on the other hand returns any kind of parent, regardless of its type.
+                    /// <br /><br />
+                    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/parentElement">MDN Reference</a>
+                    /// </summary>
+                    abstract parentElement: Fable.Core.TS.Dom.HTMLElement option
+                    /// <summary>
+                    /// The read-only <b><c>parentNode</c></b> property of the Node interface returns the parent of the specified node in the DOM tree.
+                    /// <br /><br />
+                    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/parentNode">MDN Reference</a>
+                    /// </summary>
+                    abstract parentNode: Fable.Core.TS.Dom.ParentNode option
+                    /// <summary>
+                    /// The read-only <b><c>previousSibling</c></b> property of the Node interface returns the node immediately preceding the specified one in its parent's childNodes list, or null if the specified node is the first in that list.
+                    /// <br /><br />
+                    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/previousSibling">MDN Reference</a>
+                    /// </summary>
+                    abstract previousSibling: Fable.Core.TS.Dom.ChildNode option
+                    /// <summary>
+                    /// The <b><c>textContent</c></b> property of the Node interface represents the text content of the node and its descendants.
+                    /// <br /><br />
+                    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/textContent">MDN Reference</a>
+                    /// </summary>
+                    abstract textContent: string option with get, set
+                    /// <summary>
+                    /// The <b><c>appendChild()</c></b> method of the Node interface adds a node to the end of the list of children of a specified parent node.
+                    /// <br /><br />
+                    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/appendChild">MDN Reference</a>
+                    /// </summary>
+                    abstract appendChild<'T when 'T :> Fable.Core.TS.Dom.Node>: node: 'T -> 'T
+                    /// <summary>
+                    /// The <b><c>cloneNode()</c></b> method of the Node interface returns a duplicate of the node on which this method was called. Its parameter controls if the subtree contained in the node is also cloned or not.
+                    /// <br /><br />
+                    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/cloneNode">MDN Reference</a>
+                    /// </summary>
+                    abstract cloneNode: ?subtree: bool -> Fable.Core.TS.Dom.Node
+                    /// <summary>
+                    /// The <b><c>compareDocumentPosition()</c></b> method of the Node interface reports the position of its argument node relative to the node on which it is called.
+                    /// <br /><br />
+                    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/compareDocumentPosition">MDN Reference</a>
+                    /// </summary>
+                    abstract compareDocumentPosition: other: Fable.Core.TS.Dom.Node -> float
+                    /// <summary>
+                    /// The <b><c>contains()</c></b> method of the Node interface returns a boolean value indicating whether a node is a descendant of a given node, that is the node itself, one of its direct children (childNodes), one of the children's direct children, and so on.
+                    /// <br /><br />
+                    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/contains">MDN Reference</a>
+                    /// </summary>
+                    abstract contains: ?other: Fable.Core.TS.Dom.Node -> bool
+                    /// <summary>
+                    /// The <b><c>getRootNode()</c></b> method of the Node interface returns the context object's root, which optionally includes the shadow root if it is available.
+                    /// <br /><br />
+                    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/getRootNode">MDN Reference</a>
+                    /// </summary>
+                    abstract getRootNode: ?options: Fable.Core.TS.Dom.GetRootNodeOptions -> Fable.Core.TS.Dom.Node
+                    /// <summary>
+                    /// The <b><c>hasChildNodes()</c></b> method of the Node interface returns a boolean value indicating whether the given Node has child nodes or not.
+                    /// <br /><br />
+                    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/hasChildNodes">MDN Reference</a>
+                    /// </summary>
+                    abstract hasChildNodes: unit -> bool
+                    /// <summary>
+                    /// The <b><c>insertBefore()</c></b> method of the Node interface inserts a node before a reference node as a child of a specified parent node.
+                    /// <br /><br />
+                    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/insertBefore">MDN Reference</a>
+                    /// </summary>
+                    abstract insertBefore<'T when 'T :> Fable.Core.TS.Dom.Node>: node: 'T * ?child: Fable.Core.TS.Dom.Node -> 'T
+                    /// <summary>
+                    /// The <b><c>isDefaultNamespace()</c></b> method of the Node interface accepts a namespace URI as an argument. It returns a boolean value that is true if the namespace is the default namespace on the given node and false if not. The default namespace can be retrieved with Node.lookupNamespaceURI() by passing null as the argument.
+                    /// <br /><br />
+                    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/isDefaultNamespace">MDN Reference</a>
+                    /// </summary>
+                    abstract isDefaultNamespace: ?``namespace``: string -> bool
+                    /// <summary>
+                    /// The <b><c>isEqualNode()</c></b> method of the Node interface tests whether two nodes are equal. Two nodes are equal when they have the same type, defining characteristics (for elements, this would be their ID, number of children, and so forth), its attributes match, and so on. The specific set of data points that must match varies depending on the types of the nodes.
+                    /// <br /><br />
+                    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/isEqualNode">MDN Reference</a>
+                    /// </summary>
+                    abstract isEqualNode: ?otherNode: Fable.Core.TS.Dom.Node -> bool
+                    /// <summary>
+                    /// The <b><c>isSameNode()</c></b> method of the Node interface is a legacy alias the for the === strict equality operator. That is, it tests whether two nodes are the same (in other words, whether they reference the same object).
+                    /// <br /><br />
+                    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/isSameNode">MDN Reference</a>
+                    /// </summary>
+                    abstract isSameNode: ?otherNode: Fable.Core.TS.Dom.Node -> bool
+                    /// <summary>
+                    /// The <b><c>lookupNamespaceURI()</c></b> method of the Node interface takes a prefix as parameter and returns the namespace URI associated with it on the given node if found (and null if not). This method's existence allows Node objects to be passed as a namespace resolver to XPathEvaluator.createExpression() and XPathEvaluator.evaluate().
+                    /// <br /><br />
+                    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/lookupNamespaceURI">MDN Reference</a>
+                    /// </summary>
+                    abstract lookupNamespaceURI: ?prefix: string -> string option
+                    /// <summary>
+                    /// The <b><c>lookupPrefix()</c></b> method of the Node interface returns a string containing the prefix for a given namespace URI, if present, and null if not. When multiple prefixes are possible, the first prefix is returned.
+                    /// <br /><br />
+                    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/lookupPrefix">MDN Reference</a>
+                    /// </summary>
+                    abstract lookupPrefix: ?``namespace``: string -> string option
+                    /// <summary>
+                    /// The <b><c>normalize()</c></b> method of the Node interface puts the specified node and all of its sub-tree into a normalized form. In a normalized sub-tree, no text nodes in the sub-tree are empty and there are no adjacent text nodes.
+                    /// <br /><br />
+                    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/normalize">MDN Reference</a>
+                    /// </summary>
+                    abstract normalize: unit -> unit
+                    /// <summary>
+                    /// The <b><c>removeChild()</c></b> method of the Node interface removes a child node from the DOM and returns the removed node.
+                    /// <br /><br />
+                    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/removeChild">MDN Reference</a>
+                    /// </summary>
+                    abstract removeChild<'T when 'T :> Fable.Core.TS.Dom.Node>: child: 'T -> 'T
+                    /// <summary>
+                    /// The <b><c>replaceChild()</c></b> method of the Node interface replaces a child node within the given (parent) node.
+                    /// <br /><br />
+                    /// <a href="https://developer.mozilla.org/docs/Web/API/Node/replaceChild">MDN Reference</a>
+                    /// </summary>
+                    abstract replaceChild<'T when 'T :> Fable.Core.TS.Dom.Node>: node: Fable.Core.TS.Dom.Node * child: 'T -> 'T
+                    /// <summary>
+                    /// node is an element.
+                    /// </summary>
+                    abstract ELEMENT_NODE: float
+                    abstract ATTRIBUTE_NODE: float
+                    /// <summary>
+                    /// node is a Text node.
+                    /// </summary>
+                    abstract TEXT_NODE: float
+                    /// <summary>
+                    /// node is a CDATASection node.
+                    /// </summary>
+                    abstract CDATA_SECTION_NODE: float
+                    abstract ENTITY_REFERENCE_NODE: float
+                    abstract ENTITY_NODE: float
+                    /// <summary>
+                    /// node is a ProcessingInstruction node.
+                    /// </summary>
+                    abstract PROCESSING_INSTRUCTION_NODE: float
+                    /// <summary>
+                    /// node is a Comment node.
+                    /// </summary>
+                    abstract COMMENT_NODE: float
+                    /// <summary>
+                    /// node is a document.
+                    /// </summary>
+                    abstract DOCUMENT_NODE: float
+                    /// <summary>
+                    /// node is a doctype.
+                    /// </summary>
+                    abstract DOCUMENT_TYPE_NODE: float
+                    /// <summary>
+                    /// node is a DocumentFragment node.
+                    /// </summary>
+                    abstract DOCUMENT_FRAGMENT_NODE: float
+                    abstract NOTATION_NODE: float
+                    /// <summary>
+                    /// Set when node and other are not in the same tree.
+                    /// </summary>
+                    abstract DOCUMENT_POSITION_DISCONNECTED: float
+                    /// <summary>
+                    /// Set when other is preceding node.
+                    /// </summary>
+                    abstract DOCUMENT_POSITION_PRECEDING: float
+                    /// <summary>
+                    /// Set when other is following node.
+                    /// </summary>
+                    abstract DOCUMENT_POSITION_FOLLOWING: float
+                    /// <summary>
+                    /// Set when other is an ancestor of node.
+                    /// </summary>
+                    abstract DOCUMENT_POSITION_CONTAINS: float
+                    /// <summary>
+                    /// Set when other is a descendant of node.
+                    /// </summary>
+                    abstract DOCUMENT_POSITION_CONTAINED_BY: float
+                    abstract DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC: float
+                    /// <summary>
+                    /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
+                    /// <br /><br />
+                    /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
+                    /// </summary>
+                    abstract addEventListener: ``type``: string * ?callback: U2<Fable.Core.TS.Dom.EventListener, Fable.Core.TS.Dom.EventListenerObject> * ?options: U2<bool, Fable.Core.TS.Dom.AddEventListenerOptions> -> unit
+                    /// <summary>
+                    /// The <b><c>dispatchEvent()</c></b> method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
+                    /// <br /><br />
+                    /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent">MDN Reference</a>
+                    /// </summary>
+                    abstract dispatchEvent: ``event``: Fable.Core.TS.Dom.Event -> bool
+                    /// <summary>
+                    /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
+                    /// <br /><br />
+                    /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
+                    /// </summary>
+                    abstract removeEventListener: ``type``: string * ?callback: U2<Fable.Core.TS.Dom.EventListener, Fable.Core.TS.Dom.EventListenerObject> * ?options: U2<bool, Fable.Core.TS.Dom.EventListenerOptions> -> unit
+                    [<EmitIndexer>]
+                    abstract Item: string -> obj with get, set
+
+                module Result =
+                    type Item =
+                        /// <summary>
+                        /// The read-only <b><c>baseURI</c></b> property of the Node interface returns the absolute base URL of the document containing the node.
+                        /// <br /><br />
+                        /// <a href="https://developer.mozilla.org/docs/Web/API/Node/baseURI">MDN Reference</a>
+                        /// </summary>
+                        abstract baseURI: string
+                        /// <summary>
+                        /// The read-only <b><c>childNodes</c></b> property of the Node interface returns a live NodeList of child nodes of the given element where the first child node is assigned index 0. Child nodes include elements, text and comments.
+                        /// <br /><br />
+                        /// <a href="https://developer.mozilla.org/docs/Web/API/Node/childNodes">MDN Reference</a>
+                        /// </summary>
+                        abstract childNodes: Fable.Core.TS.Dom.NodeListOf<Fable.Core.TS.Dom.ChildNode>
+                        /// <summary>
+                        /// The read-only <b><c>firstChild</c></b> property of the Node interface returns the node's first child in the tree, or null if the node has no children.
+                        /// <br /><br />
+                        /// <a href="https://developer.mozilla.org/docs/Web/API/Node/firstChild">MDN Reference</a>
+                        /// </summary>
+                        abstract firstChild: Fable.Core.TS.Dom.ChildNode option
+                        /// <summary>
+                        /// The read-only <b><c>isConnected</c></b> property of the Node interface returns a boolean indicating whether the node is connected (directly or indirectly) to a Document object.
+                        /// <br /><br />
+                        /// <a href="https://developer.mozilla.org/docs/Web/API/Node/isConnected">MDN Reference</a>
+                        /// </summary>
+                        abstract isConnected: bool
+                        /// <summary>
+                        /// The read-only <b><c>lastChild</c></b> property of the Node interface returns the last child of the node, or null if there are no child nodes.
+                        /// <br /><br />
+                        /// <a href="https://developer.mozilla.org/docs/Web/API/Node/lastChild">MDN Reference</a>
+                        /// </summary>
+                        abstract lastChild: Fable.Core.TS.Dom.ChildNode option
+                        /// <summary>
+                        /// The read-only <b><c>nextSibling</c></b> property of the Node interface returns the node immediately following the specified one in their parent's childNodes, or returns null if the specified node is the last child in the parent element.
+                        /// <br /><br />
+                        /// <a href="https://developer.mozilla.org/docs/Web/API/Node/nextSibling">MDN Reference</a>
+                        /// </summary>
+                        abstract nextSibling: Fable.Core.TS.Dom.ChildNode option
+                        /// <summary>
+                        /// The read-only <b><c>nodeName</c></b> property of Node returns the name of the current node as a string.
+                        /// <br /><br />
+                        /// <a href="https://developer.mozilla.org/docs/Web/API/Node/nodeName">MDN Reference</a>
+                        /// </summary>
+                        abstract nodeName: string
+                        /// <summary>
+                        /// The read-only <b><c>nodeType</c></b> property of a Node interface is an integer that identifies what the node is. It distinguishes different kinds of nodes from each other, such as elements, text, and comments.
+                        /// <br /><br />
+                        /// <a href="https://developer.mozilla.org/docs/Web/API/Node/nodeType">MDN Reference</a>
+                        /// </summary>
+                        abstract nodeType: float
+                        /// <summary>
+                        /// The <b><c>nodeValue</c></b> property of the Node interface returns or sets the value of the current node.
+                        /// <br /><br />
+                        /// <a href="https://developer.mozilla.org/docs/Web/API/Node/nodeValue">MDN Reference</a>
+                        /// </summary>
+                        abstract nodeValue: string option with get, set
+                        /// <summary>
+                        /// The read-only <b><c>ownerDocument</c></b> property of the Node interface returns the top-level document object of the node.
+                        /// <br /><br />
+                        /// <a href="https://developer.mozilla.org/docs/Web/API/Node/ownerDocument">MDN Reference</a>
+                        /// </summary>
+                        abstract ownerDocument: Fable.Core.TS.Dom.Document option
+                        /// <summary>
+                        /// The read-only <b><c>parentElement</c></b> property of Node interface returns the DOM node's parent Element, or null if the node either has no parent, or its parent isn't a DOM Element. Node.parentNode on the other hand returns any kind of parent, regardless of its type.
+                        /// <br /><br />
+                        /// <a href="https://developer.mozilla.org/docs/Web/API/Node/parentElement">MDN Reference</a>
+                        /// </summary>
+                        abstract parentElement: Fable.Core.TS.Dom.HTMLElement option
+                        /// <summary>
+                        /// The read-only <b><c>parentNode</c></b> property of the Node interface returns the parent of the specified node in the DOM tree.
+                        /// <br /><br />
+                        /// <a href="https://developer.mozilla.org/docs/Web/API/Node/parentNode">MDN Reference</a>
+                        /// </summary>
+                        abstract parentNode: Fable.Core.TS.Dom.ParentNode option
+                        /// <summary>
+                        /// The read-only <b><c>previousSibling</c></b> property of the Node interface returns the node immediately preceding the specified one in its parent's childNodes list, or null if the specified node is the first in that list.
+                        /// <br /><br />
+                        /// <a href="https://developer.mozilla.org/docs/Web/API/Node/previousSibling">MDN Reference</a>
+                        /// </summary>
+                        abstract previousSibling: Fable.Core.TS.Dom.ChildNode option
+                        /// <summary>
+                        /// The <b><c>textContent</c></b> property of the Node interface represents the text content of the node and its descendants.
+                        /// <br /><br />
+                        /// <a href="https://developer.mozilla.org/docs/Web/API/Node/textContent">MDN Reference</a>
+                        /// </summary>
+                        abstract textContent: string option with get, set
+                        /// <summary>
+                        /// The <b><c>appendChild()</c></b> method of the Node interface adds a node to the end of the list of children of a specified parent node.
+                        /// <br /><br />
+                        /// <a href="https://developer.mozilla.org/docs/Web/API/Node/appendChild">MDN Reference</a>
+                        /// </summary>
+                        abstract appendChild<'T when 'T :> Fable.Core.TS.Dom.Node>: node: 'T -> 'T
+                        /// <summary>
+                        /// The <b><c>cloneNode()</c></b> method of the Node interface returns a duplicate of the node on which this method was called. Its parameter controls if the subtree contained in the node is also cloned or not.
+                        /// <br /><br />
+                        /// <a href="https://developer.mozilla.org/docs/Web/API/Node/cloneNode">MDN Reference</a>
+                        /// </summary>
+                        abstract cloneNode: ?subtree: bool -> Fable.Core.TS.Dom.Node
+                        /// <summary>
+                        /// The <b><c>compareDocumentPosition()</c></b> method of the Node interface reports the position of its argument node relative to the node on which it is called.
+                        /// <br /><br />
+                        /// <a href="https://developer.mozilla.org/docs/Web/API/Node/compareDocumentPosition">MDN Reference</a>
+                        /// </summary>
+                        abstract compareDocumentPosition: other: Fable.Core.TS.Dom.Node -> float
+                        /// <summary>
+                        /// The <b><c>contains()</c></b> method of the Node interface returns a boolean value indicating whether a node is a descendant of a given node, that is the node itself, one of its direct children (childNodes), one of the children's direct children, and so on.
+                        /// <br /><br />
+                        /// <a href="https://developer.mozilla.org/docs/Web/API/Node/contains">MDN Reference</a>
+                        /// </summary>
+                        abstract contains: ?other: Fable.Core.TS.Dom.Node -> bool
+                        /// <summary>
+                        /// The <b><c>getRootNode()</c></b> method of the Node interface returns the context object's root, which optionally includes the shadow root if it is available.
+                        /// <br /><br />
+                        /// <a href="https://developer.mozilla.org/docs/Web/API/Node/getRootNode">MDN Reference</a>
+                        /// </summary>
+                        abstract getRootNode: ?options: Fable.Core.TS.Dom.GetRootNodeOptions -> Fable.Core.TS.Dom.Node
+                        /// <summary>
+                        /// The <b><c>hasChildNodes()</c></b> method of the Node interface returns a boolean value indicating whether the given Node has child nodes or not.
+                        /// <br /><br />
+                        /// <a href="https://developer.mozilla.org/docs/Web/API/Node/hasChildNodes">MDN Reference</a>
+                        /// </summary>
+                        abstract hasChildNodes: unit -> bool
+                        /// <summary>
+                        /// The <b><c>insertBefore()</c></b> method of the Node interface inserts a node before a reference node as a child of a specified parent node.
+                        /// <br /><br />
+                        /// <a href="https://developer.mozilla.org/docs/Web/API/Node/insertBefore">MDN Reference</a>
+                        /// </summary>
+                        abstract insertBefore<'T when 'T :> Fable.Core.TS.Dom.Node>: node: 'T * ?child: Fable.Core.TS.Dom.Node -> 'T
+                        /// <summary>
+                        /// The <b><c>isDefaultNamespace()</c></b> method of the Node interface accepts a namespace URI as an argument. It returns a boolean value that is true if the namespace is the default namespace on the given node and false if not. The default namespace can be retrieved with Node.lookupNamespaceURI() by passing null as the argument.
+                        /// <br /><br />
+                        /// <a href="https://developer.mozilla.org/docs/Web/API/Node/isDefaultNamespace">MDN Reference</a>
+                        /// </summary>
+                        abstract isDefaultNamespace: ?``namespace``: string -> bool
+                        /// <summary>
+                        /// The <b><c>isEqualNode()</c></b> method of the Node interface tests whether two nodes are equal. Two nodes are equal when they have the same type, defining characteristics (for elements, this would be their ID, number of children, and so forth), its attributes match, and so on. The specific set of data points that must match varies depending on the types of the nodes.
+                        /// <br /><br />
+                        /// <a href="https://developer.mozilla.org/docs/Web/API/Node/isEqualNode">MDN Reference</a>
+                        /// </summary>
+                        abstract isEqualNode: ?otherNode: Fable.Core.TS.Dom.Node -> bool
+                        /// <summary>
+                        /// The <b><c>isSameNode()</c></b> method of the Node interface is a legacy alias the for the === strict equality operator. That is, it tests whether two nodes are the same (in other words, whether they reference the same object).
+                        /// <br /><br />
+                        /// <a href="https://developer.mozilla.org/docs/Web/API/Node/isSameNode">MDN Reference</a>
+                        /// </summary>
+                        abstract isSameNode: ?otherNode: Fable.Core.TS.Dom.Node -> bool
+                        /// <summary>
+                        /// The <b><c>lookupNamespaceURI()</c></b> method of the Node interface takes a prefix as parameter and returns the namespace URI associated with it on the given node if found (and null if not). This method's existence allows Node objects to be passed as a namespace resolver to XPathEvaluator.createExpression() and XPathEvaluator.evaluate().
+                        /// <br /><br />
+                        /// <a href="https://developer.mozilla.org/docs/Web/API/Node/lookupNamespaceURI">MDN Reference</a>
+                        /// </summary>
+                        abstract lookupNamespaceURI: ?prefix: string -> string option
+                        /// <summary>
+                        /// The <b><c>lookupPrefix()</c></b> method of the Node interface returns a string containing the prefix for a given namespace URI, if present, and null if not. When multiple prefixes are possible, the first prefix is returned.
+                        /// <br /><br />
+                        /// <a href="https://developer.mozilla.org/docs/Web/API/Node/lookupPrefix">MDN Reference</a>
+                        /// </summary>
+                        abstract lookupPrefix: ?``namespace``: string -> string option
+                        /// <summary>
+                        /// The <b><c>normalize()</c></b> method of the Node interface puts the specified node and all of its sub-tree into a normalized form. In a normalized sub-tree, no text nodes in the sub-tree are empty and there are no adjacent text nodes.
+                        /// <br /><br />
+                        /// <a href="https://developer.mozilla.org/docs/Web/API/Node/normalize">MDN Reference</a>
+                        /// </summary>
+                        abstract normalize: unit -> unit
+                        /// <summary>
+                        /// The <b><c>removeChild()</c></b> method of the Node interface removes a child node from the DOM and returns the removed node.
+                        /// <br /><br />
+                        /// <a href="https://developer.mozilla.org/docs/Web/API/Node/removeChild">MDN Reference</a>
+                        /// </summary>
+                        abstract removeChild<'T when 'T :> Fable.Core.TS.Dom.Node>: child: 'T -> 'T
+                        /// <summary>
+                        /// The <b><c>replaceChild()</c></b> method of the Node interface replaces a child node within the given (parent) node.
+                        /// <br /><br />
+                        /// <a href="https://developer.mozilla.org/docs/Web/API/Node/replaceChild">MDN Reference</a>
+                        /// </summary>
+                        abstract replaceChild<'T when 'T :> Fable.Core.TS.Dom.Node>: node: Fable.Core.TS.Dom.Node * child: 'T -> 'T
+                        /// <summary>
+                        /// node is an element.
+                        /// </summary>
+                        abstract ELEMENT_NODE: float
+                        abstract ATTRIBUTE_NODE: float
+                        /// <summary>
+                        /// node is a Text node.
+                        /// </summary>
+                        abstract TEXT_NODE: float
+                        /// <summary>
+                        /// node is a CDATASection node.
+                        /// </summary>
+                        abstract CDATA_SECTION_NODE: float
+                        abstract ENTITY_REFERENCE_NODE: float
+                        abstract ENTITY_NODE: float
+                        /// <summary>
+                        /// node is a ProcessingInstruction node.
+                        /// </summary>
+                        abstract PROCESSING_INSTRUCTION_NODE: float
+                        /// <summary>
+                        /// node is a Comment node.
+                        /// </summary>
+                        abstract COMMENT_NODE: float
+                        /// <summary>
+                        /// node is a document.
+                        /// </summary>
+                        abstract DOCUMENT_NODE: float
+                        /// <summary>
+                        /// node is a doctype.
+                        /// </summary>
+                        abstract DOCUMENT_TYPE_NODE: float
+                        /// <summary>
+                        /// node is a DocumentFragment node.
+                        /// </summary>
+                        abstract DOCUMENT_FRAGMENT_NODE: float
+                        abstract NOTATION_NODE: float
+                        /// <summary>
+                        /// Set when node and other are not in the same tree.
+                        /// </summary>
+                        abstract DOCUMENT_POSITION_DISCONNECTED: float
+                        /// <summary>
+                        /// Set when other is preceding node.
+                        /// </summary>
+                        abstract DOCUMENT_POSITION_PRECEDING: float
+                        /// <summary>
+                        /// Set when other is following node.
+                        /// </summary>
+                        abstract DOCUMENT_POSITION_FOLLOWING: float
+                        /// <summary>
+                        /// Set when other is an ancestor of node.
+                        /// </summary>
+                        abstract DOCUMENT_POSITION_CONTAINS: float
+                        /// <summary>
+                        /// Set when other is a descendant of node.
+                        /// </summary>
+                        abstract DOCUMENT_POSITION_CONTAINED_BY: float
+                        abstract DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC: float
+                        /// <summary>
+                        /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
+                        /// <br /><br />
+                        /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
+                        /// </summary>
+                        abstract addEventListener: ``type``: string * ?callback: U2<Fable.Core.TS.Dom.EventListener, Fable.Core.TS.Dom.EventListenerObject> * ?options: U2<bool, Fable.Core.TS.Dom.AddEventListenerOptions> -> unit
+                        /// <summary>
+                        /// The <b><c>dispatchEvent()</c></b> method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
+                        /// <br /><br />
+                        /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent">MDN Reference</a>
+                        /// </summary>
+                        abstract dispatchEvent: ``event``: Fable.Core.TS.Dom.Event -> bool
+                        /// <summary>
+                        /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
+                        /// <br /><br />
+                        /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
+                        /// </summary>
+                        abstract removeEventListener: ``type``: string * ?callback: U2<Fable.Core.TS.Dom.EventListener, Fable.Core.TS.Dom.EventListenerObject> * ?options: U2<bool, Fable.Core.TS.Dom.EventListenerOptions> -> unit
+                        [<EmitIndexer>]
+                        abstract Item: string -> obj with get, set
+
+    /// <summary>solid-js/h/jsx-runtime</summary>
+    module JsxRuntime =
+        /// <summary>The package's value exports, each bound to its import.</summary>
+        [<Erase>]
+        type Exports =
+            [<Import("Fragment", "solid-js/h/jsx-runtime")>]
+            static member Fragment (props: H.JsxDevRuntime.Fragment.Props) : U6<float, bool, obj[], (unit -> obj), Fable.Core.TS.Dom.Node, string> option = jsNative
+            [<Import("jsx", "solid-js/h/jsx-runtime")>]
+            static member jsx (``type``: obj, props: obj) : (unit -> U2<H.JsxDevRuntime.Jsx.Result.Result.Item[], H.JsxDevRuntime.Jsx.Result.Result>) = jsNative
+            [<Import("jsxDEV", "solid-js/h/jsx-runtime")>]
+            static member jsxDEV (``type``: obj, props: obj) : (unit -> U2<H.JsxDevRuntime.Jsx.Result.Result.Item[], H.JsxDevRuntime.Jsx.Result.Result>) = jsNative
+            [<Import("jsxs", "solid-js/h/jsx-runtime")>]
+            static member jsxs (``type``: obj, props: obj) : (unit -> U2<H.JsxDevRuntime.Jsx.Result.Result.Item[], H.JsxDevRuntime.Jsx.Result.Result>) = jsNative
+
+/// <summary>solid-js/html</summary>
+module Html =
+    /// <summary>The package's value exports, each bound to its import.</summary>
+    [<Erase>]
+    type Exports =
+        [<Import("default", "solid-js/html")>]
+        static member html (statics: obj, [<ParamArray>] args: obj[]) : U2<Fable.Core.TS.Dom.Node[], Fable.Core.TS.Dom.Node> = jsNative
+
 module Index =
     [<Interface>]
     type Props<'T, 'U> =
@@ -1442,6 +2280,36 @@ module InitializedResourceReturn =
         abstract mutate<'U>: value: 'U -> 'U
         abstract mutate<'U>: value: U2<('T -> 'U), 'U> -> 'U
         abstract refetch: ('R option -> U2<'T, JS.Promise<'T>> option) with get, set
+
+/// <summary>solid-js/jsx-dev-runtime</summary>
+module JsxDevRuntime =
+    /// <summary>
+    /// Based on JSX types for Surplus and Inferno and adapted for <c>dom-expressions</c>.
+    /// <br /><br />
+    /// https://github.com/adamhaile/surplus/blob/master/index.d.ts
+    /// https://github.com/infernojs/inferno/blob/master/packages/inferno/src/core/types.ts
+    /// <br /><br />
+    /// MathML typings coming mostly from Preact
+    /// https://github.com/preactjs/preact/blob/07dc9f324e58569ce66634aa03fe8949b4190358/src/jsx.d.ts#L2575
+    /// <br /><br />
+    /// Checked against other frameworks via the following table:
+    /// https://potahtml.github.io/namespace-jsx-project/index.html
+    /// </summary>
+    type DOMElement = Fable.Core.TS.Dom.Element
+
+    /// <summary>The package's value exports, each bound to its import.</summary>
+    [<Erase>]
+    type Exports =
+        [<Import("JSX", "solid-js/jsx-dev-runtime")>]
+        static member JSX: JSX2 = jsNative
+
+/// <summary>solid-js/jsx-runtime</summary>
+module JsxRuntime =
+    /// <summary>The package's value exports, each bound to its import.</summary>
+    [<Erase>]
+    type Exports =
+        [<Import("JSX", "solid-js/jsx-runtime")>]
+        static member JSX: JSX2 = jsNative
 
 module Lazy =
     module Fn =
@@ -1591,6 +2459,136 @@ module SplitProps =
                 [<EmitIndexer>]
                 abstract Item: string -> obj with get, set
 
+/// <summary>solid-js/store</summary>
+module Store =
+    [<Interface>]
+    type DEV =
+        abstract ``$NODE``: obj
+        abstract isWrappable: (obj option -> bool)
+        abstract hooks: Store.DEV.Hooks
+        [<ParamObject; Emit("$0")>]
+        static member Create (``$NODE``: obj, isWrappable: (obj option -> bool), hooks: Store.DEV.Hooks) : DEV = jsNative
+
+    [<Interface>]
+    type ReconcileOptions =
+        abstract key: string option with get, set
+        abstract merge: bool option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?key: string, ?merge: bool) : ReconcileOptions = jsNative
+
+    type StoreNode =
+        [<EmitIndexer>]
+        abstract Item: string -> obj with get, set
+        [<EmitIndexer>]
+        abstract Item: float -> obj with get, set
+        [<EmitIndexer>]
+        abstract Item: obj -> obj with get, set
+
+    type NotWrappable = obj option
+
+    type Store = obj
+
+    /// <remarks>@deprecated</remarks>
+    [<Erase>]
+    type DeepReadonly<'T> = private DeepReadonly__ of obj
+
+    /// <remarks>@deprecated</remarks>
+    [<Erase>]
+    type DeepMutable<'T> = private DeepMutable__ of obj
+
+    [<Interface>]
+    type StorePathRange =
+        abstract from: float option with get, set
+        abstract ``to``: float option with get, set
+        abstract by: float option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?from: float, ?``to``: float, ?by: float) : StorePathRange = jsNative
+
+    type ArrayFilterFn<'T> = delegate of item: 'T * index: float -> bool
+
+    [<Erase>]
+    type StoreSetter<'T, 'U> = private StoreSetter__ of obj
+
+    type StoreSetter2<'T, 'U> = delegate of prevState: 'T * traversed: 'U -> obj
+
+    [<Erase>]
+    type Part<'T, 'K> = private Part__ of U3<'K, 'K[], U2<Func<obj, float, bool>, StorePathRange>>
+
+    type StoreReturn<'T> = 'T * Action<obj, obj, obj, obj, obj, obj, obj, obj>
+
+    /// <summary>The package's value exports, each bound to its import.</summary>
+    [<Erase>]
+    type Exports =
+        [<Import("DEV", "solid-js/store")>]
+        static member DEV: DEV option = jsNative
+        [<Import("reconcile", "solid-js/store")>]
+        static member reconcile<'T, 'U> (value: 'T, ?options: ReconcileOptions) : ('U -> 'T) = jsNative
+        [<Import("produce", "solid-js/store")>]
+        static member produce<'T> (fn: ('T -> unit)) : ('T -> 'T) = jsNative
+        [<Import("createMutable", "solid-js/store")>]
+        static member createMutable<'T when 'T :> StoreNode> (state: 'T, ?options: Store.CreateMutable.Options) : 'T = jsNative
+        [<Import("modifyMutable", "solid-js/store")>]
+        static member modifyMutable<'T> (state: 'T, modifier: ('T -> 'T)) : unit = jsNative
+        [<Import("$RAW", "solid-js/store")>]
+        static member ``$RAW``: obj = jsNative
+        /// <summary>
+        /// Returns the underlying data in the store without a proxy.
+        /// </summary>
+        /// <param name="item">store proxy object</param>
+        /// <example>
+        /// <code>
+        /// ```js
+        /// const initial = {z...};
+        /// const [state, setState] = createStore(initial);
+        /// initial === state; // =&gt; false
+        /// initial === unwrap(state); // =&gt; true
+        /// </code>
+        /// <code>
+        /// </code>
+        /// </example>
+        [<Import("unwrap", "solid-js/store")>]
+        static member unwrap<'T> (item: 'T, ?set: JS.Set<obj>) : 'T = jsNative
+        /// <summary>
+        /// Creates a reactive store that can be read through a proxy object and written with a setter function
+        /// </summary>
+        /// <remarks>@description https://docs.solidjs.com/reference/store-utilities/create-store</remarks>
+        [<Import("createStore", "solid-js/store")>]
+        static member createStore<'T> ([<ParamArray>] __0: obj) : 'T * obj = jsNative
+
+    module CreateMutable =
+        [<Interface>]
+        type Options =
+            abstract name: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?name: string) : Options = jsNative
+
+    module DEV =
+        [<Interface>]
+        type Hooks =
+            abstract onStoreNodeUpdate: Store.DEV.Hooks.OnStoreNodeUpdate option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?onStoreNodeUpdate: Store.DEV.Hooks.OnStoreNodeUpdate) : Hooks = jsNative
+
+        module Hooks =
+            type OnStoreNodeUpdate = delegate of state: Store.StoreNode * property: obj * value: obj option * prev: obj option -> unit
+
+    module SetStoreFunction =
+        type Setter<'K1, 'K2, 'K3, 'K4, 'K5, 'K6, 'K7> = delegate of prevState: obj * traversed: ('K7 * 'K6 * 'K5 * 'K4 * 'K3 * 'K2 * 'K1) -> obj
+
+        type Setter2<'K1, 'K2, 'K3, 'K4, 'K5, 'K6> = delegate of prevState: obj * traversed: ('K6 * 'K5 * 'K4 * 'K3 * 'K2 * 'K1) -> obj
+
+        type Setter3<'K1, 'K2, 'K3, 'K4, 'K5> = delegate of prevState: obj * traversed: ('K5 * 'K4 * 'K3 * 'K2 * 'K1) -> obj
+
+        type Setter4<'K1, 'K2, 'K3, 'K4> = delegate of prevState: obj * traversed: ('K4 * 'K3 * 'K2 * 'K1) -> obj
+
+        type Setter5<'K1, 'K2, 'K3> = delegate of prevState: obj * traversed: ('K3 * 'K2 * 'K1) -> obj
+
+        type Setter6<'K1, 'K2> = delegate of prevState: obj * traversed: ('K2 * 'K1) -> obj
+
+        type Setter7<'K1> = delegate of prevState: obj * traversed: 'K1[] -> obj
+
+        type Setter8<'T> = delegate of prevState: 'T * traversed: obj[] -> obj
+
 module Suspense =
     [<Interface>]
     type Props =
@@ -1627,3 +2625,510 @@ module Switch =
         abstract children: JSXElement option with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (?fallback: JSXElement, ?children: JSXElement) : Props = jsNative
+
+/// <summary>solid-js/universal</summary>
+module Universal =
+    [<Interface>]
+    type RendererOptions<'NodeType> =
+        abstract createElement: tag: string -> 'NodeType
+        abstract createTextNode: value: string -> 'NodeType
+        abstract replaceText: textNode: 'NodeType * value: string -> unit
+        abstract isTextNode: node: 'NodeType -> bool
+        abstract setProperty<'T>: node: 'NodeType * name: string * value: 'T * ?prev: 'T -> unit
+        abstract insertNode: parent: 'NodeType * node: 'NodeType * ?anchor: 'NodeType -> unit
+        abstract removeNode: parent: 'NodeType * node: 'NodeType -> unit
+        abstract getParentNode: node: 'NodeType -> 'NodeType option
+        abstract getFirstChild: node: 'NodeType -> 'NodeType option
+        abstract getNextSibling: node: 'NodeType -> 'NodeType option
+        [<ParamObject; Emit("$0")>]
+        static member Create (createElement: (string -> 'NodeType), createTextNode: (string -> 'NodeType), replaceText: Action<'NodeType, string>, isTextNode: ('NodeType -> bool), setProperty: Action<'NodeType, string, 'T, 'T option>, insertNode: Action<'NodeType, 'NodeType, 'NodeType option>, removeNode: Action<'NodeType, 'NodeType>, getParentNode: ('NodeType -> 'NodeType option), getFirstChild: ('NodeType -> 'NodeType option), getNextSibling: ('NodeType -> 'NodeType option)) : RendererOptions<'NodeType> = jsNative
+
+    [<Interface>]
+    type Renderer<'NodeType> =
+        abstract render: code: (unit -> 'NodeType) * node: 'NodeType -> (unit -> unit)
+        abstract effect<'T>: fn: ('T option -> 'T) * ?init: 'T -> unit
+        abstract memo<'T>: fn: (unit -> 'T) * equal: bool -> (unit -> 'T)
+        abstract createComponent<'T>: Comp: ('T -> 'NodeType) * props: 'T -> 'NodeType
+        abstract createElement: tag: string -> 'NodeType
+        abstract createTextNode: value: string -> 'NodeType
+        abstract insertNode: parent: 'NodeType * node: 'NodeType * ?anchor: 'NodeType -> unit
+        abstract insert<'T>: parent: obj * accessor: U2<'T, (unit -> 'T)> * ?marker: obj * ?initial: obj -> 'NodeType
+        abstract spread<'T>: node: obj * accessor: U2<'T, (unit -> 'T)> * ?skipChildren: bool -> unit
+        abstract setProp<'T>: node: 'NodeType * name: string * value: 'T * ?prev: 'T -> 'T
+        abstract mergeProps: [<ParamArray>] sources: obj[] -> obj
+        abstract ``use``<'A, 'T>: fn: Universal.Renderer.Use.Fn<'NodeType, 'A, 'T> * element: 'NodeType * arg: 'A -> 'T
+        [<ParamObject; Emit("$0")>]
+        static member Create (render: Func<(unit -> 'NodeType), 'NodeType, (unit -> unit)>, effect: Action<('T option -> 'T), 'T option>, memo: Func<(unit -> 'T), bool, (unit -> 'T)>, createComponent: Func<('T -> 'NodeType), 'T, 'NodeType>, createElement: (string -> 'NodeType), createTextNode: (string -> 'NodeType), insertNode: Action<'NodeType, 'NodeType, 'NodeType option>, insert: Func<obj, U2<'T, (unit -> 'T)>, obj option, obj option, 'NodeType>, spread: Action<obj, U2<'T, (unit -> 'T)>, bool option>, setProp: Func<'NodeType, string, 'T, 'T option, 'T>, mergeProps: (obj[] -> obj), ``use``: Func<Universal.Renderer.Use.Fn<'NodeType, 'A, 'T>, 'NodeType, 'A, 'T>) : Renderer<'NodeType> = jsNative
+
+    /// <summary>The package's value exports, each bound to its import.</summary>
+    [<Erase>]
+    type Exports =
+        [<Import("createRenderer", "solid-js/universal")>]
+        static member createRenderer<'NodeType> (options: RendererOptions<'NodeType>) : Renderer<'NodeType> = jsNative
+
+    module Renderer =
+        module Use =
+            type Fn<'NodeType, 'A, 'T> = delegate of element: 'NodeType * arg: 'A -> 'T
+
+/// <summary>solid-js/web</summary>
+module Web =
+    type MountableElement = U5<Fable.Core.TS.Dom.Document, Fable.Core.TS.Dom.DocumentFragment, JsxDevRuntime.DOMElement, Fable.Core.TS.Dom.Node, Fable.Core.TS.Dom.ShadowRoot>
+
+    [<Interface>]
+    type RequestEvent =
+        abstract request: Fable.Core.TS.Dom.Request with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (request: Fable.Core.TS.Dom.Request) : RequestEvent = jsNative
+
+    [<Interface>]
+    type DynamicProps<'T, 'P> =
+        abstract ``component``: 'T option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?``component``: 'T) : DynamicProps<'T, 'P> = jsNative
+
+    [<Interface>]
+    type LegacyResults =
+        abstract startWriting: (unit -> unit) with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (startWriting: (unit -> unit)) : LegacyResults = jsNative
+
+    /// <summary>The package's value exports, each bound to its import.</summary>
+    [<Erase>]
+    type Exports =
+        [<Import("mergeProps", "solid-js/web")>]
+        static member mergeProps<'T> ([<ParamArray>] sources: 'T) : obj = jsNative
+        /// <summary>
+        /// Creates a list elements from a list
+        /// <br /><br />
+        /// it receives a map function as its child that receives a list element and an accessor with the index and returns a JSX-Element; if the list is empty, an optional fallback is returned:
+        /// <code lang="typescript">
+        /// &lt;For each={items} fallback={&lt;div&gt;No items&lt;/div&gt;}&gt;
+        ///   {(item, index) =&gt; &lt;div data-index={index()}&gt;{item}&lt;/div&gt;}
+        /// &lt;/For&gt;
+        /// </code>
+        /// If you have a list with fixed indices and changing values, consider using <c>&lt;Index&gt;</c> instead.
+        /// </summary>
+        /// <remarks>@description https://docs.solidjs.com/reference/components/for</remarks>
+        [<Import("For", "solid-js/web")>]
+        static member For<'T, 'U> (props: For.Props<'T, 'U>) : JSXElement option = jsNative
+        /// <summary>
+        /// Non-keyed iteration over a list creating elements from its items
+        /// <br /><br />
+        /// To be used if you have a list with fixed indices, but changing values.
+        /// <code lang="typescript">
+        /// &lt;Index each={items} fallback={&lt;div&gt;No items&lt;/div&gt;}&gt;
+        ///   {(item, index) =&gt; &lt;div data-index={index}&gt;{item()}&lt;/div&gt;}
+        /// &lt;/Index&gt;
+        /// </code>
+        /// If you have a list with changing indices, better use <c>&lt;For&gt;</c>.
+        /// </summary>
+        /// <remarks>@description https://docs.solidjs.com/reference/components/index-component</remarks>
+        [<Import("Index", "solid-js/web")>]
+        static member Index<'T, 'U> (props: Index.Props<'T, 'U>) : JSXElement option = jsNative
+        /// <summary>
+        /// Conditionally render its children or an optional fallback component
+        /// </summary>
+        /// <remarks>@description https://docs.solidjs.com/reference/components/show</remarks>
+        [<Import("Show", "solid-js/web")>]
+        static member Show<'T, 'TRenderFunction> (props: Show.Props<'T, 'TRenderFunction>) : JSXElement option = jsNative
+        /// <summary>
+        /// Conditionally render its children or an optional fallback component
+        /// </summary>
+        /// <remarks>@description https://docs.solidjs.com/reference/components/show</remarks>
+        [<Import("Show", "solid-js/web")>]
+        static member Show<'T, 'TRenderFunction> (props: Show.Props2<'T, 'TRenderFunction>) : JSXElement option = jsNative
+        /// <summary>
+        /// Switches between content based on mutually exclusive conditions
+        /// <code lang="typescript">
+        /// &lt;Switch fallback={&lt;FourOhFour /&gt;}&gt;
+        ///   &lt;Match when={state.route === 'home'}&gt;
+        ///     &lt;Home /&gt;
+        ///   &lt;/Match&gt;
+        ///   &lt;Match when={state.route === 'settings'}&gt;
+        ///     &lt;Settings /&gt;
+        ///   &lt;/Match&gt;
+        /// &lt;/Switch&gt;
+        /// </code>
+        /// </summary>
+        /// <remarks>@description https://docs.solidjs.com/reference/components/switch-and-match</remarks>
+        [<Import("Switch", "solid-js/web")>]
+        static member Switch (props: Switch.Props) : JSXElement option = jsNative
+        /// <summary>
+        /// Selects a content based on condition when inside a <c>&lt;Switch&gt;</c> control flow
+        /// <code lang="typescript">
+        /// &lt;Match when={condition()}&gt;
+        ///   &lt;Content/&gt;
+        /// &lt;/Match&gt;
+        /// </code>
+        /// </summary>
+        /// <remarks>@description https://docs.solidjs.com/reference/components/switch-and-match</remarks>
+        [<Import("Match", "solid-js/web")>]
+        static member Match<'T, 'TRenderFunction> (props: Match.Props<'T, 'TRenderFunction>) : JSXElement option = jsNative
+        /// <summary>
+        /// Selects a content based on condition when inside a <c>&lt;Switch&gt;</c> control flow
+        /// <code lang="typescript">
+        /// &lt;Match when={condition()}&gt;
+        ///   &lt;Content/&gt;
+        /// &lt;/Match&gt;
+        /// </code>
+        /// </summary>
+        /// <remarks>@description https://docs.solidjs.com/reference/components/switch-and-match</remarks>
+        [<Import("Match", "solid-js/web")>]
+        static member Match<'T, 'TRenderFunction> (props: Match.Props2<'T, 'TRenderFunction>) : JSXElement option = jsNative
+        /// <summary>
+        /// Catches uncaught errors inside components and renders a fallback content
+        /// <br /><br />
+        /// Also supports a callback form that passes the error and a reset function:
+        /// <code lang="typescript">
+        /// &lt;ErrorBoundary fallback={
+        ///   (err, reset) =&gt; &lt;div onClick={reset}&gt;Error: {err.toString()}&lt;/div&gt;
+        /// }&gt;
+        ///   &lt;MyComp /&gt;
+        /// &lt;/ErrorBoundary&gt;
+        /// </code>
+        /// Errors thrown from the fallback can be caught by a parent ErrorBoundary
+        /// </summary>
+        /// <remarks>@description https://docs.solidjs.com/reference/components/error-boundary</remarks>
+        [<Import("ErrorBoundary", "solid-js/web")>]
+        static member ErrorBoundary (props: ErrorBoundary.Props) : JSXElement option = jsNative
+        /// <summary>
+        /// <b>[experimental]</b> Controls the order in which suspended content is rendered
+        /// </summary>
+        /// <remarks>@description https://docs.solidjs.com/reference/components/suspense-list</remarks>
+        [<Import("SuspenseList", "solid-js/web")>]
+        static member SuspenseList (props: SuspenseList.Props) : JSXElement option = jsNative
+        /// <summary>
+        /// Tracks all resources inside a component and renders a fallback until they are all resolved
+        /// <code lang="typescript">
+        /// const AsyncComponent = lazy(() =&gt; import('./component'));
+        ///
+        /// &lt;Suspense fallback={&lt;LoadingIndicator /&gt;}&gt;
+        ///   &lt;AsyncComponent /&gt;
+        /// &lt;/Suspense&gt;
+        /// </code>
+        /// </summary>
+        /// <remarks>@description https://docs.solidjs.com/reference/components/suspense</remarks>
+        [<Import("Suspense", "solid-js/web")>]
+        static member Suspense (props: Suspense.Props) : JSXElement option = jsNative
+        [<Import("Aliases", "solid-js/web")>]
+        static member Aliases: Record<string, string> = jsNative
+        [<Import("Properties", "solid-js/web")>]
+        static member Properties: JS.Set<string> = jsNative
+        [<Import("ChildProperties", "solid-js/web")>]
+        static member ChildProperties: JS.Set<string> = jsNative
+        [<Import("DelegatedEvents", "solid-js/web")>]
+        static member DelegatedEvents: JS.Set<string> = jsNative
+        [<Import("DOMElements", "solid-js/web")>]
+        static member DOMElements: JS.Set<string> = jsNative
+        [<Import("SVGElements", "solid-js/web")>]
+        static member SVGElements: JS.Set<string> = jsNative
+        [<Import("SVGNamespace", "solid-js/web")>]
+        static member SVGNamespace: Record<string, string> = jsNative
+        [<Import("getPropAlias", "solid-js/web")>]
+        static member getPropAlias (prop: string, tagName: string) : string option = jsNative
+        [<Import("render", "solid-js/web")>]
+        static member render (code: (unit -> JSXElement option), element: MountableElement, ?init: JSXElement, ?options: Web.Render.Options) : (unit -> unit) = jsNative
+        [<Import("template", "solid-js/web")>]
+        static member template (html: string, ?isCE: bool, ?isSVG: bool) : (unit -> JsxDevRuntime.DOMElement) = jsNative
+        [<Import("effect", "solid-js/web")>]
+        static member effect<'T> (fn: ('T option -> 'T), ?init: 'T) : unit = jsNative
+        [<Import("memo", "solid-js/web")>]
+        static member memo<'T> (fn: (unit -> 'T), equal: bool) : (unit -> 'T) = jsNative
+        [<Import("untrack", "solid-js/web")>]
+        static member untrack<'T> (fn: (unit -> 'T)) : 'T = jsNative
+        [<Import("insert", "solid-js/web")>]
+        static member insert<'T> (parent: MountableElement, accessor: U2<'T, (unit -> 'T)>, ?marker: Fable.Core.TS.Dom.Node, ?init: JSXElement) : JSXElement option = jsNative
+        [<Import("createComponent", "solid-js/web")>]
+        static member createComponent<'T> (Comp: ('T -> JSXElement option), props: 'T) : JSXElement option = jsNative
+        [<Import("delegateEvents", "solid-js/web")>]
+        static member delegateEvents (eventNames: string[], ?d: Fable.Core.TS.Dom.Document) : unit = jsNative
+        [<Import("clearDelegatedEvents", "solid-js/web")>]
+        static member clearDelegatedEvents (?d: Fable.Core.TS.Dom.Document) : unit = jsNative
+        [<Import("spread", "solid-js/web")>]
+        static member spread<'T> (node: JsxDevRuntime.DOMElement, accessor: 'T, ?isSVG: obj, ?skipChildren: obj) : unit = jsNative
+        [<Import("assign", "solid-js/web")>]
+        static member assign (node: JsxDevRuntime.DOMElement, props: obj, ?isSVG: obj, ?skipChildren: obj, ?prevProps: obj, ?skipRef: obj) : unit = jsNative
+        [<Import("setAttribute", "solid-js/web")>]
+        static member setAttribute (node: JsxDevRuntime.DOMElement, name: string, value: string) : unit = jsNative
+        [<Import("setAttributeNS", "solid-js/web")>]
+        static member setAttributeNS (node: JsxDevRuntime.DOMElement, ``namespace``: string, name: string, value: string) : unit = jsNative
+        [<Import("setBoolAttribute", "solid-js/web")>]
+        static member setBoolAttribute (node: JsxDevRuntime.DOMElement, name: string, value: obj) : unit = jsNative
+        [<Import("className", "solid-js/web")>]
+        static member className (node: JsxDevRuntime.DOMElement, value: string) : unit = jsNative
+        [<Import("setProperty", "solid-js/web")>]
+        static member setProperty (node: JsxDevRuntime.DOMElement, name: string, value: obj) : unit = jsNative
+        [<Import("setStyleProperty", "solid-js/web")>]
+        static member setStyleProperty (node: JsxDevRuntime.DOMElement, name: string, value: obj) : unit = jsNative
+        [<Import("addEventListener", "solid-js/web")>]
+        static member addEventListener (node: JsxDevRuntime.DOMElement, name: string, handler: U3<Fable.Core.TS.Dom.EventListener, Fable.Core.TS.Dom.EventListenerObject, Web.AddEventListener.Handler>, ``delegate``: bool) : unit = jsNative
+        [<Import("classList", "solid-js/web")>]
+        static member classList (node: JsxDevRuntime.DOMElement, value: Record<string, bool option>, ?prev: Record<string, bool option>) : Record<string, bool option> = jsNative
+        [<Import("style", "solid-js/web")>]
+        static member style (node: JsxDevRuntime.DOMElement, value: Record<string, string>, ?prev: Record<string, string>) : unit = jsNative
+        [<Import("getOwner", "solid-js/web")>]
+        static member getOwner () : obj = jsNative
+        [<Import("dynamicProperty", "solid-js/web")>]
+        static member dynamicProperty (props: obj, key: string) : obj = jsNative
+        [<Import("use", "solid-js/web")>]
+        static member ``use``<'Arg, 'Ret> (fn: Web.Use.Fn<'Arg, 'Ret>, node: JsxDevRuntime.DOMElement, ?arg: 'Arg) : 'Ret = jsNative
+        [<Import("getHydrationKey", "solid-js/web")>]
+        static member getHydrationKey () : string = jsNative
+        [<Import("getNextElement", "solid-js/web")>]
+        static member getNextElement (?template: (unit -> JsxDevRuntime.DOMElement)) : JsxDevRuntime.DOMElement = jsNative
+        [<Import("getNextMatch", "solid-js/web")>]
+        static member getNextMatch (start: Fable.Core.TS.Dom.Node, elementName: string) : JsxDevRuntime.DOMElement = jsNative
+        [<Import("getNextMarker", "solid-js/web")>]
+        static member getNextMarker (start: Fable.Core.TS.Dom.Node) : Fable.Core.TS.Dom.Node * Fable.Core.TS.Dom.Node[] = jsNative
+        [<Import("useAssets", "solid-js/web")>]
+        static member useAssets (fn: (unit -> JSXElement option)) : unit = jsNative
+        [<Import("getAssets", "solid-js/web")>]
+        static member getAssets () : string = jsNative
+        [<Import("HydrationScript", "solid-js/web")>]
+        static member HydrationScript () : JSXElement option = jsNative
+        [<Import("generateHydrationScript", "solid-js/web")>]
+        static member generateHydrationScript () : string = jsNative
+        [<Import("Assets", "solid-js/web")>]
+        static member Assets (props: Web.Assets.Props) : JSXElement option = jsNative
+        [<Import("Hydration", "solid-js/web")>]
+        static member Hydration (props: Web.Hydration.Props) : JSXElement option = jsNative
+        [<Import("NoHydration", "solid-js/web")>]
+        static member NoHydration (props: Web.NoHydration.Props) : JSXElement option = jsNative
+        [<Import("RequestContext", "solid-js/web")>]
+        static member RequestContext: obj = jsNative
+        [<Import("getRequestEvent", "solid-js/web")>]
+        static member getRequestEvent () : RequestEvent option = jsNative
+        [<Import("runHydrationEvents", "solid-js/web")>]
+        static member runHydrationEvents () : unit = jsNative
+        [<Import("isServer", "solid-js/web")>]
+        static member isServer: bool = jsNative
+        [<Import("isDev", "solid-js/web")>]
+        static member isDev: bool = jsNative
+        [<Import("hydrate", "solid-js/web")>]
+        static member hydrate (fn: (unit -> JSXElement option), node: MountableElement, ?options: Web.Hydrate.Options) : (unit -> unit) = jsNative
+        /// <summary>
+        /// Renders components somewhere else in the DOM
+        /// <br /><br />
+        /// Useful for inserting modals and tooltips outside of an cropping layout. If no mount point is given, the portal is inserted in document.body; it is wrapped in a <c>&lt;div&gt;</c> unless the target is document.head or <c>isSVG</c> is true. setting <c>useShadow</c> to true places the element in a shadow root to isolate styles.
+        /// </summary>
+        /// <remarks>@description https://docs.solidjs.com/reference/components/portal</remarks>
+        [<Import("Portal", "solid-js/web")>]
+        static member Portal<'T, 'S> (props: Web.Portal.Props<'T, 'S>) : Fable.Core.TS.Dom.Text = jsNative
+        /// <summary>
+        /// Renders an arbitrary component or element with the given props
+        /// <br /><br />
+        /// This is a lower level version of the <c>Dynamic</c> component, useful for
+        /// performance optimizations in libraries. Do not use this unless you know
+        /// what you are doing.
+        /// <code lang="typescript">
+        /// const element = () =&gt; multiline() ? 'textarea' : 'input';
+        /// createDynamic(element, { value: value() });
+        /// </code>
+        /// </summary>
+        /// <remarks>@description https://docs.solidjs.com/reference/components/dynamic</remarks>
+        [<Import("createDynamic", "solid-js/web")>]
+        static member createDynamic<'T> (``component``: (unit -> 'T option), props: obj) : JSXElement option = jsNative
+        /// <summary>
+        /// Renders an arbitrary custom or native component and passes the other props
+        /// <code lang="typescript">
+        /// &lt;Dynamic component={multiline() ? 'textarea' : 'input'} value={value()} /&gt;
+        /// </code>
+        /// </summary>
+        /// <remarks>@description https://docs.solidjs.com/reference/components/dynamic</remarks>
+        [<Import("Dynamic", "solid-js/web")>]
+        static member Dynamic<'T> (props: DynamicProps<'T, obj>) : JSXElement option = jsNative
+        [<Import("renderToString", "solid-js/web")>]
+        static member renderToString<'T> (fn: (unit -> 'T), ?options: Web.RenderToString.Options) : string = jsNative
+        [<Import("renderToStringAsync", "solid-js/web")>]
+        static member renderToStringAsync<'T> (fn: (unit -> 'T), ?options: Web.RenderToStringAsync.Options) : JS.Promise<string> = jsNative
+        [<Import("renderToStream", "solid-js/web")>]
+        static member renderToStream<'T> (fn: (unit -> 'T), ?options: Web.RenderToStream.Options) : Web.RenderToStream.Result = jsNative
+        [<Import("ssr", "solid-js/web")>]
+        static member ssr (template: U2<string, string[]>, [<ParamArray>] nodes: obj[]) : Web.Ssr.Result = jsNative
+        [<Import("ssrElement", "solid-js/web")>]
+        static member ssrElement (name: string, props: obj, children: obj, needsId: bool) : Web.SsrElement.Result = jsNative
+        [<Import("ssrClassList", "solid-js/web")>]
+        static member ssrClassList (value: Record<string, bool>) : string = jsNative
+        [<Import("ssrStyle", "solid-js/web")>]
+        static member ssrStyle (value: Record<string, string>) : string = jsNative
+        [<Import("ssrAttribute", "solid-js/web")>]
+        static member ssrAttribute (key: string, value: bool) : string = jsNative
+        [<Import("ssrHydrationKey", "solid-js/web")>]
+        static member ssrHydrationKey () : string = jsNative
+        [<Import("resolveSSRNode", "solid-js/web")>]
+        static member resolveSSRNode (node: obj) : string = jsNative
+        [<Import("escape", "solid-js/web")>]
+        static member escape (html: string) : string = jsNative
+        /// <remarks>@deprecated Replaced by ssrElement</remarks>
+        [<Import("ssrSpread", "solid-js/web")>]
+        static member ssrSpread (props: obj, isSVG: bool, skipChildren: bool) : unit = jsNative
+        /// <remarks>@deprecated Replaced by renderToStream</remarks>
+        [<Import("pipeToWritable", "solid-js/web")>]
+        static member pipeToWritable<'T> (fn: (unit -> 'T), writable: Fable.Core.TS.Dom.WritableStream<obj>, ?options: Web.PipeToWritable.Options) : unit = jsNative
+        /// <remarks>@deprecated Replaced by renderToStream</remarks>
+        [<Import("pipeToNodeWritable", "solid-js/web")>]
+        static member pipeToNodeWritable<'T> (fn: (unit -> 'T), writable: Web.PipeToNodeWritable.Writable, ?options: Web.PipeToNodeWritable.Options) : unit = jsNative
+
+    module AddEventListener =
+        [<Interface>]
+        type Handler =
+            abstract handleEvent: ``object``: Fable.Core.TS.Dom.Event -> unit
+            abstract once: bool option with get, set
+            abstract passive: bool option with get, set
+            abstract signal: Fable.Core.TS.Dom.AbortSignal option with get, set
+            abstract capture: bool option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (handleEvent: (Fable.Core.TS.Dom.Event -> unit), ?once: bool, ?passive: bool, ?signal: Fable.Core.TS.Dom.AbortSignal, ?capture: bool) : Handler = jsNative
+
+    module Assets =
+        [<Interface>]
+        type Props =
+            abstract children: JSXElement option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?children: JSXElement) : Props = jsNative
+
+    module Hydrate =
+        [<Interface>]
+        type Options =
+            abstract renderId: string option with get, set
+            abstract owner: obj option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?renderId: string, ?owner: obj) : Options = jsNative
+
+    module Hydration =
+        [<Interface>]
+        type Props =
+            abstract children: JSXElement option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?children: JSXElement) : Props = jsNative
+
+    module NoHydration =
+        [<Interface>]
+        type Props =
+            abstract children: JSXElement option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?children: JSXElement) : Props = jsNative
+
+    module PipeToNodeWritable =
+        [<Interface>]
+        type Options =
+            abstract nonce: string option with get, set
+            abstract onReady: (Web.LegacyResults -> unit) option with get, set
+            abstract onCompleteAll: (unit -> unit) option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?nonce: string, ?onReady: (Web.LegacyResults -> unit), ?onCompleteAll: (unit -> unit)) : Options = jsNative
+
+        [<Interface>]
+        type Writable =
+            abstract write: (string -> unit) with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (write: (string -> unit)) : Writable = jsNative
+
+    module PipeToWritable =
+        [<Interface>]
+        type Options =
+            abstract nonce: string option with get, set
+            abstract onReady: (Web.LegacyResults -> unit) option with get, set
+            abstract onCompleteAll: (unit -> unit) option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?nonce: string, ?onReady: (Web.LegacyResults -> unit), ?onCompleteAll: (unit -> unit)) : Options = jsNative
+
+    module Portal =
+        [<Interface>]
+        type Props<'T, 'S> =
+            abstract mount: Fable.Core.TS.Dom.Node option with get, set
+            abstract useShadow: 'T option with get, set
+            abstract isSVG: 'S option with get, set
+            abstract ref: obj option with get, set
+            abstract children: JSXElement option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?mount: Fable.Core.TS.Dom.Node, ?useShadow: 'T, ?isSVG: 'S, ?ref: obj, ?children: JSXElement) : Props<'T, 'S> = jsNative
+
+    module Render =
+        [<Interface>]
+        type Options =
+            abstract owner: obj option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?owner: obj) : Options = jsNative
+
+    module RenderToStream =
+        [<Interface>]
+        type Options =
+            abstract nonce: string option with get, set
+            abstract renderId: string option with get, set
+            abstract onCompleteShell: (Web.RenderToStream.Options.OnCompleteShell.Info -> unit) option with get, set
+            abstract onCompleteAll: (Web.RenderToStream.Options.OnCompleteAll.Info -> unit) option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?nonce: string, ?renderId: string, ?onCompleteShell: (Web.RenderToStream.Options.OnCompleteShell.Info -> unit), ?onCompleteAll: (Web.RenderToStream.Options.OnCompleteAll.Info -> unit)) : Options = jsNative
+
+        [<Interface>]
+        type Result =
+            abstract pipe: (Web.RenderToStream.Result.Pipe.Writable -> unit) with get, set
+            abstract pipeTo: (Fable.Core.TS.Dom.WritableStream<obj> -> unit) with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (pipe: (Web.RenderToStream.Result.Pipe.Writable -> unit), pipeTo: (Fable.Core.TS.Dom.WritableStream<obj> -> unit)) : Result = jsNative
+
+        module Options =
+            module OnCompleteAll =
+                [<Interface>]
+                type Info =
+                    abstract write: (string -> unit) with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (write: (string -> unit)) : Info = jsNative
+
+            module OnCompleteShell =
+                [<Interface>]
+                type Info =
+                    abstract write: (string -> unit) with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (write: (string -> unit)) : Info = jsNative
+
+        module Result =
+            module Pipe =
+                [<Interface>]
+                type Writable =
+                    abstract write: (string -> unit) with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (write: (string -> unit)) : Writable = jsNative
+
+    module RenderToString =
+        [<Interface>]
+        type Options =
+            abstract nonce: string option with get, set
+            abstract renderId: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?nonce: string, ?renderId: string) : Options = jsNative
+
+    module RenderToStringAsync =
+        [<Interface>]
+        type Options =
+            abstract timeoutMs: float option with get, set
+            abstract nonce: string option with get, set
+            abstract renderId: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?timeoutMs: float, ?nonce: string, ?renderId: string) : Options = jsNative
+
+    module Ssr =
+        [<Interface>]
+        type Result =
+            abstract t: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (t: string) : Result = jsNative
+
+    module SsrElement =
+        [<Interface>]
+        type Result =
+            abstract t: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (t: string) : Result = jsNative
+
+    /// <summary>solid-js/web/storage</summary>
+    module Storage =
+        /// <summary>The package's value exports, each bound to its import.</summary>
+        [<Erase>]
+        type Exports =
+            [<Import("provideRequestEvent", "solid-js/web/storage")>]
+            static member provideRequestEvent<'T, 'U when 'T :> Web.RequestEvent> (init: 'T, cb: (unit -> 'U)) : 'U = jsNative
+
+    module Use =
+        type Fn<'Arg, 'Ret> = delegate of node: JsxDevRuntime.DOMElement * arg: 'Arg -> 'Ret

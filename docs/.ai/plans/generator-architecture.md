@@ -1396,6 +1396,32 @@ goldens moved by the attribute line only. Regenerating `@types/node` compiles wi
 errors (previously 50x FS0438): 1677 exact / 1924 ergonomic / 867 widened / 356 escape,
 `SC010` x1495, 289,053 lines. The Node project stays out of the solution (#71 open).
 
+## Public subpaths and shallowest-path type homes (2026-09-12)
+
+One run enumerates every `./` key of the package.json `exports` map (`Bootstrap.publicPaths`)
+and harvests each as an owner, `FromAmbientModule "<runtime>/<key>"`, so the export-layout
+allocator renders `pkg/client` as `Client` with its own `Exports`. A key with `*` records
+`HG008`; a key naming a non-TypeScript target is skipped silently, and a key naming a missing
+or absent declaration file records `HG009`; a key resolving outside the package fails the run.
+`subpaths` in `xantham.json` restricts the set; `entry` disables enumeration.
+
+Type declarations home under the shallowest owner path among the exports sharing the
+declared type, ties broken by ordinal owner specifier, then harvest order
+(`ExportNames.declarationExports`). The cross-shipped-group preference still applies first.
+A deeper owner's export of the same type emits nothing (`Aliases`). Ambient modules follow
+the same rule. Values are unchanged: one `Exports` per owner.
+
+Catalog rows already carried dotted nested names since the specifier-module change, so
+`declarations.json` schema stays at version 1.
+
+Verification: 730 + 90 Expecto tests, compile gate, run gate. Findings moved:
+`HG008` 0 -> 1, `HG009` 0 -> 1 (`subpath-lab`); `RA007` 0 -> 1 (`solid-js`, `Store.SetStoreFunction`);
+`SA001` 8 -> 8 and `NE001` 0 -> 0, unchanged. Goldens moved: `type-fest` (+`Globals` module for
+`./globals`), `animejs` (new subpath modules and imports), `solid-js` (new subpath modules,
+`JSX` moving to the root, and a duplicate `DOMElement` abbreviation dropping), `@cloudflare/workers-types`
+(three ambient-module types moving to the root), `static-reexport-lab` (a root abbreviation
+dropping), `subpath-lab` (new).
+
 # Easy Nits 
 
 To include in scope when a phases implementation/attempt ends up being small/quick.
