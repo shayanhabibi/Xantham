@@ -1983,9 +1983,9 @@ let private exportLayout () =
     equal
         "a literal-separated overload selects the one exported function"
         "left"
-        (unbox<string>(LayoutLab.Exports.dispatch LayoutLab.Exports.Left.Left))
+        (unbox<string>(LayoutLab.Exports.dispatch LayoutLab.Exports.Left))
 
-    equal "and so does its sibling" "right" (unbox<string>(LayoutLab.Exports.dispatch LayoutLab.Exports.Right.Right))
+    equal "and so does its sibling" "right" (unbox<string>(LayoutLab.Exports.dispatch LayoutLab.Exports.Right))
 
 [<EntryPoint>]
 let main _ =
