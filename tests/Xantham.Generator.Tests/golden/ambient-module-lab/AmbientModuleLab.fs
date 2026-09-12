@@ -127,7 +127,47 @@ module AmbientLabRuntime =
         [<ParamObject; Emit("$0")>]
         static member Create (label: string) : Session = jsNative
 
+[<Interface>]
+type Session2 =
+    abstract id: string
+    [<ParamObject; Emit("$0")>]
+    static member Create (id: string) : Session2 = jsNative
+
+[<Interface>]
+type Constants =
+    abstract epoch: float
+    [<ParamObject; Emit("$0")>]
+    static member Create (epoch: float) : Constants = jsNative
+
+[<Interface>]
+type Session3 =
+    abstract id: string
+    [<ParamObject; Emit("$0")>]
+    static member Create (id: string) : Session3 = jsNative
+
+[<Interface>]
+type Constants2 =
+    abstract epoch: float
+    [<ParamObject; Emit("$0")>]
+    static member Create (epoch: float) : Constants2 = jsNative
+
 module AmbientLab =
+    module Lab =
+        /// <summary>The package's value exports, each bound to its import.</summary>
+        [<Erase>]
+        type Exports =
+            [<Import("Session", "ambient-lab:lab"); EmitConstructor>]
+            static member Session (id: string) : Session2 = jsNative
+
+        module Promises =
+            /// <summary>The package's value exports, each bound to its import.</summary>
+            [<Erase>]
+            type Exports =
+                [<Import("Session", "ambient-lab:lab/promises"); EmitConstructor>]
+                static member Session (id: string) : Session3 = jsNative
+                [<Import("describe", "ambient-lab:lab/promises")>]
+                static member describe (session: Session2) : string = jsNative
+
     module Runtime =
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]

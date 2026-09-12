@@ -3,16 +3,16 @@
   "package": "ambient-module-lab",
   "module": "AmbientModuleLab",
   "counts": {
-    "exact": 15,
-    "ergonomic": 8,
-    "widened": 3,
+    "exact": 20,
+    "ergonomic": 11,
+    "widened": 4,
     "escape": 2
   },
   "passes": [
     {
       "pass": "HG - harvest-globals",
-      "total": 6,
-      "exact": 4,
+      "total": 8,
+      "exact": 6,
       "escape": 2
     },
     {
@@ -29,8 +29,8 @@
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 1,
-      "widened": 1
+      "total": 4,
+      "widened": 4
     },
     {
       "pass": "SC - shape-classes",
@@ -41,8 +41,8 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 13,
-      "ergonomic": 13
+      "total": 17,
+      "ergonomic": 17
     }
   ]
 }
