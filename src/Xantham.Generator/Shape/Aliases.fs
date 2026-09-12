@@ -114,11 +114,19 @@ let shapeAliases: Pass<ShapeModel> =
                             else
                                 let name = fsName fallback export
 
+                                let definingOwner typeId =
+                                    Map.tryFind typeId definingExports
+                                    |> Option.map (fun defining ->
+                                        ExportLayout.ownerOf model.RuntimePackage defining.Origin)
+
+                                let owner = ExportLayout.ownerOf model.RuntimePackage export.Origin
+
                                 match
                                     Map.tryFind export.Symbol.SymbolId model.ExportTypes |> Option.bind _.Declared
                                 with
                                 | Some typeId ->
                                     match Map.tryFind typeId model.DeclNames with
+                                    | Some _ when definingOwner typeId <> Some owner -> None
                                     | Some primary when primary = name -> None
                                     | Some _ when Map.tryFind typeId definingExports = Some export -> None
                                     | Some primary when Set.contains name claimed ->

@@ -16745,6 +16745,12 @@ type RpcStubConstructor =
     [<EmitConstructor>]
     abstract Create<'T>: value: 'T -> obj
 
+type WebSocketClose2 = delegate of ws: WebSocket * code: float * reason: string * wasClean: bool -> JS.Promise<unit> option
+
+type WebSocketError2 = delegate of ws: WebSocket * error: obj -> JS.Promise<unit> option
+
+type WebSocketMessage2 = delegate of ws: WebSocket * message: U2<string, JS.ArrayBuffer> -> JS.Promise<unit> option
+
 type WorkflowDelayDuration = Cloudflare.Workers.WorkflowSleepDuration
 
 type WorkflowTimeoutDuration = Cloudflare.Workers.WorkflowSleepDuration
@@ -24062,12 +24068,6 @@ module Cloudflare =
             member _.env
                 with get (): 'Env = jsNative
                 and set (_: 'Env): unit = jsNative
-
-        type WebSocketClose = delegate of ws: WebSocket * code: float * reason: string * wasClean: bool -> JS.Promise<unit> option
-
-        type WebSocketError = delegate of ws: WebSocket * error: obj -> JS.Promise<unit> option
-
-        type WebSocketMessage = delegate of ws: WebSocket * message: U2<string, JS.ArrayBuffer> -> JS.Promise<unit> option
 
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
         type WorkflowDurationLabel =

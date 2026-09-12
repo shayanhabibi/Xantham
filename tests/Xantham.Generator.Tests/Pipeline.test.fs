@@ -4468,7 +4468,40 @@ let pipelineTests =
                       Expect.stringContains symbols "\"key\":\"HG009\"" "untyped skipped"
                       let source = rendered.Files |> List.head |> snd
                       Expect.isFalse (source.Contains "module Features") "no wildcard module"
-                      Expect.isFalse (source.Contains "module Untyped") "no untyped module" ])
+                      Expect.isFalse (source.Contains "module Untyped") "no untyped module"
+
+                  testCase "a type exported from root and a subpath is declared at the root" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+                      Expect.stringContains source "\ntype Payload =" "root declaration"
+                      Expect.isFalse (source.Contains "    type Payload =") "no nested redeclaration"
+                      Expect.isFalse (source.Contains "type Payload = Payload") "no abbreviation under the subpath"
+
+                  testCase "the shallowest path's exported name wins" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+                      Expect.stringContains source "\ntype RootSession" "root exports Session as RootSession"
+                      Expect.isFalse (source.Contains "    type Session") "client does not redeclare it"
+
+                  testCase "a type exported by a subpath alone nests under it" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+                      Expect.stringContains source "    type ClientOptions" "ClientOptions declared under Client"
+                      Expect.stringContains source "abstract level: " "DeepOnly declared"
+                      Expect.stringContains source "(options: ClientOptions)" "client signature reads its own module"
+
+                  testCase "an unexported shared type stays at the root" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+                      Expect.stringContains source "\ntype Internal =" "root"
+
+                  testCase "equal-depth keys over one file home types under the ordinal-first key" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+                      let aliasAt = source.IndexOf "module Alias ="
+                      let shapeAt = source.IndexOf "type AliasShape"
+                      let mirrorAt = source.IndexOf "module Mirror ="
+                      Expect.isTrue (aliasAt >= 0 && shapeAt > aliasAt && (mirrorAt < 0 || shapeAt < mirrorAt)) "AliasShape under Alias, not Mirror" ])
         yield!
             fixtureTests "single-case-enum-lab" (handFixture "single-case-enum-lab") GeneratorConfig.Default (fun package -> [
                 testCase "a single-case string enum is not RequireQualifiedAccess" <| fun _ ->

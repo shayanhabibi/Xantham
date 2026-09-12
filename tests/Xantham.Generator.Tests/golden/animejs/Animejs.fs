@@ -10,6 +10,81 @@ open Fable.Core.JsInterop
 open Fable.Core.JS
 open Fable.Core.TS.Dom
 
+[<Interface>]
+type Adapter =
+    /// <remarks>@type {((t: any) =&gt; boolean) | null}</remarks>
+    abstract detect: (obj -> bool) option with get, set
+    /// <remarks>@type {TargetAdapter[]}</remarks>
+    abstract targetAdapters: TargetAdapter[] with get, set
+    /// <remarks>@type {((target: any, name: string) =&gt; TargetAdapterEntry | null)[]}</remarks>
+    abstract propertyResolvers: Adapter.PropertyResolvers.Item[] with get, set
+    /// <summary>
+    /// Creates and registers a <c>TargetAdapter</c> scoped to this Adapter.
+    /// </summary>
+    abstract registerTargetAdapter: detect: (obj -> bool) -> TargetAdapter
+    /// <summary>
+    /// Registers a property resolver scoped to this Adapter. Resolvers are functions invoked at tween creation when no target adapter has claimed the name; the function returns an entry for names it handles or <c>null</c> to defer. Use for runtime-matched patterns (Color / Vector axis detection, name-prefix conventions, etc.).
+    /// </summary>
+    abstract registerPropertyResolver: resolver: Adapter.RegisterPropertyResolver.Resolver -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (targetAdapters: TargetAdapter[], propertyResolvers: Adapter.PropertyResolvers.Item[], registerTargetAdapter: ((obj -> bool) -> TargetAdapter), registerPropertyResolver: (Adapter.RegisterPropertyResolver.Resolver -> unit), ?detect: (obj -> bool)) : Adapter = jsNative
+
+[<Interface>]
+type TargetAdapter =
+    abstract detect: (obj -> bool) with get, set
+    /// <remarks>@type {Record&lt;string, TargetAdapterEntry&gt;}</remarks>
+    abstract props: Record<string, TargetAdapter.Props.Item> with get, set
+    /// <summary>
+    /// Registers a property the adapter handles. <c>setter</c> receives <c>(target, value, tween)</c>. For color and complex tweens <c>value</c> is <c>undefined</c>, read <c>tween._numbers</c> instead. <c>gate(target)</c> scopes the prop to a subset of matching targets.
+    /// </summary>
+    abstract registerProperty: name: string * getter: (obj -> obj) * setter: TargetAdapter.RegisterProperty.Setter * ?gate: (obj -> bool) -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (detect: (obj -> bool), props: Record<string, TargetAdapter.Props.Item>, registerProperty: Action<string, (obj -> obj), TargetAdapter.RegisterProperty.Setter, (obj -> bool) option>) : TargetAdapter = jsNative
+
+type Instance =
+    abstract isAnimejsInstanceProxy: bool with get, set
+    abstract parent: obj with get, set
+    abstract id: float with get, set
+    abstract _position: obj with get, set
+    abstract _rotation: obj with get, set
+    abstract _scale: obj with get, set
+    abstract _matrix: obj with get, set
+    abstract _quat: obj with get, set
+    abstract _color: obj with get, set
+    abstract _dirty: float with get, set
+    abstract _skewX: float with get, set
+    abstract _skewY: float with get, set
+    abstract _skewZ: float with get, set
+    abstract _originX: float with get, set
+    abstract _originY: float with get, set
+    abstract _originZ: float with get, set
+    abstract _hasSkewOrigin: bool with get, set
+    /// <remarks>@type {Instance[]}</remarks>
+    abstract _dirtyList: Instance[] with get, set
+    abstract _hasSetColor: bool with get, set
+    abstract _hasSetVisible: bool with get, set
+    abstract _hasGetVisible: bool with get, set
+    abstract _markDirty: flag: float -> unit
+    abstract _flush: unit -> unit
+    abstract x: float with get, set
+    abstract y: float with get, set
+    abstract z: float with get, set
+    abstract rotateX: float with get, set
+    abstract rotateY: float with get, set
+    abstract rotateZ: float with get, set
+    abstract scaleX: float with get, set
+    abstract scaleY: float with get, set
+    abstract scaleZ: float with get, set
+    abstract scale: float with get, set
+    abstract skewX: float with get, set
+    abstract skewY: float with get, set
+    abstract skewZ: float with get, set
+    abstract transformOriginX: float with get, set
+    abstract transformOriginY: float with get, set
+    abstract transformOriginZ: float with get, set
+    abstract opacity: float with get, set
+    abstract visible: bool with get, set
+
 /// <remarks>@import ;</remarks>
 [<Interface>]
 type Animatable =
@@ -4050,38 +4125,14 @@ type Exports =
     [<Import("waapi", "animejs")>]
     static member waapi: Waapi = jsNative
 
+module Adapter =
+    module PropertyResolvers =
+        type Item = delegate of target: obj * name: string -> TargetAdapter.Props.Item option
+
+    module RegisterPropertyResolver =
+        type Resolver = delegate of target: obj * name: string -> TargetAdapter.Props.Item option
+
 module Adapters =
-    [<Interface>]
-    type Adapter =
-        /// <remarks>@type {((t: any) =&gt; boolean) | null}</remarks>
-        abstract detect: (obj -> bool) option with get, set
-        /// <remarks>@type {TargetAdapter[]}</remarks>
-        abstract targetAdapters: TargetAdapter[] with get, set
-        /// <remarks>@type {((target: any, name: string) =&gt; TargetAdapterEntry | null)[]}</remarks>
-        abstract propertyResolvers: Adapters.Adapter.PropertyResolvers.Item[] with get, set
-        /// <summary>
-        /// Creates and registers a <c>TargetAdapter</c> scoped to this Adapter.
-        /// </summary>
-        abstract registerTargetAdapter: detect: (obj -> bool) -> TargetAdapter
-        /// <summary>
-        /// Registers a property resolver scoped to this Adapter. Resolvers are functions invoked at tween creation when no target adapter has claimed the name; the function returns an entry for names it handles or <c>null</c> to defer. Use for runtime-matched patterns (Color / Vector axis detection, name-prefix conventions, etc.).
-        /// </summary>
-        abstract registerPropertyResolver: resolver: Adapters.Adapter.RegisterPropertyResolver.Resolver -> unit
-        [<ParamObject; Emit("$0")>]
-        static member Create (targetAdapters: TargetAdapter[], propertyResolvers: Adapters.Adapter.PropertyResolvers.Item[], registerTargetAdapter: ((obj -> bool) -> TargetAdapter), registerPropertyResolver: (Adapters.Adapter.RegisterPropertyResolver.Resolver -> unit), ?detect: (obj -> bool)) : Adapter = jsNative
-
-    [<Interface>]
-    type TargetAdapter =
-        abstract detect: (obj -> bool) with get, set
-        /// <remarks>@type {Record&lt;string, TargetAdapterEntry&gt;}</remarks>
-        abstract props: Record<string, Adapters.TargetAdapter.Props.Item> with get, set
-        /// <summary>
-        /// Registers a property the adapter handles. <c>setter</c> receives <c>(target, value, tween)</c>. For color and complex tweens <c>value</c> is <c>undefined</c>, read <c>tween._numbers</c> instead. <c>gate(target)</c> scopes the prop to a subset of matching targets.
-        /// </summary>
-        abstract registerProperty: name: string * getter: (obj -> obj) * setter: Adapters.TargetAdapter.RegisterProperty.Setter * ?gate: (obj -> bool) -> unit
-        [<ParamObject; Emit("$0")>]
-        static member Create (detect: (obj -> bool), props: Record<string, Adapters.TargetAdapter.Props.Item>, registerProperty: Action<string, (obj -> obj), Adapters.TargetAdapter.RegisterProperty.Setter, (obj -> bool) option>) : TargetAdapter = jsNative
-
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
     type Exports =
@@ -4090,29 +4141,6 @@ module Adapters =
         /// </summary>
         [<Import("registerAdapter", "animejs/adapters")>]
         static member registerAdapter (?detect: (obj -> bool)) : Adapter = jsNative
-
-    module Adapter =
-        module PropertyResolvers =
-            type Item = delegate of target: obj * name: string -> TargetAdapter.Props.Item option
-
-        module RegisterPropertyResolver =
-            type Resolver = delegate of target: obj * name: string -> Adapters.TargetAdapter.Props.Item option
-
-    module TargetAdapter =
-        module Props =
-            [<Interface>]
-            type Item =
-                abstract get: (obj -> obj) with get, set
-                abstract set: Adapters.TargetAdapter.Props.Item.Set with get, set
-                abstract gate: (obj -> bool) option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (get: (obj -> obj), set: Adapters.TargetAdapter.Props.Item.Set, ?gate: (obj -> bool)) : Item = jsNative
-
-            module Item =
-                type Set = delegate of target: obj * value: float * tween: obj -> unit
-
-        module RegisterProperty =
-            type Setter = delegate of target: obj * value: float * tween: obj -> unit
 
     module Three =
         [<Interface>]
@@ -4124,50 +4152,6 @@ module Adapters =
             abstract registerPropertyResolver: resolver: Adapters.Three.ThreeAdapter.RegisterPropertyResolver.Resolver -> unit
             [<ParamObject; Emit("$0")>]
             static member Create (detect: (obj -> bool), targetAdapters: Adapters.Three.ThreeAdapter.TargetAdapters.Item[], propertyResolvers: Adapters.Three.ThreeAdapter.PropertyResolvers.Item[], registerTargetAdapter: ((obj -> bool) -> Adapters.Three.ThreeAdapter.RegisterTargetAdapter.Result), registerPropertyResolver: (Adapters.Three.ThreeAdapter.RegisterPropertyResolver.Resolver -> unit)) : ThreeAdapter = jsNative
-
-        type Instance =
-            abstract isAnimejsInstanceProxy: bool with get, set
-            abstract parent: obj with get, set
-            abstract id: float with get, set
-            abstract _position: obj with get, set
-            abstract _rotation: obj with get, set
-            abstract _scale: obj with get, set
-            abstract _matrix: obj with get, set
-            abstract _quat: obj with get, set
-            abstract _color: obj with get, set
-            abstract _dirty: float with get, set
-            abstract _skewX: float with get, set
-            abstract _skewY: float with get, set
-            abstract _skewZ: float with get, set
-            abstract _originX: float with get, set
-            abstract _originY: float with get, set
-            abstract _originZ: float with get, set
-            abstract _hasSkewOrigin: bool with get, set
-            /// <remarks>@type {Instance[]}</remarks>
-            abstract _dirtyList: Instance[] with get, set
-            abstract _hasSetColor: bool with get, set
-            abstract _hasSetVisible: bool with get, set
-            abstract _hasGetVisible: bool with get, set
-            abstract _markDirty: flag: float -> unit
-            abstract _flush: unit -> unit
-            abstract x: float with get, set
-            abstract y: float with get, set
-            abstract z: float with get, set
-            abstract rotateX: float with get, set
-            abstract rotateY: float with get, set
-            abstract rotateZ: float with get, set
-            abstract scaleX: float with get, set
-            abstract scaleY: float with get, set
-            abstract scaleZ: float with get, set
-            abstract scale: float with get, set
-            abstract skewX: float with get, set
-            abstract skewY: float with get, set
-            abstract skewZ: float with get, set
-            abstract transformOriginX: float with get, set
-            abstract transformOriginY: float with get, set
-            abstract transformOriginZ: float with get, set
-            abstract opacity: float with get, set
-            abstract visible: bool with get, set
 
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]
@@ -4210,10 +4194,10 @@ module Adapters =
                 [<Interface>]
                 type Result =
                     abstract detect: (obj -> bool) with get, set
-                    abstract props: Record<string, Adapters.TargetAdapter.Props.Item> with get, set
+                    abstract props: Record<string, TargetAdapter.Props.Item> with get, set
                     abstract registerProperty: name: string * getter: (obj -> obj) * setter: Adapters.Three.ThreeAdapter.RegisterTargetAdapter.Result.RegisterProperty.Setter * ?gate: (obj -> bool) -> unit
                     [<ParamObject; Emit("$0")>]
-                    static member Create (detect: (obj -> bool), props: Record<string, Adapters.TargetAdapter.Props.Item>, registerProperty: Action<string, (obj -> obj), Adapters.Three.ThreeAdapter.RegisterTargetAdapter.Result.RegisterProperty.Setter, (obj -> bool) option>) : Result = jsNative
+                    static member Create (detect: (obj -> bool), props: Record<string, TargetAdapter.Props.Item>, registerProperty: Action<string, (obj -> obj), Adapters.Three.ThreeAdapter.RegisterTargetAdapter.Result.RegisterProperty.Setter, (obj -> bool) option>) : Result = jsNative
 
                 module Result =
                     module RegisterProperty =
@@ -4804,6 +4788,22 @@ module Svg =
             abstract rotate: AutoLayoutParams.Ease with get, set
             [<ParamObject; Emit("$0")>]
             static member Create (translateX: AutoLayoutParams.Ease, translateY: AutoLayoutParams.Ease, rotate: AutoLayoutParams.Ease) : Result = jsNative
+
+module TargetAdapter =
+    module Props =
+        [<Interface>]
+        type Item =
+            abstract get: (obj -> obj) with get, set
+            abstract set: TargetAdapter.Props.Item.Set with get, set
+            abstract gate: (obj -> bool) option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (get: (obj -> obj), set: TargetAdapter.Props.Item.Set, ?gate: (obj -> bool)) : Item = jsNative
+
+        module Item =
+            type Set = delegate of target: obj * value: float * tween: obj -> unit
+
+    module RegisterProperty =
+        type Setter = delegate of target: obj * value: float * tween: obj -> unit
 
 module Text =
     /// <summary>The package's value exports, each bound to its import.</summary>

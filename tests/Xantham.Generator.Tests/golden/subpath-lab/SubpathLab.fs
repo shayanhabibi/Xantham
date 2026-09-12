@@ -10,9 +10,11 @@ open Fable.Core.JsInterop
 open Fable.Core.JS
 open Fable.Core.TS.Dom
 
-type AliasShape = Alias.AliasShape
-
-type ClientOptions = Client.ClientOptions
+[<Interface>]
+type Internal =
+    abstract hidden: float with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (hidden: float) : Internal = jsNative
 
 [<Interface>]
 type Payload =
@@ -25,8 +27,6 @@ type RootSession =
     abstract kind: string
     [<ParamObject; Emit("$0")>]
     static member Create (kind: string) : RootSession = jsNative
-
-type Session = RootSession
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
@@ -58,12 +58,6 @@ module Client =
         [<ParamObject; Emit("$0")>]
         static member Create (retries: float) : ClientOptions = jsNative
 
-    [<Interface>]
-    type Internal =
-        abstract hidden: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (hidden: float) : Internal = jsNative
-
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
     type Exports =
@@ -93,7 +87,7 @@ module Legacy =
     [<Erase>]
     type Exports =
         [<Import("connect", "subpath-lab/legacy/index.js")>]
-        static member connect (options: Client.ClientOptions) : Client.Internal = jsNative
+        static member connect (options: Client.ClientOptions) : Internal = jsNative
         [<Import("describe", "subpath-lab/legacy/index.js")>]
         static member describe (payload: obj) : string = jsNative
         [<Import("Session", "subpath-lab/legacy/index.js"); EmitConstructor>]

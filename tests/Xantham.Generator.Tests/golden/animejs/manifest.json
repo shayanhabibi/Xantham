@@ -16,8 +16,8 @@
     },
     {
       "pass": "SY - synthesize-anonymous",
-      "total": 71,
-      "exact": 71
+      "total": 72,
+      "exact": 72
     },
     {
       "pass": "LU - classify-literal-unions",

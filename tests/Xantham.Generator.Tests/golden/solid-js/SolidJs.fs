@@ -10,6 +10,12 @@ open Fable.Core.JsInterop
 open Fable.Core.JS
 open Fable.Core.TS.Dom
 
+[<Interface>]
+type JSX =
+    abstract SERIALIZABLE: obj
+    [<ParamObject; Emit("$0")>]
+    static member Create (SERIALIZABLE: obj) : JSX = jsNative
+
 type JSXElement = U5<float, bool, obj[], Fable.Core.TS.Dom.Node, string> option
 
 [<Interface>]
@@ -70,25 +76,11 @@ type SourceMapValue =
 
 type WriteSignal = delegate of node: U2<Memo<obj, obj>, SignalState<obj>> * value: obj * isComp: bool option -> obj
 
-/// <summary>
-/// Based on JSX types for Surplus and Inferno and adapted for <c>dom-expressions</c>.
-/// <br /><br />
-/// https://github.com/adamhaile/surplus/blob/master/index.d.ts
-/// https://github.com/infernojs/inferno/blob/master/packages/inferno/src/core/types.ts
-/// <br /><br />
-/// MathML typings coming mostly from Preact
-/// https://github.com/preactjs/preact/blob/07dc9f324e58569ce66634aa03fe8949b4190358/src/jsx.d.ts#L2575
-/// <br /><br />
-/// Checked against other frameworks via the following table:
-/// https://potahtml.github.io/namespace-jsx-project/index.html
-/// </summary>
-type DOMElement = JsxDevRuntime.DOMElement
-
 [<Interface>]
-type JSX =
+type JSX2 =
     abstract SERIALIZABLE: obj
     [<ParamObject; Emit("$0")>]
-    static member Create (SERIALIZABLE: obj) : JSX = jsNative
+    static member Create (SERIALIZABLE: obj) : JSX2 = jsNative
 
 type ObservableObserver<'T> = U2<('T -> unit), ObservableObserver2<'T>>
 
@@ -1698,12 +1690,6 @@ module H =
                             abstract Item: string -> obj with get, set
 
     module JsxDevRuntime =
-        [<Interface>]
-        type JSX =
-            abstract SERIALIZABLE: obj
-            [<ParamObject; Emit("$0")>]
-            static member Create (SERIALIZABLE: obj) : JSX = jsNative
-
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]
         type Exports =
@@ -2311,14 +2297,14 @@ module JsxDevRuntime =
     [<Erase>]
     type Exports =
         [<Import("JSX", "solid-js/jsx-dev-runtime")>]
-        static member JSX: JSX = jsNative
+        static member JSX: JSX2 = jsNative
 
 module JsxRuntime =
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
     type Exports =
         [<Import("JSX", "solid-js/jsx-runtime")>]
-        static member JSX: JSX = jsNative
+        static member JSX: JSX2 = jsNative
 
 module Lazy =
     module Fn =

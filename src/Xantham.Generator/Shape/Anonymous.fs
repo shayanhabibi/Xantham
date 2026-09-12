@@ -244,6 +244,18 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
 
     let aliasForms = aliasDeclarationForms model
 
+    /// Type ids a public path exports directly, by name. A type outside this set reaches a
+    /// declaration only through some export's signature, and homes at the root regardless of
+    /// which export's module is walked first to reach it.
+    let publiclyExportedTypeIds =
+        model.Harvest.Exports
+        |> List.choose (fun export ->
+            if not (hasAny SymbolFlags.Type export.Symbol.Flags) then
+                None
+            else
+                Map.tryFind export.Symbol.SymbolId model.ExportTypes |> Option.bind _.Declared)
+        |> Set.ofList
+
     /// The module name a type nests under, where its own symbol is written inside a namespace
     /// this run names.
     let namespaceOf (facts: TypeFacts) =
@@ -460,7 +472,18 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                             Naming.pascalSegment (name / uom<symbolName>), namespaceOf facts
                         | _ -> path, None
 
-                    let claimed = claim owner preferred typeId order
+                    let claimed =
+                        // A named type no public path exports directly stays at the root
+                        // (decision 10): the export whose signature happens to reach it first
+                        // during this walk does not decide its home.
+                        if Set.contains typeId publiclyExportedTypeIds then
+                            claim owner preferred typeId order
+                        else
+                            let referencingPrefix = modulePrefix
+                            modulePrefix <- ""
+                            let result = claim owner preferred typeId order
+                            modulePrefix <- referencingPrefix
+                            result
 
                     // The delegate declaration `shape-callbacks` writes for it (D5): the arity
                     // guarantee `System.Func` gives, under a name whose parameters read as

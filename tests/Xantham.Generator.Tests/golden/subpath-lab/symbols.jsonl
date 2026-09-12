@@ -1,14 +1,11 @@
-{"name":"AliasShape","file":"alias.d.ts","tier":"exact","findings":[]}
-{"name":"ClientOptions","file":"client.d.ts","tier":"widened","findings":[{"name":"SA.AbbreviationNameTaken","key":"SA003","pass":"shape-aliases","tier":"widened","symbol":"ClientOptions","fields":{"declared":"Client.ClientOptions"},"message":"abbreviation dropped - Client.ClientOptions already declares the name; the type reads under that declaration"}]}
+{"name":"Internal","file":"client.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Internal","message":"ParamObject Create synthesized (D3)"}]}
 {"name":"Payload","file":"shared.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Payload","message":"ParamObject Create synthesized (D3)"}]}
 {"name":"RootSession","file":"shared.d.ts","tier":"widened","findings":[{"name":"TR.StringLiteralToString","key":"TR006","pass":"shape-interfaces","tier":"widened","symbol":"RootSession.kind","message":"string literal type widened to string (doc-noted, \u00A74.2)"},{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"RootSession","message":"ParamObject Create synthesized (D3)"}]}
-{"name":"Session","file":"shared.d.ts","tier":"widened","findings":[{"name":"SA.AbbreviationNameTaken","key":"SA003","pass":"shape-aliases","tier":"widened","symbol":"Session","fields":{"declared":"RootSession"},"message":"abbreviation dropped - RootSession already declares the name; the type reads under that declaration"}]}
 {"name":"Exports.describe","tier":"escape","findings":[{"name":"TR.AnyToObj","key":"TR008","pass":"shape-exports","tier":"escape","symbol":"Exports.describe(payload)","message":"any maps to obj"}]}
 {"name":"Exports.RootSession","tier":"exact","findings":[]}
 {"name":"Alias.AliasShape","file":"alias.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Alias.AliasShape","message":"ParamObject Create synthesized (D3)"}]}
 {"name":"Alias.Exports.whoami","tier":"exact","findings":[]}
 {"name":"Client.ClientOptions","file":"client.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Client.ClientOptions","message":"ParamObject Create synthesized (D3)"}]}
-{"name":"Client.Internal","file":"client.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Client.Internal","message":"ParamObject Create synthesized (D3)"}]}
 {"name":"Client.Exports.connect","tier":"exact","findings":[]}
 {"name":"Client.Exports.describe","tier":"escape","findings":[{"name":"TR.AnyToObj","key":"TR008","pass":"shape-exports","tier":"escape","symbol":"Client.Exports.describe(payload)","message":"any maps to obj"}]}
 {"name":"Client.Exports.Session","tier":"exact","findings":[]}

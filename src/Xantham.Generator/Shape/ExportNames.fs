@@ -32,7 +32,14 @@ let declarationExports (ctx: Context) (model: ShapeModel) =
                 && GeneratorConfig.disposition ctx.Config origin = Ship
                 && (Map.tryFind typeId model.Types
                     |> Option.exists (fun facts -> facts.Response.Symbol = ValueSome export.Symbol.Id)))
-            |> Option.defaultValue first
+            |> Option.defaultValue (
+                exports
+                |> List.indexed
+                |> List.minBy (fun (index, export) ->
+                    let owner = ExportLayout.ownerOf model.RuntimePackage export.Origin
+                    ExportLayout.depthOf model.RuntimePackage owner, ExportLayout.ownerSpecifier owner, index)
+                |> snd
+            )
 
         typeId, defining)
 
