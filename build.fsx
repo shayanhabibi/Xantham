@@ -387,14 +387,40 @@ module Stages =
             and! filter = Options.testFilter
             and! runGate = Options.runGate
 
+            // Each test project is an Expecto console app whose entry point is
+            // `runTestsInAssemblyWithCLIArgs`, so the suite runs as the built executable rather
+            // than under `dotnet test`: no vstest host or adapter in between, the suite's output
+            // streams as it is written, and a stalled child process is visible in the run.
+            // `--filter` is Expecto's own hint: a substring of the full test name.
+            //
             // `cmd` quotes each interpolation hole as one argument, so the flag and its value
-            // have to be part of the format string rather than a pre-baked `" --filter ..."`
-            // hole - that arrives as a single argument and MSBuild rejects it as one switch.
-            let suite =
-                if System.String.IsNullOrWhiteSpace filter then
-                    cmd $"dotnet test {Repo.Project.SolutionFile} -c {config} --no-build"
-                else
-                    cmd $"dotnet test {Repo.Project.SolutionFile} -c {config} --no-build --filter {filter}"
+            // have to be part of the format string rather than a pre-baked `" --filter ..."` hole.
+            let suites = Spec.testProjects |> List.filter _.Name.EndsWith(".Tests")
+
+            let suite (name: string) =
+                stage name {
+                    for project in suites do
+                        let output =
+                            System.IO.Path.Combine(
+                                System.IO.Path.GetDirectoryName project.Path,
+                                "bin",
+                                config,
+                                "net10.0"
+                            )
+
+                        let assembly = System.IO.Path.Combine(output, project.Name + ".dll")
+
+                        let command =
+                            if System.String.IsNullOrWhiteSpace filter then
+                                cmd $"dotnet {assembly}"
+                            else
+                                cmd $"dotnet {assembly} --filter {filter}"
+
+                        stage project.Name {
+                            workingDir output
+                            run command
+                        }
+                }
 
             return
                 stage "test" {
@@ -408,10 +434,10 @@ module Stages =
                     stage "regenerate goldens" {
                         when' update
                         envVars [ ("XANTHAM_UPDATE_GOLDEN", "1") ]
-                        run suite
+                        suite "write"
                     }
 
-                    run suite
+                    suite "check"
                     // The Fable *run* gate (§5 of the architecture plan): the linked goldens compiled
                     // by Fable and executed under node against the fixtures' JavaScript runtimes.
                     // `--noCache` because Fable's up-to-date check missed a changed linked golden once,
