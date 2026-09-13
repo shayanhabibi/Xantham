@@ -108,6 +108,49 @@ let tests =
                 skiptest "run `npm install` at the repository root, or set XANTHAM_TSGO_EXE" ]
     | Some _ ->
         testList "declaration catalog" [
+            testCase "nested module manifests retain installed ownership and invalidate stale catalogs" <| fun _ ->
+                let directory = Path.Combine(temporaryRoot, "xantham-package-submanifest-" + Guid.NewGuid().ToString "N")
+                let package = Path.Combine(directory, "package")
+                Directory.CreateDirectory package |> ignore
+                try
+                    let source = Path.GetFullPath(Path.Combine(fixture, "..", "package-submanifest-lab"))
+                    for file in Directory.EnumerateFiles(source, "*", SearchOption.AllDirectories) do
+                        writePackageFile package (Path.GetRelativePath(source, file)) (File.ReadAllText file)
+                    writePackageFile package "node_modules/@scope/catalog-lab/package.json" """{"name":"@scope/catalog-lab","version":"4.5.6","types":"index.d.ts"}"""
+                    writePackageFile package "node_modules/@scope/catalog-lab/index.d.ts" "export interface Scoped { scoped: string }"
+                    writePackageFile package "node_modules/package-owner-lab/subpath/node_modules/inner-lab/package.json" """{"name":"inner-lab","version":"7.8.9","types":"index.d.ts"}"""
+                    writePackageFile package "node_modules/package-owner-lab/subpath/node_modules/inner-lab/index.d.ts" "export interface Inner { inner: string }"
+                    File.AppendAllText(Path.Combine(package, "index.d.ts"), "\nexport { Scoped } from '@scope/catalog-lab';\nexport { Inner } from 'package-owner-lab/subpath';\n")
+                    File.AppendAllText(Path.Combine(package, "node_modules/package-owner-lab/subpath/index.d.ts"), "\nexport { Inner } from 'inner-lab';\n")
+                    let config =
+                        { GeneratorConfig.Default with
+                            ModuleName = Some "Identity.Root"
+                            Lib = Some [ "esnext" ]
+                            Types = Some []
+                            DeclarationCatalog = true }
+                    let root = Path.Combine(directory, "root")
+                    Pipeline.run config package root |> Async.RunSynchronously |> ignore
+                    let catalog = JsonSerializer.Deserialize<DeclarationCatalog.Catalog>(File.ReadAllText(Path.Combine(root, "declarations.json")), JsonSerializerOptions(PropertyNameCaseInsensitive = true))
+                    let owners = catalog.Inputs |> Array.map (fun source -> source.Package, source.Version, source.File)
+                    Expect.contains owners ("package-owner-lab", "1.2.3", "subpath/index.d.ts") "subpath belongs to its installed package"
+                    Expect.contains owners ("@scope/catalog-lab", "4.5.6", "index.d.ts") "scoped installation is its own owner"
+                    Expect.contains owners ("inner-lab", "7.8.9", "index.d.ts") "nested node_modules starts a new owner"
+                    let adapter =
+                        { config with
+                            ModuleName = Some "Identity.Adapter"
+                            DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
+                    Pipeline.run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    File.AppendAllText(Path.Combine(package, "node_modules/package-owner-lab/subpath/package.json"), "\n")
+                    Expect.throwsC
+                        (fun () -> Pipeline.run adapter package (Path.Combine(directory, "stale")) |> Async.RunSynchronously |> ignore)
+                        (fun error -> Expect.stringContains error.Message "package manifest mismatch" "nested resolution metadata is authenticated")
+                    writePackageFile package "node_modules/package-owner-lab/package.json" """{"name":"package-owner-lab"}"""
+                    Expect.throwsC
+                        (fun () -> Pipeline.run config package (Path.Combine(directory, "unversioned")) |> Async.RunSynchronously |> ignore)
+                        (fun error -> Expect.stringContains error.Message "must declare its version" "installed packages still require versions")
+                finally
+                    if Directory.Exists directory then Directory.Delete(directory, true)
+
             testCase "contextual constructor bounds remain distinct and reusable" <| fun _ ->
                 let directory = Path.Combine(temporaryRoot, "xantham-constructor-bounds-" + Guid.NewGuid().ToString "N")
                 Directory.CreateDirectory directory |> ignore

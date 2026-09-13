@@ -101,6 +101,24 @@ let private compiler (ctx: Context) =
     | None -> fail "the compiler executable could not be identified"
 
 let private packageOf (ctx: Context) (file: string) =
+    let rec boundary directory =
+        let parent = Directory.GetParent directory
+
+        if Path.GetRelativePath(ctx.PackageDir / uom<dirPath>, directory) = "." then
+            Some directory
+        elif isNull parent then
+            None
+        elif parent.Name = "node_modules" then
+            Some directory
+        elif
+            parent.Name.StartsWith("@", StringComparison.Ordinal)
+            && not (isNull parent.Parent)
+            && parent.Parent.Name = "node_modules"
+        then
+            Some directory
+        else
+            boundary parent.FullName
+
     let rec find directory =
         let manifest = Path.Combine(directory, "package.json")
 
@@ -126,7 +144,51 @@ let private packageOf (ctx: Context) (file: string) =
     if file.StartsWith "bundled:" then
         ctx.PackageDir / uom<dirPath>, "typescript/lib", "bundled"
     else
-        find (Path.GetDirectoryName file)
+        let directory = Path.GetDirectoryName file
+
+        match boundary directory with
+        | Some root ->
+            let manifest = Path.Combine(root, "package.json")
+
+            if not (File.Exists manifest) then
+                fail $"{root} has no package manifest"
+
+            use doc = JsonDocument.Parse(File.ReadAllText manifest)
+
+            let field name =
+                match doc.RootElement.TryGetProperty(name: string) with
+                | true, value when
+                    value.ValueKind = JsonValueKind.String
+                    && not (String.IsNullOrWhiteSpace(value.GetString()))
+                    ->
+                    value.GetString()
+                | _ -> fail $"{manifest} must declare its {name} for stable identity"
+
+            root, field "name", field "version"
+        | None -> find directory
+
+/// Hashes package ownership metadata and intervening module manifests.
+let private manifestHash (root: string) (file: string) =
+    let rec collect directory manifests =
+        let manifest = Path.Combine(directory, "package.json")
+
+        let manifests =
+            if File.Exists manifest then
+                (Path.GetRelativePath(root, manifest) |> slash, File.ReadAllBytes manifest |> hash)
+                :: manifests
+            else
+                manifests
+
+        if Path.GetRelativePath(root, directory) = "." then
+            manifests
+        else
+            collect (Directory.GetParent(directory).FullName) manifests
+
+    let manifests = collect (Path.GetDirectoryName file) []
+
+    match manifests with
+    | [ (_, value) ] -> value
+    | values -> values |> List.sortBy fst |> json |> hashText
 
 let private sources (ctx: Context) (handles: string<Measure.declHandle> list) =
     async {
@@ -173,7 +235,7 @@ let private sources (ctx: Context) (handles: string<Measure.declHandle> list) =
                                 if file.StartsWith "bundled:" then
                                     "bundled"
                                 else
-                                    Path.Combine(root, "package.json") |> File.ReadAllBytes |> hash
+                                    manifestHash root file
                         }
                 })
             |> Async.Parallel

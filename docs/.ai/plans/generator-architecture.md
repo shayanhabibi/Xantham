@@ -1536,6 +1536,25 @@ entrypoint-refusal findings (JSAnimation, Timeline, Timer); symbol tiers are unc
 Validation: 851 generator tests, 90 Wire tests, the compile gate and 461 Fable runtime
 checks pass. A fresh FCS check reports no errors or warnings.
 
+
+### Installed package ownership and nested module manifests
+
+Catalog sources belong to their installed package root, including scoped and nested
+`node_modules` installations. A module manifest inside that package may declare its own
+resolution settings without declaring an independent package version. Source fingerprints
+include both the owner manifest and every intervening module manifest, with paths relative
+to the owner. An installed owner still requires its name and version.
+
+The package-submanifest lab reproduces a dependency subpath with a named, unversioned module
+manifest. Catalog checks cover scoped installations, nested dependencies, producer reuse,
+stale nested metadata rejection and rejection of an unversioned package owner. Existing
+golden bindings and finding counts are unchanged; the new lab retains one reported opaque
+dependency alias. Further Firebase integration validation is deferred from the first-party
+Cloudflare delivery; its general package-ownership defect is covered by this regression.
+
+Validation: 854 generator tests, 90 Wire tests, the compile gate and 461 Fable runtime
+checks pass in the full regeneration and independent-check pipeline.
+
 # Easy Nits 
 
 To include in scope when a phases implementation/attempt ends up being small/quick.

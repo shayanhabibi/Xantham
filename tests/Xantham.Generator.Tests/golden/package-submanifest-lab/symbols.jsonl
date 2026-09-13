@@ -1,0 +1,1 @@
+{"name":"Item","file":"node_modules/package-owner-lab/subpath/index.d.ts","tier":"widened","findings":[{"name":"TR.ObjectWithoutMembers","key":"TR047","pass":"shape-aliases","tier":"widened","symbol":"Item","message":"object type declares no members; obj admits the same values"}]}

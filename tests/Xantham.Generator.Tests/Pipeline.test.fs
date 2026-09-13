@@ -4817,3 +4817,11 @@ let subpathClassesTests =
                     Lib = Some [ "esnext" ]; Types = Some []
                     PublicInputs = Some(Map.ofList [ "./errors", "index.d.ts" ]) } (fun _ -> [])
     ]
+
+[<Tests>]
+let packageSubmanifestTests =
+    testList "package submanifest fixture" [
+        yield!
+            fixtureTests "package-submanifest-lab" (handFixture "package-submanifest-lab")
+                { GeneratorConfig.Default with Lib = Some [ "esnext" ]; Types = Some [] } (fun _ -> [])
+    ]
