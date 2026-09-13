@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "package": "class-implements-entrypoint-lab",
+  "module": "ClassImplementsEntrypointLab",
+  "counts": {
+    "exact": 4,
+    "ergonomic": 4,
+    "widened": 1,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "HG - harvest-globals",
+      "total": 1,
+      "exact": 1
+    },
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 9,
+      "ergonomic": 8,
+      "widened": 1
+    },
+    {
+      "pass": "SC - shape-classes",
+      "total": 4,
+      "exact": 2,
+      "ergonomic": 1,
+      "widened": 1
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 8,
+      "ergonomic": 8
+    }
+  ]
+}

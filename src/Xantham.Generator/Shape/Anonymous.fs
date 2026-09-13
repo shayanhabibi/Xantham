@@ -616,6 +616,9 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                     for baseId in facts.BaseTypes do
                         walk (into "Base") order baseId
 
+                    for interfaceId in facts.ImplementedTypes do
+                        walk (into "Implements") order interfaceId
+
                     if
                         ctx.Config.DeclarationCatalog
                         || not (List.isEmpty ctx.Config.DeclarationReferences)

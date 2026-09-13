@@ -619,6 +619,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                 yield! signature.Parameters |> List.map _.TypeId
                 yield! signature.TypeParameters
             yield! facts.BaseTypes
+            yield! facts.ImplementedTypes
             yield! facts.TypeArguments
             yield! facts.AliasTypeArguments
             yield! facts.DeclarationArguments |> List.map _.TypeId

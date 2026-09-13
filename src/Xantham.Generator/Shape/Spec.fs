@@ -826,6 +826,7 @@ let internal isVacuousOperand (model: ShapeModel) (facts: TypeFacts) =
     && facts.CallSignatures.IsEmpty
     && facts.ConstructSignatures.IsEmpty
     && facts.BaseTypes.IsEmpty
+    && facts.ImplementedTypes.IsEmpty
     && not (standsOverTypeParameter model facts)
     && (match facts.SymbolName with
         | None -> true

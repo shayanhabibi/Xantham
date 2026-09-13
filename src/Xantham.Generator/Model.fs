@@ -1033,6 +1033,8 @@ type TypeFacts =
         ConstructSignatures: ResolvedSignature list
         /// `extends` bases of an interface or class instance type, by id.
         BaseTypes: int<typeId> list
+        /// Explicit `implements` contracts of a class declaration, by id.
+        ImplementedTypes: int<typeId> list
         /// Type arguments of a generic reference, resolved for *every* group - an external
         /// `Array<T>` carries entry-package types that must still be reached (O7 note).
         TypeArguments: int<typeId> list
@@ -1082,6 +1084,7 @@ module TypeFacts =
             CallSignatures = []
             ConstructSignatures = []
             BaseTypes = []
+            ImplementedTypes = []
             TypeArguments = []
             TupleElements = []
             AliasTypeArguments = []

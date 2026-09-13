@@ -4893,3 +4893,14 @@ let catalogRecursiveJsonTests =
         yield!
             fixtureTests "catalog-recursive-json-lab" package config (fun _ -> [])
     ]
+
+[<Tests>]
+let classImplementsTests =
+    testList "class implements fixture" [
+        yield!
+            fixtureTests "class-implements-lab" (handFixture "class-implements-lab")
+                { GeneratorConfig.Default with Lib = Some [ "esnext" ]; Types = Some [] } (fun _ -> [])
+        yield!
+            fixtureTests "class-implements-entrypoint-lab" (handFixture "class-implements-entrypoint-lab")
+                { GeneratorConfig.Default with Lib = Some [ "esnext" ]; Types = Some [] } (fun _ -> [])
+    ]

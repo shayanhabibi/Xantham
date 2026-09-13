@@ -244,6 +244,13 @@ Policy question with a recommended default:
 - **Heritage** — `extends` of a named interface → F# `inherit` on the interface. Where TS
   heritage does surgery F# can't express (extending a mapped type, `Omit`-based heritage),
   flatten via `getApparentPropertiesOfType` and emit the full member set with a doc note.
+- **Explicit class contracts** — an ordinary class's `implements` clauses become `inherit`
+  edges on its instance interface when the contract also has an interface representation.
+  The compiler resolves the declared generic arguments. A shipped contract can acquire its
+  separate library owner through the declaration catalog. Entrypoint classes retain their
+  constructor and lifecycle-hook forms; contracts involving those class forms remain flattened
+  with `SI002`. Matching members alone add no subtype relationship. Generic constraint
+  inference retains its existing declared-base and intersection rules.
 - **Inline type literals** (in parameter/return positions) → hash-cons by type `Id`:
   first occurrence emits a generated-name interface (name derived from the path:
   `Foo.Bar.options`-style synthesis existed in the archive's `SyntheticPathAssignment.fs`

@@ -3956,6 +3956,7 @@ type TextDecoderStreamTextDecoderStreamInit =
 /// </summary>
 [<Interface>]
 type ByteLengthQueuingStrategy =
+    inherit QueuingStrategy<JS.ArrayBufferView>
     /// <summary>
     /// The read-only <b><c>ByteLengthQueuingStrategy.highWaterMark</c></b> property returns the total number of bytes that can be contained in the internal queue before backpressure is applied.
     /// <br /><br />
@@ -3973,6 +3974,7 @@ type ByteLengthQueuingStrategy =
 /// </summary>
 [<Interface>]
 type CountQueuingStrategy =
+    inherit QueuingStrategy<obj>
     /// <summary>
     /// The read-only <b><c>CountQueuingStrategy.highWaterMark</c></b> property returns the total number of chunks that can be contained in the internal queue before backpressure is applied.
     /// <br /><br />
@@ -16746,6 +16748,30 @@ type Rpc =
 type RpcStubConstructor =
     [<EmitConstructor>]
     abstract Create<'T>: value: 'T -> obj
+
+[<Interface>]
+type RpcTargetBranded =
+    abstract __RPC_TARGET_BRAND: unit
+    [<ParamObject; Emit("$0")>]
+    static member Create () : RpcTargetBranded = jsNative
+
+[<Interface>]
+type WorkerEntrypointBranded =
+    abstract __WORKER_ENTRYPOINT_BRAND: unit
+    [<ParamObject; Emit("$0")>]
+    static member Create () : WorkerEntrypointBranded = jsNative
+
+[<Interface>]
+type DurableObjectBranded =
+    abstract __DURABLE_OBJECT_BRAND: unit
+    [<ParamObject; Emit("$0")>]
+    static member Create () : DurableObjectBranded = jsNative
+
+[<Interface>]
+type WorkflowEntrypointBranded =
+    abstract __WORKFLOW_ENTRYPOINT_BRAND: unit
+    [<ParamObject; Emit("$0")>]
+    static member Create () : WorkflowEntrypointBranded = jsNative
 
 [<Interface>]
 type SecretsStoreSecret =

@@ -1,0 +1,7 @@
+{
+  "name": "class-implements-lab",
+  "version": "1.0.0",
+  "type": "module",
+  "types": "index.d.ts",
+  "description": "Explicit class implements clauses retain shared interface conformance."
+}

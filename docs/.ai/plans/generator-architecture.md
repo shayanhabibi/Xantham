@@ -904,6 +904,17 @@ Phases — each ends with the compile gate green on its fixtures:
     `XConstructor` and the class itself exist - once as `Exports`-bound dotted selectors, once as
     that interface's members - shaped from two different views of the same static side, and the
     two are not cross-checked against each other.
+  - *Explicit class contracts (2026-09-13).* Resolve records `implements` types separately
+    from `BaseTypes`, using typed class heritage nodes and the compiler's type-node query.
+    Reachability, free parameters and catalog source closure include these contracts.
+    `shape-interfaces` sends regular class contracts through its existing named-interface and
+    cycle guards; catalog ownership is authenticated and redirected at the existing later
+    catalog stage. Entrypoint classes, and contracts whose target is an entrypoint class, retain
+    the class constructor representation and report the unrepresented contract as `SI002`.
+    Optional lifecycle hooks and generic constraint inference retain their existing base-type
+    decisions. `class-implements-lab` covers fixed and constrained generic contracts plus a
+    structurally matching class without `implements`; `class-implements-entrypoint-lab` covers
+    subclassing, an optional hook, `Error` inheritance and a class-shaped contract target.
   - *Declared bases inherited (2026-09-02).* §4.4's heritage rule, executed: a base an
     `extends` clause names becomes an F# `inherit` beside the members that were already
     flattened in, so the derived type upcasts to it. `SI002` - "base has no F# name at this

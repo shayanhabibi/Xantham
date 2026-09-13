@@ -100,6 +100,72 @@ let accept (client: Identity.Adapter.Client) = Identity.Root.Exports.``use`` cli
 """
 
 [<Tests>]
+let classImplementsTests =
+    match Tsc.locate __SOURCE_DIRECTORY__ with
+    | None -> testCase "class implements catalog skipped - no compiler" <| fun _ -> skiptest "no tsc"
+    | Some _ ->
+        testCase "class implements catalog preserves explicit generic conformance" <| fun _ ->
+            let directory = Path.Combine(temporaryRoot, "xantham-class-implements-" + Guid.NewGuid().ToString "N")
+            Directory.CreateDirectory directory |> ignore
+            try
+                let package = Path.GetFullPath(Path.Combine(fixture, "..", "class-implements-lab"))
+                let root = Path.Combine(directory, "root")
+                let rootConfig = configured directory "Root" "model.d.ts" [||]
+                Pipeline.run rootConfig package root |> Async.RunSynchronously |> ignore
+                let adapter = configured directory "Adapter" "index.d.ts" [| Path.Combine(root, "declarations.json") |]
+                Pipeline.run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                let sources = [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ]
+                let consumer = """module Identity.Consumer
+let client (value: Identity.Adapter.Client) : Identity.Root.Model<string> = value :> _
+let generic<'T when 'T :> Identity.Root.Model<string>>
+    (value: Identity.Adapter.GenericClient<'T>) : Identity.Root.Model<'T> = value :> _
+"""
+                let code, output = compileConsumer directory sources consumer
+                Expect.equal code 0 output
+                let structural = """module Identity.Consumer
+let unrelated (value: Identity.Adapter.StructuralClient) : Identity.Root.Model<string> = value :> _
+"""
+                let code, output = compileConsumer directory sources structural
+                Expect.notEqual code 0 "matching members without implements retain their distinct nominal type"
+                Expect.stringContains output "FS0193" "the unrelated class has no generated subtype relation"
+                let invalidArgument = """module Identity.Consumer
+let invalid (value: Identity.Adapter.GenericClient<string>) = value
+"""
+                let code, output = compileConsumer directory sources invalidArgument
+                Expect.notEqual code 0 "the declared generic constraint survives inheritance"
+                Expect.stringContains output "FS0001" "string does not satisfy the model constraint"
+            finally
+                if Directory.Exists directory then Directory.Delete(directory, true)
+
+[<Tests>]
+let classImplementsEntrypointTests =
+    match Tsc.locate __SOURCE_DIRECTORY__ with
+    | None -> testCase "class implements entrypoint skipped - no compiler" <| fun _ -> skiptest "no tsc"
+    | Some _ ->
+        testCase "class implements preserves entrypoint constructors and hooks" <| fun _ ->
+            let directory = Path.Combine(temporaryRoot, "xantham-class-implements-entrypoint-" + Guid.NewGuid().ToString "N")
+            Directory.CreateDirectory directory |> ignore
+            try
+                let package = Path.GetFullPath(Path.Combine(fixture, "..", "class-implements-entrypoint-lab"))
+                let config = configured directory "Entrypoint" "index.d.ts" [||]
+                Pipeline.run config package (Path.Combine(directory, "entrypoint")) |> Async.RunSynchronously |> ignore
+                let consumer = """module Identity.Consumer
+type Station() =
+    inherit Identity.Entrypoint.ImplementsLab.Runtime.Station("station")
+    override _.run() = "ready"
+    interface Identity.Entrypoint.ImplementsLab.Runtime.Station.IFetchHandler with
+        member _.fetch() = "fetched"
+type Halt() =
+    inherit Identity.Entrypoint.ImplementsLab.Runtime.Halt("halt")
+    override _.run() = "stopped"
+let error (value: Halt) : exn = value :> exn
+"""
+                let code, output = compileConsumer directory [ "entrypoint/Identity.Entrypoint.fs" ] consumer
+                Expect.equal code 0 output
+            finally
+                if Directory.Exists directory then Directory.Delete(directory, true)
+
+[<Tests>]
 let tests =
     match Tsc.locate __SOURCE_DIRECTORY__ with
     | None ->

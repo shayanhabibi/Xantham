@@ -348,6 +348,52 @@ let private sourceFile (ctx: Context) (path: string) : Async<Ast.SourceFile vopt
         .Value
     |> Async.AwaitTask
 
+/// The instantiated interface contracts explicitly declared by a class's `implements` clauses.
+let private implementedTypes (ctx: Context) (symbol: SymbolResponse voption) : Async<TypeResponse list> =
+    async {
+        let declarations =
+            symbol
+            |> ValueOption.bind _.Declarations
+            |> ValueOption.defaultValue [||]
+            |> Array.choose (NodeHandle.parse >> ValueOption.toOption)
+
+        let! contracts =
+            declarations
+            |> Array.map (fun handle ->
+                async {
+                    let! source = sourceFile ctx handle.Path
+
+                    match source with
+                    | ValueSome source ->
+                        let node = Node.ofIndex<AnyNode> source handle.Index
+
+                        if node.Kind = SyntaxKind.ClassDeclaration then
+                            return!
+                                Node.retag<AnyNode, ClassDeclaration> node
+                                |> ClassDeclaration.heritageClauses
+                                |> Seq.filter (fun clause ->
+                                    HeritageClause.token clause = ValueSome SyntaxKind.ImplementsKeyword)
+                                |> Seq.collect HeritageClause.types
+                                |> Seq.map (fun contract ->
+                                    let location =
+                                        NodeHandle.format
+                                            {
+                                                Index = Node.index contract
+                                                Kind = contract.Kind
+                                                Path = handle.Path
+                                            }
+
+                                    ctx.Session.getTypeFromTypeNode location)
+                                |> Async.Parallel
+                        else
+                            return [||]
+                    | ValueNone -> return [||]
+                })
+            |> Async.Parallel
+
+        return contracts |> Array.concat |> Array.distinctBy _.TypeId |> Array.toList
+    }
+
 /// Whether a parameter declares the `?` that makes it omittable.
 ///
 /// For a parameter the marker lives on the declaration node alone, reached through the symbol's
@@ -998,6 +1044,12 @@ let private deriveFacts
                     let! structure = deriveStructure ctx trace registers ty
                     let! baseTypes = ctx.Session.getBaseTypes ty.Id
 
+                    let! implemented =
+                        if objectFlags.HasFlag ObjectFlags.Class then
+                            implementedTypes ctx symbol
+                        else
+                            async.Return []
+
                     let baseTypes =
                         baseTypes |> ValueOption.map Array.toList |> ValueOption.defaultValue []
 
@@ -1005,6 +1057,7 @@ let private deriveFacts
                         [
                             yield! structure.Discovered
                             yield! channel trace "base-types" baseTypes
+                            yield! channel trace "implemented-types" implemented
                             yield! channel trace "type-arguments" typeArguments
                             yield! channel trace "alias-type-arguments" aliasTypeArguments
                             yield! channel trace "target" target
@@ -1027,6 +1080,7 @@ let private deriveFacts
                             CallSignatures = structure.CallSignatures
                             ConstructSignatures = structure.ConstructSignatures
                             BaseTypes = baseTypes |> List.map _.TypeId
+                            ImplementedTypes = implemented |> List.map _.TypeId
                             TypeArguments = typeArguments |> List.map _.TypeId
                             TupleElements = tupleElements
                             AliasTypeArguments = aliasTypeArguments |> List.map _.TypeId

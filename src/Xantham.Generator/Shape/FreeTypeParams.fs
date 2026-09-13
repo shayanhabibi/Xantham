@@ -63,6 +63,7 @@ let private freeTypeParams (model: ShapeModel) (root: int<Measure.typeId>) : int
                         @ facts.IntersectionMembers
                         @ facts.TypeArguments
                         @ facts.BaseTypes
+                        @ facts.ImplementedTypes
                         @ facts.AliasTypeArguments do
                         go bound id
 
@@ -154,6 +155,7 @@ let private reuseAnonymousApplications (model: ShapeModel) =
                         && pairwise signatures original.CallSignatures applied.CallSignatures
                         && pairwise signatures original.ConstructSignatures applied.ConstructSignatures
                         && pairwise same original.BaseTypes applied.BaseTypes
+                        && pairwise same original.ImplementedTypes applied.ImplementedTypes
                     else
                         false
                 | _ -> false
