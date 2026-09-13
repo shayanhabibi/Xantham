@@ -4842,3 +4842,17 @@ let primitiveArgumentIdentityTests =
         yield!
             fixtureTests "primitive-argument-identity-lab" package config (fun _ -> [])
     ]
+
+[<Tests>]
+let groupedDomAliasTests =
+    testList "grouped DOM alias fixture" [
+        yield!
+            fixtureTests "grouped-dom-aliases-lab" (handFixture "grouped-dom-aliases-lab")
+                { GeneratorConfig.Default with
+                    ModuleName = Some "GroupedDomAliasesLab"
+                    Namespace = Some "GroupedDomAliases"
+                    Lib = Some [ "esnext"; "dom" ]
+                    Types = Some [ "worker-augmentation-lab" ]
+                    Groups = Map.ofList [ "worker-augmentation-lab" * Measure.uom<Measure.npmDependency>, Ship ] }
+                (fun _ -> [])
+    ]

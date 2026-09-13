@@ -1598,6 +1598,33 @@ provenance, and every nested member retains its primitive type.
 Validation: 860 generator tests and 90 Wire tests pass during regeneration and independent
 checking; the compile gate and 461 Fable runtime checks pass. A fresh FCS check is clean.
 
+### Compiler-library literal aliases used by shipped groups
+
+O7 placement assigns an unexported compiler-library literal alias to its unique shipped
+dependency consumer when the compiler library itself is not shipped. The finished F#
+declaration references determine that consumer. Root declarations reuse the same alias
+from the dependency module. Explicit exports, shipped compiler-library declarations and
+aliases consumed by several dependency groups retain their existing ownership.
+
+The grouped-dom-aliases lab contains an exported function over `Request` and one ambient
+dependency adding `Request.cf`. Catalog generation recovers named DOM literal aliases,
+including `RequestCache`, which previously remained in the root file while the merged
+interface belonged to the shipped dependency. That produced references in both file
+directions and FS0039 when compiling groups first. A catalog producer/adapter consumer
+passes the dependency-owned Request through both exports and reads its typed cache value.
+The ordinary golden and compile consumer also retain the augmentation's string property.
+This change addresses compiler-library literal-alias placement, not arbitrary package
+cycles or compatibility across inference profiles.
+
+Validation: 866 generator tests, 90 Wire tests, the compile gate and 461 Fable runtime
+checks pass. Existing golden bindings and finding counts are unchanged. The new lab and
+the before/after catalog probe each retain 7 exact / 0 ergonomic / 0 widened / 2 escape
+symbols; only the catalog probe's literal-alias module ownership changes.
+
+Combined validation with intrinsic-argument normalization: 869 generator tests, 90 Wire
+tests, the compile gate and 461 Fable runtime checks pass. Existing golden bindings and
+finding counts remain unchanged; the new labs retain their independently measured counts.
+
 # Easy Nits 
 
 To include in scope when a phases implementation/attempt ends up being small/quick.

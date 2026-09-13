@@ -53,7 +53,7 @@ let private exportMemberNames (m: FsExportMember) =
        | ExportValue reference -> namesOf reference)
 
 /// Every declared name the declaration reads, excluding a delegate's own name.
-let private readNames (decl: FsDecl) : string list =
+let internal readNames (decl: FsDecl) : string list =
     match decl with
     | FsInterface i ->
         typeParamNames i.TypeParameters

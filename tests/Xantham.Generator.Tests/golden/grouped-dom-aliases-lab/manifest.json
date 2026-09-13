@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "package": "grouped-dom-aliases-lab",
+  "module": "GroupedDomAliasesLab",
+  "counts": {
+    "exact": 7,
+    "ergonomic": 0,
+    "widened": 0,
+    "escape": 2
+  },
+  "passes": [
+    {
+      "pass": "SY - synthesize-anonymous",
+      "total": 6,
+      "exact": 6
+    },
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 5,
+      "ergonomic": 4,
+      "escape": 1
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 8,
+      "ergonomic": 8
+    },
+    {
+      "pass": "",
+      "total": 1,
+      "escape": 1
+    },
+    {
+      "pass": "render-source",
+      "total": 1,
+      "exact": 1
+    }
+  ]
+}

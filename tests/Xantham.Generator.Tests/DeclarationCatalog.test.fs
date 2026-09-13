@@ -140,6 +140,35 @@ let booleanAlias (value: Identity.Root.BooleanAlias) : bool = value
                 finally
                     if Directory.Exists directory then Directory.Delete(directory, true)
 
+            testCase "grouped DOM aliases retain reusable dependency ownership" <| fun _ ->
+                let directory = Path.Combine(temporaryRoot, "xantham-grouped-dom-" + Guid.NewGuid().ToString "N")
+                Directory.CreateDirectory directory |> ignore
+                try
+                    let package = Path.GetFullPath(Path.Combine(fixture, "..", "grouped-dom-aliases-lab"))
+                    let config =
+                        { GeneratorConfig.loadFile (Path.Combine(package, "xantham.json")) with
+                            ModuleName = Some "Identity.Root"
+                            Namespace = Some "Identity"
+                            DeclarationCatalog = true }
+                    let root = Path.Combine(directory, "root")
+                    Pipeline.run config package root |> Async.RunSynchronously |> ignore
+                    let adapterConfig =
+                        { config with
+                            ModuleName = Some "Identity.Adapter"
+                            DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
+                    Pipeline.run adapterConfig package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    let consumer = """module Identity.Consumer
+open Identity.WorkerAugmentationLab
+let cache (request: Request) : RequestCache =
+    (Identity.Adapter.Exports.roundTrip (Identity.Root.Exports.roundTrip request)).cache
+let metadata (request: Request) : string = request.cf
+"""
+                    let sources = [ "root/groups/Identity.WorkerAugmentationLab.fs"; "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ]
+                    let code, output = compileConsumer directory sources consumer
+                    Expect.equal code 0 output
+                finally
+                    if Directory.Exists directory then Directory.Delete(directory, true)
+
             testCase "indexed callbacks retain reusable parent identities" <| fun _ ->
                 let directory = Path.Combine(temporaryRoot, "xantham-indexed-callback-" + Guid.NewGuid().ToString "N")
                 Directory.CreateDirectory directory |> ignore
