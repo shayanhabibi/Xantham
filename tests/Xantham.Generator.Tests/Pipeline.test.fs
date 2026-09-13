@@ -4945,3 +4945,12 @@ let dependencyEntrypointTests =
             fixtureTests "dependency-entrypoint-lab" (handFixture "dependency-entrypoint-lab")
                 { GeneratorConfig.Default with Lib = Some [ "esnext" ]; Types = Some [] } (fun _ -> [])
     ]
+
+[<Tests>]
+let catalogResultConstraintsTests =
+    let package = handFixture "catalog-result-constraints-lab"
+    let config = { handConfig package with DeclarationCatalog = false }
+    testList "catalog result constraints fixture" [
+        yield!
+            fixtureTests "catalog-result-constraints-lab" package config (fun _ -> [])
+    ]

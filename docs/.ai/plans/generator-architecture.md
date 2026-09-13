@@ -1259,6 +1259,9 @@ intersection, tuple and recursive references. Source closure retains declaration
 and excludes unrelated export use sites. The regression suite checks each case through producer
 and consumer compilation. Anonymous generic result members reuse their declaration only under
 a complete substitution, preserving caller bounds and repeated or reordered arguments.
+In catalog mode this includes original anonymous declarations retained by Resolve whose only
+reachable occurrence is an application. The canonical declaration binds its original free
+parameters; applied method parameters and their constraints remain at the method use site.
 Opaque dependency aliases retain their argument owners and applications in identity, including
 the source dependencies of concrete defaults, even when member facts are intentionally widened.
 Anonymous literal unions use their literal values for identity; named aliases and enum members

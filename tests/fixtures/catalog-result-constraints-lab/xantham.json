@@ -1,0 +1,11 @@
+{
+  "module": "CatalogResultConstraintsLab",
+  "lib": [
+    "esnext"
+  ],
+  "types": [],
+  "groups": {
+    "reader-owner-lab": "ship"
+  },
+  "declarationCatalog": true
+}

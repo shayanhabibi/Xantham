@@ -265,6 +265,51 @@ let tests =
                 skiptest "run `npm install` at the repository root, or set XANTHAM_TSGO_EXE" ]
     | Some _ ->
         testList "declaration catalog" [
+            testCase "generic result declarations preserve their own constraints across packages" <| fun _ ->
+                let directory = Path.Combine(temporaryRoot, "xantham-result-constraints-" + Guid.NewGuid().ToString "N")
+                Directory.CreateDirectory directory |> ignore
+                try
+                    let package = Path.GetFullPath(Path.Combine(fixture, "..", "catalog-result-constraints-lab"))
+                    let dependency = Path.Combine(package, "node_modules", "reader-owner-lab")
+                    let config =
+                        { GeneratorConfig.loadFile (Path.Combine(package, "xantham.json")) with
+                            ModuleName = Some "Identity.Root" }
+                    let root = Path.Combine(directory, "root")
+                    Pipeline.run config dependency root |> Async.RunSynchronously |> ignore
+                    let adapter =
+                        { config with
+                            ModuleName = Some "Identity.Adapter"
+                            DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
+                    Pipeline.run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    let sources = [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ]
+                    let consumer = """module Identity.Consumer
+open Fable.Core
+let accept (reader: Identity.Root.Reader) : Identity.Root.Reader = Identity.Adapter.Exports.accept reader
+let unconstrained (value: Identity.Root.ReadResult2<string>) : string = value.value
+let read<'T when 'T :> JS.ArrayBufferView> (reader: Identity.Root.Reader) (view: 'T)
+    : JS.Promise<U2<Identity.Root.ReadResult2<'T>, Identity.Root.ReadResult3>> = reader.read view
+let readAtLeast<'T when 'T :> JS.ArrayBufferView> (reader: Identity.Root.Reader) (view: 'T)
+    : JS.Promise<U2<Identity.Root.ReadResult2<'T>, Identity.Root.ReadResult3>> = reader.readAtLeast(1.0, view)
+let bound<'T when 'T :> JS.ArrayBufferView> (reader: Identity.Root.Reader) (view: 'T)
+    : JS.Promise<U2<Identity.Root.BoundResult2<'T>, Identity.Root.BoundResult3>> = reader.readBound view
+"""
+                    let code, output = compileConsumer directory sources consumer
+                    Expect.equal code 0 output
+                    let invalidDeclaration = """module Identity.Consumer
+let invalid (value: Identity.Root.BoundResult2<string>) = value
+"""
+                    let code, output = compileConsumer directory sources invalidDeclaration
+                    Expect.notEqual code 0 "the result's own declared bound remains enforced"
+                    Expect.stringContains output "FS0001" "string is outside the declared buffer bound"
+                    let invalidCall = """module Identity.Consumer
+let invalid (reader: Identity.Root.Reader) = reader.read "text"
+"""
+                    let code, output = compileConsumer directory sources invalidCall
+                    Expect.notEqual code 0 "the method's own generic bound remains enforced"
+                    Expect.stringContains output "FS0001" "the caller must supply a buffer view"
+                finally
+                    if Directory.Exists directory then Directory.Delete(directory, true)
+
             testCase "dependency generic markers retain producer phantom contracts" <| fun _ ->
                 let directory = Path.Combine(temporaryRoot, "xantham-generic-marker-" + Guid.NewGuid().ToString "N")
                 let package = Path.Combine(directory, "package")
