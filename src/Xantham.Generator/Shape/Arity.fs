@@ -183,6 +183,41 @@ let private repaired (model: ShapeModel) =
     for name in dropped do
         findings <- findings @ [ Finding.make name RepairArity.GenericAliasDropped ]
 
+    let headTypeParameters =
+        function
+        | FsInterface d -> Some d.TypeParameters
+        | FsAbbrev d -> Some d.TypeParameters
+        | FsDelegateType d -> Some d.TypeParameters
+        | FsPhantom d -> Some d.TypeParameters
+        | _ -> None
+
+    let unwritableHead decl =
+        headTypeParameters decl
+        |> Option.map (fun parameters ->
+            let names = parameters |> List.map _.Name
+            (List.distinct names).Length <> names.Length)
+        |> Option.defaultValue false
+
+    let unwritable =
+        model.Decls
+        |> List.choose (fun decl ->
+            match declName decl with
+            | Some name when
+                not (Set.contains name phantomed)
+                && not (Set.contains name dropped)
+                && unwritableHead decl
+                ->
+                Some name
+            | _ -> None)
+        |> Set.ofList
+
+    for name in unwritable do
+        findings <-
+            findings
+            @ [ Finding.make name (RepairArity.DuplicateTypeParameterUnwritable name) ]
+
+    let dropped = Set.union dropped unwritable
+
     // The declaration is rewritten as `shape-aliases`' erased phantom (§4.10), which admits the
     // type variable an abbreviation may not: the head keeps every parameter, the resolved target
     // becomes the private case's carrier, and an application of the name finds the arity it was

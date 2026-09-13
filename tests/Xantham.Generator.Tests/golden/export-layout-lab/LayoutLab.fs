@@ -36,6 +36,7 @@ type Exports =
     [<Import("dispatch", "layout-lab")>]
     static member dispatch (kind: Exports.Right) : Exports.Right = jsNative
 
+/// <summary>layout-lab/aliases</summary>
 module Aliases =
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
@@ -61,6 +62,7 @@ module Globals =
             with get (): bool = jsNative
             and set (_: bool): unit = jsNative
 
+/// <summary>layout-lab/strict</summary>
 module Strict =
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]

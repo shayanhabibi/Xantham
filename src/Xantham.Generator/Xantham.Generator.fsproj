@@ -38,6 +38,7 @@
         <Compile Include="Shape\Arity.fs" />
         <Compile Include="Shape\Ordering.fs" />
         <Compile Include="Shape\ExportCollisions.fs" />
+        <Compile Include="Shape\Orphans.fs" />
         <Compile Include="Shape\Coverage.fs" />
         <Compile Include="Shape\Passes.fs" />
         <Compile Include="Render.fs" />

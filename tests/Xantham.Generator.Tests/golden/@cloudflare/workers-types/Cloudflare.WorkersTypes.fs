@@ -942,8 +942,6 @@ type Exception =
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, name: string, message: string, ?stack: string) : Exception = jsNative
 
-type ExportedHandlerTailStreamHandler<'Env, 'Props> = delegate of ``event``: TailStream.TailEvent<Onset> * env: 'Env * ctx: ExecutionContext<'Props> -> U3<JS.Promise<U2<(TailStream.TailEvent<ExportedHandlerTailStreamHandler.Result.Item.Event.Item> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>>, (TailStream.TailEvent<ExportedHandlerTailStreamHandler.Result.Item.Event.Item> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>
-
 [<Interface>]
 type FetchEventInfo =
     abstract ``type``: string
@@ -23942,6 +23940,7 @@ module ChatCompletionsCommonOptions =
             | [<CompiledName("text")>] Text
 
 module Cloudflare =
+    /// <summary>cloudflare:email</summary>
     module Email =
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]
@@ -24027,6 +24026,7 @@ module Cloudflare =
             [<Import("PipelineTransformationEntrypoint", "cloudflare:pipelines"); EmitConstructor>]
             static member PipelineTransformationEntrypoint<'Env, 'I, 'O> (ctx: ExecutionContext<obj>, env: 'Env) : Cloudflare.WorkersTypes.Cloudflare.Pipelines.PipelineTransformationEntrypoint<'Env, 'I, 'O> = jsNative
 
+    /// <summary>cloudflare:sockets</summary>
     module Sockets =
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]
@@ -24062,12 +24062,6 @@ module Cloudflare =
             member _.env
                 with get (): 'Env = jsNative
                 and set (_: 'Env): unit = jsNative
-
-        type WebSocketClose = delegate of ws: WebSocket * code: float * reason: string * wasClean: bool -> JS.Promise<unit> option
-
-        type WebSocketError = delegate of ws: WebSocket * error: obj -> JS.Promise<unit> option
-
-        type WebSocketMessage = delegate of ws: WebSocket * message: U2<string, JS.ArrayBuffer> -> JS.Promise<unit> option
 
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
         type WorkflowDurationLabel =

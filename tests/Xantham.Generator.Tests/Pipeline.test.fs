@@ -24,38 +24,9 @@ let private required =
     | "false" -> false
     | _ -> true
 
-/// The main working tree of a linked worktree, resolved the way `tools/workspace.fsx` does:
-/// the worktree's `.git` is a file holding `gitdir:`, and `<gitdir>/commondir` points at the
-/// common git directory whose parent is the main checkout.
-let private mainCheckout (root: string) : string option =
-    let pointer = Path.Combine(root, ".git")
-
-    if not (File.Exists pointer) then
-        None
-    else
-        let text = File.ReadAllText(pointer).Trim()
-
-        if not (text.StartsWith "gitdir:") then
-            None
-        else
-            let gitDir = Path.GetFullPath(Path.Combine(root, text.Substring(7).Trim()))
-            let commonDir = Path.Combine(gitDir, "commondir")
-
-            if not (File.Exists commonDir) then
-                None
-            else
-                let common = Path.GetFullPath(Path.Combine(gitDir, File.ReadAllText(commonDir).Trim()))
-                let checkout = Path.GetDirectoryName common
-                if Directory.Exists checkout then Some checkout else None
-
 let private root = Path.GetFullPath(Path.Combine(__SOURCE_DIRECTORY__, "..", ".."))
 
-/// An npm-installed fixture package: this checkout's install, or the main checkout's when this
-/// checkout is a worktree with no install of its own.
-let private npmFixture (name: string) =
-    [ root; yield! mainCheckout root |> Option.toList ]
-    |> List.map (fun checkout -> Path.Combine(checkout, "tests", "fixtures", name, "node_modules", name))
-    |> List.tryFind Directory.Exists
+let private npmFixture (name: string) = Fixtures.npm root name
 
 /// A hand-authored fixture, tracked in git - always present, so it needs no pin.
 let private handFixture (name: string) =
@@ -1227,6 +1198,86 @@ let pipelineTests =
                             ("SI001", "Collides")
                             "the residue is reported honestly, not silently dropped"
                 ])
+
+        yield!
+            fixtureTests "callable-overloads-lab" (handFixture "callable-overloads-lab") GeneratorConfig.Default
+                (fun package ->
+                    [ testCase "one name under two bounds, separated by arity, keeps both Invoke overloads"
+                      <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains
+                              source
+                              "type Coalesce<'T> ="
+                              "the head carries the interface's own parameter, the signatures' sitting on Invoke"
+
+                          Expect.stringContains
+                              source
+                              "abstract Invoke<'U>: value: 'U -> 'U"
+                              "the single-argument signature keeps its own 'U"
+
+                          Expect.stringContains
+                              source
+                              "abstract Invoke<'U>: value: 'U * fallback: 'U -> 'U"
+                              "and the two-argument signature keeps a separate one"
+
+                          Expect.contains
+                              (rendered.Findings |> List.map (fun finding -> finding.Key, finding.Symbol))
+                              ("SI008", "Coalesce")
+                              "reached through Invoke rather than dropped"
+
+                          Expect.isEmpty
+                              (rendered.Findings |> List.filter (fun f -> f.Key = "RA007"))
+                              "repair-arity stays silent"
+
+                      testCase "a tuple return position keeps the Coalesce reference, reaching its Invoke overloads"
+                      <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains
+                              source
+                              "static member makeCoalescer<'T> () : 'T * Coalesce<'T> = jsNative"
+                              "the reference survives a tuple return position at arity 1, unwidened"
+
+                      testCase "a single generic call signature keeps one head, hoisting both parameters onto it"
+                      <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains
+                              source
+                              "type OneShot<'T, 'U> ="
+                              "the erased head carries the interface's parameter beside the signature's"
+
+                      testCase "several non-generic call signatures collapse to one abbreviation, raising TR031"
+                      <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains
+                              source
+                              "type Multiplex ="
+                              "a function-type abbreviation"
+
+                          Expect.contains
+                              (rendered.Findings |> List.map (fun finding -> finding.Key, finding.Symbol))
+                              ("TR031", "Multiplex")
+                              "the second signature is recorded as dropped"
+
+                      testCase "a member beside the call signature keeps the existing hybrid path"
+                      <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains source "type Ledger =" "an interface head"
+                          Expect.stringContains source "abstract count: float with get, set" "the member survives"
+
+                          Expect.contains
+                              (rendered.Findings |> List.map (fun finding -> finding.Key, finding.Symbol))
+                              ("SI008", "Ledger")
+                              "its call signature still reaches Invoke" ])
 
         yield!
             fixtureTests
@@ -2503,18 +2554,23 @@ let pipelineTests =
                       Expect.stringContains source "type Distinct<'T, 'A, 'B> =" "'A and 'B are two variables"
                       Expect.stringContains source "type Single<'T, 'U> =" "and one signature collapses nothing"
 
-                  testCase "one name under two bounds is refused rather than retyped" <| fun _ ->
+                  testCase "one name under two bounds routes to an interface, not one delegate head" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                       let source = rendered.Files |> List.head |> snd
 
-                      Expect.isFalse (source.Contains "type DivergentBound") "the head F# refuses does not render"
+                      Expect.stringContains source "type DivergentBound<'T> =" "the head carries the alias parameter alone"
+                      Expect.stringContains source "abstract Invoke<'U>: value: 'U -> 'U" "each signature keeps its own 'U"
 
                       Expect.equal
                           (rendered.Findings
-                           |> List.filter (fun f -> f.Key = "RA001")
+                           |> List.filter (fun f -> f.Key = "SI008")
                            |> List.map _.Symbol)
                           [ "DivergentBound" ]
-                          "and the drop is graded as an escape, not an ergonomic collapse"
+                          "reached through Invoke rather than dropped"
+
+                      Expect.isEmpty
+                          (rendered.Findings |> List.filter (fun f -> f.Key = "RA007"))
+                          "repair-arity stays silent"
 
                   testCase "a tuple-typed rest parameter reads as the parameters it stands for" <| fun _ ->
                       // Wave two's second handback: `Setter<string | undefined>` reached the
@@ -4444,6 +4500,77 @@ let pipelineTests =
                     Expect.stringContains source "module Aliases" "the nested module Aliases for `(layout-lab/aliases).renamedCheck` is created"
             ]
         yield!
+            fixtureTests "subpath-lab" (handFixture "subpath-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "each public subpath is a nested module with its own Exports" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+                      Expect.stringContains source "[<Import(\"describe\", \"subpath-lab\")>]" "root value imports the root"
+                      Expect.stringContains source "[<Import(\"describe\", \"subpath-lab/client\")>]" "client value imports the subpath"
+                      Expect.stringContains source "[<Import(\"depth\", \"subpath-lab/client/deep\")>]" "deep value imports its subpath"
+                      Expect.stringContains source "module Client =" "client module"
+                      Expect.stringContains source "module Deep =" "deep module nests under client"
+                      Expect.stringContains source "module Legacy =" "trailing index.js key strips to Legacy"
+
+                  testCase "two keys over one file both carry the value surface" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+                      Expect.stringContains source "[<Import(\"whoami\", \"subpath-lab/alias\")>]" "alias key"
+                      Expect.stringContains source "[<Import(\"whoami\", \"subpath-lab/mirror\")>]" "mirror key"
+
+                  testCase "a value-only subpath still carries the rule-13 summary" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+                      Expect.stringContains
+                          source
+                          "/// <summary>subpath-lab/legacy/index.js</summary>\nmodule Legacy ="
+                          "Legacy owns only value exports, so the summary comes from allOwners, not exportedDeclarations"
+                      Expect.stringContains
+                          source
+                          "/// <summary>subpath-lab/mirror</summary>\nmodule Mirror ="
+                          "Mirror owns only value exports, so the summary comes from allOwners, not exportedDeclarations"
+
+                  testCase "wildcard and untyped keys are skipped with findings" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let symbols = rendered.Files |> List.find (fst >> (=) "symbols.jsonl") |> snd
+                      Expect.stringContains symbols "\"key\":\"HG008\"" "wildcard skipped"
+                      Expect.stringContains symbols "\"key\":\"HG009\"" "untyped skipped"
+                      let source = rendered.Files |> List.head |> snd
+                      Expect.isFalse (source.Contains "module Features") "no wildcard module"
+                      Expect.isFalse (source.Contains "module Untyped") "no untyped module"
+
+                  testCase "a type exported from root and a subpath is declared at the root" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+                      Expect.stringContains source "\ntype Payload =" "root declaration"
+                      Expect.isFalse (source.Contains "    type Payload =") "no nested redeclaration"
+                      Expect.isFalse (source.Contains "type Payload = Payload") "no abbreviation under the subpath"
+
+                  testCase "the shallowest path's exported name wins" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+                      Expect.stringContains source "\ntype RootSession" "root exports Session as RootSession"
+                      Expect.isFalse (source.Contains "    type Session") "client does not redeclare it"
+
+                  testCase "a type exported by a subpath alone nests under it" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+                      Expect.stringContains source "    type ClientOptions" "ClientOptions declared under Client"
+                      Expect.stringContains source "abstract level: " "DeepOnly declared"
+                      Expect.stringContains source "(options: ClientOptions)" "client signature reads its own module"
+
+                  testCase "an unexported shared type stays at the root" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+                      Expect.stringContains source "\ntype Internal =" "root"
+
+                  testCase "equal-depth keys over one file home types under the ordinal-first key" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+                      let aliasAt = source.IndexOf "module Alias ="
+                      let shapeAt = source.IndexOf "type AliasShape"
+                      let mirrorAt = source.IndexOf "module Mirror ="
+                      Expect.isTrue (aliasAt >= 0 && shapeAt > aliasAt && (mirrorAt < 0 || shapeAt < mirrorAt)) "AliasShape under Alias, not Mirror" ])
+        yield!
             fixtureTests "single-case-enum-lab" (handFixture "single-case-enum-lab") GeneratorConfig.Default (fun package -> [
                 testCase "a single-case string enum is not RequireQualifiedAccess" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -4522,4 +4649,84 @@ let staticReexportTests =
 
                       Expect.equal hits 1 "one collapsed path"
                       Expect.stringContains symbols "\"static-reexport-lab\"" "names the collapsed specifier" ])
+    ]
+
+[<Tests>]
+let orphanCallbackTests =
+    testList "orphan callback fixture" [
+        // A lifecycle hook is emitted as a handler interface, so the delegate `shape-callbacks`
+        // declares for the same callback is written at zero sites.
+        yield!
+            fixtureTests "orphan-callback-lab" (handFixture "orphan-callback-lab") GeneratorConfig.Default (fun package ->
+                let source () =
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    rendered.Files |> List.head |> snd
+
+                // (=>) pairs a declaration head with the number of times the emitted file
+                // declares it.
+                let inline (=>) head declarations = head, declarations
+
+                [ testCase "the hook reaches its handler interface" <| fun _ ->
+                    let body = source ()
+
+                    Expect.stringContains body "type IOnCloseHandler =" "the hook is an interface of its own"
+                    Expect.stringContains body "type IOnDropHandler =" "one per hook"
+
+                    Expect.stringContains
+                        body
+                        "abstract onClose: signal: Signal * code: float -> JS.Promise<unit> option"
+                        "reading its parameters directly rather than a delegate name"
+
+                  testCase "the reference positions keep the delegate they read" <| fun _ ->
+                      let body = source ()
+
+                      Expect.stringContains
+                          body
+                          "abstract onClose: OnClose option"
+                          "a plain interface's optional callback method is an option property"
+
+                      Expect.stringContains
+                          body
+                          "type OnClose = delegate of signal: Signal * code: float -> JS.Promise<unit> option"
+                          "under the delegate declared for it"
+
+                      Expect.stringContains body "abstract probe: Probe option" "and so is a class kept as an interface"
+
+                      Expect.stringContains
+                          body
+                          "abstract settle: Settle option"
+                          "and so is an entrypoint whose base this run declares"
+
+                  testTheory "a delegate is declared exactly where a reference reads it" [
+                      "type OnClose = delegate" => 1
+                      "type OnClose2 = delegate" => 0
+                      "type OnDrop = delegate" => 0
+                      "type Probe = delegate" => 1
+                      "type Settle = delegate" => 1
+                      "type Tick = delegate" => 0
+                      "type OnFail = delegate" => 0
+                  ] <| fun (head, declarations) ->
+                      let body = source ()
+                      let pattern = System.Text.RegularExpressions.Regex.Escape head
+                      let hits = System.Text.RegularExpressions.Regex.Matches(body, pattern).Count
+
+                      hits |> Flip.Expect.equal $"{head} is declared {declarations} time(s)" declarations
+
+                  testCase "no handler-interface hook leaves a delegate behind" <| fun _ ->
+                      let body = source ()
+
+                      Expect.isFalse (body.Contains "OnClose2") "the hook's callback claims no second name"
+                      Expect.isFalse (body.Contains "type OnDrop") "nor a first one"
+
+                  testCase "an entrypoint whose base this run leaves undeclared keeps no delegate" <| fun _ ->
+                      let body = source ()
+
+                      Expect.stringContains body "type IOnFailHandler =" "the hook reaches a handler interface"
+
+                      Expect.stringContains
+                          body
+                          "static member Create (onFail: Func<Signal, float, string>) : IOnFailHandler"
+                          "which reads the parameters directly"
+
+                      Expect.isFalse (body.Contains "type OnFail") "so the delegate behind it is dropped" ])
     ]

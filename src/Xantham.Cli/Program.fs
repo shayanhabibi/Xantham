@@ -195,7 +195,7 @@ let private generate (out: TextWriter) (err: TextWriter) (options: GenerateOptio
         | Ok config ->
             match
                 (try
-                    Ok(Bootstrap.resolveEntryFile config packageDir)
+                    Ok(Bootstrap.publicPaths config packageDir)
                  with e ->
                      Error e.Message)
             with

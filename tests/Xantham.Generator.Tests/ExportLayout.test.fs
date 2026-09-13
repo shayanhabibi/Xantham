@@ -43,7 +43,9 @@ let tests =
         [ testCase "Cloudflare ambient owners share the existing type's companion module" <| fun _ ->
               let config = { GeneratorConfig.Default with Lib = Some [ "esnext" ] }
               let packageDir =
-                  Path.Combine(root, "tests", "fixtures", "@cloudflare", "workers-types", "node_modules", "@cloudflare", "workers-types")
+                  match Fixtures.npm root "@cloudflare/workers-types" with
+                  | Some installed -> installed
+                  | None -> failtest "this suite requires the @cloudflare/workers-types install"
               let rendered =
                   Pipeline.generate config packageDir
                   |> Async.RunSynchronously

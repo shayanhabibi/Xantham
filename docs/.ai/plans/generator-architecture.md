@@ -152,6 +152,7 @@ order — each row cites its mapping-doc section:
 | `shape-classes` | instance interface + statics/`Exports` split | §4.4 |
 | `assign-names` | NamePath synthesis, collision resolution, keyword escaping, CompiledName | §4.14 |
 | `order-declarations` | topological sort, `and`-groups for cycles, module layout | — |
+| `drop-orphan-delegates` | a delegate whose name no declaration reads | §4.8, D5 |
 | `audit-coverage` | every harvested export reached a shaped decl or an explicit Finding | §5 |
 
 Passes are *conceptually* categorized this way even when, mechanically, two adjacent pure
@@ -413,7 +414,7 @@ Phases — each ends with the compile gate green on its fixtures:
     `` ``"cloudflare:email"`` `` is FS0883, not a type name. Its members are importable
     from that specifier, which needs a nested module with imports of its own - until
     that exists, dropping it loudly beats emitting a name F# cannot write.
-  - *Two repairs have to run after every shaping pass*, because they fix what the others
+  - *Three repairs have to run after every shaping pass*, because they fix what the others
     produce (`repair-arity`, between `order-declarations` and `audit-coverage`): a
     generic abbreviation whose target widened away its parameters is FS0035, so the
     declaration goes and its references widen; a generic declaration named bare at a
@@ -421,6 +422,12 @@ Phases — each ends with the compile gate green on its fixtures:
     out-of-scope type *variable*, one level up at the declaration head. A settable
     property of type `unit` is FS0252 and is demoted to read-only in the same pass: a
     `never`-typed brand holds no value, so it also stops being a `Create` parameter.
+    `drop-orphan-delegates` runs last of the three, after `resolve-export-collisions`:
+    `synthesize-anonymous` mints a delegate name while the positions that read the callback
+    are still being decided, and a position settled later - a lifecycle hook rendered as a
+    handler interface - writes the parameters out in full instead. Running once every
+    declaration is built replaces that prediction with the finished declaration set, so the
+    delegate goes under `DD001` rather than reaching the golden unread.
   - *Parallel fan-out is not free of observable order.* Asking for a declared type is
     what *creates* it in the checker, and a type alias stamps its name on what it
     creates, so `type A = X & Y; type B = X & Y` race: whichever is asked for first owns
@@ -1395,6 +1402,32 @@ Verification: 711 Expecto tests, the compile gate, and the run gate pass. Findin
 goldens moved by the attribute line only. Regenerating `@types/node` compiles with zero
 errors (previously 50x FS0438): 1677 exact / 1924 ergonomic / 867 widened / 356 escape,
 `SC010` x1495, 289,053 lines. The Node project stays out of the solution (#71 open).
+
+## Public subpaths and shallowest-path type homes (2026-09-12)
+
+One run enumerates every `./` key of the package.json `exports` map (`Bootstrap.publicPaths`)
+and harvests each as an owner, `FromAmbientModule "<runtime>/<key>"`, so the export-layout
+allocator renders `pkg/client` as `Client` with its own `Exports`. A key with `*` records
+`HG008`; a key naming a non-TypeScript target is skipped silently, and a key naming a missing
+or absent declaration file records `HG009`; a key resolving outside the package fails the run.
+`subpaths` in `xantham.json` restricts the set; `entry` disables enumeration.
+
+Type declarations home under the shallowest owner path among the exports sharing the
+declared type, ties broken by ordinal owner specifier, then harvest order
+(`ExportNames.declarationExports`). The cross-shipped-group preference still applies first.
+A deeper owner's export of the same type emits nothing (`Aliases`). Ambient modules follow
+the same rule. Values are unchanged: one `Exports` per owner.
+
+Catalog rows already carried dotted nested names since the specifier-module change, so
+`declarations.json` schema stays at version 1.
+
+Verification: 730 + 90 Expecto tests, compile gate, run gate. Findings moved:
+`HG008` 0 -> 1, `HG009` 0 -> 1 (`subpath-lab`); `RA007` 0 -> 1 (`solid-js`, `Store.SetStoreFunction`);
+`SA001` 8 -> 8 and `NE001` 0 -> 0, unchanged. Goldens moved: `type-fest` (+`Globals` module for
+`./globals`), `animejs` (new subpath modules and imports), `solid-js` (new subpath modules,
+`JSX` moving to the root, and a duplicate `DOMElement` abbreviation dropping), `@cloudflare/workers-types`
+(three ambient-module types moving to the root), `static-reexport-lab` (a root abbreviation
+dropping), `subpath-lab` (new).
 
 # Easy Nits 
 

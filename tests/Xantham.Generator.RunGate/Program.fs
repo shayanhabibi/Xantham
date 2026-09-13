@@ -1960,6 +1960,28 @@ let private callableHybrids () =
         6.0
         (CallableHybridLab.Exports.collides 5.0)
 
+/// §4.4's routing counterpart: two call signatures sharing a hoisted type-parameter name under
+/// different bounds reach an interface, each keeping its own `Invoke` overload. `makeCoalescer`
+/// returns the `Coalesce<'T>` reference at a tuple position, applied to one argument and reached
+/// through its `Invoke` overloads. `Holder.coalesce` reaches `Coalesce<string>` at a member
+/// position, recovering as an overloaded method under its own name (§4.2 extended to callbacks),
+/// one overload per call signature.
+let private callableOverloads () =
+    let (_, coalescer) = CallableOverloadsLab.Exports.makeCoalescer<string>()
+
+    equal "the single-argument Invoke overload reaches the underlying function" "hi" (coalescer.Invoke "hi")
+
+    equal
+        "the two-argument Invoke overload reaches the same function under its own arity"
+        7.0
+        (coalescer.Invoke(3.0, 4.0))
+
+    let holder = CallableOverloadsLab.Exports.holder
+
+    equal "the single-argument overload reaches the underlying function" "hi" (holder.coalesce "hi")
+
+    equal "the two-argument overload reaches the same function under its own arity" 7.0 (holder.coalesce (3.0, 4.0))
+
 /// Export owners reach their own containers: the root ambient module, a subpath, a re-export
 /// alias and a mutable global each bind to their own JavaScript target, and a unioned or
 /// literal-separated overload still selects the one exported function.
@@ -1989,6 +2011,36 @@ let private exportLayout () =
         (unbox<string>(LayoutLab.Exports.dispatch LayoutLab.Exports.Left))
 
     equal "and so does its sibling" "right" (unbox<string>(LayoutLab.Exports.dispatch LayoutLab.Exports.Right))
+
+/// A subpath's public export reaches its own runtime module, and a root-homed type still
+/// flows through a subpath's exported signature.
+let private subpathLab () =
+    equal
+        "the root describe reaches the root runtime"
+        "root:x"
+        (SubpathLab.Exports.describe (SubpathLab.Payload.Create "x"))
+
+    equal
+        "the client describe reaches the client runtime"
+        "client:x"
+        (SubpathLab.Client.Exports.describe (SubpathLab.Payload.Create "x"))
+
+    equal "the deep subpath reaches its runtime" 2. (SubpathLab.Client.Deep.Exports.depth ())
+
+    equal
+        "alias and mirror both reach the shared runtime"
+        ("alias", "alias")
+        (SubpathLab.Alias.Exports.whoami (), SubpathLab.Mirror.Exports.whoami ())
+
+    equal
+        "a legacy index.js key reaches the client runtime"
+        "client:y"
+        (SubpathLab.Legacy.Exports.describe (SubpathLab.Payload.Create "y"))
+
+    let connected =
+        SubpathLab.Client.Exports.connect (SubpathLab.Client.ClientOptions.Create 3.)
+
+    equal "a root-homed type flows through a subpath signature" 3. connected.hidden
 
 [<EntryPoint>]
 let main _ =
@@ -2022,8 +2074,10 @@ let main _ =
     generatedDelegateForms ()
     recordIndex ()
     callableHybrids ()
+    callableOverloads ()
     patternParameters ()
     exportLayout ()
+    subpathLab ()
 
     match failures with
     | [] ->

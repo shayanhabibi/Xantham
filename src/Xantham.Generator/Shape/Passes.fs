@@ -25,5 +25,6 @@ let passes: Pass<ShapeModel> list =
         Ordering.orderDeclarations
         Arity.repairArity
         ExportCollisions.resolveExportCollisions
+        Orphans.dropOrphanDelegates
         Coverage.auditCoverage
     ]

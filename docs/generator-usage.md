@@ -184,8 +184,16 @@ the derived package import. Set these names for the selected entry. The declarat
 inside the installed package; the runtime import is the package's public module specifier.
 For a package with no public root, supply `runtime` when generating value imports: an explicit
 declaration input still leaves the default runtime import at the package root.
-Generate other public entries with separate configurations and output directories. Conditional
-npm resolution and automatic generation of every subpath are outside this selection mechanism.
+Every `./` key of the `exports` map is generated in the same run as a nested module named
+for the key's segments: `"./client"` becomes `Client`, `"./client/deep"` becomes
+`Client.Deep`, and a trailing `index` segment or `.js`/`.mjs`/`.d.ts` extension is dropped.
+Each key's declaration file comes from its own `types` condition, else from the `types` of the
+first nested condition that declares one. A condition mapped straight to a string names a
+runtime file, so `"./client": { "import": "./client.js" }` supplies no declaration. A wildcard
+key, or a key whose conditions supply no declaration file, is skipped and reported in the
+manifest. A key naming an asset rather than a TypeScript file — `"./package.json":
+"./package.json"` — is passed over without a finding. `subpaths` restricts generation to the listed keys. Setting `entry` disables
+enumeration and generates the one file it names.
 
 ### The four group dispositions
 
@@ -257,6 +265,8 @@ the package declares it:
 | Global scope (`declare class Buffer`) | The root: `Node.Buffer`. |
 | An ambient module (`declare module "inspector"`) | A nested module named for the specifier: `Node.Inspector.Session`. |
 | A subpath (`declare module "inspector/promises"`) | One nested module per `/` segment: `Node.Inspector.Promises.Session`. |
+| An `exports` map subpath (`"./client"`) | One nested module per `/` segment: `Pkg.Client.Exports.connect`. |
+| A type exported from several public paths | The shallowest path; ties resolve by ordinal specifier order. Deeper paths do not redeclare or abbreviate it. |
 | A value export (`export function readFile`) | The module's `Exports` type: `Node.Fs.Exports.readFile`. |
 | A TypeScript `namespace` inside a module | A module nested under the specifier's: `Node.Fs.Constants`. |
 | An options object or callback with no name of its own | Under the member it was read from: `Node.ChildProcess.Exec.Callback`. |

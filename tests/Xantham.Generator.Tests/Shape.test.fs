@@ -2601,9 +2601,9 @@ let shapePassTests =
                 ("TP009", Ergonomic, "'U' is declared by 2 signatures of the same alias; the head writes one variable")
                 "the collapse is reported"
 
-        testCase "shape-callbacks keeps one name declared under two bounds apart" <| fun _ ->
-            // One variable would retype a signature, so the head stays as declared and
-            // `repair-arity` prices what F# refuses.
+        testCase "shape-callbacks skips one name declared under two bounds" <| fun _ ->
+            // `shape-interfaces` declares the type, one `Invoke` per signature, each keeping its
+            // own type parameters.
             let signature =
                 { Build.signature
                       [ Build.resolvedMember (Build.symbol 500 "value" SymbolFlags.FunctionScopedVariable) 21 ]
@@ -2633,12 +2633,56 @@ let shapePassTests =
 
             let shaped, findings = Build.runPass Callbacks.shapeCallbacks model
 
-            match shaped.Decls with
-            | [ FsAbbrev decl ] ->
-                Expect.equal (decl.TypeParameters |> List.map _.Name) [ "T"; "U"; "U" ] "a slot per bound"
-            | decls -> failtest $"expected one abbreviation, got %A{decls}"
+            Expect.isEmpty shaped.Decls "the declaration falls to shape-interfaces"
+            Expect.isEmpty findings "the skip is silent"
 
-            Expect.isEmpty (findings |> List.filter (fun finding -> finding.Key = "TP009")) "nothing was collapsed"
+        testCase "shape-interfaces declares one name declared under two bounds" <| fun _ ->
+            // The type skipped by `shape-callbacks` — each signature keeps its own type parameter
+            // on an `Invoke` member.
+            let signature =
+                { Build.signature
+                      [ Build.resolvedMember (Build.symbol 500 "value" SymbolFlags.FunctionScopedVariable) 21 ]
+                      21 with
+                    TypeParameters = [ 21<typeId> ] }
+
+            let other =
+                { Build.signature
+                      [ Build.resolvedMember (Build.symbol 501 "value" SymbolFlags.FunctionScopedVariable) 22 ]
+                      22 with
+                    TypeParameters = [ 22<typeId> ] }
+
+            let divergent =
+                { Build.facts (Build.typeResponse 50 TypeFlags.Object) with
+                    AliasTypeArguments = [ 20<typeId> ]
+                    CallSignatures = [ signature; other ] }
+
+            let model =
+                { Build.shapeModel (
+                      divergent
+                      :: typeParam 20 "T"
+                      :: { typeParam 21 "U" with Constraint = Some 20<typeId> }
+                      :: { typeParam 22 "U" with Constraint = Some 1<typeId> }
+                      :: Build.primitives
+                  ) with
+                    DeclNames = Map.ofList [ 50<typeId>, "DivergentBound" ] }
+
+            let shaped, findings = Build.runPass Interfaces.shapeInterfaces model
+
+            match shaped.Decls with
+            | [ FsInterface decl ] ->
+                Expect.equal (decl.TypeParameters |> List.map _.Name) [ "T" ] "one alias parameter on the head"
+
+                match decl.Members with
+                | [ FsInvoke first; FsInvoke second ] ->
+                    Expect.equal (first.TypeParameters |> List.map _.Name) [ "U" ] "the first signature's own 'U"
+                    Expect.equal (second.TypeParameters |> List.map _.Name) [ "U" ] "the second signature's own 'U"
+                | members -> failtest $"expected two Invoke members, got %A{members}"
+            | decls -> failtest $"expected one interface, got %A{decls}"
+
+            Expect.contains
+                (findings |> List.map (fun finding -> finding.Key, finding.Symbol))
+                ("SI008", "DivergentBound")
+                "reached through Invoke, one per call signature"
 
         // Wave three, lane K, wave two's second handback. `(...args: [value: T]) => R` is
         // TypeScript's spelling of `(value: T) => R`, and it arrived as `Func<obj[], R>`.
@@ -4204,6 +4248,47 @@ let shapePassTests =
                 [ "RA001", "DivergentBound" ]
                 "the drop is reported, not the phantom"
 
+        testCase "repair-arity drops a delegate whose head names one variable twice" <| fun _ ->
+            // A head carrying one type-parameter name twice is unwritable F#. `repair-arity`
+            // drops it under its own rule, reaching heads with every parameter used - the case
+            // left standing by `DivergentBound`'s `unused` gate.
+            let repeated =
+                FsDelegateType
+                    { Name = "SetStoreFunction"
+                      Docs = ""
+                      Tags = []
+                      Order = None
+                      TypeParameters =
+                          [ { Name = "K1"; Constraint = None }
+                            { Name = "K2"; Constraint = None }
+                            { Name = "K2"; Constraint = None } ]
+                      Parameters =
+                          [ { Name = "k1"; Type = FsTypeVar "K1" }
+                            { Name = "k2"; Type = FsTypeVar "K2" } ]
+                      Return = FsUnit }
+
+            let referrer =
+                FsAbbrev
+                    { Value = None; Name = "Setters"
+                      Docs = ""
+                      Tags = []
+                      Order = None
+                      TypeParameters = []
+                      Target = FsNamed "SetStoreFunction" }
+
+            let model = { Build.shapeModel [] with Decls = [ repeated; referrer ] }
+
+            let repaired, findings = Build.runPass Arity.repairArity model
+
+            match repaired.Decls with
+            | [ FsAbbrev decl ] -> Expect.equal decl.Target FsObj "the reference to the dropped delegate widens"
+            | decls -> failtest $"expected only the referring alias, got %A{decls}"
+
+            Expect.equal
+                (findings |> List.map (fun f -> f.Key, f.Symbol))
+                [ "RA007", "SetStoreFunction"; "RA002", "Setters" ]
+                "the head drop is reported by name, and the reference to it widens"
+
         testCase "repair-arity widens a generic named without its arguments" <| fun _ ->
             // FS0033: `PagesFunctionContext` takes three arguments and this position has none.
             let generic =
@@ -4381,3 +4466,58 @@ let privateAliasReferences =
                 TypeVars = Map.ofList [ 20<typeId>, "T" ] }
         let reference, findings = Spec.typeRef Build.context model None "accept" 30<typeId>
         (reference, findings) |> Flip.Expect.equal "" (FsApp("Accept.Config", [ FsTypeVar "T" ]), [])
+
+[<Tests>]
+let incompatibleOverloadedTypeParameters =
+    testList "overloaded type-parameter incompatibility" [
+        testCase "a single call signature is never incompatible" <| fun _ ->
+            let facts =
+                { Build.facts (Build.typeResponse 10 TypeFlags.Object) with
+                    CallSignatures = [ { Build.signature [] 4 with TypeParameters = [ 20<typeId> ] } ] }
+
+            let model = Build.shapeModel (facts :: typeParam 20 "T" :: Build.primitives)
+
+            Expect.isFalse (Spec.hasIncompatibleOverloadedTypeParameters model facts) "only one signature to overload against"
+
+        testCase "two signatures with no type parameters are never incompatible" <| fun _ ->
+            let facts =
+                { Build.facts (Build.typeResponse 10 TypeFlags.Object) with
+                    CallSignatures = [ Build.signature [] 4; Build.signature [] 4 ] }
+
+            let model = Build.shapeModel (facts :: Build.primitives)
+
+            Expect.isFalse (Spec.hasIncompatibleOverloadedTypeParameters model facts) "both signatures are plain"
+
+        testCase "two signatures sharing a name under one bound collapse, not incompatible" <| fun _ ->
+            let facts =
+                { Build.facts (Build.typeResponse 10 TypeFlags.Object) with
+                    CallSignatures =
+                        [ { Build.signature [] 4 with TypeParameters = [ 21<typeId> ] }
+                          { Build.signature [] 4 with TypeParameters = [ 22<typeId> ] } ] }
+
+            let model =
+                Build.shapeModel (facts :: typeParam 21 "T" :: typeParam 22 "T" :: Build.primitives)
+
+            Expect.isFalse
+                (Spec.hasIncompatibleOverloadedTypeParameters model facts)
+                "aliasTypeParams collapses the pair into one head slot"
+
+        testCase "two signatures sharing a name under two bounds are incompatible" <| fun _ ->
+            let facts =
+                { Build.facts (Build.typeResponse 10 TypeFlags.Object) with
+                    CallSignatures =
+                        [ { Build.signature [] 4 with TypeParameters = [ 21<typeId> ] }
+                          { Build.signature [] 4 with TypeParameters = [ 22<typeId> ] } ] }
+
+            let model =
+                Build.shapeModel (
+                    facts
+                    :: { typeParam 21 "T" with Constraint = Some 1<typeId> }
+                    :: { typeParam 22 "T" with Constraint = Some 2<typeId> }
+                    :: Build.primitives
+                )
+
+            Expect.isTrue
+                (Spec.hasIncompatibleOverloadedTypeParameters model facts)
+                "one F# head cannot carry both bounds for 'T"
+    ]

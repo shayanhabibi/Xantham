@@ -244,6 +244,17 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
 
     let aliasForms = aliasDeclarationForms model
 
+    /// The type ids exported directly by name from a public path. A type outside this set is
+    /// declared at the root, independent of walk order.
+    let publiclyExportedTypeIds =
+        model.Harvest.Exports
+        |> List.choose (fun export ->
+            if not (hasAny SymbolFlags.Type export.Symbol.Flags) then
+                None
+            else
+                Map.tryFind export.Symbol.SymbolId model.ExportTypes |> Option.bind _.Declared)
+        |> Set.ofList
+
     /// The module name a type nests under, where its own symbol is written inside a namespace
     /// this run names.
     let namespaceOf (facts: TypeFacts) =
@@ -347,8 +358,13 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
             | Untagged -> false)
 
     /// The type ids a declaration reads through call signatures rather than through a reference
-    /// position: an export's own function type, and a method member's. A delegate declared for
-    /// one of these is written nowhere, so the name is spent for nothing.
+    /// position: an export's own function type, a method member's, and the callback behind an
+    /// entrypoint's lifecycle hook. A delegate declared for one of these is written nowhere, so
+    /// the name is spent for nothing.
+    ///
+    /// A hook contributes the arms of its member type that carry call signatures: under
+    /// `strictNullChecks` the member reads `callback | undefined`, and the delegate is declared
+    /// for the arm.
     let signatureShaped =
         let exported =
             model.ExportTypes
@@ -363,7 +379,38 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                 |> List.filter (fun m -> hasAny SymbolFlags.Method m.Symbol.Flags)
                 |> List.map _.TypeId)
 
-        Set.ofList (exported @ methods)
+        // The arms of a member type that carry call signatures of their own.
+        let callbackArms (typeId: int<Measure.typeId>) =
+            match Map.tryFind typeId model.Types with
+            | None -> []
+            | Some facts when not facts.CallSignatures.IsEmpty -> [ typeId ]
+            | Some facts when flag TypeFlags.Union facts -> nonNullishMemberSet model facts
+            | Some _ -> []
+
+        let hooks =
+            let classSides = exportedClassSides model
+
+            model.Types
+            |> Map.toList
+            |> List.collect (fun (typeId, facts) ->
+                let entrypoint =
+                    match Map.tryFind typeId classSides with
+                    | Some(export, valueFacts) -> isEntrypoint export valueFacts.ConstructSignatures facts.BaseTypes
+                    | None -> false
+
+                // A declaration carrying an `inherit` line keeps its optional methods as option
+                // properties (`shape-interfaces`), which read the delegate name. A base or an
+                // intersection operand leaves the name claimed.
+                let standalone = facts.BaseTypes.IsEmpty && not (flag TypeFlags.Intersection facts)
+
+                if entrypoint && standalone then
+                    facts.Members
+                    |> List.filter (isOptionalHook model)
+                    |> List.collect (fun m -> callbackArms m.TypeId)
+                else
+                    [])
+
+        Set.ofList (exported @ methods @ hooks)
 
     let needsName (facts: TypeFacts) =
         if Map.containsKey facts.Response.TypeId names then
@@ -460,7 +507,18 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                             Naming.pascalSegment (name / uom<symbolName>), namespaceOf facts
                         | _ -> path, None
 
-                    let claimed = claim owner preferred typeId order
+                    let claimed =
+                        // A named type exported directly from no public path stays at the root
+                        // (decision 10), homed by its own name and namespace rather than by the
+                        // export the walk reaches it through.
+                        if Set.contains typeId publiclyExportedTypeIds then
+                            claim owner preferred typeId order
+                        else
+                            let referencingPrefix = modulePrefix
+                            modulePrefix <- ""
+                            let result = claim owner preferred typeId order
+                            modulePrefix <- referencingPrefix
+                            result
 
                     // The delegate declaration `shape-callbacks` writes for it (D5): the arity
                     // guarantee `System.Func` gives, under a name whose parameters read as

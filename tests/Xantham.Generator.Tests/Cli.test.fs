@@ -213,6 +213,25 @@ let commandTests =
         testCase "an unknown command is a usage error" <| fun _ ->
             invoke [ "compile" ] <| fun (code, _, _, _) -> Expect.equal code 1 "usage"
 
+        testCase "a package with subpaths but no root export passes pre-flight" <| fun _ ->
+            let package =
+                Path.Combine(Path.GetTempPath(), "xantham-rootless-" + Guid.NewGuid().ToString "N")
+
+            Directory.CreateDirectory package |> ignore
+
+            try
+                File.WriteAllText(
+                    Path.Combine(package, "package.json"),
+                    """{ "name": "rootless", "exports": { "./a": { "types": "./a.d.ts" } } }"""
+                )
+
+                File.WriteAllText(Path.Combine(package, "a.d.ts"), "export declare const v: number;")
+
+                let config = GeneratorConfig.load package
+                Bootstrap.publicPaths config package |> ignore
+            finally
+                Directory.Delete(package, true)
+
         // TODO - needs to be updated for new CLI
         // testCase "a refused xantham.json exits before generation" <| fun _ ->
         //     let package =

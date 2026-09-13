@@ -10521,6 +10521,72 @@ module ConditionalPickDeepOptions =
         | [<CompiledName("equality")>] Equality
         | [<CompiledName("extends")>] Extends
 
+/// <summary>type-fest/globals</summary>
+module Globals =
+    /// <remarks>
+    /// @remarks
+    /// The TC39 observable proposal defines a <c>closed</c> property, but some implementations (such as xstream) do not as of 10/08/2021.
+    /// As well, some guidance on making an <c>Observable</c> to not include <c>closed</c> property.
+    /// </remarks>
+    /// <remarks>@see https://github.com/tc39/proposal-observable/blob/master/src/Observable.js#L129-L130</remarks>
+    /// <remarks>@see https://github.com/staltz/xstream/blob/6c22580c1d84d69773ee4b0905df44ad464955b3/src/index.ts#L79-L85</remarks>
+    /// <remarks>@see https://github.com/benlesh/symbol-observable#making-an-object-observable</remarks>
+    /// <remarks>@category Observable</remarks>
+    [<Interface>]
+    type Unsubscribable =
+        abstract unsubscribe: unit -> unit
+        [<ParamObject; Emit("$0")>]
+        static member Create (unsubscribe: (unit -> unit)) : Unsubscribable = jsNative
+
+    /// <remarks>@category Observable</remarks>
+    [<Interface>]
+    type Observer<'ValueType> =
+        abstract next: ('ValueType -> unit) with get, set
+        abstract error: (obj -> unit) with get, set
+        abstract complete: (unit -> unit) with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (next: ('ValueType -> unit), error: (obj -> unit), complete: (unit -> unit)) : Observer<'ValueType> = jsNative
+
+    /// <summary>
+    /// Matches a value that is like an <a href="https://github.com/tc39/proposal-observable">Observable</a>.
+    /// <br /><br />
+    /// You must import it as a sub-import:
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// </code>
+    /// import type {ObservableLike} from 'type-fest/globals';
+    /// <code>
+    /// </code>
+    /// </example>
+    /// <remarks>
+    /// @remarks
+    /// The TC39 Observable proposal defines 2 forms of <c>subscribe()</c>:
+    /// 1. Three callback arguments: <c>subscribe(observer: OnNext&lt;ValueType&gt;, onError?: OnError, onComplete?: OnComplete): Unsubscribable;</c>
+    /// 2. A single <c>observer</c> argument: (as defined below)
+    /// <br /><br />
+    /// But <c>Observable</c> implementations have evolved to preferring case 2 and some implementations choose not to implement case 1. Therefore, an <c>ObservableLike</c> cannot be trusted to implement the first case. (xstream and hand built observerables often do not implement case 1)
+    /// </remarks>
+    /// <remarks>@see https://github.com/tc39/proposal-observable#observable</remarks>
+    /// <remarks>@see https://github.com/tc39/proposal-observable/blob/master/src/Observable.js#L246-L259</remarks>
+    /// <remarks>@see https://benlesh.com/posts/learning-observable-by-building-observable/</remarks>
+    /// <remarks>@category Observable</remarks>
+    [<Interface>]
+    type ObservableLike<'ValueType> =
+        abstract subscribe: ?observer: ObservableLike.Subscribe.Observer -> Unsubscribable
+        [<ParamObject; Emit("$0")>]
+        static member Create (subscribe: (ObservableLike.Subscribe.Observer option -> Unsubscribable)) : ObservableLike<'ValueType> = jsNative
+
+    module ObservableLike =
+        module Subscribe =
+            [<Interface>]
+            type Observer =
+                abstract next: (obj -> unit) option with get, set
+                abstract error: (obj -> unit) option with get, set
+                abstract complete: (unit -> unit) option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (?next: (obj -> unit), ?error: (obj -> unit), ?complete: (unit -> unit)) : Observer = jsNative
+
 module Jsonifiable2 =
     [<Interface>]
     type Item =
