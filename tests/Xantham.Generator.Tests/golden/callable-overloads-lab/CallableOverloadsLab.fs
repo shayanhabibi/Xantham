@@ -11,10 +11,10 @@ open Fable.Core.JS
 open Fable.Core.TS.Dom
 
 /// <summary>
-/// Two call signatures under one name, <c>U</c>, bound differently to <c>T</c> and to <c>number</c>, and
+/// Two call signatures under one name, <c>U</c>, bound differently to <c>string</c> and to <c>number</c>, and
 /// separated by arity: each reaches its own <c>Invoke</c> overload.
 /// </summary>
-type Coalesce<'T> =
+type Coalesce =
     [<Emit("$0($1...)")>]
     abstract Invoke<'U>: value: 'U -> 'U
     [<Emit("$0($1...)")>]
@@ -49,6 +49,13 @@ type Holder =
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
+    /// <summary>
+    /// <c>Coalesce</c> at a tuple return position, mirroring <c>solid-js</c>'s <c>createStore</c> returning
+    /// <c>[Store&lt;T&gt;, SetStoreFunction&lt;T&gt;]</c>: the reference stays named, and each call signature
+    /// reaches its own <c>Invoke</c> overload.
+    /// </summary>
+    [<Import("makeCoalescer", "callable-overloads-lab")>]
+    static member makeCoalescer () : string * Coalesce = jsNative
     [<Import("coalesce", "callable-overloads-lab")>]
     static member coalesce<'U> (value: 'U) : 'U = jsNative
     [<Import("coalesce", "callable-overloads-lab")>]

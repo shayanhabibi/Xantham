@@ -3,7 +3,7 @@
   "package": "callable-overloads-lab",
   "module": "CallableOverloadsLab",
   "counts": {
-    "exact": 3,
+    "exact": 4,
     "ergonomic": 5,
     "widened": 2,
     "escape": 0

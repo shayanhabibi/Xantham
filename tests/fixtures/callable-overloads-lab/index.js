@@ -1,8 +1,9 @@
-// The runtime behind callable-overloads-lab. `coalesce`, read off `holder`, dispatches on arity:
-// both overloads reach the same underlying function. `oneShot`, `multiplex` and `ledger` are
-// plain functions, reached through the negatives' delegates or through the hybrid path's own
-// `Invoke`.
+// The runtime behind callable-overloads-lab. `coalesce` dispatches on arity, reached both
+// through `makeCoalescer`'s tuple return and through `holder.coalesce`. `oneShot`, `multiplex`
+// and `ledger` are plain functions, reached through the negatives' delegate path.
 export const coalesce = (value, fallback) => (fallback === undefined ? value : value + fallback);
+
+export const makeCoalescer = () => ["seed", coalesce];
 
 export const oneShot = (value) => value;
 

@@ -1207,7 +1207,7 @@ let pipelineTests =
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                           let source = rendered.Files |> List.head |> snd
 
-                          Expect.stringContains source "type Coalesce<'T> =" "the head carries one type parameter"
+                          Expect.stringContains source "type Coalesce =" "the interface itself carries no type parameter"
 
                           Expect.stringContains
                               source
@@ -1227,6 +1227,16 @@ let pipelineTests =
                           Expect.isEmpty
                               (rendered.Findings |> List.filter (fun f -> f.Key = "RA007"))
                               "not one delegate head repeating 'U"
+
+                      testCase "a tuple return position keeps the Coalesce reference, reaching its Invoke overloads"
+                      <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains
+                              source
+                              "static member makeCoalescer () : string * Coalesce = jsNative"
+                              "the reference survives a tuple return position, unwidened"
 
                       testCase "a single generic call signature stays one delegate head"
                       <| fun _ ->
