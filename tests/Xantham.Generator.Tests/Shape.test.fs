@@ -4249,11 +4249,9 @@ let shapePassTests =
                 "the drop is reported, not the phantom"
 
         testCase "repair-arity drops a delegate whose head names one variable twice" <| fun _ ->
-            // `solid-js`'s `SetStoreFunction` binds a same-named type parameter under two
-            // different constraints across its call-signature overloads: `alias-type-params`
-            // collapses the overloads into one head, and the collision survives into it even
-            // though every parameter is used - `DivergentBound`'s `unused` gate never sees this
-            // one, so it needs its own drop.
+            // A head carrying one type-parameter name twice is unwritable F#. `repair-arity`
+            // drops it under its own rule, reaching heads with every parameter used - the case
+            // left standing by `DivergentBound`'s `unused` gate.
             let repeated =
                 FsDelegateType
                     { Name = "SetStoreFunction"

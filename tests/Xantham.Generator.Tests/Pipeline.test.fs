@@ -1207,7 +1207,10 @@ let pipelineTests =
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                           let source = rendered.Files |> List.head |> snd
 
-                          Expect.stringContains source "type Coalesce =" "the head is bare, its parameters sitting on Invoke"
+                          Expect.stringContains
+                              source
+                              "type Coalesce<'T> ="
+                              "the head carries the interface's own parameter, the signatures' sitting on Invoke"
 
                           Expect.stringContains
                               source
@@ -1235,17 +1238,20 @@ let pipelineTests =
 
                           Expect.stringContains
                               source
-                              "static member makeCoalescer () : string * Coalesce = jsNative"
-                              "the reference survives a tuple return position, unwidened"
+                              "static member makeCoalescer<'T> () : 'T * Coalesce<'T> = jsNative"
+                              "the reference survives a tuple return position at arity 1, unwidened"
 
-                      testCase "a single generic call signature stays one delegate head"
+                      testCase "a single generic call signature keeps one head, hoisting both parameters onto it"
                       <| fun _ ->
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                           let source = rendered.Files |> List.head |> snd
 
-                          Expect.stringContains source "type OneShot<'T, 'U> =" "one head, its own parameter hoisted onto it"
+                          Expect.stringContains
+                              source
+                              "type OneShot<'T, 'U> ="
+                              "the erased head carries the interface's parameter beside the signature's"
 
-                      testCase "several non-generic call signatures stay one delegate, raising TR031"
+                      testCase "several non-generic call signatures collapse to one abbreviation, raising TR031"
                       <| fun _ ->
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                           let source = rendered.Files |> List.head |> snd
@@ -1253,7 +1259,7 @@ let pipelineTests =
                           Expect.stringContains
                               source
                               "type Multiplex ="
-                              "a plain delegate head"
+                              "a function-type abbreviation"
 
                           Expect.contains
                               (rendered.Findings |> List.map (fun finding -> finding.Key, finding.Symbol))

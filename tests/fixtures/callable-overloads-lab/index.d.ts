@@ -2,10 +2,12 @@
 // different bounds (`hasIncompatibleOverloadedTypeParameters`, §4.4) route to an interface, each
 // call signature reaching its own `Invoke` overload.
 
-/** Two call signatures under the same name, `U`, bound differently to `string` and to `number`,
- *  and separated by arity: each reaches its own `Invoke` overload. */
-export interface Coalesce {
-    <U extends string>(value: U): U;
+/** Two call signatures under the same name, `U`, bound differently — to the interface's own `T`
+ *  and to `number` — and separated by arity: each reaches its own `Invoke` overload. The outer
+ *  `T` inside a call-signature bound mirrors `solid-js`'s `SetStoreFunction<T>`, whose every
+ *  bound reads `T`. */
+export interface Coalesce<T> {
+    <U extends T>(value: U): U;
     <U extends number>(value: U, fallback: U): U;
 }
 
@@ -32,15 +34,15 @@ export interface Ledger {
 /** `Coalesce` at a member position: both call signatures recover as separable overloads under
  *  the member's own name (§4.2 extended to callbacks), reachable through `holder.coalesce`. */
 export interface Holder {
-    coalesce: Coalesce;
+    coalesce: Coalesce<string>;
 }
 
-/** `Coalesce` at a tuple return position, mirroring `solid-js`'s `createStore` returning
- *  `[Store<T>, SetStoreFunction<T>]`: the reference keeps its name, and each call signature
- *  reaches its own `Invoke` overload. */
-export declare function makeCoalescer(): [string, Coalesce];
+/** `Coalesce<T>` at a tuple return position, mirroring `solid-js`'s `createStore` returning
+ *  `[Store<T>, SetStoreFunction<T>]`: the reference applies the function's own free `T`, keeps
+ *  its name at arity 1, and each call signature reaches its own `Invoke` overload. */
+export declare function makeCoalescer<T>(): [T, Coalesce<T>];
 
-export declare const coalesce: Coalesce;
+export declare const coalesce: Coalesce<string>;
 export declare const oneShot: OneShot<string>;
 export declare const multiplex: Multiplex;
 export declare const ledger: Ledger;

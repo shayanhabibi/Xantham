@@ -11,10 +11,12 @@ open Fable.Core.JS
 open Fable.Core.TS.Dom
 
 /// <summary>
-/// Two call signatures under the same name, <c>U</c>, bound differently to <c>string</c> and to <c>number</c>,
-/// and separated by arity: each reaches its own <c>Invoke</c> overload.
+/// Two call signatures under the same name, <c>U</c>, bound differently — to the interface's own <c>T</c>
+/// and to <c>number</c> — and separated by arity: each reaches its own <c>Invoke</c> overload. The outer
+/// <c>T</c> inside a call-signature bound mirrors <c>solid-js</c>'s <c>SetStoreFunction&lt;T&gt;</c>, whose every
+/// bound reads <c>T</c>.
 /// </summary>
-type Coalesce =
+type Coalesce<'T> =
     [<Emit("$0($1...)")>]
     abstract Invoke<'U>: value: 'U -> 'U
     [<Emit("$0($1...)")>]
@@ -49,12 +51,12 @@ type Holder =
 [<Erase>]
 type Exports =
     /// <summary>
-    /// <c>Coalesce</c> at a tuple return position, mirroring <c>solid-js</c>'s <c>createStore</c> returning
-    /// <c>[Store&lt;T&gt;, SetStoreFunction&lt;T&gt;]</c>: the reference keeps its name, and each call signature
-    /// reaches its own <c>Invoke</c> overload.
+    /// <c>Coalesce&lt;T&gt;</c> at a tuple return position, mirroring <c>solid-js</c>'s <c>createStore</c> returning
+    /// <c>[Store&lt;T&gt;, SetStoreFunction&lt;T&gt;]</c>: the reference applies the function's own free <c>T</c>, keeps
+    /// its name at arity 1, and each call signature reaches its own <c>Invoke</c> overload.
     /// </summary>
     [<Import("makeCoalescer", "callable-overloads-lab")>]
-    static member makeCoalescer () : string * Coalesce = jsNative
+    static member makeCoalescer<'T> () : 'T * Coalesce<'T> = jsNative
     [<Import("coalesce", "callable-overloads-lab")>]
     static member coalesce<'U> (value: 'U) : 'U = jsNative
     [<Import("coalesce", "callable-overloads-lab")>]
