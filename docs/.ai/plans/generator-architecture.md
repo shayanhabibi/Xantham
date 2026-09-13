@@ -1662,6 +1662,26 @@ The catalog API, source, arity and constraint guards remain unchanged.
 
 Validation and measured golden changes are recorded in
 `docs/.ai/handovers/catalog-alias-api.md`.
+### Source closure precedes anonymous parent ownership
+
+Source closure consults the canonical type identities before parent-role inference
+assigns names to anonymous checker types. The checker shares types such as
+`string[] | undefined` across independent properties. A chosen parent gives that
+anonymous type an output identity, but cannot make the parent's package a dependency
+of every other occurrence of the type. The canonical identity map is retained
+separately for closure; the completed map still supplies output declaration identities
+and their own parent sources.
+
+The anonymous-parent-source lab gives shared and consumer interfaces independent
+optional string-array properties. A typed consumer passes the shared interface across
+the catalog boundary and reads its optional strings. A changed shared input still
+invalidates the catalog. This also reproduces the Workers CacheContext closure gaining
+Containers' `deniedHosts` parent through CachePurgeOptions.
+
+Validation: 875 generator tests and 90 Wire tests pass in both phases, the compile
+gate passes, and 461 Fable checks pass. All 97 existing golden trees are byte-identical.
+The new lab has one exact and two ergonomic symbols, with no widening or escape.
+Fresh FCS checking reports zero errors and warnings.
 
 # Easy Nits 
 

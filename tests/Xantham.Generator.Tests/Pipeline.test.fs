@@ -4852,6 +4852,17 @@ let recordAliasSourceIdentityTests =
     ]
 
 [<Tests>]
+let anonymousParentSourceTests =
+    let package = handFixture "anonymous-parent-source-lab"
+    let config =
+        package
+        |> Option.map (fun directory -> GeneratorConfig.loadFile (IO.Path.Combine(directory, "xantham.json")))
+        |> Option.defaultValue GeneratorConfig.Default
+    testList "anonymous parent source fixture" [
+        yield! fixtureTests "anonymous-parent-source-lab" package { config with DeclarationCatalog = false } (fun _ -> [])
+    ]
+
+[<Tests>]
 let groupedDomAliasTests =
     testList "grouped DOM alias fixture" [
         yield!

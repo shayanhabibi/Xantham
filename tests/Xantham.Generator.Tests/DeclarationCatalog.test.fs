@@ -108,6 +108,39 @@ let tests =
                 skiptest "run `npm install` at the repository root, or set XANTHAM_TSGO_EXE" ]
     | Some _ ->
         testList "declaration catalog" [
+            testCase "anonymous parent roles do not add consumer sources to shared declarations" <| fun _ ->
+                let directory = Path.Combine(temporaryRoot, "xantham-anonymous-parent-" + Guid.NewGuid().ToString "N")
+                let package = Path.Combine(directory, "package")
+                Directory.CreateDirectory package |> ignore
+                try
+                    let source = Path.GetFullPath(Path.Combine(fixture, "..", "anonymous-parent-source-lab"))
+                    for file in Directory.EnumerateFiles(source, "*", SearchOption.AllDirectories) do
+                        writePackageFile package (Path.GetRelativePath(source, file)) (File.ReadAllText file)
+                    let config =
+                        { GeneratorConfig.loadFile (Path.Combine(package, "xantham.json")) with
+                            ModuleName = Some "Identity.Root" }
+                    let dependency = Path.Combine(package, "node_modules", "optional-array-shared-lab")
+                    let root = Path.Combine(directory, "root")
+                    Pipeline.run config dependency root |> Async.RunSynchronously |> ignore
+                    let adapter =
+                        { config with
+                            ModuleName = Some "Identity.Adapter"
+                            DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
+                    let output = Path.Combine(directory, "adapter")
+                    Pipeline.run adapter package output |> Async.RunSynchronously |> ignore
+                    let consumer = """module Identity.Consumer
+let shared (value: Identity.Adapter.Container) : Identity.Root.Shared = value.cache
+let first (value: Identity.Root.Shared) : string option = value.values |> Option.map (fun values -> values.[0])
+"""
+                    let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] consumer
+                    Expect.equal code 0 output
+                    File.AppendAllText(Path.Combine(dependency, "index.d.ts"), "\n")
+                    Expect.throwsC
+                        (fun () -> Pipeline.run adapter package (Path.Combine(directory, "stale")) |> Async.RunSynchronously |> ignore)
+                        (fun error -> Expect.stringContains error.Message "input source hash mismatch" "shared declaration sources remain authenticated")
+                finally
+                    if Directory.Exists directory then Directory.Delete(directory, true)
+
             testCase "nullable aliases retain tagged unions and one option layer across packages" <| fun _ ->
                 let directory = Path.Combine(temporaryRoot, "xantham-alias-api-" + Guid.NewGuid().ToString "N")
                 Directory.CreateDirectory directory |> ignore

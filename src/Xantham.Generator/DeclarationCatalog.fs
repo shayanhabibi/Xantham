@@ -631,6 +631,8 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
             yield! facts.Conditional |> Option.bind _.Branch |> Option.map snd |> Option.toList
         ]
 
+    let canonicalTypes = byType
+
     let closure id =
         let bound =
             Shape.Spec.declParamIds shape.Types[id] @ Shape.Spec.freeParamsOf shape id
@@ -652,7 +654,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                         not (facts.Response.Flags.HasFlag TypeFlags.TypeParameter)
                         && intrinsicArgumentKey facts.Response = ""
                     then
-                        match Map.tryFind current byType with
+                        match Map.tryFind current canonicalTypes with
                         | Some identity ->
                             for source in identity.Sources do
                                 sources.Add source |> ignore
