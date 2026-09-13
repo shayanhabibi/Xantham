@@ -584,9 +584,10 @@ let private deriveFacts
             // and widens every one to obj.
             let! aliasTypeArguments = ctx.Session.getAliasTypeArgumentsOfType ty.Id
 
+            let unionAliasArguments = aliasTypeArguments |> ValueOption.defaultValue [||]
+
             let aliasTypeArguments =
-                aliasTypeArguments
-                |> ValueOption.defaultValue [||]
+                unionAliasArguments
                 |> Array.filter (fun argument -> argument.Flags.HasFlag TypeFlags.TypeParameter)
                 |> Array.toList
 
@@ -608,9 +609,13 @@ let private deriveFacts
                            || flags.HasFlag TypeFlags.BigIntLiteral
                            || flags.HasFlag TypeFlags.BooleanLiteral))
 
-            // Other union mappings may require generic arguments that a named reference omits.
+            let closedObjectUnion =
+                Array.isEmpty unionAliasArguments
+                && not (List.isEmpty literals)
+                && literals |> List.forall (fun member_ -> member_.Flags.HasFlag TypeFlags.Object)
+
             let recoverAlias =
-                plainLiteralUnion
+                (plainLiteralUnion || closedObjectUnion)
                 && (ctx.Config.DeclarationCatalog
                     || not (List.isEmpty ctx.Config.DeclarationReferences))
 
@@ -619,11 +624,19 @@ let private deriveFacts
                     if recoverAlias && members |> List.exists isNullish then
                         let! result = ctx.Session.getNonNullableType ty.Id
 
-                        return
-                            if result.Id <> ty.Id && result.AliasSymbol.IsSome then
-                                Some result
-                            else
-                                None
+                        if result.Id <> ty.Id && result.AliasSymbol.IsSome then
+                            let! arguments = ctx.Session.getAliasTypeArgumentsOfType result.Id
+
+                            return
+                                if
+                                    plainLiteralUnion
+                                    || (arguments |> ValueOption.defaultValue [||] |> Array.isEmpty)
+                                then
+                                    Some result
+                                else
+                                    None
+                        else
+                            return None
                     else
                         return None
                 }

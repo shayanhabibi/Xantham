@@ -4423,13 +4423,13 @@ type Join<'Items, 'Delimiter> = private Join__ of obj
 /// <remarks>@category JSON</remarks>
 type JsonObject =
     [<EmitIndexer>]
-    abstract Item: string -> JsonValue option with get, set
+    abstract Item: string -> JsonValue with get, set
 
 /// <summary>
 /// Matches a JSON array.
 /// </summary>
 /// <remarks>@category JSON</remarks>
-type JsonArray = JsonValue option[]
+type JsonArray = JsonValue[]
 
 /// <summary>
 /// Matches any valid JSON primitive value.
@@ -9222,9 +9222,9 @@ type StructuredCloneable = obj option
 
 type StructuredCloneable2 =
     [<EmitIndexer>]
-    abstract Item: string -> StructuredCloneable option
+    abstract Item: string -> StructuredCloneable
     [<EmitIndexer>]
-    abstract Item: float -> StructuredCloneable option
+    abstract Item: float -> StructuredCloneable
 
 /// <summary>
 /// Returns the difference between two numbers.
@@ -10590,9 +10590,9 @@ module Globals =
 module Jsonifiable2 =
     [<Interface>]
     type Item =
-        abstract toJSON: (unit -> Jsonifiable option) with get, set
+        abstract toJSON: (unit -> Jsonifiable) with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (toJSON: (unit -> Jsonifiable option)) : Item = jsNative
+        static member Create (toJSON: (unit -> Jsonifiable)) : Item = jsNative
 
 module MergeDeepOptions =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]

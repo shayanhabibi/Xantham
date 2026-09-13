@@ -2275,7 +2275,17 @@ and internal unionRef
         | _ when isBooleanPair model remaining -> wrap FsBool []
         | _ ->
             match Map.tryFind facts.Response.TypeId model.DeclNames with
-            | Some name -> wrap (FsNamed name) []
+            | Some name when List.isEmpty hoisted -> FsNamed name, []
+            | Some name ->
+                let isLiteralEnum =
+                    remaining.Length >= 2
+                    && remaining
+                       |> List.forall (fun id -> Map.tryFind id model.Types |> Option.bind literalOf |> Option.isSome)
+
+                if not isLiteralEnum then
+                    FsNamed name, []
+                else
+                    wrap (FsNamed name) []
             | None ->
                 match namedUnionByMembers model remaining with
                 | Some name -> wrap (FsNamed name) []

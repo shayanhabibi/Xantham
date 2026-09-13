@@ -4864,3 +4864,12 @@ let groupedDomAliasTests =
                     Groups = Map.ofList [ "worker-augmentation-lab" * Measure.uom<Measure.npmDependency>, Ship ] }
                 (fun _ -> [])
     ]
+
+[<Tests>]
+let catalogAliasApiTests =
+    let package = handFixture "catalog-alias-api-lab"
+    let config = { handConfig package with DeclarationCatalog = false }
+    testList "catalog alias API fixture" [
+        yield!
+            fixtureTests "catalog-alias-api-lab" package config (fun _ -> [])
+    ]

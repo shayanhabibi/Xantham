@@ -1646,6 +1646,23 @@ has two widened declarations: unknown values use `obj`, and the separately owned
 is opaque when the root fixture is generated alone. Fresh generator FCS checking reports
 zero errors and warnings.
 
+### Nullable aliases shared across catalog owners
+
+Resolve recovers the canonical declaration behind a nullable nongeneric object union in
+catalog mode, including a tagged union reached only through an optional member. Generic
+alias applications retain their argument handling. Shape references to a named nullable
+heterogeneous alias preserve the option layer already carried by that alias. Literal unions
+still use a nullable reference to their generated enum, whose cases carry only the values.
+
+The catalog-alias-api lab exposes a nullable value alias, a tagged payload union and an
+optional tagged choice through a dependency. A consumer reaches the option object through
+`Parameters<Model["generate"]>[0]`. Its typed F# consumer passes producer-owned options and
+payloads directly to the consumer SDK and reads a JSON payload with exactly one option layer.
+The catalog API, source, arity and constraint guards remain unchanged.
+
+Validation and measured golden changes are recorded in
+`docs/.ai/handovers/catalog-alias-api.md`.
+
 # Easy Nits 
 
 To include in scope when a phases implementation/attempt ends up being small/quick.

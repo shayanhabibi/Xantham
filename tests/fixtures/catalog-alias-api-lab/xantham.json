@@ -1,0 +1,12 @@
+{
+  "module": "CatalogAliasApiLab",
+  "namespace": "Identity.Support",
+  "lib": [
+    "esnext"
+  ],
+  "types": [],
+  "groups": {
+    "alias-api-owner-lab": "ship"
+  },
+  "declarationCatalog": true
+}

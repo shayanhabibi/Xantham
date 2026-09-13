@@ -108,6 +108,40 @@ let tests =
                 skiptest "run `npm install` at the repository root, or set XANTHAM_TSGO_EXE" ]
     | Some _ ->
         testList "declaration catalog" [
+            testCase "nullable aliases retain tagged unions and one option layer across packages" <| fun _ ->
+                let directory = Path.Combine(temporaryRoot, "xantham-alias-api-" + Guid.NewGuid().ToString "N")
+                Directory.CreateDirectory directory |> ignore
+                try
+                    let package = Path.GetFullPath(Path.Combine(fixture, "..", "catalog-alias-api-lab"))
+                    let dependency = Path.Combine(package, "node_modules", "alias-api-owner-lab")
+                    let config =
+                        { GeneratorConfig.loadFile (Path.Combine(package, "xantham.json")) with
+                            ModuleName = Some "Identity.Root" }
+                    let root = Path.Combine(directory, "root")
+                    Pipeline.run config dependency root |> Async.RunSynchronously |> ignore
+                    let adapter =
+                        { config with
+                            ModuleName = Some "Identity.Adapter"
+                            DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
+                    Pipeline.run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    let consumer = """module Identity.Consumer
+open Fable.Core
+let accept (client: Identity.Adapter.Client) (part: Identity.Root.Part) : Identity.Root.Part =
+    client.accept part
+let generate (client: Identity.Adapter.Client) (options: Identity.Root.Options) : JS.Promise<Identity.Root.Part> =
+    client.generate options
+let choice (options: Identity.Root.Options) : Identity.Root.Choice option = options.choice
+let payload (output: Identity.Root.Output) : U2<string, float> option =
+    match output with
+    | Identity.Root.Output.Json value -> value
+    | Identity.Root.Output.Text _ -> None
+let json (value: Identity.Root.Value) : Identity.Root.Output = Identity.Root.Output.Json value
+"""
+                    let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] consumer
+                    Expect.equal code 0 output
+                finally
+                    if Directory.Exists directory then Directory.Delete(directory, true)
+
             testCase "independent record aliases share canonical sources and preserve input authentication" <| fun _ ->
                 let directory = Path.Combine(temporaryRoot, "xantham-record-alias-source-" + Guid.NewGuid().ToString "N")
                 let package = Path.Combine(directory, "package")

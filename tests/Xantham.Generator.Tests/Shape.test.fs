@@ -759,6 +759,19 @@ let typeRefTests =
             Expect.equal reference (FsOption(FsNamed "TimeUnit")) "the classified union's name"
             Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "only the hoist"
 
+        testCase "a named nullable heterogeneous alias carries its existing option layer" <| fun _ ->
+            let union =
+                { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 7<typeId>; 8<typeId>; 5<typeId> ] }
+            let members =
+                [ Build.facts (Build.typeResponse 7 TypeFlags.String)
+                  Build.facts (Build.typeResponse 8 TypeFlags.Number) ]
+            let model =
+                { Build.shapeModel (union :: members @ Build.primitives) with
+                    DeclNames = Map.ofList [ 10<typeId>, "Value" ] }
+            let reference, findings = Spec.typeRef Build.context model None "x" 10<typeId>
+            Expect.equal reference (FsNamed "Value") "the nullable alias owns its option layer"
+            Expect.isEmpty findings "the alias declaration reports the nullable mapping"
+
         testCase "an array of a generated declaration reads as an F# array" <| fun _ ->
             let array =
                 { Build.facts (Build.typeResponse 11 TypeFlags.Object) with
