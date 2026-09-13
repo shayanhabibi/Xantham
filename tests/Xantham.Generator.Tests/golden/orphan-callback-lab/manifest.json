@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "package": "orphan-callback-lab",
+  "module": "OrphanCallbackLab",
+  "counts": {
+    "exact": 6,
+    "ergonomic": 12,
+    "widened": 1,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "HG - harvest-globals",
+      "total": 1,
+      "exact": 1
+    },
+    {
+      "pass": "SY - synthesize-anonymous",
+      "total": 3,
+      "exact": 3
+    },
+    {
+      "pass": "shape-callbacks",
+      "total": 4,
+      "ergonomic": 4
+    },
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 13,
+      "exact": 1,
+      "ergonomic": 12
+    },
+    {
+      "pass": "SC - shape-classes",
+      "total": 4,
+      "exact": 3,
+      "widened": 1
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 15,
+      "ergonomic": 15
+    }
+  ]
+}

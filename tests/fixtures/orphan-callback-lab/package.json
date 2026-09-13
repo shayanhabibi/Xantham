@@ -1,0 +1,6 @@
+{
+    "name": "orphan-callback-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "description": "Hand-authored fixture for the delegate declared behind a lifecycle hook. An entrypoint class's optional callback method is emitted as a handler interface, so a delegate declared for the same callback is written at zero sites and takes a numeric suffix beside the plain interface's. Tracked in git, no npm install."
+}
