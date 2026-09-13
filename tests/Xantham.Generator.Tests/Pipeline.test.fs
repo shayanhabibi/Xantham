@@ -4825,3 +4825,11 @@ let packageSubmanifestTests =
             fixtureTests "package-submanifest-lab" (handFixture "package-submanifest-lab")
                 { GeneratorConfig.Default with Lib = Some [ "esnext" ]; Types = Some [] } (fun _ -> [])
     ]
+
+[<Tests>]
+let indexedCallbackTests =
+    testList "indexed callback fixture" [
+        yield!
+            fixtureTests "indexed-callback-lab" (handFixture "indexed-callback-lab")
+                { GeneratorConfig.Default with Lib = Some [ "esnext" ]; Types = Some [] } (fun _ -> [])
+    ]

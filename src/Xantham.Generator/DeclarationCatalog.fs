@@ -676,6 +676,9 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
         [
             for member_ in facts.Members do
                 yield member_.TypeId, "member:" + member_.Symbol.Name
+            for index, info in List.indexed facts.IndexInfos do
+                yield info.KeyTypeId, $"index:{index}:key"
+                yield info.ValueTypeId, $"index:{index}:value"
             for index, signature in List.indexed facts.CallSignatures do
                 yield signature.ReturnTypeId, $"call:{index}:return"
 

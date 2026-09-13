@@ -1555,6 +1555,23 @@ Cloudflare delivery; its general package-ownership defect is covered by this reg
 Validation: 854 generator tests, 90 Wire tests, the compile gate and 461 Fable runtime
 checks pass in the full regeneration and independent-check pipeline.
 
+
+### Parent identities through index signatures
+
+Catalog parent roles include index-signature keys and values, using the checker-provided
+index order. Synthesized callbacks reached through a mapped index signature receive a
+stable role through that index and any intervening union. Catalog source closure already
+traversed these dependencies; identity propagation now follows the same index edges.
+
+The three-line indexed-callback lab reduces the Containers SDK failure to a mapped handler
+collection. A second generated library reuses its catalog, and a compiled consumer reads
+and invokes the producer's callback type. Its conditional context remains a reported
+mapping loss (0 exact / 1 ergonomic / 3 widened / 0 escape). Existing golden bindings and
+finding counts are unchanged.
+
+Validation: 857 generator tests and 90 Wire tests pass during regeneration and independent
+checking; the compile gate and 461 Fable runtime checks pass. A fresh FCS check is clean.
+
 # Easy Nits 
 
 To include in scope when a phases implementation/attempt ends up being small/quick.
