@@ -172,8 +172,8 @@ let internal isPureCallback (facts: TypeFacts) =
     && facts.ConstructSignatures.IsEmpty
     && facts.Members.IsEmpty
 
-/// Two hoisted type-parameter ids name the same declared type parameter iff each resolves to
-/// the same symbol under the same constraint; an id with no symbol name answers only to itself.
+/// Two hoisted type-parameter ids share an identity when each resolves to the same symbol
+/// under the same constraint. An id with no symbol name carries no identity beyond itself.
 let private typeParamIdentity (model: ShapeModel) (id: int<typeId>) =
     let paramFacts = Map.tryFind id model.Types
 
@@ -184,9 +184,9 @@ let private typeParamIdentity (model: ShapeModel) (id: int<typeId>) =
     | Some name -> Ok(name, paramFacts |> Option.bind _.Constraint)
     | None -> Error id
 
-/// An object type with more than one call signature whose hoisted type parameters name one
-/// declared type parameter under two different bounds: the single F# head `aliasTypeParams`
-/// would produce is unwritable, since one type-parameter slot cannot carry two constraints.
+/// An object type with more than one call signature whose hoisted type parameters carry one
+/// declared type parameter's identity under two different bounds — the single F# head
+/// `aliasTypeParams` would produce is unwritable.
 let internal hasIncompatibleOverloadedTypeParameters (model: ShapeModel) (facts: TypeFacts) =
     match facts.CallSignatures with
     | []
