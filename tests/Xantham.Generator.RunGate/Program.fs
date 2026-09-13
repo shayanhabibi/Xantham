@@ -2042,6 +2042,17 @@ let private subpathLab () =
 
     equal "a root-homed type flows through a subpath signature" 3. connected.hidden
 
+let private mixedSubpaths () =
+    equal
+        "a global root function survives beside a module subpath"
+        "global:true"
+        (MixedSubpathsLab.Exports.rootCall (MixedSubpathsLab.RootOptions.Create true))
+
+    equal
+        "the module subpath keeps its runtime import beside globals"
+        "client:3"
+        (MixedSubpathsLab.Client.Exports.connect (MixedSubpathsLab.Client.ClientOptions.Create 3.))
+
 [<EntryPoint>]
 let main _ =
     SupportHelpers.run check
@@ -2078,6 +2089,7 @@ let main _ =
     patternParameters ()
     exportLayout ()
     subpathLab ()
+    mixedSubpaths ()
 
     match failures with
     | [] ->

@@ -60,7 +60,7 @@ let private followAlias (ctx: Context) (export: SymbolResponse) =
 /// A public path's exports, harvested under `origin`, with the resolved origin symbols (for
 /// `namespacesAmong`). A path backed by a global-script file - a global type library such as
 /// `@cloudflare/workers-types` or a module-free `@types/*` - yields an empty list, and
-/// `harvest-globals` supplies its ambient declarations once the whole model resolves empty.
+/// `harvest-globals` supplies its ambient declarations alongside the module exports.
 let private harvestPublicPath
     (ctx: Context)
     (origin: ExportOrigin)
@@ -310,24 +310,40 @@ let private collapseNodeAliases (ctx: Context) (exports: HarvestedExport list) =
 
         collapsed, findings
 
-/// Runs only when `harvest-exports` found nothing: a package with a module symbol may also
-/// augment the global scope, and folding those globals into its exports would emit names the
-/// package does not export.
+/// Harvests package globals when a public input is a global script, or module exports are empty.
+/// A mixed run reads the global script's scope and retains the public module exports.
 let harvestGlobals: Pass<HarvestModel> =
     {
         Name = "harvest-globals"
         Run =
             fun ctx model ->
                 async {
-                    if not (List.isEmpty model.Exports) then
+                    let! globalFiles =
+                        ctx.PublicPaths
+                        |> List.map (fun path ->
+                            async {
+                                let! symbol =
+                                    ctx.Session.getSymbolOfSourceFile (
+                                        DocumentIdentifier.FileName(path.File / uom<declFile>)
+                                    )
+
+                                return if ValueOption.isNone symbol then Some path.File else None
+                            })
+                        |> Async.Sequential
+
+                    let globalFile = globalFiles |> Array.tryPick id
+
+                    if not (List.isEmpty model.Exports) && Option.isNone globalFile then
                         return Advanced model
                     else
+                        let scopeFile = globalFile |> Option.defaultValue ctx.EntryFile
+
                         // Types and values both: a global library is mostly interfaces and aliases,
                         // but `declare function`/`declare var` are exactly what needs `[<Global>]`.
                         let! symbols =
                             ctx.Session.getSymbolsInScope (
                                 SymbolFlags.Type ||| SymbolFlags.Value,
-                                file = DocumentIdentifier.FileName(ctx.EntryFile / uom<declFile>),
+                                file = DocumentIdentifier.FileName(scopeFile / uom<declFile>),
                                 position = 0
                             )
 
@@ -366,7 +382,7 @@ let harvestGlobals: Pass<HarvestModel> =
                         let! declared =
                             ctx.Session.getSymbolsInScope (
                                 SymbolFlags.Module,
-                                file = DocumentIdentifier.FileName(ctx.EntryFile / uom<declFile>),
+                                file = DocumentIdentifier.FileName(scopeFile / uom<declFile>),
                                 position = 0
                             )
 
@@ -423,7 +439,7 @@ let harvestGlobals: Pass<HarvestModel> =
                         let harvested, aliasFindings = collapseNodeAliases ctx harvested
                         let findings = findings @ aliasFindings
 
-                        if List.isEmpty harvested && List.isEmpty findings then
+                        if List.isEmpty model.Exports && List.isEmpty harvested && List.isEmpty findings then
                             return
                                 Degraded(
                                     { model with
@@ -444,8 +460,13 @@ let harvestGlobals: Pass<HarvestModel> =
                         else
                             let model =
                                 { model with
-                                    Exports = harvested
-                                    Namespaces = namespaces
+                                    Exports =
+                                        model.Exports @ harvested
+                                        |> List.distinctBy (fun export ->
+                                            export.Origin, export.ExportName, export.Symbol.SymbolId)
+                                    Namespaces =
+                                        namespaces
+                                        |> Map.fold (fun names id name -> Map.add id name names) model.Namespaces
                                     ShadowedByLib = shadowedByLib
                                 }
 

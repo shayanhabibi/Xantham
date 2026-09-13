@@ -71,6 +71,13 @@ let private slash (path: string) = path.Replace('\\', '/')
 let private fail message =
     failwith $"declaration catalog: {message}"
 
+/// Declarations whose type identity can be shared with another generation.
+let private reusableDeclarations declarations =
+    declarations
+    |> List.filter (function
+        | FsExports _ -> false
+        | _ -> true)
+
 let private sourceKey (source: Source) =
     $"{source.Package}@{source.Version}/{source.File}"
 
@@ -684,7 +691,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                         Role = role
                     }
 
-    shape.Decls
+    reusableDeclarations shape.Decls
     |> List.map (fun decl -> Render.declName decl |> (fun name -> name, forDecl name decl))
     |> Map.ofList
 
@@ -776,6 +783,12 @@ let private ownerOrder (owners: Owner list) =
     |> snd
 
 let private classValues (ctx: Context) (shape: ShapeModel) (groups: Render.GroupModule list) =
+    let definingExports =
+        Shape.ExportNames.declarationExports ctx shape
+        |> List.choose (fun (typeId, export) ->
+            Map.tryFind typeId shape.DeclNames |> Option.map (fun name -> name, export))
+        |> Map.ofList
+
     let mutable shape = shape
     let mutable groups = groups
     let mutable values = Map.empty
@@ -786,10 +799,7 @@ let private classValues (ctx: Context) (shape: ShapeModel) (groups: Render.Group
     for declaration in shape.Decls do
         match declaration with
         | FsInterface class_ when not class_.Statics.IsEmpty ->
-            let export =
-                shape.Harvest.Exports
-                |> List.tryFind (fun export ->
-                    Shape.Spec.fsName (Shape.Spec.defaultExportName ctx) export = class_.Name)
+            let export = Map.tryFind class_.Name definingExports
 
             match
                 export
@@ -813,11 +823,15 @@ let private classValues (ctx: Context) (shape: ShapeModel) (groups: Render.Group
                         let constructors =
                             shape.Decls
                             |> List.collect (function
-                                | FsExports container -> container.Members |> List.map _.Member
+                                | FsExports container -> container.Members
                                 | _ -> [])
+                            |> List.filter (fun owned ->
+                                owned.SourceSymbolId = export.Symbol.SymbolId
+                                && owned.Owner = Shape.ExportLayout.ownerOf shape.RuntimePackage export.Origin)
+                            |> List.map _.Member
                             |> List.choose (fun member_ ->
                                 match member_.Body with
-                                | ExportConstructor(parameters, returns) when member_.Name = class_.Name ->
+                                | ExportConstructor(parameters, returns) ->
                                     Some(
                                         FsConstructor
                                             {
@@ -980,7 +994,7 @@ let apply (ctx: Context) (shape: ShapeModel) (groups: Render.GroupModule list) =
             let modules =
                 groups
                 |> List.collect (fun group ->
-                    group.Decls
+                    reusableDeclarations group.Decls
                     |> List.map (fun decl -> Render.declName decl |> (fun name -> name, group.Module)))
                 |> Map.ofList
 
@@ -1155,7 +1169,7 @@ let apply (ctx: Context) (shape: ShapeModel) (groups: Render.GroupModule list) =
                 hashText api
 
             let owned =
-                shape.Decls
+                reusableDeclarations shape.Decls
                 |> List.choose (fun decl ->
                     Render.declName decl
                     |> (fun name ->
@@ -1191,7 +1205,12 @@ let apply (ctx: Context) (shape: ShapeModel) (groups: Render.GroupModule list) =
 
             let exportedNames =
                 shape.Harvest.Exports
-                |> List.map (Shape.Spec.fsName (Shape.Spec.defaultExportName ctx))
+                |> List.map (fun export ->
+                    shape.ExportTypes
+                    |> Map.tryFind export.Symbol.SymbolId
+                    |> Option.bind _.Declared
+                    |> Option.bind (fun typeId -> Map.tryFind typeId shape.DeclNames)
+                    |> Option.defaultValue (Shape.Spec.fsName (Shape.Spec.defaultExportName ctx) export))
                 |> Set.ofList
 
             let localName (declaration: Declaration) =

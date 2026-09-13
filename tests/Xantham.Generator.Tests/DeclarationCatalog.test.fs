@@ -12,6 +12,8 @@ open Xantham.Generator.Measure
 
 let private fixture = Path.GetFullPath(Path.Combine(__SOURCE_DIRECTORY__, "..", "fixtures", "declaration-identity-lab"))
 
+let private temporaryRoot = Path.Combine(__SOURCE_DIRECTORY__, "obj", "catalog-fixtures")
+
 let private configured (directory: string) name entry (references: string array) =
     let path = Path.Combine(directory, name + ".json")
     File.WriteAllText(path,
@@ -88,10 +90,7 @@ let getCount () : float = Identity.Adapter.Client.count
 let accept (client: Identity.Adapter.Client) = Identity.Root.Exports.``use`` client
 """
 
-// TODO(#66): re-enable once the catalog defect is fixed. Every case in this list errors with
-// `declaration catalog: Exports has no stable declaration or parent role` (2026-09-12,
-// 22/38 cases across four lists), a behaviour change while the suite was disabled.
-// [<Tests>]
+[<Tests>]
 let tests =
     match Tsc.locate __SOURCE_DIRECTORY__ with
     | None ->
@@ -100,8 +99,74 @@ let tests =
                 skiptest "run `npm install` at the repository root, or set XANTHAM_TSGO_EXE" ]
     | Some _ ->
         testList "declaration catalog" [
+            testCase "nested class aliases retain their constructor and static value surface" <| fun _ ->
+                let directory = Path.Combine(temporaryRoot, "xantham-catalog-nested-class-" + Guid.NewGuid().ToString "N")
+                Directory.CreateDirectory directory |> ignore
+                try
+                    writePackageFile directory "package.json" """{"name":"nested-class-lab","version":"1.0.0","exports":{"./client":{"types":"./client.d.ts"}}}"""
+                    writePackageFile directory "client.d.ts" """export declare class Client {
+    constructor(value: string);
+    static create(value: string): Client;
+    static count: number;
+    readonly value: string;
+}
+"""
+                    let root =
+                        { GeneratorConfig.Default with
+                            ModuleName = Some "Identity.Root"
+                            Lib = Some [ "esnext" ]
+                            Types = Some []
+                            DeclarationCatalog = true }
+                    let producer = Path.Combine(directory, "root")
+                    Pipeline.run root directory producer |> Async.RunSynchronously |> ignore
+                    let reference = Path.Combine(producer, "declarations.json")
+                    let adapter = { root with ModuleName = Some "Identity.Adapter"; DeclarationReferences = [ reference ] }
+                    Pipeline.run adapter directory (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    let consumer = """module Identity.Consumer
+let construct () : Identity.Root.Client.Client = Identity.Adapter.Client.Client.Create "value"
+let create () : Identity.Root.Client.Client = Identity.Adapter.Client.Client.create "value"
+let count () : float = Identity.Adapter.Client.Client.count
+let setCount () = Identity.Adapter.Client.Client.count <- 2.0
+"""
+                    let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] consumer
+                    code |> Flip.Expect.equal output 0
+                finally Directory.Delete(directory, true)
+
+            testCase "subpath containers retain local imports while their types reuse a catalog" <| fun _ ->
+                let directory = Path.Combine(temporaryRoot, "xantham-catalog-subpaths-" + Guid.NewGuid().ToString "N")
+                Directory.CreateDirectory directory |> ignore
+                try
+                    let package = Path.GetFullPath(Path.Combine(fixture, "..", "subpath-lab"))
+                    let root =
+                        { GeneratorConfig.Default with
+                            ModuleName = Some "Identity.Root"
+                            Lib = Some [ "esnext" ]
+                            Types = Some []
+                            DeclarationCatalog = true }
+                    let producer = Path.Combine(directory, "root")
+                    Pipeline.run root package producer |> Async.RunSynchronously |> ignore
+                    let reference = Path.Combine(producer, "declarations.json")
+                    let adapter = { root with ModuleName = Some "Identity.Adapter"; DeclarationReferences = [ reference ] }
+                    let consumerDir = Path.Combine(directory, "adapter")
+                    Pipeline.run adapter package consumerDir |> Async.RunSynchronously |> ignore
+                    let source = File.ReadAllText(Path.Combine(consumerDir, "Identity.Adapter.fs"))
+                    for specifier in [ "subpath-lab"; "subpath-lab/client"; "subpath-lab/client/deep"; "subpath-lab/alias"; "subpath-lab/mirror" ] do
+                        Expect.stringContains source ("\"" + specifier + "\"") "each value container retains its own runtime imports"
+                    use catalog = JsonDocument.Parse(File.ReadAllText reference)
+                    let names = catalog.RootElement.GetProperty("declarations").EnumerateArray() |> Seq.map (fun d -> d.GetProperty("fSharpName").GetString()) |> Seq.toList
+                    Expect.isFalse (names |> List.exists (fun name -> name.EndsWith ".Exports")) "value containers are not reusable type declarations"
+                    let consumer = """module Identity.Consumer
+let shared (payload: Identity.Root.Payload) : string = Identity.Adapter.Client.Exports.describe payload
+let connect (options: Identity.Adapter.Client.ClientOptions) : Identity.Root.Internal =
+    Identity.Adapter.Client.Exports.connect options
+let deep () = Identity.Adapter.Client.Deep.Exports.depth ()
+"""
+                    let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] consumer
+                    code |> Flip.Expect.equal output 0
+                finally Directory.Delete(directory, true)
+
             testCase "opaque specializations retain declaration arguments" <| fun _ ->
-                let directory = Path.Combine(Path.GetTempPath(), "xantham-catalog-opaque-arguments-" + Guid.NewGuid().ToString "N")
+                let directory = Path.Combine(temporaryRoot, "xantham-catalog-opaque-arguments-" + Guid.NewGuid().ToString "N")
                 Directory.CreateDirectory directory |> ignore
                 try
                     writePackageFile directory "package.json" """{"name":"opaque-arguments-lab","version":"1.0.0"}"""
@@ -154,7 +219,7 @@ let repeated<'T> (value: Identity.Root.Repeated<'T>) : Identity.Adapter.Repeated
                 finally Directory.Delete(directory, true)
 
             testCase "contextual bounds do not redeclare generic result members" <| fun _ ->
-                let directory = Path.Combine(Path.GetTempPath(), "xantham-catalog-contextual-bound-" + Guid.NewGuid().ToString "N")
+                let directory = Path.Combine(temporaryRoot, "xantham-catalog-contextual-bound-" + Guid.NewGuid().ToString "N")
                 Directory.CreateDirectory directory |> ignore
                 try
                     writePackageFile directory "package.json" """{"name":"contextual-bound-lab","version":"1.0.0"}"""
@@ -185,7 +250,7 @@ let reverse<'A, 'B> (reader: Identity.Root.Reader) (left: 'A) (right: 'B) : Iden
                 finally Directory.Delete(directory, true)
 
             testCase "transparent aliases preserve API identity across entry points" <| fun _ ->
-                let directory = Path.Combine(Path.GetTempPath(), "xantham-catalog-transparent-alias-" + Guid.NewGuid().ToString "N")
+                let directory = Path.Combine(temporaryRoot, "xantham-catalog-transparent-alias-" + Guid.NewGuid().ToString "N")
                 Directory.CreateDirectory directory |> ignore
                 try
                     writePackageFile directory "package.json" """{"name":"transparent-alias-lab","version":"1.0.0"}"""
@@ -211,7 +276,7 @@ let share (peer: Identity.Adapter.Peer) : Identity.Root.Peer = peer
                 finally Directory.Delete(directory, true)
 
             testCase "generic alias applications retain their declaration owner" <| fun _ ->
-                let directory = Path.Combine(Path.GetTempPath(), "xantham-catalog-alias-applications-" + Guid.NewGuid().ToString "N")
+                let directory = Path.Combine(temporaryRoot, "xantham-catalog-alias-applications-" + Guid.NewGuid().ToString "N")
                 Directory.CreateDirectory directory |> ignore
                 try
                     let input = Path.GetFullPath(Path.Combine(fixture, "..", "default-intersection-lab"))
@@ -235,7 +300,7 @@ let share (agent: Identity.Adapter.Agent) : Identity.Root.Agent = agent
                 finally Directory.Delete(directory, true)
 
             testCase "renamed exports and generic subpath types share producer identity" <| fun _ ->
-                let directory = Path.Combine(Path.GetTempPath(), "xantham-declaration-catalog-" + Guid.NewGuid().ToString "N")
+                let directory = Path.Combine(temporaryRoot, "xantham-declaration-catalog-" + Guid.NewGuid().ToString "N")
                 Directory.CreateDirectory directory |> ignore
                 try
                     let root = configured directory "Root" "index.d.ts" [||]
@@ -261,7 +326,7 @@ let share (agent: Identity.Adapter.Agent) : Identity.Root.Agent = agent
                     Directory.Delete(directory, true)
 
             testCase "private producer ownership preserves a later class value export" <| fun _ ->
-                let directory = Path.Combine(Path.GetTempPath(), "xantham-catalog-statics-" + Guid.NewGuid().ToString "N")
+                let directory = Path.Combine(temporaryRoot, "xantham-catalog-statics-" + Guid.NewGuid().ToString "N")
                 Directory.CreateDirectory directory |> ignore
                 try
                     let root = configured directory "Root" "static-root.d.ts" [||]
@@ -274,7 +339,7 @@ let share (agent: Identity.Adapter.Agent) : Identity.Root.Agent = agent
                 finally Directory.Delete(directory, true)
 
             testCase "unchanged nested dependency versions remain separate inputs" <| fun _ ->
-                let directory = Path.Combine(Path.GetTempPath(), "xantham-catalog-versions-" + Guid.NewGuid().ToString "N")
+                let directory = Path.Combine(temporaryRoot, "xantham-catalog-versions-" + Guid.NewGuid().ToString "N")
                 Directory.CreateDirectory directory |> ignore
                 try
                     writePackageFile directory "package.json" """{"name":"versions-lab","version":"1.0.0","type":"module"}"""
@@ -305,7 +370,7 @@ let share (agent: Identity.Adapter.Agent) : Identity.Root.Agent = agent
                 "" ==> false
                 "// @ts-ignore\n" ==> true
             ] <| fun (prefix, succeeds) ->
-                let directory = Path.Combine(Path.GetTempPath(), "xantham-catalog-missing-" + Guid.NewGuid().ToString "N")
+                let directory = Path.Combine(temporaryRoot, "xantham-catalog-missing-" + Guid.NewGuid().ToString "N")
                 Directory.CreateDirectory directory |> ignore
                 try
                     writePackageFile directory "package.json" """{"name":"missing-lab","version":"1.0.0","type":"module"}"""
@@ -330,7 +395,7 @@ let share (agent: Identity.Adapter.Agent) : Identity.Root.Agent = agent
                 "cycle" =!> "owner dependency cycle"
                 "merged" =!> "declaration handle set"
             ] <| fun (mutation, expected) ->
-                let directory = Path.Combine(Path.GetTempPath(), "xantham-catalog-conflict-" + Guid.NewGuid().ToString "N")
+                let directory = Path.Combine(temporaryRoot, "xantham-catalog-conflict-" + Guid.NewGuid().ToString "N")
                 Directory.CreateDirectory directory |> ignore
                 try
                     let root = configured directory "Root" "index.d.ts" [||]
@@ -367,10 +432,7 @@ let share (agent: Identity.Adapter.Agent) : Identity.Root.Agent = agent
                     Directory.Delete(directory, true)
         ]
 
-// TODO(#66): re-enable once the catalog defect is fixed. Every case in this list errors with
-// `declaration catalog: Exports has no stable declaration or parent role` (2026-09-12,
-// 22/38 cases across four lists), a behaviour change while the suite was disabled.
-// [<Tests>]
+[<Tests>]
 let callableTests =
     match Tsc.locate __SOURCE_DIRECTORY__ with
     | None ->
@@ -386,7 +448,7 @@ let callableTests =
                 "readonly [string, number?]" ==> "tuple"
                 "{ left: string } & { right: number }" ==> "intersection"
             ] <| fun (argument, name) ->
-                let directory = Path.Combine(Path.GetTempPath(), "xantham-catalog-callable-" + name + "-" + Guid.NewGuid().ToString "N")
+                let directory = Path.Combine(temporaryRoot, "xantham-catalog-callable-" + name + "-" + Guid.NewGuid().ToString "N")
                 Directory.CreateDirectory directory |> ignore
                 try
                     writePackageFile directory "package.json" """{"name":"catalog-callable-lab","version":"1.0.0","types":"index.d.ts"}"""
@@ -415,10 +477,7 @@ let share () : Identity.Root.Create = Identity.Adapter.Exports.AdapterFactory.cr
                 finally Directory.Delete(directory, true)
         ]
 
-// TODO(#66): re-enable once the catalog defect is fixed. Every case in this list errors with
-// `declaration catalog: Exports has no stable declaration or parent role` (2026-09-12,
-// 22/38 cases across four lists), a behaviour change while the suite was disabled.
-// [<Tests>]
+[<Tests>]
 let sourceClosureTests =
     match Tsc.locate __SOURCE_DIRECTORY__ with
     | None ->
@@ -432,7 +491,7 @@ let sourceClosureTests =
                 "export declare const current: Client;" ==> "instance"
                 "export declare const label: string;" ==> "primitive"
             ] <| fun (declaration, scenario) ->
-                let directory = Path.Combine(Path.GetTempPath(), "xantham-catalog-source-" + scenario + "-" + Guid.NewGuid().ToString "N")
+                let directory = Path.Combine(temporaryRoot, "xantham-catalog-source-" + scenario + "-" + Guid.NewGuid().ToString "N")
                 Directory.CreateDirectory directory |> ignore
                 try
                     writePackageFile directory "package.json" """{"name":"catalog-source-lab","version":"1.0.0","type":"module"}"""
@@ -460,10 +519,7 @@ let share (client: Identity.Root.Client) : Identity.Root.Client = Identity.Adapt
                 finally Directory.Delete(directory, true)
         ]
 
-// TODO(#66): re-enable once the catalog defect is fixed. Every case in this list errors with
-// `declaration catalog: Exports has no stable declaration or parent role` (2026-09-12,
-// 22/38 cases across four lists), a behaviour change while the suite was disabled.
-// [<Tests>]
+[<Tests>]
 let literalUnionTests =
     match Tsc.locate __SOURCE_DIRECTORY__ with
     | None ->
@@ -473,7 +529,7 @@ let literalUnionTests =
     | Some _ ->
         testList "declaration catalog anonymous literal unions" [
             testTheory "unrelated parent properties preserve shared literal union ownership" [ ""; "?" ] <| fun optional ->
-                let directory = Path.Combine(Path.GetTempPath(), "xantham-catalog-literal-union-" + Guid.NewGuid().ToString "N")
+                let directory = Path.Combine(temporaryRoot, "xantham-catalog-literal-union-" + Guid.NewGuid().ToString "N")
                 Directory.CreateDirectory directory |> ignore
                 try
                     writePackageFile directory "package.json" """{"name":"icon-identity-lab","version":"1.0.0"}"""
@@ -502,7 +558,7 @@ let copyTheme (source: Identity.Root.Icon) (target: Identity.Adapter.Icon) = tar
                 finally Directory.Delete(directory, true)
 
             testCase "named unions and mixed enum unions retain declaration identity" <| fun _ ->
-                let directory = Path.Combine(Path.GetTempPath(), "xantham-catalog-nominal-union-" + Guid.NewGuid().ToString "N")
+                let directory = Path.Combine(temporaryRoot, "xantham-catalog-nominal-union-" + Guid.NewGuid().ToString "N")
                 Directory.CreateDirectory directory |> ignore
                 try
                     writePackageFile directory "package.json" """{"name":"nominal-union-lab","version":"1.0.0"}"""
@@ -540,8 +596,7 @@ let copyLeft (source: Identity.Root.Mixed) (target: Identity.Adapter.Mixed) = ta
                 finally Directory.Delete(directory, true)
         ]
 
-// TODO - unbrick
-// [<Tests>]
+[<Tests>]
 let privateNullableAliasTests =
     match Tsc.locate __SOURCE_DIRECTORY__ with
     | None ->
@@ -555,7 +610,7 @@ let privateNullableAliasTests =
                 for optional, nullish in cases do
                     for reverse in [ false; true ] do yield optional, nullish, reverse
             ] <| fun (optional, nullish, reverse) ->
-                let directory = Path.Combine(Path.GetTempPath(), "xantham-private-nullable-" + Guid.NewGuid().ToString "N")
+                let directory = Path.Combine(temporaryRoot, "xantham-private-nullable-" + Guid.NewGuid().ToString "N")
                 Directory.CreateDirectory directory |> ignore
                 try
                     writePackageFile directory "package.json" """{"name":"private-nullable-lab","version":"1.0.0"}"""
@@ -595,8 +650,7 @@ let copy (source: Identity.Root.Options) (target: Identity.Adapter.Options) =
                 finally Directory.Delete(directory, true)
         ]
 
-// TODO - unbrick
-// [<Tests>]
+[<Tests>]
 let genericNullableAliasTests =
     match Tsc.locate __SOURCE_DIRECTORY__ with
     | None ->
@@ -606,7 +660,7 @@ let genericNullableAliasTests =
     | Some _ ->
         testList "declaration catalog generic nullable aliases" [
             testCase "nullable tagged unions retain payload type arguments" <| fun _ ->
-                let directory = Path.Combine(Path.GetTempPath(), "xantham-generic-nullable-" + Guid.NewGuid().ToString "N")
+                let directory = Path.Combine(temporaryRoot, "xantham-generic-nullable-" + Guid.NewGuid().ToString "N")
                 Directory.CreateDirectory directory |> ignore
                 try
                     writePackageFile directory "package.json" """{"name":"generic-nullable-lab","version":"1.0.0"}"""

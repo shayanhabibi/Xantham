@@ -1429,6 +1429,22 @@ Verification: 730 + 90 Expecto tests, compile gate, run gate. Findings moved:
 (three ambient-module types moving to the root), `static-reexport-lab` (a root abbreviation
 dropping), `subpath-lab` (new).
 
+## Catalog and mixed public-input follow-up (2026-09-13)
+
+The follow-up on 2026-09-13 keeps global declarations when a selected public input is a global
+script alongside module inputs. `harvest-globals` reads the global script's scope and merges
+its declarations and namespaces with the public module exports. Module-only runs retain the
+existing policy for incidental global augmentations. `mixed-subpaths-lab` checks both entry
+orders and executes the global and imported functions through Fable.
+
+Catalog ownership covers reusable type declarations. `FsExports` containers remain local to
+each generation, with their signature references redirected to catalog owners. Public aliases
+and class constructor helpers use the qualified declaration names selected by `name-exports`;
+constructor selection uses the source symbol and export owner. The restored catalog suites
+create disposable fixtures under the test project's `obj/catalog-fixtures`, within compiler
+and SDK discovery scope. Consumer probes cover nested type aliases, local subpath imports,
+and constructors and static members on a reused nested class.
+
 # Easy Nits 
 
 To include in scope when a phases implementation/attempt ends up being small/quick.

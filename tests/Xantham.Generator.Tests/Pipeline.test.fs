@@ -4500,6 +4500,30 @@ let pipelineTests =
                     Expect.stringContains source "module Aliases" "the nested module Aliases for `(layout-lab/aliases).renamedCheck` is created"
             ]
         yield!
+            fixtureTests "mixed-subpaths-lab" (handFixture "mixed-subpaths-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "global root declarations survive module subpaths" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+                      Expect.stringContains source "type RootOptions =" "the global type survives"
+                      Expect.stringContains source "[<Global(\"rootCall\")>]" "the global function retains its binding"
+                      Expect.stringContains source "type ClientOptions =" "the module type survives"
+                      Expect.stringContains source "[<Import(\"connect\", \"mixed-subpaths-lab/client\")>]" "the subpath retains its import"
+
+                  testCase "a global subpath is harvested from its global scope beside a module root" <| fun _ ->
+                      let directory = Path.Combine(__SOURCE_DIRECTORY__, "obj", "mixed-subpaths-" + Guid.NewGuid().ToString "N")
+                      Directory.CreateDirectory directory |> ignore
+                      try
+                          for file in [ "index.d.ts"; "client.d.ts" ] do
+                              File.Copy(Path.Combine(package, file), Path.Combine(directory, file))
+                          File.WriteAllText(Path.Combine(directory, "package.json"), """{"name":"mixed-subpaths-lab","exports":{".":{"types":"./client.d.ts"},"./globals":{"types":"./index.d.ts"}}}""")
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default directory)
+                          let source = rendered.Files |> List.head |> snd
+                          Expect.stringContains source "type RootOptions =" "the global subpath's type survives"
+                          Expect.stringContains source "[<Global(\"rootCall\")>]" "the global subpath's function survives"
+                          Expect.stringContains source "[<Import(\"connect\", \"mixed-subpaths-lab\")>]" "root values retain their own imports"
+                      finally Directory.Delete(directory, true) ])
+
+        yield!
             fixtureTests "subpath-lab" (handFixture "subpath-lab") GeneratorConfig.Default (fun package ->
                 [ testCase "each public subpath is a nested module with its own Exports" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
