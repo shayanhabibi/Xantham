@@ -23,8 +23,7 @@ interface at runtime.
 
 What widens at a return position is a *concrete* application. Task 3's round 2 measured
 `makeCoalescer(): [string, Coalesce<string>]` rendering `string * (obj -> obj)` under `TR031` and
-`TR013` and generalised that to the outer type parameter itself
-(`.superpowers/sdd/2026-09-13-callable-interface-invoke/task-3-report.md`). The goldens settle
+`TR013` and generalised that to the outer type parameter itself. The goldens settle
 it: applying the declaration's own free parameter keeps the name, at `createStore` and at
 `makeCoalescer` alike.
 
