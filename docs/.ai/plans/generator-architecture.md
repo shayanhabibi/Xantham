@@ -152,6 +152,7 @@ order — each row cites its mapping-doc section:
 | `shape-classes` | instance interface + statics/`Exports` split | §4.4 |
 | `assign-names` | NamePath synthesis, collision resolution, keyword escaping, CompiledName | §4.14 |
 | `order-declarations` | topological sort, `and`-groups for cycles, module layout | — |
+| `drop-orphan-delegates` | a delegate whose name no declaration reads | §4.8, D5 |
 | `audit-coverage` | every harvested export reached a shaped decl or an explicit Finding | §5 |
 
 Passes are *conceptually* categorized this way even when, mechanically, two adjacent pure
@@ -413,7 +414,7 @@ Phases — each ends with the compile gate green on its fixtures:
     `` ``"cloudflare:email"`` `` is FS0883, not a type name. Its members are importable
     from that specifier, which needs a nested module with imports of its own - until
     that exists, dropping it loudly beats emitting a name F# cannot write.
-  - *Two repairs have to run after every shaping pass*, because they fix what the others
+  - *Three repairs have to run after every shaping pass*, because they fix what the others
     produce (`repair-arity`, between `order-declarations` and `audit-coverage`): a
     generic abbreviation whose target widened away its parameters is FS0035, so the
     declaration goes and its references widen; a generic declaration named bare at a
@@ -421,6 +422,12 @@ Phases — each ends with the compile gate green on its fixtures:
     out-of-scope type *variable*, one level up at the declaration head. A settable
     property of type `unit` is FS0252 and is demoted to read-only in the same pass: a
     `never`-typed brand holds no value, so it also stops being a `Create` parameter.
+    `drop-orphan-delegates` runs last of the three, after `resolve-export-collisions`:
+    `synthesize-anonymous` mints a delegate name while the positions that read the callback
+    are still being decided, and a position settled later - a lifecycle hook rendered as a
+    handler interface - writes the parameters out in full instead. Running once every
+    declaration is built replaces that prediction with the finished declaration set, so the
+    delegate goes under `DD001` rather than reaching the golden unread.
   - *Parallel fan-out is not free of observable order.* Asking for a declared type is
     what *creates* it in the checker, and a type alias stamps its name on what it
     creates, so `type A = X & Y; type B = X & Y` race: whichever is asked for first owns

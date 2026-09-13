@@ -1005,11 +1005,21 @@ Landed complete; these are the items reviews raised and the wave deliberately le
 - **Root-less maps, two keys over one module path, and `subpaths`** are covered by unit
   tests over `Bootstrap.publicPaths` rather than end to end.
 - **`@types/node` was not regenerated** as a measurement for this wave.
-- **Root-homing mints a twin rather than reusing an identical declaration.**
-  `@cloudflare/workers-types` declares `WebSocketClose`, `WebSocketError` and
-  `WebSocketMessage` in global scope and again in the `cloudflare:sockets` ambient module. The
-  second set is unreferenced, and was already unreferenced at `Cloudflare.Sockets.WebSocketClose`
-  before decision 10 moved it. Root-homing now takes it to a name the global copy holds, so
-  `claim` suffixes it `WebSocketClose2`. Two fixes are separable: `shape-callbacks` minting a
-  delegate nothing references, and `claim` suffixing where a structurally identical declaration
-  is already present.
+- **`claim` suffixes past a structurally identical declaration.** Of the two separable fixes
+  this entry originally carried, the first landed in `a5a5f67`: `signatureShaped` in
+  `Shape/Anonymous.fs` now collects the call-signature arms of an entrypoint's lifecycle hook,
+  so `shape-callbacks` leaves the delegate undeclared and `WebSocketClose2`,
+  `WebSocketError2` and `WebSocketMessage2` are gone. The second stands: where root-homing
+  takes a declaration to a name a structurally identical one already holds, `claim` mints a
+  suffixed twin instead of reusing it.
+- **The lifecycle-hook guard in `Shape/Anonymous.fs` is narrower than the rule it mirrors.**
+  `signatureShaped` withholds a hook's delegate name under `facts.BaseTypes.IsEmpty && not
+  (flag TypeFlags.Intersection facts)`, while `shape-interfaces` emits the hooks under
+  `entrypoint && not (inheritsSomething ())` - where an operand counts only if it is
+  *inheritable*, meaning declared in this run and acyclic. A class whose bases this run leaves
+  undeclared therefore gets handler interfaces while keeping its delegate name claimed, which
+  orphans the delegate. The narrower guard errs toward keeping names that are read, so the
+  failure mode is a spare declaration rather than a dangling reference, and no fixture reaches
+  it. Closing it means sharing `inheritable` between the two passes; it currently depends on
+  `typeRef`, `interfaceNames` and the `inherit` graph, all of which `shape-interfaces` builds
+  after `synthesize-anonymous` has run.
