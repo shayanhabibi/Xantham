@@ -231,6 +231,26 @@ with `entry` and `subpaths`; an empty map or duplicate key is an error.
 A `map` destination spelled as a bare string takes no type arguments; the object form states its
 `arity`, and a reference applying any other number widens with finding `TR053`.
 
+A supplied mapping can inject a hand-written support type:
+
+```json
+{
+  "groups": {
+    "example-models": {
+      "map": {
+        "Model": "Application.Support.Model",
+        "Result": { "name": "Application.Support.Result", "arity": 1 }
+      }
+    }
+  }
+}
+```
+
+The consumer supplies those F# definitions and their project references. A mapping states
+the caller's intended contract; arity checking alone does not establish semantic compatibility.
+Compile representative typed calls and test their runtime behavior. Generated support libraries
+can instead use declaration catalogs, which authenticate source ownership and the F# API.
+
 ## Run it
 
 ```bash
@@ -276,6 +296,13 @@ findings:
 `manifest.json` is the file to read. Every widened and every escaped site is named there and in
 `symbols.jsonl` with the finding code accounting for it, so a binding's losses are enumerable
 before you build on it.
+
+Use consumer requirements to prioritize widened sites. A lost model or resource type that
+prevents two selected libraries from composing is a concrete repair target. Unknown values,
+unsupported constructs and recursive boundaries can retain a reported widening when the
+consumer supports that contract. Keep any narrowing helpers in separate source files so that
+generation remains reproducible. A lower aggregate finding count is useful evidence only when
+the resulting public types still represent the source contract.
 
 ## Where a type lives in the binding
 
