@@ -11,8 +11,8 @@ open Fable.Core.JS
 open Fable.Core.TS.Dom
 
 /// <summary>
-/// Two call signatures under one name, <c>U</c>, bound differently to <c>string</c> and to <c>number</c>, and
-/// separated by arity: each reaches its own <c>Invoke</c> overload.
+/// Two call signatures under the same name, <c>U</c>, bound differently to <c>string</c> and to <c>number</c>,
+/// and separated by arity: each reaches its own <c>Invoke</c> overload.
 /// </summary>
 type Coalesce =
     [<Emit("$0($1...)")>]
@@ -38,9 +38,8 @@ type Ledger =
     static member Create (count: float) : Ledger = jsNative
 
 /// <summary>
-/// <c>Coalesce</c> reached at a member position, distinct from its top-level export: both call
-/// signatures recover as separable overloads under the member's own name (§4.2 extended to
-/// callbacks), reachable through <c>holder.coalesce</c> rather than through <c>Exports</c>.
+/// <c>Coalesce</c> at a member position: both call signatures recover as separable overloads under
+/// the member's own name (§4.2 extended to callbacks), reachable through <c>holder.coalesce</c>.
 /// </summary>
 type Holder =
     abstract coalesce<'U>: value: 'U -> 'U
@@ -51,7 +50,7 @@ type Holder =
 type Exports =
     /// <summary>
     /// <c>Coalesce</c> at a tuple return position, mirroring <c>solid-js</c>'s <c>createStore</c> returning
-    /// <c>[Store&lt;T&gt;, SetStoreFunction&lt;T&gt;]</c>: the reference stays named, and each call signature
+    /// <c>[Store&lt;T&gt;, SetStoreFunction&lt;T&gt;]</c>: the reference keeps its name, and each call signature
     /// reaches its own <c>Invoke</c> overload.
     /// </summary>
     [<Import("makeCoalescer", "callable-overloads-lab")>]

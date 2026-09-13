@@ -1,9 +1,9 @@
-// Overloaded generic call signatures whose hoisted type parameters share one name under two
-// different bounds (`hasIncompatibleOverloadedTypeParameters`, §4.4) route to an interface: each
-// call signature reaches its own `Invoke` overload.
+// Overloaded generic call signatures whose hoisted type parameters share a name under two
+// different bounds (`hasIncompatibleOverloadedTypeParameters`, §4.4) route to an interface, each
+// call signature reaching its own `Invoke` overload.
 
-/** Two call signatures under one name, `U`, bound differently to `string` and to `number`, and
- *  separated by arity: each reaches its own `Invoke` overload. */
+/** Two call signatures under the same name, `U`, bound differently to `string` and to `number`,
+ *  and separated by arity: each reaches its own `Invoke` overload. */
 export interface Coalesce {
     <U extends string>(value: U): U;
     <U extends number>(value: U, fallback: U): U;
@@ -29,15 +29,14 @@ export interface Ledger {
     count: number;
 }
 
-/** `Coalesce` reached at a member position, distinct from its top-level export: both call
- *  signatures recover as separable overloads under the member's own name (§4.2 extended to
- *  callbacks), reachable through `holder.coalesce` rather than through `Exports`. */
+/** `Coalesce` at a member position: both call signatures recover as separable overloads under
+ *  the member's own name (§4.2 extended to callbacks), reachable through `holder.coalesce`. */
 export interface Holder {
     coalesce: Coalesce;
 }
 
 /** `Coalesce` at a tuple return position, mirroring `solid-js`'s `createStore` returning
- *  `[Store<T>, SetStoreFunction<T>]`: the reference stays named, and each call signature
+ *  `[Store<T>, SetStoreFunction<T>]`: the reference keeps its name, and each call signature
  *  reaches its own `Invoke` overload. */
 export declare function makeCoalescer(): [string, Coalesce];
 

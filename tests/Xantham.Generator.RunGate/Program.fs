@@ -1960,13 +1960,11 @@ let private callableHybrids () =
         6.0
         (CallableHybridLab.Exports.collides 5.0)
 
-/// §4.4's routing counterpart: two call signatures sharing one hoisted type-parameter name under
-/// different bounds reach an interface, each keeping its own `Invoke` overload instead of one
-/// shared delegate head. `makeCoalescer`'s tuple return keeps the `Coalesce` reference itself, so
-/// its own `Invoke` overloads are the ones reached here. `Holder.coalesce` reaches `Coalesce` at a
-/// member position, distinct from the top-level `Exports.coalesce` static function: the property
-/// recovers as an overloaded method under its own name (§4.2 extended to callbacks), one per call
-/// signature, rather than through `Invoke`.
+/// §4.4's routing counterpart: two call signatures sharing a hoisted type-parameter name under
+/// different bounds reach an interface, each keeping its own `Invoke` overload. `makeCoalescer`
+/// returns the `Coalesce` reference at a tuple position, reached through its `Invoke` overloads.
+/// `Holder.coalesce` reaches `Coalesce` at a member position, recovering as an overloaded method
+/// under its own name (§4.2 extended to callbacks), one overload per call signature.
 let private callableOverloads () =
     let (_, coalescer) = CallableOverloadsLab.Exports.makeCoalescer ()
 

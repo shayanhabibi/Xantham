@@ -2602,8 +2602,8 @@ let shapePassTests =
                 "the collapse is reported"
 
         testCase "shape-callbacks skips one name declared under two bounds" <| fun _ ->
-            // One variable would retype a signature, so `shape-interfaces` declares it instead,
-            // one `Invoke` per signature, each keeping its own type parameters.
+            // `shape-interfaces` declares the type, one `Invoke` per signature, each keeping its
+            // own type parameters.
             let signature =
                 { Build.signature
                       [ Build.resolvedMember (Build.symbol 500 "value" SymbolFlags.FunctionScopedVariable) 21 ]
@@ -2633,12 +2633,12 @@ let shapePassTests =
 
             let shaped, findings = Build.runPass Callbacks.shapeCallbacks model
 
-            Expect.isEmpty shaped.Decls "left undeclared for shape-interfaces"
-            Expect.isEmpty findings "nothing to report from a pass that declares nothing"
+            Expect.isEmpty shaped.Decls "the declaration falls to shape-interfaces"
+            Expect.isEmpty findings "the skip is silent"
 
         testCase "shape-interfaces declares one name declared under two bounds" <| fun _ ->
-            // The type `shape-callbacks` skips: each signature keeps its own type parameter on
-            // an `Invoke` member of its own, rather than sharing one delegate head.
+            // The type skipped by `shape-callbacks` — each signature keeps its own type parameter
+            // on an `Invoke` member.
             let signature =
                 { Build.signature
                       [ Build.resolvedMember (Build.symbol 500 "value" SymbolFlags.FunctionScopedVariable) 21 ]
@@ -4488,7 +4488,7 @@ let incompatibleOverloadedTypeParameters =
 
             let model = Build.shapeModel (facts :: Build.primitives)
 
-            Expect.isFalse (Spec.hasIncompatibleOverloadedTypeParameters model facts) "nothing hoisted to collide"
+            Expect.isFalse (Spec.hasIncompatibleOverloadedTypeParameters model facts) "both signatures are plain"
 
         testCase "two signatures sharing a name under one bound collapse, not incompatible" <| fun _ ->
             let facts =

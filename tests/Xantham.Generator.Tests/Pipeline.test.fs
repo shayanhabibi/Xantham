@@ -1207,7 +1207,7 @@ let pipelineTests =
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                           let source = rendered.Files |> List.head |> snd
 
-                          Expect.stringContains source "type Coalesce =" "the interface itself carries no type parameter"
+                          Expect.stringContains source "type Coalesce =" "the head is bare, its parameters sitting on Invoke"
 
                           Expect.stringContains
                               source
@@ -1226,7 +1226,7 @@ let pipelineTests =
 
                           Expect.isEmpty
                               (rendered.Findings |> List.filter (fun f -> f.Key = "RA007"))
-                              "not one delegate head repeating 'U"
+                              "repair-arity stays silent"
 
                       testCase "a tuple return position keeps the Coalesce reference, reaching its Invoke overloads"
                       <| fun _ ->
@@ -1253,7 +1253,7 @@ let pipelineTests =
                           Expect.stringContains
                               source
                               "type Multiplex ="
-                              "a plain delegate head, no interface"
+                              "a plain delegate head"
 
                           Expect.contains
                               (rendered.Findings |> List.map (fun finding -> finding.Key, finding.Symbol))
@@ -1265,7 +1265,7 @@ let pipelineTests =
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                           let source = rendered.Files |> List.head |> snd
 
-                          Expect.stringContains source "type Ledger =" "an interface, not a delegate"
+                          Expect.stringContains source "type Ledger =" "an interface head"
                           Expect.stringContains source "abstract count: float with get, set" "the member survives"
 
                           Expect.contains
@@ -2552,7 +2552,7 @@ let pipelineTests =
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                       let source = rendered.Files |> List.head |> snd
 
-                      Expect.stringContains source "type DivergentBound<'T> =" "the head carries one type parameter, not two"
+                      Expect.stringContains source "type DivergentBound<'T> =" "the head carries the alias parameter alone"
                       Expect.stringContains source "abstract Invoke<'U>: value: 'U -> 'U" "each signature keeps its own 'U"
 
                       Expect.equal
@@ -2564,7 +2564,7 @@ let pipelineTests =
 
                       Expect.isEmpty
                           (rendered.Findings |> List.filter (fun f -> f.Key = "RA007"))
-                          "not one delegate head naming 'U twice"
+                          "repair-arity stays silent"
 
                   testCase "a tuple-typed rest parameter reads as the parameters it stands for" <| fun _ ->
                       // Wave two's second handback: `Setter<string | undefined>` reached the
