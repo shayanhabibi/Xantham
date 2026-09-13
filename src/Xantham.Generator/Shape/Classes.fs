@@ -448,8 +448,18 @@ let shapeClasses: Pass<ShapeModel> =
                         model.Decls
                         |> List.map (function
                             | FsInterface decl ->
+                                let inherits =
+                                    decl.Inherits
+                                    |> List.filter (function
+                                        | FsNamed name
+                                        | FsApp(name, _) when Map.containsKey name entrypoints ->
+                                            emit (Finding.make decl.Name (ShapeInterfaces.BaseNotDeclaredHere name))
+                                            false
+                                        | _ -> true)
+
                                 FsInterface
                                     { decl with
+                                        Inherits = inherits
                                         Statics =
                                             decl.Statics @ (Map.tryFind decl.Name statics |> Option.defaultValue [])
                                         Entrypoint = Map.tryFind decl.Name entrypoints

@@ -4954,3 +4954,12 @@ let catalogResultConstraintsTests =
         yield!
             fixtureTests "catalog-result-constraints-lab" package config (fun _ -> [])
     ]
+
+[<Tests>]
+let catalogClassInheritanceTests =
+    let package = handFixture "catalog-class-inheritance-lab"
+    let config = { handConfig package with DeclarationCatalog = false }
+    testList "catalog class inheritance fixture" [
+        yield!
+            fixtureTests "catalog-class-inheritance-lab" package config (fun _ -> [])
+    ]

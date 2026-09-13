@@ -257,6 +257,52 @@ let optional value : (string -> string) option = (Identity.Adapter.Exports.accep
                 if Directory.Exists directory then Directory.Delete(directory, true)
 
 [<Tests>]
+let classInheritanceCatalogTests =
+    match Tsc.locate __SOURCE_DIRECTORY__ with
+    | None -> testCase "class inheritance catalog skipped - no compiler" <| fun _ -> skiptest "no tsc"
+    | Some _ ->
+        testCase "class inheritance catalog retains constructors and flattened members" <| fun _ ->
+            let directory = Path.Combine(temporaryRoot, "xantham-class-inheritance-" + Guid.NewGuid().ToString "N")
+            Directory.CreateDirectory directory |> ignore
+            try
+                let package = Path.GetFullPath(Path.Combine(fixture, "..", "catalog-class-inheritance-lab"))
+                let root = Path.Combine(directory, "root")
+                Pipeline.run (configured directory "Root" "index.d.ts" [||]) package root |> Async.RunSynchronously |> ignore
+                let adapter = configured directory "Adapter" "adapter.d.ts" [| Path.Combine(root, "declarations.json") |]
+                Pipeline.run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                let sources = [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ]
+                let consumer = """module Identity.Consumer
+let explicit () : Identity.Adapter.Explicit<string> = Identity.Adapter.Exports.Explicit "seed"
+let implicit () : Identity.Adapter.Implicit<string> = Identity.Adapter.Exports.Implicit "seed"
+let inherited (value: Identity.Adapter.Explicit<string>) : string = value.seed
+let inheritedImplicit (value: Identity.Adapter.Implicit<string>) : string = value.seed
+let extension (value: Identity.Adapter.Extension<string>) : string = value.seed
+let optional (value: Identity.Adapter.Explicit<string>) : (string -> string) option = value.fetch
+let own (value: Identity.Adapter.Explicit<string>) : string = value.send "message"
+let ordinary (value: Identity.Adapter.PlainDerived<string>) : Identity.Adapter.Plain<string> = value :> _
+type Actor() =
+    inherit Identity.Root.ClassLab.Runtime.Actor<string>("seed")
+    interface Identity.Root.ClassLab.Runtime.Actor.IFetchHandler<string> with
+        member _.fetch value = value
+"""
+                let code, output = compileConsumer directory sources consumer
+                Expect.equal code 0 output
+                let invalid = """module Identity.Consumer
+let invalid () : Identity.Adapter.Explicit<string> = Identity.Adapter.Exports.Explicit 1.0
+"""
+                let code, output = compileConsumer directory sources invalid
+                Expect.notEqual code 0 "the constructor retains its inherited generic contract"
+                Expect.stringContains output "FS0001" "a numeric seed cannot construct the string instance"
+                let nominal = """module Identity.Consumer
+let invalid (value: Identity.Adapter.Explicit<string>) : Identity.Root.ClassLab.Runtime.Actor<string> = value :> _
+"""
+                let code, output = compileConsumer directory sources nominal
+                Expect.notEqual code 0 "flattened class bases do not claim a nominal upcast"
+                Expect.stringContains output "FS0193" "the emitted interface cannot upcast to an abstract class"
+            finally
+                if Directory.Exists directory then Directory.Delete(directory, true)
+
+[<Tests>]
 let tests =
     match Tsc.locate __SOURCE_DIRECTORY__ with
     | None ->

@@ -915,6 +915,14 @@ Phases — each ends with the compile gate green on its fixtures:
     generic subclass with an inline constructor argument and optional hook, rejects a wrong
     constructor argument, and covers ordinary modules, type-only exports and a package's own
     quoted public module. Its Fable checks exercise the ambient constructor and hook presence.
+  - *Interface bases emitted as classes (2026-09-13).* Classes removes an interface's
+    inheritance edge when the accepted entrypoint map emits its target as an abstract class.
+    This precedes inherited-member deduplication, preserving the complete member surface and
+    ordinary constructor exports. Existing SI006 records the omitted nominal relation;
+    ordinary interface bases retain their inheritance. `catalog-class-inheritance-lab` covers
+    explicit and inherited constructors, an interface extending the class, ordinary upcasts,
+    and typed inherited members. Ambient bases remain subclassable; ordinary derived SDK
+    classes retain their existing interface-and-constructor representation.
   - *Explicit class contracts (2026-09-13).* Resolve records `implements` types separately
     from `BaseTypes`, using typed class heritage nodes and the compiler's type-node query.
     Reachability, free parameters and catalog source closure include these contracts.
