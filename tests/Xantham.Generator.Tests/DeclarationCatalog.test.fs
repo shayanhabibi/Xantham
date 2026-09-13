@@ -99,6 +99,39 @@ let tests =
                 skiptest "run `npm install` at the repository root, or set XANTHAM_TSGO_EXE" ]
     | Some _ ->
         testList "declaration catalog" [
+            testCase "subpath function results retain their qualified parent identity" <| fun _ ->
+                let directory = Path.Combine(temporaryRoot, "xantham-catalog-function-result-" + Guid.NewGuid().ToString "N")
+                Directory.CreateDirectory directory |> ignore
+                try
+                    let package = Path.GetFullPath(Path.Combine(fixture, "..", "catalog-subpath-lab"))
+                    let root =
+                        { GeneratorConfig.Default with
+                            ModuleName = Some "Identity.Root"
+                            Lib = Some [ "esnext" ]
+                            Types = Some []
+                            DeclarationCatalog = true }
+                    let producer = Path.Combine(directory, "root")
+                    Pipeline.run root package producer |> Async.RunSynchronously |> ignore
+                    let reference = Path.Combine(producer, "declarations.json")
+                    let adapter = { root with ModuleName = Some "Identity.Adapter"; DeclarationReferences = [ reference ] }
+                    Pipeline.run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    let consumer = """module Identity.Consumer
+open Fable.Core
+open Identity.Root.Chat.Create.Result
+let item (key: string) : U4<Item, Item2, Item3, Item4> =
+    Identity.Adapter.Chat.Exports.create().[key]
+let title (key: string) : string option =
+    match item key with
+    | U4.Case1 value -> value.title
+    | U4.Case2 value -> value.title
+    | U4.Case3 value -> value.title
+    | U4.Case4 value -> value.title
+let options (value: Identity.Root.Chat.LegacyOptions) : Identity.Root.Chat.Options = value
+"""
+                    let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] consumer
+                    code |> Flip.Expect.equal output 0
+                finally Directory.Delete(directory, true)
+
             testCase "nested class aliases retain their constructor and static value surface" <| fun _ ->
                 let directory = Path.Combine(temporaryRoot, "xantham-catalog-nested-class-" + Guid.NewGuid().ToString "N")
                 Directory.CreateDirectory directory |> ignore

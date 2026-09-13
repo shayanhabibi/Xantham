@@ -1,0 +1,8 @@
+{
+  "name": "catalog-subpath-lab",
+  "version": "1.0.0",
+  "exports": {
+    ".": { "types": "./index.d.ts" },
+    "./chat": { "types": "./chat.d.ts" }
+  }
+}

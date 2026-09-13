@@ -4754,3 +4754,11 @@ let orphanCallbackTests =
 
                       Expect.isFalse (body.Contains "type OnFail") "so the delegate behind it is dropped" ])
     ]
+
+[<Tests>]
+let catalogSubpathTests =
+    testList "catalog subpath fixture" [
+        yield!
+            fixtureTests "catalog-subpath-lab" (handFixture "catalog-subpath-lab")
+                GeneratorConfig.Default (fun _ -> [])
+    ]

@@ -1445,6 +1445,17 @@ create disposable fixtures under the test project's `obj/catalog-fixtures`, with
 and SDK discovery scope. Consumer probes cover nested type aliases, local subpath imports,
 and constructors and static members on a reused nested class.
 
+`catalog-subpath-lab` covers anonymous function-result declarations under a public subpath
+and two names exported for the same interface. Catalog parent-role lookup uses the export's
+qualified module path, including the Pascal-cased function parent of generated result types.
+`shape-aliases` places secondary names under that same export path. The consumer gate reuses
+the result union through a second catalog owner and type-checks the nested interface alias.
+
+Validation: 811 generator and 90 Wire tests pass in both the regeneration and check phases;
+the compile gate and 455 Fable runtime checks pass. Workers' `SA003` count falls by one as
+the root retention alias and the three module-scoped Workflow aliases retain separate names.
+Workers' tiers change from 410/1068/369/111 to 412/1068/368/111 (exact/ergonomic/widened/escape).
+
 # Easy Nits 
 
 To include in scope when a phases implementation/attempt ends up being small/quick.

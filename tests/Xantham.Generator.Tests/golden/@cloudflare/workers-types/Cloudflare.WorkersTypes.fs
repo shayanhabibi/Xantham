@@ -16743,12 +16743,6 @@ type RpcStubConstructor =
     [<EmitConstructor>]
     abstract Create<'T>: value: 'T -> obj
 
-type WorkflowDelayDuration = Cloudflare.Workers.WorkflowSleepDuration
-
-type WorkflowTimeoutDuration = Cloudflare.Workers.WorkflowSleepDuration
-
-type WorkflowRetentionDuration = Cloudflare.Workers.WorkflowSleepDuration
-
 [<Interface>]
 type SecretsStoreSecret =
     /// <summary>
@@ -18241,6 +18235,8 @@ type WorkflowDurationLabel =
     | [<CompiledName("year")>] Year
 
 type WorkflowSleepDuration = Cloudflare.Workers.WorkflowSleepDuration
+
+type WorkflowRetentionDuration = WorkflowSleepDuration
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type WorkflowInstanceLocationHint =
@@ -24075,6 +24071,8 @@ module Cloudflare =
 
         type WorkflowSleepDuration = U2<float, string>
 
+        type WorkflowDelayDuration = Cloudflare.WorkersTypes.Cloudflare.Workers.WorkflowSleepDuration
+
         [<Interface>]
         type WorkflowDynamicDelayContext =
             abstract ctx: Cloudflare.Workers.WorkflowDynamicDelayContext.Ctx with get, set
@@ -24083,6 +24081,10 @@ module Cloudflare =
             static member Create (ctx: Cloudflare.Workers.WorkflowDynamicDelayContext.Ctx, error: exn) : WorkflowDynamicDelayContext = jsNative
 
         type WorkflowDelayFunction = (Cloudflare.WorkersTypes.Cloudflare.Workers.WorkflowDynamicDelayContext -> U3<float, JS.Promise<Cloudflare.WorkersTypes.Cloudflare.Workers.WorkflowSleepDuration>, string>)
+
+        type WorkflowTimeoutDuration = Cloudflare.WorkersTypes.Cloudflare.Workers.WorkflowSleepDuration
+
+        type WorkflowRetentionDuration = Cloudflare.WorkersTypes.Cloudflare.Workers.WorkflowSleepDuration
 
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
         type WorkflowBackoff =

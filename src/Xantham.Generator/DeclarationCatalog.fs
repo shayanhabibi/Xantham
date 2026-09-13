@@ -657,6 +657,9 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
             | _ -> fail $"{name} has conflicting declaration identities")
         |> Map.ofList
 
+    let exportPath =
+        Shape.ExportLayout.declPath (Shape.ExportLayout.modulePaths shape) shape
+
     let rec forDecl name decl =
         match Map.tryFind name byName with
         | Some identity -> identity
@@ -666,9 +669,13 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                 |> List.tryFind (fun export ->
                     let exportedName = Shape.Spec.fsName (Shape.Spec.defaultExportName ctx) export
 
+                    let qualified leaf =
+                        String.concat "." (exportPath export @ [ leaf ])
+
                     export.Order.IsSome
                     && export.Order = order decl
-                    && (exportedName = name || Naming.pascalSegment exportedName = name))
+                    && (qualified exportedName = name
+                        || qualified (Naming.pascalSegment exportedName) = name))
 
             match exported with
             | Some export ->
@@ -680,7 +687,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                     []
             | None ->
                 match name.LastIndexOf '.' with
-                | -1 -> fail $"{name} has no stable declaration or parent role"
+                | -1 -> fail $"{Render.declName decl} has no stable declaration or parent role at {name}"
                 | at ->
                     let parent = name.Substring(0, at)
                     let role = "generated:" + name.Substring(at + 1)
