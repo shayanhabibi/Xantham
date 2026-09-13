@@ -265,6 +265,47 @@ let tests =
                 skiptest "run `npm install` at the repository root, or set XANTHAM_TSGO_EXE" ]
     | Some _ ->
         testList "declaration catalog" [
+            testCase "dependency generic markers retain producer phantom contracts" <| fun _ ->
+                let directory = Path.Combine(temporaryRoot, "xantham-generic-marker-" + Guid.NewGuid().ToString "N")
+                let package = Path.Combine(directory, "package")
+                Directory.CreateDirectory package |> ignore
+                try
+                    let source = Path.GetFullPath(Path.Combine(fixture, "..", "generic-marker-catalog-lab"))
+                    for file in Directory.EnumerateFiles(source, "*", SearchOption.AllDirectories) do
+                        writePackageFile package (Path.GetRelativePath(source, file)) (File.ReadAllText file)
+                    let config =
+                        { GeneratorConfig.loadFile (Path.Combine(package, "xantham.json")) with
+                            ModuleName = Some "Identity.Root" }
+                    let dependency = Path.Combine(package, "node_modules", "generic-marker-owner-lab")
+                    let root = Path.Combine(directory, "root")
+                    Pipeline.run config dependency root |> Async.RunSynchronously |> ignore
+                    let adapter =
+                        { config with
+                            ModuleName = Some "Identity.Adapter"
+                            DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
+                    Pipeline.run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    let sources = [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ]
+                    let consumer = """module Identity.Consumer
+let accept (value: Identity.Root.Options<string>) : Identity.Root.Options<string> = Identity.Adapter.Exports.accept value
+let marker (value: Identity.Root.Options<string>) : Identity.Root.Marker<string> = value.marker
+let setMarker (value: Identity.Root.Options<string>) (marker: Identity.Root.Marker<string>) = value.marker <- marker
+let loose (value: Identity.Root.LooseOptions) (candidate: obj) = value.value <- candidate
+"""
+                    let code, output = compileConsumer directory sources consumer
+                    Expect.equal code 0 output
+                    let wrongMarker = """module Identity.Consumer
+let wrong (value: Identity.Root.Options<string>) (marker: Identity.Root.Marker<int>) = value.marker <- marker
+"""
+                    let code, output = compileConsumer directory sources wrongMarker
+                    Expect.notEqual code 0 "different marker arguments remain incompatible"
+                    Expect.stringContains output "FS0001" "the wrong marker type is rejected without a cast"
+                    File.AppendAllText(Path.Combine(dependency, "index.d.ts"), "\n")
+                    Expect.throwsC
+                        (fun () -> Pipeline.run adapter package (Path.Combine(directory, "stale")) |> Async.RunSynchronously |> ignore)
+                        (fun error -> Expect.stringContains error.Message "input source hash mismatch" "marker declarations remain authenticated")
+                finally
+                    if Directory.Exists directory then Directory.Delete(directory, true)
+
             testCase "local obj aliases normalize shared erased unions without erasing real contracts" <| fun _ ->
                 let directory = Path.Combine(temporaryRoot, "xantham-empty-union-" + Guid.NewGuid().ToString "N")
                 let package = Path.Combine(directory, "package")

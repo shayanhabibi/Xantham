@@ -1761,6 +1761,21 @@ The typed catalog regression checks shared values and setters, alias chains, ret
 callable/indexed/inherited/generic contracts, the TR035 finding, and stale-input rejection.
 Measurements are recorded in `docs/.ai/handovers/empty-union-alias.md`.
 
+### Generic empty declarations reached through dependencies
+
+Anonymous naming retains a shipped, explicitly named generic empty declaration. The
+generic target is visited before its applications, so existing alias shaping emits its
+phantom once and references retain their type arguments. Empty nongeneric objects keep
+their existing object representation; external group disposition and constructor,
+callback, array, and index-signature rules remain in force.
+
+The generic-marker-catalog lab passes Options<string> and Marker<string> across a
+producer/consumer catalog boundary, rejects Marker<int> at the string marker setter,
+and retains stale-input rejection. It reproduces the Workers FacetStartupOptions class
+property losing DurableObjectClass<T> in a consumer program. The producer's phantom
+contract remains unchanged; no catalog compatibility guard is relaxed. Full measurements
+are recorded in `docs/.ai/handovers/generic-marker-catalog.md`.
+
 # Easy Nits 
 
 To include in scope when a phases implementation/attempt ends up being small/quick.

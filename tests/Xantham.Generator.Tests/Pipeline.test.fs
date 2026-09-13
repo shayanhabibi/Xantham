@@ -4863,6 +4863,17 @@ let anonymousParentSourceTests =
     ]
 
 [<Tests>]
+let genericMarkerCatalogTests =
+    let package = handFixture "generic-marker-catalog-lab"
+    let config =
+        package
+        |> Option.map (fun directory -> GeneratorConfig.loadFile (IO.Path.Combine(directory, "xantham.json")))
+        |> Option.defaultValue GeneratorConfig.Default
+    testList "generic marker catalog fixture" [
+        yield! fixtureTests "generic-marker-catalog-lab" package { config with DeclarationCatalog = false } (fun _ -> [])
+    ]
+
+[<Tests>]
 let emptyUnionAliasTests =
     let package = handFixture "empty-union-alias-lab"
     let config =

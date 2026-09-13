@@ -454,9 +454,11 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
             && (arrayElement model facts).IsNone
             && not (isTuple facts)
             && facts.ConstructSignatures.IsEmpty
-            // An index signature is shape too: `Record<string, boolean>` has no members
-            // and one index signature, and is an interface of one `Item`.
-            && not (facts.Members.IsEmpty && facts.IndexInfos.IsEmpty)
+            // Index signatures retain their interface shape; named generic empty declarations
+            // retain their parameters through the phantom emitted by shape-aliases.
+            && (not (facts.Members.IsEmpty && facts.IndexInfos.IsEmpty)
+                || ((facts.SymbolName |> Option.exists (isSyntheticName >> not))
+                    && not (List.isEmpty (declParamIds facts))))
             // A pure index signature with no symbol of its own resolves through the
             // support package's `Record`/`ReadonlyRecord` instead of a minted name
             // (TR059); an interface's own name, reached this way rather than through a
