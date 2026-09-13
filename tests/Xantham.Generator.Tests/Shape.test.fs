@@ -4424,3 +4424,58 @@ let privateAliasReferences =
                 TypeVars = Map.ofList [ 20<typeId>, "T" ] }
         let reference, findings = Spec.typeRef Build.context model None "accept" 30<typeId>
         (reference, findings) |> Flip.Expect.equal "" (FsApp("Accept.Config", [ FsTypeVar "T" ]), [])
+
+[<Tests>]
+let incompatibleOverloadedTypeParameters =
+    testList "overloaded type-parameter incompatibility" [
+        testCase "a single call signature is never incompatible" <| fun _ ->
+            let facts =
+                { Build.facts (Build.typeResponse 10 TypeFlags.Object) with
+                    CallSignatures = [ { Build.signature [] 4 with TypeParameters = [ 20<typeId> ] } ] }
+
+            let model = Build.shapeModel (facts :: typeParam 20 "T" :: Build.primitives)
+
+            Expect.isFalse (Spec.hasIncompatibleOverloadedTypeParameters model facts) "only one signature to overload against"
+
+        testCase "two signatures with no type parameters are never incompatible" <| fun _ ->
+            let facts =
+                { Build.facts (Build.typeResponse 10 TypeFlags.Object) with
+                    CallSignatures = [ Build.signature [] 4; Build.signature [] 4 ] }
+
+            let model = Build.shapeModel (facts :: Build.primitives)
+
+            Expect.isFalse (Spec.hasIncompatibleOverloadedTypeParameters model facts) "nothing hoisted to collide"
+
+        testCase "two signatures sharing a name under one bound collapse, not incompatible" <| fun _ ->
+            let facts =
+                { Build.facts (Build.typeResponse 10 TypeFlags.Object) with
+                    CallSignatures =
+                        [ { Build.signature [] 4 with TypeParameters = [ 21<typeId> ] }
+                          { Build.signature [] 4 with TypeParameters = [ 22<typeId> ] } ] }
+
+            let model =
+                Build.shapeModel (facts :: typeParam 21 "T" :: typeParam 22 "T" :: Build.primitives)
+
+            Expect.isFalse
+                (Spec.hasIncompatibleOverloadedTypeParameters model facts)
+                "aliasTypeParams collapses the pair into one head slot"
+
+        testCase "two signatures sharing a name under two bounds are incompatible" <| fun _ ->
+            let facts =
+                { Build.facts (Build.typeResponse 10 TypeFlags.Object) with
+                    CallSignatures =
+                        [ { Build.signature [] 4 with TypeParameters = [ 21<typeId> ] }
+                          { Build.signature [] 4 with TypeParameters = [ 22<typeId> ] } ] }
+
+            let model =
+                Build.shapeModel (
+                    facts
+                    :: { typeParam 21 "T" with Constraint = Some 1<typeId> }
+                    :: { typeParam 22 "T" with Constraint = Some 2<typeId> }
+                    :: Build.primitives
+                )
+
+            Expect.isTrue
+                (Spec.hasIncompatibleOverloadedTypeParameters model facts)
+                "one F# head cannot carry both bounds for 'T"
+    ]

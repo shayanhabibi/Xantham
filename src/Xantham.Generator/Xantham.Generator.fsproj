@@ -50,4 +50,8 @@
         <ProjectReference Include="..\Xantham.TypeScript.Wire\Xantham.TypeScript.Wire.fsproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <InternalsVisibleTo Include="Xantham.Generator.Tests" />
+    </ItemGroup>
+
 </Project>

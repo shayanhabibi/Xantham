@@ -172,6 +172,37 @@ let internal isPureCallback (facts: TypeFacts) =
     && facts.ConstructSignatures.IsEmpty
     && facts.Members.IsEmpty
 
+/// Two hoisted type-parameter ids name the same declared type parameter iff each resolves to
+/// the same symbol under the same constraint; an id with no symbol name answers only to itself.
+let private typeParamIdentity (model: ShapeModel) (id: int<typeId>) =
+    let paramFacts = Map.tryFind id model.Types
+
+    match
+        paramFacts
+        |> Option.bind (_.SymbolName >> Option.map (fun value -> value / uom<symbolName>))
+    with
+    | Some name -> Ok(name, paramFacts |> Option.bind _.Constraint)
+    | None -> Error id
+
+/// An object type with more than one call signature whose hoisted type parameters name one
+/// declared type parameter under two different bounds: the single F# head `aliasTypeParams`
+/// would produce is unwritable, since one type-parameter slot cannot carry two constraints.
+let internal hasIncompatibleOverloadedTypeParameters (model: ShapeModel) (facts: TypeFacts) =
+    match facts.CallSignatures with
+    | []
+    | [ _ ] -> false
+    | signatures ->
+        signatures
+        |> List.collect _.TypeParameters
+        |> List.distinct
+        |> List.choose (fun id ->
+            match typeParamIdentity model id with
+            | Ok identity -> Some identity
+            | Error _ -> None)
+        |> List.distinct
+        |> List.countBy fst
+        |> List.exists (fun (_, count) -> count > 1)
+
 /// An object type whose whole content is one index signature: `interface Bag { [key:
 /// string]: number }`, or the anonymous shape `Record`/`ReadonlyRecord` express directly
 /// (§4.10, TR059).
@@ -2416,17 +2447,7 @@ let internal aliasTypeParams (ctx: Context) (model: ShapeModel) (owner: string) 
     // Declarations sharing a name *and* a bound share a variable; a name declared under two
     // bounds keeps a slot per bound, where one variable would retype a signature. An unnamed
     // parameter answers only to itself, so each still reports its own erasure.
-    let identity id =
-        let facts = Map.tryFind id model.Types
-
-        match
-            facts
-            |> Option.bind (_.SymbolName >> Option.map (fun value -> value / uom<symbolName>))
-        with
-        | Some name -> Ok(name, facts |> Option.bind _.Constraint)
-        | None -> Error id
-
-    let groups = ids |> List.groupBy identity
+    let groups = ids |> List.groupBy (typeParamIdentity model)
 
     let collapsed =
         groups
