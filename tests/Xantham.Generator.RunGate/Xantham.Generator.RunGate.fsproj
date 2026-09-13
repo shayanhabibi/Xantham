@@ -50,6 +50,7 @@
         <Compile Include="..\Xantham.Generator.Tests\golden\subpath-lab\SubpathLab.fs" Link="subpath-lab\SubpathLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\mixed-subpaths-lab\MixedSubpathsLab.fs" Link="mixed-subpaths-lab\MixedSubpathsLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\exclusive-signature-lab\ExclusiveSignatureLab.fs" Link="exclusive-signature-lab\ExclusiveSignatureLab.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\public-inputs-lab\PublicInputsLab.fs" Link="public-inputs-lab\PublicInputsLab.fs" />
         <Compile Include="Probes.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\pattern-parameter-lab\PatternParameterLab.fs" Link="pattern-parameter-lab\PatternParameterLab.fs" />
         <Compile Include="SupportHelpers.fs" />

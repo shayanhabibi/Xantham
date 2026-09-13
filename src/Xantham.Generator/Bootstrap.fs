@@ -135,6 +135,7 @@ let resolveEntryFile (config: GeneratorConfig) (packageDir: string) : string =
 /// root alone over that file. Otherwise the manifest root (`entryFile`) plus every `./` key of
 /// the `exports` map, filtered by `Subpaths` when configured. Skipped keys are returned with
 /// their finding. A root-less map yields no root path.
+/// `publicInputs` selects an exact key-to-file map instead, including the root only when listed.
 let publicPaths (config: GeneratorConfig) (packageDir: string) : PublicPath list * (string * HarvestGlobals) list =
     let packageDir = Path.GetFullPath packageDir
 
@@ -147,8 +148,32 @@ let publicPaths (config: GeneratorConfig) (packageDir: string) : PublicPath list
 
         path
 
-    match config.Entry with
-    | Some _ ->
+    match config.PublicInputs, config.Entry with
+    | Some _, Some _ -> failwith "xantham.json: publicInputs cannot be combined with entry"
+    | Some _, _ when config.Subpaths.IsSome -> failwith "xantham.json: publicInputs cannot be combined with subpaths"
+    | Some inputs, None ->
+        if inputs.IsEmpty then
+            failwith "xantham.json: publicInputs must contain at least one input"
+
+        inputs
+        |> Map.toList
+        |> List.map (fun (key, file) ->
+            let validKey =
+                key = "."
+                || (key.StartsWith("./", StringComparison.Ordinal)
+                    && not (key |> Seq.exists (fun c -> Char.IsControl c || "\\*?#".Contains c))
+                    && (key.Substring(2).Split '/'
+                        |> Array.forall (fun segment -> segment <> "" && segment <> "." && segment <> "..")))
+
+            if not validKey then
+                failwith $"xantham.json: publicInputs key \"{key}\" must be . or a concrete ./ export path"
+
+            {
+                Key = key
+                File = resolveEntryFile { config with Entry = Some file } packageDir * uom<declFile>
+            }),
+        []
+    | None, Some _ ->
         [
             {
                 Key = "."
@@ -156,7 +181,7 @@ let publicPaths (config: GeneratorConfig) (packageDir: string) : PublicPath list
             }
         ],
         []
-    | None ->
+    | None, None ->
         let keys, hasRoot =
             readManifest packageDir (fun root ->
                 match root.TryGetProperty "exports" with

@@ -4779,3 +4779,15 @@ let exclusiveSignatureTests =
             fixtureTests "exclusive-signature-lab" (handFixture "exclusive-signature-lab")
                 GeneratorConfig.Default (fun _ -> [])
     ]
+
+[<Tests>]
+let publicInputTests =
+    let config =
+        { GeneratorConfig.Default with
+            Lib = Some [ "esnext" ]
+            Types = Some []
+            PublicInputs = Some(Map.ofList [ "./widgets/card", "types/card.d.ts"; "./mirror/card", "types/card.d.ts" ]) }
+    testList "explicit public input fixture" [
+        yield!
+            fixtureTests "public-inputs-lab" (handFixture "public-inputs-lab") config (fun _ -> [])
+    ]

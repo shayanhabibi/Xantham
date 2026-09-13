@@ -1,0 +1,3 @@
+{"name":"Mirror.Card.Card","file":"types/card.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Mirror.Card.Card","message":"ParamObject Create synthesized (D3)"}]}
+{"name":"Mirror.Card.Exports.describe","tier":"exact","findings":[]}
+{"name":"Widgets.Card.Exports.describe","tier":"exact","findings":[]}

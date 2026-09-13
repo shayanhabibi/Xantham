@@ -2090,6 +2090,17 @@ let main _ =
     exportLayout ()
     subpathLab ()
     mixedSubpaths ()
+    let card = PublicInputsLab.Mirror.Card.Card.Create "test"
+
+    equal
+        "explicit mirror input keeps its runtime import"
+        "mirror:test"
+        (PublicInputsLab.Mirror.Card.Exports.describe card)
+
+    equal
+        "explicit widget input shares the type and keeps its runtime import"
+        "widget:test"
+        (PublicInputsLab.Widgets.Card.Exports.describe card)
 
     equal
         "exclusive URL factory emits its own property"

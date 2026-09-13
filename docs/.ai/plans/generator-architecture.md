@@ -1478,6 +1478,26 @@ The existing Agents browser entry compiles in the external corpus probe. Shippin
 dependency separately still exposes a group-to-root reference cycle and remains an open
 library-stratification issue.
 
+## Explicit public-input partitions (2026-09-13)
+
+`GeneratorConfig.PublicInputs` maps concrete public export keys to declaration files within
+one package. Bootstrap uses exactly that map as its compiler roots, with `.` included only
+when selected. This supports caller-expanded wildcard exports, selected conditional variants,
+and independent browser/Workers programs without changing automatic export enumeration.
+`entry` and `subpaths` are mutually exclusive with this mode. Empty maps, duplicate JSON keys,
+non-concrete import keys and invalid declaration paths fail before generation.
+
+The public-inputs lab selects two runtime exports sharing a declaration file while the
+manifest root is unavailable. Fable checks both runtime imports with the same generated Card
+type. Config and bootstrap checks cover selection conflicts and invalid inputs. FCS impact
+analysis before adding the field found 92 uses in nine generator files; CLI/schema and consumer
+compatibility are also checked by the build and regression gates.
+
+Validation: 843 generator tests, 90 Wire tests, the compile gate and 459 Fable runtime
+checks pass. Existing golden bindings and finding counts are unchanged; the new lab has
+2 exact and 1 ergonomic symbols. Catalog consumer builds now disable shared build servers
+and use one MSBuild worker after two nested build workers exited during an earlier run.
+
 # Easy Nits 
 
 To include in scope when a phases implementation/attempt ends up being small/quick.

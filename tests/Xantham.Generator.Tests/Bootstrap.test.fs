@@ -6,6 +6,9 @@ open Expecto
 open Xantham.Generator
 open Xantham.Generator.Measure
 
+let private publicInputsFixture =
+    Path.GetFullPath(Path.Combine(__SOURCE_DIRECTORY__, "..", "fixtures", "public-inputs-lab"))
+
 let private selection expected (manifest: string) =
     let package = Path.Combine(Path.GetTempPath(), "xantham-entry-" + Guid.NewGuid().ToString "N")
     Directory.CreateDirectory package |> ignore
@@ -62,6 +65,45 @@ let private enumeration (files: string list) (manifest: string) =
 [<Tests>]
 let tests =
     testList "generator declaration entry" [
+        testCase "explicit public inputs exclude the root and retain runtime aliases" <| fun _ ->
+            let config = GeneratorConfig.load publicInputsFixture
+            let paths, skipped = Bootstrap.publicPaths config publicInputsFixture
+            paths |> List.map _.Key |> Flip.Expect.equal "only the concrete requested imports" [ "./mirror/card"; "./widgets/card" ]
+            paths |> List.map _.File |> List.distinct |> List.length |> Flip.Expect.equal "both imports share a declaration file" 1
+            skipped |> Flip.Expect.equal "explicit inputs have no skipped wildcard patterns" []
+
+        testCase "explicit public inputs can select a root independently of its manifest entry" <| fun _ ->
+            let config =
+                { GeneratorConfig.Default with
+                    PublicInputs = Some(Map.ofList [ ".", "types/card.d.ts" ]) }
+            let paths, _ = Bootstrap.publicPaths config publicInputsFixture
+            paths |> List.map _.Key |> Flip.Expect.equal "root is selected explicitly" [ "." ]
+
+        testTheory "invalid public input keys" [ ""; "./"; "card"; "./widgets/*"; "./../card"; "./widgets//card"; "./widgets/./card"; "./widgets\\card"; "./card?variant"; "./card#variant" ] <| fun key ->
+            let config = { GeneratorConfig.Default with PublicInputs = Some(Map.ofList [ key, "types/card.d.ts" ]) }
+            Expect.throws (fun () -> Bootstrap.publicPaths config publicInputsFixture |> ignore) "invalid import keys fail before generation"
+
+        testTheory "invalid public input declaration paths" [ ""; "../outside.d.ts"; "/outside.d.ts"; "missing.d.ts"; "runtime/widget-card.js" ] <| fun file ->
+            let config = { GeneratorConfig.Default with PublicInputs = Some(Map.ofList [ "./card", file ]) }
+            Expect.throws (fun () -> Bootstrap.publicPaths config publicInputsFixture |> ignore) "the input must be an existing TypeScript file in the package"
+
+        testTheory "public inputs conflict with implicit selection options" [
+            { GeneratorConfig.Default with Entry = Some "types/card.d.ts" }
+            { GeneratorConfig.Default with Subpaths = Some [] }
+        ] <| fun config ->
+            let config = { config with PublicInputs = Some(Map.ofList [ "./card", "types/card.d.ts" ]) }
+            Expect.throws (fun () -> Bootstrap.publicPaths config publicInputsFixture |> ignore) "selection modes must be unambiguous"
+
+        testTheory "invalid public input JSON" [
+            "[]"; "{}"; "null"; "{\"./card\":null}"; "{\"./card\":\"\"}"
+            "{\"./card\":\"types/card.d.ts\",\"./card\":\"types/card.d.ts\"}"
+        ] <| fun json ->
+            let file = Path.GetTempFileName()
+            try
+                File.WriteAllText(file, "{\"publicInputs\":" + json + "}")
+                Expect.throws (fun () -> GeneratorConfig.loadFile file |> ignore) "invalid selections must not be silently normalized"
+            finally File.Delete file
+
         let inline (==>) manifest entry = manifest, Ok entry
         let inline (=!>) manifest message = manifest, Error message
         let inline (<=>) selected entry = selected, entry

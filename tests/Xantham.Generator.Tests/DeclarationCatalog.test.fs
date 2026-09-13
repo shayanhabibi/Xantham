@@ -42,6 +42,8 @@ let private compileConsumer directory sources (consumer: string) =
     start.WorkingDirectory <- directory
     start.ArgumentList.Add "build"
     start.ArgumentList.Add "Consumer.fsproj"
+    start.ArgumentList.Add "--disable-build-servers"
+    start.ArgumentList.Add "-m:1"
     start.ArgumentList.Add "--verbosity"
     start.ArgumentList.Add "quiet"
     start.RedirectStandardOutput <- true

@@ -64,10 +64,9 @@ let private configKeys =
             ("entry",
              "The TypeScript input file, relative to the package directory passed to generate, even when \
           the configuration lives elsewhere. Must name an existing .ts, .tsx, .mts or .cts file \
-          (including declarations) within that directory. Omitted, \
-          selects types, typings, a root-export types string, then index.d.ts. An exports map without a \
-          root requires an explicit entry. Set runtime separately for a public JavaScript subpath; each \
-          invocation generates from one entry.")
+          (including declarations) within that directory. When provided, selects only this input. \
+          Omitted, publicInputs or the manifest's public declarations select the compiler program. \
+          Set runtime separately for a single public JavaScript subpath.")
 
             "RuntimePackage",
             ("runtime",
@@ -93,6 +92,12 @@ let private configKeys =
             ("subpaths",
              "The package.json exports keys generated as nested modules, each written as in the map (\"./client\"). \
           Omitted, every non-wildcard ./ key is generated. A key absent from the map fails generation.")
+
+            "PublicInputs",
+            ("publicInputs",
+             "Exact public export keys (\".\" or concrete \"./path\") mapped to TypeScript files within the input package. \
+          Only these inputs are generated; include \".\" explicitly to select the root. Use for expanded wildcards, \
+          conditional declarations and separate runtime environments. Mutually exclusive with entry and subpaths.")
         ]
 
 /// The JSON key and description of one `CompilerLibConfig` field.
@@ -210,6 +215,13 @@ let private writeFieldType (w: Utf8JsonWriter) (name: string) (t: Type) =
         w.WriteString("type", "object")
         w.WriteStartObject "additionalProperties"
         w.WriteString("$ref", "#/$defs/disposition")
+        w.WriteEndObject()
+    | t when isMapOf t typeof<string> ->
+        w.WriteString("type", "object")
+        w.WriteNumber("minProperties", 1)
+        w.WriteStartObject "additionalProperties"
+        w.WriteString("type", "string")
+        w.WriteNumber("minLength", 1)
         w.WriteEndObject()
     | t when t = typeof<CompilerLibConfig> -> writeCompilerLib w
     | t -> failwith $"xantham.json: {name} has type {t.FullName}, which Schema.fs writes no JSON form for"

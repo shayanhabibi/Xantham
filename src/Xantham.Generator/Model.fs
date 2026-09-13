@@ -200,13 +200,12 @@ type GeneratorConfig =
         Matching types reuse their producer's F# identity; incompatible catalogs fail generation.")>]
         DeclarationReferences: string list
         /// The TypeScript input file, relative to the package directory. `None` selects the
-        /// manifest's root declaration entry. Set `RuntimePackage` separately for a public subpath.
+        /// manifest's public declaration inputs. Set `RuntimePackage` separately for a single subpath.
         [<Description("The TypeScript input file, relative to the package directory passed to \
         generate, even when the configuration lives elsewhere. Must \
         name an existing .ts, .tsx, .mts or .cts file (including declarations) \
-        within that directory. Omitted, selects types, typings, \
-        a root-export types string, then index.d.ts. An exports map without a root requires an explicit entry. \
-        Set runtime separately for a public JavaScript subpath; each invocation generates from one entry.")>]
+        within that directory. When provided, selects only this input. Omitted, publicInputs or the \
+        manifest's public declarations select the compiler program. Set runtime separately for a single public JavaScript subpath.")>]
         Entry: string option
         /// Overrides the npm package the generated `[<Import(…)>]` attributes name. `None`
         /// derives it from the package name (`GeneratorConfig.runtimePackage`), which is right
@@ -237,6 +236,12 @@ type GeneratorConfig =
         [<Description("The package.json exports keys generated as nested modules, each written as in the map \
         (\"./client\"). Omitted, every non-wildcard ./ key is generated. A key absent from the map fails generation.")>]
         Subpaths: string list option
+        /// Exact public import paths and their declaration files for one compiler program.
+        [<Description("Exact public export keys (\".\" or concrete \"./path\") mapped to TypeScript files \
+        within the input package. Only these inputs are generated; include \".\" explicitly to select the root. \
+        Use for expanded wildcards, conditional declarations and separate runtime environments. \
+        Mutually exclusive with entry and subpaths.")>]
+        PublicInputs: Map<string, string> option
     }
 
     static member Default =
@@ -254,6 +259,7 @@ type GeneratorConfig =
             CompilerLib = CompilerLibConfig.Default
             AutoOpenExports = false
             Subpaths = None
+            PublicInputs = None
         }
 
 module GeneratorConfig =
@@ -422,6 +428,32 @@ module GeneratorConfig =
                 | true, _ -> failwith "xantham.json: subpaths must be an array of exports keys beginning with ./"
                 | _ -> None
 
+            let publicInputs =
+                match doc.RootElement.TryGetProperty "publicInputs" with
+                | false, _ -> None
+                | true, value when value.ValueKind = JsonValueKind.Object ->
+                    let entries =
+                        value.EnumerateObject()
+                        |> Seq.map (fun property ->
+                            if
+                                property.Value.ValueKind <> JsonValueKind.String
+                                || String.IsNullOrWhiteSpace(property.Value.GetString())
+                            then
+                                failwith
+                                    "xantham.json: publicInputs must map public export keys to nonempty TypeScript paths"
+
+                            property.Name, property.Value.GetString())
+                        |> Seq.toList
+
+                    if List.isEmpty entries then
+                        failwith "xantham.json: publicInputs must contain at least one input"
+
+                    if (entries |> List.map fst |> List.distinct).Length <> entries.Length then
+                        failwith "xantham.json: publicInputs contains duplicate export keys"
+
+                    Some(Map.ofList entries)
+                | true, _ -> failwith "xantham.json: publicInputs must be an object"
+
             let compilerLib =
                 match doc.RootElement.TryGetProperty "compilerLib" with
                 | false, _ -> CompilerLibConfig.Default
@@ -465,6 +497,7 @@ module GeneratorConfig =
                 CompilerLib = compilerLib
                 AutoOpenExports = boolField "autoOpenExports" GeneratorConfig.Default.AutoOpenExports
                 Subpaths = subpaths
+                PublicInputs = publicInputs
             }
 
     /// Loads `<packageDir>/xantham.json`.

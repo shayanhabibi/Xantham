@@ -157,12 +157,11 @@ diagnostic. `lib` selects compiler libraries independently.
 
 ### Select a declaration entry
 
-Each invocation generates from one TypeScript input. By default, the generator selects the
-manifest's `types`, then `typings`, then the first `types` string under the root export's
-conditions, then `index.d.ts`. In an `exports` map, the root is `"."`; named subpaths such as
-`"./adapter"` are separate inputs. A map without a root, an empty map, or an explicitly blocked
-`".": null` requires an explicit `entry`, even when `types`, `typings` or `index.d.ts` exists.
-An absent or top-level `null` `exports` field uses the default lookup.
+Each invocation creates one TypeScript program over its selected public inputs. By default,
+these are the manifest root and its supported public subpaths. The root lookup checks `types`,
+then `typings`, then the first `types` string under the root export's conditions, then
+`index.d.ts`. A rootless export map supplies only its public subpaths. An absent or top-level
+`null` `exports` field uses the default root lookup.
 
 Use `entry` to select a particular declaration file, including a condition-specific `.d.mts`
 or `.d.cts` file. Choose the environment or import/require variant explicitly; the default
@@ -194,6 +193,29 @@ key, or a key whose conditions supply no declaration file, is skipped and report
 manifest. A key naming an asset rather than a TypeScript file — `"./package.json":
 "./package.json"` — is passed over without a finding. `subpaths` restricts generation to the listed keys. Setting `entry` disables
 enumeration and generates the one file it names.
+
+Use `publicInputs` for an exact selection, including concrete wildcard expansions or a set of
+declaration variants that share one runtime environment:
+
+```jsonc
+{
+  "module": "Example.Browser",
+  "lib": ["esnext", "dom"],
+  "types": [],
+  "publicInputs": {
+    "./client": "dist/browser/client.d.ts",
+    "./components/card": "dist/components/card.d.ts"
+  }
+}
+```
+
+The map contains every input for this invocation. Include `"."` explicitly to select a root;
+its value supplies the root declaration file. Keys are concrete public export paths, and values
+are existing TypeScript files within the package. The caller selects the published conditional
+variant and expands wildcard patterns. Values sharing a file still keep their separate runtime
+imports, while declaration ownership follows the normal shallowest-path rule. `runtime`, when
+provided, is the base import prefix for the selected keys. `publicInputs` is mutually exclusive
+with `entry` and `subpaths`; an empty map or duplicate key is an error.
 
 ### The four group dispositions
 

@@ -1,0 +1,8 @@
+{
+  "lib": ["esnext"],
+  "types": [],
+  "publicInputs": {
+    "./widgets/card": "types/card.d.ts",
+    "./mirror/card": "types/card.d.ts"
+  }
+}
