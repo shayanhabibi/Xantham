@@ -974,3 +974,29 @@ keys over one file home types under the ordinal-first key and carry values under
 wildcard and untyped keys record `HG008`/`HG009` and produce no module; a configured
 `entry` still generates a single path; no golden moves except by a type relocating
 shallower or an abbreviation disappearing; compile gate and run gate pass.
+
+## Follow-up work (recorded 2026-09-13, after the merge)
+
+Landed complete; these are the items reviews raised and the wave deliberately left.
+
+- **Lib-type aliases keep a subpath home.** `solid-js` declares `type DOMElement = Element`
+  in `types/jsx.d.ts`, which no public path exports. It renders as
+  `JsxDevRuntime.DOMElement` and root signatures reference it qualified, against decision 10.
+  The redundant root abbreviation is gone, and the output compiles. The naming site was not
+  located inside `Shape/Anonymous.fs`, `Shape/Aliases.fs` or `Resolve.fs`; start from the
+  rendered `Docs` string of the declaration and trace backwards.
+- **`RA007` drops rather than renames.** A declaration head that repeats a type-parameter
+  name loses the declaration. Renaming the duplicate parameters retains it.
+- **The opaque-namespace coverage exemption is broad.** It admits any Module-flagged export
+  with no Type flag, no value export and no harvested member. Gating on
+  `getExportsOfModule` returning empty is tighter.
+- **`Shape/Anonymous.fs` resets the module prefix for symbol-named types only.** A
+  path-derived member of a root-homed type keeps the referencing owner's prefix. No fixture
+  reaches this.
+- **`subpaths` is ignored when `entry` is set**, silently. The JSON schema's `items` carries
+  no `^\./` pattern although the loader rejects other strings.
+- **Harvest issues one full-scope `getSymbolsInScope` per public path.** Several keys
+  resolving to one file repeat the query.
+- **Root-less maps, two keys over one module path, and `subpaths`** are covered by unit
+  tests over `Bootstrap.publicPaths` rather than end to end.
+- **`@types/node` was not regenerated** as a measurement for this wave.
