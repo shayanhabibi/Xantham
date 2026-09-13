@@ -4833,3 +4833,12 @@ let indexedCallbackTests =
             fixtureTests "indexed-callback-lab" (handFixture "indexed-callback-lab")
                 { GeneratorConfig.Default with Lib = Some [ "esnext" ]; Types = Some [] } (fun _ -> [])
     ]
+
+[<Tests>]
+let primitiveArgumentIdentityTests =
+    let package = handFixture "primitive-argument-identity-lab"
+    let config = { handConfig package with DeclarationCatalog = false }
+    testList "primitive argument identity fixture" [
+        yield!
+            fixtureTests "primitive-argument-identity-lab" package config (fun _ -> [])
+    ]

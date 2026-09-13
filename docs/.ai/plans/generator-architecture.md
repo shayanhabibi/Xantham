@@ -1572,6 +1572,32 @@ finding counts are unchanged.
 Validation: 857 generator tests and 90 Wire tests pass during regeneration and independent
 checking; the compile gate and 461 Fable runtime checks pass. A fresh FCS check is clean.
 
+### Intrinsic arguments and named primitive aliases
+
+Structural declaration identities normalize intrinsic argument types by their flags and
+literal values before consulting declaration handles. Named primitive aliases retain their
+own catalog declarations. Enum literals retain declaration identity and are excluded from
+the intrinsic fallback.
+
+The primitive-argument-identity lab has an ambient dependency with named string, number and
+boolean aliases and an interface containing an anonymous nested object. A consumer reaches
+the interface without reaching those aliases. The producer and consumer must agree on the
+nested object's identity and preserve the same typed API. The regression compiles a consumer
+that reads each nested member and uses the producer's primitive aliases.
+
+The failure originates in the checker's interned primitive types: an exported alias can add
+declaration handles to the same primitive type ID used by an unrelated structural member.
+Intrinsic arguments share canonical keys across named alias owners. The intrinsic mask
+excludes unique symbols, template literals and string mappings, whose semantic identities
+require more than flags and a literal value.
+
+Existing golden bindings and finding counts are unchanged. The new lab has 1 exact /
+2 ergonomic / 0 widened / 1 escape symbol; the escape is GE004's dependency-module naming
+provenance, and every nested member retains its primitive type.
+
+Validation: 860 generator tests and 90 Wire tests pass during regeneration and independent
+checking; the compile gate and 461 Fable runtime checks pass. A fresh FCS check is clean.
+
 # Easy Nits 
 
 To include in scope when a phases implementation/attempt ends up being small/quick.

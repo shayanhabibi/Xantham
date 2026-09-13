@@ -108,6 +108,38 @@ let tests =
                 skiptest "run `npm install` at the repository root, or set XANTHAM_TSGO_EXE" ]
     | Some _ ->
         testList "declaration catalog" [
+            testCase "primitive aliases preserve nested declaration identities across packages" <| fun _ ->
+                let directory = Path.Combine(temporaryRoot, "xantham-primitive-argument-" + Guid.NewGuid().ToString "N")
+                Directory.CreateDirectory directory |> ignore
+                try
+                    let package = Path.GetFullPath(Path.Combine(fixture, "..", "primitive-argument-identity-lab"))
+                    let dependency = Path.Combine(package, "node_modules", "intrinsic-owner-lab")
+                    let configure name references =
+                        let path = Path.Combine(directory, name + ".json")
+                        File.WriteAllText(path,
+                            JsonSerializer.Serialize {| ``module`` = "Identity." + name; ``namespace`` = "Identity.Support"
+                                                        lib = [| "esnext" |]; types = [| "intrinsic-owner-lab" |]
+                                                        groups = Map.ofList [ "intrinsic-owner-lab", "ship" ]
+                                                        declarationCatalog = true; declarationReferences = references |})
+                        GeneratorConfig.loadFile path
+                    let root = Path.Combine(directory, "root")
+                    Pipeline.run (configure "Root" ([||] : string array)) dependency root |> Async.RunSynchronously |> ignore
+                    let adapter = configure "Adapter" [| Path.Combine(root, "declarations.json") |]
+                    Pipeline.run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    let consumer = """module Identity.Consumer
+let reuse (value: Identity.Root.Item) : Identity.Root.Item = Identity.Adapter.Exports.``use`` value
+let text (value: Identity.Root.Item) : string = value.nested.value
+let number (value: Identity.Root.Item) : float = value.nested.count
+let enabled (value: Identity.Root.Item) : bool = value.nested.enabled
+let textAlias (value: Identity.Root.StringAlias) : string = value
+let numberAlias (value: Identity.Root.NumberAlias) : float = value
+let booleanAlias (value: Identity.Root.BooleanAlias) : bool = value
+"""
+                    let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] consumer
+                    Expect.equal code 0 output
+                finally
+                    if Directory.Exists directory then Directory.Delete(directory, true)
+
             testCase "indexed callbacks retain reusable parent identities" <| fun _ ->
                 let directory = Path.Combine(temporaryRoot, "xantham-indexed-callback-" + Guid.NewGuid().ToString "N")
                 Directory.CreateDirectory directory |> ignore

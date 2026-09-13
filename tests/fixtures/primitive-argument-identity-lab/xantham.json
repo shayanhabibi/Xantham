@@ -1,0 +1,14 @@
+{
+  "module": "PrimitiveArgumentIdentityLab",
+  "namespace": "Identity.Support",
+  "lib": [
+    "esnext"
+  ],
+  "types": [
+    "intrinsic-owner-lab"
+  ],
+  "groups": {
+    "intrinsic-owner-lab": "ship"
+  },
+  "declarationCatalog": true
+}

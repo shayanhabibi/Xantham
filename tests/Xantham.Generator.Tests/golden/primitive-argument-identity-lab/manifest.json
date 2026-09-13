@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "package": "primitive-argument-identity-lab",
+  "module": "PrimitiveArgumentIdentityLab",
+  "counts": {
+    "exact": 1,
+    "ergonomic": 2,
+    "widened": 0,
+    "escape": 1
+  },
+  "passes": [
+    {
+      "pass": "SY - synthesize-anonymous",
+      "total": 1,
+      "exact": 1
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 2,
+      "ergonomic": 2
+    },
+    {
+      "pass": "",
+      "total": 1,
+      "escape": 1
+    },
+    {
+      "pass": "render-source",
+      "total": 1,
+      "exact": 1
+    }
+  ]
+}

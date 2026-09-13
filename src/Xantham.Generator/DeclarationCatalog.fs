@@ -353,6 +353,34 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
         else
             None
 
+    let intrinsicArgumentKey (argument: Proto.TypeResponse) =
+        if
+            not (argument.Flags.HasFlag TypeFlags.EnumLiteral)
+            && uint32 (
+                argument.Flags
+                &&& (TypeFlags.String
+                     ||| TypeFlags.StringLiteral
+                     ||| TypeFlags.Number
+                     ||| TypeFlags.NumberLiteral
+                     ||| TypeFlags.Boolean
+                     ||| TypeFlags.BooleanLiteral
+                     ||| TypeFlags.BigInt
+                     ||| TypeFlags.BigIntLiteral
+                     ||| TypeFlags.ESSymbol
+                     ||| TypeFlags.Any
+                     ||| TypeFlags.Unknown
+                     ||| TypeFlags.Null
+                     ||| TypeFlags.Undefined
+                     ||| TypeFlags.Void
+                     ||| TypeFlags.Never
+                     ||| TypeFlags.NonPrimitive)
+               )
+               <> 0u
+        then
+            json (uint32 argument.Flags, argument.Value)
+        else
+            ""
+
     let rec typeIdentity visited bindings id =
         if List.contains id visited then
             None
@@ -393,6 +421,11 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                     let rec argumentKeyWith visited bindings argument =
                         match Map.tryFind argument bindings with
                         | Some key -> key
+                        | None when
+                            Map.tryFind argument shape.Types
+                            |> Option.exists (fun facts -> intrinsicArgumentKey facts.Response <> "")
+                            ->
+                            intrinsicArgumentKey shape.Types[argument].Response
                         | None ->
                             // Recursive references use their distance along the current type path.
                             match List.tryFindIndex ((=) argument) visited with
@@ -416,25 +449,6 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                                         + Option.defaultValue
                                             ""
                                             (argument.SymbolName |> Option.map (fun x -> x / uom<symbolName>))
-                                    | Some argument when
-                                        uint32 (
-                                            argument.Response.Flags
-                                            &&& (TypeFlags.StringLike
-                                                 ||| TypeFlags.NumberLike
-                                                 ||| TypeFlags.BooleanLike
-                                                 ||| TypeFlags.BigIntLike
-                                                 ||| TypeFlags.ESSymbolLike
-                                                 ||| TypeFlags.Any
-                                                 ||| TypeFlags.Unknown
-                                                 ||| TypeFlags.Null
-                                                 ||| TypeFlags.Undefined
-                                                 ||| TypeFlags.Void
-                                                 ||| TypeFlags.Never
-                                                 ||| TypeFlags.NonPrimitive)
-                                        )
-                                        <> 0u
-                                        ->
-                                        json (uint32 argument.Response.Flags, argument.Response.Value)
                                     | Some facts when not (List.isEmpty facts.UnionMembers) ->
                                         keys "union" facts.UnionMembers
                                     | Some facts when not (List.isEmpty facts.IntersectionMembers) ->
@@ -535,30 +549,6 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                         else
                             arguments
 
-                    let unresolvedArgumentKey (argument: Proto.TypeResponse) =
-                        if
-                            not (argument.Flags.HasFlag TypeFlags.EnumLiteral)
-                            && uint32 (
-                                argument.Flags
-                                &&& (TypeFlags.StringLike
-                                     ||| TypeFlags.NumberLike
-                                     ||| TypeFlags.BooleanLike
-                                     ||| TypeFlags.BigIntLike
-                                     ||| TypeFlags.ESSymbolLike
-                                     ||| TypeFlags.Any
-                                     ||| TypeFlags.Unknown
-                                     ||| TypeFlags.Null
-                                     ||| TypeFlags.Undefined
-                                     ||| TypeFlags.Void
-                                     ||| TypeFlags.Never
-                                     ||| TypeFlags.NonPrimitive)
-                               )
-                               <> 0u
-                        then
-                            json (uint32 argument.Flags, argument.Value)
-                        else
-                            ""
-
                     let arguments =
                         if structural && not (List.isEmpty arguments) then
                             // Populated structural keys already describe the applied members,
@@ -571,7 +561,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                                     if Map.containsKey argument.TypeId shape.Types then
                                         partKey argument.TypeId
                                     else
-                                        unresolvedArgumentKey argument)
+                                        intrinsicArgumentKey argument)
 
                             if not structural then
                                 arguments @ declarationArguments
@@ -600,7 +590,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                                 if Map.containsKey argument.TypeId shape.Types then
                                     argumentKey argument.TypeId
                                 else
-                                    unresolvedArgumentKey argument)
+                                    intrinsicArgumentKey argument)
 
                         if List.isEmpty facts.AliasDeclarations || List.contains "" aliasArguments then
                             if role = "constructor" && not (List.contains "" aliasArguments) then
