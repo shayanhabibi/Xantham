@@ -26,8 +26,9 @@ let private stringField (name: string) (el: JsonElement) =
     | true, v when v.ValueKind = JsonValueKind.String -> Some(v.GetString())
     | _ -> None
 
-/// The `types` string found under `types`, then `import`, then `default`, then any other
-/// non-`.` condition, in that order.
+/// The declaration file a conditions object selects: its own `types` string, else the first
+/// one found by descending its non-`.` conditions in declaration order. A condition whose value
+/// is a bare string names a runtime file rather than a declaration, and yields `None`.
 let rec private declarationOf (el: JsonElement) : string option =
     match el.ValueKind with
     | JsonValueKind.Object ->
@@ -156,27 +157,24 @@ let publicPaths (config: GeneratorConfig) (packageDir: string) : PublicPath list
         ],
         []
     | None ->
-        let keys =
+        let keys, hasRoot =
             readManifest packageDir (fun root ->
                 match root.TryGetProperty "exports" with
                 | true, exports when exports.ValueKind = JsonValueKind.Object ->
-                    exports.EnumerateObject()
-                    |> Seq.filter (fun p -> p.Name.StartsWith("./", StringComparison.Ordinal))
-                    |> Seq.map (fun p -> p.Name, subpathTargetOf p.Value)
-                    |> Seq.toList
-                    |> Some
-                | _ -> None)
-            |> Option.defaultValue []
+                    let keys =
+                        exports.EnumerateObject()
+                        |> Seq.filter (fun p -> p.Name.StartsWith("./", StringComparison.Ordinal))
+                        |> Seq.map (fun p -> p.Name, subpathTargetOf p.Value)
+                        |> Seq.toList
 
-        let hasRoot =
-            readManifest packageDir (fun root ->
-                match root.TryGetProperty "exports" with
-                | true, exports when exports.ValueKind = JsonValueKind.Object ->
-                    match exports.TryGetProperty "." with
-                    | true, r -> Some(r.ValueKind <> JsonValueKind.Null)
-                    | _ -> Some(List.isEmpty keys)
-                | _ -> Some true)
-            |> Option.defaultValue true
+                    let hasRoot =
+                        match exports.TryGetProperty "." with
+                        | true, r -> r.ValueKind <> JsonValueKind.Null
+                        | _ -> List.isEmpty keys
+
+                    Some(keys, hasRoot)
+                | _ -> None)
+            |> Option.defaultValue ([], true)
 
         let selected =
             match config.Subpaths with
@@ -188,36 +186,44 @@ let publicPaths (config: GeneratorConfig) (packageDir: string) : PublicPath list
 
                 keys |> List.filter (fun (k, _) -> List.contains k wanted)
 
-        let skipped, taken =
-            selected
-            |> List.sortBy (fun (key, _) -> key)
-            |> List.fold
-                (fun (skipped, taken) (key, declared) ->
-                    if key.Contains '*' then
-                        skipped @ [ key, HarvestGlobals.SubpathWildcardSkipped key ], taken
+        let isTypeScriptFile (file: string) =
+            [ ".d.ts"; ".d.mts"; ".d.cts"; ".ts"; ".tsx"; ".mts"; ".cts" ]
+            |> List.exists (fun suffix -> file.EndsWith(suffix, StringComparison.Ordinal))
+
+        /// Generated, reported, or passed over: a key naming an asset rather than a TypeScript
+        /// file (`"./package.json": "./package.json"`) leaves no trace in the manifest.
+        let classify (key: string, declared) =
+            if key.Contains '*' then
+                Choice2Of3(key, HarvestGlobals.SubpathWildcardSkipped key)
+            else
+                match declared with
+                | None -> Choice2Of3(key, HarvestGlobals.SubpathWithoutDeclarations key)
+                | Some file when not (isTypeScriptFile file) -> Choice3Of3 key
+                | Some file ->
+                    let path = inside file
+
+                    if File.Exists path then
+                        Choice1Of3
+                            {
+                                Key = key
+                                File = path * uom<declFile>
+                            }
                     else
-                        let isTypeScriptFile (file: string) =
-                            [ ".d.ts"; ".d.mts"; ".d.cts"; ".ts"; ".tsx"; ".mts"; ".cts" ]
-                            |> List.exists (fun suffix -> file.EndsWith(suffix, StringComparison.Ordinal))
+                        Choice2Of3(key, HarvestGlobals.SubpathWithoutDeclarations key)
 
-                        match declared with
-                        | None -> skipped @ [ key, HarvestGlobals.SubpathWithoutDeclarations key ], taken
-                        | Some file when not (isTypeScriptFile file) -> skipped, taken
-                        | Some file ->
-                            let path = inside file
+        let classified = selected |> List.sortBy fst |> List.map classify
 
-                            if not (File.Exists path) then
-                                skipped @ [ key, HarvestGlobals.SubpathWithoutDeclarations key ], taken
-                            else
-                                skipped,
-                                taken
-                                @ [
-                                    {
-                                        Key = key
-                                        File = path * uom<declFile>
-                                    }
-                                ])
-                ([], [])
+        let taken =
+            classified
+            |> List.choose (function
+                | Choice1Of3 path -> Some path
+                | _ -> None)
+
+        let skipped =
+            classified
+            |> List.choose (function
+                | Choice2Of3 reported -> Some reported
+                | _ -> None)
 
         let root =
             if hasRoot then

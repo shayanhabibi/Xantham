@@ -183,10 +183,6 @@ let private repaired (model: ShapeModel) =
     for name in dropped do
         findings <- findings @ [ Finding.make name RepairArity.GenericAliasDropped ]
 
-    // A duplicated head name reaches any of these declaration kinds, not only the unused
-    // abbreviation `writableHead` already covers - `alias-type-params` collapsing two
-    // call-signature overloads' same-named, differently-bound parameter into one head produces
-    // it on an interface or delegate type as readily as an alias.
     let headTypeParameters =
         function
         | FsInterface d -> Some d.TypeParameters

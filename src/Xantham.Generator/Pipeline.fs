@@ -114,9 +114,9 @@ let private exportedDeclarations (ctx: Context) (shape: ShapeModel) =
     |> Map.ofList
 
 /// The runtime specifier of each nested module path the entry module writes for an ambient
-/// module owner - the one-line summary `Render.renderSources` places above that module's
+/// module owner - the one-line summary `Render.renderSources` places above the module's
 /// opening line (rule 13). Keyed by `Shape.ExportLayout.modulePaths`, which resolves hashed
-/// path collisions across owners; entry-module and global-scope owners carry no entry here.
+/// path collisions across owners. Covers ambient-module owners exclusively.
 let private moduleSpecifiers (shape: ShapeModel) : Map<string list, string<importSpecifier>> =
     let paths = Shape.ExportLayout.modulePaths shape
 

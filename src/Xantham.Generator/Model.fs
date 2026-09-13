@@ -792,8 +792,8 @@ module Naming =
                 capitalize part)
         |> String.concat ""
 
-/// One public import surface of the package: an `exports` map key and the declaration
-/// file its conditions select. `Key` is `"."` for the root.
+/// A public import surface of the package: an `exports` map key paired with the declaration
+/// file selected by its conditions. `Key` is `"."` for the root.
 type PublicPath = { Key: string; File: string<declFile> }
 
 /// Everything a pass may reach for, created once per run by `Bootstrap.start`. Passes never

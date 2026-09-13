@@ -187,9 +187,12 @@ declaration input still leaves the default runtime import at the package root.
 Every `./` key of the `exports` map is generated in the same run as a nested module named
 for the key's segments: `"./client"` becomes `Client`, `"./client/deep"` becomes
 `Client.Deep`, and a trailing `index` segment or `.js`/`.mjs`/`.d.ts` extension is dropped.
-Each key's declaration file comes from its `types`, `import` or `default` condition, in that
-order. A wildcard key or a key without a declaration file is skipped and reported in the
-manifest. `subpaths` restricts generation to the listed keys. Setting `entry` disables
+Each key's declaration file comes from its own `types` condition, else from the `types` of the
+first nested condition that declares one. A condition mapped straight to a string names a
+runtime file, so `"./client": { "import": "./client.js" }` supplies no declaration. A wildcard
+key, or a key whose conditions supply no declaration file, is skipped and reported in the
+manifest. A key naming an asset rather than a TypeScript file — `"./package.json":
+"./package.json"` — is passed over without a finding. `subpaths` restricts generation to the listed keys. Setting `entry` disables
 enumeration and generates the one file it names.
 
 ### The four group dispositions

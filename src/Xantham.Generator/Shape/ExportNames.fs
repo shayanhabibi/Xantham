@@ -10,6 +10,8 @@ open Xantham.Generator.Shape.Spec
 /// defining symbol takes precedence over an alias of it; within one group, the export whose
 /// owner path is shallowest, ordinal owner specifier and then harvest order breaking ties.
 let declarationExports (ctx: Context) (model: ShapeModel) =
+    let hasEntryOwner = ExportLayout.hasEntryOwner model
+
     model.Harvest.Exports
     |> List.choose (fun export ->
         if not (hasAny SymbolFlags.Type export.Symbol.Flags) then
@@ -38,7 +40,10 @@ let declarationExports (ctx: Context) (model: ShapeModel) =
                 |> List.indexed
                 |> List.minBy (fun (index, export) ->
                     let owner = ExportLayout.ownerOf model.RuntimePackage export.Origin
-                    ExportLayout.depthOf model.RuntimePackage owner, ExportLayout.ownerSpecifier owner, index)
+
+                    ExportLayout.depthOf model.RuntimePackage hasEntryOwner owner,
+                    ExportLayout.ownerSpecifier owner,
+                    index)
                 |> snd
             )
 

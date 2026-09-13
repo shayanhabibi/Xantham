@@ -93,14 +93,24 @@ let tests =
                   ExportLayout.allocate (runtime "pkg") [ "Other"; "Other_f60acb6ef7d5" ] [ owner ]
               Expect.notEqual allocated[owner] [ "Other_f60acb6ef7d5" ] "candidate reserved"
 
-          testCase "depth counts preferred-path segments and the entry is shallowest" <| fun _ ->
-              let depth = ExportLayout.depthOf (runtime "pkg")
-              Expect.equal (depth EntryModule) 0 "entry"
-              Expect.equal (depth GlobalScope) 0 "global"
-              Expect.equal (depth (ambient "pkg/client")) 1 "child"
-              Expect.equal (depth (ambient "pkg/client/deep")) 2 "grandchild"
-              Expect.equal (depth (ambient "pkg/client/index.js")) 1 "trailing index"
-              Expect.equal (depth (ambient "node:stream/web")) 2 "unrelated"
+          // `withEntry`/`bare` marks whether the run renders an entry module, which is what
+          // nests globals under `Globals`; owner ==> the depth its preferred path carries
+          let withEntry owner = true, owner
+          let bare owner = false, owner
+          let inline (==>) (hasEntryOwner, owner) depth = hasEntryOwner, owner, depth
+
+          testTheory "depth counts preferred-path segments and the entry is shallowest" [
+              withEntry EntryModule ==> 0
+              bare EntryModule ==> 0
+              withEntry GlobalScope ==> 1 // renders as `Globals.X`, so it ties with a depth-1 subpath
+              bare GlobalScope ==> 0
+              withEntry (ambient "pkg/client") ==> 1
+              withEntry (ambient "pkg/client/deep") ==> 2
+              withEntry (ambient "pkg/client/index.js") ==> 1
+              withEntry (ambient "node:stream/web") ==> 2
+          ] <| fun (hasEntryOwner, owner, expected) ->
+              ExportLayout.depthOf (runtime "pkg") hasEntryOwner owner
+              |> Flip.Expect.equal "preferred-path segments" expected
 
           testCase "owner specifiers order ordinally" <| fun _ ->
               let owners = [ ambient "pkg/mirror"; ambient "pkg/alias" ]

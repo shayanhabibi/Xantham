@@ -702,10 +702,10 @@ type HarvestGlobals =
     | [<Escape>] AmbientModuleWildcard of specifier: string
     | [<Exact>] NamespaceIsModuleBody of ns: string * specifier: string
     | [<Widened>] AmbientModuleAliasDivergent of name: string * spellings: string list
-    /// A public subpath key containing `*`. No module is generated for it.
+    /// A public subpath key containing `*`. The run skips it.
     | [<Escape>] SubpathWildcardSkipped of key: string
-    /// A public subpath key whose conditions supply no declaration file. No module is
-    /// generated for it.
+    /// A public subpath key whose conditions select a file other than a declaration file. The
+    /// run skips it.
     | [<Escape>] SubpathWithoutDeclarations of key: string
 
     interface IFindingKind with
@@ -1081,8 +1081,8 @@ type RepairArity =
     /// head declares. The alias is written with the surplus parameters erased as phantoms, so
     /// references keep their arity; the erased parameters carry no value.
     | [<Widened>] AliasKeptAsPhantom of name: string
-    /// A declaration whose head repeats one type parameter's name under two different bounds.
-    /// The declaration is dropped, and every reference to it widens.
+    /// A declaration whose head repeats a type parameter name. The declaration is dropped, and
+    /// every reference to it widens.
     | [<Widened>] DuplicateTypeParameterUnwritable of name: string
 
     interface IFindingKind with
@@ -1099,8 +1099,7 @@ type RepairArity =
                 $"{name} reads but does not write: its type holds no value, and F# has no setter of type unit"
             | AliasKeptAsPhantom name ->
                 $"{name} resolves to a target using fewer type parameters than its head; the surplus are erased phantoms"
-            | DuplicateTypeParameterUnwritable name ->
-                $"{name} dropped: two of its type parameters share a name under different bounds"
+            | DuplicateTypeParameterUnwritable name -> $"{name} dropped: two of its type parameters share a name"
 
 /// `audit-coverage`.
 [<Prefix("AC", "audit-coverage")>]

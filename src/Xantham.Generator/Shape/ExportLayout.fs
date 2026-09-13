@@ -93,12 +93,10 @@ let preferredPath (runtimePackage: string<importSpecifier>) hasEntryOwner =
         else
             segments ambient
 
-/// The nesting depth of an owner's preferred path: 0 for the entry module and globals.
-let depthOf (runtimePackage: string<importSpecifier>) (owner: ExportOwner) : int =
-    match owner with
-    | EntryModule
-    | GlobalScope -> 0
-    | AmbientModule _ -> rawPreferredPath runtimePackage true owner |> List.length
+/// The nesting depth of an owner's preferred path: 0 for the entry module, and for globals the
+/// depth `preferredPath` gives them under the same `hasEntryOwner`.
+let depthOf (runtimePackage: string<importSpecifier>) (hasEntryOwner: bool) (owner: ExportOwner) : int =
+    rawPreferredPath runtimePackage hasEntryOwner owner |> List.length
 
 /// The ordinal tie-break key of an owner: its specifier, or `""` for the entry module and
 /// globals.
@@ -231,6 +229,13 @@ let allOwners (model: ShapeModel) : ExportOwner list =
     model.Harvest.Exports
     |> List.map (fun export -> ownerOf model.RuntimePackage export.Origin)
     |> List.distinct
+
+/// Whether the run renders an entry module, which is what nests global-scope declarations under
+/// `Globals` and so gives them depth 1.
+let hasEntryOwner (model: ShapeModel) : bool =
+    allOwners model
+    |> List.map (normalizeOwner model.RuntimePackage)
+    |> List.contains EntryModule
 
 /// The nested-module path each owner's declared types render under, unique across owners.
 /// Empty for an entry-module or global-scope owner.

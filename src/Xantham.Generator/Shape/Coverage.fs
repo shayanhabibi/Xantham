@@ -30,11 +30,10 @@ let auditCoverage: Pass<ShapeModel> =
 
                     let name = fsName (defaultExportName ctx)
 
-                    // A type export's own declaration carries the fully qualified name
-                    // `name-exports` assigned it - `Store.SetStoreFunction` for a subpath export
-                    // nested under its module - which is the name every other pass's finding
-                    // names it by. Falls back to the bare export name for a value export, which
-                    // `name-exports` does not assign a `DeclNames` entry to.
+                    // The fully qualified name assigned by `name-exports`, which every other
+                    // pass's finding also reports: `Store.SetStoreFunction` for a subpath export
+                    // nested under its module. A value export falls back to its bare export
+                    // name, `DeclNames` covering type exports only.
                     let qualifiedName (export: HarvestedExport) =
                         model.ExportTypes
                         |> Map.tryFind export.Symbol.SymbolId
@@ -53,17 +52,16 @@ let auditCoverage: Pass<ShapeModel> =
                            |> Set.exists (fun declared ->
                                declared.StartsWith(exported + ".") || declared.EndsWith("." + exported))
 
-                    // The parent symbols of every harvested export, for telling a namespace with
-                    // harvested members apart from one with none.
+                    // The parent symbols of every harvested export, identifying which namespaces
+                    // have harvested members.
                     let namespacesWithMembers =
                         model.Harvest.Exports
                         |> List.choose (fun export -> export.Symbol.ParentSymbolId |> ValueOption.toOption)
                         |> Set.ofList
 
-                    // A namespace export whose own declared members carry none of them the `export`
-                    // keyword - `SolidStore.Unwrappable` in `solid-js` - reaches harvest with no
-                    // member of its own, and holds no type or value surface a declaration could ever
-                    // carry on its behalf.
+                    // A namespace export whose declared members all omit the `export` keyword -
+                    // `SolidStore.Unwrappable` in `solid-js`. Harvest yields it empty, so its type
+                    // and value surface is empty and a declaration would represent nothing.
                     let opaqueNamespace (export: HarvestedExport) =
                         hasAny SymbolFlags.Module export.Symbol.Flags
                         && not (hasAny SymbolFlags.Type export.Symbol.Flags)

@@ -48,7 +48,12 @@ is the specification; there is no separate spec document.
 13. Enumeration is automatic whenever an `exports` map has one or more `./` keys. An
     optional `subpaths` allowlist in `xantham.json` restricts it. No boolean toggle.
 14. Findings: wildcard key skipped and key without a declaration file are both Escape. A key
-    resolving outside the package directory is a hard failure. Relocation gets no finding.
+    whose conditions name a declaration file absent from the package raises the same Escape
+    finding rather than failing the run - a published `exports` map that overreaches degrades
+    the binding and leaves the rest of the package generatable. A key naming an asset rather
+    than a TypeScript file (`"./package.json": "./package.json"`) is passed over silently; it
+    offers no type surface to report on. A key resolving outside the package directory is a
+    hard failure. Relocation gets no finding.
 15. Declaration catalogs: `FSharpName` already carries the dotted nested path since commit
     4d2fede (`Shape/ExportNames.fs` writes `path @ [preferred]`). **No schema change.**
     The catalog `SchemaVersion` stays 1.
@@ -449,9 +454,9 @@ let publicPaths (config: GeneratorConfig) (packageDir: string) : PublicPath list
                             let path = inside file
 
                             if not (File.Exists path) then
-                                failwith $"package.json: exports key \"{key}\" names a missing declaration file {file}"
-
-                            skipped, taken @ [ { Key = key; File = path * uom<declFile> } ])
+                                skipped @ [ key, HarvestGlobals.SubpathWithoutDeclarations key ], taken
+                            else
+                                skipped, taken @ [ { Key = key; File = path * uom<declFile> } ])
                 ([], [])
 
         let root =
@@ -1000,3 +1005,11 @@ Landed complete; these are the items reviews raised and the wave deliberately le
 - **Root-less maps, two keys over one module path, and `subpaths`** are covered by unit
   tests over `Bootstrap.publicPaths` rather than end to end.
 - **`@types/node` was not regenerated** as a measurement for this wave.
+- **Root-homing mints a twin rather than reusing an identical declaration.**
+  `@cloudflare/workers-types` declares `WebSocketClose`, `WebSocketError` and
+  `WebSocketMessage` in global scope and again in the `cloudflare:sockets` ambient module. The
+  second set is unreferenced, and was already unreferenced at `Cloudflare.Sockets.WebSocketClose`
+  before decision 10 moved it. Root-homing now takes it to a name the global copy holds, so
+  `claim` suffixes it `WebSocketClose2`. Two fixes are separable: `shape-callbacks` minting a
+  delegate nothing references, and `claim` suffixing where a structurally identical declaration
+  is already present.

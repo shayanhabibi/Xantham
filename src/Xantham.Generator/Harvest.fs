@@ -57,11 +57,10 @@ let private followAlias (ctx: Context) (export: SymbolResponse) =
             return export.Name, export
     }
 
-/// One public path's exports, harvested under `origin`, with the resolved origin symbols
-/// (for `namespacesAmong`). A path whose file has no module symbol contributes nothing - a
-/// global-script subpath, or a global type library (`@cloudflare/workers-types`, `@types/*`
-/// that declare no module) that `harvest-globals` picks the file's ambient declarations up
-/// instead when the whole model ends up empty.
+/// A public path's exports, harvested under `origin`, with the resolved origin symbols (for
+/// `namespacesAmong`). A path backed by a global-script file - a global type library such as
+/// `@cloudflare/workers-types` or a module-free `@types/*` - yields an empty list, and
+/// `harvest-globals` supplies its ambient declarations once the whole model resolves empty.
 let private harvestPublicPath
     (ctx: Context)
     (origin: ExportOrigin)
@@ -111,9 +110,8 @@ let private harvestPublicPath
 /// aliases land on the declaring symbol. The root binds `[<Import(name, package)>]`; a
 /// subpath binds under its own specifier, `"<runtime>/<key without the leading ./>"`.
 ///
-/// A skipped `exports` key (a wildcard, or a key without declarations) raises the finding
-/// `Context.SkippedPaths` already carries for it, and degrades the model rather than failing
-/// the run.
+/// A skipped `exports` key - a wildcard, or a key without declarations - raises the finding
+/// recorded for it in `Context.SkippedPaths`, degrading the model and leaving the run intact.
 let harvestExports: Pass<HarvestModel> =
     {
         Name = "harvest-exports"
