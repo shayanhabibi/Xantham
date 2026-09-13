@@ -145,7 +145,13 @@ let internal nonNullishMemberSet (model: ShapeModel) (candidate: TypeFacts) =
 /// The declared union whose non-nullish member set matches, if any: what lets an
 /// `"ms" | "s" | undefined` member position resolve to the exported `TimeUnit` rather than a
 /// synthesized twin (literal types are interned, so the ids match across positions).
-let internal namedUnionByMembers (model: ShapeModel) (memberIds: int<Measure.typeId> list) : string option =
+/// Catalog runs keep inline literal unions independent of reachable named aliases;
+/// direct alias references retain their declaration ownership.
+let internal namedUnionByMembers
+    (ctx: Context)
+    (model: ShapeModel)
+    (memberIds: int<Measure.typeId> list)
+    : string option =
     let wanted = List.sort memberIds
 
     model.DeclNames
@@ -163,6 +169,12 @@ let internal namedUnionByMembers (model: ShapeModel) (memberIds: int<Measure.typ
 
             if
                 (List.isEmpty nullish || literalEnum)
+                && not (
+                    literalEnum
+                    && not (List.isEmpty candidate.AliasDeclarations)
+                    && (ctx.Config.DeclarationCatalog
+                        || not (List.isEmpty ctx.Config.DeclarationReferences))
+                )
                 && nonNullishMemberSet model candidate = wanted
             then
                 Some name
@@ -2298,7 +2310,7 @@ and internal unionRef
                 else
                     wrap (FsNamed name) []
             | None ->
-                match namedUnionByMembers model remaining with
+                match namedUnionByMembers ctx model remaining with
                 | Some name -> wrap (FsNamed name) []
                 | None ->
                     let reference, findings = erasedUnionRef ctx model self owner remaining in wrap reference findings

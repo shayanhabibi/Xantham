@@ -322,7 +322,8 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
     let isLiteralUnion (facts: TypeFacts) =
         let _, remaining = splitNullish model facts
 
-        remaining.Length > 1
+        facts.NonNullableAlias.IsNone
+        && remaining.Length > 1
         && remaining
            |> List.forall (fun id ->
                match Map.tryFind id model.Types with
@@ -330,7 +331,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                | None -> false)
         && not (isBooleanPair model remaining)
         && (Set.contains facts.Response.TypeId recoveredAliases
-            || (namedUnionByMembers { model with DeclNames = names } remaining).IsNone)
+            || (namedUnionByMembers ctx { model with DeclNames = names } remaining).IsNone)
 
     /// A union `detect-tagged-unions` will declare (D4, §4.5(2)): every arm an object type
     /// carrying the same string-literal discriminant, and data a DU case can bind. That pass
@@ -351,7 +352,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
         let nullish, remaining = splitNullish model facts
 
         List.isEmpty nullish
-        && (namedUnionByMembers { model with DeclNames = names } remaining).IsNone
+        && (namedUnionByMembers ctx { model with DeclNames = names } remaining).IsNone
         && (match taggedUnionShape { model with DeclNames = names } facts with
             | Discriminated(tag, tagged, _) -> tagged |> List.forall (fst >> isTaggedCaseData tag)
             | TagCollides _

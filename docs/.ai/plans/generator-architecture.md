@@ -1715,6 +1715,24 @@ retain the canonical nullable Value. A typed F# consumer constructs and reuses b
 Actual pinned AI SDK diagnostic generation/compilation and the full regression measurements
 are recorded in `docs/.ai/handovers/catalog-recursive-json.md`.
 
+### Inline literal unions across catalog programs
+
+Shape does not promote an inline literal union to an unrelated named alias by matching
+its member values when producing or consuming a declaration catalog. The named alias
+may be reachable only in the producer program; borrowing its name would change the
+shared declaration's F# API in the consumer. Inline unions instead retain their own
+structural enum identity. Explicit alias references and recovered non-nullable alias
+wrappers keep their named owners, source closures, and distinct declaration identities.
+Nonliteral unions retain the existing member-set matching behavior.
+
+The literal-alias-identity lab places an inline optional `"a" | "b"` property beside
+named aliases in both literal orders and a nominal TypeScript enum. A separate consumer
+uses the inline values in reverse order. Its typed F# consumer shares the producer's
+property enum; the two named aliases and the nominal enum keep independent catalog
+identities, and a changed dependency input still invalidates the catalog. Catalog
+source, API, arity, and constraint checks remain unchanged. Measurements and rejected
+alternatives are recorded in `docs/.ai/handovers/literal-alias-identity.md`.
+
 # Easy Nits 
 
 To include in scope when a phases implementation/attempt ends up being small/quick.

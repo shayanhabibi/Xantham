@@ -1,0 +1,12 @@
+{
+  "module": "LiteralAliasIdentityLab",
+  "namespace": "Identity",
+  "lib": [
+    "esnext"
+  ],
+  "types": [],
+  "groups": {
+    "literal-alias-owner-lab": "ship"
+  },
+  "declarationCatalog": true
+}

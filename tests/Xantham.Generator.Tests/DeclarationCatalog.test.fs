@@ -174,6 +174,45 @@ let tests =
                 skiptest "run `npm install` at the repository root, or set XANTHAM_TSGO_EXE" ]
     | Some _ ->
         testList "declaration catalog" [
+            testCase "anonymous literal enums retain identity beside named aliases across packages" <| fun _ ->
+                let directory = Path.Combine(temporaryRoot, "xantham-literal-alias-" + Guid.NewGuid().ToString "N")
+                let package = Path.Combine(directory, "package")
+                Directory.CreateDirectory package |> ignore
+                try
+                    let source = Path.GetFullPath(Path.Combine(fixture, "..", "literal-alias-identity-lab"))
+                    for file in Directory.EnumerateFiles(source, "*", SearchOption.AllDirectories) do
+                        writePackageFile package (Path.GetRelativePath(source, file)) (File.ReadAllText file)
+                    let config =
+                        { GeneratorConfig.loadFile (Path.Combine(package, "xantham.json")) with
+                            ModuleName = Some "Identity.Root" }
+                    let dependency = Path.Combine(package, "node_modules", "literal-alias-owner-lab")
+                    let root = Path.Combine(directory, "root")
+                    Pipeline.run config dependency root |> Async.RunSynchronously |> ignore
+                    let catalog = JsonSerializer.Deserialize<DeclarationCatalog.Catalog>(File.ReadAllText(Path.Combine(root, "declarations.json")), JsonSerializerOptions(PropertyNameCaseInsensitive = true))
+                    let mode = catalog.Declarations |> Array.find (fun declaration -> declaration.FSharpName = "Identity.Root.Mode")
+                    let reversed = catalog.Declarations |> Array.find (fun declaration -> declaration.FSharpName = "Identity.Root.ReversedMode")
+                    let nominal = catalog.Declarations |> Array.find (fun declaration -> declaration.FSharpName = "Identity.Root.Nominal")
+                    Expect.notEqual mode.Identity reversed.Identity "named literal aliases retain distinct declaration owners"
+                    Expect.notEqual mode.Identity nominal.Identity "TypeScript enum declarations retain nominal identity"
+                    let adapter =
+                        { config with
+                            ModuleName = Some "Identity.Adapter"
+                            DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
+                    Pipeline.run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    let consumer = """module Identity.Consumer
+let accept (value: Identity.Root.Value) (mode: Identity.Root.Value.Kind) : Identity.Root.Value = Identity.Adapter.Exports.accept(value, mode)
+let property (value: Identity.Root.Value) : Identity.Root.Value.Kind option = value.kind
+let nominal (value: Identity.Root.Nominal) : Identity.Root.Nominal = Identity.Adapter.Exports.nominal value
+"""
+                    let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] consumer
+                    Expect.equal code 0 output
+                    File.AppendAllText(Path.Combine(dependency, "index.d.ts"), "\n")
+                    Expect.throwsC
+                        (fun () -> Pipeline.run adapter package (Path.Combine(directory, "stale")) |> Async.RunSynchronously |> ignore)
+                        (fun error -> Expect.stringContains error.Message "input source hash mismatch" "shared alias input remains authenticated")
+                finally
+                    if Directory.Exists directory then Directory.Delete(directory, true)
+
             testCase "NonNullable recursive aliases retain canonical payload types across packages" <| fun _ ->
                 let directory = Path.Combine(temporaryRoot, "xantham-recursive-json-" + Guid.NewGuid().ToString "N")
                 Directory.CreateDirectory directory |> ignore
