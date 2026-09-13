@@ -108,6 +108,57 @@ let tests =
                 skiptest "run `npm install` at the repository root, or set XANTHAM_TSGO_EXE" ]
     | Some _ ->
         testList "declaration catalog" [
+            testCase "independent record aliases share canonical sources and preserve input authentication" <| fun _ ->
+                let directory = Path.Combine(temporaryRoot, "xantham-record-alias-source-" + Guid.NewGuid().ToString "N")
+                let package = Path.Combine(directory, "package")
+                Directory.CreateDirectory package |> ignore
+                try
+                    let source = Path.GetFullPath(Path.Combine(fixture, "..", "record-alias-source-identity-lab"))
+                    for file in Directory.EnumerateFiles(source, "*", SearchOption.AllDirectories) do
+                        writePackageFile package (Path.GetRelativePath(source, file)) (File.ReadAllText file)
+                    let config =
+                        { GeneratorConfig.Default with
+                            ModuleName = Some "Identity.Root"
+                            Lib = Some [ "esnext" ]
+                            Types = Some []
+                            DeclarationCatalog = true }
+                    let root = Path.Combine(directory, "root")
+                    Pipeline.run config package root |> Async.RunSynchronously |> ignore
+                    let catalog = JsonSerializer.Deserialize<DeclarationCatalog.Catalog>(File.ReadAllText(Path.Combine(root, "declarations.json")), JsonSerializerOptions(PropertyNameCaseInsensitive = true))
+                    let record = catalog.Declarations |> Array.find (fun declaration -> declaration.FSharpName = "Identity.Root.PipelineRecord")
+                    let modelRecord = catalog.Declarations |> Array.find (fun declaration -> declaration.FSharpName = "Identity.Root.ModelRecord")
+                    Expect.isFalse (record.Sources |> Array.exists (fun source -> source.Package = "record-alias-source-identity-lab")) "transparent alias application is not a canonical declaration source"
+                    Expect.isTrue (modelRecord.Sources |> Array.exists (fun source -> source.Package = "record-model-lab")) "the applied model declaration remains authenticated"
+                    Expect.isTrue (catalog.Inputs |> Array.exists (fun source -> source.Package = "record-alias-source-identity-lab" && source.File = "index.d.ts")) "alias source remains a catalog input"
+                    let adapter =
+                        { config with
+                            ModuleName = Some "Identity.Adapter"
+                            DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
+                    let consumerPackage = Path.Combine(package, "consumer")
+                    Pipeline.run adapter consumerPackage (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    let consumer = """module Identity.Consumer
+let echo (value: Identity.Root.PipelineRecord) : Identity.Root.PipelineRecord = Identity.Adapter.Exports.echo value
+let alias (value: Identity.Adapter.OutboundHandlerParams) : Identity.Root.PipelineRecord = value
+let model (value: Identity.Adapter.ModelParams) : Identity.Root.ModelRecord = value
+let text (value: Identity.Adapter.TextParams) (key: string) : string = value.[key]
+"""
+                    let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] consumer
+                    Expect.equal code 0 output
+                    let aliasFile = Path.Combine(package, "index.d.ts")
+                    let aliasSource = File.ReadAllText aliasFile
+                    File.AppendAllText(aliasFile, "\n")
+                    File.AppendAllText(Path.Combine(consumerPackage, "index.d.ts"), "\nimport '../index';\n")
+                    Expect.throwsC
+                        (fun () -> Pipeline.run adapter consumerPackage (Path.Combine(directory, "stale-alias")) |> Async.RunSynchronously |> ignore)
+                        (fun error -> Expect.stringContains error.Message "input source hash mismatch" "reachable alias input changes still invalidate the producer")
+                    File.WriteAllText(aliasFile, aliasSource)
+                    writePackageFile package "node_modules/record-model-lab/index.d.ts" "export interface Model { value: number }\n"
+                    Expect.throwsC
+                        (fun () -> Pipeline.run adapter consumerPackage (Path.Combine(directory, "stale-model")) |> Async.RunSynchronously |> ignore)
+                        (fun error -> Expect.stringContains error.Message "input source hash mismatch" "changed semantic dependencies still invalidate the producer")
+                finally
+                    if Directory.Exists directory then Directory.Delete(directory, true)
+
             testCase "primitive aliases preserve nested declaration identities across packages" <| fun _ ->
                 let directory = Path.Combine(temporaryRoot, "xantham-primitive-argument-" + Guid.NewGuid().ToString "N")
                 Directory.CreateDirectory directory |> ignore

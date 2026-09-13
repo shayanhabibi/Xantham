@@ -1625,6 +1625,27 @@ Combined validation with intrinsic-argument normalization: 869 generator tests, 
 tests, the compile gate and 461 Fable runtime checks pass. Existing golden bindings and
 finding counts remain unchanged; the new labs retain their independently measured counts.
 
+### Canonical declaration sources for transparent aliases
+
+A declaration's source closure follows the sources selected for each canonical type
+identity. Transparent alias applications retain their source fingerprints in catalog inputs;
+they contribute declaration sources when the alias itself defines the identity. Intrinsic
+arguments share their provenance across named primitive aliases.
+
+The record-alias-source-identity lab gives separate packages independent aliases of
+`Record<string, unknown>` and `Record<string, Model>`. The aliases share their applied
+canonical declarations while preserving public F# names and typed consumer access. The
+model's declaration remains part of its record's source closure. Changes to a reachable
+alias input or to the applied model still invalidate the producer catalog through the
+existing source authentication checks.
+
+Validation: 872 generator tests and 90 Wire tests pass in both regeneration and check
+phases, the compile gate passes, and 461 Fable runtime checks pass. All 95 pre-existing
+golden directories, including their finding counts, remain byte-identical. The new lab
+has two widened declarations: unknown values use `obj`, and the separately owned model
+is opaque when the root fixture is generated alone. Fresh generator FCS checking reports
+zero errors and warnings.
+
 # Easy Nits 
 
 To include in scope when a phases implementation/attempt ends up being small/quick.

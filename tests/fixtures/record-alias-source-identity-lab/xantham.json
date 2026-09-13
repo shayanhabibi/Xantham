@@ -1,0 +1,8 @@
+{
+  "module": "RecordAliasSourceIdentityLab",
+  "lib": [
+    "esnext"
+  ],
+  "types": [],
+  "declarationCatalog": true
+}

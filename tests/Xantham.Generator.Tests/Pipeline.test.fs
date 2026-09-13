@@ -4844,6 +4844,14 @@ let primitiveArgumentIdentityTests =
     ]
 
 [<Tests>]
+let recordAliasSourceIdentityTests =
+    testList "record alias source identity fixture" [
+        yield!
+            fixtureTests "record-alias-source-identity-lab" (handFixture "record-alias-source-identity-lab")
+                { GeneratorConfig.Default with Lib = Some [ "esnext" ]; Types = Some [] } (fun _ -> [])
+    ]
+
+[<Tests>]
 let groupedDomAliasTests =
     testList "grouped DOM alias fixture" [
         yield!

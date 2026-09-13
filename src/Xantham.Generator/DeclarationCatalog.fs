@@ -637,7 +637,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
             |> Set.ofList
 
         let visited = Collections.Generic.HashSet<int<Measure.typeId>>()
-        let files = Collections.Generic.HashSet<string>()
+        let sources = Collections.Generic.HashSet<Source>()
         let pending = Collections.Generic.Stack<int<Measure.typeId>>()
         pending.Push id
 
@@ -648,18 +648,23 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                 match Map.tryFind current shape.Types with
                 | None -> ()
                 | Some facts ->
-                    if not (facts.Response.Flags.HasFlag TypeFlags.TypeParameter) then
-                        for handle in facts.Declarations @ facts.AliasDeclarations do
-                            files.Add((handle / uom<declHandle>).Split([| '.' |], 3)[2]) |> ignore
+                    if
+                        not (facts.Response.Flags.HasFlag TypeFlags.TypeParameter)
+                        && intrinsicArgumentKey facts.Response = ""
+                    then
+                        match Map.tryFind current byType with
+                        | Some identity ->
+                            for source in identity.Sources do
+                                sources.Add source |> ignore
+                        | None ->
+                            for handle in facts.Declarations do
+                                let file = (handle / uom<declHandle>).Split([| '.' |], 3)[2]
+                                sources.Add sourceFiles[file] |> ignore
 
                     for dependency in dependencies facts do
                         pending.Push dependency
 
-        files
-        |> Seq.map (fun file -> sourceFiles[file])
-        |> Seq.distinct
-        |> Seq.sortBy sourceKey
-        |> Seq.toList
+        sources |> Seq.sortBy sourceKey |> Seq.toList
 
     // Parent roles cover checker-synthesized types whose symbol has no declaration handle.
     let edges (facts: TypeFacts) =
