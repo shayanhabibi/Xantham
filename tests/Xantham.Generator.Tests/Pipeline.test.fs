@@ -4807,3 +4807,13 @@ let readonlyEnumTests =
             fixtureTests "readonly-enums-lab" (handFixture "readonly-enums-lab")
                 { GeneratorConfig.Default with Lib = Some [ "esnext" ]; Types = Some [] } (fun _ -> [])
     ]
+
+[<Tests>]
+let subpathClassesTests =
+    testList "subpath class fixture" [
+        yield!
+            fixtureTests "subpath-classes-lab" (handFixture "subpath-classes-lab")
+                { GeneratorConfig.Default with
+                    Lib = Some [ "esnext" ]; Types = Some []
+                    PublicInputs = Some(Map.ofList [ "./errors", "index.d.ts" ]) } (fun _ -> [])
+    ]

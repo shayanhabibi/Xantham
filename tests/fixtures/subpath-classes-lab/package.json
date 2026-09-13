@@ -1,0 +1,1 @@
+{"name":"subpath-classes-lab","version":"1.0.0","type":"module","exports":{".":{"types":"./index.d.ts","default":"./index.js"},"./errors":{"types":"./index.d.ts","default":"./index.js"}}}

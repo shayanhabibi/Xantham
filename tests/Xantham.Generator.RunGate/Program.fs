@@ -2091,6 +2091,9 @@ let main _ =
     subpathLab ()
     mixedSubpaths ()
     let card = PublicInputsLab.Mirror.Card.Card.Create "test"
+    let child = SubpathClassesLab.Errors.Exports.Child "details"
+    equal "public subpath constructor retains inherited members" "child" child.code
+    equal "public subpath constructor retains derived members" "details" child.detail
 
     equal
         "explicit mirror input keeps its runtime import"

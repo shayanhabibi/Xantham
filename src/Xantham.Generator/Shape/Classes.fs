@@ -372,7 +372,7 @@ let shapeClasses: Pass<ShapeModel> =
                                         |> Option.map _.BaseTypes
                                         |> Option.defaultValue []
 
-                                    if isEntrypoint export facts.ConstructSignatures bases then
+                                    if isEntrypoint ctx export facts.ConstructSignatures bases then
                                         admitEntrypoint export facts bases declaredName
 
                                     facts.ConstructSignatures

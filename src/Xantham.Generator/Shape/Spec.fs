@@ -2793,12 +2793,29 @@ let internal agreedMemberType (model: ShapeModel) (facts: TypeFacts) (m: Resolve
 /// other class keeps the interface form, where the `[<ParamObject>]` Create is the construction
 /// a consumer wants.
 let internal isEntrypoint
+    (ctx: Context)
     (export: HarvestedExport)
     (constructSignatures: ResolvedSignature list)
     (bases: int<Measure.typeId> list)
     =
     match export.Origin with
-    | FromAmbientModule _ -> (constructSignatures |> List.exists _.IsAbstract) || not bases.IsEmpty
+    | FromAmbientModule specifier ->
+        let runtime =
+            GeneratorConfig.runtimePackage ctx.Config ctx.PackageName / uom<importSpecifier>
+
+        let publicInput =
+            ctx.PublicPaths
+            |> List.exists (fun path ->
+                let publicSpecifier =
+                    if path.Key = "." then
+                        runtime
+                    else
+                        runtime + "/" + path.Key.Substring 2
+
+                publicSpecifier = specifier / uom<importSpecifier>)
+
+        not publicInput
+        && ((constructSignatures |> List.exists _.IsAbstract) || not bases.IsEmpty)
     | FromGlobal
     | FromModule -> false
 

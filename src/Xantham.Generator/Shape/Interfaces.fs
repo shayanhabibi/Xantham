@@ -154,7 +154,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                                     let entrypoint =
                                         match Map.tryFind typeId classSides with
                                         | Some(export, valueFacts) ->
-                                            isEntrypoint export valueFacts.ConstructSignatures facts.BaseTypes
+                                            isEntrypoint ctx export valueFacts.ConstructSignatures facts.BaseTypes
                                         | None -> false
 
                                     let inheritsSomething () =

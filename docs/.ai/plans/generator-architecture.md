@@ -1520,6 +1520,22 @@ checking; the compile gate and 459 Fable runtime checks pass. Existing golden bi
 finding counts are unchanged. Constructor bounds: 1 exact / 4 ergonomic. Readonly enums:
 2 exact / 2 ergonomic. Both labs have zero widened and escape symbols.
 
+### Public SDK classes and ambient runtime entrypoints
+
+Entrypoint classification compares an export's import specifier against the exact selected
+public-input map. A package subpath retains the same class representation as its root.
+Genuine ambient runtime modules still receive the entrypoint class and optional-hook rules.
+The distinction applies consistently in interface, anonymous-type and class shaping.
+
+The subpath-classes lab has a two-class Error hierarchy under a public subpath. It previously
+emitted an interface inheriting an imported abstract class (FS0887). The corrected output
+compiles, and Fable constructs the real JavaScript subclass and reads its own and inherited
+members. Existing binding text is unchanged. Anime.js loses three inappropriate SC008
+entrypoint-refusal findings (JSAnimation, Timeline, Timer); symbol tiers are unchanged.
+
+Validation: 851 generator tests, 90 Wire tests, the compile gate and 461 Fable runtime
+checks pass. A fresh FCS check reports no errors or warnings.
+
 # Easy Nits 
 
 To include in scope when a phases implementation/attempt ends up being small/quick.

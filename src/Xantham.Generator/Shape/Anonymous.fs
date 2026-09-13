@@ -395,7 +395,8 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
             |> List.collect (fun (typeId, facts) ->
                 let entrypoint =
                     match Map.tryFind typeId classSides with
-                    | Some(export, valueFacts) -> isEntrypoint export valueFacts.ConstructSignatures facts.BaseTypes
+                    | Some(export, valueFacts) ->
+                        isEntrypoint ctx export valueFacts.ConstructSignatures facts.BaseTypes
                     | None -> false
 
                 // A declaration carrying an `inherit` line keeps its optional methods as option
