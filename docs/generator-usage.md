@@ -266,8 +266,10 @@ Map its TypeScript name to `"Application.Support.Check"` and supply that definit
 the generated binding. This delegate has zero generic type parameters and two callback
 arguments: mapping `arity` describes the former. A two-argument Fable probe validates both
 passing this delegate to JavaScript and receiving and invoking a JavaScript callback.
+Ordinary generation of the same callback also chooses a delegate, with `TR055` reporting
+its two arguments; the corresponding runtime control passes.
 
-A curried alias such as `type Check = string -> float -> bool` has a different calling
+A manually supplied curried alias such as `type Check = string -> float -> bool` has a different calling
 convention. In that probe it compiles and works when passed to JavaScript, but invoking a
 returned callback fails at runtime. A name mapping supplies no currying adapter. Keep any
 required adapter explicit and test both directions across the JavaScript boundary.
@@ -275,12 +277,14 @@ required adapter explicit and test both directions across the JavaScript boundar
 Keeping the imported callback typed as a delegate gives F# callers a simple adapter:
 
 ```fsharp
-let asFunction (callback: Application.Support.Check) : string -> float -> bool =
-    fun value count -> callback.Invoke(value, count)
+let inline asFunction (callback: Application.Support.Check) value count =
+    callback.Invoke(value, count)
 ```
 
 The probe validates both direct invocation and partial application of this wrapper over a
-callback returned from JavaScript.
+callback returned from JavaScript. With this inline form, direct application emits only
+`callback(value, count)`; a retained partial application still has a closure. This comparison
+concerns the manually injected alias and its adapter at the JavaScript return boundary.
 
 Generic callback mapping also has a known limit: the tested `GenericCheck<string>` reference
 retains its alias name but supplies zero usable type arguments on this path. Mapping it to a
