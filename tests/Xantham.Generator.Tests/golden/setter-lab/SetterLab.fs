@@ -20,6 +20,13 @@ type Distinct<'T, 'A, 'B> = private Distinct__ of ('A -> 'A)
 type Single<'T, 'U> = private Single__ of ('U -> 'U)
 
 /// <summary>
+/// One name, two bounds: one variable cannot stand for both.
+/// </summary>
+type DivergentBound<'T> =
+    [<Emit("$0($1...)")>]
+    abstract Invoke<'U>: value: 'U -> 'U
+
+/// <summary>
 /// Reference positions, including the empty-tuple rest <c>Setter&lt;string | undefined&gt;</c> reaches.
 /// </summary>
 type Holder =

@@ -1200,6 +1200,86 @@ let pipelineTests =
                 ])
 
         yield!
+            fixtureTests "callable-overloads-lab" (handFixture "callable-overloads-lab") GeneratorConfig.Default
+                (fun package ->
+                    [ testCase "one name under two bounds, separated by arity, keeps both Invoke overloads"
+                      <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains
+                              source
+                              "type Coalesce<'T> ="
+                              "the head carries the interface's own parameter, the signatures' sitting on Invoke"
+
+                          Expect.stringContains
+                              source
+                              "abstract Invoke<'U>: value: 'U -> 'U"
+                              "the single-argument signature keeps its own 'U"
+
+                          Expect.stringContains
+                              source
+                              "abstract Invoke<'U>: value: 'U * fallback: 'U -> 'U"
+                              "and the two-argument signature keeps a separate one"
+
+                          Expect.contains
+                              (rendered.Findings |> List.map (fun finding -> finding.Key, finding.Symbol))
+                              ("SI008", "Coalesce")
+                              "reached through Invoke rather than dropped"
+
+                          Expect.isEmpty
+                              (rendered.Findings |> List.filter (fun f -> f.Key = "RA007"))
+                              "repair-arity stays silent"
+
+                      testCase "a tuple return position keeps the Coalesce reference, reaching its Invoke overloads"
+                      <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains
+                              source
+                              "static member makeCoalescer<'T> () : 'T * Coalesce<'T> = jsNative"
+                              "the reference survives a tuple return position at arity 1, unwidened"
+
+                      testCase "a single generic call signature keeps one head, hoisting both parameters onto it"
+                      <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains
+                              source
+                              "type OneShot<'T, 'U> ="
+                              "the erased head carries the interface's parameter beside the signature's"
+
+                      testCase "several non-generic call signatures collapse to one abbreviation, raising TR031"
+                      <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains
+                              source
+                              "type Multiplex ="
+                              "a function-type abbreviation"
+
+                          Expect.contains
+                              (rendered.Findings |> List.map (fun finding -> finding.Key, finding.Symbol))
+                              ("TR031", "Multiplex")
+                              "the second signature is recorded as dropped"
+
+                      testCase "a member beside the call signature keeps the existing hybrid path"
+                      <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains source "type Ledger =" "an interface head"
+                          Expect.stringContains source "abstract count: float with get, set" "the member survives"
+
+                          Expect.contains
+                              (rendered.Findings |> List.map (fun finding -> finding.Key, finding.Symbol))
+                              ("SI008", "Ledger")
+                              "its call signature still reaches Invoke" ])
+
+        yield!
             fixtureTests
                 "uninhabited-intersection-lab"
                 (handFixture "uninhabited-intersection-lab")
@@ -2474,18 +2554,23 @@ let pipelineTests =
                       Expect.stringContains source "type Distinct<'T, 'A, 'B> =" "'A and 'B are two variables"
                       Expect.stringContains source "type Single<'T, 'U> =" "and one signature collapses nothing"
 
-                  testCase "one name under two bounds is refused rather than retyped" <| fun _ ->
+                  testCase "one name under two bounds routes to an interface, not one delegate head" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                       let source = rendered.Files |> List.head |> snd
 
-                      Expect.isFalse (source.Contains "type DivergentBound") "the head F# refuses does not render"
+                      Expect.stringContains source "type DivergentBound<'T> =" "the head carries the alias parameter alone"
+                      Expect.stringContains source "abstract Invoke<'U>: value: 'U -> 'U" "each signature keeps its own 'U"
 
                       Expect.equal
                           (rendered.Findings
-                           |> List.filter (fun f -> f.Key = "RA001")
+                           |> List.filter (fun f -> f.Key = "SI008")
                            |> List.map _.Symbol)
                           [ "DivergentBound" ]
-                          "and the drop is graded as an escape, not an ergonomic collapse"
+                          "reached through Invoke rather than dropped"
+
+                      Expect.isEmpty
+                          (rendered.Findings |> List.filter (fun f -> f.Key = "RA007"))
+                          "repair-arity stays silent"
 
                   testCase "a tuple-typed rest parameter reads as the parameters it stands for" <| fun _ ->
                       // Wave two's second handback: `Setter<string | undefined>` reached the
