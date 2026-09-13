@@ -4594,3 +4594,70 @@ let staticReexportTests =
                       Expect.equal hits 1 "one collapsed path"
                       Expect.stringContains symbols "\"static-reexport-lab\"" "names the collapsed specifier" ])
     ]
+
+[<Tests>]
+let orphanCallbackTests =
+    testList "orphan callback fixture" [
+        // A lifecycle hook is emitted as a handler interface, so the delegate `shape-callbacks`
+        // declares for the same callback is written at zero sites.
+        yield!
+            fixtureTests "orphan-callback-lab" (handFixture "orphan-callback-lab") GeneratorConfig.Default (fun package ->
+                let source () =
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    rendered.Files |> List.head |> snd
+
+                // (=>) pairs a declaration head with the number of times the emitted file
+                // declares it.
+                let inline (=>) head declarations = head, declarations
+
+                [ testCase "the hook reaches its handler interface" <| fun _ ->
+                    let body = source ()
+
+                    Expect.stringContains body "type IOnCloseHandler =" "the hook is an interface of its own"
+                    Expect.stringContains body "type IOnDropHandler =" "one per hook"
+
+                    Expect.stringContains
+                        body
+                        "abstract onClose: signal: Signal * code: float -> JS.Promise<unit> option"
+                        "reading its parameters directly rather than a delegate name"
+
+                  testCase "the reference positions keep the delegate they read" <| fun _ ->
+                      let body = source ()
+
+                      Expect.stringContains
+                          body
+                          "abstract onClose: OnClose option"
+                          "a plain interface's optional callback method is an option property"
+
+                      Expect.stringContains
+                          body
+                          "type OnClose = delegate of signal: Signal * code: float -> JS.Promise<unit> option"
+                          "under the delegate declared for it"
+
+                      Expect.stringContains body "abstract probe: Probe option" "and so is a class kept as an interface"
+
+                      Expect.stringContains
+                          body
+                          "abstract settle: Settle option"
+                          "and so is an entrypoint whose base this run declares"
+
+                  testTheory "a delegate is declared exactly where a reference reads it" [
+                      "type OnClose = delegate" => 1
+                      "type OnClose2 = delegate" => 0
+                      "type OnDrop = delegate" => 0
+                      "type Probe = delegate" => 1
+                      "type Settle = delegate" => 1
+                      "type Tick = delegate" => 0
+                  ] <| fun (head, declarations) ->
+                      let body = source ()
+                      let pattern = System.Text.RegularExpressions.Regex.Escape head
+                      let hits = System.Text.RegularExpressions.Regex.Matches(body, pattern).Count
+
+                      hits |> Flip.Expect.equal $"{head} is declared {declarations} time(s)" declarations
+
+                  testCase "no handler-interface hook leaves a delegate behind" <| fun _ ->
+                      let body = source ()
+
+                      Expect.isFalse (body.Contains "OnClose2") "the hook's callback claims no second name"
+                      Expect.isFalse (body.Contains "type OnDrop") "nor a first one" ])
+    ]
