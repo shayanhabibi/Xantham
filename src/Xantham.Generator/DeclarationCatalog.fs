@@ -319,9 +319,12 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                         else
                             "constructor"
 
-                    let bindings =
+                    let parameters =
                         (Shape.Spec.declParamIds facts @ Shape.Spec.freeParamsOf shape id)
                         |> List.distinct
+
+                    let bindings =
+                        parameters
                         |> List.mapi (fun index parameter -> parameter, "parameter:" + string index)
                         |> List.fold (fun bindings (parameter, key) -> Map.add parameter key bindings) bindings
 
@@ -407,6 +410,17 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
 
                         key
 
+                    let parameterBounds =
+                        if role = "constructor" && not (List.isEmpty parameters) then
+                            parameters
+                            |> List.map (fun parameter ->
+                                Map.tryFind parameter shape.Types
+                                |> Option.bind _.Constraint
+                                |> Option.map partKey)
+                            |> fun bounds -> [ json ("parameter-bounds", bounds) ]
+                        else
+                            []
+
                     let signature (signature: ResolvedSignature) =
                         let signatureBindings =
                             signature.TypeParameters
@@ -459,6 +473,30 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                         else
                             arguments
 
+                    let unresolvedArgumentKey (argument: Proto.TypeResponse) =
+                        if
+                            not (argument.Flags.HasFlag TypeFlags.EnumLiteral)
+                            && uint32 (
+                                argument.Flags
+                                &&& (TypeFlags.StringLike
+                                     ||| TypeFlags.NumberLike
+                                     ||| TypeFlags.BooleanLike
+                                     ||| TypeFlags.BigIntLike
+                                     ||| TypeFlags.ESSymbolLike
+                                     ||| TypeFlags.Any
+                                     ||| TypeFlags.Unknown
+                                     ||| TypeFlags.Null
+                                     ||| TypeFlags.Undefined
+                                     ||| TypeFlags.Void
+                                     ||| TypeFlags.Never
+                                     ||| TypeFlags.NonPrimitive)
+                               )
+                               <> 0u
+                        then
+                            json (uint32 argument.Flags, argument.Value)
+                        else
+                            ""
+
                     let arguments =
                         if structural && not (List.isEmpty arguments) then
                             // Populated structural keys already describe the applied members,
@@ -470,10 +508,8 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                                 |> List.map (fun argument ->
                                     if Map.containsKey argument.TypeId shape.Types then
                                         partKey argument.TypeId
-                                    elif argument.Flags.HasFlag TypeFlags.Object then
-                                        ""
                                     else
-                                        json (uint32 argument.Flags, argument.Value))
+                                        unresolvedArgumentKey argument)
 
                             if not structural then
                                 arguments @ declarationArguments
@@ -501,20 +537,18 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                             |> List.map (fun argument ->
                                 if Map.containsKey argument.TypeId shape.Types then
                                     argumentKey argument.TypeId
-                                elif argument.Flags.HasFlag TypeFlags.Object then
-                                    ""
                                 else
-                                    json (uint32 argument.Flags, argument.Value))
+                                    unresolvedArgumentKey argument)
 
                         if List.isEmpty facts.AliasDeclarations || List.contains "" aliasArguments then
                             if role = "constructor" && not (List.contains "" aliasArguments) then
-                                Some(identity role handles aliasArguments)
+                                Some(identity role handles (aliasArguments @ parameterBounds))
                             else
                                 None
                         else
                             Some(identity "alias" facts.AliasDeclarations aliasArguments)
                     else
-                        Some(identity role handles arguments)
+                        Some(identity role handles (arguments @ parameterBounds))
 
     let mutable byType =
         shape.Types

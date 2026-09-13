@@ -4791,3 +4791,19 @@ let publicInputTests =
         yield!
             fixtureTests "public-inputs-lab" (handFixture "public-inputs-lab") config (fun _ -> [])
     ]
+
+[<Tests>]
+let constructorBoundsTests =
+    testList "constructor bounds fixture" [
+        yield!
+            fixtureTests "catalog-constructor-bounds-lab" (handFixture "catalog-constructor-bounds-lab")
+                { GeneratorConfig.Default with Lib = Some [ "esnext" ]; Types = Some [] } (fun _ -> [])
+    ]
+
+[<Tests>]
+let readonlyEnumTests =
+    testList "readonly dependency enum fixture" [
+        yield!
+            fixtureTests "readonly-enums-lab" (handFixture "readonly-enums-lab")
+                { GeneratorConfig.Default with Lib = Some [ "esnext" ]; Types = Some [] } (fun _ -> [])
+    ]

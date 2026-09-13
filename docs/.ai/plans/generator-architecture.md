@@ -1498,6 +1498,28 @@ checks pass. Existing golden bindings and finding counts are unchanged; the new 
 2 exact and 1 ergonomic symbols. Catalog consumer builds now disable shared build servers
 and use one MSBuild worker after two nested build workers exited during an earlier run.
 
+### Contextual constructor bounds and unresolved declaration arguments
+
+Constructor identities include the constraints on their declaration and captured type
+parameters. An exported `Factory<T extends Base>` and a use under `T extends Derived` receive
+distinct identities; both remain reusable through a producer catalog. The four-line
+catalog-constructor-bounds lab reproduces the previous collision.
+
+An unresolved declaration argument contributes a scalar key only for supported intrinsic or
+literal flags. Enum, union and other unexpanded arguments require a resolved identity or a
+parent role. Their flags alone do not identify a type. The readonly-enums lab imports two
+dependency enums and applies `Readonly` to each; their generated enum types remain distinct
+and reusable through a catalog.
+
+Catalog compile consumers use the test assembly's configuration and disable dependency
+rebuilds. The test project builds Core.TS as a prerequisite. This keeps parallel consumer
+builds from rewriting a shared reference assembly while another compiler reads it.
+
+Validation: 849 generator tests and 90 Wire tests pass during regeneration and independent
+checking; the compile gate and 459 Fable runtime checks pass. Existing golden bindings and
+finding counts are unchanged. Constructor bounds: 1 exact / 4 ergonomic. Readonly enums:
+2 exact / 2 ergonomic. Both labs have zero widened and escape symbols.
+
 # Easy Nits 
 
 To include in scope when a phases implementation/attempt ends up being small/quick.

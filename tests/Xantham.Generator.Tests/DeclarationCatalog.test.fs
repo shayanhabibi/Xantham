@@ -44,6 +44,13 @@ let private compileConsumer directory sources (consumer: string) =
     start.ArgumentList.Add "Consumer.fsproj"
     start.ArgumentList.Add "--disable-build-servers"
     start.ArgumentList.Add "-m:1"
+    start.ArgumentList.Add "-p:BuildProjectReferences=false"
+    start.ArgumentList.Add "--configuration"
+#if DEBUG
+    start.ArgumentList.Add "Debug"
+#else
+    start.ArgumentList.Add "Release"
+#endif
     start.ArgumentList.Add "--verbosity"
     start.ArgumentList.Add "quiet"
     start.RedirectStandardOutput <- true
@@ -101,6 +108,62 @@ let tests =
                 skiptest "run `npm install` at the repository root, or set XANTHAM_TSGO_EXE" ]
     | Some _ ->
         testList "declaration catalog" [
+            testCase "contextual constructor bounds remain distinct and reusable" <| fun _ ->
+                let directory = Path.Combine(temporaryRoot, "xantham-constructor-bounds-" + Guid.NewGuid().ToString "N")
+                Directory.CreateDirectory directory |> ignore
+                try
+                    let package = Path.GetFullPath(Path.Combine(fixture, "..", "catalog-constructor-bounds-lab"))
+                    let config =
+                        { GeneratorConfig.Default with
+                            ModuleName = Some "Identity.Root"
+                            Lib = Some [ "esnext" ]
+                            Types = Some []
+                            DeclarationCatalog = true }
+                    let root = Path.Combine(directory, "root")
+                    let adapter = Path.Combine(directory, "adapter")
+                    Pipeline.run config package root |> Async.RunSynchronously |> ignore
+                    let adapterConfig =
+                        { config with
+                            ModuleName = Some "Identity.Adapter"
+                            DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
+                    Pipeline.run adapterConfig package adapter |> Async.RunSynchronously |> ignore
+                    let consumer = """module Identity.Consumer
+let broad<'T when 'T :> Identity.Root.Base> (factory: Identity.Root.Factory<'T>) : 'T = factory.Create()
+let narrow<'T when 'T :> Identity.Root.Derived> (factory: Identity.Root.Create.FactoryConstructor<'T>) : 'T =
+    Identity.Adapter.Exports.create factory
+"""
+                    let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] consumer
+                    Expect.equal code 0 output
+                finally
+                    if Directory.Exists directory then Directory.Delete(directory, true)
+
+            testCase "readonly dependency enums keep distinct parent identities" <| fun _ ->
+                let directory = Path.Combine(temporaryRoot, "xantham-readonly-enums-" + Guid.NewGuid().ToString "N")
+                Directory.CreateDirectory directory |> ignore
+                try
+                    let package = Path.GetFullPath(Path.Combine(fixture, "..", "readonly-enums-lab"))
+                    let config =
+                        { GeneratorConfig.Default with
+                            ModuleName = Some "Identity.Root"
+                            Lib = Some [ "esnext" ]
+                            Types = Some []
+                            DeclarationCatalog = true }
+                    let root = Path.Combine(directory, "root")
+                    Pipeline.run config package root |> Async.RunSynchronously |> ignore
+                    let adapterConfig =
+                        { config with
+                            ModuleName = Some "Identity.Adapter"
+                            DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
+                    Pipeline.run adapterConfig package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    let consumer = """module Identity.Consumer
+let view = Identity.Root.View.Create(Identity.Root.Permissions.Access.Allow, Identity.Root.Permissions.Waiting.Manual)
+let reuse (value: Identity.Adapter.View) : Identity.Root.View = value
+"""
+                    let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] consumer
+                    Expect.equal code 0 output
+                finally
+                    if Directory.Exists directory then Directory.Delete(directory, true)
+
             testCase "augmented DOM types and global function values compile against Core.TS" <| fun _ ->
                 let directory = Path.Combine(temporaryRoot, "xantham-dom-augmentation-" + Guid.NewGuid().ToString "N")
                 Directory.CreateDirectory directory |> ignore
