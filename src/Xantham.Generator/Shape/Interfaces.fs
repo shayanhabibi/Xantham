@@ -7,17 +7,21 @@ open Xantham.Generator.Shape.Spec
 
 /// What `shape-interfaces` declares under a name: an object shape with members, or an
 /// intersection of object types flattened into one (§4.6). Not an array, a tuple, or a named
-/// instantiation. An index signature counts: `interface Bag { [key: string]: number }`.
+/// instantiation. An index signature counts: `interface Bag { [key: string]: number }`. An
+/// overloaded callable whose call signatures carry incompatible hoisted type parameters
+/// (§4.4's `Invoke`) counts too, even with no members of its own: one delegate cannot name a
+/// type parameter twice under two different bounds.
 let private declaresInterface (model: ShapeModel) (facts: TypeFacts) =
     (flag TypeFlags.Object facts
      // A constructor object is shape even with no properties of its own: `interface F { new
      // (): X }` has no members and one construct signature, and becomes an interface of one
      // `Create` (§4.4).
-     && not (
-         facts.Members.IsEmpty
-         && facts.IndexInfos.IsEmpty
-         && facts.ConstructSignatures.IsEmpty
-     )
+     && (not (
+             facts.Members.IsEmpty
+             && facts.IndexInfos.IsEmpty
+             && facts.ConstructSignatures.IsEmpty
+         )
+         || hasIncompatibleOverloadedTypeParameters model facts)
      // A pure index signature the checker gave no symbol of its own - reached through a
      // type alias, or written inline - resolves through `objectRef` as a `Record`/
      // `ReadonlyRecord` reference instead (TR059). `interface Bag { [key: string]:

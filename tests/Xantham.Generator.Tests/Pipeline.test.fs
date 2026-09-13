@@ -2474,18 +2474,22 @@ let pipelineTests =
                       Expect.stringContains source "type Distinct<'T, 'A, 'B> =" "'A and 'B are two variables"
                       Expect.stringContains source "type Single<'T, 'U> =" "and one signature collapses nothing"
 
-                  testCase "one name under two bounds is refused rather than retyped" <| fun _ ->
+                  testCase "one name under two bounds routes to an interface, not one delegate head" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                       let source = rendered.Files |> List.head |> snd
 
-                      Expect.isFalse (source.Contains "type DivergentBound") "the head F# refuses does not render"
+                      Expect.stringContains source "abstract Invoke<'U>: value: 'U -> 'U" "each signature keeps its own 'U"
 
                       Expect.equal
                           (rendered.Findings
-                           |> List.filter (fun f -> f.Key = "RA001")
+                           |> List.filter (fun f -> f.Key = "SI008")
                            |> List.map _.Symbol)
                           [ "DivergentBound" ]
-                          "and the drop is graded as an escape, not an ergonomic collapse"
+                          "reached through Invoke rather than dropped"
+
+                      Expect.isEmpty
+                          (rendered.Findings |> List.filter (fun f -> f.Key = "RA007"))
+                          "not one delegate head naming 'U twice"
 
                   testCase "a tuple-typed rest parameter reads as the parameters it stands for" <| fun _ ->
                       // Wave two's second handback: `Setter<string | undefined>` reached the

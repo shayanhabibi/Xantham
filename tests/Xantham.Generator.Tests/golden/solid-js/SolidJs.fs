@@ -2510,6 +2510,18 @@ module Store =
     [<Erase>]
     type Part<'T, 'K> = private Part__ of U3<'K, 'K[], U2<Func<obj, float, bool>, StorePathRange>>
 
+    type SetStoreFunction<'T> =
+        [<Emit("$0($1...)")>]
+        abstract Invoke<'K1, 'K2, 'K3, 'K4, 'K5, 'K6>: k1: U3<'K1, 'K1[], U2<Func<obj, float, bool>, StorePathRange>> * k2: U3<'K2, 'K2[], U2<Func<obj, float, bool>, StorePathRange>> * k3: U3<'K3, 'K3[], U2<Func<obj, float, bool>, StorePathRange>> * k4: U3<'K4, 'K4[], U2<Func<obj, float, bool>, StorePathRange>> * k5: U3<'K5, 'K5[], U2<Func<obj, float, bool>, StorePathRange>> * k6: U3<'K6, 'K6[], U2<Func<obj, float, bool>, StorePathRange>> * k7: obj * setter: obj -> unit
+        [<Emit("$0($1...)")>]
+        abstract Invoke<'K1, 'K2>: k1: U3<'K1, 'K1[], U2<Func<obj, float, bool>, StorePathRange>> * k2: U3<'K2, 'K2[], U2<Func<obj, float, bool>, StorePathRange>> * k3: obj * setter: obj -> unit
+        [<Emit("$0($1...)")>]
+        abstract Invoke<'K1>: k1: U3<'K1, 'K1[], U2<Func<obj, float, bool>, StorePathRange>> * k2: obj * setter: obj -> unit
+        [<Emit("$0($1...)")>]
+        abstract Invoke: k1: obj * setter: obj -> unit
+        [<Emit("$0($1...)")>]
+        abstract Invoke: setter: obj -> unit
+
     type StoreReturn<'T> = 'T * Action<obj, obj, obj, obj, obj, obj, obj, obj>
 
     /// <summary>The package's value exports, each bound to its import.</summary>
@@ -2549,7 +2561,7 @@ module Store =
         /// </summary>
         /// <remarks>@description https://docs.solidjs.com/reference/store-utilities/create-store</remarks>
         [<Import("createStore", "solid-js/store")>]
-        static member createStore<'T> ([<ParamArray>] __0: obj) : 'T * obj = jsNative
+        static member createStore<'T> ([<ParamArray>] __0: obj) : 'T * SetStoreFunction<'T> = jsNative
 
     module CreateMutable =
         [<Interface>]
@@ -2567,23 +2579,6 @@ module Store =
 
         module Hooks =
             type OnStoreNodeUpdate = delegate of state: Store.StoreNode * property: obj * value: obj option * prev: obj option -> unit
-
-    module SetStoreFunction =
-        type Setter<'K1, 'K2, 'K3, 'K4, 'K5, 'K6, 'K7> = delegate of prevState: obj * traversed: ('K7 * 'K6 * 'K5 * 'K4 * 'K3 * 'K2 * 'K1) -> obj
-
-        type Setter2<'K1, 'K2, 'K3, 'K4, 'K5, 'K6> = delegate of prevState: obj * traversed: ('K6 * 'K5 * 'K4 * 'K3 * 'K2 * 'K1) -> obj
-
-        type Setter3<'K1, 'K2, 'K3, 'K4, 'K5> = delegate of prevState: obj * traversed: ('K5 * 'K4 * 'K3 * 'K2 * 'K1) -> obj
-
-        type Setter4<'K1, 'K2, 'K3, 'K4> = delegate of prevState: obj * traversed: ('K4 * 'K3 * 'K2 * 'K1) -> obj
-
-        type Setter5<'K1, 'K2, 'K3> = delegate of prevState: obj * traversed: ('K3 * 'K2 * 'K1) -> obj
-
-        type Setter6<'K1, 'K2> = delegate of prevState: obj * traversed: ('K2 * 'K1) -> obj
-
-        type Setter7<'K1> = delegate of prevState: obj * traversed: 'K1[] -> obj
-
-        type Setter8<'T> = delegate of prevState: 'T * traversed: obj[] -> obj
 
 module Suspense =
     [<Interface>]

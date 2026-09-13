@@ -5,8 +5,8 @@
   "counts": {
     "exact": 53,
     "ergonomic": 163,
-    "widened": 91,
-    "escape": 43
+    "widened": 84,
+    "escape": 42
   },
   "passes": [
     {
@@ -26,17 +26,17 @@
     },
     {
       "pass": "shape-callbacks",
-      "total": 227,
-      "ergonomic": 162,
-      "widened": 61,
+      "total": 156,
+      "ergonomic": 105,
+      "widened": 47,
       "escape": 4
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 811,
+      "total": 1012,
       "exact": 15,
-      "ergonomic": 623,
-      "widened": 126,
+      "ergonomic": 744,
+      "widened": 206,
       "escape": 47
     },
     {
@@ -57,24 +57,24 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 157,
-      "ergonomic": 157
+      "total": 158,
+      "ergonomic": 158
+    },
+    {
+      "pass": "DO - dedupe-overloads",
+      "total": 4,
+      "widened": 4
     },
     {
       "pass": "RA - repair-arity",
-      "total": 14,
+      "total": 12,
       "ergonomic": 7,
-      "widened": 7
+      "widened": 5
     },
     {
       "pass": "DD - drop-orphan-delegates",
-      "total": 2,
-      "exact": 2
-    },
-    {
-      "pass": "AC - audit-coverage",
-      "total": 1,
-      "escape": 1
+      "total": 10,
+      "exact": 10
     }
   ]
 }

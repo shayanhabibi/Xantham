@@ -57,7 +57,11 @@ let shapeCallbacks: Pass<ShapeModel> =
                         |> List.sortBy fst
                         |> List.choose (fun (typeId, name) ->
                             match Map.tryFind typeId model.Types with
-                            | Some facts when flag TypeFlags.Object facts && isPureCallback facts ->
+                            | Some facts when
+                                flag TypeFlags.Object facts
+                                && isPureCallback facts
+                                && not (hasIncompatibleOverloadedTypeParameters model facts)
+                                ->
                                 let typeParameters, scope, parameterFindings = aliasTypeParams ctx model name facts
 
                                 // The signature is read under the alias's own parameters, so
