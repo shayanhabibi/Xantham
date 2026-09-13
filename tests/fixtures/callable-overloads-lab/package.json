@@ -1,0 +1,7 @@
+{
+  "name": "callable-overloads-lab",
+  "type": "module",
+  "types": "index.d.ts",
+  "main": "index.js",
+  "description": "Hand-authored lab: overloaded generic call signatures sharing one type-parameter name under two bounds route to shape-interfaces (§4.4) instead of a delegate head."
+}

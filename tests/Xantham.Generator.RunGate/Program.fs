@@ -1960,6 +1960,21 @@ let private callableHybrids () =
         6.0
         (CallableHybridLab.Exports.collides 5.0)
 
+/// §4.4's routing counterpart: two call signatures sharing one hoisted type-parameter name under
+/// different bounds reach an interface, each keeping its own `Invoke` overload instead of one
+/// shared delegate head. The checks below call each overload through its bound function, the
+/// runtime evidence the routing claim rests on.
+let private callableOverloads () =
+    equal
+        "the single-argument overload reaches the underlying function"
+        "hi"
+        (CallableOverloadsLab.Exports.coalesce "hi")
+
+    equal
+        "the two-argument overload reaches the same function under its own arity"
+        7.0
+        (CallableOverloadsLab.Exports.coalesce (3.0, 4.0))
+
 /// Export owners reach their own containers: the root ambient module, a subpath, a re-export
 /// alias and a mutable global each bind to their own JavaScript target, and a unioned or
 /// literal-separated overload still selects the one exported function.
@@ -2052,6 +2067,7 @@ let main _ =
     generatedDelegateForms ()
     recordIndex ()
     callableHybrids ()
+    callableOverloads ()
     patternParameters ()
     exportLayout ()
     subpathLab ()

@@ -1200,6 +1200,70 @@ let pipelineTests =
                 ])
 
         yield!
+            fixtureTests "callable-overloads-lab" (handFixture "callable-overloads-lab") GeneratorConfig.Default
+                (fun package ->
+                    [ testCase "one name under two bounds, separated by arity, keeps both Invoke overloads"
+                      <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains source "type Coalesce<'T> =" "the head carries one type parameter"
+
+                          Expect.stringContains
+                              source
+                              "abstract Invoke<'U>: value: 'U -> 'U"
+                              "the single-argument signature keeps its own 'U"
+
+                          Expect.stringContains
+                              source
+                              "abstract Invoke<'U>: value: 'U * fallback: 'U -> 'U"
+                              "and the two-argument signature keeps a separate one"
+
+                          Expect.contains
+                              (rendered.Findings |> List.map (fun finding -> finding.Key, finding.Symbol))
+                              ("SI008", "Coalesce")
+                              "reached through Invoke rather than dropped"
+
+                          Expect.isEmpty
+                              (rendered.Findings |> List.filter (fun f -> f.Key = "RA007"))
+                              "not one delegate head naming 'U twice"
+
+                      testCase "a single generic call signature stays one delegate head"
+                      <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains source "type OneShot<'T, 'U> =" "one head, its own parameter hoisted onto it"
+
+                      testCase "several non-generic call signatures stay one delegate, raising TR031"
+                      <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains
+                              source
+                              "type Multiplex ="
+                              "a plain delegate head, no interface"
+
+                          Expect.contains
+                              (rendered.Findings |> List.map (fun finding -> finding.Key, finding.Symbol))
+                              ("TR031", "Multiplex")
+                              "the second signature is recorded as dropped"
+
+                      testCase "a member beside the call signature keeps the existing hybrid path"
+                      <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains source "type Ledger =" "an interface, not a delegate"
+                          Expect.stringContains source "abstract count: float with get, set" "the member survives"
+
+                          Expect.contains
+                              (rendered.Findings |> List.map (fun finding -> finding.Key, finding.Symbol))
+                              ("SI008", "Ledger")
+                              "its call signature still reaches Invoke" ])
+
+        yield!
             fixtureTests
                 "uninhabited-intersection-lab"
                 (handFixture "uninhabited-intersection-lab")
@@ -2478,6 +2542,7 @@ let pipelineTests =
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                       let source = rendered.Files |> List.head |> snd
 
+                      Expect.stringContains source "type DivergentBound<'T> =" "the head carries one type parameter, not two"
                       Expect.stringContains source "abstract Invoke<'U>: value: 'U -> 'U" "each signature keeps its own 'U"
 
                       Expect.equal

@@ -45,6 +45,7 @@
         <Compile Include="..\Xantham.Generator.Tests\golden\shared-tag-lab\SharedTagLab.fs" Link="shared-tag-lab\SharedTagLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\record-index-lab\RecordIndexLab.fs" Link="record-index-lab\RecordIndexLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\callable-hybrid-lab\CallableHybridLab.fs" Link="callable-hybrid-lab\CallableHybridLab.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\callable-overloads-lab\CallableOverloadsLab.fs" Link="callable-overloads-lab\CallableOverloadsLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\export-layout-lab\LayoutLab.fs" Link="export-layout-lab\LayoutLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\subpath-lab\SubpathLab.fs" Link="subpath-lab\SubpathLab.fs" />
         <Compile Include="Probes.fs" />
