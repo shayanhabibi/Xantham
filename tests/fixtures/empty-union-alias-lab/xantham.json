@@ -1,0 +1,12 @@
+{
+  "module": "EmptyUnionAliasLab",
+  "namespace": "Identity",
+  "lib": [
+    "esnext"
+  ],
+  "types": [],
+  "groups": {
+    "empty-union-owner-lab": "ship"
+  },
+  "declarationCatalog": true
+}

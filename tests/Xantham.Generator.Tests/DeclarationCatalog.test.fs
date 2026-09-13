@@ -174,6 +174,48 @@ let tests =
                 skiptest "run `npm install` at the repository root, or set XANTHAM_TSGO_EXE" ]
     | Some _ ->
         testList "declaration catalog" [
+            testCase "local obj aliases normalize shared erased unions without erasing real contracts" <| fun _ ->
+                let directory = Path.Combine(temporaryRoot, "xantham-empty-union-" + Guid.NewGuid().ToString "N")
+                let package = Path.Combine(directory, "package")
+                Directory.CreateDirectory package |> ignore
+                try
+                    let source = Path.GetFullPath(Path.Combine(fixture, "..", "empty-union-alias-lab"))
+                    for file in Directory.EnumerateFiles(source, "*", SearchOption.AllDirectories) do
+                        writePackageFile package (Path.GetRelativePath(source, file)) (File.ReadAllText file)
+                    let config =
+                        { GeneratorConfig.loadFile (Path.Combine(package, "xantham.json")) with
+                            ModuleName = Some "Identity.Root" }
+                    let dependency = Path.Combine(package, "node_modules", "empty-union-owner-lab")
+                    let root = Path.Combine(directory, "root")
+                    Pipeline.run config dependency root |> Async.RunSynchronously |> ignore
+                    let adapter =
+                        { config with
+                            ModuleName = Some "Identity.Adapter"
+                            DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
+                    Pipeline.run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    let consumer = """module Identity.Consumer
+open Fable.Core
+let accept (value: Identity.Root.Value) : Identity.Root.Value = Identity.Adapter.Exports.accept value
+let property (value: Identity.Root.Value) : obj option = value.event
+let setProperty (value: Identity.Root.Value) (event: obj option) = value.event <- event
+let aliased (value: Identity.Root.AliasedValue) : Identity.Root.AliasedValue = Identity.Adapter.Exports.aliased value
+let setAliased (value: Identity.Root.AliasedValue) (event: obj) = value.event <- event
+let callable (value: Identity.Root.Controls) = match value.callable with U2.Case1 _ -> () | U2.Case2 _ -> ()
+let indexed (value: Identity.Root.Controls) = match value.indexed with U2.Case1 _ -> () | U2.Case2 _ -> ()
+let inherited (value: Identity.Root.Controls) = match value.inherited with U2.Case1 _ -> () | U2.Case2 _ -> ()
+let generic (value: Identity.Root.Controls) = match value.generic with U2.Case1 _ -> () | U2.Case2 _ -> ()
+"""
+                    let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] consumer
+                    Expect.equal code 0 output
+                    let symbols = File.ReadAllText(Path.Combine(root, "symbols.jsonl"))
+                    Expect.stringContains symbols "TR035" "the producer reports the existing obj-union widening"
+                    File.AppendAllText(Path.Combine(dependency, "index.d.ts"), "\n")
+                    Expect.throwsC
+                        (fun () -> Pipeline.run adapter package (Path.Combine(directory, "stale")) |> Async.RunSynchronously |> ignore)
+                        (fun error -> Expect.stringContains error.Message "input source hash mismatch" "normalization does not weaken source authentication")
+                finally
+                    if Directory.Exists directory then Directory.Delete(directory, true)
+
             testCase "anonymous literal enums retain identity beside named aliases across packages" <| fun _ ->
                 let directory = Path.Combine(temporaryRoot, "xantham-literal-alias-" + Guid.NewGuid().ToString "N")
                 let package = Path.Combine(directory, "package")

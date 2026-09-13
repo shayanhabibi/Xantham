@@ -4,8 +4,8 @@
   "module": "Cloudflare.WorkersTypes",
   "counts": {
     "exact": 412,
-    "ergonomic": 1072,
-    "widened": 369,
+    "ergonomic": 1071,
+    "widened": 370,
     "escape": 111
   },
   "passes": [
@@ -84,6 +84,11 @@
       "pass": "RA - repair-arity",
       "total": 8,
       "ergonomic": 8
+    },
+    {
+      "pass": "normalize-obj-unions",
+      "total": 1,
+      "widened": 1
     },
     {
       "pass": "DD - drop-orphan-delegates",

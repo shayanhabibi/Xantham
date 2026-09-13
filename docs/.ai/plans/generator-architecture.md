@@ -1733,6 +1733,23 @@ identities, and a changed dependency input still invalidates the catalog. Catalo
 source, API, arity, and constraint checks remain unchanged. Measurements and rejected
 alternatives are recorded in `docs/.ai/handovers/literal-alias-identity.md`.
 
+### Erased unions containing emitted object aliases
+
+The late `normalize-obj-unions` Shape pass applies the existing TR035 rule after local
+abbreviations and generic phantoms have been emitted. A union containing a nongeneric
+local alias whose target resolves to `obj` becomes `obj`, just like a direct object arm.
+Alias traversal stops at cycles and does not expand external references, named interface
+contracts, or generic phantoms. Option and container wrappers retain their structure.
+The existing declaration-reference traversal keeps properties, constructor helpers,
+aliases, and export signatures consistent before catalog API authentication.
+
+The empty-union-alias lab reproduces a producer exporting an empty interface and a
+consumer reaching it only through `Value.event`. The producer formerly retained an
+erased union over its named `obj` alias while the consumer widened a direct object arm.
+The typed catalog regression checks shared values and setters, alias chains, retained
+callable/indexed/inherited/generic contracts, the TR035 finding, and stale-input rejection.
+Measurements are recorded in `docs/.ai/handovers/empty-union-alias.md`.
+
 # Easy Nits 
 
 To include in scope when a phases implementation/attempt ends up being small/quick.

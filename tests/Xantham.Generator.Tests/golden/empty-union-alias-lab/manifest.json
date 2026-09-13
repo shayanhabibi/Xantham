@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "package": "empty-union-consumer-lab",
+  "module": "EmptyUnionAliasLab",
+  "counts": {
+    "exact": 2,
+    "ergonomic": 1,
+    "widened": 2,
+    "escape": 1
+  },
+  "passes": [
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 5,
+      "ergonomic": 1,
+      "widened": 4
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 3,
+      "ergonomic": 3
+    },
+    {
+      "pass": "",
+      "total": 1,
+      "escape": 1
+    },
+    {
+      "pass": "render-source",
+      "total": 1,
+      "exact": 1
+    }
+  ]
+}
