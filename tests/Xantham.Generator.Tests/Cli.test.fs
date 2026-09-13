@@ -227,8 +227,6 @@ let commandTests =
 
                 File.WriteAllText(Path.Combine(package, "a.d.ts"), "export declare const v: number;")
 
-                //FOR-REVIEW calls the pre-flight directly (Bootstrap.publicPaths) rather than
-                // through the full CLI path, since the assertion needs no compiler
                 let config = GeneratorConfig.load package
                 Bootstrap.publicPaths config package |> ignore
             finally
