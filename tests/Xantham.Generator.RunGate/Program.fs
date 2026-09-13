@@ -2053,8 +2053,37 @@ let private mixedSubpaths () =
         "client:3"
         (MixedSubpathsLab.Client.Exports.connect (MixedSubpathsLab.Client.ClientOptions.Create 3.))
 
+type private DependencyActor() =
+    inherit
+        DependencyEntrypointLab.EntrypointLab.Runtime.Actor<string>(
+            DependencyEntrypointLab.EntrypointLab.Runtime.Actor.Options<string>.Create "seed"
+        )
+
+    interface DependencyEntrypointLab.EntrypointLab.Runtime.Actor.IFetchHandler<string> with
+        member _.fetch value = "fetch:" + value
+
+type private DependencyActorWithoutHook() =
+    inherit
+        DependencyEntrypointLab.EntrypointLab.Runtime.Actor<string>(
+            DependencyEntrypointLab.EntrypointLab.Runtime.Actor.Options<string>.Create "quiet"
+        )
+
+let private dependencyEntrypoint () =
+    let actor = DependencyActor()
+    equal "dependency entrypoint constructor imports its ambient runtime" "seed" actor.seed
+
+    equal
+        "dependency entrypoint generic hook retains its argument"
+        "fetch:value"
+        ((actor :> DependencyEntrypointLab.EntrypointLab.Runtime.Actor.IFetchHandler<string>).fetch "value")
+
+    check "dependency entrypoint hook is present when implemented" (emitJsExpr actor "typeof $0.fetch === 'function'")
+    let quiet = DependencyActorWithoutHook()
+    check "dependency entrypoint omitted hook is absent" (emitJsExpr quiet "$0.fetch === undefined")
+
 [<EntryPoint>]
 let main _ =
+    dependencyEntrypoint ()
     SupportHelpers.run check
     ExportProvenance.run check
     globals ()

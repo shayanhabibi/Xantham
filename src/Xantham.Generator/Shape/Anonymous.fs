@@ -396,8 +396,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
             |> List.collect (fun (typeId, facts) ->
                 let entrypoint =
                     match Map.tryFind typeId classSides with
-                    | Some(export, valueFacts) ->
-                        isEntrypoint ctx export valueFacts.ConstructSignatures facts.BaseTypes
+                    | Some(export, constructors) -> isEntrypoint ctx export constructors facts.BaseTypes
                     | None -> false
 
                 // A declaration carrying an `inherit` line keeps its optional methods as option
@@ -600,7 +599,10 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                     for info in facts.IndexInfos do
                         walk (into "Item") order info.ValueTypeId
 
-                    let signatures = facts.CallSignatures @ facts.ConstructSignatures
+                    let signatures =
+                        facts.CallSignatures
+                        @ facts.ConstructSignatures
+                        @ (facts.AmbientClass |> Option.map snd |> Option.defaultValue [])
 
                     for signature in signatures do
                         for p in signature.Parameters do

@@ -523,6 +523,56 @@ let orderExports: Pass<HarvestModel> =
                     export.ExportName)
         })
 
+/// Runtime ambient class exports available to declarations reached through dependencies.
+let harvestAmbientClasses: Pass<HarvestModel> =
+    {
+        Name = "harvest-ambient-classes"
+        Run =
+            fun ctx model ->
+                async {
+                    let! modules =
+                        ctx.Session.getSymbolsInScope (
+                            SymbolFlags.Module,
+                            file = DocumentIdentifier.FileName(ctx.EntryFile / uom<declFile>),
+                            position = 0
+                        )
+
+                    let! exports =
+                        modules
+                        |> Array.filter (fun symbol ->
+                            symbol.Name.StartsWith "\""
+                            && GeneratorConfig.disposition
+                                ctx.Config
+                                (Grouping.classify ctx.PackageDir (ValueSome symbol))
+                                =
+                                Ship)
+                        |> Array.sortBy _.Name
+                        |> Array.map (harvestAmbientModule ctx)
+                        |> Async.Sequential
+
+                    let classes =
+                        exports
+                        |> Array.toList
+                        |> List.collect (fun (exports, _, _) -> exports)
+                        |> List.filter (fun export ->
+                            export.HasValueExport
+                            && hasAny SymbolFlags.Class export.Symbol.Flags
+                            && GeneratorConfig.disposition
+                                ctx.Config
+                                (Grouping.classify ctx.PackageDir (ValueSome export.Symbol))
+                                =
+                                Ship)
+
+                    return Advanced { model with AmbientClasses = classes }
+                }
+    }
+
 /// The tier's pass list, in execution order.
 let passes: Pass<HarvestModel> list =
-    [ harvestExports; harvestGlobals; harvestDocs; orderExports ]
+    [
+        harvestExports
+        harvestGlobals
+        harvestAmbientClasses
+        harvestDocs
+        orderExports
+    ]

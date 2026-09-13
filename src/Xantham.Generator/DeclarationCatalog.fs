@@ -614,7 +614,10 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
             for index in facts.IndexInfos do
                 yield index.KeyTypeId
                 yield index.ValueTypeId
-            for signature in facts.CallSignatures @ facts.ConstructSignatures do
+            for signature in
+                facts.CallSignatures
+                @ facts.ConstructSignatures
+                @ (facts.AmbientClass |> Option.map snd |> Option.defaultValue []) do
                 yield signature.ReturnTypeId
                 yield! signature.Parameters |> List.map _.TypeId
                 yield! signature.TypeParameters

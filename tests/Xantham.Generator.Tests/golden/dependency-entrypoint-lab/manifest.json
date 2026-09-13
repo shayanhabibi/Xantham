@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "package": "dependency-entrypoint-lab",
+  "module": "DependencyEntrypointLab",
+  "counts": {
+    "exact": 3,
+    "ergonomic": 4,
+    "widened": 0,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "HG - harvest-globals",
+      "total": 2,
+      "exact": 2
+    },
+    {
+      "pass": "SY - synthesize-anonymous",
+      "total": 1,
+      "exact": 1
+    },
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 2,
+      "ergonomic": 2
+    },
+    {
+      "pass": "SC - shape-classes",
+      "total": 1,
+      "exact": 1
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 5,
+      "ergonomic": 5
+    }
+  ]
+}

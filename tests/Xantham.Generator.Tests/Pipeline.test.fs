@@ -4926,3 +4926,11 @@ let classImplementsTests =
             fixtureTests "class-implements-entrypoint-lab" (handFixture "class-implements-entrypoint-lab")
                 { GeneratorConfig.Default with Lib = Some [ "esnext" ]; Types = Some [] } (fun _ -> [])
     ]
+
+[<Tests>]
+let dependencyEntrypointTests =
+    testList "dependency entrypoint fixture" [
+        yield!
+            fixtureTests "dependency-entrypoint-lab" (handFixture "dependency-entrypoint-lab")
+                { GeneratorConfig.Default with Lib = Some [ "esnext" ]; Types = Some [] } (fun _ -> [])
+    ]

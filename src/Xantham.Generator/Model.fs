@@ -931,6 +931,8 @@ type HarvestedExport =
 type HarvestModel =
     {
         Exports: HarvestedExport list
+        /// Runtime class exports from ambient modules, available to reached declarations.
+        AmbientClasses: HarvestedExport list
         /// The namespaces the entry package declares, by symbol id, under names an F# module
         /// can be spelled with. A declaration written inside one nests under it where a second
         /// declaration claims the same name.
@@ -948,6 +950,7 @@ type HarvestModel =
     static member Empty: HarvestModel =
         {
             Exports = []
+            AmbientClasses = []
             Namespaces = Map.empty
             ShadowedByLib = 0
         }
@@ -1035,6 +1038,8 @@ type TypeFacts =
         BaseTypes: int<typeId> list
         /// Explicit `implements` contracts of a class declaration, by id.
         ImplementedTypes: int<typeId> list
+        /// Runtime provenance and constructors of a reached ambient class.
+        AmbientClass: (HarvestedExport * ResolvedSignature list) option
         /// Type arguments of a generic reference, resolved for *every* group - an external
         /// `Array<T>` carries entry-package types that must still be reached (O7 note).
         TypeArguments: int<typeId> list
@@ -1085,6 +1090,7 @@ module TypeFacts =
             ConstructSignatures = []
             BaseTypes = []
             ImplementedTypes = []
+            AmbientClass = None
             TypeArguments = []
             TupleElements = []
             AliasTypeArguments = []

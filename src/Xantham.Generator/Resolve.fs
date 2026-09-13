@@ -423,6 +423,89 @@ let private declaresQuestionToken (ctx: Context) (parameter: SymbolResponse) : A
                        |> ValueOption.isSome
     }
 
+let private resolveMember (ctx: Context) isProperty (property: SymbolResponse) =
+    async {
+        let! propertyType = ctx.Session.getTypeOfSymbol property.Id
+        let! docs = ctx.Session.getDocumentationComment property.Id
+        let! tags = ctx.Session.getJsDocTags property.Id
+
+        // `CheckFlags.Readonly` only marks transient symbols; a declared
+        // `readonly` modifier is the checker's to see, so ask it.
+        let! readOnly =
+            if isProperty then
+                ctx.Session.isReadonlySymbol property.Id
+            else
+                async.Return false
+
+        let! questionToken =
+            if isProperty then
+                async.Return false
+            else
+                declaresQuestionToken ctx property
+
+        return
+            {
+                Symbol = property
+                Docs = docs
+                Tags = tags |> ValueOption.map Array.toList |> ValueOption.defaultValue []
+                Optional =
+                    property.Flags.HasFlag SymbolFlags.Optional
+                    || property.CheckFlags.HasFlag CheckFlags.OptionalParameter
+                    || questionToken
+                ReadOnly = readOnly
+                TypeId = propertyType.TypeId
+            },
+            propertyType
+    }
+
+let private resolveSignatures (ctx: Context) (trace: Trace option) (registers: Registers) (ty: TypeResponse) kind =
+    let label =
+        if kind = SignatureKind.Call then
+            "call-signature"
+        else
+            "construct-signature"
+
+    async {
+        let! signatures = ctx.Session.getSignaturesOfType (ty.Id, kind)
+
+        return!
+            signatures
+            |> Array.map (fun signature ->
+                async {
+                    let! parameters = ctx.Session.getParametersOfSignature signature.Id
+                    let parameters = parameters |> ValueOption.defaultValue [||]
+
+                    let! parameterFacts =
+                        parameters |> Array.map (resolveMember ctx false) |> Async.Parallel
+
+                    let! returnType = ctx.Session.getReturnTypeOfSignature signature.Id
+
+                    // A generic callback alias spells its parameters on the
+                    // signature, not the type, so `Mapper<T> = (t: T) => T` has
+                    // nothing to bind without this call.
+                    let! typeParameters = ctx.Session.getTypeParametersOfSignature signature.Id
+                    let typeParameters = typeParameters |> ValueOption.defaultValue [||]
+
+                    for parameter in typeParameters do
+                        registers.SignatureParameters.TryAdd(parameter.TypeId, true) |> ignore
+
+                    return
+                        {
+                            Parameters = parameterFacts |> Array.map fst |> Array.toList
+                            HasRest = signature.Flags.HasFlag SignatureFlags.HasRestParameter
+                            TypeParameters = typeParameters |> Array.map _.TypeId |> Array.toList
+                            IsAbstract = signature.Flags.HasFlag SignatureFlags.Abstract
+                            ReturnTypeId = returnType.TypeId
+                        },
+                        [
+                            yield! channel trace $"{label}-parameter" (parameterFacts |> Array.map snd |> Array.toList)
+                            yield! channel trace $"{label}-type-parameter" (typeParameters |> Array.toList)
+                            yield! channel trace $"{label}-return" [ returnType ]
+                        ]
+                })
+            |> Async.Parallel
+    }
+
 /// The structure of a type that has members: properties, call and construct signatures, index
 /// signatures, each with the responses it discovered. Object types and the intersections of
 /// them share it, because the checker answers the same questions about both: the properties of
@@ -432,96 +515,12 @@ let private deriveStructure (ctx: Context) (trace: Trace option) (registers: Reg
         let! properties = ctx.Session.getPropertiesOfType ty.Id
         let properties = properties |> ValueOption.defaultValue [||]
 
-        // `readonly` is a property's fact and the `?` token a parameter's; each is asked for at
-        // the position that carries it.
-        let resolveMember isProperty (property: SymbolResponse) =
-            async {
-                let! propertyType = ctx.Session.getTypeOfSymbol property.Id
-                let! docs = ctx.Session.getDocumentationComment property.Id
-                let! tags = ctx.Session.getJsDocTags property.Id
+        let! members = properties |> Array.map (resolveMember ctx true) |> Async.Parallel
 
-                // `CheckFlags.Readonly` only marks transient symbols; a declared
-                // `readonly` modifier is the checker's to see, so ask it.
-                let! readOnly =
-                    if isProperty then
-                        ctx.Session.isReadonlySymbol property.Id
-                    else
-                        async.Return false
+        let! callSignatures = resolveSignatures ctx trace registers ty SignatureKind.Call
 
-                let! questionToken =
-                    if isProperty then
-                        async.Return false
-                    else
-                        declaresQuestionToken ctx property
-
-                return
-                    {
-                        Symbol = property
-                        Docs = docs
-                        Tags = tags |> ValueOption.map Array.toList |> ValueOption.defaultValue []
-                        Optional =
-                            property.Flags.HasFlag SymbolFlags.Optional
-                            || property.CheckFlags.HasFlag CheckFlags.OptionalParameter
-                            || questionToken
-                        ReadOnly = readOnly
-                        TypeId = propertyType.TypeId
-                    },
-                    propertyType
-            }
-
-        let! members = properties |> Array.map (resolveMember true) |> Async.Parallel
-
-        let resolveSignatures kind =
-            let label =
-                if kind = SignatureKind.Call then
-                    "call-signature"
-                else
-                    "construct-signature"
-
-            async {
-                let! signatures = ctx.Session.getSignaturesOfType (ty.Id, kind)
-
-                return!
-                    signatures
-                    |> Array.map (fun signature ->
-                        async {
-                            let! parameters = ctx.Session.getParametersOfSignature signature.Id
-                            let parameters = parameters |> ValueOption.defaultValue [||]
-                            let! parameterFacts = parameters |> Array.map (resolveMember false) |> Async.Parallel
-                            let! returnType = ctx.Session.getReturnTypeOfSignature signature.Id
-
-                            // A generic callback alias spells its parameters on the
-                            // signature, not the type, so `Mapper<T> = (t: T) => T` has
-                            // nothing to bind without this call.
-                            let! typeParameters = ctx.Session.getTypeParametersOfSignature signature.Id
-                            let typeParameters = typeParameters |> ValueOption.defaultValue [||]
-
-                            for parameter in typeParameters do
-                                registers.SignatureParameters.TryAdd(parameter.TypeId, true) |> ignore
-
-                            return
-                                {
-                                    Parameters = parameterFacts |> Array.map fst |> Array.toList
-                                    HasRest = signature.Flags.HasFlag SignatureFlags.HasRestParameter
-                                    TypeParameters = typeParameters |> Array.map _.TypeId |> Array.toList
-                                    IsAbstract = signature.Flags.HasFlag SignatureFlags.Abstract
-                                    ReturnTypeId = returnType.TypeId
-                                },
-                                [
-                                    yield!
-                                        channel
-                                            trace
-                                            $"{label}-parameter"
-                                            (parameterFacts |> Array.map snd |> Array.toList)
-                                    yield! channel trace $"{label}-type-parameter" (typeParameters |> Array.toList)
-                                    yield! channel trace $"{label}-return" [ returnType ]
-                                ]
-                        })
-                    |> Async.Parallel
-            }
-
-        let! callSignatures = resolveSignatures SignatureKind.Call
-        let! constructSignatures = resolveSignatures SignatureKind.Construct
+        let! constructSignatures =
+            resolveSignatures ctx trace registers ty SignatureKind.Construct
 
         // An index signature is not a property: `getPropertiesOfType` returns nothing at
         // all for `interface Bag { [key: string]: number }`, so without this the type
@@ -608,6 +607,7 @@ let private deriveFacts
     (ctx: Context)
     (trace: Trace option)
     (registers: Registers)
+    (ambientClasses: Map<int<symbolId>, HarvestedExport>)
     (ty: TypeResponse)
     : Async<TypeFacts * TypeResponse list> =
     async {
@@ -1050,12 +1050,30 @@ let private deriveFacts
                         else
                             async.Return []
 
+                    let! ambientClass, constructorDependencies =
+                        async {
+                            match
+                                symbol
+                                |> ValueOption.toOption
+                                |> Option.bind (fun symbol -> Map.tryFind symbol.SymbolId ambientClasses)
+                            with
+                            | Some export when objectFlags.HasFlag ObjectFlags.Class ->
+                                let! value = ctx.Session.getTypeOfSymbol export.Symbol.Id
+                                let! signatures = resolveSignatures ctx trace registers value SignatureKind.Construct
+
+                                return
+                                    Some(export, signatures |> Array.map fst |> Array.toList),
+                                    signatures |> Array.toList |> List.collect snd
+                            | _ -> return None, []
+                        }
+
                     let baseTypes =
                         baseTypes |> ValueOption.map Array.toList |> ValueOption.defaultValue []
 
                     let discovered =
                         [
                             yield! structure.Discovered
+                            yield! constructorDependencies
                             yield! channel trace "base-types" baseTypes
                             yield! channel trace "implemented-types" implemented
                             yield! channel trace "type-arguments" typeArguments
@@ -1081,6 +1099,7 @@ let private deriveFacts
                             ConstructSignatures = structure.ConstructSignatures
                             BaseTypes = baseTypes |> List.map _.TypeId
                             ImplementedTypes = implemented |> List.map _.TypeId
+                            AmbientClass = ambientClass
                             TypeArguments = typeArguments |> List.map _.TypeId
                             TupleElements = tupleElements
                             AliasTypeArguments = aliasTypeArguments |> List.map _.TypeId
@@ -1290,6 +1309,11 @@ let resolveTypeTable: Pass<ResolveModel> =
 
                     let registers = Registers.start ()
 
+                    let ambientClasses =
+                        model.Harvest.AmbientClasses
+                        |> List.map (fun export -> export.Symbol.SymbolId, export)
+                        |> Map.ofList
+
                     let rec walk table derived notFollowed findings frontier depth =
                         async {
                             // An instantiation derived as identity that a union or an
@@ -1404,7 +1428,7 @@ let resolveTypeTable: Pass<ResolveModel> =
                                     fresh
                                     |> List.map (fun ty ->
                                         async {
-                                            let! result = attempt (deriveFacts ctx trace registers ty)
+                                            let! result = attempt (deriveFacts ctx trace registers ambientClasses ty)
                                             return ty, result
                                         })
                                     |> Async.Parallel

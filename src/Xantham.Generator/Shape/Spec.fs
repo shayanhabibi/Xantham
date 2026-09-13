@@ -2847,28 +2847,50 @@ let internal isEntrypoint
 
                 publicSpecifier = specifier / uom<importSpecifier>)
 
+        let sourcePackage =
+            match Grouping.classify ctx.PackageDir (ValueSome export.Symbol) with
+            | EntryPackage -> Some(ctx.PackageName / uom<npmDependency>)
+            | Dependency name -> Some(name / uom<npmDependency>)
+            | CompilerLib
+            | Unclassified -> None
+
+        let packageImport =
+            sourcePackage
+            |> Option.exists (fun package ->
+                let specifier = specifier / uom<importSpecifier>
+
+                specifier = package
+                || specifier.StartsWith(package + "/", System.StringComparison.Ordinal))
+
         not publicInput
+        && not packageImport
         && ((constructSignatures |> List.exists _.IsAbstract) || not bases.IsEmpty)
     | FromGlobal
     | FromModule -> false
 
-/// The instance side of every exported class, keyed by the type id its declaration is written
-/// under, with the constructor object carrying its construct signatures. `shape-classes` turns
-/// the pair into the entrypoint class form (§4.4) and `shape-interfaces` reads it to decide
-/// which optional methods are lifecycle hooks.
-let internal exportedClassSides (model: ShapeModel) : Map<int<Measure.typeId>, HarvestedExport * TypeFacts> =
-    model.Harvest.Exports
-    |> List.choose (fun export ->
-        if not (hasAny SymbolFlags.Class export.Symbol.Flags) then
-            None
-        else
-            match Map.tryFind export.Symbol.SymbolId model.ExportTypes with
-            | Some ids ->
-                match ids.Declared, ids.Value |> Option.bind (fun typeId -> Map.tryFind typeId model.Types) with
-                | Some declared, Some valueFacts -> Some(declared, (export, valueFacts))
-                | _ -> None
-            | None -> None)
-    |> Map.ofList
+/// Runtime exports and constructor signatures for public and reached ambient class declarations.
+let internal exportedClassSides
+    (model: ShapeModel)
+    : Map<int<Measure.typeId>, HarvestedExport * ResolvedSignature list> =
+    let reached =
+        model.Types
+        |> Map.toList
+        |> List.choose (fun (typeId, facts) -> facts.AmbientClass |> Option.map (fun side -> typeId, side))
+
+    let exported =
+        model.Harvest.Exports
+        |> List.choose (fun export ->
+            if not (hasAny SymbolFlags.Class export.Symbol.Flags) then
+                None
+            else
+                match Map.tryFind export.Symbol.SymbolId model.ExportTypes with
+                | Some ids ->
+                    match ids.Declared, ids.Value |> Option.bind (fun typeId -> Map.tryFind typeId model.Types) with
+                    | Some declared, Some valueFacts -> Some(declared, (export, valueFacts.ConstructSignatures))
+                    | _ -> None
+                | None -> None)
+
+    reached @ exported |> Map.ofList
 
 /// The call signatures a member declares, read off the non-nullish arms where its type is a
 /// union. Under `strictNullChecks` an optional member's type is a union with `undefined`, which

@@ -904,6 +904,17 @@ Phases — each ends with the compile gate green on its fixtures:
     `XConstructor` and the class itself exist - once as `Exports`-bound dotted selectors, once as
     that interface's members - shaped from two different views of the same static side, and the
     two are not cross-checked against each other.
+  - *Reached ambient class sides (2026-09-13).* Harvest retains runtime ambient class export
+    metadata separately from public exports, using the existing resolver for quoted modules and
+    `export =` namespace bodies. Resolve reads constructor signatures only for reached shipped
+    classes and follows their parameter/type-parameter/return dependencies. The common class-side
+    view feeds optional-hook naming, interface inheritance admission and entrypoint shaping;
+    dependency recovery adds no public constructor/static occurrences. Source-package imports
+    remain ordinary bindings alongside the existing runtime/public-input check. Catalog source
+    and API authentication remain strict. `dependency-entrypoint-lab` compiles an authenticated
+    generic subclass with an inline constructor argument and optional hook, rejects a wrong
+    constructor argument, and covers ordinary modules, type-only exports and a package's own
+    quoted public module. Its Fable checks exercise the ambient constructor and hook presence.
   - *Explicit class contracts (2026-09-13).* Resolve records `implements` types separately
     from `BaseTypes`, using typed class heritage nodes and the compiler's type-node query.
     Reachability, free parameters and catalog source closure include these contracts.

@@ -166,6 +166,97 @@ let error (value: Halt) : exn = value :> exn
                 if Directory.Exists directory then Directory.Delete(directory, true)
 
 [<Tests>]
+let dependencyEntrypointTests =
+    match Tsc.locate __SOURCE_DIRECTORY__ with
+    | None -> testCase "dependency entrypoint catalog skipped - no compiler" <| fun _ -> skiptest "no tsc"
+    | Some _ ->
+        testCase "dependency entrypoint catalog preserves constructors and optional hooks" <| fun _ ->
+            let directory = Path.Combine(temporaryRoot, "xantham-dependency-entrypoint-" + Guid.NewGuid().ToString "N")
+            Directory.CreateDirectory directory |> ignore
+            try
+                let package = Path.GetFullPath(Path.Combine(fixture, "..", "dependency-entrypoint-lab"))
+                let root = Path.Combine(directory, "root")
+                Pipeline.run (configured directory "Root" "index.d.ts" [||]) package root |> Async.RunSynchronously |> ignore
+                let adapter = configured directory "Adapter" "adapter.d.ts" [| Path.Combine(root, "declarations.json") |]
+                Pipeline.run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                let consumer = """module Identity.Consumer
+type Actor() =
+    inherit Identity.Root.EntrypointLab.Runtime.Actor<string>(Identity.Root.EntrypointLab.Runtime.Actor.Options<string>.Create "seed")
+    interface Identity.Root.EntrypointLab.Runtime.Actor.IFetchHandler<string> with
+        member _.fetch value = value
+let accept (actor: Identity.Root.EntrypointLab.Runtime.Actor<string>) : Identity.Root.EntrypointLab.Runtime.Actor<string> =
+    Identity.Adapter.Exports.accept actor
+"""
+                let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] consumer
+                Expect.equal code 0 output
+                let invalid = """module Identity.Consumer
+type Actor() =
+    inherit Identity.Root.EntrypointLab.Runtime.Actor<string>(Identity.Root.EntrypointLab.Runtime.Actor.Options<float>.Create 1.0)
+"""
+                let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] invalid
+                Expect.notEqual code 0 "the inline constructor option retains the class type parameter"
+                Expect.stringContains output "FS0193" "numeric options do not construct the string actor"
+            finally
+                if Directory.Exists directory then Directory.Delete(directory, true)
+
+[<Tests>]
+let dependencyEntrypointOrdinaryTests =
+    match Tsc.locate __SOURCE_DIRECTORY__ with
+    | None -> testCase "dependency entrypoint negatives skipped - no compiler" <| fun _ -> skiptest "no tsc"
+    | Some _ ->
+        testCase "dependency entrypoint retains ordinary and type-only class interfaces" <| fun _ ->
+            let directory = Path.Combine(temporaryRoot, "xantham-dependency-ordinary-" + Guid.NewGuid().ToString "N")
+            Directory.CreateDirectory directory |> ignore
+            try
+                let package = Path.GetFullPath(Path.Combine(fixture, "..", "dependency-entrypoint-lab"))
+                for name, entry, declaration in [ "plain", "plain-adapter.d.ts", "Plain"; "type-only", "type-only-adapter.d.ts", "Hidden" ] do
+                    let run = Path.Combine(directory, name)
+                    Directory.CreateDirectory run |> ignore
+                    Pipeline.run (configured run "Root" entry [||]) package (Path.Combine(run, "root")) |> Async.RunSynchronously |> ignore
+                    let consumer = $"""module Identity.Consumer
+let optional (value: Identity.Root.{declaration}<string>) : (string -> string) option = value.fetch
+"""
+                    let code, output = compileConsumer run [ "root/Identity.Root.fs" ] consumer
+                    Expect.equal code 0 output
+                    let invalid = $"""module Identity.Consumer
+type Invalid() = inherit Identity.Root.{declaration}<string>("seed")
+"""
+                    let code, output = compileConsumer run [ "root/Identity.Root.fs" ] invalid
+                    Expect.notEqual code 0 "an ordinary or type-only class has no subclassable runtime constructor"
+            finally
+                if Directory.Exists directory then Directory.Delete(directory, true)
+
+[<Tests>]
+let dependencyEntrypointPublicImportTests =
+    match Tsc.locate __SOURCE_DIRECTORY__ with
+    | None -> testCase "dependency entrypoint public import skipped - no compiler" <| fun _ -> skiptest "no tsc"
+    | Some _ ->
+        testCase "dependency entrypoint catalog retains a package's ordinary ambient public import" <| fun _ ->
+            let directory = Path.Combine(temporaryRoot, "xantham-dependency-public-" + Guid.NewGuid().ToString "N")
+            Directory.CreateDirectory directory |> ignore
+            try
+                let package = Path.GetFullPath(Path.Combine(fixture, "..", "dependency-entrypoint-lab"))
+                let owner = Path.Combine(package, "node_modules", "public-entrypoint-owner-lab")
+                let configure name entry runtime references =
+                    let file = Path.Combine(directory, name + ".json")
+                    File.WriteAllText(file, JsonSerializer.Serialize {| ``module`` = "Identity." + name; entry = entry; runtime = runtime
+                                                                        lib = [| "esnext" |]; types = ([||] : string array)
+                                                                        groups = Map.ofList [ "public-entrypoint-owner-lab", "ship" ]
+                                                                        declarationCatalog = true; declarationReferences = references |})
+                    GeneratorConfig.loadFile file
+                let root = Path.Combine(directory, "root")
+                Pipeline.run (configure "Root" "index.d.ts" "public-entrypoint-owner-lab" ([||] : string array)) owner root |> Async.RunSynchronously |> ignore
+                let adapter = configure "Adapter" "public-adapter.d.ts" "dependency-entrypoint-lab" [| Path.Combine(root, "declarations.json") |]
+                Pipeline.run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                let consumer = """module Identity.Consumer
+let optional value : (string -> string) option = (Identity.Adapter.Exports.accept value).fetch
+"""
+                let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] consumer
+                Expect.equal code 0 output
+            finally
+                if Directory.Exists directory then Directory.Delete(directory, true)
+
+[<Tests>]
 let tests =
     match Tsc.locate __SOURCE_DIRECTORY__ with
     | None ->

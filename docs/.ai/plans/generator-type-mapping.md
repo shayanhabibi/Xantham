@@ -251,6 +251,12 @@ Policy question with a recommended default:
   constructor and lifecycle-hook forms; contracts involving those class forms remain flattened
   with `SI002`. Matching members alone add no subtype relationship. Generic constraint
   inference retains its existing declared-base and intersection rules.
+- **Dependency entrypoints** — reached ambient runtime classes retain their constructor and
+  optional lifecycle-hook forms across catalog producer and consumer programs. Ambient module
+  exports, including `export =` namespaces, establish the runtime import; type-only exports
+  retain interface form. Package and package-subpath imports retain their ordinary class
+  binding form when reached from a dependency. Constructor parameter shapes retain the class's
+  generic arguments without adding constructor members to the consumer's public `Exports`.
 - **Inline type literals** (in parameter/return positions) → hash-cons by type `Id`:
   first occurrence emits a generated-name interface (name derived from the path:
   `Foo.Bar.options`-style synthesis existed in the archive's `SyntheticPathAssignment.fs`

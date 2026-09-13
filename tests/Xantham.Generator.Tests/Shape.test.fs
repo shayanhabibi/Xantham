@@ -221,6 +221,7 @@ let private conditionalAliasModel (declaredOperands: int list) (appliedOperands:
 
     { Build.shapeModel (table @ Build.primitives) with
         Harvest = { Exports = [ Build.export "seed" (Build.symbol 400 "seed" SymbolFlags.BlockScopedVariable) ]
+                    AmbientClasses = []
                     Namespaces = Map.empty
                     ShadowedByLib = 0
                   }
@@ -1181,6 +1182,7 @@ let private ansiRegexShaped () =
             { Exports =
                 [ Build.export "Options" optionsSymbol
                   Build.export "default" functionSymbol ]
+              AmbientClasses = []
               Namespaces = Map.empty
               ShadowedByLib = 0
             }
@@ -1234,6 +1236,7 @@ let shapePassTests =
             let model =
                 { Build.shapeModel (bagType :: Build.primitives) with
                     Harvest = { Exports = [ Build.export "Bag" bagSymbol ]
+                                AmbientClasses = []
                                 Namespaces = Map.empty
                                 ShadowedByLib = 0
                               }
@@ -1268,6 +1271,7 @@ let shapePassTests =
             let model =
                 { Build.shapeModel (bagType :: Build.primitives) with
                     Harvest = { Exports = [ Build.export "FrozenBag" bagSymbol ]
+                                AmbientClasses = []
                                 Namespaces = Map.empty
                                 ShadowedByLib = 0
                               }
@@ -1299,6 +1303,7 @@ let shapePassTests =
             let model =
                 { Build.shapeModel (bagType :: Build.primitives) with
                     Harvest = { Exports = [ Build.export "Bag" bagSymbol ]
+                                AmbientClasses = []
                                 Namespaces = Map.empty
                                 ShadowedByLib = 0
                               }
@@ -1349,6 +1354,7 @@ let shapePassTests =
             let model =
                 { Build.shapeModel (anonymous :: makeType :: Build.primitives) with
                     Harvest = { Exports = [ Build.export "make" (Build.symbol 400 "make" SymbolFlags.Function) ]
+                                AmbientClasses = []
                                 Namespaces = Map.empty
                                 ShadowedByLib = 0
                               }
@@ -1369,6 +1375,7 @@ let shapePassTests =
                 { Build.shapeModel (internal' :: Build.primitives) with
                     Harvest =
                         { Exports = [ Build.export "globals" (Build.symbol 400 "globals" SymbolFlags.BlockScopedVariable) ]
+                          AmbientClasses = []
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
@@ -1403,6 +1410,7 @@ let shapePassTests =
                 { Build.shapeModel (exported :: namespaced :: holder :: Build.primitives) with
                     Harvest =
                         { Exports = [ Build.export "holder" (Build.symbol 400 "holder" SymbolFlags.BlockScopedVariable) ]
+                          AmbientClasses = []
                           Namespaces = Map.ofList [ 900<symbolId>, ((fun value -> value * uom<symbolName>) "TailStream") ]
                           ShadowedByLib = 0
                         }
@@ -1440,6 +1448,7 @@ let shapePassTests =
                 { Build.shapeModel (exported :: namespaced :: holder :: Build.primitives) with
                     Harvest =
                         { Exports = [ Build.export "holder" (Build.symbol 400 "holder" SymbolFlags.BlockScopedVariable) ]
+                          AmbientClasses = []
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
@@ -1471,6 +1480,7 @@ let shapePassTests =
                         { Exports =
                             [ Build.export "Event" inNamespace
                               Build.export "Event" (Build.symbol 101 "Event" SymbolFlags.Interface) ]
+                          AmbientClasses = []
                           Namespaces = Map.ofList [ 900<symbolId>, ((fun value -> value * uom<symbolName>) "TailStream") ]
                           ShadowedByLib = 0
                         }
@@ -1502,6 +1512,7 @@ let shapePassTests =
                         { Exports =
                             [ Build.export "Session" (Build.symbol 100 "Session" SymbolFlags.Interface)
                               Build.export "Session" (Build.symbol 101 "Session" SymbolFlags.Interface) ]
+                          AmbientClasses = []
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
@@ -1542,6 +1553,7 @@ let shapePassTests =
             let model =
                 { Build.shapeModel (declaration :: instantiation :: typeParam 20 "T" :: typeParam 21 "U" :: Build.primitives) with
                     Harvest = { Exports = [ Build.export "current" (Build.symbol 400 "current" SymbolFlags.BlockScopedVariable) ]
+                                AmbientClasses = []
                                 Namespaces = Map.empty
                                 ShadowedByLib = 0
                               }
@@ -2799,6 +2811,7 @@ let shapePassTests =
                     Harvest =
                         { Exports =
                             [ Build.export "Timer" (Build.symbol 800 "Timer" (SymbolFlags.Class ||| SymbolFlags.Value)) ]
+                          AmbientClasses = []
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
@@ -2874,6 +2887,7 @@ let shapePassTests =
                     Harvest =
                         { Exports =
                             [ Build.export "Clash" (Build.symbol 810 "Clash" (SymbolFlags.Class ||| SymbolFlags.Value)) ]
+                          AmbientClasses = []
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
@@ -2947,6 +2961,7 @@ let shapePassTests =
                     Harvest =
                         { Exports =
                             [ Build.export "Gauge" (Build.symbol 600 "Gauge" (SymbolFlags.Class ||| SymbolFlags.Value)) ]
+                          AmbientClasses = []
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
@@ -2965,6 +2980,7 @@ let shapePassTests =
                     Harvest =
                         { Exports =
                             [ Build.export "widgets" (Build.symbol 600 "widgets" SymbolFlags.BlockScopedVariable) ]
+                          AmbientClasses = []
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
@@ -3084,6 +3100,7 @@ let shapePassTests =
                 { Build.shapeModel ((cases |> List.collect (fun (facts, _, _, _) -> facts)) @ Build.primitives) with
                     Harvest =
                         { Exports = cases |> List.map (fun (_, _, export, _) -> export)
+                          AmbientClasses = []
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
@@ -3173,6 +3190,7 @@ let shapePassTests =
                   ) with
                     Harvest =
                         { Exports = cases |> List.map (fun (_, _, export, _) -> export)
+                          AmbientClasses = []
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
@@ -3231,6 +3249,7 @@ let shapePassTests =
                         { Exports =
                             [ { Build.export "Vise" (Build.symbol 800 "Vise" (SymbolFlags.Class ||| SymbolFlags.Value)) with
                                   Origin = ExportOrigin.StringFromAmbientModule "lab:tools" } ]
+                          AmbientClasses = []
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
@@ -3286,6 +3305,7 @@ let shapePassTests =
                             [ Build.export
                                   "DOMException"
                                   (Build.symbol 810 "DOMException" (SymbolFlags.Class ||| SymbolFlags.Value)) ]
+                          AmbientClasses = []
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
@@ -4405,6 +4425,7 @@ let shapePassTests =
             let model =
                 { Build.shapeModel [] with
                     Harvest = { Exports = [ Build.export "Gone" (Build.symbol 300 "Gone" SymbolFlags.TypeAlias) ]
+                                AmbientClasses = []
                                 Namespaces = Map.empty
                                 ShadowedByLib = 0
                               } }

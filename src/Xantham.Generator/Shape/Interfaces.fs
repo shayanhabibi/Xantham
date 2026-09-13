@@ -120,8 +120,7 @@ let shapeInterfaces: Pass<ShapeModel> =
 
                     let rec entrypointClass typeId =
                         match Map.tryFind typeId classSides, Map.tryFind typeId model.Types with
-                        | Some(export, valueFacts), Some facts ->
-                            isEntrypoint ctx export valueFacts.ConstructSignatures facts.BaseTypes
+                        | Some(export, constructors), Some facts -> isEntrypoint ctx export constructors facts.BaseTypes
                         | _, Some facts ->
                             match facts.Response.TargetTypeId with
                             | ValueSome target when target <> typeId -> entrypointClass target
@@ -163,8 +162,8 @@ let shapeInterfaces: Pass<ShapeModel> =
                                 let hooks =
                                     let entrypoint =
                                         match Map.tryFind typeId classSides with
-                                        | Some(export, valueFacts) ->
-                                            isEntrypoint ctx export valueFacts.ConstructSignatures facts.BaseTypes
+                                        | Some(export, constructors) ->
+                                            isEntrypoint ctx export constructors facts.BaseTypes
                                         | None -> false
 
                                     let inheritsSomething () =
