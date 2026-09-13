@@ -251,6 +251,32 @@ the caller's intended contract; arity checking alone does not establish semantic
 Compile representative typed calls and test their runtime behavior. Generated support libraries
 can instead use declaration catalogs, which authenticate source ownership and the F# API.
 
+### Injecting callback types
+
+A named, fixed-signature TypeScript callback can map to a supplied F# delegate. For a
+JavaScript callback `(value: string, count: number) => boolean`, a compatible definition is:
+
+```fsharp
+module Application.Support
+
+type Check = delegate of string * float -> bool
+```
+
+Map its TypeScript name to `"Application.Support.Check"` and supply that definition before
+the generated binding. This delegate has zero generic type parameters and two callback
+arguments: mapping `arity` describes the former. A two-argument Fable probe validates both
+passing this delegate to JavaScript and receiving and invoking a JavaScript callback.
+
+A curried alias such as `type Check = string -> float -> bool` has a different calling
+convention. In that probe it compiles and works when passed to JavaScript, but invoking a
+returned callback fails at runtime. A name mapping supplies no currying adapter. Keep any
+required adapter explicit and test both directions across the JavaScript boundary.
+
+Generic callback mapping also has a known limit: the tested `GenericCheck<string>` reference
+retains its alias name but supplies zero usable type arguments on this path. Mapping it to a
+destination of generic arity one produces `TR053` and widens. This result does not establish
+support for generic, overloaded, optional-argument or rest-argument callback mappings.
+
 ## Run it
 
 ```bash
