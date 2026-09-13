@@ -187,7 +187,7 @@ let private typeParamIdentity (model: ShapeModel) (id: int<typeId>) =
 
 /// An object type whose call signatures hoist a shared type-parameter name under two different
 /// bounds — the F# head produced by `aliasTypeParams` is unwritable.
-let internal hasIncompatibleOverloadedTypeParameters (model: ShapeModel) (facts: TypeFacts) =
+let hasIncompatibleOverloadedTypeParameters (model: ShapeModel) (facts: TypeFacts) =
     match facts.CallSignatures with
     | []
     | [ _ ] -> false
