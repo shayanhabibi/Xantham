@@ -1456,6 +1456,28 @@ the compile gate and 455 Fable runtime checks pass. Workers' `SA003` count falls
 the root retention alias and the three module-scoped Workflow aliases retain separate names.
 Workers' tiers change from 410/1068/369/111 to 412/1068/368/111 (exact/ergonomic/widened/escape).
 
+## Augmented libraries and exclusive factories (2026-09-13)
+
+`resolve-type-table` follows non-compiler declarations when a standard-library symbol is
+augmented, preferring entry sources and then deterministic dependency source order. Local
+augmentations retain their generic parameters and members; dependency augmentations use the
+configured group disposition. Function values resolve their callable signatures by content.
+`augmented-dom-lab` and its compiled consumer cover generic Request/RequestInit augmentations,
+`typeof fetch`, and unchanged mapping of an ordinary DOM Response.
+
+The exclusive-arm fold preserves separate union arms when the proposed factories have
+identical parameter types and optionality. F# parameter names do not distinguish overload
+signatures. `exclusive-signature-lab` exercises the URL/HTML case and calls each arm's factory
+through Fable to verify the emitted property.
+
+Validation: 816 generator tests and 90 Wire tests pass in both phases, with the compile gate
+and 457 Fable checks passing. The Workers golden adds its merged `Disposable` declaration
+and explicit `HyperdriveDynamic` inheritance. Its symbol-keyed dispose member remains a
+reported mapping loss (`MB.SymbolKeyedMemberDropped` +1); base flattening becomes inheritance.
+The existing Agents browser entry compiles in the external corpus probe. Shipping its Workers
+dependency separately still exposes a group-to-root reference cycle and remains an open
+library-stratification issue.
+
 # Easy Nits 
 
 To include in scope when a phases implementation/attempt ends up being small/quick.

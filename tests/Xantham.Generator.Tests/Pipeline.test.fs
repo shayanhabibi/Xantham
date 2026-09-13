@@ -4762,3 +4762,20 @@ let catalogSubpathTests =
             fixtureTests "catalog-subpath-lab" (handFixture "catalog-subpath-lab")
                 GeneratorConfig.Default (fun _ -> [])
     ]
+
+[<Tests>]
+let augmentedDomTests =
+    testList "augmented DOM fixture" [
+        yield!
+            fixtureTests "augmented-dom-lab" (handFixture "augmented-dom-lab")
+                { GeneratorConfig.Default with Lib = Some [ "esnext"; "dom" ]; Types = Some [] }
+                (fun _ -> [])
+    ]
+
+[<Tests>]
+let exclusiveSignatureTests =
+    testList "exclusive factory signatures" [
+        yield!
+            fixtureTests "exclusive-signature-lab" (handFixture "exclusive-signature-lab")
+                GeneratorConfig.Default (fun _ -> [])
+    ]

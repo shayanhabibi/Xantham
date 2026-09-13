@@ -1,0 +1,4 @@
+{"name":"UrlPage","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"MB.OptionalMemberAsOption","key":"MB003","pass":"shape-interfaces","tier":"ergonomic","symbol":"UrlPage.html","message":"optional member reads as option"},{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"UrlPage","message":"ParamObject Create synthesized (D3)"}]}
+{"name":"HtmlPage","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"MB.OptionalMemberAsOption","key":"MB003","pass":"shape-interfaces","tier":"ergonomic","symbol":"HtmlPage.url","message":"optional member reads as option"},{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"HtmlPage","message":"ParamObject Create synthesized (D3)"}]}
+{"name":"Page","file":"index.d.ts","tier":"exact","findings":[]}
+{"name":"Exports.render","tier":"exact","findings":[]}

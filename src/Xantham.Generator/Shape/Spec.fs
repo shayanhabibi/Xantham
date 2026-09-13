@@ -574,9 +574,22 @@ let internal exclusiveArmShape (model: ShapeModel) (facts: TypeFacts) : Exclusiv
 
             let armShapes = arms |> List.map (fun arm -> { Facts = arm; Own = ownFor arm })
 
+            let parameterTypes arm =
+                let required, optional =
+                    shared @ arm.Own |> List.partition (fun member_ -> not member_.Optional)
+
+                required @ optional
+                |> List.map (fun member_ -> member_.TypeId, member_.Optional)
+
             // An arm contributing nothing of its own is not exclusive - it is the same shape
             // as another arm, reached twice, and belongs to `namedUnionByMembers` instead.
             if armShapes |> List.exists (fun a -> a.Own.IsEmpty) then
+                NotExclusiveArms
+            elif
+                (armShapes |> List.map parameterTypes |> List.distinct).Length
+                <> armShapes.Length
+            then
+                // F# overload signatures omit parameter names. Keep colliding arms as separate types.
                 NotExclusiveArms
             // Folds the moment one arm's own member is required: that fact alone gives F# a
             // required-arity anchor to resolve the whole set of `Create` overloads on, even

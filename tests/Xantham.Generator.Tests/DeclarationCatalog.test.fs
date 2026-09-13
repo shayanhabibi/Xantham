@@ -99,6 +99,31 @@ let tests =
                 skiptest "run `npm install` at the repository root, or set XANTHAM_TSGO_EXE" ]
     | Some _ ->
         testList "declaration catalog" [
+            testCase "augmented DOM types and global function values compile against Core.TS" <| fun _ ->
+                let directory = Path.Combine(temporaryRoot, "xantham-dom-augmentation-" + Guid.NewGuid().ToString "N")
+                Directory.CreateDirectory directory |> ignore
+                try
+                    let package = Path.GetFullPath(Path.Combine(fixture, "..", "augmented-dom-lab"))
+                    let config =
+                        { GeneratorConfig.Default with
+                            ModuleName = Some "Identity.Root"
+                            Lib = Some [ "esnext"; "dom" ]
+                            Types = Some [] }
+                    Pipeline.run config package (Path.Combine(directory, "root")) |> Async.RunSynchronously |> ignore
+                    let consumer = """module Identity.Consumer
+open Fable.Core
+let value (request: Identity.Root.Request<string>) : string option = request.cf
+let options (init: Identity.Root.RequestInit<float>) : float option = init.cf
+let plain () : Fable.Core.TS.Dom.Response = Identity.Root.Exports.plain()
+let invoke (request: Identity.Root.Request<Identity.Root.Request.Value.Item>)
+           (init: Identity.Root.RequestInit<Identity.Root.Request.Init.Item>) : JS.Promise<Fable.Core.TS.Dom.Response> =
+    let fetch = Identity.Root.Exports.request(request, init)
+    fetch.Invoke(U3.Case1 "https://example.invalid/", None)
+"""
+                    let code, output = compileConsumer directory [ "root/Identity.Root.fs" ] consumer
+                    code |> Flip.Expect.equal output 0
+                finally Directory.Delete(directory, true)
+
             testCase "subpath function results retain their qualified parent identity" <| fun _ ->
                 let directory = Path.Combine(temporaryRoot, "xantham-catalog-function-result-" + Guid.NewGuid().ToString "N")
                 Directory.CreateDirectory directory |> ignore

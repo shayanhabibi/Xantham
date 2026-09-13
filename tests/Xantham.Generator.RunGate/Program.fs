@@ -2091,6 +2091,18 @@ let main _ =
     subpathLab ()
     mixedSubpaths ()
 
+    equal
+        "exclusive URL factory emits its own property"
+        "url:https://example.invalid/"
+        (ExclusiveSignatureLab.Exports.render (
+            U2.Case2(ExclusiveSignatureLab.UrlPage.Create "https://example.invalid/")
+        ))
+
+    equal
+        "exclusive HTML factory emits its own property"
+        "html:<p>test</p>"
+        (ExclusiveSignatureLab.Exports.render (U2.Case1(ExclusiveSignatureLab.HtmlPage.Create "<p>test</p>")))
+
     match failures with
     | [] ->
         printfn $"run gate: {passed} checks passed"

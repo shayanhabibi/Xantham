@@ -16067,12 +16067,16 @@ type Hyperdrive =
     [<ParamObject; Emit("$0")>]
     static member Create (connect: (unit -> Socket), connectionString: string, host: string, ip: string, port: float, user: string, password: string, database: string) : Hyperdrive = jsNative
 
+type Disposable =
+    interface end
+
 /// <summary>
 /// A handle to a dynamically-provisioned Hyperdrive connection, returned by
 /// <c>HyperdriveApi.get()</c>.
 /// </summary>
 [<Interface>]
 type HyperdriveDynamic =
+    inherit Disposable
     /// <summary>
     /// The database name to use when connecting through this Hyperdrive.
     /// </summary>

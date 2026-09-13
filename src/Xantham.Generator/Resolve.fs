@@ -719,7 +719,22 @@ let private deriveFacts
                 []
         elif has TypeFlags.Object then
             let! symbol = ctx.Session.getSymbolOfType ty.Id
-            let origin = Grouping.classify ctx.PackageDir symbol
+            let firstOrigin = Grouping.classify ctx.PackageDir symbol
+
+            let origin =
+                if firstOrigin <> CompilerLib then
+                    firstOrigin
+                else
+                    symbol
+                    |> ValueOption.bind _.Declarations
+                    |> ValueOption.defaultValue [||]
+                    |> Array.choose (NodeHandle.parse >> ValueOption.toOption)
+                    |> Array.map (fun handle -> handle.Path * uom<filePath>)
+                    |> Array.filter (fun file -> Grouping.classifyFile ctx.PackageDir file <> CompilerLib)
+                    |> Array.sortBy (Grouping.sourceOrderKey ctx.PackageDir)
+                    |> Array.tryHead
+                    |> Option.map (Grouping.classifyFile ctx.PackageDir)
+                    |> Option.defaultValue firstOrigin
 
             // Type arguments resolve for every group (O7 note): an external `Array<T>` or
             // `Promise<T>` carries entry-package types the walk must still reach.
@@ -776,14 +791,16 @@ let private deriveFacts
             // whatever group it was written in.
             let objectFlags = ty.ObjectFlags |> ValueOption.defaultValue ObjectFlags.None
 
-            // A member's type is named for the member: the type of `Promise.then` carries
-            // the symbol `then`, a member name rather than a declaration head. Such a type
-            // resolves by content whatever group it was written in; a symbol that declares
-            // a type keeps the shortcut.
+            // Function and member values resolve their signatures by content.
             let isMemberType =
                 match symbol with
                 | ValueSome s ->
-                    hasAny (SymbolFlags.Method ||| SymbolFlags.Property ||| SymbolFlags.Signature) s.Flags
+                    hasAny
+                        (SymbolFlags.Function
+                         ||| SymbolFlags.Method
+                         ||| SymbolFlags.Property
+                         ||| SymbolFlags.Signature)
+                        s.Flags
                     && not (
                         hasAny
                             (SymbolFlags.Interface
