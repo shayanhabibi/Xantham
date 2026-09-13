@@ -29,7 +29,15 @@ export interface Ledger {
     count: number;
 }
 
+/** `Coalesce` reached at a member position, distinct from its top-level export: both call
+ *  signatures recover as separable overloads under the member's own name (§4.2 extended to
+ *  callbacks), reachable through `holder.coalesce` rather than through `Exports`. */
+export interface Holder {
+    coalesce: Coalesce<string>;
+}
+
 export declare const coalesce: Coalesce<string>;
 export declare const oneShot: OneShot<string>;
 export declare const multiplex: Multiplex;
 export declare const ledger: Ledger;
+export declare const holder: Holder;

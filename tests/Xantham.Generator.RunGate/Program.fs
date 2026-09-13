@@ -1962,18 +1962,15 @@ let private callableHybrids () =
 
 /// §4.4's routing counterpart: two call signatures sharing one hoisted type-parameter name under
 /// different bounds reach an interface, each keeping its own `Invoke` overload instead of one
-/// shared delegate head. The checks below call each overload through its bound function, the
-/// runtime evidence the routing claim rests on.
+/// shared delegate head. `Holder.coalesce` reaches `Coalesce` at a member position, distinct
+/// from the top-level `Exports.coalesce` static function: the property recovers as an
+/// overloaded method under its own name (§4.2 extended to callbacks), one per call signature.
 let private callableOverloads () =
-    equal
-        "the single-argument overload reaches the underlying function"
-        "hi"
-        (CallableOverloadsLab.Exports.coalesce "hi")
+    let holder = CallableOverloadsLab.Exports.holder
 
-    equal
-        "the two-argument overload reaches the same function under its own arity"
-        7.0
-        (CallableOverloadsLab.Exports.coalesce (3.0, 4.0))
+    equal "the single-argument overload reaches the underlying function" "hi" (holder.coalesce "hi")
+
+    equal "the two-argument overload reaches the same function under its own arity" 7.0 (holder.coalesce (3.0, 4.0))
 
 /// Export owners reach their own containers: the root ambient module, a subpath, a re-export
 /// alias and a mutable global each bind to their own JavaScript target, and a unioned or

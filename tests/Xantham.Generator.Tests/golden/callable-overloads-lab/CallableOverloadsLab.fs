@@ -37,6 +37,15 @@ type Ledger =
     [<ParamObject; Emit("$0")>]
     static member Create (count: float) : Ledger = jsNative
 
+/// <summary>
+/// <c>Coalesce</c> reached at a member position, distinct from its top-level export: both call
+/// signatures recover as separable overloads under the member's own name (§4.2 extended to
+/// callbacks), reachable through <c>holder.coalesce</c> rather than through <c>Exports</c>.
+/// </summary>
+type Holder =
+    abstract coalesce<'U>: value: 'U -> 'U
+    abstract coalesce<'U>: value: 'U * fallback: 'U -> 'U
+
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
@@ -52,3 +61,5 @@ type Exports =
     static member multiplex (value: float, extra: float) : float = jsNative
     [<Import("ledger", "callable-overloads-lab")>]
     static member ledger (id: float) : string = jsNative
+    [<Import("holder", "callable-overloads-lab")>]
+    static member holder: Holder = jsNative

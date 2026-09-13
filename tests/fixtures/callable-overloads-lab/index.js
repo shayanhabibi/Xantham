@@ -1,6 +1,7 @@
-// runtime behind callable-overloads-lab. `coalesce` proves both Invoke overloads reach the same
-// underlying function with the arity each call signature declared; `oneShot`, `multiplex` and
-// `ledger` are plain functions the negatives' delegates or hybrid Invoke call straight through to.
+// The runtime behind callable-overloads-lab. `coalesce`, read off `holder`, dispatches on arity:
+// both overloads reach the same underlying function. `oneShot`, `multiplex` and `ledger` are
+// plain functions, reached through the negatives' delegates or through the hybrid path's own
+// `Invoke`.
 export const coalesce = (value, fallback) => (fallback === undefined ? value : value + fallback);
 
 export const oneShot = (value) => value;
@@ -8,3 +9,5 @@ export const oneShot = (value) => value;
 export const multiplex = (value, extra) => (extra === undefined ? value + 1 : value + extra);
 
 export const ledger = Object.assign((id) => `entry:${id}`, { count: 0 });
+
+export const holder = { coalesce };

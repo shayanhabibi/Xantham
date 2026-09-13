@@ -1226,7 +1226,7 @@ let pipelineTests =
 
                           Expect.isEmpty
                               (rendered.Findings |> List.filter (fun f -> f.Key = "RA007"))
-                              "not one delegate head naming 'U twice"
+                              "not one delegate head repeating 'U"
 
                       testCase "a single generic call signature stays one delegate head"
                       <| fun _ ->
