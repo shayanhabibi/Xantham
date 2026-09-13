@@ -272,6 +272,16 @@ convention. In that probe it compiles and works when passed to JavaScript, but i
 returned callback fails at runtime. A name mapping supplies no currying adapter. Keep any
 required adapter explicit and test both directions across the JavaScript boundary.
 
+Keeping the imported callback typed as a delegate gives F# callers a simple adapter:
+
+```fsharp
+let asFunction (callback: Application.Support.Check) : string -> float -> bool =
+    fun value count -> callback.Invoke(value, count)
+```
+
+The probe validates both direct invocation and partial application of this wrapper over a
+callback returned from JavaScript.
+
 Generic callback mapping also has a known limit: the tested `GenericCheck<string>` reference
 retains its alias name but supplies zero usable type arguments on this path. Mapping it to a
 destination of generic arity one produces `TR053` and widens. This result does not establish
