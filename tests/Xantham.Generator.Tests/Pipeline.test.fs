@@ -24,38 +24,9 @@ let private required =
     | "false" -> false
     | _ -> true
 
-/// The main working tree of a linked worktree, resolved the way `tools/workspace.fsx` does:
-/// the worktree's `.git` is a file holding `gitdir:`, and `<gitdir>/commondir` points at the
-/// common git directory whose parent is the main checkout.
-let private mainCheckout (root: string) : string option =
-    let pointer = Path.Combine(root, ".git")
-
-    if not (File.Exists pointer) then
-        None
-    else
-        let text = File.ReadAllText(pointer).Trim()
-
-        if not (text.StartsWith "gitdir:") then
-            None
-        else
-            let gitDir = Path.GetFullPath(Path.Combine(root, text.Substring(7).Trim()))
-            let commonDir = Path.Combine(gitDir, "commondir")
-
-            if not (File.Exists commonDir) then
-                None
-            else
-                let common = Path.GetFullPath(Path.Combine(gitDir, File.ReadAllText(commonDir).Trim()))
-                let checkout = Path.GetDirectoryName common
-                if Directory.Exists checkout then Some checkout else None
-
 let private root = Path.GetFullPath(Path.Combine(__SOURCE_DIRECTORY__, "..", ".."))
 
-/// An npm-installed fixture package: this checkout's install, or the main checkout's when this
-/// checkout is a worktree with no install of its own.
-let private npmFixture (name: string) =
-    [ root; yield! mainCheckout root |> Option.toList ]
-    |> List.map (fun checkout -> Path.Combine(checkout, "tests", "fixtures", name, "node_modules", name))
-    |> List.tryFind Directory.Exists
+let private npmFixture (name: string) = Fixtures.npm root name
 
 /// A hand-authored fixture, tracked in git - always present, so it needs no pin.
 let private handFixture (name: string) =
@@ -4648,6 +4619,7 @@ let orphanCallbackTests =
                       "type Probe = delegate" => 1
                       "type Settle = delegate" => 1
                       "type Tick = delegate" => 0
+                      "type OnFail = delegate" => 0
                   ] <| fun (head, declarations) ->
                       let body = source ()
                       let pattern = System.Text.RegularExpressions.Regex.Escape head
@@ -4659,5 +4631,17 @@ let orphanCallbackTests =
                       let body = source ()
 
                       Expect.isFalse (body.Contains "OnClose2") "the hook's callback claims no second name"
-                      Expect.isFalse (body.Contains "type OnDrop") "nor a first one" ])
+                      Expect.isFalse (body.Contains "type OnDrop") "nor a first one"
+
+                  testCase "an entrypoint whose base this run leaves undeclared keeps no delegate" <| fun _ ->
+                      let body = source ()
+
+                      Expect.stringContains body "type IOnFailHandler =" "the hook reaches a handler interface"
+
+                      Expect.stringContains
+                          body
+                          "static member Create (onFail: Func<Signal, float, string>) : IOnFailHandler"
+                          "which reads the parameters directly"
+
+                      Expect.isFalse (body.Contains "type OnFail") "so the delegate behind it is dropped" ])
     ]

@@ -942,8 +942,6 @@ type Exception =
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, name: string, message: string, ?stack: string) : Exception = jsNative
 
-type ExportedHandlerTailStreamHandler<'Env, 'Props> = delegate of ``event``: TailStream.TailEvent<Onset> * env: 'Env * ctx: ExecutionContext<'Props> -> U3<JS.Promise<U2<(TailStream.TailEvent<ExportedHandlerTailStreamHandler.Result.Item.Event.Item> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>>, (TailStream.TailEvent<ExportedHandlerTailStreamHandler.Result.Item.Event.Item> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>
-
 [<Interface>]
 type FetchEventInfo =
     abstract ``type``: string

@@ -61,6 +61,17 @@ declare module "orphan-lab:runtime" {
     }
 
     /**
+     * An entrypoint whose base this run leaves undeclared: `Error` binds to `exn`, which this run
+     * declares elsewhere than as an interface, so the hooks are emitted and the delegate behind
+     * `onFail` reaches zero sites. The standalone guard in `synthesize-anonymous` misses it.
+     */
+    export class Wharf extends Error {
+        constructor(code: number);
+        readonly code: number;
+        onFail?(signal: Signal, code: number): string;
+    }
+
+    /**
      * A class whose base this run declares. F# admits no `inherit` of an interface, so the
      * declaration keeps the interface form and its optional callback method is an option
      * property reading the delegate name.

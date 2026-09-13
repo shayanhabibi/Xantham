@@ -5,7 +5,7 @@
   "counts": {
     "exact": 53,
     "ergonomic": 163,
-    "widened": 92,
+    "widened": 91,
     "escape": 43
   },
   "passes": [
@@ -65,6 +65,11 @@
       "total": 14,
       "ergonomic": 7,
       "widened": 7
+    },
+    {
+      "pass": "DD - drop-orphan-delegates",
+      "total": 2,
+      "exact": 2
     },
     {
       "pass": "AC - audit-coverage",

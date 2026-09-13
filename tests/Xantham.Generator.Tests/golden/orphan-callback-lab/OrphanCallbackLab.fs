@@ -78,6 +78,28 @@ module OrphanLab =
             static member Create (depth: float, ?probe: Probe) : Hub = jsNative
 
         /// <summary>
+        /// An entrypoint whose base this run leaves undeclared: <c>Error</c> binds to <c>exn</c>, which this run
+        /// declares elsewhere than as an interface, so the hooks are emitted and the delegate behind
+        /// <c>onFail</c> reaches zero sites. The standalone guard in <c>synthesize-anonymous</c> misses it.
+        /// </summary>
+        [<Import("Wharf", "orphan-lab:runtime"); AbstractClass>]
+        type Wharf (code: float) =
+            inherit exn()
+            member _.code: float = jsNative
+            member _.name
+                with get (): string = jsNative
+                and set (_: string): unit = jsNative
+            member _.message
+                with get (): string = jsNative
+                and set (_: string): unit = jsNative
+            member _.stack
+                with get (): string option = jsNative
+                and set (_: string option): unit = jsNative
+            member _.cause
+                with get (): obj option = jsNative
+                and set (_: obj option): unit = jsNative
+
+        /// <summary>
         /// A class whose base this run declares. F# admits no <c>inherit</c> of an interface, so the
         /// declaration keeps the interface form and its optional callback method is an option
         /// property reading the delegate name.
@@ -119,6 +141,13 @@ module OrphanLab =
             [<Import("Hub", "orphan-lab:runtime"); EmitConstructor>]
             static member Hub (depth: float) : Hub = jsNative
             /// <summary>
+            /// An entrypoint whose base this run leaves undeclared: <c>Error</c> binds to <c>exn</c>, which this run
+            /// declares elsewhere than as an interface, so the hooks are emitted and the delegate behind
+            /// <c>onFail</c> reaches zero sites. The standalone guard in <c>synthesize-anonymous</c> misses it.
+            /// </summary>
+            [<Import("Wharf", "orphan-lab:runtime"); EmitConstructor>]
+            static member Wharf (code: float) : Wharf = jsNative
+            /// <summary>
             /// A class whose base this run declares. F# admits no <c>inherit</c> of an interface, so the
             /// declaration keeps the interface form and its optional callback method is an option
             /// property reading the delegate name.
@@ -146,3 +175,10 @@ module OrphanLab =
                 abstract onClose: signal: Signal * code: float -> JS.Promise<unit> option
                 [<ParamObject; Emit("$0")>]
                 static member Create (onClose: Func<Signal, float, JS.Promise<unit> option>) : IOnCloseHandler = jsNative
+
+        module Wharf =
+            [<Interface>]
+            type IOnFailHandler =
+                abstract onFail: signal: Signal * code: float -> string
+                [<ParamObject; Emit("$0")>]
+                static member Create (onFail: Func<Signal, float, string>) : IOnFailHandler = jsNative

@@ -84,6 +84,11 @@
       "pass": "RA - repair-arity",
       "total": 4,
       "ergonomic": 4
+    },
+    {
+      "pass": "DD - drop-orphan-delegates",
+      "total": 1,
+      "exact": 1
     }
   ]
 }

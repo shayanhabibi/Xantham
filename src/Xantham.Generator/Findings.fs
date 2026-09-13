@@ -230,6 +230,7 @@ module FindingCodes =
             "RA.ReadWithoutWrite", "RA005"
             "RA.AliasKeptAsPhantom", "RA006"
             "RA.DuplicateTypeParameterUnwritable", "RA007"
+            "DD.DelegateReachedNoReference", "DD001"
             "AC.ExportNotRepresented", "AC001"
             "GE.GroupShipped", "GE001"
             "GE.ShippedGroupWithoutDeclarations", "GE002"
@@ -1101,6 +1102,19 @@ type RepairArity =
                 $"{name} resolves to a target using fewer type parameters than its head; the surplus are erased phantoms"
             | DuplicateTypeParameterUnwritable name -> $"{name} dropped: two of its type parameters share a name"
 
+/// `drop-orphan-delegates`.
+[<Prefix("DD", "drop-orphan-delegates")>]
+type DropOrphanDelegates =
+    /// The delegate was declared for a callback every reading position writes out in full, so the
+    /// declaration is dropped.
+    | [<Exact>] DelegateReachedNoReference
+
+    interface IFindingKind with
+        member this.Message =
+            match this with
+            | DelegateReachedNoReference ->
+                "delegate dropped: every position reading this callback writes its parameters directly"
+
 /// `audit-coverage`.
 [<Prefix("AC", "audit-coverage")>]
 type AuditCoverage =
@@ -1162,6 +1176,7 @@ module FindingCatalogue =
             typeof<SynthesizeParamObjects>
             typeof<DedupeOverloads>
             typeof<RepairArity>
+            typeof<DropOrphanDelegates>
             typeof<AuditCoverage>
             typeof<EmitGroups>
         ]

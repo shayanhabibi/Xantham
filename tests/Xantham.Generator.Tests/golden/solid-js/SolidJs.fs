@@ -240,8 +240,6 @@ type ResourceActions<'T, 'R> =
 
 type ResourceSource<'S> = U3<bool, 'S, (unit -> U2<bool, 'S> option)> option
 
-type ResourceFetcher<'S, 'T, 'R> = delegate of k: 'S * info: ResourceFetcher.Info<'T, 'R> -> U2<'T, JS.Promise<'T>>
-
 [<Interface>]
 type ResourceFetcherInfo<'T, 'R> =
     abstract value: 'T option with get, set
@@ -2508,8 +2506,6 @@ module Store =
 
     [<Erase>]
     type StoreSetter<'T, 'U> = private StoreSetter__ of obj
-
-    type StoreSetter2<'T, 'U> = delegate of prevState: 'T * traversed: 'U -> obj
 
     [<Erase>]
     type Part<'T, 'K> = private Part__ of U3<'K, 'K[], U2<Func<obj, float, bool>, StorePathRange>>
