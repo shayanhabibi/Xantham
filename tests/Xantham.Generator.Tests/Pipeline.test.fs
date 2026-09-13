@@ -4884,3 +4884,12 @@ let catalogAliasApiTests =
         yield!
             fixtureTests "catalog-alias-api-lab" package config (fun _ -> [])
     ]
+
+[<Tests>]
+let catalogRecursiveJsonTests =
+    let package = handFixture "catalog-recursive-json-lab"
+    let config = { handConfig package with DeclarationCatalog = false }
+    testList "catalog recursive JSON fixture" [
+        yield!
+            fixtureTests "catalog-recursive-json-lab" package config (fun _ -> [])
+    ]

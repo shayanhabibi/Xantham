@@ -609,13 +609,8 @@ let private deriveFacts
                            || flags.HasFlag TypeFlags.BigIntLiteral
                            || flags.HasFlag TypeFlags.BooleanLiteral))
 
-            let closedObjectUnion =
-                Array.isEmpty unionAliasArguments
-                && not (List.isEmpty literals)
-                && literals |> List.forall (fun member_ -> member_.Flags.HasFlag TypeFlags.Object)
-
             let recoverAlias =
-                (plainLiteralUnion || closedObjectUnion)
+                (plainLiteralUnion || Array.isEmpty unionAliasArguments)
                 && (ctx.Config.DeclarationCatalog
                     || not (List.isEmpty ctx.Config.DeclarationReferences))
 
@@ -627,10 +622,25 @@ let private deriveFacts
                         if result.Id <> ty.Id && result.AliasSymbol.IsSome then
                             let! arguments = ctx.Session.getAliasTypeArgumentsOfType result.Id
 
+                            let! canonical =
+                                async {
+                                    if plainLiteralUnion then
+                                        return true
+                                    else
+                                        let! symbol = ctx.Session.getAliasSymbolOfType result.Id
+
+                                        match symbol with
+                                        | ValueSome symbol ->
+                                            let! declared = ctx.Session.getDeclaredTypeOfSymbol symbol.Id
+                                            return declared.Id = result.Id
+                                        | ValueNone -> return false
+                                }
+
                             return
                                 if
-                                    plainLiteralUnion
-                                    || (arguments |> ValueOption.defaultValue [||] |> Array.isEmpty)
+                                    canonical
+                                    && (plainLiteralUnion
+                                        || (arguments |> ValueOption.defaultValue [||] |> Array.isEmpty))
                                 then
                                     Some result
                                 else
@@ -642,10 +652,18 @@ let private deriveFacts
                 }
 
             let! alias =
-                if recoverAlias && ty.AliasSymbol.IsSome then
-                    ctx.Session.getAliasSymbolOfType ty.Id
-                else
-                    async.Return ValueNone
+                async {
+                    if recoverAlias && ty.AliasSymbol.IsSome then
+                        let! symbol = ctx.Session.getAliasSymbolOfType ty.Id
+
+                        match symbol with
+                        | ValueSome symbol when not plainLiteralUnion ->
+                            let! declared = ctx.Session.getDeclaredTypeOfSymbol symbol.Id
+                            return if declared.Id = ty.Id then ValueSome symbol else ValueNone
+                        | symbol -> return symbol
+                    else
+                        return ValueNone
+                }
 
             return
                 { TypeFacts.shallow ty with

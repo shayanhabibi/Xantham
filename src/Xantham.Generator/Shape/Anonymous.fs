@@ -417,7 +417,15 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
         if Map.containsKey facts.Response.TypeId names then
             false
         elif flag TypeFlags.Union facts && not (flag TypeFlags.Boolean facts) then
-            isLiteralUnion facts || becomesTaggedUnion facts
+            let canonicalAlias =
+                (ctx.Config.DeclarationCatalog
+                 || not (List.isEmpty ctx.Config.DeclarationReferences))
+                && facts.AliasTypeArguments.IsEmpty
+                && facts.DeclarationArguments.IsEmpty
+                && (facts.SymbolName |> Option.exists (isSyntheticName >> not))
+                && GeneratorConfig.disposition ctx.Config facts.Origin = Ship
+
+            isLiteralUnion facts || becomesTaggedUnion facts || canonicalAlias
         elif flag TypeFlags.Object facts && isPureCallback facts then
             // A callback the arity rule retains as a delegate is declared under a name of its
             // own (D5), so the consumer reads `x: float * y: float` where `Func<float, float,

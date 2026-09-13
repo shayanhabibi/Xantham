@@ -154,7 +154,17 @@ let internal namedUnionByMembers (model: ShapeModel) (memberIds: int<Measure.typ
     |> Seq.tryPick (fun (typeId, name) ->
         match Map.tryFind typeId model.Types with
         | Some candidate when flag TypeFlags.Union candidate && not (flag TypeFlags.Boolean candidate) ->
-            if nonNullishMemberSet model candidate = wanted then
+            let nullish, members = splitNullish model candidate
+
+            let literalEnum =
+                members.Length >= 2
+                && members
+                   |> List.forall (fun id -> Map.tryFind id model.Types |> Option.bind literalOf |> Option.isSome)
+
+            if
+                (List.isEmpty nullish || literalEnum)
+                && nonNullishMemberSet model candidate = wanted
+            then
                 Some name
             else
                 None

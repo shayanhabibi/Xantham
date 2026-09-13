@@ -4478,7 +4478,7 @@ type Jsonifiable = U6<string, float, bool, obj[], Jsonifiable2, Jsonifiable2.Ite
 
 type Jsonifiable2 =
     [<EmitIndexer>]
-    abstract Item: string -> Jsonifiable option with get, set
+    abstract Item: string -> U6<string, float, bool, Jsonifiable[], Jsonifiable2, Jsonifiable2.Item> option with get, set
 
 /// <summary>
 /// Transform a type to one that is assignable to the <c>JsonValue</c> type.
@@ -10658,7 +10658,7 @@ module PackageJson =
         /// </summary>
         abstract test: string option with get, set
         [<EmitIndexer>]
-        abstract Item: string -> JsonValue option with get, set
+        abstract Item: string -> U5<string, float, bool, JsonValue[], JsonObject> option with get, set
 
     type Engines =
         abstract node: string option with get, set
@@ -10707,7 +10707,7 @@ module PackageJson =
         /// </summary>
         abstract tag: string option with get, set
         [<EmitIndexer>]
-        abstract Item: string -> JsonValue option with get, set
+        abstract Item: string -> U5<string, float, bool, JsonValue[], JsonObject> option with get, set
 
     [<Interface>]
     type Repository =

@@ -1683,6 +1683,27 @@ gate passes, and 461 Fable checks pass. All 97 existing golden trees are byte-id
 The new lab has one exact and two ergonomic symbols, with no widening or escape.
 Fresh FCS checking reports zero errors and warnings.
 
+
+### Recursive alias boundaries and NonNullable payloads
+
+Catalog-mode Resolve records a nongeneric union alias's source name only when the checker
+reports the same declared type for its alias symbol. A transformed `NonNullable<T>` therefore
+keeps its own nullability instead of borrowing the name of nullable `T`. Shape names shipped
+canonical union aliases even when they are reachable only through other declarations.
+Recursive aliases then reach the same named boundary in producer and consumer programs.
+
+Union member-set matching reuses a heterogeneous alias only when the candidate is
+non-nullable. Nullable literal unions remain reusable through their value-only enums.
+This preserves the difference between `T` and `NonNullable<T>` while keeping enum reuse.
+The existing widening at an unnamed recursive alias cycle remains reported as TR001.
+
+The catalog-recursive-json lab contains `Value = string | number | null | Value[]` and a
+tagged payload whose result is `NonNullable<Value>`. A separately generated consumer imports
+only the payload. The shared payload has no outer option, while its recursive array values
+retain the canonical nullable Value. A typed F# consumer constructs and reuses both forms.
+Actual pinned AI SDK diagnostic generation/compilation and the full regression measurements
+are recorded in `docs/.ai/handovers/catalog-recursive-json.md`.
+
 # Easy Nits 
 
 To include in scope when a phases implementation/attempt ends up being small/quick.

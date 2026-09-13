@@ -772,6 +772,32 @@ let typeRefTests =
             Expect.equal reference (FsNamed "Value") "the nullable alias owns its option layer"
             Expect.isEmpty findings "the alias declaration reports the nullable mapping"
 
+        testCase "a nonnullable union does not reuse a nullable heterogeneous alias" <| fun _ ->
+            let nullable =
+                { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 7<typeId>; 8<typeId>; 5<typeId> ] }
+            let nonnullable =
+                { Build.facts (Build.typeResponse 11 TypeFlags.Union) with UnionMembers = [ 7<typeId>; 8<typeId> ] }
+            let members =
+                [ Build.facts (Build.typeResponse 7 TypeFlags.String)
+                  Build.facts (Build.typeResponse 8 TypeFlags.Number) ]
+            let model =
+                { Build.shapeModel (nullable :: nonnullable :: members @ Build.primitives) with
+                    DeclNames = Map.ofList [ 10<typeId>, "Value" ] }
+            let reference, _ = Spec.typeRef Build.context model None "x" 11<typeId>
+            Expect.equal reference (FsErasedUnion [ FsString; FsFloat ]) "NonNullable does not regain null through an alias"
+
+        testCase "a nonnullable literal union reuses the nullable union's value-only enum" <| fun _ ->
+            let nullable =
+                { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 7<typeId>; 8<typeId>; 5<typeId> ] }
+            let nonnullable =
+                { Build.facts (Build.typeResponse 11 TypeFlags.Union) with UnionMembers = [ 7<typeId>; 8<typeId> ] }
+            let model =
+                { Build.shapeModel (nullable :: nonnullable :: stringLiteral 7 "ms" :: stringLiteral 8 "s" :: Build.primitives) with
+                    DeclNames = Map.ofList [ 10<typeId>, "TimeUnit" ] }
+            let reference, findings = Spec.typeRef Build.context model None "x" 11<typeId>
+            Expect.equal reference (FsNamed "TimeUnit") "the generated enum already excludes null"
+            Expect.isEmpty findings "the nonnullable reference adds no option layer"
+
         testCase "an array of a generated declaration reads as an F# array" <| fun _ ->
             let array =
                 { Build.facts (Build.typeResponse 11 TypeFlags.Object) with

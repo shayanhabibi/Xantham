@@ -108,6 +108,38 @@ let tests =
                 skiptest "run `npm install` at the repository root, or set XANTHAM_TSGO_EXE" ]
     | Some _ ->
         testList "declaration catalog" [
+            testCase "NonNullable recursive aliases retain canonical payload types across packages" <| fun _ ->
+                let directory = Path.Combine(temporaryRoot, "xantham-recursive-json-" + Guid.NewGuid().ToString "N")
+                Directory.CreateDirectory directory |> ignore
+                try
+                    let package = Path.GetFullPath(Path.Combine(fixture, "..", "catalog-recursive-json-lab"))
+                    let dependency = Path.Combine(package, "node_modules", "recursive-json-owner-lab")
+                    let config =
+                        { GeneratorConfig.loadFile (Path.Combine(package, "xantham.json")) with
+                            ModuleName = Some "Identity.Root" }
+                    let root = Path.Combine(directory, "root")
+                    Pipeline.run config dependency root |> Async.RunSynchronously |> ignore
+                    let adapter =
+                        { config with
+                            ModuleName = Some "Identity.Adapter"
+                            DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
+                    Pipeline.run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    let consumer = """module Identity.Consumer
+open Fable.Core
+let accept (output: Identity.Root.Output) : Identity.Root.Output = Identity.Adapter.Exports.accept output
+let result (output: Identity.Root.Output) : U3<string, float, Identity.Root.Value[]> =
+    match output with
+    | Identity.Root.Output.Result result -> result
+    | Identity.Root.Output.Text text -> U3.Case1 text
+let nullable (value: Identity.Root.Value) : U3<string, float, obj[]> option = value
+let array (values: Identity.Root.Value[]) : Identity.Root.Output =
+    Identity.Adapter.Exports.accept (Identity.Root.Output.Result (U3.Case3 values))
+"""
+                    let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] consumer
+                    Expect.equal code 0 output
+                finally
+                    if Directory.Exists directory then Directory.Delete(directory, true)
+
             testCase "anonymous parent roles do not add consumer sources to shared declarations" <| fun _ ->
                 let directory = Path.Combine(temporaryRoot, "xantham-anonymous-parent-" + Guid.NewGuid().ToString "N")
                 let package = Path.Combine(directory, "package")
