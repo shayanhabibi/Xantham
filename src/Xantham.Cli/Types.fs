@@ -1,5 +1,7 @@
 ﻿module Xantham.Cli.Types
+
 open System
+
 [<Struct>]
 type OutputMode =
     | Pretty
@@ -25,7 +27,7 @@ module ColorMode =
         | ColorMode.Auto when outputMode.IsJson -> false
         | ColorMode.Auto ->
             (not Console.IsOutputRedirected
-            && String.IsNullOrEmpty(Environment.GetEnvironmentVariable("NO_COLOR")))
+             && String.IsNullOrEmpty(Environment.GetEnvironmentVariable("NO_COLOR")))
             || not (String.IsNullOrEmpty(Environment.GetEnvironmentVariable("FORCE_COLOR")))
 
 module BannerMode =
@@ -35,4 +37,3 @@ module BannerMode =
         | BannerMode.Never -> false
         | BannerMode.Auto when outputMode.IsJson -> false
         | BannerMode.Auto -> not Console.IsOutputRedirected
-        

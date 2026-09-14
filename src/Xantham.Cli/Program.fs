@@ -62,31 +62,32 @@ let private emit (out: TextWriter) (err: TextWriter) (options: GenerateOptions) 
 
     try
         let report = Async.RunSynchronously(Pipeline.run config packageDir outDir)
+
         if options.Json then
-            JsonSerializer.Serialize(report, JsonSerializerOptions.Default)
-            |> out.WriteLine
+            JsonSerializer.Serialize(report, JsonSerializerOptions.Default) |> out.WriteLine
             Exit.Generated
         else
-        for name in report.OutputFiles do
-            out.WriteLine(Path.Combine(outDir, name.Replace('/', Path.DirectorySeparatorChar)))
+            for name in report.OutputFiles do
+                out.WriteLine(Path.Combine(outDir, name.Replace('/', Path.DirectorySeparatorChar)))
 
-        if not options.Quiet then
-            err.WriteLine $"{Bootstrap.packageName packageDir} -> {report.ModuleName}"
+            if not options.Quiet then
+                err.WriteLine $"{Bootstrap.packageName packageDir} -> {report.ModuleName}"
 
-            for line in summary report do
-                err.WriteLine line
+                for line in summary report do
+                    err.WriteLine line
 
-            match libShadowWarning config report with
-            | Some warning -> err.WriteLine warning
-            | None -> ()
+                match libShadowWarning config report with
+                | Some warning -> err.WriteLine warning
+                | None -> ()
 
-        Exit.Generated
+            Exit.Generated
     with e ->
         err.WriteLine $"xantham: generating {packageDir} failed - {e.Message}"
         Exit.Failed
 
 let private generate (out: TextWriter) (err: TextWriter) (options: GenerateOptions) =
     let packageDir = Path.GetFullPath options.PackageDir
+
     match refusePackage packageDir with
     | Some message ->
         err.WriteLine $"xantham: {message}"
@@ -231,20 +232,24 @@ let run (out: TextWriter) (err: TextWriter) (argv: string[]) : int =
                                     setAction (fun useJsonOutput ->
                                         match Xantham.TypeScript.Wire.Tsc.locate cache with
                                         | Some tsc ->
-                                            if useJsonOutput
-                                            then $"{{\"version\":\"{Spec.tscVersion}\",\"path\":\"{tsc}\"}}"
-                                            else $"{Spec.tscVersion} cached at: {tsc}"
+                                            if useJsonOutput then
+                                                $"{{\"version\":\"{Spec.tscVersion}\",\"path\":\"{tsc}\"}}"
+                                            else
+                                                $"{Spec.tscVersion} cached at: {tsc}"
                                             |> out.WriteLine
                                         | None ->
-                                            if useJsonOutput
-                                            then $"{{\"version\":\"{Spec.tscVersion}\",\"path\":null,\"error\":\"not found. run `xantham tsc init`\"}}"
-                                            else $"{Spec.tscVersion} not found in cache. Run `xantham tsc init`."
+                                            if useJsonOutput then
+                                                $"{{\"version\":\"{Spec.tscVersion}\",\"path\":null,\"error\":\"not found. run `xantham tsc init`\"}}"
+                                            else
+                                                $"{Spec.tscVersion} not found in cache. Run `xantham tsc init`."
                                             |> err.WriteLine
+
                                         Exit.Generated)
                                 }
                                 command "clean" {
                                     description "remove all cached xantham compilers"
                                     inputs Options.useJsonOutput
+
                                     setAction (fun useJsonOutput ->
                                         let path =
                                             Path.Combine(
@@ -255,17 +260,25 @@ let run (out: TextWriter) (err: TextWriter) (argv: string[]) : int =
 
                                         if Directory.Exists(path) then
                                             Directory.Delete(path, true)
-                                            if useJsonOutput
+
+                                            if
+                                                useJsonOutput
                                             //language=json
-                                            then """{"msg":"cache removed"}"""
-                                            else "xantham cache removed"
-                                            |> out.WriteLine 
-                                        else
-                                            if useJsonOutput
-                                            //language=json
-                                            then """{"msg":"nothing to remove"}"""
-                                            else "no xantham cache to remove"
+                                            then
+                                                """{"msg":"cache removed"}"""
+                                            else
+                                                "xantham cache removed"
                                             |> out.WriteLine
+                                        else
+                                            if
+                                                useJsonOutput
+                                            //language=json
+                                            then
+                                                """{"msg":"nothing to remove"}"""
+                                            else
+                                                "no xantham cache to remove"
+                                            |> out.WriteLine
+
                                         Exit.Generated)
                                 }
                             ]
@@ -275,19 +288,20 @@ let run (out: TextWriter) (err: TextWriter) (argv: string[]) : int =
                         inputs (renderFigletFn, GenerateOptions.Default)
 
                         setAction (fun (renderFn, opts) ->
-                            renderFn()
+                            renderFn ()
                             checkCache ()
                             generate out err opts)
                     }
                     command "schema" {
                         description "write the JSON Schema for xantham.json"
-                        hidden
                         inputs (renderFigletFn, Options.schemaOut)
+
                         setAction (fun (fn, op) ->
-                            fn()
+                            fn ()
                             schema out err op)
                     }
                 ]
+
             helpAction
         }
 

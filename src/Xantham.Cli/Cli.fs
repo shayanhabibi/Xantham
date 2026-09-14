@@ -60,66 +60,67 @@ module Options =
         Input.argument<string> "package-dir"
         |> Input.description "a directory holding package.json and the node_modules its declarations resolve through."
         |> Input.arity ExactlyOne
-        
-    let private outputMode = input {
-        let! mode =
-            Input.option<bool> "--json"
-            |> Input.desc "Whether to output JSON."
-            |> Input.def false
-        return if mode then OutputMode.Json else OutputMode.Pretty
-    }
-    
-    let private bannerMode = input {
-        let! mode =
-            Input.option<string> "--banner"
-            |> Input.desc "Whether to show the CLI banner."
-            |> Input.def "auto"
-            |> Input.acceptOnlyFromAmong [
-                "never"
-                "auto"
-                "always"
-            ]
-        return
-            match mode with
-            | "never" -> BannerMode.Never
-            | "always" -> BannerMode.Always
-            | _ -> BannerMode.Auto
-    }
-    
-    let private colorMode = input {
-        let! mode =
-            Input.option<string> "--color"
-            |> Input.desc "Whether to use colors in the CLI output."
-            |> Input.def "auto"
-            |> Input.acceptOnlyFromAmong [
-                "never"
-                "always"
-                "auto"
-            ]
-        return
-            match mode with
-            | "never" -> ColorMode.Never
-            | "always" -> ColorMode.Always
-            | _ -> ColorMode.Auto
-    }
-    
-    let shouldShowBanner = input {
-        let! bannerMode = bannerMode
-        and! outputMode = outputMode
-        and! quiet = quiet
-        return not quiet && BannerMode.shouldShowBanner outputMode bannerMode
-    }
-    
-    let shouldUseColor = input {
-        let! colorMode = colorMode
-        and! outputMode = outputMode
-        return ColorMode.shouldUseColor outputMode colorMode
-    }
-    
-    let useJsonOutput = input {
-        let! outputMode = outputMode
-        return outputMode.IsJson
-    }
+
+    let private outputMode =
+        input {
+            let! mode =
+                Input.option<bool> "--json"
+                |> Input.desc "Whether to output JSON."
+                |> Input.def false
+
+            return if mode then OutputMode.Json else OutputMode.Pretty
+        }
+
+    let private bannerMode =
+        input {
+            let! mode =
+                Input.option<string> "--banner"
+                |> Input.desc "Whether to show the CLI banner."
+                |> Input.def "auto"
+                |> Input.acceptOnlyFromAmong [ "never"; "auto"; "always" ]
+
+            return
+                match mode with
+                | "never" -> BannerMode.Never
+                | "always" -> BannerMode.Always
+                | _ -> BannerMode.Auto
+        }
+
+    let private colorMode =
+        input {
+            let! mode =
+                Input.option<string> "--color"
+                |> Input.desc "Whether to use colors in the CLI output."
+                |> Input.def "auto"
+                |> Input.acceptOnlyFromAmong [ "never"; "always"; "auto" ]
+
+            return
+                match mode with
+                | "never" -> ColorMode.Never
+                | "always" -> ColorMode.Always
+                | _ -> ColorMode.Auto
+        }
+
+    let shouldShowBanner =
+        input {
+            let! bannerMode = bannerMode
+            and! outputMode = outputMode
+            and! quiet = quiet
+            return not quiet && BannerMode.shouldShowBanner outputMode bannerMode
+        }
+
+    let shouldUseColor =
+        input {
+            let! colorMode = colorMode
+            and! outputMode = outputMode
+            return ColorMode.shouldUseColor outputMode colorMode
+        }
+
+    let useJsonOutput =
+        input {
+            let! outputMode = outputMode
+            return outputMode.IsJson
+        }
 
 module internal Xantham =
     /// The configuration for a run: `xantham.json` under the package directory, or under
@@ -164,9 +165,14 @@ module internal Xantham =
                         Json = json
                     }
             }
-    
-    let renderFigletFn = input {
-        let! shouldShowBanner = Options.shouldShowBanner
-        and! shouldUseColor = Options.shouldUseColor
-        return fun () -> if shouldShowBanner then Style.renderFiglet shouldUseColor
-    }
+
+    let renderFigletFn =
+        input {
+            let! shouldShowBanner = Options.shouldShowBanner
+            and! shouldUseColor = Options.shouldUseColor
+
+            return
+                fun () ->
+                    if shouldShowBanner then
+                        Style.renderFiglet shouldUseColor
+        }

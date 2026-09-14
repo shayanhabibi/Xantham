@@ -20,10 +20,10 @@
         -->
         <MaxCompilerErrors Condition="'$(MaxCompilerErrors)' == ''">25</MaxCompilerErrors>
         <OtherFlags>$(OtherFlags) --maxerrors:$(MaxCompilerErrors)</OtherFlags>
-        <PackageIcon Condition="'$(PackageIcon)' == ''">xantham-logo-electric-cyan.png</PackageIcon>
+        <PackageIcon Condition="'$(PackageIcon)' == ''">xantham-logo_64.png</PackageIcon>
     </PropertyGroup>
     <ItemGroup>
-        <None Include="$(MSBuildThisFileDirectory)site\static\xantham-resource-pack\assets\vectors\xantham-logo-electric-cyan.png" Pack="true" PackagePath="\" />
+        <None Include="$(MSBuildThisFileDirectory)static\xantham-resource-pack\assets\png\xantham-logo_64.png" Pack="true" PackagePath="\" />
     </ItemGroup>
 
 </Project>

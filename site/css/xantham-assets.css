@@ -1,5 +1,5 @@
 /* The atlas has a transparent backing; tiles composite over the page background. */
-.xantham-mascot-tile { display:inline-block; flex-shrink:0; background-image:url("mascot-atlas.png"); background-repeat:no-repeat; background-size:1536px 1024px; vertical-align:middle; }
+.xantham-mascot-tile { display:inline-block; flex-shrink:0; background-image:url("/Xantham/assets/mascot-atlas.png"); background-repeat:no-repeat; background-size:1536px 1024px; vertical-align:middle; }
 /* turnaround */
 .xantham-turnaround-front { width:155px; height:138px; background-position:-25px -140px; }
 .xantham-turnaround-three-quarter-left { width:142px; height:138px; background-position:-193px -140px; }
@@ -45,6 +45,6 @@
 .xantham-poses-with-book { width:118px; height:124px; background-position:-1085px -731px; }
 .xantham-poses-with-coffee { width:127px; height:125px; background-position:-1235px -730px; }
 .xantham-poses-stacked { width:118px; height:145px; background-position:-1390px -711px; }
-.xantham-banner { width:100%; aspect-ratio:16/3; background-image:url("banner-light-dark.png"); background-size:100% 200%; background-repeat:no-repeat; }
+.xantham-banner { width:100%; aspect-ratio:16/3; background-image:url("/Xantham/assets/banner-light-dark.png"); background-size:100% 200%; background-repeat:no-repeat; }
 .xantham-banner-light { background-position:center top; }
 .xantham-banner-dark { background-position:center bottom; }

@@ -42,8 +42,9 @@ let apiOptions =
 let navbar =
     Theme.navbar
         [
-            NavbarSection("Xantham", "xantham-cli", "/xantham-cli/")
-            NavbarSection("Tsc Wire", "wire", "/wire/")
+            NavbarSection("Guide", "xantham-cli", "/xantham-cli/")
+            NavbarSection("TypeScript.Wire", "wire", "/wire/")
+            NavbarSection("DEV", "dev", "/dev/")
             NavbarDivider
             NavbarSection("Reference", "reference", "/reference/")
         ]
@@ -65,14 +66,38 @@ let navbar =
                         [
                             Menu.page "xantham-cli/guide/installation"
                             Menu.page "xantham-cli/guide/usage"
+                            Menu.page "xantham-cli/guide/bindings"
+                            Menu.page "xantham-cli/guide/packages"
+                            Menu.page "xantham-cli/guide/configuration"
+                            Menu.page "xantham-cli/guide/dependencies"
+                            Menu.page "xantham-cli/guide/troubleshooting"
                         ]
                     Menu.link "Source" "https://github.com/shayanhabibi/xantham"
+                ]
+        ]
+    >> Theme.menu
+        "wire"
+        [
+            Menu.section "TypeScript.Wire" [ Menu.page "wire/index"; Menu.page "wire/navigation" ]
+        ]
+    >> Theme.menu
+        "dev"
+        [
+            Menu.section
+                "Contributing"
+                [
+                    Menu.page "dev/index"
+                    Menu.page "dev/setup"
+                    Menu.page "dev/generator"
+                    Menu.page "dev/generated-sources"
+                    Menu.page "dev/hand-written"
                 ]
         ]
 
 let theme =
     Theme.defaults
     |> navbar
+    |> Theme.favIcon "/branding/xantham-logo-electric-cyan.svg"
     |> Theme.editUrl "https://github.com/shayanhabibi/xantham/edit/main/site"
     |> Theme.footer (
         Html.div
@@ -111,9 +136,13 @@ let site =
                     //language=css
                     "@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));"
                 ]
+            TailwindEntryFooter =
+                opts.TailwindEntryFooter
+                @ [
+                    let stylesheet = System.IO.Path.Combine(__SOURCE_DIRECTORY__, "css", "xantham.css")
+                    "@import \"" + stylesheet.Replace('\\', '/') + "\";"
+                ]
         })
-    |> Site.stylesheet "css/xantham-assets.css"
-    |> Site.stylesheet "css/xantham.css"
     |> Nuglify.minifyHtml
     |> Theme.register theme
     |> Site.collection (Theme.docs theme "content")

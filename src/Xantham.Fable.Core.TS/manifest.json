@@ -73,10 +73,20 @@
       "widened": 2
     },
     {
+      "pass": "normalize-obj-unions",
+      "total": 1,
+      "widened": 1
+    },
+    {
       "pass": "resolve-export-collisions",
       "total": 21,
       "ergonomic": 15,
       "widened": 6
+    },
+    {
+      "pass": "DD - drop-orphan-delegates",
+      "total": 2,
+      "exact": 2
     },
     {
       "pass": "render-source",

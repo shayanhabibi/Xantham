@@ -1,19 +1,23 @@
 ﻿---
-title: Overview
+title: TypeScript.Wire
+description: Use the TypeScript 7 compiler API from .NET.
 category: Wire
 order: 0
 ---
 
-`Xantham.TypeScript.Wire` is the communication client for TypeScript's api that is
-releasing with `+7.1.0`. 
+<div class="xantham-welcome">
+<span class="xantham-mascot-tile xantham-actions-explore" aria-hidden="true"></span>
+<div class="xantham-welcome__copy"><p class="xantham-lead">Read syntax trees, query types, and inspect diagnostics from .NET using TypeScript 7’s own compiler API.</p></div>
+</div>
 
-Compatible `tsc` versions are currently in prerelease.
+`Xantham.TypeScript.Wire` is the compiler client used by the generator and is available
+as an independent package for your own tools.
 
 ## Install
 
 ```bash frame=terminal
 dotnet add package Xantham.TypeScript.Wire
-npm install typescript@7.1.0-dev.20260830.1
+npm install --save-exact typescript@7.1.0-dev.20260902.1
 ```
 
 :::caution
@@ -51,10 +55,10 @@ most common setup failure.
 
 ## Two clients
 
-| | Use | Concurrency |
-|---|---|---|
-| `TscChannel` | synchronous `Api.*` | **one request at a time**, not thread-safe |
-| `TscMailbox` | `Async` `AsyncApi.*`, batches overlapping calls | safe from many callers; 2.1–2.3× under pressure |
+<div class="xantham-grid">
+<div class="card xantham-card"><span class="xantham-card__label">Synchronous</span><h3>TscChannel</h3><p>Use <code>Api.*</code> for one request at a time. Give each concurrent caller its own channel.</p></div>
+<div class="card xantham-card"><span class="xantham-card__label">Asynchronous</span><h3>TscMailbox</h3><p>Use <code>AsyncApi.*</code> for concurrent callers. Overlapping requests are batched.</p></div>
+</div>
 
 Both own a child process and both are `IDisposable` — `use`, don't `let`. Disposal closes stdin,
 which is the documented shutdown; a leaked instance leaks a `tsc` process.
@@ -229,7 +233,7 @@ let session = session.WithSnapshot updated.Snapshot
 The 16 methods that take neither argument — `initialize`, `updateSnapshot`, `createProgram`, the
 `transpile*` and config-parsing family — precede any snapshot, so they hang off
 `session.Sessionless` rather than being absent. Handles are valid for exactly the pair a session
-holds; [`wire-navigation.md`] (wire-navigation.md#a-session-is-the-snapshot-and-the-project-bound-once)
+holds; [Navigating the AST](navigation.md#a-session-is-the-snapshot-and-the-project-bound-once)
 covers that scope and where the layer is generated from.
 
 ## Common patterns
@@ -270,7 +274,7 @@ let ty = Api.getTypeAtLocation channel { Snapshot = snapshot.Snapshot; Project =
 
 Handles are valid only within the snapshot and project that produced them. Going the other way —
 a handle from `symbol.Declarations` back to a node — is in
-[`wire-navigation.md`] (wire-navigation.md#example-a-symbols-declarations).
+[Navigating the AST](navigation.md#example-a-symbols-declarations).
 
 ### Enumerate a module's exports
 
@@ -362,5 +366,4 @@ output.OutputText
 
 - [Navigating the AST](navigation.md) — sessions in depth, `Node<'Tag>`, views, accessors,
   node handles.
-- [The hand-written register](hand-written.md) — the facts transcribed from upstream rather
-  than derived, and how to update them.
+- [Contributing to Xantham](../dev/index.md) — build, test, and maintain the compiler client.

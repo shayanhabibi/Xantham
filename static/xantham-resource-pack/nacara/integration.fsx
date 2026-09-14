@@ -7,5 +7,6 @@
 //
 // Example with an existing `site` value:
 open Nacara.Core
+
 let withXanthamBranding site =
     site |> Site.stylesheet "css/xantham.css"
