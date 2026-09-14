@@ -1,0 +1,19 @@
+/* Modest refinements; Nacara retains its layout, mobile drawer and interactions. */
+.nacara-navbar { border-bottom-color: var(--nacara-border); box-shadow: 0 1px 0 rgb(0 123 255 / 5%); }
+.nacara-navbar__brand { font-weight: 750; letter-spacing: -0.025em; }
+.nacara-navbar__brand img { width: 2rem; height: 2rem; object-fit: contain; }
+.nacara-sidebar__link[aria-current="page"] { box-shadow: inset 3px 0 0 var(--nacara-primary); }
+[dir="rtl"] .nacara-sidebar__link[aria-current="page"] { box-shadow: inset -3px 0 0 var(--nacara-primary); }
+.nacara-content h1 { font-weight: 750; letter-spacing: -0.035em; }
+.nacara-content :where(p,li) > a { text-decoration: underline; text-underline-offset: 0.18em; text-decoration-thickness: 0.06em; }
+.nacara-content :where(p,li) > a:hover { text-decoration-thickness: 0.12em; }
+.nacara-code__title { font-weight: 600; }
+::selection { background: var(--nacara-primary); color: var(--nacara-primary-contrast); }
+/* Optional classes for your custom landing page; no layout replacement required. */
+.xantham-hero { padding: clamp(1.5rem, 5vw, 4rem); border: 1px solid var(--nacara-border); border-radius: 1.5rem; background: linear-gradient(135deg, var(--nacara-primary-subtle), var(--nacara-bg) 60%, var(--nacara-bg-subtle)); }
+.xantham-hero__eyebrow { color: var(--nacara-primary); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+.xantham-brand-mark { display: inline-block; width: 4rem; height: 4rem; object-fit: contain; }
+.xantham-mascot { display: block; width: 5rem; height: auto; }
+/* The midnight icon needs a light tile in either scheme. */
+.xantham-mascot--midnight { background: var(--xantham-mist); padding: 0.5rem; border-radius: 1rem; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }

@@ -1,0 +1,623 @@
+{
+  "sheet": {
+    "file": "mascot-atlas.png",
+    "width": 1536,
+    "height": 1024
+  },
+  "frames": [
+    {
+      "id": "turnaround-front",
+      "label": "Front",
+      "group": "turnaround",
+      "x": 0,
+      "y": 0,
+      "width": 155,
+      "height": 171,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "turnaround-three-quarter-left",
+      "label": "Three quarter left",
+      "group": "turnaround",
+      "x": 155,
+      "y": 0,
+      "width": 152,
+      "height": 171,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "turnaround-left",
+      "label": "Left",
+      "group": "turnaround",
+      "x": 307,
+      "y": 0,
+      "width": 143,
+      "height": 171,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "turnaround-side-left",
+      "label": "Side left",
+      "group": "turnaround",
+      "x": 450,
+      "y": 0,
+      "width": 137,
+      "height": 171,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "turnaround-back",
+      "label": "Back",
+      "group": "turnaround",
+      "x": 587,
+      "y": 0,
+      "width": 157,
+      "height": 171,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "turnaround-side-right",
+      "label": "Side right",
+      "group": "turnaround",
+      "x": 744,
+      "y": 0,
+      "width": 147,
+      "height": 171,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "turnaround-right",
+      "label": "Right",
+      "group": "turnaround",
+      "x": 891,
+      "y": 0,
+      "width": 146,
+      "height": 171,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "turnaround-three-quarter-right",
+      "label": "Three quarter right",
+      "group": "turnaround",
+      "x": 1037,
+      "y": 0,
+      "width": 160,
+      "height": 171,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "turnaround-top",
+      "label": "Top",
+      "group": "turnaround",
+      "x": 1197,
+      "y": 0,
+      "width": 169,
+      "height": 171,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "turnaround-bottom",
+      "label": "Bottom",
+      "group": "turnaround",
+      "x": 1366,
+      "y": 0,
+      "width": 170,
+      "height": 171,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "expressions-neutral",
+      "label": "Neutral",
+      "group": "expressions",
+      "x": 0,
+      "y": 215,
+      "width": 156,
+      "height": 169,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "expressions-happy",
+      "label": "Happy",
+      "group": "expressions",
+      "x": 156,
+      "y": 215,
+      "width": 137,
+      "height": 169,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "expressions-sad",
+      "label": "Sad",
+      "group": "expressions",
+      "x": 293,
+      "y": 215,
+      "width": 148,
+      "height": 169,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "expressions-angry",
+      "label": "Angry",
+      "group": "expressions",
+      "x": 441,
+      "y": 215,
+      "width": 146,
+      "height": 169,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "expressions-curious",
+      "label": "Curious",
+      "group": "expressions",
+      "x": 587,
+      "y": 215,
+      "width": 154,
+      "height": 169,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "expressions-excited",
+      "label": "Excited",
+      "group": "expressions",
+      "x": 741,
+      "y": 215,
+      "width": 166,
+      "height": 169,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "expressions-determined",
+      "label": "Determined",
+      "group": "expressions",
+      "x": 907,
+      "y": 215,
+      "width": 165,
+      "height": 169,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "expressions-thinking",
+      "label": "Thinking",
+      "group": "expressions",
+      "x": 1072,
+      "y": 215,
+      "width": 143,
+      "height": 169,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "expressions-surprised",
+      "label": "Surprised",
+      "group": "expressions",
+      "x": 1215,
+      "y": 215,
+      "width": 162,
+      "height": 169,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "expressions-mischievous",
+      "label": "Mischievous",
+      "group": "expressions",
+      "x": 1377,
+      "y": 215,
+      "width": 159,
+      "height": 169,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "actions-idle",
+      "label": "Idle",
+      "group": "actions",
+      "x": 0,
+      "y": 419,
+      "width": 162,
+      "height": 168,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "actions-peek",
+      "label": "Peek",
+      "group": "actions",
+      "x": 162,
+      "y": 419,
+      "width": 129,
+      "height": 168,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white",
+      "clipPolygon": [
+        [
+          0,
+          0
+        ],
+        [
+          113,
+          0
+        ],
+        [
+          113,
+          81
+        ],
+        [
+          129,
+          101
+        ],
+        [
+          129,
+          168
+        ],
+        [
+          0,
+          168
+        ]
+      ]
+    },
+    {
+      "id": "actions-wave",
+      "label": "Wave",
+      "group": "actions",
+      "x": 276,
+      "y": 419,
+      "width": 142,
+      "height": 168,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white",
+      "clipPolygon": [
+        [
+          0,
+          0
+        ],
+        [
+          142,
+          0
+        ],
+        [
+          142,
+          168
+        ],
+        [
+          15,
+          168
+        ],
+        [
+          15,
+          81
+        ],
+        [
+          0,
+          81
+        ]
+      ]
+    },
+    {
+      "id": "actions-sit",
+      "label": "Sit",
+      "group": "actions",
+      "x": 418,
+      "y": 419,
+      "width": 129,
+      "height": 168,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "actions-lie-down",
+      "label": "Lie down",
+      "group": "actions",
+      "x": 547,
+      "y": 419,
+      "width": 166,
+      "height": 168,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "actions-sleep",
+      "label": "Sleep",
+      "group": "actions",
+      "x": 713,
+      "y": 419,
+      "width": 129,
+      "height": 168,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "actions-explore",
+      "label": "Explore",
+      "group": "actions",
+      "x": 842,
+      "y": 419,
+      "width": 149,
+      "height": 168,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "actions-generate",
+      "label": "Generate",
+      "group": "actions",
+      "x": 991,
+      "y": 419,
+      "width": 145,
+      "height": 168,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "actions-iterate",
+      "label": "Iterate",
+      "group": "actions",
+      "x": 1136,
+      "y": 419,
+      "width": 148,
+      "height": 168,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "actions-side-sitting",
+      "label": "Side sitting",
+      "group": "actions",
+      "x": 1284,
+      "y": 419,
+      "width": 100,
+      "height": 168,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "actions-question",
+      "label": "Question",
+      "group": "actions",
+      "x": 1384,
+      "y": 419,
+      "width": 152,
+      "height": 168,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "poses-create",
+      "label": "Create",
+      "group": "poses",
+      "x": 0,
+      "y": 613,
+      "width": 144,
+      "height": 166,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "poses-celebrate",
+      "label": "Celebrate",
+      "group": "poses",
+      "x": 144,
+      "y": 613,
+      "width": 149,
+      "height": 166,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "poses-read",
+      "label": "Read",
+      "group": "poses",
+      "x": 293,
+      "y": 613,
+      "width": 143,
+      "height": 166,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "poses-coffee",
+      "label": "Coffee",
+      "group": "poses",
+      "x": 436,
+      "y": 613,
+      "width": 148,
+      "height": 166,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "poses-float",
+      "label": "Float",
+      "group": "poses",
+      "x": 584,
+      "y": 613,
+      "width": 156,
+      "height": 166,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "poses-jump",
+      "label": "Jump",
+      "group": "poses",
+      "x": 740,
+      "y": 613,
+      "width": 161,
+      "height": 166,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "poses-slide",
+      "label": "Slide",
+      "group": "poses",
+      "x": 901,
+      "y": 613,
+      "width": 175,
+      "height": 166,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "poses-from-behind",
+      "label": "From behind",
+      "group": "poses",
+      "x": 1076,
+      "y": 613,
+      "width": 148,
+      "height": 166,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "poses-stacked",
+      "label": "Stacked",
+      "group": "poses",
+      "x": 1224,
+      "y": 613,
+      "width": 150,
+      "height": 166,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "poses-hold-logo",
+      "label": "Hold logo",
+      "group": "poses",
+      "x": 1374,
+      "y": 613,
+      "width": 162,
+      "height": 166,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "reactions-with-logo",
+      "label": "With logo",
+      "group": "reactions",
+      "x": 0,
+      "y": 808,
+      "width": 139,
+      "height": 167,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "reactions-sparkle",
+      "label": "Sparkle",
+      "group": "reactions",
+      "x": 139,
+      "y": 808,
+      "width": 149,
+      "height": 167,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "reactions-confused",
+      "label": "Confused",
+      "group": "reactions",
+      "x": 288,
+      "y": 808,
+      "width": 144,
+      "height": 167,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "reactions-blush",
+      "label": "Blush",
+      "group": "reactions",
+      "x": 432,
+      "y": 808,
+      "width": 142,
+      "height": 167,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "reactions-laugh",
+      "label": "Laugh",
+      "group": "reactions",
+      "x": 574,
+      "y": 808,
+      "width": 154,
+      "height": 167,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "reactions-cry",
+      "label": "Cry",
+      "group": "reactions",
+      "x": 728,
+      "y": 808,
+      "width": 153,
+      "height": 167,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "reactions-love",
+      "label": "Love",
+      "group": "reactions",
+      "x": 881,
+      "y": 808,
+      "width": 165,
+      "height": 167,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "reactions-idea",
+      "label": "Idea",
+      "group": "reactions",
+      "x": 1046,
+      "y": 808,
+      "width": 144,
+      "height": 167,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "reactions-shy",
+      "label": "Shy",
+      "group": "reactions",
+      "x": 1190,
+      "y": 808,
+      "width": 154,
+      "height": 167,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    },
+    {
+      "id": "reactions-determined-alt",
+      "label": "Determined alt",
+      "group": "reactions",
+      "x": 1344,
+      "y": 808,
+      "width": 192,
+      "height": 167,
+      "source": "assets/mascot-atlas.png",
+      "background": "opaque white"
+    }
+  ],
+  "notes": "Individually reviewed source-coordinate frames. clipPolygon, where present, is a list of local pixel coordinates and must be applied with the rectangular viewport. The laptop and seated-profile figures share a connected gum base in the source."
+}

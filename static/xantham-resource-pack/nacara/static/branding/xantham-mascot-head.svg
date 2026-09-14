@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 448" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Xantham mascot head</title>
+  <desc id="desc">A cyan pointed hood with faceted violet ears, a midnight face and two white oval eyes. Simplified vector icon based on the supplied mascot.</desc>
+  <defs>
+    <linearGradient id="ear" x1="60" y1="55" x2="180" y2="265" gradientUnits="userSpaceOnUse"><stop stop-color="#9D6BFF"/><stop offset="1" stop-color="#8054DE"/></linearGradient>
+    <linearGradient id="hood" x1="256" y1="105" x2="256" y2="419" gradientUnits="userSpaceOnUse"><stop stop-color="#9AE4FF"/><stop offset="1" stop-color="#55BAF4"/></linearGradient>
+    <linearGradient id="face" x1="256" y1="188" x2="256" y2="414" gradientUnits="userSpaceOnUse"><stop stop-color="#111225"/><stop offset="1" stop-color="#1A1B2E"/></linearGradient>
+  </defs>
+  <g id="ears">
+    <path d="M104 265 C62 216 43 124 61 47 Q69 41 85 48 C140 62 188 87 225 132Z" fill="url(#ear)"/>
+    <path d="M61 47 C120 55 180 89 225 132 L133 125Z" fill="#8FDCFA"/>
+    <path d="M61 47 133 125 92 188 Q65 132 61 47Z" fill="#9564EC"/>
+    <path d="M133 125 161 194 92 188Z" fill="#A98BFC"/>
+    <path d="M133 125 225 132 161 194Z" fill="#65C4F5"/>
+    <path d="M92 188 161 194 104 265Z" fill="#9475EA"/>
+    <path d="M408 265 C450 216 469 124 451 47 Q443 41 427 48 C372 62 324 87 287 132Z" fill="#9470EE"/>
+    <path d="M451 47 C392 55 332 89 287 132 L379 125Z" fill="#82D5F8"/>
+    <path d="M451 47 379 125 420 188 Q447 132 451 47Z" fill="#9864F0"/>
+    <path d="M379 125 351 194 420 188Z" fill="#B794FF"/>
+    <path d="M379 125 287 132 351 194Z" fill="#66C1F4"/>
+    <path d="M420 188 351 194 408 265Z" fill="#A885F5"/>
+  </g>
+  <g id="hood">
+    <path d="M256 105 C174 130 86 229 47 331 Q33 360 53 376 C108 411 176 429 256 434 C336 429 404 411 459 376 Q479 360 465 331 C426 229 338 130 256 105Z" fill="url(#hood)"/>
+    <path d="M256 105 C174 130 86 229 47 331 Q40 346 42 357 L87 337 C136 255 192 194 256 164Z" fill="#8CDDFC"/>
+    <path d="M256 105 C338 130 426 229 465 331 Q472 346 470 357 L425 337 C376 255 320 194 256 164Z" fill="#73CFF8"/>
+    <path d="M53 376 C108 411 176 429 256 434 L256 411 88 356 42 357 Q42 369 53 376Z" fill="#519CEB"/>
+    <path d="M459 376 C404 411 336 429 256 434 L256 411 424 356 470 357 Q470 369 459 376Z" fill="#66B8F1"/>
+  </g>
+  <g id="face">
+    <path d="M256 164 C310 187 389 267 435 344 Q447 362 429 374 C379 402 318 416 256 422 C194 416 133 402 83 374 Q65 362 77 344 C123 267 202 187 256 164Z" fill="#3794D9"/>
+    <path d="M256 171 C308 195 384 273 429 347 Q439 360 424 369 C378 396 317 411 256 416 C195 411 134 396 88 369 Q73 360 83 347 C128 273 204 195 256 171Z" fill="url(#face)"/>
+    <path d="M256 180 C201 209 142 271 97 345" stroke="#20243F" stroke-width="7" stroke-linecap="round"/>
+  </g>
+  <g id="eyes" fill="#FFFFFF">
+    <ellipse cx="199" cy="321" rx="29" ry="42" transform="rotate(-6 199 321)"/>
+    <ellipse cx="313" cy="321" rx="29" ry="42" transform="rotate(6 313 321)"/>
+  </g>
+</svg>

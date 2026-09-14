@@ -1,0 +1,12 @@
+GIMP Palette
+Name: Xantham
+Columns: 4
+# From supplied brand guide
+ 26  27  46	midnight
+  0 123 255	xantham-blue
+183 148 255	gum-violet
+115 219 255	sky-blue
+221 235 255	ice
+246 243 255	mist
+148 163 184	slate
+255 255 255	white

@@ -1,0 +1,113 @@
+/* Xantham · Nacara.Theme.Default tokens. Load after the default theme. */
+:root {
+  --xantham-midnight: #1A1B2E;
+  --xantham-blue: #007BFF;
+  --xantham-violet: #B794FF;
+  --xantham-sky: #73DBFF;
+  --xantham-ice: #DDEBFF;
+  --xantham-mist: #F6F3FF;
+  --xantham-slate: #94A3B8;
+  --xantham-white: #FFFFFF;
+  --xantham-electric-blue: #005FFF;
+  --xantham-cyan: #2DD9F5;
+  --nacara-font-sans: "Segoe UI", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --nacara-font-mono: "Cascadia Code", "JetBrains Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  --nacara-radius: 0.75rem;
+  --nacara-radius-sm: 0.375rem;
+  --nacara-content-width: 76ch;
+  --nacara-splash-width: 72rem;
+  --nacara-layout-gap: 2rem;
+  --nacara-sidebar-width: 17rem;
+  --nacara-toc-width: 14rem;
+  --nacara-navbar-height: 4rem;
+  --nacara-navbar-opacity: 96%;
+  --nacara-navbar-blur: 12px;
+  --nacara-control-height: 2.25rem;
+  --nacara-control-radius: 0.5rem;
+  --xantham-logo-gradient: linear-gradient(135deg, #005FFF, #2DD9F5);
+}
+
+/* UI shades are contrast-adjusted; original brand swatches remain above. */
+:root, :root[data-theme="light"] {
+  --nacara-bg: #FFFFFF;
+  --nacara-bg-subtle: #F6F3FF;
+  --nacara-bg-raised: #FFFFFF;
+  --nacara-border: #D1D9EC;
+  --nacara-text: #25263D;
+  --nacara-text-muted: #59647D;
+  --nacara-heading: #1A1B2E;
+  --nacara-primary: #005FCC;
+  --nacara-primary-contrast: #FFFFFF;
+  --nacara-primary-subtle: #EAF3FF;
+  --nacara-note: #005FCC;
+  --nacara-tip: #147454;
+  --nacara-warning: #8A5700;
+  --nacara-danger: #B3294D;
+  --nacara-code-inline-bg: #F6F3FF;
+  --nacara-code-inline-border: #DDD7ED;
+  --nacara-code-inline-text: #6542A6;
+  --nacara-shadow: 0 2px 5px rgb(26 27 46 / 4%), 0 12px 32px rgb(26 27 46 / 7%);
+  --tok-comment: #606B82;
+  --tok-string: #166B50;
+  --tok-number: #805014;
+  --tok-constant: #805014;
+  --tok-constructor: #005FCC;
+  --tok-property: #8B345E;
+  --tok-escape: #006B80;
+  --tok-keyword: #7141AD;
+  --tok-operator: #006B80;
+  --tok-function: #005FCC;
+  --tok-type: #7141AD;
+  --tok-namespace: #005FCC;
+  --tok-variable: #25263D;
+  --tok-parameter: #25263D;
+  --tok-punctuation: #59647D;
+  --tok-tag: #8B345E;
+  --tok-attribute: #805014;
+  --tok-preprocessor: #7141AD;
+  --tok-invalid: #B3294D;
+  --tok-inserted: #166B50;
+  --tok-deleted: #B3294D;
+}
+
+:root[data-theme="dark"] {
+  --nacara-bg: #101426;
+  --nacara-bg-subtle: #191E35;
+  --nacara-bg-raised: #202640;
+  --nacara-border: #37415F;
+  --nacara-text: #E5ECFA;
+  --nacara-text-muted: #ADBBD2;
+  --nacara-heading: #F6F3FF;
+  --nacara-primary: #73DBFF;
+  --nacara-primary-contrast: #101426;
+  --nacara-primary-subtle: #17344D;
+  --nacara-note: #73DBFF;
+  --nacara-tip: #78DDB4;
+  --nacara-warning: #F3C77C;
+  --nacara-danger: #FF9BB5;
+  --nacara-code-inline-bg: #24213E;
+  --nacara-code-inline-border: #484064;
+  --nacara-code-inline-text: #D2B8FF;
+  --nacara-shadow: 0 2px 5px rgb(0 0 0 / 16%), 0 12px 32px rgb(0 0 0 / 24%);
+  --tok-comment: #ADBBD2;
+  --tok-string: #8EDBB9;
+  --tok-number: #F3C77C;
+  --tok-constant: #F3C77C;
+  --tok-constructor: #73DBFF;
+  --tok-property: #F2A9CD;
+  --tok-escape: #87E4E2;
+  --tok-keyword: #C9A9FF;
+  --tok-operator: #87E4E2;
+  --tok-function: #73DBFF;
+  --tok-type: #C9A9FF;
+  --tok-namespace: #73DBFF;
+  --tok-variable: #E5ECFA;
+  --tok-parameter: #E5ECFA;
+  --tok-punctuation: #ADBBD2;
+  --tok-tag: #F2A9CD;
+  --tok-attribute: #F3C77C;
+  --tok-preprocessor: #C9A9FF;
+  --tok-invalid: #FF9BB5;
+  --tok-inserted: #8EDBB9;
+  --tok-deleted: #FF9BB5;
+}

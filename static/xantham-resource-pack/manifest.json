@@ -1,0 +1,94 @@
+{
+  "name": "Xantham resource pack",
+  "version": "1.2.1",
+  "sources": [
+    {
+      "file": "assets/mascot-atlas.png",
+      "original": "b799729c-0dae-4361-8446-9a03e74039ec.png",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "7524168821a0a3d01a22d31142683eab2e519fa6543b19512133e5d813e7615c"
+    },
+    {
+      "file": "assets/banner-light-dark.png",
+      "original": "x3.png",
+      "width": 2048,
+      "height": 768,
+      "sha256": "1da4cda4e7b41c5babffa599989be6af41a7ba800086a2de9af20c9bcb8207ae"
+    },
+    {
+      "file": "assets/workflow-banner.png",
+      "original": "Xantham TypeScript-to-F# Workflow Banner(1).png",
+      "width": 2048,
+      "height": 768,
+      "sha256": "275647a13fc25f88264b7914974fcb053da4cd1a699fe5a5b2294adcd0c17cec"
+    },
+    {
+      "file": "reference/brand-guidelines.png",
+      "original": "x8(1).png",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "4ac0fbf2097d65a01a3b1d0375fe143aa889c4402a7f196e8b42b4af8da22740"
+    },
+    {
+      "file": "reference/alternate-brand-concept.png",
+      "original": "x7.png",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "c688d2fb0466ec7a23e7b6cb2d0d8490e3830c08f3678cbd4831a281f258d7e7"
+    },
+    {
+      "file": "reference/alternate-transparent-atlas.png",
+      "original": "x9.png",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "b20f3d399a1df5b91c6c15f743ee7ac4c49872710f448c2f6ceb74b36c19ac75"
+    }
+  ],
+  "mascot_frame_count": 51,
+  "format_note": "Original PNG files, CSS sprites, and four editable SVG assets. Both logo colorways use the corrected center diamond.",
+  "vectors": [
+    {
+      "file": "assets/vectors/xantham-logo-electric-cyan.svg",
+      "title": "Electric blue / cyan",
+      "description": "Latest logo; corrected center diamond and equal diagonal gaps.",
+      "viewBox": "0 0 512 512",
+      "sha256": "c20ab69a5f848fb3adb559d0b74a063c4444026fa645a72608de3dfb9810a817"
+    },
+    {
+      "file": "assets/vectors/xantham-logo.svg",
+      "title": "Brand blue / sky blue",
+      "description": "Continuous brand gradient with the same corrected center diamond.",
+      "viewBox": "0 0 512 512",
+      "sha256": "6df228f2fb2e920b6570955f61aed45ab914c615a07a1555d574668c8deb7a3d"
+    },
+    {
+      "file": "assets/vectors/xantham-mascot-head.svg",
+      "title": "Faceted mascot head",
+      "description": "Editable cyan and violet mascot icon.",
+      "viewBox": "0 0 512 448",
+      "sha256": "bcd98cca5b24ede51ddc8ee9af52c97c2ea3efe1dd64708f591f02d691887a72"
+    },
+    {
+      "file": "assets/vectors/xantham-mascot-head-midnight.svg",
+      "title": "Midnight mascot head",
+      "description": "Monochrome mascot; transparent hood trim and eyes.",
+      "viewBox": "0 0 512 512",
+      "sha256": "5631b20468f70d4061be3efa10545f867db827f86c46665ca2f33c36ff80ef2a"
+    }
+  ],
+  "nacara": {
+    "directory": "nacara",
+    "entrypoint": "nacara/css/xantham.css",
+    "target": "F# Nacara.Theme.Default",
+    "verifiedAgainst": "Live upstream CSS retrieved 2026-09-14",
+    "contrastCombinations": 66
+  },
+  "mascot_frames": {
+    "file": "assets/frames.json",
+    "revision": 2,
+    "count": 51,
+    "review": "All frames visually checked using rendered source-coordinate clipping",
+    "sha256": "e79aea973af4b8cf323619fe74c940ab6457d9bc5b8d11314a8501984f206bb2"
+  }
+}

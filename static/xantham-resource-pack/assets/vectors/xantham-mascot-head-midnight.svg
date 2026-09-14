@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none" role="img" aria-labelledby="title description">
+  <title id="title">Xantham midnight mascot mark</title>
+  <desc id="description">An original monochrome variant of the Xantham mascot: two swept pointed ears, a peaked hood, and curious eyes. Hood trim and eyes are transparent negative space.</desc>
+  <defs>
+    <mask id="cutouts" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512" style="mask-type:luminance">
+      <path fill="#fff" d="M0 0H512V512H0Z"/>
+      <path d="M91 366 C119 300 192 221 256 189 C320 221 393 300 421 366" stroke="#000" stroke-width="20" stroke-linecap="round"/>
+      <path fill="#000" d="M181 310 C165 313 160 334 166 352 C171 367 184 375 197 370 C211 364 214 348 207 332 C201 317 190 308 181 310Z"/>
+      <path fill="#000" d="M331 310 C347 313 352 334 346 352 C341 367 328 375 315 370 C301 364 298 348 305 332 C311 317 322 308 331 310Z"/>
+    </mask>
+  </defs>
+  <g id="mascot" fill="#1A1B2E" mask="url(#cutouts)">
+    <path id="left-ear" d="M100 285 C65 243 45 154 57 81 Q59 70 71 72 C130 80 186 108 225 150 L172 249Z"/>
+    <path id="right-ear" d="M412 285 C447 243 467 154 455 81 Q453 70 441 72 C382 80 326 108 287 150 L340 249Z"/>
+    <path id="hood-and-face" d="M256 132 C178 157 89 253 46 349 Q32 379 57 397 C111 434 182 453 256 460 C330 453 401 434 455 397 Q480 379 466 349 C423 253 334 157 256 132Z"/>
+  </g>
+</svg>
