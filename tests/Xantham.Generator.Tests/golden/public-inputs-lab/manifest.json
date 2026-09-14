@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "package": "public-inputs-lab",
+  "module": "PublicInputsLab",
+  "counts": {
+    "exact": 2,
+    "ergonomic": 1,
+    "widened": 0,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 1,
+      "ergonomic": 1
+    }
+  ]
+}

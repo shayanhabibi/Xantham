@@ -3956,6 +3956,7 @@ type TextDecoderStreamTextDecoderStreamInit =
 /// </summary>
 [<Interface>]
 type ByteLengthQueuingStrategy =
+    inherit QueuingStrategy<JS.ArrayBufferView>
     /// <summary>
     /// The read-only <b><c>ByteLengthQueuingStrategy.highWaterMark</c></b> property returns the total number of bytes that can be contained in the internal queue before backpressure is applied.
     /// <br /><br />
@@ -3973,6 +3974,7 @@ type ByteLengthQueuingStrategy =
 /// </summary>
 [<Interface>]
 type CountQueuingStrategy =
+    inherit QueuingStrategy<obj>
     /// <summary>
     /// The read-only <b><c>CountQueuingStrategy.highWaterMark</c></b> property returns the total number of chunks that can be contained in the internal queue before backpressure is applied.
     /// <br /><br />
@@ -4028,7 +4030,7 @@ type TailEvent =
 
 [<Interface>]
 type TraceItem =
-    abstract ``event``: U10<TraceItemAlarmEventInfo, TraceItemConnectEventInfo, TraceItemCustomEventInfo, TraceItemEmailEventInfo, TraceItemFetchEventInfo, TraceItemHibernatableWebSocketEventInfo, TraceItemJsRpcEventInfo, TraceItemQueueEventInfo, TraceItemScheduledEventInfo, TraceItemTailEventInfo> option
+    abstract ``event``: obj option
     abstract eventTimestamp: float option
     abstract logs: TraceLog[]
     abstract exceptions: TraceException[]
@@ -4047,7 +4049,7 @@ type TraceItem =
     abstract cpuTime: float
     abstract wallTime: float
     [<ParamObject; Emit("$0")>]
-    static member Create (logs: TraceLog[], exceptions: TraceException[], diagnosticsChannelEvents: TraceDiagnosticChannelEvent[], outcome: string, executionModel: string, truncated: bool, cpuTime: float, wallTime: float, ?``event``: U10<TraceItemAlarmEventInfo, TraceItemConnectEventInfo, TraceItemCustomEventInfo, TraceItemEmailEventInfo, TraceItemFetchEventInfo, TraceItemHibernatableWebSocketEventInfo, TraceItemJsRpcEventInfo, TraceItemQueueEventInfo, TraceItemScheduledEventInfo, TraceItemTailEventInfo>, ?eventTimestamp: float, ?scriptName: string, ?entrypoint: string, ?scriptVersion: ScriptVersion, ?dispatchNamespace: string, ?scriptTags: string[], ?tailAttributes: Record<string, U3<string, float, bool>>, ?preview: TracePreviewInfo, ?durableObjectId: string) : TraceItem = jsNative
+    static member Create (logs: TraceLog[], exceptions: TraceException[], diagnosticsChannelEvents: TraceDiagnosticChannelEvent[], outcome: string, executionModel: string, truncated: bool, cpuTime: float, wallTime: float, ?``event``: obj, ?eventTimestamp: float, ?scriptName: string, ?entrypoint: string, ?scriptVersion: ScriptVersion, ?dispatchNamespace: string, ?scriptTags: string[], ?tailAttributes: Record<string, U3<string, float, bool>>, ?preview: TracePreviewInfo, ?durableObjectId: string) : TraceItem = jsNative
 
 [<Interface>]
 type TraceItemAlarmEventInfo =
@@ -16067,12 +16069,16 @@ type Hyperdrive =
     [<ParamObject; Emit("$0")>]
     static member Create (connect: (unit -> Socket), connectionString: string, host: string, ip: string, port: float, user: string, password: string, database: string) : Hyperdrive = jsNative
 
+type Disposable =
+    interface end
+
 /// <summary>
 /// A handle to a dynamically-provisioned Hyperdrive connection, returned by
 /// <c>HyperdriveApi.get()</c>.
 /// </summary>
 [<Interface>]
 type HyperdriveDynamic =
+    inherit Disposable
     /// <summary>
     /// The database name to use when connecting through this Hyperdrive.
     /// </summary>
@@ -16743,11 +16749,29 @@ type RpcStubConstructor =
     [<EmitConstructor>]
     abstract Create<'T>: value: 'T -> obj
 
-type WorkflowDelayDuration = Cloudflare.Workers.WorkflowSleepDuration
+[<Interface>]
+type RpcTargetBranded =
+    abstract __RPC_TARGET_BRAND: unit
+    [<ParamObject; Emit("$0")>]
+    static member Create () : RpcTargetBranded = jsNative
 
-type WorkflowTimeoutDuration = Cloudflare.Workers.WorkflowSleepDuration
+[<Interface>]
+type WorkerEntrypointBranded =
+    abstract __WORKER_ENTRYPOINT_BRAND: unit
+    [<ParamObject; Emit("$0")>]
+    static member Create () : WorkerEntrypointBranded = jsNative
 
-type WorkflowRetentionDuration = Cloudflare.Workers.WorkflowSleepDuration
+[<Interface>]
+type DurableObjectBranded =
+    abstract __DURABLE_OBJECT_BRAND: unit
+    [<ParamObject; Emit("$0")>]
+    static member Create () : DurableObjectBranded = jsNative
+
+[<Interface>]
+type WorkflowEntrypointBranded =
+    abstract __WORKFLOW_ENTRYPOINT_BRAND: unit
+    [<ParamObject; Emit("$0")>]
+    static member Create () : WorkflowEntrypointBranded = jsNative
 
 [<Interface>]
 type SecretsStoreSecret =
@@ -18241,6 +18265,8 @@ type WorkflowDurationLabel =
     | [<CompiledName("year")>] Year
 
 type WorkflowSleepDuration = Cloudflare.Workers.WorkflowSleepDuration
+
+type WorkflowRetentionDuration = WorkflowSleepDuration
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type WorkflowInstanceLocationHint =
@@ -24075,6 +24101,8 @@ module Cloudflare =
 
         type WorkflowSleepDuration = U2<float, string>
 
+        type WorkflowDelayDuration = Cloudflare.WorkersTypes.Cloudflare.Workers.WorkflowSleepDuration
+
         [<Interface>]
         type WorkflowDynamicDelayContext =
             abstract ctx: Cloudflare.Workers.WorkflowDynamicDelayContext.Ctx with get, set
@@ -24083,6 +24111,10 @@ module Cloudflare =
             static member Create (ctx: Cloudflare.Workers.WorkflowDynamicDelayContext.Ctx, error: exn) : WorkflowDynamicDelayContext = jsNative
 
         type WorkflowDelayFunction = (Cloudflare.WorkersTypes.Cloudflare.Workers.WorkflowDynamicDelayContext -> U3<float, JS.Promise<Cloudflare.WorkersTypes.Cloudflare.Workers.WorkflowSleepDuration>, string>)
+
+        type WorkflowTimeoutDuration = Cloudflare.WorkersTypes.Cloudflare.Workers.WorkflowSleepDuration
+
+        type WorkflowRetentionDuration = Cloudflare.WorkersTypes.Cloudflare.Workers.WorkflowSleepDuration
 
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
         type WorkflowBackoff =
@@ -25959,27 +25991,3 @@ module WorkflowInstanceRestartOptions =
             | [<CompiledName("do")>] Do
             | [<CompiledName("sleep")>] Sleep
             | [<CompiledName("waitForEvent")>] WaitForEvent
-
-[<Erase>]
-type U10<'t1, 't2, 't3, 't4, 't5, 't6, 't7, 't8, 't9, 't10> =
-    | Case1 of 't1
-    | Case2 of 't2
-    | Case3 of 't3
-    | Case4 of 't4
-    | Case5 of 't5
-    | Case6 of 't6
-    | Case7 of 't7
-    | Case8 of 't8
-    | Case9 of 't9
-    | Case10 of 't10
-
-    static member op_ErasedCast(x: 't1) = Case1 x
-    static member op_ErasedCast(x: 't2) = Case2 x
-    static member op_ErasedCast(x: 't3) = Case3 x
-    static member op_ErasedCast(x: 't4) = Case4 x
-    static member op_ErasedCast(x: 't5) = Case5 x
-    static member op_ErasedCast(x: 't6) = Case6 x
-    static member op_ErasedCast(x: 't7) = Case7 x
-    static member op_ErasedCast(x: 't8) = Case8 x
-    static member op_ErasedCast(x: 't9) = Case9 x
-    static member op_ErasedCast(x: 't10) = Case10 x

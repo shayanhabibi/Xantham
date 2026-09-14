@@ -1,0 +1,12 @@
+{
+  "module": "CatalogRecursiveJsonLab",
+  "namespace": "Identity.Support",
+  "lib": [
+    "esnext"
+  ],
+  "types": [],
+  "groups": {
+    "recursive-json-owner-lab": "ship"
+  },
+  "declarationCatalog": true
+}

@@ -44,9 +44,8 @@
     },
     {
       "pass": "SC - shape-classes",
-      "total": 65,
-      "ergonomic": 62,
-      "widened": 3
+      "total": 62,
+      "ergonomic": 62
     },
     {
       "pass": "SE - shape-exports",

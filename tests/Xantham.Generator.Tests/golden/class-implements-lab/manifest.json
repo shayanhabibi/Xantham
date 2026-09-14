@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "package": "class-implements-lab",
+  "module": "ClassImplementsLab",
+  "counts": {
+    "exact": 3,
+    "ergonomic": 5,
+    "widened": 0,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 2,
+      "exact": 2
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 9,
+      "ergonomic": 9
+    }
+  ]
+}

@@ -118,6 +118,15 @@ let shapeInterfaces: Pass<ShapeModel> =
                     // declaration's optional methods are lifecycle hooks (§4.4).
                     let classSides = exportedClassSides model
 
+                    let rec entrypointClass typeId =
+                        match Map.tryFind typeId classSides, Map.tryFind typeId model.Types with
+                        | Some(export, constructors), Some facts -> isEntrypoint ctx export constructors facts.BaseTypes
+                        | _, Some facts ->
+                            match facts.Response.TargetTypeId with
+                            | ValueSome target when target <> typeId -> entrypointClass target
+                            | _ -> false
+                        | _ -> false
+
                     let decls =
                         declarationNames
                         |> Map.toList
@@ -153,8 +162,8 @@ let shapeInterfaces: Pass<ShapeModel> =
                                 let hooks =
                                     let entrypoint =
                                         match Map.tryFind typeId classSides with
-                                        | Some(export, valueFacts) ->
-                                            isEntrypoint export valueFacts.ConstructSignatures facts.BaseTypes
+                                        | Some(export, constructors) ->
+                                            isEntrypoint ctx export constructors facts.BaseTypes
                                         | None -> false
 
                                     let inheritsSomething () =
@@ -225,6 +234,13 @@ let shapeInterfaces: Pass<ShapeModel> =
 
                                 for baseId in facts.BaseTypes do
                                     admit true baseId
+
+                                for interfaceId in facts.ImplementedTypes do
+                                    if entrypointClass typeId || entrypointClass interfaceId then
+                                        findings <-
+                                            findings @ [ Finding.make name ShapeInterfaces.BaseMembersFlattened ]
+                                    else
+                                        admit true interfaceId
 
                                 inheritGraph <- Map.add name (inherits |> List.map fst) inheritGraph
 

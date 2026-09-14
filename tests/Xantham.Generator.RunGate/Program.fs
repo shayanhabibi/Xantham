@@ -2042,8 +2042,48 @@ let private subpathLab () =
 
     equal "a root-homed type flows through a subpath signature" 3. connected.hidden
 
+let private mixedSubpaths () =
+    equal
+        "a global root function survives beside a module subpath"
+        "global:true"
+        (MixedSubpathsLab.Exports.rootCall (MixedSubpathsLab.RootOptions.Create true))
+
+    equal
+        "the module subpath keeps its runtime import beside globals"
+        "client:3"
+        (MixedSubpathsLab.Client.Exports.connect (MixedSubpathsLab.Client.ClientOptions.Create 3.))
+
+type private DependencyActor() =
+    inherit
+        DependencyEntrypointLab.EntrypointLab.Runtime.Actor<string>(
+            DependencyEntrypointLab.EntrypointLab.Runtime.Actor.Options<string>.Create "seed"
+        )
+
+    interface DependencyEntrypointLab.EntrypointLab.Runtime.Actor.IFetchHandler<string> with
+        member _.fetch value = "fetch:" + value
+
+type private DependencyActorWithoutHook() =
+    inherit
+        DependencyEntrypointLab.EntrypointLab.Runtime.Actor<string>(
+            DependencyEntrypointLab.EntrypointLab.Runtime.Actor.Options<string>.Create "quiet"
+        )
+
+let private dependencyEntrypoint () =
+    let actor = DependencyActor()
+    equal "dependency entrypoint constructor imports its ambient runtime" "seed" actor.seed
+
+    equal
+        "dependency entrypoint generic hook retains its argument"
+        "fetch:value"
+        ((actor :> DependencyEntrypointLab.EntrypointLab.Runtime.Actor.IFetchHandler<string>).fetch "value")
+
+    check "dependency entrypoint hook is present when implemented" (emitJsExpr actor "typeof $0.fetch === 'function'")
+    let quiet = DependencyActorWithoutHook()
+    check "dependency entrypoint omitted hook is absent" (emitJsExpr quiet "$0.fetch === undefined")
+
 [<EntryPoint>]
 let main _ =
+    dependencyEntrypoint ()
     SupportHelpers.run check
     ExportProvenance.run check
     globals ()
@@ -2078,6 +2118,33 @@ let main _ =
     patternParameters ()
     exportLayout ()
     subpathLab ()
+    mixedSubpaths ()
+    let card = PublicInputsLab.Mirror.Card.Card.Create "test"
+    let child = SubpathClassesLab.Errors.Exports.Child "details"
+    equal "public subpath constructor retains inherited members" "child" child.code
+    equal "public subpath constructor retains derived members" "details" child.detail
+
+    equal
+        "explicit mirror input keeps its runtime import"
+        "mirror:test"
+        (PublicInputsLab.Mirror.Card.Exports.describe card)
+
+    equal
+        "explicit widget input shares the type and keeps its runtime import"
+        "widget:test"
+        (PublicInputsLab.Widgets.Card.Exports.describe card)
+
+    equal
+        "exclusive URL factory emits its own property"
+        "url:https://example.invalid/"
+        (ExclusiveSignatureLab.Exports.render (
+            U2.Case2(ExclusiveSignatureLab.UrlPage.Create "https://example.invalid/")
+        ))
+
+    equal
+        "exclusive HTML factory emits its own property"
+        "html:<p>test</p>"
+        (ExclusiveSignatureLab.Exports.render (U2.Case1(ExclusiveSignatureLab.HtmlPage.Create "<p>test</p>")))
 
     match failures with
     | [] ->

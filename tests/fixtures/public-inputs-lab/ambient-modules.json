@@ -1,0 +1,4 @@
+{
+  "public-inputs-lab/mirror/card": "runtime/mirror-card.js",
+  "public-inputs-lab/widgets/card": "runtime/widget-card.js"
+}

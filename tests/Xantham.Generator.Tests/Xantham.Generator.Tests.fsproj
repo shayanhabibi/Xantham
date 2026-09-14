@@ -35,6 +35,7 @@
     <ItemGroup>
         <ProjectReference Include="..\..\src\Xantham.Generator\Xantham.Generator.fsproj" />
         <ProjectReference Include="..\..\src\Xantham.Cli\Xantham.Cli.fsproj" />
+        <ProjectReference Include="..\..\src\Xantham.Fable.Core.TS\Xantham.Fable.Core.TS.fsproj" ReferenceOutputAssembly="false" />
     </ItemGroup>
 
     <ItemGroup>

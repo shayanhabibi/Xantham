@@ -1,0 +1,10 @@
+{
+  "name": "public-inputs-lab",
+  "version": "1.0.0",
+  "type": "module",
+  "exports": {
+    ".": { "types": "./server.d.ts" },
+    "./widgets/*": { "types": "./types/*.d.ts", "default": "./runtime/widget-*.js" },
+    "./mirror/*": { "types": "./types/*.d.ts", "default": "./runtime/mirror-*.js" }
+  }
+}

@@ -1,0 +1,4 @@
+{"name":"RootOptions","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"RootOptions","message":"ParamObject Create synthesized (D3)"}]}
+{"name":"Exports.rootCall","tier":"exact","findings":[]}
+{"name":"Client.ClientOptions","file":"client.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Client.ClientOptions","message":"ParamObject Create synthesized (D3)"}]}
+{"name":"Client.Exports.connect","tier":"exact","findings":[]}

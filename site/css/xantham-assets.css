@@ -1,0 +1,50 @@
+/* The atlas has a transparent backing; tiles composite over the page background. */
+.xantham-mascot-tile { display:inline-block; flex-shrink:0; background-image:url("/Xantham/assets/mascot-atlas.png"); background-repeat:no-repeat; background-size:1536px 1024px; vertical-align:middle; }
+/* turnaround */
+.xantham-turnaround-front { width:155px; height:138px; background-position:-25px -140px; }
+.xantham-turnaround-three-quarter-left { width:142px; height:138px; background-position:-193px -140px; }
+.xantham-turnaround-left { width:116px; height:141px; background-position:-355px -137px; }
+.xantham-turnaround-side-left { width:110px; height:146px; background-position:-501px -132px; }
+.xantham-turnaround-back { width:131px; height:143px; background-position:-635px -136px; }
+.xantham-turnaround-side-right { width:115px; height:146px; background-position:-793px -132px; }
+.xantham-turnaround-right { width:117px; height:142px; background-position:-937px -136px; }
+.xantham-turnaround-three-quarter-right { width:146px; height:137px; background-position:-1080px -141px; }
+.xantham-turnaround-top { width:126px; height:131px; background-position:-1241px -142px; }
+.xantham-turnaround-bottom { width:120px; height:126px; background-position:-1386px -146px; }
+/* expressions */
+.xantham-expressions-neutral { width:111px; height:109px; background-position:-26px -361px; }
+.xantham-expressions-mischievous { width:116px; height:109px; background-position:-164px -361px; }
+.xantham-expressions-curious { width:103px; height:127px; background-position:-298px -343px; }
+.xantham-expressions-excited { width:127px; height:127px; background-position:-417px -343px; }
+.xantham-expressions-determined { width:117px; height:111px; background-position:-561px -359px; }
+.xantham-expressions-thinking { width:104px; height:110px; background-position:-703px -360px; }
+.xantham-expressions-happy { width:143px; height:107px; background-position:-826px -361px; }
+.xantham-expressions-peek { width:117px; height:95px; background-position:-980px -373px; }
+.xantham-expressions-surprised { width:118px; height:124px; background-position:-1112px -346px; }
+.xantham-expressions-sad { width:104px; height:114px; background-position:-1256px -356px; }
+.xantham-expressions-angry { width:115px; height:123px; background-position:-1381px -347px; }
+/* actions */
+.xantham-actions-idle { width:129px; height:116px; background-position:-31px -546px; }
+.xantham-actions-explore { width:137px; height:123px; background-position:-177px -538px; }
+.xantham-actions-discover { width:105px; height:122px; background-position:-337px -539px; }
+.xantham-actions-generate { width:125px; height:115px; background-position:-469px -546px; }
+.xantham-actions-iterate { width:131px; height:117px; background-position:-613px -543px; }
+.xantham-actions-question { width:133px; height:137px; background-position:-772px -524px; }
+.xantham-actions-create { width:130px; height:133px; background-position:-906px -528px; }
+.xantham-actions-celebrate { width:144px; height:126px; background-position:-1053px -536px; }
+.xantham-actions-sleep { width:173px; height:117px; background-position:-1205px -543px; }
+.xantham-actions-wave { width:114px; height:129px; background-position:-1397px -531px; }
+/* poses */
+.xantham-poses-with-logo { width:122px; height:118px; background-position:-26px -737px; }
+.xantham-poses-holding-logo { width:109px; height:116px; background-position:-174px -738px; }
+.xantham-poses-sitting-alt { width:125px; height:117px; background-position:-304px -737px; }
+.xantham-poses-floating { width:102px; height:136px; background-position:-454px -723px; }
+.xantham-poses-jumping { width:131px; height:137px; background-position:-593px -718px; }
+.xantham-poses-sliding { width:169px; height:121px; background-position:-742px -735px; }
+.xantham-poses-from-behind { width:115px; height:118px; background-position:-935px -732px; }
+.xantham-poses-with-book { width:118px; height:124px; background-position:-1085px -731px; }
+.xantham-poses-with-coffee { width:127px; height:125px; background-position:-1235px -730px; }
+.xantham-poses-stacked { width:118px; height:145px; background-position:-1390px -711px; }
+.xantham-banner { width:100%; aspect-ratio:16/3; background-image:url("/Xantham/assets/banner-light-dark.png"); background-size:100% 200%; background-repeat:no-repeat; }
+.xantham-banner-light { background-position:center top; }
+.xantham-banner-dark { background-position:center bottom; }

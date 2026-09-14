@@ -224,7 +224,7 @@ let shapeClasses: Pass<ShapeModel> =
                     /// the declaration then keeps the interface form it already has.
                     let admitEntrypoint
                         (export: HarvestedExport)
-                        (facts: TypeFacts)
+                        (constructors: ResolvedSignature list)
                         (bases: int<typeId> list)
                         (name: string)
                         =
@@ -248,7 +248,7 @@ let shapeClasses: Pass<ShapeModel> =
                             // primary constructor takes one parameter list. `Exports` still
                             // carries every one of them under `[<EmitConstructor>]`.
                             let parameters =
-                                match facts.ConstructSignatures with
+                                match constructors with
                                 | [] -> []
                                 | signature :: _ ->
                                     let _, parameters, _, _ = shapeSignature ctx model (Some name) name signature
@@ -372,8 +372,8 @@ let shapeClasses: Pass<ShapeModel> =
                                         |> Option.map _.BaseTypes
                                         |> Option.defaultValue []
 
-                                    if isEntrypoint export facts.ConstructSignatures bases then
-                                        admitEntrypoint export facts bases declaredName
+                                    if isEntrypoint ctx export facts.ConstructSignatures bases then
+                                        admitEntrypoint export facts.ConstructSignatures bases declaredName
 
                                     facts.ConstructSignatures
                                     |> List.mapi (fun ordinal signature ->
@@ -399,6 +399,13 @@ let shapeClasses: Pass<ShapeModel> =
                                                     Settable = false
                                                 }
                                         }))
+
+                    for KeyValue(typeId, (export, constructors)) in exportedClassSides model do
+                        if not (Map.containsKey export.Symbol.SymbolId model.ExportTypes) then
+                            match Map.tryFind typeId model.Types, Map.tryFind typeId model.DeclNames with
+                            | Some facts, Some name when isEntrypoint ctx export constructors facts.BaseTypes ->
+                                admitEntrypoint export constructors facts.BaseTypes name
+                            | _ -> ()
 
                     // A class reachable through several export paths (`export * from`) contributes
                     // one occurrence of its statics per path; collapse to the path the class's own
@@ -441,8 +448,18 @@ let shapeClasses: Pass<ShapeModel> =
                         model.Decls
                         |> List.map (function
                             | FsInterface decl ->
+                                let inherits =
+                                    decl.Inherits
+                                    |> List.filter (function
+                                        | FsNamed name
+                                        | FsApp(name, _) when Map.containsKey name entrypoints ->
+                                            emit (Finding.make decl.Name (ShapeInterfaces.BaseNotDeclaredHere name))
+                                            false
+                                        | _ -> true)
+
                                 FsInterface
                                     { decl with
+                                        Inherits = inherits
                                         Statics =
                                             decl.Statics @ (Map.tryFind decl.Name statics |> Option.defaultValue [])
                                         Entrypoint = Map.tryFind decl.Name entrypoints

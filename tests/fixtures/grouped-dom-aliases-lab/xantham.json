@@ -1,0 +1,7 @@
+{
+  "module": "GroupedDomAliasesLab",
+  "lib": ["esnext", "dom"],
+  "types": ["worker-augmentation-lab"],
+  "namespace": "GroupedDomAliases",
+  "groups": { "worker-augmentation-lab": "ship" }
+}

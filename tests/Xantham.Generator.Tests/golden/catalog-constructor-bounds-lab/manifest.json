@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "package": "catalog-constructor-bounds-lab",
+  "module": "CatalogConstructorBoundsLab",
+  "counts": {
+    "exact": 1,
+    "ergonomic": 4,
+    "widened": 0,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 3,
+      "exact": 1,
+      "ergonomic": 2
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 2,
+      "ergonomic": 2
+    }
+  ]
+}

@@ -322,7 +322,8 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
     let isLiteralUnion (facts: TypeFacts) =
         let _, remaining = splitNullish model facts
 
-        remaining.Length > 1
+        facts.NonNullableAlias.IsNone
+        && remaining.Length > 1
         && remaining
            |> List.forall (fun id ->
                match Map.tryFind id model.Types with
@@ -330,7 +331,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                | None -> false)
         && not (isBooleanPair model remaining)
         && (Set.contains facts.Response.TypeId recoveredAliases
-            || (namedUnionByMembers { model with DeclNames = names } remaining).IsNone)
+            || (namedUnionByMembers ctx { model with DeclNames = names } remaining).IsNone)
 
     /// A union `detect-tagged-unions` will declare (D4, §4.5(2)): every arm an object type
     /// carrying the same string-literal discriminant, and data a DU case can bind. That pass
@@ -351,7 +352,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
         let nullish, remaining = splitNullish model facts
 
         List.isEmpty nullish
-        && (namedUnionByMembers { model with DeclNames = names } remaining).IsNone
+        && (namedUnionByMembers ctx { model with DeclNames = names } remaining).IsNone
         && (match taggedUnionShape { model with DeclNames = names } facts with
             | Discriminated(tag, tagged, _) -> tagged |> List.forall (fst >> isTaggedCaseData tag)
             | TagCollides _
@@ -395,7 +396,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
             |> List.collect (fun (typeId, facts) ->
                 let entrypoint =
                     match Map.tryFind typeId classSides with
-                    | Some(export, valueFacts) -> isEntrypoint export valueFacts.ConstructSignatures facts.BaseTypes
+                    | Some(export, constructors) -> isEntrypoint ctx export constructors facts.BaseTypes
                     | None -> false
 
                 // A declaration carrying an `inherit` line keeps its optional methods as option
@@ -416,7 +417,15 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
         if Map.containsKey facts.Response.TypeId names then
             false
         elif flag TypeFlags.Union facts && not (flag TypeFlags.Boolean facts) then
-            isLiteralUnion facts || becomesTaggedUnion facts
+            let canonicalAlias =
+                (ctx.Config.DeclarationCatalog
+                 || not (List.isEmpty ctx.Config.DeclarationReferences))
+                && facts.AliasTypeArguments.IsEmpty
+                && facts.DeclarationArguments.IsEmpty
+                && (facts.SymbolName |> Option.exists (isSyntheticName >> not))
+                && GeneratorConfig.disposition ctx.Config facts.Origin = Ship
+
+            isLiteralUnion facts || becomesTaggedUnion facts || canonicalAlias
         elif flag TypeFlags.Object facts && isPureCallback facts then
             // A callback the arity rule retains as a delegate is declared under a name of its
             // own (D5), so the consumer reads `x: float * y: float` where `Func<float, float,
@@ -445,9 +454,11 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
             && (arrayElement model facts).IsNone
             && not (isTuple facts)
             && facts.ConstructSignatures.IsEmpty
-            // An index signature is shape too: `Record<string, boolean>` has no members
-            // and one index signature, and is an interface of one `Item`.
-            && not (facts.Members.IsEmpty && facts.IndexInfos.IsEmpty)
+            // Index signatures retain their interface shape; named generic empty declarations
+            // retain their parameters through the phantom emitted by shape-aliases.
+            && (not (facts.Members.IsEmpty && facts.IndexInfos.IsEmpty)
+                || ((facts.SymbolName |> Option.exists (isSyntheticName >> not))
+                    && not (List.isEmpty (declParamIds facts))))
             // A pure index signature with no symbol of its own resolves through the
             // support package's `Record`/`ReadonlyRecord` instead of a minted name
             // (TR059); an interface's own name, reached this way rather than through a
@@ -590,7 +601,10 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                     for info in facts.IndexInfos do
                         walk (into "Item") order info.ValueTypeId
 
-                    let signatures = facts.CallSignatures @ facts.ConstructSignatures
+                    let signatures =
+                        facts.CallSignatures
+                        @ facts.ConstructSignatures
+                        @ (facts.AmbientClass |> Option.map snd |> Option.defaultValue [])
 
                     for signature in signatures do
                         for p in signature.Parameters do
@@ -606,6 +620,9 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
 
                     for baseId in facts.BaseTypes do
                         walk (into "Base") order baseId
+
+                    for interfaceId in facts.ImplementedTypes do
+                        walk (into "Implements") order interfaceId
 
                     if
                         ctx.Config.DeclarationCatalog

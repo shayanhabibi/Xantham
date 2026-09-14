@@ -904,6 +904,36 @@ Phases — each ends with the compile gate green on its fixtures:
     `XConstructor` and the class itself exist - once as `Exports`-bound dotted selectors, once as
     that interface's members - shaped from two different views of the same static side, and the
     two are not cross-checked against each other.
+  - *Reached ambient class sides (2026-09-13).* Harvest retains runtime ambient class export
+    metadata separately from public exports, using the existing resolver for quoted modules and
+    `export =` namespace bodies. Resolve reads constructor signatures only for reached shipped
+    classes and follows their parameter/type-parameter/return dependencies. The common class-side
+    view feeds optional-hook naming, interface inheritance admission and entrypoint shaping;
+    dependency recovery adds no public constructor/static occurrences. Source-package imports
+    remain ordinary bindings alongside the existing runtime/public-input check. Catalog source
+    and API authentication remain strict. `dependency-entrypoint-lab` compiles an authenticated
+    generic subclass with an inline constructor argument and optional hook, rejects a wrong
+    constructor argument, and covers ordinary modules, type-only exports and a package's own
+    quoted public module. Its Fable checks exercise the ambient constructor and hook presence.
+  - *Interface bases emitted as classes (2026-09-13).* Classes removes an interface's
+    inheritance edge when the accepted entrypoint map emits its target as an abstract class.
+    This precedes inherited-member deduplication, preserving the complete member surface and
+    ordinary constructor exports. Existing SI006 records the omitted nominal relation;
+    ordinary interface bases retain their inheritance. `catalog-class-inheritance-lab` covers
+    explicit and inherited constructors, an interface extending the class, ordinary upcasts,
+    and typed inherited members. Ambient bases remain subclassable; ordinary derived SDK
+    classes retain their existing interface-and-constructor representation.
+  - *Explicit class contracts (2026-09-13).* Resolve records `implements` types separately
+    from `BaseTypes`, using typed class heritage nodes and the compiler's type-node query.
+    Reachability, free parameters and catalog source closure include these contracts.
+    `shape-interfaces` sends regular class contracts through its existing named-interface and
+    cycle guards; catalog ownership is authenticated and redirected at the existing later
+    catalog stage. Entrypoint classes, and contracts whose target is an entrypoint class, retain
+    the class constructor representation and report the unrepresented contract as `SI002`.
+    Optional lifecycle hooks and generic constraint inference retain their existing base-type
+    decisions. `class-implements-lab` covers fixed and constrained generic contracts plus a
+    structurally matching class without `implements`; `class-implements-entrypoint-lab` covers
+    subclassing, an optional hook, `Error` inheritance and a class-shaped contract target.
   - *Declared bases inherited (2026-09-02).* §4.4's heritage rule, executed: a base an
     `extends` clause names becomes an F# `inherit` beside the members that were already
     flattened in, so the derived type upcasts to it. `SI002` - "base has no F# name at this
@@ -1237,6 +1267,9 @@ intersection, tuple and recursive references. Source closure retains declaration
 and excludes unrelated export use sites. The regression suite checks each case through producer
 and consumer compilation. Anonymous generic result members reuse their declaration only under
 a complete substitution, preserving caller bounds and repeated or reordered arguments.
+In catalog mode this includes original anonymous declarations retained by Resolve whose only
+reachable occurrence is an application. The canonical declaration binds its original free
+parameters; applied method parameters and their constraints remain at the method use site.
 Opaque dependency aliases retain their argument owners and applications in identity, including
 the source dependencies of concrete defaults, even when member facts are intentionally widened.
 Anonymous literal unions use their literal values for identity; named aliases and enum members
@@ -1428,6 +1461,331 @@ Verification: 730 + 90 Expecto tests, compile gate, run gate. Findings moved:
 `JSX` moving to the root, and a duplicate `DOMElement` abbreviation dropping), `@cloudflare/workers-types`
 (three ambient-module types moving to the root), `static-reexport-lab` (a root abbreviation
 dropping), `subpath-lab` (new).
+
+## Catalog and mixed public-input follow-up (2026-09-13)
+
+The follow-up on 2026-09-13 keeps global declarations when a selected public input is a global
+script alongside module inputs. `harvest-globals` reads the global script's scope and merges
+its declarations and namespaces with the public module exports. Module-only runs retain the
+existing policy for incidental global augmentations. `mixed-subpaths-lab` checks both entry
+orders and executes the global and imported functions through Fable.
+
+Catalog ownership covers reusable type declarations. `FsExports` containers remain local to
+each generation, with their signature references redirected to catalog owners. Public aliases
+and class constructor helpers use the qualified declaration names selected by `name-exports`;
+constructor selection uses the source symbol and export owner. The restored catalog suites
+create disposable fixtures under the test project's `obj/catalog-fixtures`, within compiler
+and SDK discovery scope. Consumer probes cover nested type aliases, local subpath imports,
+and constructors and static members on a reused nested class.
+
+`catalog-subpath-lab` covers anonymous function-result declarations under a public subpath
+and two names exported for the same interface. Catalog parent-role lookup uses the export's
+qualified module path, including the Pascal-cased function parent of generated result types.
+`shape-aliases` places secondary names under that same export path. The consumer gate reuses
+the result union through a second catalog owner and type-checks the nested interface alias.
+
+Validation: 811 generator and 90 Wire tests pass in both the regeneration and check phases;
+the compile gate and 455 Fable runtime checks pass. Workers' `SA003` count falls by one as
+the root retention alias and the three module-scoped Workflow aliases retain separate names.
+Workers' tiers change from 410/1068/369/111 to 412/1068/368/111 (exact/ergonomic/widened/escape).
+
+## Augmented libraries and exclusive factories (2026-09-13)
+
+`resolve-type-table` follows non-compiler declarations when a standard-library symbol is
+augmented, preferring entry sources and then deterministic dependency source order. Local
+augmentations retain their generic parameters and members; dependency augmentations use the
+configured group disposition. Function values resolve their callable signatures by content.
+`augmented-dom-lab` and its compiled consumer cover generic Request/RequestInit augmentations,
+`typeof fetch`, and unchanged mapping of an ordinary DOM Response.
+
+The exclusive-arm fold preserves separate union arms when the proposed factories have
+identical parameter types and optionality. F# parameter names do not distinguish overload
+signatures. `exclusive-signature-lab` exercises the URL/HTML case and calls each arm's factory
+through Fable to verify the emitted property.
+
+Validation: 816 generator tests and 90 Wire tests pass in both phases, with the compile gate
+and 457 Fable checks passing. The Workers golden adds its merged `Disposable` declaration
+and explicit `HyperdriveDynamic` inheritance. Its symbol-keyed dispose member remains a
+reported mapping loss (`MB.SymbolKeyedMemberDropped` +1); base flattening becomes inheritance.
+The existing Agents browser entry compiles in the external corpus probe. Shipping its Workers
+dependency separately still exposes a group-to-root reference cycle and remains an open
+library-stratification issue.
+
+## Explicit public-input partitions (2026-09-13)
+
+`GeneratorConfig.PublicInputs` maps concrete public export keys to declaration files within
+one package. Bootstrap uses exactly that map as its compiler roots, with `.` included only
+when selected. This supports caller-expanded wildcard exports, selected conditional variants,
+and independent browser/Workers programs without changing automatic export enumeration.
+`entry` and `subpaths` are mutually exclusive with this mode. Empty maps, duplicate JSON keys,
+non-concrete import keys and invalid declaration paths fail before generation.
+
+The public-inputs lab selects two runtime exports sharing a declaration file while the
+manifest root is unavailable. Fable checks both runtime imports with the same generated Card
+type. Config and bootstrap checks cover selection conflicts and invalid inputs. FCS impact
+analysis before adding the field found 92 uses in nine generator files; CLI/schema and consumer
+compatibility are also checked by the build and regression gates.
+
+Validation: 843 generator tests, 90 Wire tests, the compile gate and 459 Fable runtime
+checks pass. Existing golden bindings and finding counts are unchanged; the new lab has
+2 exact and 1 ergonomic symbols. Catalog consumer builds now disable shared build servers
+and use one MSBuild worker after two nested build workers exited during an earlier run.
+
+### Contextual constructor bounds and unresolved declaration arguments
+
+Constructor identities include the constraints on their declaration and captured type
+parameters. An exported `Factory<T extends Base>` and a use under `T extends Derived` receive
+distinct identities; both remain reusable through a producer catalog. The four-line
+catalog-constructor-bounds lab reproduces the previous collision.
+
+An unresolved declaration argument contributes a scalar key only for supported intrinsic or
+literal flags. Enum, union and other unexpanded arguments require a resolved identity or a
+parent role. Their flags alone do not identify a type. The readonly-enums lab imports two
+dependency enums and applies `Readonly` to each; their generated enum types remain distinct
+and reusable through a catalog.
+
+Catalog compile consumers use the test assembly's configuration and disable dependency
+rebuilds. The test project builds Core.TS as a prerequisite. This keeps parallel consumer
+builds from rewriting a shared reference assembly while another compiler reads it.
+
+Validation: 849 generator tests and 90 Wire tests pass during regeneration and independent
+checking; the compile gate and 459 Fable runtime checks pass. Existing golden bindings and
+finding counts are unchanged. Constructor bounds: 1 exact / 4 ergonomic. Readonly enums:
+2 exact / 2 ergonomic. Both labs have zero widened and escape symbols.
+
+### Public SDK classes and ambient runtime entrypoints
+
+Entrypoint classification compares an export's import specifier against the exact selected
+public-input map. A package subpath retains the same class representation as its root.
+Genuine ambient runtime modules still receive the entrypoint class and optional-hook rules.
+The distinction applies consistently in interface, anonymous-type and class shaping.
+
+The subpath-classes lab has a two-class Error hierarchy under a public subpath. It previously
+emitted an interface inheriting an imported abstract class (FS0887). The corrected output
+compiles, and Fable constructs the real JavaScript subclass and reads its own and inherited
+members. Existing binding text is unchanged. Anime.js loses three inappropriate SC008
+entrypoint-refusal findings (JSAnimation, Timeline, Timer); symbol tiers are unchanged.
+
+Validation: 851 generator tests, 90 Wire tests, the compile gate and 461 Fable runtime
+checks pass. A fresh FCS check reports no errors or warnings.
+
+
+### Installed package ownership and nested module manifests
+
+Catalog sources belong to their installed package root, including scoped and nested
+`node_modules` installations. A module manifest inside that package may declare its own
+resolution settings without declaring an independent package version. Source fingerprints
+include both the owner manifest and every intervening module manifest, with paths relative
+to the owner. An installed owner still requires its name and version.
+
+The package-submanifest lab reproduces a dependency subpath with a named, unversioned module
+manifest. Catalog checks cover scoped installations, nested dependencies, producer reuse,
+stale nested metadata rejection and rejection of an unversioned package owner. Existing
+golden bindings and finding counts are unchanged; the new lab retains one reported opaque
+dependency alias. Further Firebase integration validation is deferred from the first-party
+Cloudflare delivery; its general package-ownership defect is covered by this regression.
+
+Validation: 854 generator tests, 90 Wire tests, the compile gate and 461 Fable runtime
+checks pass in the full regeneration and independent-check pipeline.
+
+
+### Parent identities through index signatures
+
+Catalog parent roles include index-signature keys and values, using the checker-provided
+index order. Synthesized callbacks reached through a mapped index signature receive a
+stable role through that index and any intervening union. Catalog source closure already
+traversed these dependencies; identity propagation now follows the same index edges.
+
+The three-line indexed-callback lab reduces the Containers SDK failure to a mapped handler
+collection. A second generated library reuses its catalog, and a compiled consumer reads
+and invokes the producer's callback type. Its conditional context remains a reported
+mapping loss (0 exact / 1 ergonomic / 3 widened / 0 escape). Existing golden bindings and
+finding counts are unchanged.
+
+Validation: 857 generator tests and 90 Wire tests pass during regeneration and independent
+checking; the compile gate and 461 Fable runtime checks pass. A fresh FCS check is clean.
+
+### Intrinsic arguments and named primitive aliases
+
+Structural declaration identities normalize intrinsic argument types by their flags and
+literal values before consulting declaration handles. Named primitive aliases retain their
+own catalog declarations. Enum literals retain declaration identity and are excluded from
+the intrinsic fallback.
+
+The primitive-argument-identity lab has an ambient dependency with named string, number and
+boolean aliases and an interface containing an anonymous nested object. A consumer reaches
+the interface without reaching those aliases. The producer and consumer must agree on the
+nested object's identity and preserve the same typed API. The regression compiles a consumer
+that reads each nested member and uses the producer's primitive aliases.
+
+The failure originates in the checker's interned primitive types: an exported alias can add
+declaration handles to the same primitive type ID used by an unrelated structural member.
+Intrinsic arguments share canonical keys across named alias owners. The intrinsic mask
+excludes unique symbols, template literals and string mappings, whose semantic identities
+require more than flags and a literal value.
+
+Existing golden bindings and finding counts are unchanged. The new lab has 1 exact /
+2 ergonomic / 0 widened / 1 escape symbol; the escape is GE004's dependency-module naming
+provenance, and every nested member retains its primitive type.
+
+Validation: 860 generator tests and 90 Wire tests pass during regeneration and independent
+checking; the compile gate and 461 Fable runtime checks pass. A fresh FCS check is clean.
+
+### Compiler-library literal aliases used by shipped groups
+
+O7 placement assigns an unexported compiler-library literal alias to its unique shipped
+dependency consumer when the compiler library itself is not shipped. The finished F#
+declaration references determine that consumer. Root declarations reuse the same alias
+from the dependency module. Explicit exports, shipped compiler-library declarations and
+aliases consumed by several dependency groups retain their existing ownership.
+
+The grouped-dom-aliases lab contains an exported function over `Request` and one ambient
+dependency adding `Request.cf`. Catalog generation recovers named DOM literal aliases,
+including `RequestCache`, which previously remained in the root file while the merged
+interface belonged to the shipped dependency. That produced references in both file
+directions and FS0039 when compiling groups first. A catalog producer/adapter consumer
+passes the dependency-owned Request through both exports and reads its typed cache value.
+The ordinary golden and compile consumer also retain the augmentation's string property.
+This change addresses compiler-library literal-alias placement, not arbitrary package
+cycles or compatibility across inference profiles.
+
+Validation: 866 generator tests, 90 Wire tests, the compile gate and 461 Fable runtime
+checks pass. Existing golden bindings and finding counts are unchanged. The new lab and
+the before/after catalog probe each retain 7 exact / 0 ergonomic / 0 widened / 2 escape
+symbols; only the catalog probe's literal-alias module ownership changes.
+
+Combined validation with intrinsic-argument normalization: 869 generator tests, 90 Wire
+tests, the compile gate and 461 Fable runtime checks pass. Existing golden bindings and
+finding counts remain unchanged; the new labs retain their independently measured counts.
+
+### Canonical declaration sources for transparent aliases
+
+A declaration's source closure follows the sources selected for each canonical type
+identity. Transparent alias applications retain their source fingerprints in catalog inputs;
+they contribute declaration sources when the alias itself defines the identity. Intrinsic
+arguments share their provenance across named primitive aliases.
+
+The record-alias-source-identity lab gives separate packages independent aliases of
+`Record<string, unknown>` and `Record<string, Model>`. The aliases share their applied
+canonical declarations while preserving public F# names and typed consumer access. The
+model's declaration remains part of its record's source closure. Changes to a reachable
+alias input or to the applied model still invalidate the producer catalog through the
+existing source authentication checks.
+
+Validation: 872 generator tests and 90 Wire tests pass in both regeneration and check
+phases, the compile gate passes, and 461 Fable runtime checks pass. All 95 pre-existing
+golden directories, including their finding counts, remain byte-identical. The new lab
+has two widened declarations: unknown values use `obj`, and the separately owned model
+is opaque when the root fixture is generated alone. Fresh generator FCS checking reports
+zero errors and warnings.
+
+### Nullable aliases shared across catalog owners
+
+Resolve recovers the canonical declaration behind a nullable nongeneric object union in
+catalog mode, including a tagged union reached only through an optional member. Generic
+alias applications retain their argument handling. Shape references to a named nullable
+heterogeneous alias preserve the option layer already carried by that alias. Literal unions
+still use a nullable reference to their generated enum, whose cases carry only the values.
+
+The catalog-alias-api lab exposes a nullable value alias, a tagged payload union and an
+optional tagged choice through a dependency. A consumer reaches the option object through
+`Parameters<Model["generate"]>[0]`. Its typed F# consumer passes producer-owned options and
+payloads directly to the consumer SDK and reads a JSON payload with exactly one option layer.
+The catalog API, source, arity and constraint guards remain unchanged.
+
+Validation and measured golden changes are recorded in
+`docs/.ai/handovers/catalog-alias-api.md`.
+### Source closure precedes anonymous parent ownership
+
+Source closure consults the canonical type identities before parent-role inference
+assigns names to anonymous checker types. The checker shares types such as
+`string[] | undefined` across independent properties. A chosen parent gives that
+anonymous type an output identity, but cannot make the parent's package a dependency
+of every other occurrence of the type. The canonical identity map is retained
+separately for closure; the completed map still supplies output declaration identities
+and their own parent sources.
+
+The anonymous-parent-source lab gives shared and consumer interfaces independent
+optional string-array properties. A typed consumer passes the shared interface across
+the catalog boundary and reads its optional strings. A changed shared input still
+invalidates the catalog. This also reproduces the Workers CacheContext closure gaining
+Containers' `deniedHosts` parent through CachePurgeOptions.
+
+Validation: 875 generator tests and 90 Wire tests pass in both phases, the compile
+gate passes, and 461 Fable checks pass. All 97 existing golden trees are byte-identical.
+The new lab has one exact and two ergonomic symbols, with no widening or escape.
+Fresh FCS checking reports zero errors and warnings.
+
+
+### Recursive alias boundaries and NonNullable payloads
+
+Catalog-mode Resolve records a nongeneric union alias's source name only when the checker
+reports the same declared type for its alias symbol. A transformed `NonNullable<T>` therefore
+keeps its own nullability instead of borrowing the name of nullable `T`. Shape names shipped
+canonical union aliases even when they are reachable only through other declarations.
+Recursive aliases then reach the same named boundary in producer and consumer programs.
+
+Union member-set matching reuses a heterogeneous alias only when the candidate is
+non-nullable. Nullable literal unions remain reusable through their value-only enums.
+This preserves the difference between `T` and `NonNullable<T>` while keeping enum reuse.
+The existing widening at an unnamed recursive alias cycle remains reported as TR001.
+
+The catalog-recursive-json lab contains `Value = string | number | null | Value[]` and a
+tagged payload whose result is `NonNullable<Value>`. A separately generated consumer imports
+only the payload. The shared payload has no outer option, while its recursive array values
+retain the canonical nullable Value. A typed F# consumer constructs and reuses both forms.
+Actual pinned AI SDK diagnostic generation/compilation and the full regression measurements
+are recorded in `docs/.ai/handovers/catalog-recursive-json.md`.
+
+### Inline literal unions across catalog programs
+
+Shape does not promote an inline literal union to an unrelated named alias by matching
+its member values when producing or consuming a declaration catalog. The named alias
+may be reachable only in the producer program; borrowing its name would change the
+shared declaration's F# API in the consumer. Inline unions instead retain their own
+structural enum identity. Explicit alias references and recovered non-nullable alias
+wrappers keep their named owners, source closures, and distinct declaration identities.
+Nonliteral unions retain the existing member-set matching behavior.
+
+The literal-alias-identity lab places an inline optional `"a" | "b"` property beside
+named aliases in both literal orders and a nominal TypeScript enum. A separate consumer
+uses the inline values in reverse order. Its typed F# consumer shares the producer's
+property enum; the two named aliases and the nominal enum keep independent catalog
+identities, and a changed dependency input still invalidates the catalog. Catalog
+source, API, arity, and constraint checks remain unchanged. Measurements and rejected
+alternatives are recorded in `docs/.ai/handovers/literal-alias-identity.md`.
+
+### Erased unions containing emitted object aliases
+
+The late `normalize-obj-unions` Shape pass applies the existing TR035 rule after local
+abbreviations and generic phantoms have been emitted. A union containing a nongeneric
+local alias whose target resolves to `obj` becomes `obj`, just like a direct object arm.
+Alias traversal stops at cycles and does not expand external references, named interface
+contracts, or generic phantoms. Option and container wrappers retain their structure.
+The existing declaration-reference traversal keeps properties, constructor helpers,
+aliases, and export signatures consistent before catalog API authentication.
+
+The empty-union-alias lab reproduces a producer exporting an empty interface and a
+consumer reaching it only through `Value.event`. The producer formerly retained an
+erased union over its named `obj` alias while the consumer widened a direct object arm.
+The typed catalog regression checks shared values and setters, alias chains, retained
+callable/indexed/inherited/generic contracts, the TR035 finding, and stale-input rejection.
+Measurements are recorded in `docs/.ai/handovers/empty-union-alias.md`.
+
+### Generic empty declarations reached through dependencies
+
+Anonymous naming retains a shipped, explicitly named generic empty declaration. The
+generic target is visited before its applications, so existing alias shaping emits its
+phantom once and references retain their type arguments. Empty nongeneric objects keep
+their existing object representation; external group disposition and constructor,
+callback, array, and index-signature rules remain in force.
+
+The generic-marker-catalog lab passes Options<string> and Marker<string> across a
+producer/consumer catalog boundary, rejects Marker<int> at the string marker setter,
+and retains stale-input rejection. It reproduces the Workers FacetStartupOptions class
+property losing DurableObjectClass<T> in a consumer program. The producer's phantom
+contract remains unchanged; no catalog compatibility guard is relaxed. Full measurements
+are recorded in `docs/.ai/handovers/generic-marker-catalog.md`.
 
 # Easy Nits 
 

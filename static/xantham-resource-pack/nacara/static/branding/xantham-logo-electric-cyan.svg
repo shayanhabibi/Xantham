@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Xantham electric blue and cyan logo</title>
+  <desc id="desc">Xantham diamond mark in the banner’s electric blue and bright cyan palette. Clean analytical gradients with a deliberate two-tone center; transparent background.</desc>
+  <defs>
+    <linearGradient id="electric-blue" x1="55" y1="365" x2="300" y2="40" gradientUnits="userSpaceOnUse" color-interpolation="sRGB">
+      <stop stop-color="#005FFF"/><stop offset="1" stop-color="#00B7F5"/>
+    </linearGradient>
+    <linearGradient id="bright-cyan" x1="270" y1="488" x2="365" y2="70" gradientUnits="userSpaceOnUse" color-interpolation="sRGB">
+      <stop stop-color="#0072FF"/><stop offset="1" stop-color="#2DD9F5"/>
+    </linearGradient>
+    <linearGradient id="core-cyan" x1="256" y1="315" x2="315" y2="197" gradientUnits="userSpaceOnUse" color-interpolation="sRGB">
+      <stop stop-color="#00BFFF"/><stop offset="1" stop-color="#73E5FF"/>
+    </linearGradient>
+  </defs>
+  <g fill="url(#electric-blue)">
+    <path id="outer-left" d="M250 25 Q250 18 244 24 L27 241 Q12 256 27 271 L244 488 Q250 494 250 487 V407 Q250 402 246 398 L110 262 Q104 256 110 250 L246 114 Q250 110 250 105 Z"/>
+    <path id="outer-right" fill="url(#bright-cyan)" d="M262 25 Q262 18 268 24 L485 241 Q500 256 485 271 L268 488 Q262 494 262 487 V407 Q262 402 266 398 L402 262 Q408 256 402 250 L266 114 Q262 110 262 105 Z"/>
+    <path id="inner-left" d="M250 139 Q250 133 245 138 L137 246 Q127 256 137 266 L245 374 Q250 379 250 373 V332 L178 260 Q174 256 178 252 L250 180 Z"/>
+    <path id="inner-right" fill="url(#bright-cyan)" d="M262 139 Q262 133 267 138 L375 246 Q385 256 375 266 L267 374 Q262 379 262 373 V332 L334 260 Q338 256 334 252 L262 180 Z"/>
+    <path id="center-left" d="M256 197 256 315 197 256Z"/>
+    <path id="center-right" fill="url(#core-cyan)" d="M256 197 315 256 256 315Z"/>
+  </g>
+</svg>

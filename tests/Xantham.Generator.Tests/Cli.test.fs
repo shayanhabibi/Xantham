@@ -33,7 +33,7 @@ let private invoke (args: string list) (test: int * string * string * string -> 
     let err = new StringWriter()
 
     try
-        let code = Xantham.Cli.Program.run out err (Array.ofList (args @ [ "-o"; outDir ]))
+        let code = Xantham.Cli.Program.run out err (Array.ofList (args @ [ "-o"; outDir; "--banner"; "never" ]))
         test (code, out.ToString(), err.ToString(), outDir)
     finally
         if Directory.Exists outDir then

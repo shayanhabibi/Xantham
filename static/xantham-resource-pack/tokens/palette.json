@@ -1,0 +1,13 @@
+{
+  "source": "Hex labels printed in reference/brand-guidelines.png",
+  "colors": {
+    "midnight": "#1A1B2E",
+    "xantham-blue": "#007BFF",
+    "gum-violet": "#B794FF",
+    "sky-blue": "#73DBFF",
+    "ice": "#DDEBFF",
+    "mist": "#F6F3FF",
+    "slate": "#94A3B8",
+    "white": "#FFFFFF"
+  }
+}

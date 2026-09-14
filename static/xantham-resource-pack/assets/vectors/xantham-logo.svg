@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Xantham logo</title>
+  <desc id="desc">Nested blue and cyan diamond mark with a narrow vertical split. Editable vector reconstruction of the supplied branding.</desc>
+  <defs>
+    <linearGradient id="blue" x1="64" y1="448" x2="448" y2="64" gradientUnits="userSpaceOnUse" color-interpolation="sRGB"><stop stop-color="#007BFF"/><stop offset="1" stop-color="#73DBFF"/></linearGradient>
+  </defs>
+  <g fill="url(#blue)">
+    <path id="outer-left" d="M250 25 Q250 18 244 24 L27 241 Q12 256 27 271 L244 488 Q250 494 250 487 V407 Q250 402 246 398 L110 262 Q104 256 110 250 L246 114 Q250 110 250 105 Z"/>
+    <path id="outer-right" d="M262 25 Q262 18 268 24 L485 241 Q500 256 485 271 L268 488 Q262 494 262 487 V407 Q262 402 266 398 L402 262 Q408 256 402 250 L266 114 Q262 110 262 105 Z"/>
+    <path id="inner-left" d="M250 139 Q250 133 245 138 L137 246 Q127 256 137 266 L245 374 Q250 379 250 373 V332 L178 260 Q174 256 178 252 L250 180 Z"/>
+    <path id="inner-right" d="M262 139 Q262 133 267 138 L375 246 Q385 256 375 266 L267 374 Q262 379 262 373 V332 L334 260 Q338 256 334 252 L262 180 Z"/>
+    <path id="center" d="M256 197 315 256 256 315 197 256Z"/>
+  </g>
+</svg>

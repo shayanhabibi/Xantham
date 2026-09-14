@@ -106,13 +106,15 @@ let shapeAliases: Pass<ShapeModel> =
                     let definingExports =
                         Xantham.Generator.Shape.ExportNames.declarationExports ctx model |> Map.ofList
 
+                    let exportPath = ExportLayout.declPath (ExportLayout.modulePaths model) model
+
                     let aliasDecls =
                         model.Harvest.Exports
                         |> List.choose (fun export ->
                             if not (hasAny SymbolFlags.Type export.Symbol.Flags) then
                                 None
                             else
-                                let name = fsName fallback export
+                                let name = String.concat "." (exportPath export @ [ fsName fallback export ])
 
                                 let definingOwner typeId =
                                     Map.tryFind typeId definingExports

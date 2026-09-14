@@ -4500,6 +4500,30 @@ let pipelineTests =
                     Expect.stringContains source "module Aliases" "the nested module Aliases for `(layout-lab/aliases).renamedCheck` is created"
             ]
         yield!
+            fixtureTests "mixed-subpaths-lab" (handFixture "mixed-subpaths-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "global root declarations survive module subpaths" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+                      Expect.stringContains source "type RootOptions =" "the global type survives"
+                      Expect.stringContains source "[<Global(\"rootCall\")>]" "the global function retains its binding"
+                      Expect.stringContains source "type ClientOptions =" "the module type survives"
+                      Expect.stringContains source "[<Import(\"connect\", \"mixed-subpaths-lab/client\")>]" "the subpath retains its import"
+
+                  testCase "a global subpath is harvested from its global scope beside a module root" <| fun _ ->
+                      let directory = Path.Combine(__SOURCE_DIRECTORY__, "obj", "mixed-subpaths-" + Guid.NewGuid().ToString "N")
+                      Directory.CreateDirectory directory |> ignore
+                      try
+                          for file in [ "index.d.ts"; "client.d.ts" ] do
+                              File.Copy(Path.Combine(package, file), Path.Combine(directory, file))
+                          File.WriteAllText(Path.Combine(directory, "package.json"), """{"name":"mixed-subpaths-lab","exports":{".":{"types":"./client.d.ts"},"./globals":{"types":"./index.d.ts"}}}""")
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default directory)
+                          let source = rendered.Files |> List.head |> snd
+                          Expect.stringContains source "type RootOptions =" "the global subpath's type survives"
+                          Expect.stringContains source "[<Global(\"rootCall\")>]" "the global subpath's function survives"
+                          Expect.stringContains source "[<Import(\"connect\", \"mixed-subpaths-lab\")>]" "root values retain their own imports"
+                      finally Directory.Delete(directory, true) ])
+
+        yield!
             fixtureTests "subpath-lab" (handFixture "subpath-lab") GeneratorConfig.Default (fun package ->
                 [ testCase "each public subpath is a nested module with its own Exports" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -4729,4 +4753,213 @@ let orphanCallbackTests =
                           "which reads the parameters directly"
 
                       Expect.isFalse (body.Contains "type OnFail") "so the delegate behind it is dropped" ])
+    ]
+
+[<Tests>]
+let catalogSubpathTests =
+    testList "catalog subpath fixture" [
+        yield!
+            fixtureTests "catalog-subpath-lab" (handFixture "catalog-subpath-lab")
+                GeneratorConfig.Default (fun _ -> [])
+    ]
+
+[<Tests>]
+let augmentedDomTests =
+    testList "augmented DOM fixture" [
+        yield!
+            fixtureTests "augmented-dom-lab" (handFixture "augmented-dom-lab")
+                { GeneratorConfig.Default with Lib = Some [ "esnext"; "dom" ]; Types = Some [] }
+                (fun _ -> [])
+    ]
+
+[<Tests>]
+let exclusiveSignatureTests =
+    testList "exclusive factory signatures" [
+        yield!
+            fixtureTests "exclusive-signature-lab" (handFixture "exclusive-signature-lab")
+                GeneratorConfig.Default (fun _ -> [])
+    ]
+
+[<Tests>]
+let publicInputTests =
+    let config =
+        { GeneratorConfig.Default with
+            Lib = Some [ "esnext" ]
+            Types = Some []
+            PublicInputs = Some(Map.ofList [ "./widgets/card", "types/card.d.ts"; "./mirror/card", "types/card.d.ts" ]) }
+    testList "explicit public input fixture" [
+        yield!
+            fixtureTests "public-inputs-lab" (handFixture "public-inputs-lab") config (fun _ -> [])
+    ]
+
+[<Tests>]
+let constructorBoundsTests =
+    testList "constructor bounds fixture" [
+        yield!
+            fixtureTests "catalog-constructor-bounds-lab" (handFixture "catalog-constructor-bounds-lab")
+                { GeneratorConfig.Default with Lib = Some [ "esnext" ]; Types = Some [] } (fun _ -> [])
+    ]
+
+[<Tests>]
+let readonlyEnumTests =
+    testList "readonly dependency enum fixture" [
+        yield!
+            fixtureTests "readonly-enums-lab" (handFixture "readonly-enums-lab")
+                { GeneratorConfig.Default with Lib = Some [ "esnext" ]; Types = Some [] } (fun _ -> [])
+    ]
+
+[<Tests>]
+let subpathClassesTests =
+    testList "subpath class fixture" [
+        yield!
+            fixtureTests "subpath-classes-lab" (handFixture "subpath-classes-lab")
+                { GeneratorConfig.Default with
+                    Lib = Some [ "esnext" ]; Types = Some []
+                    PublicInputs = Some(Map.ofList [ "./errors", "index.d.ts" ]) } (fun _ -> [])
+    ]
+
+[<Tests>]
+let packageSubmanifestTests =
+    testList "package submanifest fixture" [
+        yield!
+            fixtureTests "package-submanifest-lab" (handFixture "package-submanifest-lab")
+                { GeneratorConfig.Default with Lib = Some [ "esnext" ]; Types = Some [] } (fun _ -> [])
+    ]
+
+[<Tests>]
+let indexedCallbackTests =
+    testList "indexed callback fixture" [
+        yield!
+            fixtureTests "indexed-callback-lab" (handFixture "indexed-callback-lab")
+                { GeneratorConfig.Default with Lib = Some [ "esnext" ]; Types = Some [] } (fun _ -> [])
+    ]
+
+[<Tests>]
+let primitiveArgumentIdentityTests =
+    let package = handFixture "primitive-argument-identity-lab"
+    let config = { handConfig package with DeclarationCatalog = false }
+    testList "primitive argument identity fixture" [
+        yield!
+            fixtureTests "primitive-argument-identity-lab" package config (fun _ -> [])
+    ]
+
+[<Tests>]
+let recordAliasSourceIdentityTests =
+    testList "record alias source identity fixture" [
+        yield!
+            fixtureTests "record-alias-source-identity-lab" (handFixture "record-alias-source-identity-lab")
+                { GeneratorConfig.Default with Lib = Some [ "esnext" ]; Types = Some [] } (fun _ -> [])
+    ]
+
+[<Tests>]
+let anonymousParentSourceTests =
+    let package = handFixture "anonymous-parent-source-lab"
+    let config =
+        package
+        |> Option.map (fun directory -> GeneratorConfig.loadFile (IO.Path.Combine(directory, "xantham.json")))
+        |> Option.defaultValue GeneratorConfig.Default
+    testList "anonymous parent source fixture" [
+        yield! fixtureTests "anonymous-parent-source-lab" package { config with DeclarationCatalog = false } (fun _ -> [])
+    ]
+
+[<Tests>]
+let genericMarkerCatalogTests =
+    let package = handFixture "generic-marker-catalog-lab"
+    let config =
+        package
+        |> Option.map (fun directory -> GeneratorConfig.loadFile (IO.Path.Combine(directory, "xantham.json")))
+        |> Option.defaultValue GeneratorConfig.Default
+    testList "generic marker catalog fixture" [
+        yield! fixtureTests "generic-marker-catalog-lab" package { config with DeclarationCatalog = false } (fun _ -> [])
+    ]
+
+[<Tests>]
+let emptyUnionAliasTests =
+    let package = handFixture "empty-union-alias-lab"
+    let config =
+        package
+        |> Option.map (fun directory -> GeneratorConfig.loadFile (IO.Path.Combine(directory, "xantham.json")))
+        |> Option.defaultValue GeneratorConfig.Default
+    testList "empty union alias fixture" [
+        yield! fixtureTests "empty-union-alias-lab" package { config with DeclarationCatalog = false } (fun _ -> [])
+    ]
+
+[<Tests>]
+let literalAliasIdentityTests =
+    let package = handFixture "literal-alias-identity-lab"
+    let config =
+        package
+        |> Option.map (fun directory -> GeneratorConfig.loadFile (IO.Path.Combine(directory, "xantham.json")))
+        |> Option.defaultValue GeneratorConfig.Default
+    testList "literal alias identity fixture" [
+        yield! fixtureTests "literal-alias-identity-lab" package { config with DeclarationCatalog = false } (fun _ -> [])
+    ]
+
+[<Tests>]
+let groupedDomAliasTests =
+    testList "grouped DOM alias fixture" [
+        yield!
+            fixtureTests "grouped-dom-aliases-lab" (handFixture "grouped-dom-aliases-lab")
+                { GeneratorConfig.Default with
+                    ModuleName = Some "GroupedDomAliasesLab"
+                    Namespace = Some "GroupedDomAliases"
+                    Lib = Some [ "esnext"; "dom" ]
+                    Types = Some [ "worker-augmentation-lab" ]
+                    Groups = Map.ofList [ "worker-augmentation-lab" * Measure.uom<Measure.npmDependency>, Ship ] }
+                (fun _ -> [])
+    ]
+
+[<Tests>]
+let catalogAliasApiTests =
+    let package = handFixture "catalog-alias-api-lab"
+    let config = { handConfig package with DeclarationCatalog = false }
+    testList "catalog alias API fixture" [
+        yield!
+            fixtureTests "catalog-alias-api-lab" package config (fun _ -> [])
+    ]
+
+[<Tests>]
+let catalogRecursiveJsonTests =
+    let package = handFixture "catalog-recursive-json-lab"
+    let config = { handConfig package with DeclarationCatalog = false }
+    testList "catalog recursive JSON fixture" [
+        yield!
+            fixtureTests "catalog-recursive-json-lab" package config (fun _ -> [])
+    ]
+
+[<Tests>]
+let classImplementsTests =
+    testList "class implements fixture" [
+        yield!
+            fixtureTests "class-implements-lab" (handFixture "class-implements-lab")
+                { GeneratorConfig.Default with Lib = Some [ "esnext" ]; Types = Some [] } (fun _ -> [])
+        yield!
+            fixtureTests "class-implements-entrypoint-lab" (handFixture "class-implements-entrypoint-lab")
+                { GeneratorConfig.Default with Lib = Some [ "esnext" ]; Types = Some [] } (fun _ -> [])
+    ]
+
+[<Tests>]
+let dependencyEntrypointTests =
+    testList "dependency entrypoint fixture" [
+        yield!
+            fixtureTests "dependency-entrypoint-lab" (handFixture "dependency-entrypoint-lab")
+                { GeneratorConfig.Default with Lib = Some [ "esnext" ]; Types = Some [] } (fun _ -> [])
+    ]
+
+[<Tests>]
+let catalogResultConstraintsTests =
+    let package = handFixture "catalog-result-constraints-lab"
+    let config = { handConfig package with DeclarationCatalog = false }
+    testList "catalog result constraints fixture" [
+        yield!
+            fixtureTests "catalog-result-constraints-lab" package config (fun _ -> [])
+    ]
+
+[<Tests>]
+let catalogClassInheritanceTests =
+    let package = handFixture "catalog-class-inheritance-lab"
+    let config = { handConfig package with DeclarationCatalog = false }
+    testList "catalog class inheritance fixture" [
+        yield!
+            fixtureTests "catalog-class-inheritance-lab" package config (fun _ -> [])
     ]

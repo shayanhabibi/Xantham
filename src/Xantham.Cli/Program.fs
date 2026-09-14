@@ -7,105 +7,11 @@ open System
 open System.Diagnostics
 open System.IO
 open System.Text
+open System.Text.Json
+open Xantham.Cli.Xantham
 open Xantham.Generator
 open FSharp.SystemCommandLine
 open Fake.JavaScript
-
-/// What the process exits with.
-[<RequireQualifiedAccess>]
-module Exit =
-    /// The binding and its manifest were written.
-    [<Literal>]
-    let Generated = 0
-
-    /// The command line is not one this program accepts.
-    [<Literal>]
-    let Usage = 1
-
-    /// The path holds no package the generator can read.
-    [<Literal>]
-    let NoPackage = 2
-
-    /// `xantham.json` was refused.
-    [<Literal>]
-    let Configuration = 3
-
-    /// Generation itself failed.
-    [<Literal>]
-    let Failed = 4
-
-module Options =
-    let out =
-        Input.option<string> "--out"
-        |> Input.alias "-o"
-        |> Input.description "where the binding, the shipped groups, manifest.json and symbols.jsonl are written."
-        |> Input.defaultValue "xantham-out"
-        |> Input.arity Arity.ExactlyOne
-        |> Input.acceptLegalFilePathsOnly
-        |> Input.helpName "dir"
-
-    let config =
-        Input.optionMaybe<string> "--config"
-        |> Input.description
-            "the xantham.json configuring the run, or the directory holding one (default: the package directory)."
-        |> Input.arity Arity.ExactlyOne
-        |> Input.acceptLegalFilePathsOnly
-        |> Input.helpName "path"
-
-    let quiet =
-        Input.option<bool> "--quiet"
-        |> Input.description "write the file list alone, dropping the findings summary."
-
-    let schemaOut =
-        Input.optionMaybe<string> "--out"
-        |> Input.alias "-o"
-        |> Input.helpName "path"
-        |> Input.acceptLegalFilePathsOnly
-
-    let packageDir =
-        Input.argument<string> "package-dir"
-        |> Input.description "a directory holding package.json and the node_modules its declarations resolve through."
-        |> Input.arity ExactlyOne
-
-/// The configuration for a run: `xantham.json` under the package directory, or under
-/// `--config` when that names a directory. A `--config` naming the file itself reads it under
-/// whatever name it carries.
-let private loadConfig =
-    input {
-        let! config = Options.config
-        and! packageDir = Options.packageDir
-
-        return
-            match config with
-            | None -> GeneratorConfig.load packageDir
-            | Some path when Directory.Exists path -> GeneratorConfig.load path
-            | Some path when not (File.Exists path) -> failwith $"no configuration at {path}"
-            | Some path -> GeneratorConfig.loadFile path
-    }
-
-type private GenerateOptions =
-    {
-        PackageDir: string
-        Out: string
-        Config: GeneratorConfig
-        Quiet: bool
-    }
-
-    static member Default =
-        input {
-            let! packageDir = Options.packageDir
-            and! out = Options.out
-            and! config = loadConfig
-            and! quiet = Options.quiet
-
-            return
-                {
-                    PackageDir = packageDir
-                    Out = out
-                    Config = config
-                    Quiet = quiet
-                }
-        }
 
 /// The findings a run raised, in the manifest's own vocabulary: the four tiers, then the count
 /// of each finding key, commonest first.
@@ -157,20 +63,24 @@ let private emit (out: TextWriter) (err: TextWriter) (options: GenerateOptions) 
     try
         let report = Async.RunSynchronously(Pipeline.run config packageDir outDir)
 
-        for name in report.OutputFiles do
-            out.WriteLine(Path.Combine(outDir, name.Replace('/', Path.DirectorySeparatorChar)))
+        if options.Json then
+            JsonSerializer.Serialize(report, JsonSerializerOptions.Default) |> out.WriteLine
+            Exit.Generated
+        else
+            for name in report.OutputFiles do
+                out.WriteLine(Path.Combine(outDir, name.Replace('/', Path.DirectorySeparatorChar)))
 
-        if not options.Quiet then
-            err.WriteLine $"{Bootstrap.packageName packageDir} -> {report.ModuleName}"
+            if not options.Quiet then
+                err.WriteLine $"{Bootstrap.packageName packageDir} -> {report.ModuleName}"
 
-            for line in summary report do
-                err.WriteLine line
+                for line in summary report do
+                    err.WriteLine line
 
-            match libShadowWarning config report with
-            | Some warning -> err.WriteLine warning
-            | None -> ()
+                match libShadowWarning config report with
+                | Some warning -> err.WriteLine warning
+                | None -> ()
 
-        Exit.Generated
+            Exit.Generated
     with e ->
         err.WriteLine $"xantham: generating {packageDir} failed - {e.Message}"
         Exit.Failed
@@ -317,20 +227,30 @@ let run (out: TextWriter) (err: TextWriter) (argv: string[]) : int =
                                 }
                                 command "version" {
                                     description "show the xantham typescript compiler version"
+                                    inputs Options.useJsonOutput
 
-                                    setAction (fun _ ->
+                                    setAction (fun useJsonOutput ->
                                         match Xantham.TypeScript.Wire.Tsc.locate cache with
-                                        | Some tsc -> $"{Spec.tscVersion} cached at: {tsc}" |> out.WriteLine
+                                        | Some tsc ->
+                                            if useJsonOutput then
+                                                $"{{\"version\":\"{Spec.tscVersion}\",\"path\":\"{tsc}\"}}"
+                                            else
+                                                $"{Spec.tscVersion} cached at: {tsc}"
+                                            |> out.WriteLine
                                         | None ->
-                                            $"{Spec.tscVersion} not found in cache. Run `xantham tsc init`."
+                                            if useJsonOutput then
+                                                $"{{\"version\":\"{Spec.tscVersion}\",\"path\":null,\"error\":\"not found. run `xantham tsc init`\"}}"
+                                            else
+                                                $"{Spec.tscVersion} not found in cache. Run `xantham tsc init`."
                                             |> err.WriteLine
 
                                         Exit.Generated)
                                 }
                                 command "clean" {
                                     description "remove all cached xantham compilers"
+                                    inputs Options.useJsonOutput
 
-                                    setAction (fun _ ->
+                                    setAction (fun useJsonOutput ->
                                         let path =
                                             Path.Combine(
                                                 Environment.GetFolderPath Environment.SpecialFolder.UserProfile,
@@ -340,9 +260,24 @@ let run (out: TextWriter) (err: TextWriter) (argv: string[]) : int =
 
                                         if Directory.Exists(path) then
                                             Directory.Delete(path, true)
-                                            out.WriteLine "xantham cache removed"
+
+                                            if
+                                                useJsonOutput
+                                            //language=json
+                                            then
+                                                """{"msg":"cache removed"}"""
+                                            else
+                                                "xantham cache removed"
+                                            |> out.WriteLine
                                         else
-                                            out.WriteLine "no xantham cache to remove"
+                                            if
+                                                useJsonOutput
+                                            //language=json
+                                            then
+                                                """{"msg":"nothing to remove"}"""
+                                            else
+                                                "no xantham cache to remove"
+                                            |> out.WriteLine
 
                                         Exit.Generated)
                                 }
@@ -350,17 +285,20 @@ let run (out: TextWriter) (err: TextWriter) (argv: string[]) : int =
                     }
                     command "generate" {
                         description "generate a binding and its manifest"
-                        inputs GenerateOptions.Default
+                        inputs (renderFigletFn, GenerateOptions.Default)
 
-                        setAction (fun opts ->
+                        setAction (fun (renderFn, opts) ->
+                            renderFn ()
                             checkCache ()
                             generate out err opts)
                     }
                     command "schema" {
                         description "write the JSON Schema for xantham.json"
-                        hidden
-                        inputs Options.schemaOut
-                        setAction (schema out err)
+                        inputs (renderFigletFn, Options.schemaOut)
+
+                        setAction (fun (fn, op) ->
+                            fn ()
+                            schema out err op)
                     }
                 ]
 

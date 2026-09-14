@@ -145,7 +145,13 @@ let internal nonNullishMemberSet (model: ShapeModel) (candidate: TypeFacts) =
 /// The declared union whose non-nullish member set matches, if any: what lets an
 /// `"ms" | "s" | undefined` member position resolve to the exported `TimeUnit` rather than a
 /// synthesized twin (literal types are interned, so the ids match across positions).
-let internal namedUnionByMembers (model: ShapeModel) (memberIds: int<Measure.typeId> list) : string option =
+/// Catalog runs keep inline literal unions independent of reachable named aliases;
+/// direct alias references retain their declaration ownership.
+let internal namedUnionByMembers
+    (ctx: Context)
+    (model: ShapeModel)
+    (memberIds: int<Measure.typeId> list)
+    : string option =
     let wanted = List.sort memberIds
 
     model.DeclNames
@@ -154,7 +160,23 @@ let internal namedUnionByMembers (model: ShapeModel) (memberIds: int<Measure.typ
     |> Seq.tryPick (fun (typeId, name) ->
         match Map.tryFind typeId model.Types with
         | Some candidate when flag TypeFlags.Union candidate && not (flag TypeFlags.Boolean candidate) ->
-            if nonNullishMemberSet model candidate = wanted then
+            let nullish, members = splitNullish model candidate
+
+            let literalEnum =
+                members.Length >= 2
+                && members
+                   |> List.forall (fun id -> Map.tryFind id model.Types |> Option.bind literalOf |> Option.isSome)
+
+            if
+                (List.isEmpty nullish || literalEnum)
+                && not (
+                    literalEnum
+                    && not (List.isEmpty candidate.AliasDeclarations)
+                    && (ctx.Config.DeclarationCatalog
+                        || not (List.isEmpty ctx.Config.DeclarationReferences))
+                )
+                && nonNullishMemberSet model candidate = wanted
+            then
                 Some name
             else
                 None
@@ -574,9 +596,22 @@ let internal exclusiveArmShape (model: ShapeModel) (facts: TypeFacts) : Exclusiv
 
             let armShapes = arms |> List.map (fun arm -> { Facts = arm; Own = ownFor arm })
 
+            let parameterTypes arm =
+                let required, optional =
+                    shared @ arm.Own |> List.partition (fun member_ -> not member_.Optional)
+
+                required @ optional
+                |> List.map (fun member_ -> member_.TypeId, member_.Optional)
+
             // An arm contributing nothing of its own is not exclusive - it is the same shape
             // as another arm, reached twice, and belongs to `namedUnionByMembers` instead.
             if armShapes |> List.exists (fun a -> a.Own.IsEmpty) then
+                NotExclusiveArms
+            elif
+                (armShapes |> List.map parameterTypes |> List.distinct).Length
+                <> armShapes.Length
+            then
+                // F# overload signatures omit parameter names. Keep colliding arms as separate types.
                 NotExclusiveArms
             // Folds the moment one arm's own member is required: that fact alone gives F# a
             // required-arity anchor to resolve the whole set of `Create` overloads on, even
@@ -803,6 +838,7 @@ let internal isVacuousOperand (model: ShapeModel) (facts: TypeFacts) =
     && facts.CallSignatures.IsEmpty
     && facts.ConstructSignatures.IsEmpty
     && facts.BaseTypes.IsEmpty
+    && facts.ImplementedTypes.IsEmpty
     && not (standsOverTypeParameter model facts)
     && (match facts.SymbolName with
         | None -> true
@@ -2262,9 +2298,19 @@ and internal unionRef
         | _ when isBooleanPair model remaining -> wrap FsBool []
         | _ ->
             match Map.tryFind facts.Response.TypeId model.DeclNames with
-            | Some name -> wrap (FsNamed name) []
+            | Some name when List.isEmpty hoisted -> FsNamed name, []
+            | Some name ->
+                let isLiteralEnum =
+                    remaining.Length >= 2
+                    && remaining
+                       |> List.forall (fun id -> Map.tryFind id model.Types |> Option.bind literalOf |> Option.isSome)
+
+                if not isLiteralEnum then
+                    FsNamed name, []
+                else
+                    wrap (FsNamed name) []
             | None ->
-                match namedUnionByMembers model remaining with
+                match namedUnionByMembers ctx model remaining with
                 | Some name -> wrap (FsNamed name) []
                 | None ->
                     let reference, findings = erasedUnionRef ctx model self owner remaining in wrap reference findings
@@ -2780,32 +2826,71 @@ let internal agreedMemberType (model: ShapeModel) (facts: TypeFacts) (m: Resolve
 /// other class keeps the interface form, where the `[<ParamObject>]` Create is the construction
 /// a consumer wants.
 let internal isEntrypoint
+    (ctx: Context)
     (export: HarvestedExport)
     (constructSignatures: ResolvedSignature list)
     (bases: int<Measure.typeId> list)
     =
     match export.Origin with
-    | FromAmbientModule _ -> (constructSignatures |> List.exists _.IsAbstract) || not bases.IsEmpty
+    | FromAmbientModule specifier ->
+        let runtime =
+            GeneratorConfig.runtimePackage ctx.Config ctx.PackageName / uom<importSpecifier>
+
+        let publicInput =
+            ctx.PublicPaths
+            |> List.exists (fun path ->
+                let publicSpecifier =
+                    if path.Key = "." then
+                        runtime
+                    else
+                        runtime + "/" + path.Key.Substring 2
+
+                publicSpecifier = specifier / uom<importSpecifier>)
+
+        let sourcePackage =
+            match Grouping.classify ctx.PackageDir (ValueSome export.Symbol) with
+            | EntryPackage -> Some(ctx.PackageName / uom<npmDependency>)
+            | Dependency name -> Some(name / uom<npmDependency>)
+            | CompilerLib
+            | Unclassified -> None
+
+        let packageImport =
+            sourcePackage
+            |> Option.exists (fun package ->
+                let specifier = specifier / uom<importSpecifier>
+
+                specifier = package
+                || specifier.StartsWith(package + "/", System.StringComparison.Ordinal))
+
+        not publicInput
+        && not packageImport
+        && ((constructSignatures |> List.exists _.IsAbstract) || not bases.IsEmpty)
     | FromGlobal
     | FromModule -> false
 
-/// The instance side of every exported class, keyed by the type id its declaration is written
-/// under, with the constructor object carrying its construct signatures. `shape-classes` turns
-/// the pair into the entrypoint class form (§4.4) and `shape-interfaces` reads it to decide
-/// which optional methods are lifecycle hooks.
-let internal exportedClassSides (model: ShapeModel) : Map<int<Measure.typeId>, HarvestedExport * TypeFacts> =
-    model.Harvest.Exports
-    |> List.choose (fun export ->
-        if not (hasAny SymbolFlags.Class export.Symbol.Flags) then
-            None
-        else
-            match Map.tryFind export.Symbol.SymbolId model.ExportTypes with
-            | Some ids ->
-                match ids.Declared, ids.Value |> Option.bind (fun typeId -> Map.tryFind typeId model.Types) with
-                | Some declared, Some valueFacts -> Some(declared, (export, valueFacts))
-                | _ -> None
-            | None -> None)
-    |> Map.ofList
+/// Runtime exports and constructor signatures for public and reached ambient class declarations.
+let internal exportedClassSides
+    (model: ShapeModel)
+    : Map<int<Measure.typeId>, HarvestedExport * ResolvedSignature list> =
+    let reached =
+        model.Types
+        |> Map.toList
+        |> List.choose (fun (typeId, facts) -> facts.AmbientClass |> Option.map (fun side -> typeId, side))
+
+    let exported =
+        model.Harvest.Exports
+        |> List.choose (fun export ->
+            if not (hasAny SymbolFlags.Class export.Symbol.Flags) then
+                None
+            else
+                match Map.tryFind export.Symbol.SymbolId model.ExportTypes with
+                | Some ids ->
+                    match ids.Declared, ids.Value |> Option.bind (fun typeId -> Map.tryFind typeId model.Types) with
+                    | Some declared, Some valueFacts -> Some(declared, (export, valueFacts.ConstructSignatures))
+                    | _ -> None
+                | None -> None)
+
+    reached @ exported |> Map.ofList
 
 /// The call signatures a member declares, read off the non-nullish arms where its type is a
 /// union. Under `strictNullChecks` an optional member's type is a union with `undefined`, which

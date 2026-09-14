@@ -1,0 +1,7 @@
+{
+  "name": "exclusive-signature-lab",
+  "version": "1.0.0",
+  "type": "module",
+  "types": "index.d.ts",
+  "main": "index.js"
+}

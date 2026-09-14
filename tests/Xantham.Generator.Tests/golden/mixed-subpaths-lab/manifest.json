@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "package": "mixed-subpaths-lab",
+  "module": "MixedSubpathsLab",
+  "counts": {
+    "exact": 2,
+    "ergonomic": 2,
+    "widened": 0,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 2,
+      "ergonomic": 2
+    }
+  ]
+}

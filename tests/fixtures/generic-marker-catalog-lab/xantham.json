@@ -1,0 +1,12 @@
+{
+  "module": "GenericMarkerCatalogLab",
+  "namespace": "Identity",
+  "lib": [
+    "esnext"
+  ],
+  "types": [],
+  "groups": {
+    "generic-marker-owner-lab": "ship"
+  },
+  "declarationCatalog": true
+}

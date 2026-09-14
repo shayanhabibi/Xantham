@@ -71,6 +71,13 @@ let private slash (path: string) = path.Replace('\\', '/')
 let private fail message =
     failwith $"declaration catalog: {message}"
 
+/// Declarations whose type identity can be shared with another generation.
+let private reusableDeclarations declarations =
+    declarations
+    |> List.filter (function
+        | FsExports _ -> false
+        | _ -> true)
+
 let private sourceKey (source: Source) =
     $"{source.Package}@{source.Version}/{source.File}"
 
@@ -94,6 +101,24 @@ let private compiler (ctx: Context) =
     | None -> fail "the compiler executable could not be identified"
 
 let private packageOf (ctx: Context) (file: string) =
+    let rec boundary directory =
+        let parent = Directory.GetParent directory
+
+        if Path.GetRelativePath(ctx.PackageDir / uom<dirPath>, directory) = "." then
+            Some directory
+        elif isNull parent then
+            None
+        elif parent.Name = "node_modules" then
+            Some directory
+        elif
+            parent.Name.StartsWith("@", StringComparison.Ordinal)
+            && not (isNull parent.Parent)
+            && parent.Parent.Name = "node_modules"
+        then
+            Some directory
+        else
+            boundary parent.FullName
+
     let rec find directory =
         let manifest = Path.Combine(directory, "package.json")
 
@@ -119,7 +144,51 @@ let private packageOf (ctx: Context) (file: string) =
     if file.StartsWith "bundled:" then
         ctx.PackageDir / uom<dirPath>, "typescript/lib", "bundled"
     else
-        find (Path.GetDirectoryName file)
+        let directory = Path.GetDirectoryName file
+
+        match boundary directory with
+        | Some root ->
+            let manifest = Path.Combine(root, "package.json")
+
+            if not (File.Exists manifest) then
+                fail $"{root} has no package manifest"
+
+            use doc = JsonDocument.Parse(File.ReadAllText manifest)
+
+            let field name =
+                match doc.RootElement.TryGetProperty(name: string) with
+                | true, value when
+                    value.ValueKind = JsonValueKind.String
+                    && not (String.IsNullOrWhiteSpace(value.GetString()))
+                    ->
+                    value.GetString()
+                | _ -> fail $"{manifest} must declare its {name} for stable identity"
+
+            root, field "name", field "version"
+        | None -> find directory
+
+/// Hashes package ownership metadata and intervening module manifests.
+let private manifestHash (root: string) (file: string) =
+    let rec collect directory manifests =
+        let manifest = Path.Combine(directory, "package.json")
+
+        let manifests =
+            if File.Exists manifest then
+                (Path.GetRelativePath(root, manifest) |> slash, File.ReadAllBytes manifest |> hash)
+                :: manifests
+            else
+                manifests
+
+        if Path.GetRelativePath(root, directory) = "." then
+            manifests
+        else
+            collect (Directory.GetParent(directory).FullName) manifests
+
+    let manifests = collect (Path.GetDirectoryName file) []
+
+    match manifests with
+    | [ (_, value) ] -> value
+    | values -> values |> List.sortBy fst |> json |> hashText
 
 let private sources (ctx: Context) (handles: string<Measure.declHandle> list) =
     async {
@@ -166,7 +235,7 @@ let private sources (ctx: Context) (handles: string<Measure.declHandle> list) =
                                 if file.StartsWith "bundled:" then
                                     "bundled"
                                 else
-                                    Path.Combine(root, "package.json") |> File.ReadAllBytes |> hash
+                                    manifestHash root file
                         }
                 })
             |> Async.Parallel
@@ -284,6 +353,34 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
         else
             None
 
+    let intrinsicArgumentKey (argument: Proto.TypeResponse) =
+        if
+            not (argument.Flags.HasFlag TypeFlags.EnumLiteral)
+            && uint32 (
+                argument.Flags
+                &&& (TypeFlags.String
+                     ||| TypeFlags.StringLiteral
+                     ||| TypeFlags.Number
+                     ||| TypeFlags.NumberLiteral
+                     ||| TypeFlags.Boolean
+                     ||| TypeFlags.BooleanLiteral
+                     ||| TypeFlags.BigInt
+                     ||| TypeFlags.BigIntLiteral
+                     ||| TypeFlags.ESSymbol
+                     ||| TypeFlags.Any
+                     ||| TypeFlags.Unknown
+                     ||| TypeFlags.Null
+                     ||| TypeFlags.Undefined
+                     ||| TypeFlags.Void
+                     ||| TypeFlags.Never
+                     ||| TypeFlags.NonPrimitive)
+               )
+               <> 0u
+        then
+            json (uint32 argument.Flags, argument.Value)
+        else
+            ""
+
     let rec typeIdentity visited bindings id =
         if List.contains id visited then
             None
@@ -312,15 +409,23 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                         else
                             "constructor"
 
-                    let bindings =
+                    let parameters =
                         (Shape.Spec.declParamIds facts @ Shape.Spec.freeParamsOf shape id)
                         |> List.distinct
+
+                    let bindings =
+                        parameters
                         |> List.mapi (fun index parameter -> parameter, "parameter:" + string index)
                         |> List.fold (fun bindings (parameter, key) -> Map.add parameter key bindings) bindings
 
                     let rec argumentKeyWith visited bindings argument =
                         match Map.tryFind argument bindings with
                         | Some key -> key
+                        | None when
+                            Map.tryFind argument shape.Types
+                            |> Option.exists (fun facts -> intrinsicArgumentKey facts.Response <> "")
+                            ->
+                            intrinsicArgumentKey shape.Types[argument].Response
                         | None ->
                             // Recursive references use their distance along the current type path.
                             match List.tryFindIndex ((=) argument) visited with
@@ -344,25 +449,6 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                                         + Option.defaultValue
                                             ""
                                             (argument.SymbolName |> Option.map (fun x -> x / uom<symbolName>))
-                                    | Some argument when
-                                        uint32 (
-                                            argument.Response.Flags
-                                            &&& (TypeFlags.StringLike
-                                                 ||| TypeFlags.NumberLike
-                                                 ||| TypeFlags.BooleanLike
-                                                 ||| TypeFlags.BigIntLike
-                                                 ||| TypeFlags.ESSymbolLike
-                                                 ||| TypeFlags.Any
-                                                 ||| TypeFlags.Unknown
-                                                 ||| TypeFlags.Null
-                                                 ||| TypeFlags.Undefined
-                                                 ||| TypeFlags.Void
-                                                 ||| TypeFlags.Never
-                                                 ||| TypeFlags.NonPrimitive)
-                                        )
-                                        <> 0u
-                                        ->
-                                        json (uint32 argument.Response.Flags, argument.Response.Value)
                                     | Some facts when not (List.isEmpty facts.UnionMembers) ->
                                         keys "union" facts.UnionMembers
                                     | Some facts when not (List.isEmpty facts.IntersectionMembers) ->
@@ -399,6 +485,17 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                             complete <- false
 
                         key
+
+                    let parameterBounds =
+                        if role = "constructor" && not (List.isEmpty parameters) then
+                            parameters
+                            |> List.map (fun parameter ->
+                                Map.tryFind parameter shape.Types
+                                |> Option.bind _.Constraint
+                                |> Option.map partKey)
+                            |> fun bounds -> [ json ("parameter-bounds", bounds) ]
+                        else
+                            []
 
                     let signature (signature: ResolvedSignature) =
                         let signatureBindings =
@@ -463,10 +560,8 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                                 |> List.map (fun argument ->
                                     if Map.containsKey argument.TypeId shape.Types then
                                         partKey argument.TypeId
-                                    elif argument.Flags.HasFlag TypeFlags.Object then
-                                        ""
                                     else
-                                        json (uint32 argument.Flags, argument.Value))
+                                        intrinsicArgumentKey argument)
 
                             if not structural then
                                 arguments @ declarationArguments
@@ -494,20 +589,18 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                             |> List.map (fun argument ->
                                 if Map.containsKey argument.TypeId shape.Types then
                                     argumentKey argument.TypeId
-                                elif argument.Flags.HasFlag TypeFlags.Object then
-                                    ""
                                 else
-                                    json (uint32 argument.Flags, argument.Value))
+                                    intrinsicArgumentKey argument)
 
                         if List.isEmpty facts.AliasDeclarations || List.contains "" aliasArguments then
                             if role = "constructor" && not (List.contains "" aliasArguments) then
-                                Some(identity role handles aliasArguments)
+                                Some(identity role handles (aliasArguments @ parameterBounds))
                             else
                                 None
                         else
                             Some(identity "alias" facts.AliasDeclarations aliasArguments)
                     else
-                        Some(identity role handles arguments)
+                        Some(identity role handles (arguments @ parameterBounds))
 
     let mutable byType =
         shape.Types
@@ -521,11 +614,15 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
             for index in facts.IndexInfos do
                 yield index.KeyTypeId
                 yield index.ValueTypeId
-            for signature in facts.CallSignatures @ facts.ConstructSignatures do
+            for signature in
+                facts.CallSignatures
+                @ facts.ConstructSignatures
+                @ (facts.AmbientClass |> Option.map snd |> Option.defaultValue []) do
                 yield signature.ReturnTypeId
                 yield! signature.Parameters |> List.map _.TypeId
                 yield! signature.TypeParameters
             yield! facts.BaseTypes
+            yield! facts.ImplementedTypes
             yield! facts.TypeArguments
             yield! facts.AliasTypeArguments
             yield! facts.DeclarationArguments |> List.map _.TypeId
@@ -538,13 +635,15 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
             yield! facts.Conditional |> Option.bind _.Branch |> Option.map snd |> Option.toList
         ]
 
+    let canonicalTypes = byType
+
     let closure id =
         let bound =
             Shape.Spec.declParamIds shape.Types[id] @ Shape.Spec.freeParamsOf shape id
             |> Set.ofList
 
         let visited = Collections.Generic.HashSet<int<Measure.typeId>>()
-        let files = Collections.Generic.HashSet<string>()
+        let sources = Collections.Generic.HashSet<Source>()
         let pending = Collections.Generic.Stack<int<Measure.typeId>>()
         pending.Push id
 
@@ -555,24 +654,32 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                 match Map.tryFind current shape.Types with
                 | None -> ()
                 | Some facts ->
-                    if not (facts.Response.Flags.HasFlag TypeFlags.TypeParameter) then
-                        for handle in facts.Declarations @ facts.AliasDeclarations do
-                            files.Add((handle / uom<declHandle>).Split([| '.' |], 3)[2]) |> ignore
+                    if
+                        not (facts.Response.Flags.HasFlag TypeFlags.TypeParameter)
+                        && intrinsicArgumentKey facts.Response = ""
+                    then
+                        match Map.tryFind current canonicalTypes with
+                        | Some identity ->
+                            for source in identity.Sources do
+                                sources.Add source |> ignore
+                        | None ->
+                            for handle in facts.Declarations do
+                                let file = (handle / uom<declHandle>).Split([| '.' |], 3)[2]
+                                sources.Add sourceFiles[file] |> ignore
 
                     for dependency in dependencies facts do
                         pending.Push dependency
 
-        files
-        |> Seq.map (fun file -> sourceFiles[file])
-        |> Seq.distinct
-        |> Seq.sortBy sourceKey
-        |> Seq.toList
+        sources |> Seq.sortBy sourceKey |> Seq.toList
 
     // Parent roles cover checker-synthesized types whose symbol has no declaration handle.
     let edges (facts: TypeFacts) =
         [
             for member_ in facts.Members do
                 yield member_.TypeId, "member:" + member_.Symbol.Name
+            for index, info in List.indexed facts.IndexInfos do
+                yield info.KeyTypeId, $"index:{index}:key"
+                yield info.ValueTypeId, $"index:{index}:value"
             for index, signature in List.indexed facts.CallSignatures do
                 yield signature.ReturnTypeId, $"call:{index}:return"
 
@@ -650,6 +757,9 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
             | _ -> fail $"{name} has conflicting declaration identities")
         |> Map.ofList
 
+    let exportPath =
+        Shape.ExportLayout.declPath (Shape.ExportLayout.modulePaths shape) shape
+
     let rec forDecl name decl =
         match Map.tryFind name byName with
         | Some identity -> identity
@@ -659,9 +769,13 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                 |> List.tryFind (fun export ->
                     let exportedName = Shape.Spec.fsName (Shape.Spec.defaultExportName ctx) export
 
+                    let qualified leaf =
+                        String.concat "." (exportPath export @ [ leaf ])
+
                     export.Order.IsSome
                     && export.Order = order decl
-                    && (exportedName = name || Naming.pascalSegment exportedName = name))
+                    && (qualified exportedName = name
+                        || qualified (Naming.pascalSegment exportedName) = name))
 
             match exported with
             | Some export ->
@@ -673,7 +787,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                     []
             | None ->
                 match name.LastIndexOf '.' with
-                | -1 -> fail $"{name} has no stable declaration or parent role"
+                | -1 -> fail $"{Render.declName decl} has no stable declaration or parent role at {name}"
                 | at ->
                     let parent = name.Substring(0, at)
                     let role = "generated:" + name.Substring(at + 1)
@@ -684,7 +798,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                         Role = role
                     }
 
-    shape.Decls
+    reusableDeclarations shape.Decls
     |> List.map (fun decl -> Render.declName decl |> (fun name -> name, forDecl name decl))
     |> Map.ofList
 
@@ -776,6 +890,12 @@ let private ownerOrder (owners: Owner list) =
     |> snd
 
 let private classValues (ctx: Context) (shape: ShapeModel) (groups: Render.GroupModule list) =
+    let definingExports =
+        Shape.ExportNames.declarationExports ctx shape
+        |> List.choose (fun (typeId, export) ->
+            Map.tryFind typeId shape.DeclNames |> Option.map (fun name -> name, export))
+        |> Map.ofList
+
     let mutable shape = shape
     let mutable groups = groups
     let mutable values = Map.empty
@@ -786,10 +906,7 @@ let private classValues (ctx: Context) (shape: ShapeModel) (groups: Render.Group
     for declaration in shape.Decls do
         match declaration with
         | FsInterface class_ when not class_.Statics.IsEmpty ->
-            let export =
-                shape.Harvest.Exports
-                |> List.tryFind (fun export ->
-                    Shape.Spec.fsName (Shape.Spec.defaultExportName ctx) export = class_.Name)
+            let export = Map.tryFind class_.Name definingExports
 
             match
                 export
@@ -813,11 +930,15 @@ let private classValues (ctx: Context) (shape: ShapeModel) (groups: Render.Group
                         let constructors =
                             shape.Decls
                             |> List.collect (function
-                                | FsExports container -> container.Members |> List.map _.Member
+                                | FsExports container -> container.Members
                                 | _ -> [])
+                            |> List.filter (fun owned ->
+                                owned.SourceSymbolId = export.Symbol.SymbolId
+                                && owned.Owner = Shape.ExportLayout.ownerOf shape.RuntimePackage export.Origin)
+                            |> List.map _.Member
                             |> List.choose (fun member_ ->
                                 match member_.Body with
-                                | ExportConstructor(parameters, returns) when member_.Name = class_.Name ->
+                                | ExportConstructor(parameters, returns) ->
                                     Some(
                                         FsConstructor
                                             {
@@ -980,7 +1101,7 @@ let apply (ctx: Context) (shape: ShapeModel) (groups: Render.GroupModule list) =
             let modules =
                 groups
                 |> List.collect (fun group ->
-                    group.Decls
+                    reusableDeclarations group.Decls
                     |> List.map (fun decl -> Render.declName decl |> (fun name -> name, group.Module)))
                 |> Map.ofList
 
@@ -1155,7 +1276,7 @@ let apply (ctx: Context) (shape: ShapeModel) (groups: Render.GroupModule list) =
                 hashText api
 
             let owned =
-                shape.Decls
+                reusableDeclarations shape.Decls
                 |> List.choose (fun decl ->
                     Render.declName decl
                     |> (fun name ->
@@ -1191,7 +1312,12 @@ let apply (ctx: Context) (shape: ShapeModel) (groups: Render.GroupModule list) =
 
             let exportedNames =
                 shape.Harvest.Exports
-                |> List.map (Shape.Spec.fsName (Shape.Spec.defaultExportName ctx))
+                |> List.map (fun export ->
+                    shape.ExportTypes
+                    |> Map.tryFind export.Symbol.SymbolId
+                    |> Option.bind _.Declared
+                    |> Option.bind (fun typeId -> Map.tryFind typeId shape.DeclNames)
+                    |> Option.defaultValue (Shape.Spec.fsName (Shape.Spec.defaultExportName ctx) export))
                 |> Set.ofList
 
             let localName (declaration: Declaration) =

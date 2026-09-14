@@ -1,37 +1,86 @@
 ---
 title: Xantham
-description: Documentation for Xantham
+description: Generate F# bindings for Fable from TypeScript declarations.
 layout: splash
 ---
 
+<div class="xantham-home">
+<div class="xantham-banner" role="img" aria-label="Xantham"></div>
+<section class="xantham-home__intro" aria-labelledby="xantham-heading">
+<div>
+<span class="xantham-hero__eyebrow">TypeScript → F# · Fable 5</span>
+<h1 id="xantham-heading">Your next Fable binding starts here.</h1>
+<p class="xantham-lead">Generate F# bindings from TypeScript declarations. Bring npm packages into your Fable project, with a report of the types that need your attention.</p>
+<div class="xantham-home__actions">
+<a href="xantham-cli/" class="btn btn-primary">Get started →</a>
+<a href="https://github.com/shayanhabibi/Xantham" class="btn btn-outline">View on GitHub</a>
+</div>
+</div>
+<div class="xantham-home__art" aria-hidden="true"><span class="xantham-mascot-tile xantham-actions-wave"></span></div>
+</section>
 
-<section class="bg-white dark:bg-inherit">
-    <div class="dark:bg-inherit grid max-w-screen-xl px-4 py-8 mx-auto lg:gap-8 xl:gap-0 lg:py-16 lg:grid-cols-12">
-        <div class="mr-auto place-self-center lg:col-span-7">
-            <h1 class="max-w-2xl mb-4 text-4xl font-extrabold tracking-tight leading-none md:text-5xl xl:text-6xl dark:text-white">Superpowered Fable Generator</h1>
-            <p class="max-w-2xl mb-6 font-light text-gray-500 lg:mb-8 md:text-lg lg:text-xl dark:text-gray-400">From single file type declaration files, to multiple dependency typescript packages, <span class="underline decoration-2 font-bold">xantham</span> can handle it all.</p>
-            <a href="https://github.com/shayanhabibi/xantham" class="inline-flex items-center justify-center px-5 py-3 mr-3 text-base font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:focus:ring-primary-900">
-                Leave a Star
-                <svg class="w-5 h-5 ml-2 -mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-            </a>
-            <div class="aura aura-xs">
-                <a href="xantham-cli/" class="inline-flex bg-(--root-bg) items-center justify-center px-5 py-3 text-base font-medium text-center text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-800">
-                    Get Started!
-                </a> 
-            </div>
-        </div>
-<div class="hidden lg:mt-0 lg:ml-4 lg:col-span-5 lg:flex">
+<section class="xantham-home__section" aria-labelledby="generate-heading">
+<span class="xantham-hero__eyebrow">The generator</span>
+<h2 id="generate-heading">Declarations in. F# out.</h2>
+<p>Install the tool, cache its matching TypeScript compiler, and point it at an installed package.</p>
 
-```bash frame=terminal
-dotnet tool install -g xantham
-
-xantham --help
+```bash frame=terminal title="Get generating"
+dotnet tool install --global xantham
 xantham tsc init
-xantham generate ./node_modules/typescript
+xantham generate ./node_modules/your-package
 ```
 
-
-</div>                
+<div class="xantham-grid">
+<a class="card xantham-card" href="xantham-cli/guide/bindings/">
+<span class="xantham-card__label">Use the result</span>
+<h3>From generated files to your app</h3>
+<p>Add the support packages, put files in compile order, and call the package from F#.</p>
+<span class="xantham-card__link">Using bindings →</span>
+</a>
+<a class="card xantham-card" href="xantham-cli/guide/troubleshooting/">
+<span class="xantham-card__label">Know what changed</span>
+<h3>See where types lose precision</h3>
+<p>The generation report identifies widened and unsupported types so you can review the APIs you use.</p>
+<span class="xantham-card__link">Reading the report →</span>
+</a>
 </div>
 </section>
 
+<section class="xantham-home__section" aria-labelledby="packages-heading">
+<span class="xantham-hero__eyebrow">Support packages</span>
+<h2 id="packages-heading">The types behind your bindings</h2>
+<p>Use the shared support libraries alongside the generated F#.</p>
+<div class="xantham-grid">
+<a class="card xantham-card" href="xantham-cli/guide/packages/#utility-types">
+<span class="xantham-card__label">TypeScript utility types</span>
+<h3>Xantham.Fable.Core</h3>
+<p>F# representations for property keys, indexed access, and nominal brands. Erased by Fable at runtime.</p>
+<span class="xantham-card__link">Explore the support library →</span>
+</a>
+<a class="card xantham-card" href="xantham-cli/guide/packages/#standard-libraries">
+<span class="xantham-card__label">ECMAScript &amp; DOM</span>
+<h3>Xantham.Fable.Core.TS</h3>
+<p>Generated bindings for TypeScript’s standard libraries, including promises, collections, and browser APIs.</p>
+<span class="xantham-card__link">Use the standard libraries →</span>
+</a>
+</div>
+<p>Working with Node.js? See the <a href="xantham-cli/guide/packages/#node-bindings">Node bindings and their current status</a>.</p>
+</section>
+
+<section class="xantham-home__section" aria-labelledby="wire-heading">
+<div class="xantham-welcome">
+<span class="xantham-mascot-tile xantham-actions-explore" aria-hidden="true"></span>
+<div class="xantham-welcome__copy">
+<span class="xantham-hero__eyebrow">Build with the compiler</span>
+<h2 id="wire-heading">TypeScript.Wire</h2>
+<p>The .NET client for TypeScript 7’s compiler API. Read syntax trees, query types, and inspect diagnostics from your own tools.</p>
+<div class="xantham-home__actions"><a class="btn btn-outline" href="wire/">Explore TypeScript.Wire →</a></div>
+</div>
+</div>
+</section>
+<section class="xantham-home__section" aria-labelledby="contribute-heading">
+<h2 id="contribute-heading">Help shape Xantham</h2>
+<p>A small declaration that reproduces a problem, a clearer example, or a generator improvement makes a useful contribution.</p>
+<a href="dev/" class="btn btn-outline">Contributor guide →</a>
+</section>
+</div>

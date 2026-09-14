@@ -1,0 +1,67 @@
+/* Modest refinements; Nacara retains its layout, mobile drawer and interactions. */
+.nacara-navbar { border-bottom-color: var(--nacara-border); box-shadow: 0 1px 0 rgb(0 123 255 / 5%); }
+.nacara-navbar__brand { font-weight: 750; letter-spacing: -0.025em; }
+.nacara-navbar__brand img { width: 2rem; height: 2rem; object-fit: contain; }
+.nacara-sidebar__link[aria-current="page"] { box-shadow: inset 3px 0 0 var(--nacara-primary); }
+[dir="rtl"] .nacara-sidebar__link[aria-current="page"] { box-shadow: inset -3px 0 0 var(--nacara-primary); }
+.nacara-content h1 { font-weight: 750; letter-spacing: -0.035em; }
+.nacara-content :where(p,li) > a { text-decoration: underline; text-underline-offset: 0.18em; text-decoration-thickness: 0.06em; }
+.nacara-content :where(p,li) > a:hover { text-decoration-thickness: 0.12em; }
+.nacara-code__title { font-weight: 600; }
+::selection { background: var(--nacara-primary); color: var(--nacara-primary-contrast); }
+/* Optional classes for your custom landing page; no layout replacement required. */
+.xantham-hero { 
+    padding: clamp(1.5rem, 5vw, 4rem); 
+}
+.xantham-hero__eyebrow { color: var(--nacara-primary); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+.xantham-brand-mark { display: inline-block; width: 4rem; height: 4rem; object-fit: contain; }
+.xantham-mascot { display: block; width: 5rem; height: auto; }
+/* The midnight icon needs a light tile in either scheme. */
+.xantham-mascot--midnight { background: var(--xantham-mist); padding: 0.5rem; border-radius: 1rem; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+/* Shared reading rhythm and navigation cards. */
+.nacara-content { line-height: 1.75; }
+.nacara-content > h2 { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--nacara-border); }
+.nacara-content > h3 { margin-top: 2rem; }
+.nacara-content > :where(pre, figure, table, .nacara-code) { margin-block: 1.75rem; }
+.nacara-content :where(h1, h2, h3, h4) { scroll-margin-top: 6rem; }
+.xantham-lead { font-size: 1.15rem; line-height: 1.75; color: var(--nacara-text-muted); max-width: 60ch; }
+.xantham-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; margin-block: 2rem; }
+.xantham-card { display: flex; flex-direction: column; gap: .65rem; padding: 1.5rem; border: 1px solid var(--nacara-border); border-radius: 1rem; background: var(--nacara-bg-raised); min-width: 0; }
+.xantham-card :where(h2, h3, p) { margin: 0; }
+.xantham-card h3 { font-size: 1.1rem; line-height: 1.45; }
+.xantham-card p { color: var(--nacara-text-muted); }
+a.xantham-card { color: var(--nacara-text); text-decoration: none; transition: border-color .15s, box-shadow .15s; }
+a.xantham-card:hover { border-color: var(--nacara-primary); box-shadow: var(--nacara-shadow); }
+.xantham-card__label { color: var(--nacara-primary); font-size: .75rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.xantham-card__link { margin-top: auto; padding-top: .5rem; color: var(--nacara-primary); font-weight: 600; }
+.xantham-callout { margin-block: 2rem; padding: 1.5rem; border: 1px solid var(--nacara-border); border-left: 3px solid var(--nacara-primary); border-radius: .75rem; background: var(--nacara-bg-subtle); }
+.xantham-callout > :first-child { margin-top: 0; }
+.xantham-callout > :last-child { margin-bottom: 0; }
+.xantham-welcome { display: flex; align-items: center; gap: 2rem; margin-block: 1.5rem 2.5rem; padding: 2rem; border: 1px solid var(--nacara-border); border-radius: 1rem; background: var(--nacara-bg-subtle); }
+.xantham-welcome p { margin: 0; }
+.xantham-welcome__copy { flex: 1; min-width: 0; }
+.xantham-next { margin-top: 3rem; }
+.xantham-home { max-width: 72rem; margin-inline: auto; }
+.xantham-home .xantham-banner { border: 1px solid var(--nacara-border); border-radius: 1.5rem; background-position: center top; }
+:root[data-theme="dark"] .xantham-home .xantham-banner { background-position: center bottom; }
+.xantham-home__intro { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 3rem; padding-block: clamp(2rem, 5vw, 4rem); }
+.xantham-home h1 { font-size: clamp(2.25rem, 5vw, 4rem); line-height: 1.1; letter-spacing: -.045em; max-width: 17ch; margin-block: .75rem 1.5rem; }
+.xantham-home h2 { margin-block: 0 .75rem; font-size: 1.75rem; }
+.xantham-home__section { padding-block: 2.5rem; border-top: 1px solid var(--nacara-border); }
+.xantham-home__actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.75rem; }
+.xantham-home__actions .btn-primary { background: var(--nacara-primary); color: var(--nacara-primary-contrast); border-color: var(--nacara-primary); }
+.xantham-home__art { display: grid; place-items: center; width: 14rem; height: 14rem; border-radius: 50%; background: radial-gradient(circle, var(--nacara-primary-subtle), transparent 72%); }
+.xantham-home__art .xantham-mascot-tile { transform: scale(1.4); }
+.xantham-card code { overflow-wrap: anywhere; }
+.xantham-card:focus-visible, .xantham-home a:focus-visible { outline: 3px solid var(--nacara-primary); outline-offset: 4px; }
+@media (max-width: 640px) {
+  .xantham-grid { grid-template-columns: 1fr; }
+  .xantham-home__intro { grid-template-columns: 1fr; gap: 1rem; }
+  .xantham-home__art { display: none; }
+  .xantham-welcome { gap: 1rem; padding: 1.25rem; }
+  .xantham-welcome .xantham-mascot-tile { display: none; }
+  .xantham-card { padding: 1.25rem; }
+}
+@media (prefers-reduced-motion: reduce) { a.xantham-card { transition: none; } }

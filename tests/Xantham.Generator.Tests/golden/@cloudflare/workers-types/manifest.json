@@ -3,9 +3,9 @@
   "package": "@cloudflare/workers-types",
   "module": "Cloudflare.WorkersTypes",
   "counts": {
-    "exact": 410,
-    "ergonomic": 1068,
-    "widened": 369,
+    "exact": 412,
+    "ergonomic": 1071,
+    "widened": 370,
     "escape": 111
   },
   "passes": [
@@ -41,17 +41,17 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 8118,
-      "exact": 95,
-      "ergonomic": 7357,
-      "widened": 516,
-      "escape": 150
+      "total": 8127,
+      "exact": 98,
+      "ergonomic": 7361,
+      "widened": 517,
+      "escape": 151
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 75,
+      "total": 74,
       "ergonomic": 38,
-      "widened": 36,
+      "widened": 35,
       "escape": 1
     },
     {
@@ -71,8 +71,8 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 2062,
-      "ergonomic": 2062
+      "total": 2067,
+      "ergonomic": 2067
     },
     {
       "pass": "DO - dedupe-overloads",
@@ -82,8 +82,13 @@
     },
     {
       "pass": "RA - repair-arity",
-      "total": 4,
-      "ergonomic": 4
+      "total": 8,
+      "ergonomic": 8
+    },
+    {
+      "pass": "normalize-obj-unions",
+      "total": 1,
+      "widened": 1
     },
     {
       "pass": "DD - drop-orphan-delegates",

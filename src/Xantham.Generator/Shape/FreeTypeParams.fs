@@ -63,6 +63,7 @@ let private freeTypeParams (model: ShapeModel) (root: int<Measure.typeId>) : int
                         @ facts.IntersectionMembers
                         @ facts.TypeArguments
                         @ facts.BaseTypes
+                        @ facts.ImplementedTypes
                         @ facts.AliasTypeArguments do
                         go bound id
 
@@ -77,7 +78,7 @@ let private freeTypeParams (model: ShapeModel) (root: int<Measure.typeId>) : int
 
 /// Reuses an anonymous declaration under a complete substitution of its free parameters.
 /// Caller constraints remain on the caller's parameters.
-let private reuseAnonymousApplications (model: ShapeModel) =
+let private reuseAnonymousApplications includeUnnamed (model: ShapeModel) =
     let anonymous instantiated (facts: TypeFacts) =
         let flags = facts.Response.ObjectFlags |> ValueOption.defaultValue ObjectFlags.None
 
@@ -86,16 +87,28 @@ let private reuseAnonymousApplications (model: ShapeModel) =
         && not facts.Declarations.IsEmpty
         && not facts.Members.IsEmpty
 
-    let declarations =
-        model.DeclNames
+    let parameters =
+        model.Types
         |> Map.toList
-        |> List.choose (fun (id, _) ->
-            let facts = model.Types[id]
+        |> List.choose (fun (id, facts) ->
+            if anonymous false facts then
+                let free =
+                    if Map.containsKey id model.DeclNames then
+                        freeParamsOf model id
+                    elif includeUnnamed then
+                        freeTypeParams model id
+                    else
+                        []
 
-            if anonymous false facts && not (freeParamsOf model id).IsEmpty then
-                Some(facts.Declarations, id)
+                if free.IsEmpty then None else Some(id, free)
             else
                 None)
+        |> Map.ofList
+
+    let declarations =
+        parameters
+        |> Map.toList
+        |> List.map (fun (id, _) -> model.Types[id].Declarations, id)
         |> List.groupBy fst
         |> List.choose (fun (handles, entries) ->
             match entries with
@@ -104,7 +117,7 @@ let private reuseAnonymousApplications (model: ShapeModel) =
         |> Map.ofList
 
     let arguments declared instance =
-        let parameters = freeParamsOf model declared
+        let parameters = parameters[declared]
         let mutable substitution = Map.empty
         let mutable visited = Set.empty
 
@@ -154,6 +167,7 @@ let private reuseAnonymousApplications (model: ShapeModel) =
                         && pairwise signatures original.CallSignatures applied.CallSignatures
                         && pairwise signatures original.ConstructSignatures applied.ConstructSignatures
                         && pairwise same original.BaseTypes applied.BaseTypes
+                        && pairwise same original.ImplementedTypes applied.ImplementedTypes
                     else
                         false
                 | _ -> false
@@ -188,9 +202,21 @@ let private reuseAnonymousApplications (model: ShapeModel) =
             | Some declared when anonymous true facts ->
                 match arguments declared id with
                 | Some arguments ->
+                    let name =
+                        Map.tryFind declared current.DeclNames
+                        |> Option.defaultValue current.DeclNames[id]
+
+                    let order =
+                        Map.tryFind declared current.DeclOrders
+                        |> Option.defaultWith (fun () -> Map.tryFind id current.DeclOrders |> Option.defaultValue None)
+
                     { current with
-                        DeclNames = Map.add id model.DeclNames[declared] current.DeclNames
-                        DeclParams = Map.add id arguments current.DeclParams
+                        DeclNames = current.DeclNames |> Map.add declared name |> Map.add id name
+                        DeclOrders = Map.add declared order current.DeclOrders
+                        DeclParams =
+                            current.DeclParams
+                            |> Map.add declared parameters[declared]
+                            |> Map.add id arguments
                         AliasApplications = Map.add id declared current.AliasApplications
                     }
                 | None -> current
@@ -234,4 +260,4 @@ let bindFreeTypeParams: Pass<ShapeModel> =
                 model.DeclParams
                 |> Map.fold (fun kept typeId arguments -> Map.add typeId arguments kept) bound
         }
-        |> reuseAnonymousApplications)
+        |> reuseAnonymousApplications (ctx.Config.DeclarationCatalog || not ctx.Config.DeclarationReferences.IsEmpty))

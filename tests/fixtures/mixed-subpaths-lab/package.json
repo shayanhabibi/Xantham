@@ -1,0 +1,9 @@
+{
+  "name": "mixed-subpaths-lab",
+  "version": "1.0.0",
+  "type": "module",
+  "exports": {
+    ".": { "types": "./index.d.ts" },
+    "./client": { "types": "./client.d.ts" }
+  }
+}

@@ -157,12 +157,11 @@ diagnostic. `lib` selects compiler libraries independently.
 
 ### Select a declaration entry
 
-Each invocation generates from one TypeScript input. By default, the generator selects the
-manifest's `types`, then `typings`, then the first `types` string under the root export's
-conditions, then `index.d.ts`. In an `exports` map, the root is `"."`; named subpaths such as
-`"./adapter"` are separate inputs. A map without a root, an empty map, or an explicitly blocked
-`".": null` requires an explicit `entry`, even when `types`, `typings` or `index.d.ts` exists.
-An absent or top-level `null` `exports` field uses the default lookup.
+Each invocation creates one TypeScript program over its selected public inputs. By default,
+these are the manifest root and its supported public subpaths. The root lookup checks `types`,
+then `typings`, then the first `types` string under the root export's conditions, then
+`index.d.ts`. A rootless export map supplies only its public subpaths. An absent or top-level
+`null` `exports` field uses the default root lookup.
 
 Use `entry` to select a particular declaration file, including a condition-specific `.d.mts`
 or `.d.cts` file. Choose the environment or import/require variant explicitly; the default
@@ -195,6 +194,29 @@ manifest. A key naming an asset rather than a TypeScript file — `"./package.js
 "./package.json"` — is passed over without a finding. `subpaths` restricts generation to the listed keys. Setting `entry` disables
 enumeration and generates the one file it names.
 
+Use `publicInputs` for an exact selection, including concrete wildcard expansions or a set of
+declaration variants that share one runtime environment:
+
+```jsonc
+{
+  "module": "Example.Browser",
+  "lib": ["esnext", "dom"],
+  "types": [],
+  "publicInputs": {
+    "./client": "dist/browser/client.d.ts",
+    "./components/card": "dist/components/card.d.ts"
+  }
+}
+```
+
+The map contains every input for this invocation. Include `"."` explicitly to select a root;
+its value supplies the root declaration file. Keys are concrete public export paths, and values
+are existing TypeScript files within the package. The caller selects the published conditional
+variant and expands wildcard patterns. Values sharing a file still keep their separate runtime
+imports, while declaration ownership follows the normal shallowest-path rule. `runtime`, when
+provided, is the base import prefix for the selected keys. `publicInputs` is mutually exclusive
+with `entry` and `subpaths`; an empty map or duplicate key is an error.
+
 ### The four group dispositions
 
 `groups` is keyed by npm name, with the compiler's own library as `typescript/lib`.
@@ -208,6 +230,66 @@ enumeration and generates the one file it names.
 
 A `map` destination spelled as a bare string takes no type arguments; the object form states its
 `arity`, and a reference applying any other number widens with finding `TR053`.
+
+A supplied mapping can inject a hand-written support type:
+
+```json
+{
+  "groups": {
+    "example-models": {
+      "map": {
+        "Model": "Application.Support.Model",
+        "Result": { "name": "Application.Support.Result", "arity": 1 }
+      }
+    }
+  }
+}
+```
+
+The consumer supplies those F# definitions and their project references. A mapping states
+the caller's intended contract; arity checking alone does not establish semantic compatibility.
+Compile representative typed calls and test their runtime behavior. Generated support libraries
+can instead use declaration catalogs, which authenticate source ownership and the F# API.
+
+### Injecting callback types
+
+A named, fixed-signature TypeScript callback can map to a supplied F# delegate. For a
+JavaScript callback `(value: string, count: number) => boolean`, a compatible definition is:
+
+```fsharp
+module Application.Support
+
+type Check = delegate of string * float -> bool
+```
+
+Map its TypeScript name to `"Application.Support.Check"` and supply that definition before
+the generated binding. This delegate has zero generic type parameters and two callback
+arguments: mapping `arity` describes the former. A two-argument Fable probe validates both
+passing this delegate to JavaScript and receiving and invoking a JavaScript callback.
+Ordinary generation of the same callback also chooses a delegate, with `TR055` reporting
+its two arguments; the corresponding runtime control passes.
+
+A manually supplied curried alias such as `type Check = string -> float -> bool` has a different calling
+convention. In that probe it compiles and works when passed to JavaScript, but invoking a
+returned callback fails at runtime. A name mapping supplies no currying adapter. Keep any
+required adapter explicit and test both directions across the JavaScript boundary.
+
+Keeping the imported callback typed as a delegate gives F# callers a simple adapter:
+
+```fsharp
+let inline asFunction (callback: Application.Support.Check) value count =
+    callback.Invoke(value, count)
+```
+
+The probe validates both direct invocation and partial application of this wrapper over a
+callback returned from JavaScript. With this inline form, direct application emits only
+`callback(value, count)`; a retained partial application still has a closure. This comparison
+concerns the manually injected alias and its adapter at the JavaScript return boundary.
+
+Generic callback mapping also has a known limit: the tested `GenericCheck<string>` reference
+retains its alias name but supplies zero usable type arguments on this path. Mapping it to a
+destination of generic arity one produces `TR053` and widens. This result does not establish
+support for generic, overloaded, optional-argument or rest-argument callback mappings.
 
 ## Run it
 
@@ -254,6 +336,13 @@ findings:
 `manifest.json` is the file to read. Every widened and every escaped site is named there and in
 `symbols.jsonl` with the finding code accounting for it, so a binding's losses are enumerable
 before you build on it.
+
+Use consumer requirements to prioritize widened sites. A lost model or resource type that
+prevents two selected libraries from composing is a concrete repair target. Unknown values,
+unsupported constructs and recursive boundaries can retain a reported widening when the
+consumer supports that contract. Keep any narrowing helpers in separate source files so that
+generation remains reproducible. A lower aggregate finding count is useful evidence only when
+the resulting public types still represent the source contract.
 
 ## Where a type lives in the binding
 

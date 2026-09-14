@@ -347,3 +347,49 @@ let repairArity: Pass<ShapeModel> =
                             Degraded(model, findings)
                 }
     }
+
+/// Collapses erased unions containing a local nongeneric abbreviation for `obj`.
+let internal normalizeObjUnions: Pass<ShapeModel> =
+    {
+        Name = "normalize-obj-unions"
+        Run =
+            fun _ model ->
+                async {
+                    let aliases =
+                        model.Decls
+                        |> List.choose (function
+                            | FsAbbrev decl when decl.TypeParameters.IsEmpty -> Some(decl.Name, decl.Target)
+                            | _ -> None)
+                        |> Map.ofList
+
+                    let rec admitsObj visited =
+                        function
+                        | FsObj -> true
+                        | FsNamed name when not (Set.contains name visited) ->
+                            Map.tryFind name aliases |> Option.exists (admitsObj (Set.add name visited))
+                        | FsErasedUnion arms -> List.exists (admitsObj visited) arms
+                        | _ -> false
+
+                    let mutable findings = []
+
+                    let decls =
+                        model.Decls
+                        |> List.map (fun decl ->
+                            let owner = declName decl |> Option.defaultValue "Exports"
+
+                            decl
+                            |> mapDeclRefs (function
+                                | FsErasedUnion arms when List.exists (admitsObj Set.empty) arms ->
+                                    findings <- findings @ [ Finding.make owner TypeReference.UnionWithObjArm ]
+                                    FsObj
+                                | other -> other))
+
+                    let model = { model with Decls = decls }
+
+                    return
+                        if List.isEmpty findings then
+                            Advanced model
+                        else
+                            Degraded(model, List.distinct findings)
+                }
+    }

@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "package": "literal-alias-consumer-lab",
+  "module": "LiteralAliasIdentityLab",
+  "counts": {
+    "exact": 4,
+    "ergonomic": 1,
+    "widened": 0,
+    "escape": 1
+  },
+  "passes": [
+    {
+      "pass": "SY - synthesize-anonymous",
+      "total": 2,
+      "exact": 2
+    },
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 2,
+      "ergonomic": 2
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 1,
+      "ergonomic": 1
+    },
+    {
+      "pass": "",
+      "total": 1,
+      "escape": 1
+    },
+    {
+      "pass": "render-source",
+      "total": 1,
+      "exact": 1
+    }
+  ]
+}

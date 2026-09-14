@@ -318,4 +318,4 @@ write one down: `SyntaxKind.StringLiteral`, never `11u`. The same goes for the f
 `SymbolFlags.Property`, never `4`.
 
 The handful of facts in this pipeline that are transcribed rather than derived — and what to do
-when upstream moves them — [are documented here](hand-written.md).
+when upstream moves them — [are documented here](../dev/hand-written.md).

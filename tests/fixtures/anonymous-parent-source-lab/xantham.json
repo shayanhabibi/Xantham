@@ -1,0 +1,11 @@
+{
+  "module": "AnonymousParentSourceLab",
+  "lib": [
+    "esnext"
+  ],
+  "types": [],
+  "groups": {
+    "optional-array-shared-lab": "ship"
+  },
+  "declarationCatalog": true
+}

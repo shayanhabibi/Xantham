@@ -242,3 +242,55 @@ let exportOrderTests =
             shaped.Decls |> List.map Render.declName
             |> Flip.Expect.equal "emitted declarations retain the same logical source order" expected
     ]
+
+[<Tests>]
+let groupedCompilerAliasTests =
+    let dependency name = Dependency (name * Measure.uom<Measure.npmDependency>)
+    let first = dependency "first-sdk"
+    let second = dependency "second-sdk"
+    testList "grouped compiler literal aliases" [
+        testTheory "alias placement preserves declaration ownership" [
+            "one dependency", Widen, CompilerLib, false, [ first; EntryPackage ], "FirstSdk"
+            "shipped compiler", Ship, CompilerLib, false, [ first ], "TypeScript.Lib.Dom"
+            "entry alias", Widen, EntryPackage, false, [ first ], "TestPkg"
+            "explicit alias export", Widen, CompilerLib, true, [ first ], "TestPkg"
+            "several dependencies", Widen, CompilerLib, false, [ first; second ], "TestPkg"
+            "entry consumer", Widen, CompilerLib, false, [ EntryPackage ], "TestPkg"
+        ] <| fun (label, compilerDisposition, origin, exported, consumers, expected) ->
+            let ctx =
+                { context with
+                    PackageDir = "/packages/ownership" * Measure.uom<Measure.dirPath>
+                    Config =
+                        { GeneratorConfig.Default with
+                            Groups = Map.ofList [ "typescript/lib" * Measure.uom<Measure.npmDependency>, compilerDisposition
+                                                  "first-sdk" * Measure.uom<Measure.npmDependency>, Ship
+                                                  "second-sdk" * Measure.uom<Measure.npmDependency>, Ship ] } }
+            let alias =
+                { facts (typeResponse 10 TypeFlags.Union) with
+                    Origin = origin
+                    SymbolName = Some ("RequestCache" * Measure.uom<Measure.symbolName>)
+                    DeclFile = Some ("/compiler/lib.dom.d.ts" * Measure.uom<Measure.declFile>) }
+            let reads =
+                consumers |> List.mapi (fun index origin ->
+                    20 + index, $"Request{index}", { facts (typeResponse (20 + index) TypeFlags.Object) with Origin = origin })
+            let exportedSymbol =
+                { symbol 100 "RequestCache" SymbolFlags.TypeAlias with
+                    Declarations = ValueSome [| "1.TypeAliasDeclaration./compiler/lib.dom.d.ts" |] }
+            let model =
+                { shapeModel (alias :: (reads |> List.map (fun (_, _, facts) -> facts))) with
+                    Harvest =
+                        { HarvestModel.Empty with
+                            Exports = if exported then [ export "RequestCache" exportedSymbol ] else [] }
+                    ExportTypes =
+                        if exported then Map.ofList [ 100<Measure.symbolId>, { Declared = Some 10<Measure.typeId>; Value = None } ]
+                        else Map.empty
+                    DeclNames =
+                        (10<Measure.typeId>, "RequestCache") :: (reads |> List.map (fun (id, name, _) -> id * Measure.uom<Measure.typeId>, name)) |> Map.ofList
+                    Decls =
+                        FsStringEnum { Name = "RequestCache"; Docs = ""; Tags = []; Order = None; Cases = [] }
+                        :: (reads |> List.map (fun (_, name, _) -> abbreviation name None (FsNamed "RequestCache"))) }
+            Pipeline.groupModules ctx model
+            |> List.find (fun group -> group.Decls |> List.exists (fun decl -> Render.declName decl = "RequestCache"))
+            |> _.Module
+            |> Flip.Expect.equal label expected
+    ]

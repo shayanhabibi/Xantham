@@ -239,7 +239,7 @@ let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel)
             | Some owner -> originOf owner
             | None -> Map.tryFind name origins |> Option.defaultValue Unclassified
 
-    let groupOf decl =
+    let sourceGroupOf decl =
         let origin =
             match Render.declName decl with
             | name when Map.containsKey name origins -> originOf name
@@ -249,6 +249,48 @@ let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel)
                 |> Option.defaultWith (fun () -> name |> originOf)
 
         emittingGroup ctx origin
+
+    let compilerAliases =
+        shape.Decls
+        |> List.choose (fun decl ->
+            match decl with
+            | FsStringEnum _
+            | FsEnum _ ->
+                let name = Render.declName decl
+
+                if
+                    Map.tryFind name origins = Some CompilerLib
+                    && not (Map.containsKey name declared)
+                    && sourceGroupOf decl = EntryPackage
+                then
+                    Some name
+                else
+                    None
+            | _ -> None)
+        |> Set.ofList
+
+    // Compiler-lib literal aliases used by a shipped dependency belong beside that
+    // dependency. Explicit exports and aliases shared by several dependencies keep their
+    // source ownership.
+    let aliasOwners =
+        shape.Decls
+        |> List.collect (fun decl ->
+            match sourceGroupOf decl with
+            | Dependency _ as group ->
+                Shape.Orphans.readNames decl
+                |> List.filter (fun name -> Set.contains name compilerAliases)
+                |> List.map (fun name -> name, group)
+            | _ -> [])
+        |> List.groupBy fst
+        |> List.choose (fun (name, uses) ->
+            match uses |> List.map snd |> List.distinct with
+            | [ group ] -> Some(name, group)
+            | _ -> None)
+        |> Map.ofList
+
+    let groupOf decl =
+        Map.tryFind (Render.declName decl) aliasOwners
+        |> Option.defaultWith (fun () -> sourceGroupOf decl)
 
     // The compiler lib ships as two modules under one `namespace rec`: the ECMAScript libs and
     // the DOM libs. A declaration's family is its own symbol's file; a hoisted name takes its

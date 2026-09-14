@@ -3,10 +3,10 @@
   "package": "@types/node",
   "module": "Node",
   "counts": {
-    "exact": 1253,
-    "ergonomic": 1801,
-    "widened": 636,
-    "escape": 332
+    "exact": 1247,
+    "ergonomic": 1774,
+    "widened": 768,
+    "escape": 345
   },
   "passes": [
     {
@@ -17,8 +17,8 @@
     },
     {
       "pass": "SY - synthesize-anonymous",
-      "total": 1928,
-      "exact": 1928
+      "total": 2252,
+      "exact": 2252
     },
     {
       "pass": "LU - classify-literal-unions",
@@ -33,53 +33,53 @@
     },
     {
       "pass": "shape-callbacks",
-      "total": 2292,
-      "ergonomic": 2006,
-      "widened": 211,
-      "escape": 75
+      "total": 2625,
+      "ergonomic": 2124,
+      "widened": 415,
+      "escape": 86
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 27871,
-      "exact": 899,
-      "ergonomic": 15973,
-      "widened": 9025,
-      "escape": 1974
+      "total": 27725,
+      "exact": 915,
+      "ergonomic": 15485,
+      "widened": 9272,
+      "escape": 2053
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 164,
-      "ergonomic": 87,
-      "widened": 74,
+      "total": 90,
+      "ergonomic": 26,
+      "widened": 61,
       "escape": 3
     },
     {
       "pass": "SC - shape-classes",
-      "total": 3430,
+      "total": 3380,
       "exact": 795,
-      "ergonomic": 1062,
+      "ergonomic": 1012,
       "widened": 1096,
       "escape": 477
     },
     {
       "pass": "SE - shape-exports",
-      "total": 2113,
+      "total": 1875,
       "exact": 8,
-      "ergonomic": 1452,
-      "widened": 604,
+      "ergonomic": 1195,
+      "widened": 623,
       "escape": 49
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 2108,
-      "ergonomic": 2108
+      "total": 2126,
+      "ergonomic": 2126
     },
     {
       "pass": "DO - dedupe-overloads",
-      "total": 2008,
+      "total": 2009,
       "exact": 87,
       "ergonomic": 1,
-      "widened": 1920
+      "widened": 1921
     },
     {
       "pass": "RA - repair-arity",
@@ -89,14 +89,19 @@
     },
     {
       "pass": "resolve-export-collisions",
-      "total": 39,
+      "total": 40,
       "ergonomic": 9,
-      "widened": 30
+      "widened": 31
+    },
+    {
+      "pass": "DD - drop-orphan-delegates",
+      "total": 19,
+      "exact": 19
     },
     {
       "pass": "AC - audit-coverage",
-      "total": 21,
-      "escape": 21
+      "total": 2,
+      "escape": 2
     }
   ]
 }

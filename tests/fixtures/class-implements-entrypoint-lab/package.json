@@ -1,0 +1,7 @@
+{
+  "name": "class-implements-entrypoint-lab",
+  "version": "1.0.0",
+  "type": "module",
+  "types": "index.d.ts",
+  "description": "Implements clauses preserve subclassable entrypoints and lifecycle hooks."
+}
