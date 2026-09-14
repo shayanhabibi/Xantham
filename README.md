@@ -1,5 +1,15 @@
 ![Xantham](static/xantham-resource-pack/assets/workflow-banner.png)
 
+<div>
+  
+![NuGet Version](https://img.shields.io/nuget/v/xantham?label=xantham)
+![NuGet Version](https://img.shields.io/nuget/v/Xantham.TypeScript.Wire?label=xantham.typescript.wire)
+![NuGet Version](https://img.shields.io/nuget/v/Xantham.Fable.Core?label=xantham.fable.core)
+![NuGet Version](https://img.shields.io/nuget/v/Xantham.Fable.Core.TS?label=xantham.fable.core.ts)
+![NuGet Version](https://img.shields.io/nuget/v/Xantham.Fable.Node?label=xantham.fable.node)
+
+</div>
+
 Xantham is a `TypeScript` → `F# Fable bindings` generator, built on the TypeScript 7 compiler's own API server.
 Pure F# consumer and producer.
 
