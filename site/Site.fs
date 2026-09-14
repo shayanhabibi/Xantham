@@ -112,6 +112,8 @@ let site =
                     "@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));"
                 ]
         })
+    |> Site.stylesheet "css/xantham-assets.css"
+    |> Site.stylesheet "css/xantham.css"
     |> Nuglify.minifyHtml
     |> Theme.register theme
     |> Site.collection (Theme.docs theme "content")

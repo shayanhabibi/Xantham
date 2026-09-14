@@ -7,6 +7,7 @@
     <ItemGroup>
         <Compile Include="Site.fs"/>
         <None Include="**/*.*" Exclude="bin/**/*;obj/**/*;output/**/*;.nacara/**/*" />
+        <None Remove="static\xantham-resource-pack\**" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Fake.IO.FileSystem" Version="6.1.4" />
@@ -26,5 +27,8 @@
         <PackageReference Include="Nacara.Plugin.Deploy.GitHubPages" Version="1.0.0-*"/>
         <PackageReference Include="Nacara.Theme.Default" Version="1.0.0-*"/>
         <PackageReference Include="Partas.Nacara.Plugins.DaisyUI" Version="0.1.0" />
+    </ItemGroup>
+    <ItemGroup>
+      <EmbeddedResource Remove="static\xantham-resource-pack\**" />
     </ItemGroup>
 </Project>
