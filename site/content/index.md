@@ -78,6 +78,15 @@ xantham generate ./node_modules/your-package
 </div>
 </div>
 </section>
+<section class="xantham-home__section" aria-labelledby="blog-heading">
+<h2 id="blog-heading">Behind the bindings</h2>
+<a class="card xantham-card" href="blog/15092026-xantham/">
+<span class="xantham-card__label">15 September 2026</span>
+<h3>How Xantham relates to Glutinum</h3>
+<p>Shared roots, package graphs, and reusable compiler access from .NET.</p>
+<span class="xantham-card__link">Read the post →</span>
+</a>
+</section>
 <section class="xantham-home__section" aria-labelledby="contribute-heading">
 <h2 id="contribute-heading">Help shape Xantham</h2>
 <p>A small declaration that reproduces a problem, a clearer example, or a generator improvement makes a useful contribution.</p>
