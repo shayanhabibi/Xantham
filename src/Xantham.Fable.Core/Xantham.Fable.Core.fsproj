@@ -10,7 +10,7 @@
              net8.0 compile gate can reference the package without a downgrade. -->
         <TargetFrameworks>netstandard2.1;net8.0</TargetFrameworks>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <Version>0.1.0-alpha.1</Version>
+        <Version>0.1.0</Version>
         <AssemblyVersion>0.0.0.0</AssemblyVersion>
     </PropertyGroup>
 
@@ -23,8 +23,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="Library.fs"/>
-        <Compile Include="Helpers.fs"/>
+        <Compile Include="Library.fs" />
+        <Compile Include="Helpers.fs" />
         <None Include="README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 
