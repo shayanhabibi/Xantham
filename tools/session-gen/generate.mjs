@@ -400,6 +400,7 @@ out.blank();
 out.w("open System.Runtime.CompilerServices");
 out.w("open System.Text.Json.Nodes");
 out.w("open Xantham.TypeScript.Wire.Proto");
+out.w("open Xantham.TypeScript.Wire.ProtoEnums");
 out.blank();
 
 doc(out, 
