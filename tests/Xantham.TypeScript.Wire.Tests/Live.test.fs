@@ -28,9 +28,11 @@ let private withSession (test: TscChannel -> UpdateSnapshotResponse -> string ->
 
             let snapshot =
                 Api.updateSnapshot channel
-                    { OpenProjects = ValueSome [| file "tsconfig.json" |]
+                    { Snapshot = ValueNone
+                      OpenProjects = ValueSome [| file "tsconfig.json" |]
                       CloseProjects = ValueNone
                       FileChanges = ValueNone
+                      FileSystem = ValueNone
                       OpenFiles = ValueNone
                       CloseFiles = ValueNone }
 

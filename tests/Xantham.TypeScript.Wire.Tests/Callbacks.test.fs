@@ -134,7 +134,7 @@ let callbackTests =
                 |> Flip.Expect.equal "unanswered falls back" ""
 
             testCase "getAccessibleEntries answers names in two arrays" <| fun _ ->
-                let entries = { Files = [| "a.ts" |]; Directories = [| "sub" |] }
+                let entries: FileSystemEntries = { Files = [| "a.ts" |]; Directories = [| "sub" |] }
 
                 reply "getAccessibleEntries"
                     { VirtualFileSystem.Default with GetAccessibleEntries = ValueSome(fun _ -> ValueSome entries) }

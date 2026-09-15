@@ -147,7 +147,7 @@ let jsonTests =
                 { Snapshot = 1; Project = "p"; File = DocumentIdentifier.FileName "a.ts"; Position = 4 }
 
             testCase "any parameter record encodes into a batch entry" <| fun _ ->
-                { Requests = ValueSome [| ProtoJson.batchEntry Method.GetSymbolAtPosition symbolParams |] }
+                { BatchRequestsParams.Default with Requests = ValueSome [| ProtoJson.batchEntry Method.GetSymbolAtPosition symbolParams |] }
                 |> write
                 |> Flip.Expect.equal ""
                     """{"requests":[{"method":"getSymbolAtPosition","params":{"snapshot":1,"project":"p","file":"a.ts","position":4}}]}"""
@@ -159,7 +159,7 @@ let jsonTests =
 
             // Null is still the absent value, exactly as it was for the JsonNode it replaced.
             testCase "a parameterless entry omits the payload" <| fun _ ->
-                { Requests = ValueSome [| ProtoJson.batchEntryNoParams Method.GetVoidType |] }
+                { BatchRequestsParams.Default with Requests = ValueSome [| ProtoJson.batchEntryNoParams Method.GetVoidType |] }
                 |> write
                 |> Flip.Expect.equal "" """{"requests":[{"method":"getVoidType"}]}"""
 
