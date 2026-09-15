@@ -129,7 +129,7 @@ let private moduleSpecifiers (shape: ShapeModel) : Map<string list, string<impor
 
 /// Origin of each named type that was reached while shaping declarations. Explicit exports
 /// supply their declaration ownership; other named types keep their own symbol origin.
-let private declOrigins compilerOnly (ctx: Context) (shape: ShapeModel) : Map<string, PackageId> =
+let private declOrigins compilerOnly (ctx: Context) (shape: ShapeModel) : Map<string, Xantham.Generator.PackageId> =
     let declared = exportedDeclarations ctx shape
 
     let exportOrigins =
@@ -196,7 +196,7 @@ let private declFamilies (shape: ShapeModel) : Map<string, string> =
 /// The group a declaration is written into: its own where that group ships, the entry package's
 /// otherwise. An anonymous shape belongs to the entry package whatever file its node sits in
 /// (D6).
-let private emittingGroup (ctx: Context) (origin: PackageId) =
+let private emittingGroup (ctx: Context) (origin: Xantham.Generator.PackageId) =
     match origin with
     | EntryPackage
     | Unclassified -> EntryPackage
@@ -326,7 +326,7 @@ let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel)
     let placed = shape.Decls |> List.groupBy placementOf |> Map.ofList
     let entrySpecifiers = moduleSpecifiers shape
 
-    let moduleOf (origin: PackageId, family: string) : Render.GroupModule =
+    let moduleOf (origin: Xantham.Generator.PackageId, family: string) : Render.GroupModule =
         let decls = placed |> Map.tryFind (origin, family) |> Option.defaultValue []
 
         match GeneratorConfig.groupKey origin with
