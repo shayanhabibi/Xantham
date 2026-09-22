@@ -842,7 +842,7 @@ Phases — each ends with the compile gate green on its fixtures:
     against a hand-built model, two on the rung — plus the standing guard that no rendered
     source anywhere contains `>>:`. All three gates green: `dotnet build Xantham.slnx` clean,
     182 + 85 Expecto tests, run gate 49 checks. Found by the `@types/three` recon
-    (`docs/plans/generator-three-rung.md` §9, blocker 4); it is not `three`-specific, which is
+    (`docs/.ai/plans/generator-three-rung.md` §9, blocker 4); it is not `three`-specific, which is
     why the lab landed regardless of whether that rung ever does.
   - *Constructor objects declared (2026-09-02).* The 31 `__type` sites the harvest entry left
     visible, and the `DOMException.isError` finding the statics entry left visible, are the same
@@ -1046,7 +1046,7 @@ Phases — each ends with the compile gate green on its fixtures:
   specifier and leaves the module name alone; and a real scope keeps its segment, with
   `@cloudflare/workers-types` staying `Cloudflare.WorkersTypes`.
 
-**Wave two, closed (2026-09-02).** Five lanes over `docs/plans/generator-wave-two.md`, dispatched
+**Wave two, closed (2026-09-02).** Five lanes over `docs/.ai/plans/generator-wave-two.md`, dispatched
 as three concurrent lanes on disjoint pass files and then two sequenced through `Shape/Spec.fs`.
 Every finding case the wave needed was appended in one pre-dispatch commit, so no branch edited
 `Findings.fs` and the positional-renumbering conflict did not arise; two case wordings that did
@@ -1062,17 +1062,17 @@ widening every argument at those sites, which is the finding that mattered and w
 missed by taking the recon's count on trust. `@types/three` stays out of the corpus; the four
 reasons in `generator-three-rung.md` for holding it back are unchanged by this wave.
 
-**Wave three, closed (2026-09-02).** Seven lanes over `docs/plans/generator-wave-three.md`, in two batches of concurrent lanes on disjoint pass files. The corpus stands at 28 fixtures and 14,803 findings, from 21 and 15,278. `TR023` fell 727 to 143 and its cause 1 is closed: every site remaining names a type rather than a member. Escape fell 200 to 192.
+**Wave three, closed (2026-09-02).** Seven lanes over `docs/.ai/plans/generator-wave-three.md`, in two batches of concurrent lanes on disjoint pass files. The corpus stands at 28 fixtures and 14,803 findings, from 21 and 15,278. `TR023` fell 727 to 143 and its cause 1 is closed: every site remaining names a type rather than a member. Escape fell 200 to 192.
 
 The wave was scoped by a measurement rather than by a plan. Lane G re-ran the `@types/three` harness against wave two's HEAD and found one of four criteria met - the 128 MB file compiles clean where it had 666 errors - and the instantiation runaway unmoved to the digit. It reduced the reason to twelve lines, and lane J closed it: `three` renders 112,054 lines against 482,805, the runaway falls from 70.6% of the file to 0.1%, `TR002` 5,698 to 4, `TP001` 162 to 2. The rung is still refused, now on size alone at 112k against ~50k, and `TR019` 0 to 4,461 is the price a memberless phantom declaration charges. Blocker 1 had been open since the rung was first reconnoitred.
 
-Three things the wave learned that outlive it. `TR044`'s absence was not evidence of a closed hole: lane K's lab compiled to three `FS0001`, so a primitive, tuple or array argument against a written constraint had been falling through all along. `TR018` is a distinct defect rather than `TR023`'s residue - it moved by zero under lane L, refuting the hypothesis in the `TR023` recon's §9 - and is re-priced in `docs/plans/generator-tr018-recon.md` at 194 sites over four causes. And `RA001` had been masking a malformed type-parameter list, which is what a drop does: it hides the thing it drops.
+Three things the wave learned that outlive it. `TR044`'s absence was not evidence of a closed hole: lane K's lab compiled to three `FS0001`, so a primitive, tuple or array argument against a written constraint had been falling through all along. `TR018` is a distinct defect rather than `TR023`'s residue - it moved by zero under lane L, refuting the hypothesis in the `TR023` recon's §9 - and is re-priced in `docs/.ai/plans/generator-tr018-recon.md` at 194 sites over four causes. And `RA001` had been masking a malformed type-parameter list, which is what a drop does: it hides the thing it drops.
 
 `TP007` is constructed nowhere in `src/` and is retained rather than retired, because removing it renumbers `TP008`, which is quoted by four source files and by measurements two plan documents record. The case says so.
 
 The measurement handed up rather than acted on: `RT001` says `@cloudflare/workers-types` now truncates 1,772 types at `FollowDepth` 12 against 261 before, and a five-symbol lab from another lane crossed the cutoff during composition. No output is wrong today. Raising the cutoff is a corpus-wide behaviour change and belongs to a wave that measures it deliberately.
 
-**Wave four, closed (2026-09-03).** Four lanes over `docs/plans/generator-wave-four.md`, in one
+**Wave four, closed (2026-09-03).** Four lanes over `docs/.ai/plans/generator-wave-four.md`, in one
 batch on disjoint pass files. The corpus stands at 30 fixtures. `TR018` fell 197 to 77 and
 `@cloudflare/workers-types` - now the litmus test in place of `@types/three` - reads exact 231,
 ergonomic 1,061, widened 365, escape 115, from 374 widened.
@@ -1104,7 +1104,7 @@ drops arity (132). The user's disposition on all four is to hand-roll or generat
 to raise a PR upstream once the generator is working. That is a wave-five lane.
 
 The measurement handed up rather than acted on, for the second wave running: `RT001` and the
-`FollowDepth` cutoff. `docs/plans/generator-cloudflare-recon.md` adds three more - a finding-count
+`FollowDepth` cutoff. `docs/.ai/plans/generator-cloudflare-recon.md` adds three more - a finding-count
 inflation of x14 in `erasedUnionRef` that makes `TR037`'s 56 into 4 real owners, an
 `ErasedUnionArity` cap of 4 that `Fable.Core`'s `U2`-`U9` does not require, and `KVNamespace.get`
 binding only its first overload, which makes the arrayBuffer, stream and json forms unreachable
@@ -1229,8 +1229,8 @@ section above.
   *Updated (2026-09-06):* the later combined compiler-library producer supersedes the
   shipping restriction above. Its `Es` and `Dom` modules share `namespace rec TypeScript.Lib`.
   The clean `esnext`/`dom` profile compiles for `netstandard2.1` and `net8.0`; the retained split
-  snapshots are outside the solution. The [packaging record](../handovers/wave-sixteen-management.md#compiler-library-packaging-after-this-handover)
-  gives the input pins and measurements.
+  snapshots are outside the solution. The input pins and measurements were recorded in a
+  packaging handover retired on 2026-09-22.
 
   Declaration placement now follows the defining export, with synthesized nested declarations
   following their parent. A secondary alias keeps its own export's owner. These distinctions
@@ -1696,7 +1696,7 @@ payloads directly to the consumer SDK and reads a JSON payload with exactly one 
 The catalog API, source, arity and constraint guards remain unchanged.
 
 Validation and measured golden changes are recorded in
-`docs/.ai/handovers/catalog-alias-api.md`.
+`docs/.ai/footguns.md`.
 ### Source closure precedes anonymous parent ownership
 
 Source closure consults the canonical type identities before parent-role inference
@@ -1737,7 +1737,7 @@ tagged payload whose result is `NonNullable<Value>`. A separately generated cons
 only the payload. The shared payload has no outer option, while its recursive array values
 retain the canonical nullable Value. A typed F# consumer constructs and reuses both forms.
 Actual pinned AI SDK diagnostic generation/compilation and the full regression measurements
-are recorded in `docs/.ai/handovers/catalog-recursive-json.md`.
+are recorded in `docs/.ai/footguns.md`.
 
 ### Inline literal unions across catalog programs
 
@@ -1755,7 +1755,7 @@ uses the inline values in reverse order. Its typed F# consumer shares the produc
 property enum; the two named aliases and the nominal enum keep independent catalog
 identities, and a changed dependency input still invalidates the catalog. Catalog
 source, API, arity, and constraint checks remain unchanged. Measurements and rejected
-alternatives are recorded in `docs/.ai/handovers/literal-alias-identity.md`.
+alternatives are recorded in `docs/.ai/footguns.md`.
 
 ### Erased unions containing emitted object aliases
 
@@ -1772,7 +1772,7 @@ consumer reaching it only through `Value.event`. The producer formerly retained 
 erased union over its named `obj` alias while the consumer widened a direct object arm.
 The typed catalog regression checks shared values and setters, alias chains, retained
 callable/indexed/inherited/generic contracts, the TR035 finding, and stale-input rejection.
-Measurements are recorded in `docs/.ai/handovers/empty-union-alias.md`.
+Measurements are recorded in `docs/.ai/footguns.md`.
 
 ### Generic empty declarations reached through dependencies
 
@@ -1787,7 +1787,7 @@ producer/consumer catalog boundary, rejects Marker<int> at the string marker set
 and retains stale-input rejection. It reproduces the Workers FacetStartupOptions class
 property losing DurableObjectClass<T> in a consumer program. The producer's phantom
 contract remains unchanged; no catalog compatibility guard is relaxed. Full measurements
-are recorded in `docs/.ai/handovers/generic-marker-catalog.md`.
+are recorded in `docs/.ai/footguns.md`.
 
 # Easy Nits 
 

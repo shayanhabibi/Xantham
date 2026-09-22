@@ -77,7 +77,7 @@ Four holes, in descending order of risk:
 
 1. **Virtual-FS callbacks** — `TsGoCallback` (`Library.fs:47`) and the `--callbacks=` path
    through `TscChannel`/`TscMailbox` have zero tests; "callback" does not appear in the test
-   project. Per `docs/plans/tsgo-protocol.md` (probe5) the arguments arrive JSON-encoded and an
+   project. Per `docs/.ai/plans/tsgo-protocol.md` (probe5) the arguments arrive JSON-encoded and an
    explicit `null` is not the same as absent — it changes module resolution. Needs a test that
    serves a file from memory and asserts both the encoding and the null/absent distinction.
 2. **WTF-8 decoding** — `Wtf8.decode` (`Library.fs:55`) exists precisely for lone surrogates,
@@ -163,7 +163,7 @@ not ours.
 
 ## Phase 5 — Protocol document's own open items — DONE
 
-From `docs/plans/tsgo-protocol.md:843-847`, plus one discrepancy found since:
+From `docs/.ai/plans/tsgo-protocol.md:843-847`, plus one discrepancy found since:
 
 - Transcribe the exact `RemoteSourceFile` extended-data field names from
   `dist/api/node/node.js:264-297` into §5.6.
@@ -175,7 +175,7 @@ From `docs/plans/tsgo-protocol.md:843-847`, plus one discrepancy found since:
 - Confirm `ping`'s params/result, and whether the four `transpile*` methods the generator emits
   exist in the shipped build.
 
-**Outcome.** All four settled against `typescript@7.1.0-dev.20260830.1`, and `docs/plans/tsgo-protocol.md`
+**Outcome.** All four settled against `typescript@7.1.0-dev.20260830.1`, and `docs/.ai/plans/tsgo-protocol.md`
 now says so with its checklist ticked.
 
 - §5.6 carries the whole nineteen-word record, names and offsets, from the

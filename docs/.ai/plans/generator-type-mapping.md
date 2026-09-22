@@ -404,7 +404,7 @@ result exact. `tests/fixtures/brand-lab` pins all of it under the live compiler,
 included, and its golden compiles against the support package in the gate.
 
 *Landed (wave four, lane P) — three of the four intersections that used to widen.*
-`docs/plans/generator-tr018-recon.md` attributed every `TR018` site to one of four causes; three
+`docs/.ai/plans/generator-tr018-recon.md` attributed every `TR018` site to one of four causes; three
 of them now have an answer, and the fourth (a type-parameter operand) is left as the contract it
 always was.
 
@@ -765,7 +765,7 @@ Fable F# tuples *are* JS arrays — a happy exact match:
   - The numeric suffix survives where several shapes reach one path and no position
     separates them: the arms of an anonymous union, the parameters of two overloads of one
     member, and two exports of one name with no namespace between them.
-    `docs/.ai/handovers/lane-ad.md` and `lane-ai.md` carry the corpus counts.
+    The corpus counts were carried in lane handovers retired on 2026-09-22.
 - JSDoc → XML doc comments (`getDocumentationComment`, `getJsDocTags`); `@deprecated` →
   `[<Obsolete>]`; `@see`/`@example` carried into `<remarks>`/`<example>`. The tier
   annotation from §1 also lands here. JSDoc is markdown and XML docs are not, so a fenced

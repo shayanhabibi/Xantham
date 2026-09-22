@@ -197,6 +197,12 @@ The rest of the dispatch checklist:
   the session and costs nothing to leave unread. A wave of long reports exhausts the managing
   agent's context before the last lane is dispatched, and the manager is the one participant that
   cannot be restarted without losing the wave.
+- **Retire a handover when its wave closes.** The report is scaffolding for composition, not a
+  permanent record. On merge, the behaviour change goes to its phase record in
+  `docs/.ai/plans/generator-architecture.md`, anything that constrains a future change goes to
+  `docs/.ai/footguns.md`, and the handover is deleted in the same commit. Sixteen handovers were
+  retired on 2026-09-22 having accumulated zero inbound references, and two earlier deletions
+  left citations pointing at files that no longer existed.
 - **Gate at batch boundaries, not per lane.** Every lane gates itself before it commits. Run the
   full `dotnet fsi build.fsx -- test` once over the composed tree when a batch merges, and once at
   final integration. Re-running it after each individual merge re-proves what the lane already

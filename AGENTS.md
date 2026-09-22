@@ -6,7 +6,10 @@ into a typed layer. Generated bindings target **Fable 5.x only**: if a mapping n
 Fable 5 provides, use it; a lossy mapping is lossy because of F# or a missing binding, never
 because of the Fable version.
 
-Consumer documentation lives under `docs/`; AI/agent notes live under `docs/.ai/`.
+Consumer documentation lives under `docs/`; AI/agent notes live under `docs/.ai/`, indexed by
+`docs/.ai/README.md`. Before changing generator behaviour, read `docs/.ai/footguns.md`: it
+carries the compiler-API traps, catalog identity rules and pass invariants that earlier waves
+paid for.
 
 ## Rules files
 

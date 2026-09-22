@@ -152,7 +152,7 @@ Not a missing name: the name exists and binds, and the *arity* is lost. `Naming.
 a compiler-lib name to a `Fable.Core.JS` name, and where the destination takes fewer type
 parameters than the source the extra arguments are dropped.
 
-`docs/plans/generator-architecture.md` (O7) already records the conclusion this forces — the
+`docs/.ai/plans/generator-architecture.md` (O7) already records the conclusion this forces — the
 destination of a group redirection has to carry arity, not just a name. Listed here because it is
 the same class of question and the answer may be the same: bind it upstream, bind it in
 `src/Xantham.Fable.Core`, or accept the loss.
