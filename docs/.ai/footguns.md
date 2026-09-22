@@ -67,6 +67,33 @@ duplicate or an unnamed type.
 declaration's own free parameter keeps the name; `Coalesce<string>` renders `obj -> obj` under
 `TR031`/`TR013` where `Coalesce<'T>` does not.
 
+## Fable runtime type tests
+
+Measured against Fable 5.13.0 on 2026-09-22 while designing erased-DU mapping for mixed
+literal/typed unions. These constrain any pass that puts a payload arm on an `[<Erase>]` union.
+Full table and provenance: `docs/.ai/plans/2026-09-22-mixed-literal-unions.md`.
+
+**Two arms that share a runtime test are a silent failure.** `float[]` and `(float * float)`
+both reach `isArrayLike` (`Fable2Babel.fs:491-492` sends `Fable.Array _ | Fable.Tuple _` to one
+test); `System.Func<…>` and `(float -> float)` both reach `typeof x === "function"` (`:489-490`).
+The second arm compiles to a dead branch and **emits no diagnostic at all**. An arm with no
+usable test — `U_n`, a nested erased union, a plain interface, a type parameter — does warn
+(`Cannot type test`) and is greppable. Verifying only the warnings misses the first failure mode
+entirely; it needs a runtime round-trip.
+
+**A `[<StringEnum>]` arm makes the literal cases unreachable.** It tests `typeof x === "string"`
+and so does every fieldless literal case, so the arm swallows them. An F# `enum` arm tests
+`typeof x === "number"` and collides with a `float` arm the same way.
+
+Distinctness must therefore be checked over *emitted test class*, not over `FsTypeRef` — which
+is what `erasedUnionRef`'s `List.distinct` (`Shape/Spec.fs:2321`) does, and it is not sufficient
+for this purpose.
+
+**A lambda coerces to a delegate at method-argument position only.** A union-case constructor
+gets no coercion: a bare lambda into a `System.Func<…>` arm is FS0002, and a curried
+`(float -> float -> string)` arm accepts the lambda but emits curried JS of the wrong arity. The
+same arm carried by a method parameter takes a bare lambda and emits `(a, b) => …`.
+
 ## Build and test environment
 
 **Nested `dotnet build` inside a test stalls under `dotnet test`.** Idle MSBuild nodes hold the
@@ -80,6 +107,11 @@ the catalog suites run in the main checkout.
 ## Open threads
 
 Carried from lanes that closed without finishing these.
+
+- **Two union-mapping designs are approved and unimplemented**, paired and cross-referenced:
+  `plans/2026-09-22-mixed-literal-unions.md` and `plans/2026-09-22-union-arm-overloads.md`. Both
+  ship disabled; neither pass may inspect the other's config. The overload record's corpus counts
+  must be recomputed after the mixed-union Step 0 measurement.
 
 - **`objectRef` ordering.** `Shape/Spec.fs`'s pure-callback branch sits ahead of its
   named-instantiation lookup, so `type StoreReturn<'T> = 'T * Action<obj, …>` while
