@@ -110,16 +110,12 @@ let private configKeys =
 let private unionArmKeys =
     Map.ofList
         [
-            "Enabled",
-            ("enabled",
-             "Synthesize one overload per arm beside the union member. Defaults to false.")
+            "Enabled", ("enabled", "Synthesize one overload per arm beside the union member. Defaults to false.")
             "MaxArms",
             ("maxArms",
              "The largest arm count that expands. A union with more arms keeps the union member alone. \
           Defaults to 4.")
-            "Policy",
-            ("policy",
-             "Which union parameters expand. Only \"single\" is accepted; \"linear\" is reserved.")
+            "Policy", ("policy", "Which union parameters expand. Only \"single\" is accepted; \"linear\" is reserved.")
         ]
 
 /// The JSON key and description of one `CompilerLibConfig` field.

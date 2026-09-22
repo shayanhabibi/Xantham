@@ -59,124 +59,125 @@ let expandUnionArms: Pass<ShapeModel> =
                         return Advanced model
                     else
 
-                    let abbrevs = abbreviations model.Decls
-                    let mutable findings = []
+                        let abbrevs = abbreviations model.Decls
+                        let mutable findings = []
 
-                    /// One export member's expansion: the members it becomes, in render order.
-                    /// The union member always survives and always comes first.
-                    let expandMember (owner: string) (taken: Set<string * _>) (owned: OwnedExportMember) =
-                        let export = owned.Member
+                        /// One export member's expansion: the members it becomes, in render order.
+                        /// The union member always survives and always comes first.
+                        let expandMember (owner: string) (taken: Set<string * _>) (owned: OwnedExportMember) =
+                            let export = owned.Member
 
-                        match export.Body with
-                        | ExportFunction(parameters, returns) ->
-                            match soleUnionParameter abbrevs parameters with
-                            | None -> [ owned ]
-                            | Some(index, parameter, arms) ->
-                                let site = $"{owner}.{export.Name}"
+                            match export.Body with
+                            | ExportFunction(parameters, returns) ->
+                                match soleUnionParameter abbrevs parameters with
+                                | None -> [ owned ]
+                                | Some(index, parameter, arms) ->
+                                    let site = $"{owner}.{export.Name}"
 
-                                let armKeys =
-                                    arms
-                                    |> List.map (fun arm ->
-                                        parameters
-                                        |> List.mapi (fun i p -> if i = index then { p with Type = arm } else p)
-                                        |> signatureKey abbrevs)
-
-                                if arms.Length > config.MaxArms then
-                                    findings <-
-                                        findings
-                                        @ [
-                                            Finding.make
-                                                site
-                                                (ExpandUnionArms.ArmCountExceedsCap(
-                                                    parameter.Name,
-                                                    arms.Length,
-                                                    config.MaxArms
-                                                ))
-                                        ]
-
-                                    [ owned ]
-                                elif (List.distinct armKeys).Length <> armKeys.Length then
-                                    // A partial arm set would be an API whose shape depends on
-                                    // which arms happened to survive, so the member declines whole.
-                                    findings <-
-                                        findings
-                                        @ [
-                                            Finding.make
-                                                site
-                                                (ExpandUnionArms.ArmsCollapseToOneSignature parameter.Name)
-                                        ]
-
-                                    [ owned ]
-                                elif armKeys |> List.exists (fun key -> Set.contains (export.Name, key) taken) then
-                                    findings <-
-                                        findings
-                                        @ [
-                                            Finding.make
-                                                site
-                                                (ExpandUnionArms.ArmOverloadCollides(parameter.Name, export.Name))
-                                        ]
-
-                                    [ owned ]
-                                else
-                                    findings <-
-                                        findings
-                                        @ [
-                                            Finding.make
-                                                site
-                                                (ExpandUnionArms.ArmOverloadsSynthesized(
-                                                    parameter.Name,
-                                                    arms.Length
-                                                ))
-                                        ]
-
-                                    let synthesized =
+                                    let armKeys =
                                         arms
                                         |> List.map (fun arm ->
-                                            let armParameters =
-                                                parameters
-                                                |> List.mapi (fun i p -> if i = index then { p with Type = arm } else p)
+                                            parameters
+                                            |> List.mapi (fun i p -> if i = index then { p with Type = arm } else p)
+                                            |> signatureKey abbrevs)
 
-                                            { owned with
-                                                Member =
-                                                    { export with
-                                                        Body = ExportFunction(armParameters, returns)
-                                                    }
-                                            })
+                                    if arms.Length > config.MaxArms then
+                                        findings <-
+                                            findings
+                                            @ [
+                                                Finding.make
+                                                    site
+                                                    (ExpandUnionArms.ArmCountExceedsCap(
+                                                        parameter.Name,
+                                                        arms.Length,
+                                                        config.MaxArms
+                                                    ))
+                                            ]
 
-                                    owned :: synthesized
-                        | _ -> [ owned ]
+                                        [ owned ]
+                                    elif (List.distinct armKeys).Length <> armKeys.Length then
+                                        // A partial arm set would be an API whose shape depends on
+                                        // which arms happened to survive, so the member declines whole.
+                                        findings <-
+                                            findings
+                                            @ [
+                                                Finding.make
+                                                    site
+                                                    (ExpandUnionArms.ArmsCollapseToOneSignature parameter.Name)
+                                            ]
 
-                    let expandContainer (container: FsExportContainer) =
-                        // Every signature the container already has, so a synthesized arm that
-                        // clashes with a TypeScript-declared overload is refused rather than
-                        // emitted. Built once, before expansion, and not added to: two members
-                        // expanding into each other's space is the collision this catches.
-                        let taken =
-                            container.Members
-                            |> List.choose (fun owned ->
-                                match owned.Member.Body with
-                                | ExportFunction(parameters, _)
-                                | ExportConstructor(parameters, _) ->
-                                    Some(owned.Member.Name, signatureKey abbrevs parameters)
-                                | ExportValue _ -> None)
-                            |> Set.ofList
+                                        [ owned ]
+                                    elif armKeys |> List.exists (fun key -> Set.contains (export.Name, key) taken) then
+                                        findings <-
+                                            findings
+                                            @ [
+                                                Finding.make
+                                                    site
+                                                    (ExpandUnionArms.ArmOverloadCollides(parameter.Name, export.Name))
+                                            ]
 
-                        { container with
-                            Members = container.Members |> List.collect (expandMember container.Name taken)
-                        }
+                                        [ owned ]
+                                    else
+                                        findings <-
+                                            findings
+                                            @ [
+                                                Finding.make
+                                                    site
+                                                    (ExpandUnionArms.ArmOverloadsSynthesized(
+                                                        parameter.Name,
+                                                        arms.Length
+                                                    ))
+                                            ]
 
-                    let decls =
-                        model.Decls
-                        |> List.map (function
-                            | FsExports container -> FsExports(expandContainer container)
-                            | other -> other)
+                                        let synthesized =
+                                            arms
+                                            |> List.map (fun arm ->
+                                                let armParameters =
+                                                    parameters
+                                                    |> List.mapi (fun i p ->
+                                                        if i = index then { p with Type = arm } else p)
 
-                    let model = { model with Decls = decls }
+                                                { owned with
+                                                    Member =
+                                                        { export with
+                                                            Body = ExportFunction(armParameters, returns)
+                                                        }
+                                                })
 
-                    return
-                        if List.isEmpty findings then
-                            Advanced model
-                        else
-                            Degraded(model, findings)
+                                        owned :: synthesized
+                            | _ -> [ owned ]
+
+                        let expandContainer (container: FsExportContainer) =
+                            // Every signature the container already has, so a synthesized arm that
+                            // clashes with a TypeScript-declared overload is refused rather than
+                            // emitted. Built once, before expansion, and not added to: two members
+                            // expanding into each other's space is the collision this catches.
+                            let taken =
+                                container.Members
+                                |> List.choose (fun owned ->
+                                    match owned.Member.Body with
+                                    | ExportFunction(parameters, _)
+                                    | ExportConstructor(parameters, _) ->
+                                        Some(owned.Member.Name, signatureKey abbrevs parameters)
+                                    | ExportValue _ -> None)
+                                |> Set.ofList
+
+                            { container with
+                                Members = container.Members |> List.collect (expandMember container.Name taken)
+                            }
+
+                        let decls =
+                            model.Decls
+                            |> List.map (function
+                                | FsExports container -> FsExports(expandContainer container)
+                                | other -> other)
+
+                        let model = { model with Decls = decls }
+
+                        return
+                            if List.isEmpty findings then
+                                Advanced model
+                            else
+                                Degraded(model, findings)
                 }
     }

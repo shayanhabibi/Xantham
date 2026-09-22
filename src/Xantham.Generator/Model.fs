@@ -521,8 +521,10 @@ module GeneratorConfig =
                             match name.GetString() with
                             | "single" -> Single
                             | "linear" ->
-                                failwith "xantham.json: unionArmOverloads.policy \"linear\" is reserved and not yet implemented"
-                            | other -> failwith $"xantham.json: unionArmOverloads.policy must be \"single\", not \"{other}\""
+                                failwith
+                                    "xantham.json: unionArmOverloads.policy \"linear\" is reserved and not yet implemented"
+                            | other ->
+                                failwith $"xantham.json: unionArmOverloads.policy must be \"single\", not \"{other}\""
                         | true, _ -> failwith "xantham.json: unionArmOverloads.policy must be a string"
 
                     {
