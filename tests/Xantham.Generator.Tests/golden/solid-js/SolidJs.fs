@@ -295,27 +295,27 @@ type OnOptions =
     [<ParamObject; Emit("$0")>]
     static member Create (?defer: bool) : OnOptions = jsNative
 
-type ContextProviderComponent<'T> = (ContextProviderComponent.Props<'T> -> JSXElement option)
+type ContextProviderComponent<'T> = (ContextProviderComponent.Props<'T> -> JSXElement)
 
 [<Interface>]
 type Context<'T> =
     abstract id: obj with get, set
-    abstract Provider: (Context.Provider.Props<'T> -> JSXElement option) with get, set
+    abstract Provider: (Context.Provider.Props<'T> -> JSXElement) with get, set
     abstract defaultValue: 'T with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (id: obj, Provider: (Context.Provider.Props<'T> -> JSXElement option), defaultValue: 'T) : Context<'T> = jsNative
+    static member Create (id: obj, Provider: (Context.Provider.Props<'T> -> JSXElement), defaultValue: 'T) : Context<'T> = jsNative
 
 type ResolvedJSXElement = U4<float, bool, Fable.Core.TS.Dom.Node, string> option
 
-type ResolvedChildren = U5<float, bool, ResolvedJSXElement option[], Fable.Core.TS.Dom.Node, string> option
+type ResolvedChildren = U5<float, bool, ResolvedJSXElement[], Fable.Core.TS.Dom.Node, string> option
 
 [<Interface>]
 type ChildrenReturn =
-    abstract toArray: (unit -> ResolvedJSXElement option[]) with get, set
+    abstract toArray: (unit -> ResolvedJSXElement[]) with get, set
     [<Emit("$0($1...)")>]
-    abstract Invoke: unit -> ResolvedChildren option
+    abstract Invoke: unit -> ResolvedChildren
     [<ParamObject; Emit("$0")>]
-    static member Create (toArray: (unit -> ResolvedJSXElement option[])) : ChildrenReturn = jsNative
+    static member Create (toArray: (unit -> ResolvedJSXElement[])) : ChildrenReturn = jsNative
 
 [<Interface>]
 type ExternalSource =
@@ -324,7 +324,7 @@ type ExternalSource =
     [<ParamObject; Emit("$0")>]
     static member Create (track: (obj -> obj), dispose: (unit -> unit)) : ExternalSource = jsNative
 
-type Component<'P> = ('P -> JSXElement option)
+type Component<'P> = ('P -> JSXElement)
 
 /// <summary>
 /// Extend props to forbid the <c>children</c> prop.
@@ -335,7 +335,7 @@ type Component<'P> = ('P -> JSXElement option)
 type VoidProps<'P> = private VoidProps__ of obj
 
 [<Erase>]
-type VoidComponent<'P> = private VoidComponent__ of (obj -> JSXElement option)
+type VoidComponent<'P> = private VoidComponent__ of (obj -> JSXElement)
 
 /// <summary>
 /// Extend props to allow an optional <c>children</c> prop with the usual
@@ -346,7 +346,7 @@ type VoidComponent<'P> = private VoidComponent__ of (obj -> JSXElement option)
 type ParentProps<'P> = private ParentProps__ of obj
 
 [<Erase>]
-type ParentComponent<'P> = private ParentComponent__ of (obj -> JSXElement option)
+type ParentComponent<'P> = private ParentComponent__ of (obj -> JSXElement)
 
 /// <summary>
 /// Extend props to require a <c>children</c> prop with the specified type.
@@ -358,13 +358,13 @@ type ParentComponent<'P> = private ParentComponent__ of (obj -> JSXElement optio
 type FlowProps<'P, 'C> = private FlowProps__ of obj
 
 [<Erase>]
-type FlowComponent<'P, 'C> = private FlowComponent__ of (obj -> JSXElement option)
+type FlowComponent<'P, 'C> = private FlowComponent__ of (obj -> JSXElement)
 
 /// <remarks>@deprecated : use <c>ParentProps</c> instead</remarks>
 [<Erase>]
 type PropsWithChildren<'P> = private PropsWithChildren__ of obj
 
-type ValidComponent = U2<string, (obj -> JSXElement option)>
+type ValidComponent = U2<string, (obj -> JSXElement)>
 
 /// <summary>
 /// Takes the props of the passed component and returns its type
@@ -393,9 +393,9 @@ type SplitProps = obj[]
 type MatchProps<'T> =
     abstract ``when``: U2<bool, 'T> option with get, set
     abstract keyed: bool option with get, set
-    abstract children: U6<float, bool, JSXElement option[], Fable.Core.TS.Dom.Node, (obj -> JSXElement option), string> option with get, set
+    abstract children: U6<float, bool, JSXElement[], Fable.Core.TS.Dom.Node, (obj -> JSXElement), string> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?``when``: U2<bool, 'T>, ?keyed: bool, ?children: U6<float, bool, JSXElement option[], Fable.Core.TS.Dom.Node, (obj -> JSXElement option), string>) : MatchProps<'T> = jsNative
+    static member Create (?``when``: U2<bool, 'T>, ?keyed: bool, ?children: U6<float, bool, JSXElement[], Fable.Core.TS.Dom.Node, (obj -> JSXElement), string>) : MatchProps<'T> = jsNative
 
 [<Interface>]
 type SharedConfig =
@@ -1012,7 +1012,7 @@ type Exports =
     /// <returns>a accessor of the same children, but resolved</returns>
     /// <remarks>@description https://docs.solidjs.com/reference/component-apis/children</remarks>
     [<Import("children", "solid-js")>]
-    static member children (fn: (unit -> JSXElement option)) : ChildrenReturn = jsNative
+    static member children (fn: (unit -> JSXElement)) : ChildrenReturn = jsNative
     [<Import("enableExternalSource", "solid-js")>]
     static member enableExternalSource (factory: Func<(obj -> obj), (unit -> unit), ExternalSource>, ?untrack: ((unit -> obj) -> obj)) : unit = jsNative
     /// <remarks>
@@ -1031,7 +1031,7 @@ type Exports =
     [<Import("enableHydration", "solid-js")>]
     static member enableHydration () : unit = jsNative
     [<Import("createComponent", "solid-js")>]
-    static member createComponent<'T> (Comp: ('T -> JSXElement option), props: 'T) : JSXElement option = jsNative
+    static member createComponent<'T> (Comp: ('T -> JSXElement), props: 'T) : JSXElement = jsNative
     [<Import("mergeProps", "solid-js")>]
     static member mergeProps<'T> ([<ParamArray>] sources: 'T) : obj = jsNative
     [<Import("splitProps", "solid-js")>]
@@ -1053,7 +1053,7 @@ type Exports =
     /// </summary>
     /// <remarks>@description https://docs.solidjs.com/reference/components/for</remarks>
     [<Import("For", "solid-js")>]
-    static member For<'T, 'U> (props: For.Props<'T, 'U>) : JSXElement option = jsNative
+    static member For<'T, 'U> (props: For.Props<'T, 'U>) : JSXElement = jsNative
     /// <summary>
     /// Non-keyed iteration over a list creating elements from its items
     /// <br /><br />
@@ -1067,19 +1067,19 @@ type Exports =
     /// </summary>
     /// <remarks>@description https://docs.solidjs.com/reference/components/index-component</remarks>
     [<Import("Index", "solid-js")>]
-    static member Index<'T, 'U> (props: Index.Props<'T, 'U>) : JSXElement option = jsNative
+    static member Index<'T, 'U> (props: Index.Props<'T, 'U>) : JSXElement = jsNative
     /// <summary>
     /// Conditionally render its children or an optional fallback component
     /// </summary>
     /// <remarks>@description https://docs.solidjs.com/reference/components/show</remarks>
     [<Import("Show", "solid-js")>]
-    static member Show<'T, 'TRenderFunction> (props: Show.Props<'T, 'TRenderFunction>) : JSXElement option = jsNative
+    static member Show<'T, 'TRenderFunction> (props: Show.Props<'T, 'TRenderFunction>) : JSXElement = jsNative
     /// <summary>
     /// Conditionally render its children or an optional fallback component
     /// </summary>
     /// <remarks>@description https://docs.solidjs.com/reference/components/show</remarks>
     [<Import("Show", "solid-js")>]
-    static member Show<'T, 'TRenderFunction> (props: Show.Props2<'T, 'TRenderFunction>) : JSXElement option = jsNative
+    static member Show<'T, 'TRenderFunction> (props: Show.Props2<'T, 'TRenderFunction>) : JSXElement = jsNative
     /// <summary>
     /// Switches between content based on mutually exclusive conditions
     /// <code lang="typescript">
@@ -1095,7 +1095,7 @@ type Exports =
     /// </summary>
     /// <remarks>@description https://docs.solidjs.com/reference/components/switch-and-match</remarks>
     [<Import("Switch", "solid-js")>]
-    static member Switch (props: Switch.Props) : JSXElement option = jsNative
+    static member Switch (props: Switch.Props) : JSXElement = jsNative
     /// <summary>
     /// Selects a content based on condition when inside a <c>&lt;Switch&gt;</c> control flow
     /// <code lang="typescript">
@@ -1106,7 +1106,7 @@ type Exports =
     /// </summary>
     /// <remarks>@description https://docs.solidjs.com/reference/components/switch-and-match</remarks>
     [<Import("Match", "solid-js")>]
-    static member Match<'T, 'TRenderFunction> (props: Match.Props<'T, 'TRenderFunction>) : JSXElement option = jsNative
+    static member Match<'T, 'TRenderFunction> (props: Match.Props<'T, 'TRenderFunction>) : JSXElement = jsNative
     /// <summary>
     /// Selects a content based on condition when inside a <c>&lt;Switch&gt;</c> control flow
     /// <code lang="typescript">
@@ -1117,7 +1117,7 @@ type Exports =
     /// </summary>
     /// <remarks>@description https://docs.solidjs.com/reference/components/switch-and-match</remarks>
     [<Import("Match", "solid-js")>]
-    static member Match<'T, 'TRenderFunction> (props: Match.Props2<'T, 'TRenderFunction>) : JSXElement option = jsNative
+    static member Match<'T, 'TRenderFunction> (props: Match.Props2<'T, 'TRenderFunction>) : JSXElement = jsNative
     [<Import("resetErrorBoundaries", "solid-js")>]
     static member resetErrorBoundaries () : unit = jsNative
     /// <summary>
@@ -1135,7 +1135,7 @@ type Exports =
     /// </summary>
     /// <remarks>@description https://docs.solidjs.com/reference/components/error-boundary</remarks>
     [<Import("ErrorBoundary", "solid-js")>]
-    static member ErrorBoundary (props: ErrorBoundary.Props) : JSXElement option = jsNative
+    static member ErrorBoundary (props: ErrorBoundary.Props) : JSXElement = jsNative
     [<Import("sharedConfig", "solid-js")>]
     static member sharedConfig: SharedConfig = jsNative
     /// <summary>
@@ -1143,7 +1143,7 @@ type Exports =
     /// </summary>
     /// <remarks>@description https://docs.solidjs.com/reference/components/suspense-list</remarks>
     [<Import("SuspenseList", "solid-js")>]
-    static member SuspenseList (props: SuspenseList.Props) : JSXElement option = jsNative
+    static member SuspenseList (props: SuspenseList.Props) : JSXElement = jsNative
     /// <summary>
     /// Tracks all resources inside a component and renders a fallback until they are all resolved
     /// <code lang="typescript">
@@ -1156,7 +1156,7 @@ type Exports =
     /// </summary>
     /// <remarks>@description https://docs.solidjs.com/reference/components/suspense</remarks>
     [<Import("Suspense", "solid-js")>]
-    static member Suspense (props: Suspense.Props) : JSXElement option = jsNative
+    static member Suspense (props: Suspense.Props) : JSXElement = jsNative
 
 module Computation =
     type State =
@@ -1179,17 +1179,17 @@ module Context =
         [<Interface>]
         type Props<'T> =
             abstract value: 'T with get, set
-            abstract children: JSXElement option with get, set
+            abstract children: JSXElement with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (value: 'T, ?children: JSXElement) : Props<'T> = jsNative
+            static member Create (value: 'T, children: JSXElement) : Props<'T> = jsNative
 
 module ContextProviderComponent =
     [<Interface>]
     type Props<'T> =
         abstract value: 'T with get, set
-        abstract children: JSXElement option with get, set
+        abstract children: JSXElement with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (value: 'T, ?children: JSXElement) : Props<'T> = jsNative
+        static member Create (value: 'T, children: JSXElement) : Props<'T> = jsNative
 
 module CreateEffect =
     [<Interface>]
@@ -1363,13 +1363,13 @@ module DeferredOptions =
 module ErrorBoundary =
     [<Interface>]
     type Props =
-        abstract fallback: U6<float, bool, JSXElement option[], Fable.Core.TS.Dom.Node, ErrorBoundary.Props.Fallback, string> option with get, set
-        abstract children: JSXElement option with get, set
+        abstract fallback: U6<float, bool, JSXElement[], Fable.Core.TS.Dom.Node, ErrorBoundary.Props.Fallback, string> option with get, set
+        abstract children: JSXElement with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?fallback: U6<float, bool, JSXElement option[], Fable.Core.TS.Dom.Node, ErrorBoundary.Props.Fallback, string>, ?children: JSXElement) : Props = jsNative
+        static member Create (children: JSXElement, ?fallback: U6<float, bool, JSXElement[], Fable.Core.TS.Dom.Node, ErrorBoundary.Props.Fallback, string>) : Props = jsNative
 
     module Props =
-        type Fallback = delegate of err: obj * reset: (unit -> unit) -> JSXElement option
+        type Fallback = delegate of err: obj * reset: (unit -> unit) -> JSXElement
 
 module For =
     [<Interface>]
@@ -2332,17 +2332,17 @@ module Match =
     type Props<'T, 'TRenderFunction> =
         abstract ``when``: U2<bool, 'T> option with get, set
         abstract keyed: bool option with get, set
-        abstract children: U6<float, bool, JSXElement option[], Fable.Core.TS.Dom.Node, 'TRenderFunction, string> option with get, set
+        abstract children: U6<float, bool, JSXElement[], Fable.Core.TS.Dom.Node, 'TRenderFunction, string> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?``when``: U2<bool, 'T>, ?keyed: bool, ?children: U6<float, bool, JSXElement option[], Fable.Core.TS.Dom.Node, 'TRenderFunction, string>) : Props<'T, 'TRenderFunction> = jsNative
+        static member Create (?``when``: U2<bool, 'T>, ?keyed: bool, ?children: U6<float, bool, JSXElement[], Fable.Core.TS.Dom.Node, 'TRenderFunction, string>) : Props<'T, 'TRenderFunction> = jsNative
 
     [<Interface>]
     type Props2<'T, 'TRenderFunction> =
         abstract ``when``: U2<bool, 'T> option with get, set
         abstract keyed: bool with get, set
-        abstract children: U6<float, bool, JSXElement option[], Fable.Core.TS.Dom.Node, 'TRenderFunction, string> option with get, set
+        abstract children: U6<float, bool, JSXElement[], Fable.Core.TS.Dom.Node, 'TRenderFunction, string> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (keyed: bool, ?``when``: U2<bool, 'T>, ?children: U6<float, bool, JSXElement option[], Fable.Core.TS.Dom.Node, 'TRenderFunction, string>) : Props2<'T, 'TRenderFunction> = jsNative
+        static member Create (keyed: bool, ?``when``: U2<bool, 'T>, ?children: U6<float, bool, JSXElement[], Fable.Core.TS.Dom.Node, 'TRenderFunction, string>) : Props2<'T, 'TRenderFunction> = jsNative
 
 module Memo =
     type Comparator<'Next> = delegate of prev: 'Next * next: 'Next -> bool
@@ -2431,18 +2431,18 @@ module Show =
         abstract ``when``: U2<bool, 'T> option with get, set
         abstract keyed: bool option with get, set
         abstract fallback: JSXElement option with get, set
-        abstract children: U6<float, bool, JSXElement option[], Fable.Core.TS.Dom.Node, 'TRenderFunction, string> option with get, set
+        abstract children: U6<float, bool, JSXElement[], Fable.Core.TS.Dom.Node, 'TRenderFunction, string> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?``when``: U2<bool, 'T>, ?keyed: bool, ?fallback: JSXElement, ?children: U6<float, bool, JSXElement option[], Fable.Core.TS.Dom.Node, 'TRenderFunction, string>) : Props<'T, 'TRenderFunction> = jsNative
+        static member Create (?``when``: U2<bool, 'T>, ?keyed: bool, ?fallback: JSXElement, ?children: U6<float, bool, JSXElement[], Fable.Core.TS.Dom.Node, 'TRenderFunction, string>) : Props<'T, 'TRenderFunction> = jsNative
 
     [<Interface>]
     type Props2<'T, 'TRenderFunction> =
         abstract ``when``: U2<bool, 'T> option with get, set
         abstract keyed: bool with get, set
         abstract fallback: JSXElement option with get, set
-        abstract children: U6<float, bool, JSXElement option[], Fable.Core.TS.Dom.Node, 'TRenderFunction, string> option with get, set
+        abstract children: U6<float, bool, JSXElement[], Fable.Core.TS.Dom.Node, 'TRenderFunction, string> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (keyed: bool, ?``when``: U2<bool, 'T>, ?fallback: JSXElement, ?children: U6<float, bool, JSXElement option[], Fable.Core.TS.Dom.Node, 'TRenderFunction, string>) : Props2<'T, 'TRenderFunction> = jsNative
+        static member Create (keyed: bool, ?``when``: U2<bool, 'T>, ?fallback: JSXElement, ?children: U6<float, bool, JSXElement[], Fable.Core.TS.Dom.Node, 'TRenderFunction, string>) : Props2<'T, 'TRenderFunction> = jsNative
 
 module SignalOptions =
     type Equals<'T> = delegate of prev: 'T * next: 'T -> bool
@@ -2584,18 +2584,18 @@ module Suspense =
     [<Interface>]
     type Props =
         abstract fallback: JSXElement option with get, set
-        abstract children: JSXElement option with get, set
+        abstract children: JSXElement with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?fallback: JSXElement, ?children: JSXElement) : Props = jsNative
+        static member Create (children: JSXElement, ?fallback: JSXElement) : Props = jsNative
 
 module SuspenseList =
     [<Interface>]
     type Props =
-        abstract children: JSXElement option with get, set
+        abstract children: JSXElement with get, set
         abstract revealOrder: SuspenseList.Props.RevealOrder with get, set
         abstract tail: SuspenseList.Props.Tail option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (revealOrder: SuspenseList.Props.RevealOrder, ?children: JSXElement, ?tail: SuspenseList.Props.Tail) : Props = jsNative
+        static member Create (children: JSXElement, revealOrder: SuspenseList.Props.RevealOrder, ?tail: SuspenseList.Props.Tail) : Props = jsNative
 
     module Props =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -2613,9 +2613,9 @@ module Switch =
     [<Interface>]
     type Props =
         abstract fallback: JSXElement option with get, set
-        abstract children: JSXElement option with get, set
+        abstract children: JSXElement with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?fallback: JSXElement, ?children: JSXElement) : Props = jsNative
+        static member Create (children: JSXElement, ?fallback: JSXElement) : Props = jsNative
 
 /// <summary>solid-js/universal</summary>
 module Universal =
@@ -2701,7 +2701,7 @@ module Web =
         /// </summary>
         /// <remarks>@description https://docs.solidjs.com/reference/components/for</remarks>
         [<Import("For", "solid-js/web")>]
-        static member For<'T, 'U> (props: For.Props<'T, 'U>) : JSXElement option = jsNative
+        static member For<'T, 'U> (props: For.Props<'T, 'U>) : JSXElement = jsNative
         /// <summary>
         /// Non-keyed iteration over a list creating elements from its items
         /// <br /><br />
@@ -2715,19 +2715,19 @@ module Web =
         /// </summary>
         /// <remarks>@description https://docs.solidjs.com/reference/components/index-component</remarks>
         [<Import("Index", "solid-js/web")>]
-        static member Index<'T, 'U> (props: Index.Props<'T, 'U>) : JSXElement option = jsNative
+        static member Index<'T, 'U> (props: Index.Props<'T, 'U>) : JSXElement = jsNative
         /// <summary>
         /// Conditionally render its children or an optional fallback component
         /// </summary>
         /// <remarks>@description https://docs.solidjs.com/reference/components/show</remarks>
         [<Import("Show", "solid-js/web")>]
-        static member Show<'T, 'TRenderFunction> (props: Show.Props<'T, 'TRenderFunction>) : JSXElement option = jsNative
+        static member Show<'T, 'TRenderFunction> (props: Show.Props<'T, 'TRenderFunction>) : JSXElement = jsNative
         /// <summary>
         /// Conditionally render its children or an optional fallback component
         /// </summary>
         /// <remarks>@description https://docs.solidjs.com/reference/components/show</remarks>
         [<Import("Show", "solid-js/web")>]
-        static member Show<'T, 'TRenderFunction> (props: Show.Props2<'T, 'TRenderFunction>) : JSXElement option = jsNative
+        static member Show<'T, 'TRenderFunction> (props: Show.Props2<'T, 'TRenderFunction>) : JSXElement = jsNative
         /// <summary>
         /// Switches between content based on mutually exclusive conditions
         /// <code lang="typescript">
@@ -2743,7 +2743,7 @@ module Web =
         /// </summary>
         /// <remarks>@description https://docs.solidjs.com/reference/components/switch-and-match</remarks>
         [<Import("Switch", "solid-js/web")>]
-        static member Switch (props: Switch.Props) : JSXElement option = jsNative
+        static member Switch (props: Switch.Props) : JSXElement = jsNative
         /// <summary>
         /// Selects a content based on condition when inside a <c>&lt;Switch&gt;</c> control flow
         /// <code lang="typescript">
@@ -2754,7 +2754,7 @@ module Web =
         /// </summary>
         /// <remarks>@description https://docs.solidjs.com/reference/components/switch-and-match</remarks>
         [<Import("Match", "solid-js/web")>]
-        static member Match<'T, 'TRenderFunction> (props: Match.Props<'T, 'TRenderFunction>) : JSXElement option = jsNative
+        static member Match<'T, 'TRenderFunction> (props: Match.Props<'T, 'TRenderFunction>) : JSXElement = jsNative
         /// <summary>
         /// Selects a content based on condition when inside a <c>&lt;Switch&gt;</c> control flow
         /// <code lang="typescript">
@@ -2765,7 +2765,7 @@ module Web =
         /// </summary>
         /// <remarks>@description https://docs.solidjs.com/reference/components/switch-and-match</remarks>
         [<Import("Match", "solid-js/web")>]
-        static member Match<'T, 'TRenderFunction> (props: Match.Props2<'T, 'TRenderFunction>) : JSXElement option = jsNative
+        static member Match<'T, 'TRenderFunction> (props: Match.Props2<'T, 'TRenderFunction>) : JSXElement = jsNative
         /// <summary>
         /// Catches uncaught errors inside components and renders a fallback content
         /// <br /><br />
@@ -2781,13 +2781,13 @@ module Web =
         /// </summary>
         /// <remarks>@description https://docs.solidjs.com/reference/components/error-boundary</remarks>
         [<Import("ErrorBoundary", "solid-js/web")>]
-        static member ErrorBoundary (props: ErrorBoundary.Props) : JSXElement option = jsNative
+        static member ErrorBoundary (props: ErrorBoundary.Props) : JSXElement = jsNative
         /// <summary>
         /// <b>[experimental]</b> Controls the order in which suspended content is rendered
         /// </summary>
         /// <remarks>@description https://docs.solidjs.com/reference/components/suspense-list</remarks>
         [<Import("SuspenseList", "solid-js/web")>]
-        static member SuspenseList (props: SuspenseList.Props) : JSXElement option = jsNative
+        static member SuspenseList (props: SuspenseList.Props) : JSXElement = jsNative
         /// <summary>
         /// Tracks all resources inside a component and renders a fallback until they are all resolved
         /// <code lang="typescript">
@@ -2800,7 +2800,7 @@ module Web =
         /// </summary>
         /// <remarks>@description https://docs.solidjs.com/reference/components/suspense</remarks>
         [<Import("Suspense", "solid-js/web")>]
-        static member Suspense (props: Suspense.Props) : JSXElement option = jsNative
+        static member Suspense (props: Suspense.Props) : JSXElement = jsNative
         [<Import("Aliases", "solid-js/web")>]
         static member Aliases: Record<string, string> = jsNative
         [<Import("Properties", "solid-js/web")>]
@@ -2818,7 +2818,7 @@ module Web =
         [<Import("getPropAlias", "solid-js/web")>]
         static member getPropAlias (prop: string, tagName: string) : string option = jsNative
         [<Import("render", "solid-js/web")>]
-        static member render (code: (unit -> JSXElement option), element: MountableElement, ?init: JSXElement, ?options: Web.Render.Options) : (unit -> unit) = jsNative
+        static member render (code: (unit -> JSXElement), element: MountableElement, ?init: JSXElement, ?options: Web.Render.Options) : (unit -> unit) = jsNative
         [<Import("template", "solid-js/web")>]
         static member template (html: string, ?isCE: bool, ?isSVG: bool) : (unit -> JsxDevRuntime.DOMElement) = jsNative
         [<Import("effect", "solid-js/web")>]
@@ -2828,9 +2828,9 @@ module Web =
         [<Import("untrack", "solid-js/web")>]
         static member untrack<'T> (fn: (unit -> 'T)) : 'T = jsNative
         [<Import("insert", "solid-js/web")>]
-        static member insert<'T> (parent: MountableElement, accessor: U2<'T, (unit -> 'T)>, ?marker: Fable.Core.TS.Dom.Node, ?init: JSXElement) : JSXElement option = jsNative
+        static member insert<'T> (parent: MountableElement, accessor: U2<'T, (unit -> 'T)>, ?marker: Fable.Core.TS.Dom.Node, ?init: JSXElement) : JSXElement = jsNative
         [<Import("createComponent", "solid-js/web")>]
-        static member createComponent<'T> (Comp: ('T -> JSXElement option), props: 'T) : JSXElement option = jsNative
+        static member createComponent<'T> (Comp: ('T -> JSXElement), props: 'T) : JSXElement = jsNative
         [<Import("delegateEvents", "solid-js/web")>]
         static member delegateEvents (eventNames: string[], ?d: Fable.Core.TS.Dom.Document) : unit = jsNative
         [<Import("clearDelegatedEvents", "solid-js/web")>]
@@ -2872,19 +2872,19 @@ module Web =
         [<Import("getNextMarker", "solid-js/web")>]
         static member getNextMarker (start: Fable.Core.TS.Dom.Node) : Fable.Core.TS.Dom.Node * Fable.Core.TS.Dom.Node[] = jsNative
         [<Import("useAssets", "solid-js/web")>]
-        static member useAssets (fn: (unit -> JSXElement option)) : unit = jsNative
+        static member useAssets (fn: (unit -> JSXElement)) : unit = jsNative
         [<Import("getAssets", "solid-js/web")>]
         static member getAssets () : string = jsNative
         [<Import("HydrationScript", "solid-js/web")>]
-        static member HydrationScript () : JSXElement option = jsNative
+        static member HydrationScript () : JSXElement = jsNative
         [<Import("generateHydrationScript", "solid-js/web")>]
         static member generateHydrationScript () : string = jsNative
         [<Import("Assets", "solid-js/web")>]
-        static member Assets (props: Web.Assets.Props) : JSXElement option = jsNative
+        static member Assets (props: Web.Assets.Props) : JSXElement = jsNative
         [<Import("Hydration", "solid-js/web")>]
-        static member Hydration (props: Web.Hydration.Props) : JSXElement option = jsNative
+        static member Hydration (props: Web.Hydration.Props) : JSXElement = jsNative
         [<Import("NoHydration", "solid-js/web")>]
-        static member NoHydration (props: Web.NoHydration.Props) : JSXElement option = jsNative
+        static member NoHydration (props: Web.NoHydration.Props) : JSXElement = jsNative
         [<Import("RequestContext", "solid-js/web")>]
         static member RequestContext: obj = jsNative
         [<Import("getRequestEvent", "solid-js/web")>]
@@ -2896,7 +2896,7 @@ module Web =
         [<Import("isDev", "solid-js/web")>]
         static member isDev: bool = jsNative
         [<Import("hydrate", "solid-js/web")>]
-        static member hydrate (fn: (unit -> JSXElement option), node: MountableElement, ?options: Web.Hydrate.Options) : (unit -> unit) = jsNative
+        static member hydrate (fn: (unit -> JSXElement), node: MountableElement, ?options: Web.Hydrate.Options) : (unit -> unit) = jsNative
         /// <summary>
         /// Renders components somewhere else in the DOM
         /// <br /><br />
@@ -2918,7 +2918,7 @@ module Web =
         /// </summary>
         /// <remarks>@description https://docs.solidjs.com/reference/components/dynamic</remarks>
         [<Import("createDynamic", "solid-js/web")>]
-        static member createDynamic<'T> (``component``: (unit -> 'T option), props: obj) : JSXElement option = jsNative
+        static member createDynamic<'T> (``component``: (unit -> 'T option), props: obj) : JSXElement = jsNative
         /// <summary>
         /// Renders an arbitrary custom or native component and passes the other props
         /// <code lang="typescript">
@@ -2927,7 +2927,7 @@ module Web =
         /// </summary>
         /// <remarks>@description https://docs.solidjs.com/reference/components/dynamic</remarks>
         [<Import("Dynamic", "solid-js/web")>]
-        static member Dynamic<'T> (props: DynamicProps<'T, obj>) : JSXElement option = jsNative
+        static member Dynamic<'T> (props: DynamicProps<'T, obj>) : JSXElement = jsNative
         [<Import("renderToString", "solid-js/web")>]
         static member renderToString<'T> (fn: (unit -> 'T), ?options: Web.RenderToString.Options) : string = jsNative
         [<Import("renderToStringAsync", "solid-js/web")>]
@@ -3031,9 +3031,9 @@ module Web =
             abstract useShadow: 'T option with get, set
             abstract isSVG: 'S option with get, set
             abstract ref: obj option with get, set
-            abstract children: JSXElement option with get, set
+            abstract children: JSXElement with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?mount: Fable.Core.TS.Dom.Node, ?useShadow: 'T, ?isSVG: 'S, ?ref: obj, ?children: JSXElement) : Props<'T, 'S> = jsNative
+            static member Create (children: JSXElement, ?mount: Fable.Core.TS.Dom.Node, ?useShadow: 'T, ?isSVG: 'S, ?ref: obj) : Props<'T, 'S> = jsNative
 
     module Render =
         [<Interface>]

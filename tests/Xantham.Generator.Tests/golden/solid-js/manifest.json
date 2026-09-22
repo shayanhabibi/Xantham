@@ -3,8 +3,8 @@
   "package": "solid-js",
   "module": "SolidJs",
   "counts": {
-    "exact": 53,
-    "ergonomic": 163,
+    "exact": 69,
+    "ergonomic": 147,
     "widened": 84,
     "escape": 42
   },
@@ -26,32 +26,32 @@
     },
     {
       "pass": "shape-callbacks",
-      "total": 156,
-      "ergonomic": 105,
+      "total": 150,
+      "ergonomic": 99,
       "widened": 47,
       "escape": 4
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 1012,
+      "total": 986,
       "exact": 15,
-      "ergonomic": 744,
+      "ergonomic": 718,
       "widened": 206,
       "escape": 47
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 109,
+      "total": 107,
       "exact": 4,
-      "ergonomic": 39,
+      "ergonomic": 37,
       "widened": 65,
       "escape": 1
     },
     {
       "pass": "SE - shape-exports",
-      "total": 296,
+      "total": 259,
       "exact": 2,
-      "ergonomic": 226,
+      "ergonomic": 189,
       "widened": 42,
       "escape": 26
     },
