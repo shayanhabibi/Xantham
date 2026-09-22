@@ -162,7 +162,68 @@ type - ships later, against the 2 corpus members that carry more than one union 
 
 ## Interaction with mixed unions
 
+Paired record: `docs/.ai/plans/2026-09-22-mixed-literal-unions.md`. Changes to arm composition
+belong in both.
+
 The mixed-union work sits directly upstream. §4.5 preference 1 sends an all-literal union to a
-`StringEnum` before arm expansion ever sees it; a mixed union that begins emitting named literal
-cases makes those cases *arms*, and the two features compose at that point. Changes to arm
-composition belong in both records.
+`StringEnum` before arm expansion ever sees it; the mixed-union pass extends that to unions
+mixing literals with typed members, emitting a named `[<Erase(CaseRules.None)>]` DU.
+
+**They are two mapping styles for different contexts, not rivals.** A named DU preserves the
+literal set and reads well wherever a value is held, named, or matched; arm overloads read
+better at a call site, especially for callbacks. Which is wanted is a property of the
+consuming code, invisible to the generator — so it is a user choice expressed in config, like
+`groups` dispositions already are. Our job is defensible defaults and an honest description of
+the interaction, not per-union arbitration.
+
+Where both are enabled and could claim one union, **precedence is structural and fixed**:
+`classify-literal-unions` is `Passes.fs` position 5, ahead of this pass after
+`dedupe-overloads`, so a union converted to a named DU is no longer a `U_n` and never arrives
+here — the same mechanism that already keeps all-literal unions out. Nothing negotiates.
+
+Neither pass should inspect the other's config flag or use sites. An earlier draft of the
+mixed-union record proposed having it decline callback-bearing unions to feed this pass; that
+was wrong in the shipping default (both features are `enabled: false`, so the decline would
+lose the literal set to buy nothing) and it assumed an eligibility this pass does not
+guarantee — six-arm unions exceed `maxArms`, and property or return positions are unreachable
+from here at all. A user who enables a combination we would not have chosen gets the
+documented result of that combination.
+
+### Callbacks are where the choice actually bites
+
+Measured 2026-09-22 (Fable 5.13.0), and it reverses the intuitive answer. A union-case
+constructor gets no lambda-to-delegate coercion — that applies at method-argument position
+only:
+
+| Position | Bare lambda | Emitted JS |
+|---|---|---|
+| DU case, `System.Func<float,float,string>` arm | FS0002 — needs `System.Func<_,_,_>(...)` | `(a, b) => ...` |
+| DU case, curried `(float -> float -> string)` arm | compiles | `(a) => ((b) => ...)` — curried, wrong arity |
+| **Method parameter carrying the arm type (this feature)** | **compiles** | **`(a, b) => ...` correct** |
+
+This is direct evidence for the claim in § *What the overloads buy* that delegate-arm
+callability is the load-bearing benefit: the DU route cannot reach it from either direction.
+
+It is therefore the clearest case for a user preferring this style: consuming code that passes
+lambdas at call sites is materially better served here, and a user with a callback-heavy
+package has good reason to leave the mixed-union pass off for it. The mixed-union pass does
+**not** decline callback arms to make that happen — it documents the cost and lets the choice
+be made in config. Both records should keep saying so; the temptation to encode a preference
+in pass logic has already been written and removed once.
+
+### The collapsing-arm exclusion is weaker than the mixed-union arm rule
+
+This pass refuses arms that are not pairwise distinct *as F# signatures*. The mixed-union pass
+refuses arms not pairwise distinct *as runtime test classes* — a strictly stronger condition,
+since `float[]` and `string[]` are distinct signatures sharing one `isArrayLike` test. Anything
+the mixed-union pass accepts would pass the collapsing check here; the reverse does not hold,
+so neither rule substitutes for the other.
+
+### Corpus numbers have a dependency
+
+The counts in § *Corpus shape* — 484 imported static members, 59 with a union parameter, 57
+with exactly one — are measured against today's union population. Every union the mixed-union
+pass claims leaves that population, including some of the six-arm cluster that carries 132 of
+the 239 uncapped overloads. Those figures, and the `maxArms` cap analysis resting on them,
+must be recomputed once the mixed-union Step 0 measurement lands. Both features ship disabled,
+so there is no release-ordering hazard — only a measurement one.
