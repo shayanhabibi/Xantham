@@ -247,6 +247,16 @@ let private matchesGoldens (fixture: string) (config: GeneratorConfig) (package:
 
     rendered
 
+/// `expand-union-arms` ships disabled, so its lab is the one fixture that opts in and the one
+/// place the landing's golden diff appears.
+let private unionArmConfig =
+    { GeneratorConfig.Default with
+        UnionArmOverloads =
+            { UnionArmOverloadsConfig.Default with
+                Enabled = true
+            }
+    }
+
 let private fixtureTests (fixture: string) (package: string option) (config: GeneratorConfig) extra =
     match Tsc.locate __SOURCE_DIRECTORY__, package with
     | None, _ ->
@@ -2634,6 +2644,88 @@ let pipelineTests =
                           (rendered.Findings |> List.filter (fun f -> f.Symbol = "Formatter") |> List.map _.Key)
                           [ "TR031" ]
                           "a `type X = delegate of ...` holds one signature" ])
+
+        // The feature ships disabled, so the golden diff of the landing is confined to this
+        // lab: every other fixture runs the default and is untouched.
+        yield!
+            fixtureTests "union-arm-overload-lab" (handFixture "union-arm-overload-lab") unionArmConfig (fun package ->
+                let rendered () = Async.RunSynchronously(Pipeline.generate unionArmConfig package)
+
+                let findingsFor symbol =
+                    (rendered ()).Findings
+                    |> List.filter (fun f -> f.Symbol = symbol)
+                    |> List.map _.Key
+
+                [ testCase "a single-union parameter gains one overload per arm, beside the union member"
+                  <| fun _ ->
+                      let source = (rendered ()).Files |> List.head |> snd
+
+                      Expect.stringContains
+                          source
+                          "static member label (value: U2<string, float>) : string"
+                          "the union member survives"
+
+                      Expect.stringContains source "static member label (value: string) : string" "and the string arm"
+                      Expect.stringContains source "static member label (value: float) : string" "and the float arm"
+                      Expect.equal (findingsFor "Exports.label") [ "UA001" ] "expansion is recorded"
+
+                  testCase "a delegate arm becomes callable in its own right" <| fun _ ->
+                      let source = (rendered ()).Files |> List.head |> snd
+
+                      Expect.stringContains
+                          source
+                          "static member apply (handler: Apply.Handler) : string"
+                          "the arm is the named delegate, so a bare lambda has a target type to infer against"
+
+                      Expect.stringContains
+                          source
+                          "type Handler = delegate of a: float * b: float -> string"
+                          "and that delegate carries the arity and parameter types"
+
+                      Expect.equal (findingsFor "Exports.apply") [ "UA001" ] "expansion is recorded"
+
+                  testCase "arms that are one F# type never reach the pass as a union" <| fun _ ->
+                      let source = (rendered ()).Files |> List.head |> snd
+
+                      // `number[]` and `ReadonlyArray<number>` are both `float[]`, so the arms are
+                      // deduped upstream and there is no union left to expand or to refuse. The
+                      // arms-collapse guard (`UA003`) answers the case this cannot reach, and is
+                      // exercised on a hand-built model in Shape.test.fs.
+                      Expect.stringContains
+                          source
+                          "static member collapse (items: float[]) : string"
+                          "one member, one signature"
+
+                      Expect.isEmpty (findingsFor "Exports.collapse") "there is nothing for the pass to say"
+
+                  testCase "an arm colliding with a declared overload refuses the member" <| fun _ ->
+                      let source = (rendered ()).Files |> List.head |> snd
+
+                      Expect.stringContains
+                          source
+                          "static member tint (value: U2<string, float>) : string"
+                          "the union member survives"
+
+                      Expect.stringContains
+                          source
+                          "static member tint (value: string) : string"
+                          "and so does the overload TypeScript declared"
+
+                      Expect.isFalse
+                          (source.Contains "static member tint (value: float) : string")
+                          "but no arm is synthesized: a partial arm set is not the API either signature asked for"
+
+                      Expect.equal
+                          (findingsFor "Exports.tint")
+                          [ "UA004" ]
+                          "the collision is recorded against the member that declined"
+
+                  testCase "a union over the cap keeps its union member alone" <| fun _ ->
+                      Expect.equal (findingsFor "Exports.wide") [ "UA002" ] "five arms against a cap of four"
+
+                  testCase "the shapes outside policy single are left alone without a finding" <| fun _ ->
+                      Expect.isEmpty (findingsFor "Exports.pair") "two union parameters is linear's business"
+                      Expect.isEmpty (findingsFor "Exports.maybe") "an optional union parameter is not a candidate" ])
 
         yield!
             fixtureTests "constraint-arg-lab" (handFixture "constraint-arg-lab") GeneratorConfig.Default (fun package ->

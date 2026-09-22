@@ -23,6 +23,7 @@ let passes: Pass<ShapeModel> list =
         Inherited.dropInherited
         Overloads.dedupeOverloads
         Ordering.orderDeclarations
+        UnionArms.expandUnionArms
         Arity.repairArity
         Arity.normalizeObjUnions
         ExportCollisions.resolveExportCollisions

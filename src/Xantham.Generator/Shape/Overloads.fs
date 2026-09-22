@@ -71,25 +71,13 @@ let dedupeOverloads: Pass<ShapeModel> =
                              Finding.make set.Member (DedupeOverloads.OverloadsDistinguishedByLiteral set.Parameter)))
                         @ List.choose id literalFindings
 
-                    let abbrevs =
-                        model.Decls
-                        |> List.choose (function
-                            | FsAbbrev decl -> Some(decl.Name, decl.Target)
-                            | _ -> None)
-                        |> Map.ofList
+                    let abbrevs = abbreviations model.Decls
 
                     /// The reference with abbreviations expanded, so `TargetsParam` and
                     /// `DOMTargetsParam` (both `obj`) compare equal the way the compiler sees them.
-                    let rec normalize (visited: Set<string>) (reference: FsTypeRef) : FsTypeRef =
-                        match reference with
-                        | FsNamed name when Map.containsKey name abbrevs && not (Set.contains name visited) ->
-                            normalize (Set.add name visited) abbrevs[name]
-                        | FsOption inner -> FsOption(normalize visited inner)
-                        | FsArray element -> FsArray(normalize visited element)
-                        | FsDelegate(args, ret) ->
-                            FsDelegate(args |> List.map (normalize visited), normalize visited ret)
-                        | FsFunc(argument, ret) -> FsFunc(normalize visited argument, normalize visited ret)
-                        | other -> other
+                    /// Shared with `expand-union-arms`, which resolves the same names.
+                    let normalize (visited: Set<string>) (reference: FsTypeRef) : FsTypeRef =
+                        expandAbbreviations abbrevs visited reference
 
                     /// A reference with its own signature's type variables renamed by declaration
                     /// order, so `<A extends T>(value: A): A` and `<B extends T>(value: B): B`

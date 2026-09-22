@@ -3174,3 +3174,28 @@ let uniqueCaseNames (names: string list) =
 
         seen <- Set.add unique seen
         unique)
+
+/// Type abbreviations declared by a model, as name -> target. Shared by the passes that must
+/// compare signatures the way the compiler does: .NET overload resolution sees through an
+/// abbreviation, so `TargetsParam` and the `U6<...>` it abbreviates are one type to it.
+let abbreviations (decls: FsDecl list) : Map<string, FsTypeRef> =
+    decls
+    |> List.choose (function
+        | FsAbbrev decl -> Some(decl.Name, decl.Target)
+        | _ -> None)
+    |> Map.ofList
+
+/// A reference with abbreviations expanded. `visited` breaks a cycle a malformed declaration
+/// set could otherwise spin on; it is threaded rather than global so nested positions of one
+/// reference each get their own budget.
+let rec expandAbbreviations (abbrevs: Map<string, FsTypeRef>) (visited: Set<string>) (reference: FsTypeRef) =
+    let recur = expandAbbreviations abbrevs visited
+
+    match reference with
+    | FsNamed name when Map.containsKey name abbrevs && not (Set.contains name visited) ->
+        expandAbbreviations abbrevs (Set.add name visited) abbrevs[name]
+    | FsOption inner -> FsOption(recur inner)
+    | FsArray element -> FsArray(recur element)
+    | FsDelegate(args, ret) -> FsDelegate(List.map recur args, recur ret)
+    | FsFunc(argument, ret) -> FsFunc(recur argument, recur ret)
+    | other -> other

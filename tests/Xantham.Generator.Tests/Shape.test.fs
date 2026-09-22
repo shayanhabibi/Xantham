@@ -4581,3 +4581,135 @@ let incompatibleOverloadedTypeParameters =
                 (Spec.hasIncompatibleOverloadedTypeParameters model facts)
                 "one F# head cannot carry both bounds for 'T"
     ]
+
+[<Tests>]
+let unionArmOverloadTests =
+    // `expand-union-arms` under a config that turns it on - it is off by default, so a plain
+    // `Build.runPass` would take the disabled early return and assert nothing.
+    //
+    // The collapse case lives here rather than in the lab fixture because TypeScript reduces a
+    // union by type identity before Xantham reads it: `number[] | Ids` where `type Ids =
+    // number[]` arrives as one arm, not two. Two arms that are one F# signature is reachable in
+    // the model and not from source, so the model is where the guard is exercised.
+    let config =
+        { GeneratorConfig.Default with
+            UnionArmOverloads =
+                { UnionArmOverloadsConfig.Default with
+                    Enabled = true } }
+
+    let exportMember name (parameters: FsParam list) =
+        {
+            Owner = EntryModule
+            HarvestIndex = 0
+            ExportName = name
+            SourceSymbolId = 1<symbolId>
+            SignatureOrdinal = None
+            Member =
+                {
+                    Name = name
+                    Docs = ""
+                    Tags = []
+                    TypeParameters = []
+                    Binding = ImportNamed name
+                    Body = ExportFunction(parameters, FsString)
+                    Settable = false
+                }
+        }
+
+    let parameter name typeRef =
+        {
+            Name = name
+            Optional = false
+            Rest = false
+            Type = typeRef
+        }
+
+    let abbrev name target =
+        FsAbbrev
+            {
+                Name = name
+                Docs = ""
+                Tags = []
+                Order = None
+                TypeParameters = []
+                Target = target
+                Value = None
+            }
+
+    let modelWith decls members =
+        { Build.shapeModel [] with
+            Decls =
+                decls
+                @ [
+                    FsExports
+                        {
+                            Name = "Exports"
+                            Owner = EntryModule
+                            Members = members
+                        }
+                ] }
+
+    let signatures (model: ShapeModel) =
+        model.Decls
+        |> List.collect (function
+            | FsExports container ->
+                container.Members
+                |> List.choose (fun owned ->
+                    match owned.Member.Body with
+                    | ExportFunction(parameters, _) ->
+                        Some(owned.Member.Name, parameters |> List.map _.Type)
+                    | _ -> None)
+            | _ -> [])
+
+    testList "expand-union-arms" [
+        testCase "arms that expand to one signature decline whole" <| fun _ ->
+            let model =
+                modelWith
+                    [ abbrev "Ids" (FsArray FsFloat) ]
+                    [ exportMember "collapse" [ parameter "value" (FsErasedUnion [ FsArray FsFloat; FsNamed "Ids" ]) ] ]
+
+            let expanded, findings = Build.runPassWith config UnionArms.expandUnionArms model
+
+            Expect.equal
+                (signatures expanded)
+                [ "collapse", [ FsErasedUnion [ FsArray FsFloat; FsNamed "Ids" ] ] ]
+                "the union member survives alone; no arm is expanded"
+
+            Expect.equal
+                (findings |> List.map (fun finding -> finding.Key))
+                [ "UA003" ]
+                "the member reports the collapse rather than expanding the surviving arm"
+
+        testCase "arms distinct after abbreviation expansion still expand" <| fun _ ->
+            let model =
+                modelWith
+                    [ abbrev "Ids" (FsArray FsFloat) ]
+                    [ exportMember "take" [ parameter "value" (FsErasedUnion [ FsString; FsNamed "Ids" ]) ] ]
+
+            let expanded, findings = Build.runPassWith config UnionArms.expandUnionArms model
+
+            Expect.equal
+                (signatures expanded)
+                [
+                    "take", [ FsErasedUnion [ FsString; FsNamed "Ids" ] ]
+                    "take", [ FsString ]
+                    "take", [ FsNamed "Ids" ]
+                ]
+                "the arms keep the names they were declared under, beside the union member"
+
+            Expect.equal
+                (findings |> List.map (fun finding -> finding.Key))
+                [ "UA001" ]
+                "expansion is reported once for the member"
+
+        testCase "the pass is a no-op while disabled" <| fun _ ->
+            let model =
+                modelWith
+                    []
+                    [ exportMember "label" [ parameter "value" (FsErasedUnion [ FsString; FsFloat ]) ] ]
+
+            let expanded, findings = Build.runPass UnionArms.expandUnionArms model
+
+            Expect.equal (signatures expanded) (signatures model) "nothing is synthesized"
+            Expect.isEmpty findings "and nothing is reported"
+    ]

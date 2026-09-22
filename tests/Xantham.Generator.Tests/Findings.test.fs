@@ -187,6 +187,10 @@ let findingsTests =
                     "DO.ExportMemberRenamed DO007 ergonomic"
                     "DO.ExportReturnTypesUnioned DO008 widened"
                     "DO.ExportDeclarationsConsolidated DO009 ergonomic"
+                    "UA.ArmOverloadsSynthesized UA001 ergonomic"
+                    "UA.ArmCountExceedsCap UA002 ergonomic"
+                    "UA.ArmsCollapseToOneSignature UA003 ergonomic"
+                    "UA.ArmOverloadCollides UA004 ergonomic"
                     "RA.GenericAliasDropped RA001 widened"
                     "RA.ReferenceToDroppedAlias RA002 widened"
                     "RA.GenericWithoutArguments RA003 widened"
@@ -215,7 +219,7 @@ let findingsTests =
               Expect.equal (FindingCatalogue.passLabel "name-exports") "NE - name-exports" "a pass with a union"
 
               let passes = FindingCatalogue.passPrefixes |> Map.toList |> List.map fst
-              Expect.equal passes.Length 16 "every per-pass union names its pass"
+              Expect.equal passes.Length 17 "every per-pass union names its pass"
 
           testCase "a finding derives name, key, tier, payload and message from its kind" <| fun _ ->
               let finding = Finding.make "Options.legacy" (TypeReference.UnionTooWide(10, 9))

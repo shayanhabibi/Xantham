@@ -1,6 +1,6 @@
 # Union arm overloads at parameter position
 
-Status: design approved 2026-09-22, unimplemented.
+Status: implemented 2026-09-22, shipped disabled.
 Closes the deferred half of **D4** (`generator-type-mapping.md` §4.5).
 
 `generator-architecture.md` records the state this design starts from: "`U_n` already satisfies
@@ -234,3 +234,27 @@ pass claims leaves that population, including some of the six-arm cluster that c
 the 239 uncapped overloads. Those figures, and the `maxArms` cap analysis resting on them,
 must be recomputed once the mixed-union Step 0 measurement lands. Both features ship disabled,
 so there is no release-ordering hazard — only a measurement one.
+
+
+## Implementation notes — 2026-09-22
+
+Shipped as `Shape/UnionArms.fs`, pass `expand-union-arms`, findings `UA001`–`UA004`. Three
+things the design did not anticipate:
+
+**Pass position.** The design said "after `dedupe-overloads`", which is necessary but not
+sufficient. Exports do not become an `FsExports` container until `order-declarations` builds
+one from `model.ExportMembers`; before that they are a flat list with no container name to key
+findings on, and a pass sitting earlier rewrites `model.Decls` where no export lives. The pass
+runs after `order-declarations`, which is after `dedupe-overloads`, so the design constraint
+holds.
+
+**`UA003` is unreachable from TypeScript source.** Arms that are one F# signature but distinct
+`FsTypeRef`s cannot be written: TypeScript reduces a union by type identity before Xantham
+reads it, so `number[] | Ids` with `type Ids = number[]` arrives as a single arm, and arms that
+are identical `FsTypeRef`s (`number[] | ReadonlyArray<number>`) are already deduped by
+`erasedUnionRef`. The guard is kept — an API that collapses would be FS0041 at every call site
+— and is exercised in `Shape.test.fs` against a hand-built model, with the lab fixture
+documenting why the source-level case does not reach it.
+
+**Config-aware pass harness.** `Build.runPassWith` was added so a pass that ships disabled can
+be unit-tested at all; `Build.runPass` takes the disabled early return and asserts nothing.

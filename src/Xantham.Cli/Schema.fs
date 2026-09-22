@@ -98,6 +98,28 @@ let private configKeys =
              "Exact public export keys (\".\" or concrete \"./path\") mapped to TypeScript files within the input package. \
           Only these inputs are generated; include \".\" explicitly to select the root. Use for expanded wildcards, \
           conditional declarations and separate runtime environments. Mutually exclusive with entry and subpaths.")
+
+            "UnionArmOverloads",
+            ("unionArmOverloads",
+             "Synthesized overloads beside a member whose parameter is an erased union, one per arm. \
+          Disabled by default: enabling it makes existing `!^` casts at those call sites ambiguous.")
+        ]
+
+/// The JSON key and description of one `UnionArmOverloadsConfig` field. `policy` is spelled as
+/// the strings the reader accepts; `linear` is declared but refused until it ships.
+let private unionArmKeys =
+    Map.ofList
+        [
+            "Enabled",
+            ("enabled",
+             "Synthesize one overload per arm beside the union member. Defaults to false.")
+            "MaxArms",
+            ("maxArms",
+             "The largest arm count that expands. A union with more arms keeps the union member alone. \
+          Defaults to 4.")
+            "Policy",
+            ("policy",
+             "Which union parameters expand. Only \"single\" is accepted; \"linear\" is reserved.")
         ]
 
 /// The JSON key and description of one `CompilerLibConfig` field.
@@ -197,6 +219,36 @@ let private writeCompilerLib (w: Utf8JsonWriter) =
 
     w.WriteEndObject()
 
+let private writeUnionArmOverloads (w: Utf8JsonWriter) =
+    w.WriteString("type", "object")
+    w.WriteBoolean("additionalProperties", false)
+    w.WriteStartObject "properties"
+
+    for field in FSharpType.GetRecordFields typeof<UnionArmOverloadsConfig> do
+        match Map.tryFind field.Name unionArmKeys with
+        | None -> failwith $"UnionArmOverloadsConfig.{field.Name} is absent from Schema.fs's key table"
+        | Some(key, description) ->
+            w.WritePropertyName key
+
+            writeDescribed w description (fun w ->
+                let fieldType = unwrapOption field.PropertyType
+
+                if fieldType = typeof<bool> then
+                    w.WriteString("type", "boolean")
+                elif fieldType = typeof<int> then
+                    w.WriteString("type", "integer")
+                    w.WriteNumber("minimum", 2)
+                elif fieldType = typeof<UnionArmPolicy> then
+                    w.WriteString("type", "string")
+                    w.WriteStartArray "enum"
+                    w.WriteStringValue "single"
+                    w.WriteEndArray()
+                else
+                    failwith
+                        $"UnionArmOverloadsConfig.{field.Name} has type {fieldType.FullName}, which Schema.fs writes no JSON form for")
+
+    w.WriteEndObject()
+
 /// The schema fragment for one F# type. `option` is unwrapped: every key of `xantham.json` is
 /// optional.
 let private writeFieldType (w: Utf8JsonWriter) (name: string) (t: Type) =
@@ -224,6 +276,7 @@ let private writeFieldType (w: Utf8JsonWriter) (name: string) (t: Type) =
         w.WriteNumber("minLength", 1)
         w.WriteEndObject()
     | t when t = typeof<CompilerLibConfig> -> writeCompilerLib w
+    | t when t = typeof<UnionArmOverloadsConfig> -> writeUnionArmOverloads w
     | t -> failwith $"xantham.json: {name} has type {t.FullName}, which Schema.fs writes no JSON form for"
 
 let private writeConfigProperties (w: Utf8JsonWriter) =

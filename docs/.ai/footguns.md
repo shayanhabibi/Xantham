@@ -67,6 +67,17 @@ duplicate or an unnamed type.
 declaration's own free parameter keeps the name; `Coalesce<string>` renders `obj -> obj` under
 `TR031`/`TR013` where `Coalesce<'T>` does not.
 
+**A pass that rewrites exports must run after `order-declarations`.** Exports are not an
+`FsExports` decl until `order-declarations` builds one from `model.ExportMembers`. A pass sitting
+earlier and mapping over `model.Decls` looking for `FsExports` matches nothing, silently produces
+no output, and has no container name to key its findings on. `expand-union-arms` cost an
+afternoon to this.
+
+**A finding needs a row in `FindingCodes.table`, not just a registered union.** Registering the
+kind in `FindingCatalogue` is enough to compile and enough for the pass to run; the missing code
+only throws at manifest render, from `Finding.get_Key`, which reads as a render bug rather than a
+missing table row.
+
 ## Fable runtime type tests
 
 Measured against Fable 5.13.0 on 2026-09-22 while designing erased-DU mapping for mixed

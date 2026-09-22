@@ -82,6 +82,41 @@ type CompilerLibConfig =
             AutoOpenDom = false
         }
 
+/// Which union parameters of a member expand. Declared as a union now, with `Linear` rejected
+/// by the reader until it ships, so the second landing is a new case here rather than a change
+/// to the configuration schema.
+type UnionArmPolicy =
+    /// Expand the single union parameter of a member that has exactly one. The only policy the
+    /// first landing accepts.
+    | Single
+    /// Expand each union parameter in turn while holding the others at union type. Reserved:
+    /// declared, rejected by the reader, unimplemented.
+    | Linear
+
+/// How a member whose parameter is an erased union gains one overload per arm, beside the union
+/// member rather than instead of it. Disabled by default: every generated binding is a stable
+/// artefact, and arm overloads make `f(!^ x)` ambiguous at existing call sites (FS0041), so a
+/// consumer opts in and migrates once.
+type UnionArmOverloadsConfig =
+    {
+        [<Description("Synthesize one overload per arm for a member whose parameter is an erased union, beside \
+        the union member. Defaults to false. Enabling it makes `!^` casts at those call sites ambiguous.")>]
+        Enabled: bool
+        [<Description("The largest arm count that expands. A union with more arms keeps the union member alone \
+        and reports why. Defaults to 4.")>]
+        MaxArms: int
+        [<Description("Which union parameters expand. Only \"single\" is accepted: a member with exactly one \
+        union parameter. \"linear\" is reserved and rejected until it ships.")>]
+        Policy: UnionArmPolicy
+    }
+
+    static member Default =
+        {
+            Enabled = false
+            MaxArms = 4
+            Policy = Single
+        }
+
 /// The one identifier validator shared by names that become F# declaration or module segments.
 module Identifier =
     let private shaped =
@@ -242,6 +277,8 @@ type GeneratorConfig =
         Use for expanded wildcards, conditional declarations and separate runtime environments. \
         Mutually exclusive with entry and subpaths.")>]
         PublicInputs: Map<string, string> option
+        /// Arm overloads beside an erased-union parameter (D4 §4.5's deferred half).
+        UnionArmOverloads: UnionArmOverloadsConfig
     }
 
     static member Default =
@@ -260,6 +297,7 @@ type GeneratorConfig =
             AutoOpenExports = false
             Subpaths = None
             PublicInputs = None
+            UnionArmOverloads = UnionArmOverloadsConfig.Default
         }
 
 module GeneratorConfig =
@@ -454,6 +492,46 @@ module GeneratorConfig =
                     Some(Map.ofList entries)
                 | true, _ -> failwith "xantham.json: publicInputs must be an object"
 
+            let unionArmOverloads =
+                match doc.RootElement.TryGetProperty "unionArmOverloads" with
+                | false, _ -> UnionArmOverloadsConfig.Default
+                | true, value when value.ValueKind = JsonValueKind.Object ->
+                    let enabled =
+                        match value.TryGetProperty "enabled" with
+                        | false, _ -> UnionArmOverloadsConfig.Default.Enabled
+                        | true, flag when flag.ValueKind = JsonValueKind.True -> true
+                        | true, flag when flag.ValueKind = JsonValueKind.False -> false
+                        | true, _ -> failwith "xantham.json: unionArmOverloads.enabled must be a boolean"
+
+                    let maxArms =
+                        match value.TryGetProperty "maxArms" with
+                        | false, _ -> UnionArmOverloadsConfig.Default.MaxArms
+                        | true, count when count.ValueKind = JsonValueKind.Number ->
+                            match count.TryGetInt32() with
+                            | true, count when count >= 2 -> count
+                            | _ -> failwith "xantham.json: unionArmOverloads.maxArms must be an integer of at least 2"
+                        | true, _ -> failwith "xantham.json: unionArmOverloads.maxArms must be a number"
+
+                    // `linear` is declared in `UnionArmPolicy` and refused here, so shipping it
+                    // later adds a case rather than changing this schema.
+                    let policy =
+                        match value.TryGetProperty "policy" with
+                        | false, _ -> UnionArmOverloadsConfig.Default.Policy
+                        | true, name when name.ValueKind = JsonValueKind.String ->
+                            match name.GetString() with
+                            | "single" -> Single
+                            | "linear" ->
+                                failwith "xantham.json: unionArmOverloads.policy \"linear\" is reserved and not yet implemented"
+                            | other -> failwith $"xantham.json: unionArmOverloads.policy must be \"single\", not \"{other}\""
+                        | true, _ -> failwith "xantham.json: unionArmOverloads.policy must be a string"
+
+                    {
+                        Enabled = enabled
+                        MaxArms = maxArms
+                        Policy = policy
+                    }
+                | true, _ -> failwith "xantham.json: unionArmOverloads must be an object"
+
             let compilerLib =
                 match doc.RootElement.TryGetProperty "compilerLib" with
                 | false, _ -> CompilerLibConfig.Default
@@ -498,6 +576,7 @@ module GeneratorConfig =
                 AutoOpenExports = boolField "autoOpenExports" GeneratorConfig.Default.AutoOpenExports
                 Subpaths = subpaths
                 PublicInputs = publicInputs
+                UnionArmOverloads = unionArmOverloads
             }
 
     /// Loads `<packageDir>/xantham.json`.

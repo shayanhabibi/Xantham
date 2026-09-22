@@ -223,6 +223,10 @@ module FindingCodes =
             "DO.ExportMemberRenamed", "DO007"
             "DO.ExportReturnTypesUnioned", "DO008"
             "DO.ExportDeclarationsConsolidated", "DO009"
+            "UA.ArmOverloadsSynthesized", "UA001"
+            "UA.ArmCountExceedsCap", "UA002"
+            "UA.ArmsCollapseToOneSignature", "UA003"
+            "UA.ArmOverloadCollides", "UA004"
             "RA.GenericAliasDropped", "RA001"
             "RA.ReferenceToDroppedAlias", "RA002"
             "RA.GenericWithoutArguments", "RA003"
@@ -1070,6 +1074,35 @@ type DedupeOverloads =
             | KeyofConstrainedOverloadDropped parameter ->
                 $"overload dropped; parameter {parameter} separates only by a keyof-constrained type parameter"
 
+/// `expand-union-arms`. The refusal cases carry the weight: a consumer who enables the feature
+/// and finds a member unchanged reads the manifest to learn which condition it failed.
+[<Prefix("UA", "expand-union-arms")>]
+type ExpandUnionArms =
+    /// The member gained one overload per arm beside its union member. Arm overloads add a call
+    /// path rather than recovering fidelity, so the member keeps the grade its union earned.
+    | [<Ergonomic>] ArmOverloadsSynthesized of parameter: string * arms: int
+    /// The union has more arms than `maxArms` admits. The union member stands alone.
+    | [<Ergonomic>] ArmCountExceedsCap of parameter: string * arms: int * cap: int
+    /// Two arms map to one F# signature, so every synthesised call site would be FS0041. A
+    /// partial arm set would be an API whose shape depends on which arms happened to survive,
+    /// so the whole member declines.
+    | [<Ergonomic>] ArmsCollapseToOneSignature of parameter: string
+    /// A synthesised signature collides with a member the declaration already has, including a
+    /// TypeScript-declared overload that survived dedupe.
+    | [<Ergonomic>] ArmOverloadCollides of parameter: string * memberName: string
+
+    interface IFindingKind with
+        member this.Message =
+            match this with
+            | ArmOverloadsSynthesized(parameter, arms) ->
+                $"parameter {parameter} expanded to {arms} arm overloads beside the union member"
+            | ArmCountExceedsCap(parameter, arms, cap) ->
+                $"parameter {parameter} not expanded: {arms} arms exceeds the configured cap of {cap}"
+            | ArmsCollapseToOneSignature parameter ->
+                $"parameter {parameter} not expanded: its arms map to one F# signature"
+            | ArmOverloadCollides(parameter, memberName) ->
+                $"parameter {parameter} not expanded: a synthesized signature collides with {memberName}"
+
 /// `repair-arity`.
 [<Prefix("RA", "repair-arity")>]
 type RepairArity =
@@ -1175,6 +1208,7 @@ module FindingCatalogue =
             typeof<ShapeExports>
             typeof<SynthesizeParamObjects>
             typeof<DedupeOverloads>
+            typeof<ExpandUnionArms>
             typeof<RepairArity>
             typeof<DropOrphanDelegates>
             typeof<AuditCoverage>

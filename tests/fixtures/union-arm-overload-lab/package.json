@@ -1,0 +1,6 @@
+{
+  "name": "union-arm-overload-lab",
+  "type": "module",
+  "types": "index.d.ts",
+  "description": "Lab for expand-union-arms: a single-union export, a delegate arm, a collapsing arm set, an over-cap union, and the two shapes that are not candidates."
+}
