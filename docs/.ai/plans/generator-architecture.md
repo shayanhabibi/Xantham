@@ -362,7 +362,9 @@ Phases — each ends with the compile gate green on its fixtures:
     literals all widen to `string`), a union collapsing to one arm *is* that arm, and
     any `obj` arm collapses the whole union to `obj`. `U_n` already satisfies D4's
     position preference - `U2.Case1 x` constructs on input, and the DU matches on
-    output - so only overload expansion at input positions is still deferred.
+    output - so only overload expansion at input positions is still deferred. Designed in
+    `2026-09-22-union-arm-overloads.md` as the `expand-union-arms` pass, running after
+    `dedupe-overloads` and shipping disabled.
   - *Fable's tagged-union erasure carries the arm's own properties as named DU fields*,
     not the arm type as a single payload. Verified against Fable 5.13 rather than
     recalled: `Circle(radius = 2.0)` emits `{ kind: "circle", radius: 2 }`, `None` in an

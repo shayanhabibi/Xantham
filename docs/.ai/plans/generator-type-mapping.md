@@ -328,6 +328,10 @@ prefer overloads and erased-union constructors. *Output* (return/property-read) 
 prefer tagged unions where detectable, and emit typed test helpers otherwise, since the
 consumer must discriminate. The generator knows the position; use it.
 
+The input half is designed in `docs/.ai/plans/2026-09-22-union-arm-overloads.md`: one
+synthesised overload per arm beside the `U_n` member, single-union members only, capped at four
+arms, disabled by default because an additive overload makes `f(!^ x)` FS0041.
+
 ### 4.6 Intersections
 
 - Intersections of object types → flatten with `getPropertiesOfType` on the intersection
