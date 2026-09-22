@@ -586,7 +586,26 @@ type TscChannel(exePath: string, cwd: string, ?callbacks: IDictionary<string, Ts
         let mutable result = ValueNone
 
         while result.IsNone do
-            let messageType, responseMethod, responsePayload = Msgpack.readFrame output
+            // A frame read almost never fails on its own account: it fails because the server
+            // died, and the server says why on stderr before it goes. That text is already
+            // being drained into `stderr`, and dropping it here leaves only "closed the pipe
+            // mid-frame" - true, and useless. Waits are bounded because a server that is still
+            // running has a different problem and must not hang the caller as well.
+            let messageType, responseMethod, responsePayload =
+                try
+                    Msgpack.readFrame output
+                with e ->
+                    proc.WaitForExit 3000 |> ignore
+                    drain.Wait 3000 |> ignore
+
+                    let code =
+                        if proc.HasExited then
+                            string proc.ExitCode
+                        else
+                            "still running"
+
+                    let diagnostics = lock stderr (fun () -> stderr.ToString())
+                    failwith $"{e.Message}\n--- tsgo method={method} exit={code} stderr ---\n{diagnostics}"
 
             match messageType with
             | MessageType.Response -> result <- ValueSome responsePayload
