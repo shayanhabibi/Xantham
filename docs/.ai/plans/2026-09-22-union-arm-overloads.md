@@ -219,12 +219,17 @@ since `float[]` and `string[]` are distinct signatures sharing one `isArrayLike`
 the mixed-union pass accepts would pass the collapsing check here; the reverse does not hold,
 so neither rule substitutes for the other.
 
-### Corpus numbers have a dependency — resolved 2026-09-22, no change
+### Corpus numbers have a dependency — still open
 
-The mixed-union Step 0 gate ran and returned **zero** eligible unions across all 108 packages,
-so that pass will not be built and claims nothing. The counts below stand as measured and the
-`maxArms` analysis needs no recomputation. The paragraph that follows is kept for its reasoning;
-its action item is discharged.
+This was marked resolved on 2026-09-22 on the strength of a mixed-union Step 0 run reporting
+**zero** eligible unions. That run was wrong: it read rendered `FsTypeRef`s, where string
+literals have already been widened to `FsString` at `Spec.fs:1542`. Re-measured against raw
+`TypeFacts`, the gate returns **11 eligible of 45**. See
+`2026-09-22-mixed-literal-unions.md` § *Step 0 result*.
+
+So the action item below is **not** discharged. The mixed-union pass is undecided rather than
+declined, and if it is built it will claim unions out of the population the counts below were
+measured over.
 
 
 
