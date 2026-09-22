@@ -219,7 +219,14 @@ since `float[]` and `string[]` are distinct signatures sharing one `isArrayLike`
 the mixed-union pass accepts would pass the collapsing check here; the reverse does not hold,
 so neither rule substitutes for the other.
 
-### Corpus numbers have a dependency
+### Corpus numbers have a dependency — resolved 2026-09-22, no change
+
+The mixed-union Step 0 gate ran and returned **zero** eligible unions across all 108 packages,
+so that pass will not be built and claims nothing. The counts below stand as measured and the
+`maxArms` analysis needs no recomputation. The paragraph that follows is kept for its reasoning;
+its action item is discharged.
+
+
 
 The counts in § *Corpus shape* — 484 imported static members, 59 with a union parameter, 57
 with exactly one — are measured against today's union population. Every union the mixed-union

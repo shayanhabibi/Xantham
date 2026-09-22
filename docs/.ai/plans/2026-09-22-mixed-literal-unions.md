@@ -27,9 +27,11 @@ type Origin =
 with the literals widened to `string`, or widens to `obj`. Both lose the literal set. The DU
 form keeps it, and `Origin.Num 3.5` is a direct application with no `!^` needed.
 
-**Status:** design settled and empirically validated against Fable 5.13.0; not implemented.
-Two review rounds and four compile probes went into it. Everything below marked *verified* was
-observed in emitted JavaScript, not recalled.
+**Status: NOT BUILDING THIS.** Step 0 ran on 2026-09-22 and returned zero eligible unions
+across the whole 108-package corpus. See "Step 0 result" below. The design is settled and
+empirically validated against Fable 5.13.0, and it stays here as a record of *why* the corpus
+cannot use it — not as work queued up. Everything marked *verified* was observed in emitted
+JavaScript, not recalled.
 
 ## The constraint that shapes everything
 
@@ -135,13 +137,60 @@ error here whenever the sole literal is lowercase.
 
 ## Step 0 — go/no-go gate
 
-- [ ] Wire the classifier from `mixed-union-classifier.fsx` (see "Prototype" below) into a
+- [x] Wire the classifier from `mixed-union-classifier.fsx` (see "Prototype" below) into a
       throwaway counting pass. No model or render changes.
-- [ ] Over Anime.js and two other packages, count: unions mixing string literals with
+- [x] Over Anime.js and two other packages, count: unions mixing string literals with
       non-literal members; and of those, how many pass every condition below.
-- [ ] **If the second number is near zero, stop and write up the negative result.** The
+- [x] **If the second number is near zero, stop and write up the negative result.** The
       implementation cost is dominated by a tenth `FsDecl` case rippling through ~40
       exhaustive match sites. That is not worth paying for a handful of unions.
+
+## Step 0 result — 2026-09-22: zero eligible, do not build
+
+Run over all 108 golden packages rather than the three the step asked for, via a throwaway
+`count-mixed-unions` pass at `Passes.fs` position 5 (written, run, reverted; not committed).
+Named arms were left unresolved and counted as *eligible*, so every number below is an upper
+bound.
+
+**18 unique mixed literal/typed unions in the corpus. 0 pass the conditions.**
+
+| Rejected by | Unions |
+|---|---|
+| a bare `string` arm beside the literals (test class `Str`) | 12 |
+| an `Opaque` arm — `U_n`, `obj`, a type parameter | 3 |
+| non-string literals in the mix (condition 1) | 2 |
+| all arms plain `[<Interface>]`, none discriminable | 1 |
+
+Arm ambiguity never fired: all 18 had pairwise-distinct test classes. **The feature is not
+blocked by the thing the design spent its effort on.** It is blocked by condition 4, and
+overwhelmingly by one idiom.
+
+### The blocking idiom
+
+Two thirds of the corpus's mixed unions are `"a" | "b" | string` — TypeScript's
+autocomplete-hint pattern, usually written `"a" | "b" | (string & {})`. A bare `string` arm
+tests `typeof x === "string"` and so does every fieldless literal case, so the arm swallows the
+literals. This is unfixable by any amount of classifier work: the literals *are* strings. The
+`EasingParam` union carries 43 literals beside a `string` arm and `ValidComponent` carries 208
+— exactly the unions whose literal sets were most worth keeping, and precisely the ones that
+cannot keep them.
+
+The nearest miss was `ChatCompletionToolChoiceOption` (`@cloudflare/workers-types`): three
+string literals and three named arms, distinct, no `string` arm. Its arms are plain
+`[<Interface>]` declarations with no `[<Import>]`, so each is `warnAndEvalToFalse` — the DU
+would compile with all three payload branches silently absent. It renders today as
+`U4<string, …>` with the literals widened away, and that stays the honest answer.
+
+### What this closes
+
+The `U_n` fallback is not a gap for this corpus; it is the correct mapping for the shapes the
+corpus actually contains. Revisit only if a target package appears with mixed unions over
+`[<Import>]`-bound classes — re-run the counting pass before reopening, do not re-argue the
+design.
+
+It also resolves the dependency recorded in `2026-09-22-union-arm-overloads.md` § *Corpus
+numbers have a dependency*: this pass claims **no** unions, so that record's 484/59/57 counts
+and its `maxArms` analysis stand unchanged and need no recomputation.
 
 ## Conditions to emit
 
