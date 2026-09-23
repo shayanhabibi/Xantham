@@ -38,9 +38,11 @@ let private withMain (test: Ast.SourceFile -> unit) =
 
             let snapshot =
                 Api.updateSnapshot channel
-                    { OpenProjects = ValueSome [| file "tsconfig.json" |]
+                    { Snapshot = ValueNone
+                      OpenProjects = ValueSome [| file "tsconfig.json" |]
                       CloseProjects = ValueNone
                       FileChanges = ValueNone
+                      FileSystem = ValueNone
                       OpenFiles = ValueNone
                       CloseFiles = ValueNone }
 

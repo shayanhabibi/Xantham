@@ -1,6 +1,6 @@
 {
   "repo": "microsoft/TypeScript",
-  "ref": "cf7b9361a33fa0c8e1afa3cf45fde29c9ab23ec0",
+  "ref": "879f9867ac455404e75759dd1739281cf6aa7f85",
   "comment": "Pinned commit of the upstream sources vendored into tools/tsc-ast/upstream, which mirrors the upstream directory layout. Bump `ref` (or pass --ref) and run `dotnet fsi tools/generate-wire.fsx sync tsc-ast` to resync.",
   "sources": [
     {

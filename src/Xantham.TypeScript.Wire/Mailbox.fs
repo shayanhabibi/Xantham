@@ -51,7 +51,7 @@ type TscMailbox(exePath, cwd, ?callbacks: IDictionary<string, TsGoCallback>) =
                             ProtoJson.request<BatchRequestsParams, BatchRequestsResponse>
                                 channel
                                 Method.BatchRequests
-                                { Requests = ValueSome requests }
+                                { BatchRequestsParams.Default with Requests = ValueSome requests }
 
                         if response.Responses.Length <> requests.Length then
                             failwithf
