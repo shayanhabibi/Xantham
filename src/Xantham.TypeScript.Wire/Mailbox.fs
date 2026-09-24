@@ -1,10 +1,67 @@
 ﻿namespace Xantham.TypeScript.Wire
 
 open System
+open System.Collections.Concurrent
 open System.Collections.Generic
 open System.Runtime.ExceptionServices
 open System.Threading
+open System.Threading.Tasks
 open Xantham.TypeScript.Wire.Proto
+
+/// How <see cref="T:Xantham.TypeScript.Wire.TscMailbox"/> sends a group of queued requests.
+[<RequireQualifiedAccess>]
+module Batch =
+
+    /// The methods that change server state: they create or free a snapshot or program, write
+    /// files, or toggle profiling. A batch refused as a whole has already executed them, so they
+    /// are reported as failed with the batch error and are never re-sent.
+    let sideEffectingMethods =
+        HashSet<string>
+            [
+                Method.Release
+                Method.UpdateSnapshot
+                Method.UpdateTemporarySnapshot
+                Method.CreateProgram
+                Method.Emit
+                Method.StartCPUProfile
+                Method.StopCPUProfile
+                Method.SaveHeapProfile
+            ]
+
+    /// The result of each of `requests`, in order: `one` for a lone request, `many` for several.
+    /// A whole-batch `TsGoError` replays the read-only members one by one through `one`; any
+    /// other failure is every member's result.
+    let internal dispatch
+        (one: BatchRequest -> byte[])
+        (many: BatchRequest[] -> Result<byte[], exn>[])
+        (requests: BatchRequest[])
+        : Result<byte[], exn>[] =
+        try
+            if requests.Length = 1 then
+                [| Ok(one requests[0]) |]
+            else
+                many requests
+        with
+        | TsGoError _ as batchError when requests.Length > 1 ->
+            // The server refused the batch as a whole, not one member of it: a batch response is
+            // marshalled in one piece, so a single result that cannot be encoded (verified live:
+            // a number literal type whose value is `1e999` is `+Inf` to Go's JSON encoder) fails
+            // every request travelling with it. The channel survived - the refusal is an
+            // ordinary error frame - so replay the read-only members one by one and let only the
+            // guilty one fail.
+            requests
+            |> Array.map (fun request ->
+                if sideEffectingMethods.Contains request.Method then
+                    Error batchError
+                else
+                    try
+                        Ok(one request)
+                    with error ->
+                        Error error)
+        | error ->
+            // The channel failed, and keeps failing every later request with the same error, so
+            // nobody in this group gets an answer.
+            Array.create requests.Length (Error error)
 
 /// <summary>
 /// <para>Asynchronous wrapper for the serial channel. Avoids the async-api overhead of the tsc encoding.</para>
@@ -21,9 +78,14 @@ type TscMailbox(exePath, cwd, ?callbacks: IDictionary<string, TsGoCallback>) =
     let cancellation = new CancellationTokenSource()
     let mutable disposed = 0
 
+    // Every reply not yet completed. Dispose fails them, since the agent stops with them queued.
+    let pending = ConcurrentDictionary<TaskCompletionSource<Result<byte[], exn>>, unit>()
+
+    let disposedError () = ObjectDisposedException(nameof TscMailbox) :> exn
+
     // Replies carry the failure rather than raising inside the agent
     let agent =
-        MailboxProcessor<BatchRequest * AsyncReplyChannel<Result<byte[], exn>>>
+        MailboxProcessor<BatchRequest * TaskCompletionSource<Result<byte[], exn>>>
             .Start(
                 (fun inbox ->
                     // Everything already queued goes out together. The count is read after the first
@@ -75,34 +137,13 @@ type TscMailbox(exePath, cwd, ?callbacks: IDictionary<string, TsGoCallback>) =
                             let! first = inbox.Receive()
                             let! batch = drain (ResizeArray [ first ])
                             let requests = batch |> Seq.map fst |> Array.ofSeq
+                            let results = Batch.dispatch one many requests
 
-                            let results =
-                                try
-                                    if requests.Length = 1 then
-                                        [| Ok(one requests[0]) |]
-                                    else
-                                        many requests
-                                with
-                                | TsGoError _ when requests.Length > 1 ->
-                                    // The server refused the batch as a whole, not one member of it:
-                                    // a batch response is marshalled in one piece, so a single
-                                    // result that cannot be encoded (verified live: a number literal
-                                    // type whose value is `1e999` is `+Inf` to Go's JSON encoder)
-                                    // fails every request travelling with it. The channel survived -
-                                    // the refusal is an ordinary error frame - so replay the members
-                                    // one by one and let only the guilty one fail.
-                                    requests
-                                    |> Array.map (fun request ->
-                                        try
-                                            Ok(one request)
-                                        with error ->
-                                            Error error)
-                                | error ->
-                                    // The channel is dead; nobody in this group gets an answer, so
-                                    // tell all of them the same thing.
-                                    Array.create requests.Length (Error error)
+                            batch
+                            |> Seq.iteri (fun i (_, reply: TaskCompletionSource<_>) ->
+                                reply.TrySetResult results[i] |> ignore
+                                pending.TryRemove reply |> ignore)
 
-                            Seq.iteri (fun i (_, reply: AsyncReplyChannel<_>) -> reply.Reply results[i]) batch
                             return! loop ()
                         }
 
@@ -112,7 +153,20 @@ type TscMailbox(exePath, cwd, ?callbacks: IDictionary<string, TsGoCallback>) =
 
     let send entry =
         async {
-            match! agent.PostAndAsyncReply(fun reply -> entry, reply) with
+            if Volatile.Read &disposed = 1 then
+                raise (disposedError ())
+
+            let reply =
+                TaskCompletionSource<Result<byte[], exn>>(TaskCreationOptions.RunContinuationsAsynchronously)
+
+            pending[reply] <- ()
+            // A Dispose between the check above and the registration has already swept `pending`.
+            if Volatile.Read &disposed = 1 then
+                reply.TrySetResult(Error(disposedError ())) |> ignore
+            else
+                agent.Post(entry, reply)
+
+            match! Async.AwaitTask reply.Task with
             | Ok bytes -> return bytes
             // Rethrow where it was raised, so the caller sees the channel's stack and not this one.
             | Error error ->
@@ -193,11 +247,14 @@ type TscMailbox(exePath, cwd, ?callbacks: IDictionary<string, TsGoCallback>) =
             | bytes -> return ValueSome(Ast.read bytes)
         }
 
-    /// Stops the agent and closes the channel, which is owned here: the channel is constructed
-    /// internally and never handed out, so no caller can be holding it. Idempotent, because `use`
-    /// will call this again after an explicit call.
+    /// Stops the agent and closes the channel, which is owned here. Requests still queued fail
+    /// with `ObjectDisposedException`, as does every later request. Idempotent.
     member _.Dispose() =
         if Interlocked.Exchange(&disposed, 1) = 0 then
+            for reply in pending.Keys do
+                reply.TrySetResult(Error(disposedError ())) |> ignore
+
+            pending.Clear()
             cancellation.Cancel()
             (agent :> IDisposable).Dispose()
             cancellation.Dispose()
