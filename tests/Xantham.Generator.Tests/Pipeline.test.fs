@@ -2720,6 +2720,15 @@ let pipelineTests =
                           [ "UA004" ]
                           "the collision is recorded against the member that declined"
 
+                  testCase "an arm that is a prefix of a declared overload with an optional tail refuses the member" <| fun _ ->
+                      let source = (rendered ()).Files |> List.head |> snd
+
+                      Expect.isFalse
+                          (source.Contains "static member prefix (x: string) : string")
+                          "a call `prefix \"a\"` would select the arm and the declared overload alike"
+
+                      Expect.equal (findingsFor "Exports.prefix") [ "UA004" ] "the ambiguity is recorded as a collision"
+
                   testCase "a union over the cap keeps its union member alone" <| fun _ ->
                       Expect.equal (findingsFor "Exports.wide") [ "UA002" ] "five arms against a cap of four"
 
