@@ -305,17 +305,19 @@ let generateSession =
             }
     }
 
-rootCommand fsi.CommandLineArgs[1..] {
-    command "sync" { command "tsc-ast" { syncTscAst } }
+exit (
+    rootCommand fsi.CommandLineArgs[1..] {
+        command "sync" { command "tsc-ast" { syncTscAst } }
 
-    command "generate" {
-        command "proto" { generateProto }
+        command "generate" {
+            command "proto" { generateProto }
 
-        command "ast" {
-            requireUpstream
-            generateAst
+            command "ast" {
+                requireUpstream
+                generateAst
+            }
+
+            command "session" { generateSession }
         }
-
-        command "session" { generateSession }
     }
-}
+)

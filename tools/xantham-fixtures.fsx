@@ -183,13 +183,15 @@ module Stage =
                 }
         }
 
-rootCommand fsi.CommandLineArgs[1..] {
-    command "init" {
-        stage "parallel/initialise fixtures" {
-            parallel' 4
+exit (
+    rootCommand fsi.CommandLineArgs[1..] {
+        command "init" {
+            stage "parallel/initialise fixtures" {
+                parallel' 4
 
-            for fixture in fixtures do
-                Stage.initialiseFixture (InputSpec.ret fixture)
+                for fixture in fixtures do
+                    Stage.initialiseFixture (InputSpec.ret fixture)
+            }
         }
     }
-}
+)

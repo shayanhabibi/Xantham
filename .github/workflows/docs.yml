@@ -30,10 +30,7 @@ jobs:
       # Restore the local tools
       - name: Restore tools
         run: dotnet tool restore
-      # Build the code for the API documentation
-      - name: Build code
-        run: dotnet build -c Release Xantham.slnx
-      # Generate the documentation files
+      # Clean, build the documented projects in Release and generate the documentation files
       - name: Generate the documentation'
         run: dotnet fsi build.fsx -- docs
       # Upload the static files
