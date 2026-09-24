@@ -141,12 +141,13 @@ the catalog suites run in the main checkout.
 
 Carried from lanes that closed without finishing these.
 
-- **Mixed literal/typed unions: measured and declined.** `plans/2026-09-22-mixed-literal-unions.md`
-  Step 0 found 18 such unions in the corpus and **0** emittable as erased DUs — two thirds are
-  `"a" | "b" | string`, whose bare `string` arm swallows the literal cases. `U_n` is the right
-  mapping here. Re-run the counting pass before reopening; do not re-argue the design.
-- **Union arm overloads remain open and unimplemented**: `plans/2026-09-22-union-arm-overloads.md`.
-  Ships disabled. Its corpus counts are now final (the mixed-union pass claims nothing).
+- **Mixed literal/typed unions: reopened, decision pending.**
+  `plans/2026-09-22-mixed-literal-unions.md` Step 0 found **11 eligible of 45** such unions,
+  counted over raw `TypeFacts` by `Shape/MixedUnionCensus.fs`. An earlier run reported 0; it
+  read `FsTypeRef`s after the literals had already widened to `string`, and its result is
+  withdrawn. Whether 11 unions justify a new decl case is the open question.
+- **Union arm overloads: implemented 2026-09-22, shipped disabled** behind
+  `unionArmOverloads.enabled` in `xantham.json`: `plans/2026-09-22-union-arm-overloads.md`.
 
 - **`objectRef` ordering.** `Shape/Spec.fs`'s pure-callback branch sits ahead of its
   named-instantiation lookup, so `type StoreReturn<'T> = 'T * Action<obj, …>` while
