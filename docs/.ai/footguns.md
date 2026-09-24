@@ -105,6 +105,28 @@ gets no coercion: a bare lambda into a `System.Func<…>` arm is FS0002, and a c
 `(float -> float -> string)` arm accepts the lambda but emits curried JS of the wrong arity. The
 same arm carried by a method parameter takes a bare lambda and emits `(a, b) => …`.
 
+## Fable consumption of bindings
+
+**`Xantham.Fable.Core.TS` reaches Fable as a DLL, never as source.** Fable merges a NuGet
+package's sources only when the package ships `fable/*.fsproj`, and this package ships `lib/`
+alone. The run gate reproduces that with `--exclude Xantham.Fable.Core.TS`, which also cut its
+Fable compile from 22.7s to 6.3s (Fable 5.0.0, 2026-09-24). From the DLL, Fable resolves only
+attributes (`Emit`, `Import`, `Global`, `Erase`, `ParamObject`, `CompiledValue`) and interfaces.
+Every member of the bindings, generated or hand-written, must therefore be an attribute-carrying
+member or an abstract one. An `inline` member or a member with a body fails at the consumer's
+call site:
+
+- under a `Fable.Core.*` namespace, as `… is not supported, try updating fable tool`;
+- elsewhere, as `Cannot find the body of inline member`.
+
+The run gate catches this only for members it calls, so a new hand-written member needs a check
+in `tests/Xantham.Generator.RunGate/Program.fs` (`bindingExtensions`).
+
+`Xantham.Fable.Core` is the exception: its `KeyOf`/`TypeKeyOf` helpers are `inline`, so it is
+compiled from source, and excluding it fails with `Cannot find inline member`. Its package
+therefore needs its sources under `fable/`. `0.1.0-alpha.1` ships `lib/` alone, so a NuGet
+consumer calling those helpers fails the same way — an open thread.
+
 ## Build and test environment
 
 **Nested `dotnet build` inside a test stalls under `dotnet test`.** Idle MSBuild nodes hold the

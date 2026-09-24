@@ -2081,11 +2081,19 @@ let private dependencyEntrypoint () =
     let quiet = DependencyActorWithoutHook()
     check "dependency entrypoint omitted hook is absent" (emitJsExpr quiet "$0.fetch === undefined")
 
+/// The hand-written members of `Xantham.Fable.Core.TS`, which the gate references as a built DLL.
+let private bindingExtensions () =
+    let increment =
+        Fable.Core.TSExtensions.Utils.toJSFunc (fun (value: int) -> value + 1)
+
+    check "toJSFunc yields the callable JavaScript function" (emitJsExpr increment "$0(1) === 2")
+
 [<EntryPoint>]
 let main _ =
     dependencyEntrypoint ()
     SupportHelpers.run check
     ExportProvenance.run check
+    bindingExtensions ()
     globals ()
     imports ()
     ambientModules ()

@@ -439,12 +439,14 @@ module Stages =
                     // by Fable and executed under node against the fixtures' JavaScript runtimes.
                     // `--noCache` because Fable's up-to-date check missed a changed linked golden once,
                     // and a gate that skips its compile is not a gate.
+                    // `--exclude Xantham.Fable.Core.TS` references the bindings as a built DLL, as a
+                    // NuGet consumer receives them, rather than transpiling their sources.
                     stage "run gate" {
                         when' runGate
                         workingDir "tests/Xantham.Generator.RunGate"
 
                         run
-                            "dotnet fable . -o fable-out --noCache --run node --import ./register.mjs fable-out/Program.js"
+                            "dotnet fable . -o fable-out --noCache --exclude Xantham.Fable.Core.TS --run node --import ./register.mjs fable-out/Program.js"
                     }
                 }
         }
