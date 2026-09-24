@@ -236,7 +236,7 @@ symbol |> ValueOption.exists (fun symbol -> symbol.Flags.HasFlag SymbolFlags.Pro
 `SymbolFlags`, `TypeFlags`, `ObjectFlags`, `CheckFlags`, `SignatureFlags` and `ElementFlags` are
 generated into `Enums.generated.fs` from upstream's published enums, and the response records name
 them. Which field carries which enum is an explicit table in the proto generator, not a guess from
-the field name — see entry 3 of `docs/wire-hand-written.md`.
+the field name — see entry 3 of the [hand-written register](../dev/hand-written.md).
 
 Each enum comes in two halves, and the seam is invisible from here. The single bits upstream
 defines are enum cases; the combinations it builds out of them are `[<Literal>]`s in a companion

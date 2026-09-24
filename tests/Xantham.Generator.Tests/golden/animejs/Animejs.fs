@@ -3643,6 +3643,7 @@ type Utils =
     abstract wrap: v: float * min: float * max: float -> float
     abstract wrap: min: float * max: float -> ChainableUtil
     abstract mapRange: value: float * inLow: float * inHigh: float * outLow: float * outHigh: float -> float
+    abstract mapRange: inLow: float * inHigh: float * outLow: float * outHigh: float -> ChainableUtil
     abstract degToRad: degrees: float -> float
     abstract degToRad: unit -> ChainableUtil
     abstract radToDeg: radians: float -> float

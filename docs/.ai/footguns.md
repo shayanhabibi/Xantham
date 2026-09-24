@@ -81,7 +81,8 @@ missing table row.
 ## Fable runtime type tests
 
 Measured against Fable 5.13.0 on 2026-09-22 while designing erased-DU mapping for mixed
-literal/typed unions. These constrain any pass that puts a payload arm on an `[<Erase>]` union.
+literal/typed unions. The repository pins the `fable` tool at 5.0.0, and these results are
+unverified there. These constrain any pass that puts a payload arm on an `[<Erase>]` union.
 Full table and provenance: `docs/.ai/plans/2026-09-22-mixed-literal-unions.md`.
 
 **Two arms that share a runtime test are a silent failure.** `float[]` and `(float * float)`
@@ -105,6 +106,28 @@ gets no coercion: a bare lambda into a `System.Func<…>` arm is FS0002, and a c
 `(float -> float -> string)` arm accepts the lambda but emits curried JS of the wrong arity. The
 same arm carried by a method parameter takes a bare lambda and emits `(a, b) => …`.
 
+## Fable consumption of bindings
+
+**`Xantham.Fable.Core.TS` reaches Fable as a DLL, never as source.** Fable merges a NuGet
+package's sources only when the package ships `fable/*.fsproj`, and this package ships `lib/`
+alone. The run gate reproduces that with `--exclude Xantham.Fable.Core.TS`, which also cut its
+Fable compile from 22.7s to 6.3s (Fable 5.0.0, 2026-09-24). From the DLL, Fable resolves only
+attributes (`Emit`, `Import`, `Global`, `Erase`, `ParamObject`, `CompiledValue`) and interfaces.
+Every member of the bindings, generated or hand-written, must therefore be an attribute-carrying
+member or an abstract one. An `inline` member or a member with a body fails at the consumer's
+call site:
+
+- under a `Fable.Core.*` namespace, as `… is not supported, try updating fable tool`;
+- elsewhere, as `Cannot find the body of inline member`.
+
+The run gate catches this only for members it calls, so a new hand-written member needs a check
+in `tests/Xantham.Generator.RunGate/Program.fs` (`bindingExtensions`).
+
+`Xantham.Fable.Core` is the exception: its `KeyOf`/`TypeKeyOf` helpers are `inline`, so it is
+compiled from source, and excluding it fails with `Cannot find inline member`. Its package ships
+its sources under `fable/` for the same reason; a package without them fails the same way at a
+consumer's first helper call.
+
 ## Build and test environment
 
 **Nested `dotnet build` inside a test stalls under `dotnet test`.** Idle MSBuild nodes hold the
@@ -113,18 +136,20 @@ directly, and nested builds carry a `global.json` in a temp directory outside th
 newer SDK stays eligible.
 
 **`tools/workspace.fsx` exports `XANTHAM_TSGO_EXE` from any checkout**, not only a worktree, so
-the catalog suites run in the main checkout.
+the catalog suites run in the main checkout. Only a worktree skips `npm install`: the main
+checkout owns its install, so a `package.json` typescript pin bump reaches the exported path.
 
 ## Open threads
 
 Carried from lanes that closed without finishing these.
 
-- **Mixed literal/typed unions: measured and declined.** `plans/2026-09-22-mixed-literal-unions.md`
-  Step 0 found 18 such unions in the corpus and **0** emittable as erased DUs — two thirds are
-  `"a" | "b" | string`, whose bare `string` arm swallows the literal cases. `U_n` is the right
-  mapping here. Re-run the counting pass before reopening; do not re-argue the design.
-- **Union arm overloads remain open and unimplemented**: `plans/2026-09-22-union-arm-overloads.md`.
-  Ships disabled. Its corpus counts are now final (the mixed-union pass claims nothing).
+- **Mixed literal/typed unions: reopened, decision pending.**
+  `plans/2026-09-22-mixed-literal-unions.md` Step 0 found **11 eligible of 45** such unions,
+  counted over raw `TypeFacts` by `Shape/MixedUnionCensus.fs`. An earlier run reported 0; it
+  read `FsTypeRef`s after the literals had already widened to `string`, and its result is
+  withdrawn. Whether 11 unions justify a new decl case is the open question.
+- **Union arm overloads: implemented 2026-09-22, shipped disabled** behind
+  `unionArmOverloads.enabled` in `xantham.json`: `plans/2026-09-22-union-arm-overloads.md`.
 
 - **`objectRef` ordering.** `Shape/Spec.fs`'s pure-callback branch sits ahead of its
   named-instantiation lookup, so `type StoreReturn<'T> = 'T * Action<obj, …>` while

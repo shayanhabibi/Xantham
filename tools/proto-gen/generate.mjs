@@ -116,7 +116,7 @@ function mapType(node, ctx) {
  *
  * The schema cannot say so - the Go side serialises every enum as an integer - but upstream's own
  * typed wrapper does, in `dist/api/sync/api.d.ts` and `dist/api/async/types.d.ts`. Each entry
- * below is transcribed from a declaration there; the register in `docs/wire-hand-written.md`
+ * below is transcribed from a declaration there; the register in `site/content/dev/hand-written.md`
  * names the declaration for each one.
  *
  * Explicit rather than inferred from the field name: `TypeToTypeNodeParams.flags` is a

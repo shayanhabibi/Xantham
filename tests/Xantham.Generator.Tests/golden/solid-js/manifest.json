@@ -61,11 +61,6 @@
       "ergonomic": 158
     },
     {
-      "pass": "DO - dedupe-overloads",
-      "total": 4,
-      "widened": 4
-    },
-    {
       "pass": "RA - repair-arity",
       "total": 12,
       "ergonomic": 7,

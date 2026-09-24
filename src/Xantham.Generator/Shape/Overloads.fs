@@ -135,7 +135,7 @@ let dedupeOverloads: Pass<ShapeModel> =
                                 // `Create` overloads collide the same way methods do, and share
                                 // their namespace: a static side with both `new (url: string)`
                                 // and a `Create(url: string)` property would be one clash.
-                                let key = ("Create", signatureKey c.TypeParameters c.Parameters).ToString()
+                                let key = "Create", signatureKey c.TypeParameters c.Parameters
 
                                 if Set.contains key seen then
                                     findings <-
@@ -146,7 +146,7 @@ let dedupeOverloads: Pass<ShapeModel> =
                                     seen <- Set.add key seen
                                     true
                             | FsMethod m ->
-                                let key = (m.Name, signatureKey m.TypeParameters m.Parameters).ToString()
+                                let key = m.Name, signatureKey m.TypeParameters m.Parameters
 
                                 if Set.contains key seen then
                                     let dropped =
@@ -164,7 +164,7 @@ let dedupeOverloads: Pass<ShapeModel> =
                                 // `Invoke` overloads collide the same way `Create` overloads do: two
                                 // call signatures that widen to the same F# parameter types are one
                                 // .NET member, not two.
-                                let key = ("Invoke", signatureKey c.TypeParameters c.Parameters).ToString()
+                                let key = "Invoke", signatureKey c.TypeParameters c.Parameters
 
                                 if Set.contains key seen then
                                     findings <-

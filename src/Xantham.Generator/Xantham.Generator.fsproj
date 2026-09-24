@@ -25,6 +25,7 @@
         <Compile Include="Shape\Anonymous.fs" />
         <Compile Include="Shape\ConstructorObjects.fs" />
         <Compile Include="Shape\FreeTypeParams.fs" />
+        <Compile Include="Shape\MixedUnionCensus.fs" />
         <Compile Include="Shape\LiteralUnions.fs" />
         <Compile Include="Shape\TaggedUnions.fs" />
         <Compile Include="Shape\Callbacks.fs" />

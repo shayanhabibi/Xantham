@@ -19,13 +19,6 @@ module Xantham.Generator.Shape.UnionArms
 open Xantham.Generator
 open Xantham.Generator.Shape.Spec
 
-/// What a member's parameter list looks like to .NET overload resolution: optionality, rest-ness
-/// and the abbreviation-expanded type of each parameter. Return types are absent because
-/// resolution ignores them.
-let private signatureKey (abbrevs: Map<string, FsTypeRef>) (parameters: FsParam list) =
-    parameters
-    |> List.map (fun p -> p.Optional, p.Rest, expandAbbreviations abbrevs Set.empty p.Type)
-
 /// The sole parameter of a member that reads as an erased union, with its arms.
 ///
 /// An optional union parameter is not a candidate: expanding it would have to choose between
@@ -64,7 +57,11 @@ let expandUnionArms: Pass<ShapeModel> =
 
                         /// One export member's expansion: the members it becomes, in render order.
                         /// The union member always survives and always comes first.
-                        let expandMember (owner: string) (taken: Set<string * _>) (owned: OwnedExportMember) =
+                        let expandMember
+                            (owner: string)
+                            (taken: (string * FsTypeParam list * FsParam list) list)
+                            (owned: OwnedExportMember)
+                            =
                             let export = owned.Member
 
                             match export.Body with
@@ -74,12 +71,15 @@ let expandUnionArms: Pass<ShapeModel> =
                                 | Some(index, parameter, arms) ->
                                     let site = $"{owner}.{export.Name}"
 
-                                    let armKeys =
+                                    let armParameters =
                                         arms
                                         |> List.map (fun arm ->
                                             parameters
-                                            |> List.mapi (fun i p -> if i = index then { p with Type = arm } else p)
-                                            |> signatureKey abbrevs)
+                                            |> List.mapi (fun i p -> if i = index then { p with Type = arm } else p))
+
+                                    let armKeys =
+                                        armParameters
+                                        |> List.map (CompiledSignature.parameterKey abbrevs export.TypeParameters)
 
                                     if arms.Length > config.MaxArms then
                                         findings <-
@@ -107,7 +107,17 @@ let expandUnionArms: Pass<ShapeModel> =
                                             ]
 
                                         [ owned ]
-                                    elif armKeys |> List.exists (fun key -> Set.contains (export.Name, key) taken) then
+                                    elif
+                                        armParameters
+                                        |> List.exists (fun arm ->
+                                            taken
+                                            |> List.exists (fun (name, typeParameters, declared) ->
+                                                name = export.Name
+                                                && CompiledSignature.overlaps
+                                                    abbrevs
+                                                    (export.TypeParameters, arm)
+                                                    (typeParameters, declared)))
+                                    then
                                         findings <-
                                             findings
                                             @ [
@@ -130,13 +140,8 @@ let expandUnionArms: Pass<ShapeModel> =
                                             ]
 
                                         let synthesized =
-                                            arms
-                                            |> List.map (fun arm ->
-                                                let armParameters =
-                                                    parameters
-                                                    |> List.mapi (fun i p ->
-                                                        if i = index then { p with Type = arm } else p)
-
+                                            armParameters
+                                            |> List.map (fun armParameters ->
                                                 { owned with
                                                     Member =
                                                         { export with
@@ -148,19 +153,19 @@ let expandUnionArms: Pass<ShapeModel> =
                             | _ -> [ owned ]
 
                         let expandContainer (container: FsExportContainer) =
-                            // Every signature the container already has, so a synthesized arm that
-                            // clashes with a TypeScript-declared overload is refused rather than
-                            // emitted. Built once, before expansion, and not added to: two members
-                            // expanding into each other's space is the collision this catches.
+                            // Every signature the container already has. A synthesized arm that
+                            // one call could select alongside a declared overload - one compiled
+                            // signature, or a prefix with an omissible tail - declines the member.
+                            // Built once, before expansion, and not added to: two members expanding
+                            // into each other's space is the collision this catches.
                             let taken =
                                 container.Members
                                 |> List.choose (fun owned ->
                                     match owned.Member.Body with
                                     | ExportFunction(parameters, _)
                                     | ExportConstructor(parameters, _) ->
-                                        Some(owned.Member.Name, signatureKey abbrevs parameters)
+                                        Some(owned.Member.Name, owned.Member.TypeParameters, parameters)
                                     | ExportValue _ -> None)
-                                |> Set.ofList
 
                             { container with
                                 Members = container.Members |> List.collect (expandMember container.Name taken)

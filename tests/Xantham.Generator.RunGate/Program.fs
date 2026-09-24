@@ -1270,6 +1270,16 @@ let private callbackMixedForms () =
 /// so each claim reads the `length` of the function JavaScript received beside the result of
 /// calling it with all its arguments at once, and the non-callback arm of the same union is read
 /// beside it.
+/// `expand-union-arms` overloads (union-arm-overload-lab): the delegate arm takes a bare lambda,
+/// which crosses at the delegate's declared arity; the string arm crosses as its own value.
+let private unionArmOverloads () =
+    equal
+        "a bare lambda on the delegate arm overload crosses at its declared arity"
+        "2:got:1:2"
+        (UnionArmOverloadLab.Exports.apply (fun a b -> $"got:{a}:{b}"))
+
+    equal "the string arm overload crosses as its own value" "text:plain" (UnionArmOverloadLab.Exports.apply "plain")
+
 let private callbackUnionArmForms () =
     let attempt (f: unit -> string) =
         try
@@ -2081,11 +2091,19 @@ let private dependencyEntrypoint () =
     let quiet = DependencyActorWithoutHook()
     check "dependency entrypoint omitted hook is absent" (emitJsExpr quiet "$0.fetch === undefined")
 
+/// The hand-written members of `Xantham.Fable.Core.TS`, which the gate references as a built DLL.
+let private bindingExtensions () =
+    let increment =
+        Fable.Core.TSExtensions.Utils.toJSFunc (fun (value: int) -> value + 1)
+
+    check "toJSFunc yields the callable JavaScript function" (emitJsExpr increment "$0(1) === 2")
+
 [<EntryPoint>]
 let main _ =
     dependencyEntrypoint ()
     SupportHelpers.run check
     ExportProvenance.run check
+    bindingExtensions ()
     globals ()
     imports ()
     ambientModules ()
@@ -2109,6 +2127,7 @@ let main _ =
     callbackTupledForms ()
     callbackMixedForms ()
     callbackUnionArmForms ()
+    unionArmOverloads ()
     callbackUnionNestingForms ()
     callbackNamedDelegateForms ()
     generatedDelegateForms ()
@@ -2155,4 +2174,8 @@ let main _ =
             eprintfn $"run gate FAILED: {claim}"
 
         eprintfn $"run gate: {failed.Length} of {passed + failed.Length} checks failed"
+        // Fable discards `main`'s return value; node reports failure through `process.exitCode`.
+#if FABLE_COMPILER
+        emitJsStatement 1 "process.exitCode = $0"
+#endif
         1

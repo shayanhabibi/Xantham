@@ -189,7 +189,7 @@ Wave thirteen's lane CH made an object whose whole content is one index signatur
 `MB004` from 140 to 63 and now carries **221 sites** under `TR059`
 (`TR.IndexSignatureAsRecord`, ergonomic). It works, and it is gated at the run gate.
 
-The point for you is that **this repository declares the type, in `src/Xantham.Fable.Core/Record.fs`,
+The point for you is that **this repository declares the type, in `src/Xantham.Fable.Core/Library.fs`,
 because `Fable.Core` ships nothing for it.** Every generated binding therefore depends on a support
 assembly of ours for its single commonest construct.
 

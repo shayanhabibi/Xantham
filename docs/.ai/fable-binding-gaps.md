@@ -3,7 +3,7 @@
 Places where a generated binding widens because **`Fable.Core` ships no name to bind to**, not
 because Fable's compilation model loses something and not because F# has no form.
 
-`docs/fable5-workarounds.md` sorts every loss into three causes and covers only the second:
+`docs/.ai/fable5-workarounds.md` sorts every loss into three causes and covers only the second:
 
 1. **F# has no form.** Rank-2 types, structural subtyping, singleton literal types.
 2. **Fable 5's compilation model.** What the emitted JavaScript or the Fable runtime does.

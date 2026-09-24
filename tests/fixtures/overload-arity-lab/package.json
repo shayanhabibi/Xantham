@@ -1,0 +1,6 @@
+{
+  "name": "overload-arity-lab",
+  "type": "module",
+  "types": "index.d.ts",
+  "description": "Hand-authored lab: dedupe-overloads separates signatures that differ past their third parameter."
+}

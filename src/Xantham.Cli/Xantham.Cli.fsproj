@@ -12,6 +12,7 @@
         <Authors>Shayan Habibi</Authors>
         <Description>Command line driver for the Xantham TypeScript-to-F# bindings generator.</Description>
         <PackageTags>typescript;fsharp;fable;bindings;codegen;dotnet-tool</PackageTags>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     <AssemblyVersion>0.0.0.0</AssemblyVersion></PropertyGroup>
 
     <ItemGroup>
@@ -23,6 +24,7 @@
         <Compile Include="Style.fs" />
         <Compile Include="Cli.fs" />
         <Compile Include="Program.fs" />
+        <None Include="README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 
     <ItemGroup>

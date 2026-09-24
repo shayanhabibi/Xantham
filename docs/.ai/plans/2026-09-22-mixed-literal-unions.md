@@ -27,11 +27,14 @@ type Origin =
 with the literals widened to `string`, or widens to `obj`. Both lose the literal set. The DU
 form keeps it, and `Origin.Num 3.5` is a direct application with no `!^` needed.
 
-**Status: NOT BUILDING THIS.** Step 0 ran on 2026-09-22 and returned zero eligible unions
-across the whole 108-package corpus. See "Step 0 result" below. The design is settled and
-empirically validated against Fable 5.13.0, and it stays here as a record of *why* the corpus
-cannot use it — not as work queued up. Everything marked *verified* was observed in emitted
-JavaScript, not recalled.
+**Status: REOPENED, pending a decision.** Step 0 ran twice on 2026-09-22. The first run
+returned zero eligible unions and this plan was closed on that basis; the second run, against
+raw `TypeFacts` rather than rendered `FsTypeRef`s, returned **11 eligible out of 45**. The
+first number was a measurement artifact — see "Step 0 result" below. The design is settled and
+empirically validated against Fable 5.13.0; the repository pins the `fable` tool at 5.0.0, and
+the validation is unverified there. What is not settled is whether 11 unions justify a
+new decl case, a new render template, and a runtime round-trip test. Everything marked
+*verified* was observed in emitted JavaScript, not recalled.
 
 ## The constraint that shapes everything
 
@@ -137,7 +140,7 @@ error here whenever the sole literal is lowercase.
 
 ## Step 0 — go/no-go gate
 
-- [x] Wire the classifier from `mixed-union-classifier.fsx` (see "Prototype" below) into a
+- [x] Wire the classifier (see "Prototype" below; the census is `Shape/MixedUnionCensus.fs`) into a
       throwaway counting pass. No model or render changes.
 - [x] Over Anime.js and two other packages, count: unions mixing string literals with
       non-literal members; and of those, how many pass every condition below.
@@ -145,35 +148,84 @@ error here whenever the sole literal is lowercase.
       implementation cost is dominated by a tenth `FsDecl` case rippling through ~40
       exhaustive match sites. That is not worth paying for a handful of unions.
 
-## Step 0 result — 2026-09-22: zero eligible, do not build
+## Step 0 result — 2026-09-22: 11 eligible of 45
 
-Run over all 108 golden packages rather than the three the step asked for, via a throwaway
-`count-mixed-unions` pass at `Passes.fs` position 5 (written, run, reverted; not committed).
-Named arms were left unresolved and counted as *eligible*, so every number below is an upper
-bound.
+Run over all 108 golden packages rather than the three the step asked for, via the
+`count-mixed-unions` pass in `Shape/MixedUnionCensus.fs`, inert unless
+`XANTHAM_MIXED_UNION_CENSUS` names a file to append to. Named arms are left unresolved and
+counted as *eligible*, so every number below is an upper bound.
 
-**18 unique mixed literal/typed unions in the corpus. 0 pass the conditions.**
+**45 unique mixed literal/typed unions in the corpus. 11 pass the conditions.**
 
 | Rejected by | Unions |
 |---|---|
-| a bare `string` arm beside the literals (test class `Str`) | 12 |
-| an `Opaque` arm — `U_n`, `obj`, a type parameter | 3 |
-| non-string literals in the mix (condition 1) | 2 |
-| all arms plain `[<Interface>]`, none discriminable | 1 |
+| an `Opaque` arm — `U_n`, `obj`, a type parameter, an intersection | 17 |
+| non-string literals in the mix (condition 1) | 8 |
+| an arm Fable cannot type test (`NotDiscriminable`) | 8 |
+| two arms share one test class (condition 3) | 1 |
+| **none — eligible** | **11** |
 
-Arm ambiguity never fired: all 18 had pairwise-distinct test classes. **The feature is not
-blocked by the thing the design spent its effort on.** It is blocked by condition 4, and
-overwhelmingly by one idiom.
+### The first run was wrong, and how
+
+An earlier run of this step reported 18 unique and 0 eligible, and this plan was closed on it.
+That census read rendered `FsTypeRef`s. String literals are widened to `FsString` inside the
+shared type-reference reader (`Spec.fs:1542`), so it saw `U3<float, string, float[]>` where the
+source said `number | "first" | "center" | "last" | "random" | Array<number>` and scored a
+union that never had a bare `string` arm as though it had one. That put 12 unions in a
+`Str`-arm bucket that does not exist, and the literals it was supposed to be counting had
+already been destroyed before it looked.
+
+Reading raw `TypeFacts` instead, the `Str` bucket is **empty**. The 11 rows that still carry a
+`Str` class are all `string | false` — one unpaired boolean literal — and they are rejected one
+rung earlier, under condition 1.
+
+Two corrections to avoid over-reading this. TypeScript flattens `boolean` into `true | false`,
+so a `string | boolean` union arrives carrying two boolean literals that are not literals in
+this feature's sense; the census folds that pair back into one `Bool` arm before counting.
+And 4 of the 11 eligible rows are string literals beside exactly that folded `Bool`
+(`auto,clip,hidden,scroll,visible | ['Bool']` and similar) — a DU there may not beat
+`U2<string, bool>`, which is a judgement call and not something this count settles.
+
+### The eligible set
+
+| Package | Literals | Typed arms |
+|---|---|---|
+| `animejs` | `center,first,last,random` | `Num`, `ArrayLike` |
+| `animejs` | `blend,none,replace` | `Num` |
+| `animejs` | `auto,center,left,random,right` | `Num` |
+| `animejs` | `x,y` | `FuncLike` |
+| `animejs` | `auto,clip,hidden,scroll,visible` | `Bool` |
+| `animejs` | `bottom,center,left,right,top` | `Bool` |
+| `@cloudflare/workers-types` | `high,low,medium-high,medium-low` | `Num` |
+| `@cloudflare/workers-types` | `domcontentloaded,load,networkidle0,networkidle2` | `ArrayLike` |
+| `@cloudflare/workers-types` | `all,indexed,none` | `Bool` |
+| `@cloudflare/workers-types` | `mixed` | `Bool` |
+| several | `always,auto,false,min2,true` | `Bool` |
+
+The first row is `StaggerParams.from`, which renders today as `U3<float, string, float[]>` and
+is the example the introductory blog post uses to credit Glutinum for doing better. Its arms
+lower to `typeof x === "number"` and `Array.isArray(x)`, so it discriminates cleanly.
+
+**Arm ambiguity fired once in 45.** The feature is still not meaningfully blocked by the thing
+the design spent its effort on. Only 13 packages carry a mixed union at all, and the census
+walks every union in `model.Types`, which is a superset of what actually reaches a binding —
+so the 11 is an upper bound on an upper bound.
 
 ### The blocking idiom
 
-Two thirds of the corpus's mixed unions are `"a" | "b" | string` — TypeScript's
-autocomplete-hint pattern, usually written `"a" | "b" | (string & {})`. A bare `string` arm
-tests `typeof x === "string"` and so does every fieldless literal case, so the arm swallows the
+The largest single group of rejections is still `"a" | "b" | string` — TypeScript's
+autocomplete-hint pattern, usually written `"a" | "b" | (string & {})`. 30 of the 370 raw rows
+carry more than 20 literals and every one of them is this shape. A bare `string` arm tests
+`typeof x === "string"` and so does every fieldless literal case, so the arm swallows the
 literals. This is unfixable by any amount of classifier work: the literals *are* strings. The
-`EasingParam` union carries 43 literals beside a `string` arm and `ValidComponent` carries 208
-— exactly the unions whose literal sets were most worth keeping, and precisely the ones that
+`EasingParam` union carries 43 literals beside such an arm and `ValidComponent` carries 208 —
+exactly the unions whose literal sets were most worth keeping, and precisely the ones that
 cannot keep them.
+
+These land in the `Opaque` bucket rather than `Str` because `(string & {})` is an
+*intersection*, and `classify` has no `TypeFlags.String` to match on. The bucket name changed
+between the two runs; the verdict did not. Do not read the empty `Str` column as this idiom
+having gone away.
 
 The nearest miss was `ChatCompletionToolChoiceOption` (`@cloudflare/workers-types`): three
 string literals and three named arms, distinct, no `string` arm. Its arms are plain
@@ -181,16 +233,22 @@ string literals and three named arms, distinct, no `string` arm. Its arms are pl
 would compile with all three payload branches silently absent. It renders today as
 `U4<string, …>` with the literals widened away, and that stays the honest answer.
 
-### What this closes
+### What this leaves open
 
-The `U_n` fallback is not a gap for this corpus; it is the correct mapping for the shapes the
-corpus actually contains. Revisit only if a target package appears with mixed unions over
-`[<Import>]`-bound classes — re-run the counting pass before reopening, do not re-argue the
-design.
+The `U_n` fallback is the correct mapping for most of what the corpus contains, and for the
+autocomplete-hint idiom it is the only possible one. It is not the correct mapping for all 11
+of the eligible set, and `StaggerParams.from` is a case where it demonstrably loses
+information a DU would keep.
 
-It also resolves the dependency recorded in `2026-09-22-union-arm-overloads.md` § *Corpus
-numbers have a dependency*: this pass claims **no** unions, so that record's 484/59/57 counts
-and its `maxArms` analysis stand unchanged and need no recomputation.
+What is undecided is whether 11 unions — 7 of them once the literals-plus-`Bool` rows are set
+aside — justify a new `FsDecl` case, a render template that does not exist yet, and the
+runtime round-trip verification that condition 3 makes mandatory. That is a cost question, not
+a correctness one, and this plan does not answer it.
+
+The dependency recorded in `2026-09-22-union-arm-overloads.md` § *Corpus numbers have a
+dependency* is **not** resolved. That record assumed this pass would claim no unions. If this
+one is built, its 484/59/57 counts and the `maxArms` analysis need recomputation against
+whatever set this pass takes.
 
 ## Conditions to emit
 

@@ -1515,11 +1515,7 @@ and internal typeRefOnPath
     | None ->
         match Map.tryFind typeId model.NotFollowed with
         | Some reason -> FsObj, [ Finding.make owner (TypeReference.TypeNotResolved reason) ]
-        | None ->
-            FsObj,
-            [
-                Finding.make owner (TypeReference.MissingFromTypeTable(typeId / uom<typeId>))
-            ]
+        | None -> FsObj, [ Finding.make owner TypeReference.MissingFromTypeTable ]
     | Some facts ->
         let has f = flag f facts
 
@@ -2377,18 +2373,27 @@ let typeParamsOf
 
     let named =
         ids
-        |> List.choose (fun id ->
+        |> List.indexed
+        |> List.choose (fun (position, id) ->
             match
                 Map.tryFind id model.Types
                 |> Option.bind (_.SymbolName >> Option.map (fun value -> value / uom<symbolName>))
             with
             | Some name -> Some(id, name)
             | None ->
-                findings <-
-                    findings
-                    @ [ Finding.make owner (TypeParameters.UnnamedTypeParameter(id / uom<typeId>)) ]
+                findings <- findings @ [ Finding.make owner (TypeParameters.UnnamedTypeParameter position) ]
 
                 None)
+
+    for _, name in named do
+        let written = Naming.typeVariable name
+
+        if written <> name then
+            findings <-
+                findings
+                @ [
+                    Finding.make owner (SynthesizeAnonymous.NameSanitisedForIdentifier(name, written))
+                ]
 
     // Layered onto whatever is already in scope rather than replacing it: a generic *method*
     // binds its own parameters on top of its declaration's, and `read<K extends keyof T>` has
@@ -3199,3 +3204,86 @@ let rec expandAbbreviations (abbrevs: Map<string, FsTypeRef>) (visited: Set<stri
     | FsDelegate(args, ret) -> FsDelegate(List.map recur args, recur ret)
     | FsFunc(argument, ret) -> FsFunc(recur argument, recur ret)
     | other -> other
+
+/// Signatures as .NET overload resolution compares them: abbreviations expanded at every depth and
+/// a signature's own type variables renamed by position.
+module CompiledSignature =
+    /// The reference with every abbreviation expanded, at any depth. A cycle stops at its first
+    /// repeated name.
+    let rec normalize (abbrevs: Map<string, FsTypeRef>) (visited: Set<string>) (reference: FsTypeRef) : FsTypeRef =
+        let recur = normalize abbrevs visited
+
+        match reference with
+        | FsNamed name when Map.containsKey name abbrevs && not (Set.contains name visited) ->
+            normalize abbrevs (Set.add name visited) abbrevs[name]
+        | FsOption inner -> FsOption(recur inner)
+        | FsArray element -> FsArray(recur element)
+        | FsTuple components -> FsTuple(List.map recur components)
+        | FsErasedUnion arms -> FsErasedUnion(List.map recur arms)
+        | FsDelegate(args, ret) -> FsDelegate(List.map recur args, recur ret)
+        | FsFunc(argument, ret) -> FsFunc(recur argument, recur ret)
+        | FsApp(name, args) -> FsApp(name, List.map recur args)
+        | FsBranded(primitive, measure) -> FsBranded(recur primitive, measure)
+        | other -> other
+
+    let rec private renameTypeVars (rename: Map<string, string>) (reference: FsTypeRef) : FsTypeRef =
+        let recur = renameTypeVars rename
+
+        match reference with
+        | FsTypeVar name -> FsTypeVar(rename |> Map.tryFind name |> Option.defaultValue name)
+        | FsOption inner -> FsOption(recur inner)
+        | FsArray element -> FsArray(recur element)
+        | FsTuple components -> FsTuple(List.map recur components)
+        | FsErasedUnion arms -> FsErasedUnion(List.map recur arms)
+        | FsDelegate(args, ret) -> FsDelegate(List.map recur args, recur ret)
+        | FsFunc(argument, ret) -> FsFunc(recur argument, recur ret)
+        | FsApp(name, args) -> FsApp(name, List.map recur args)
+        | FsBranded(primitive, measure) -> FsBranded(recur primitive, measure)
+        | other -> other
+
+    /// The reference as the compiler sees it inside a signature declaring `typeParameters`: the
+    /// signature's own type variables are renamed by position, then abbreviations expand.
+    let compiled (abbrevs: Map<string, FsTypeRef>) (typeParameters: FsTypeParam list) (reference: FsTypeRef) =
+        let rename = typeParameters |> List.mapi (fun i p -> p.Name, $"T{i}") |> Map.ofList
+
+        normalize abbrevs Set.empty (renameTypeVars rename reference)
+
+    /// The compiled parameter signature: generic arity, plus optionality, rest and type per
+    /// position.
+    let parameterKey (abbrevs: Map<string, FsTypeRef>) (typeParameters: FsTypeParam list) (parameters: FsParam list) =
+        typeParameters.Length,
+        parameters
+        |> List.map (fun p -> p.Optional, p.Rest, compiled abbrevs typeParameters p.Type)
+
+    /// Whether `shorter`'s parameters are a prefix of `longer`'s and the rest of `longer` may be
+    /// omitted at the call, so a call supplying the prefix alone selects either.
+    let ambiguousPrefix
+        (abbrevs: Map<string, FsTypeRef>)
+        (shorter: FsTypeParam list * FsParam list)
+        (longer: FsTypeParam list * FsParam list)
+        =
+        let shorterTypes, shorterParams = shorter
+        let longerTypes, longerParams = longer
+
+        shorterParams.Length < longerParams.Length
+        && shorterTypes.Length = longerTypes.Length
+        && List.forall2
+            (fun (a: FsParam) (b: FsParam) ->
+                a.Rest = b.Rest
+                && compiled abbrevs shorterTypes a.Type = compiled abbrevs longerTypes b.Type)
+            shorterParams
+            (List.take shorterParams.Length longerParams)
+        && (longerParams
+            |> List.skip shorterParams.Length
+            |> List.forall (fun p -> p.Optional || p.Rest))
+
+    /// Whether a call can select either signature: one compiled parameter signature, or one a
+    /// prefix of the other with an omissible tail.
+    let overlaps
+        (abbrevs: Map<string, FsTypeRef>)
+        (a: FsTypeParam list * FsParam list)
+        (b: FsTypeParam list * FsParam list)
+        =
+        parameterKey abbrevs (fst a) (snd a) = parameterKey abbrevs (fst b) (snd b)
+        || ambiguousPrefix abbrevs a b
+        || ambiguousPrefix abbrevs b a

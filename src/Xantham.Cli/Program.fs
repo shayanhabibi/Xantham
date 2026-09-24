@@ -83,19 +83,30 @@ let private emit (out: TextWriter) (err: TextWriter) (options: GenerateOptions) 
             Exit.Generated
     with e ->
         err.WriteLine $"xantham: generating {packageDir} failed - {e.Message}"
+
+        if (Xantham.TypeScript.Wire.Tsc.locate packageDir).IsNone then
+            err.WriteLine "xantham: run `xantham tsc init` to cache the pinned compiler"
+
         Exit.Failed
 
 let private generate (out: TextWriter) (err: TextWriter) (options: GenerateOptions) =
     let packageDir = Path.GetFullPath options.PackageDir
 
-    match refusePackage packageDir with
-    | Some message ->
+    // An unrecognised option binds as the package-dir argument.
+    let refusal =
+        if options.PackageDir.StartsWith "-" then
+            Some(Exit.Usage, $"unrecognised option {options.PackageDir}")
+        else
+            refusePackage packageDir |> Option.map (fun message -> Exit.NoPackage, message)
+
+    match refusal with
+    | Some(code, message) ->
         err.WriteLine $"xantham: {message}"
-        Exit.NoPackage
+        code
     | None ->
         match
             (try
-                Ok options.Config
+                Ok(options.Config())
              with e ->
                  Error e.Message)
         with
@@ -179,23 +190,49 @@ let private ensureInstall () =
 }"""
         )
 
-    if not (Directory.Exists(Path.Combine(cache, "node_modules"))) then
-        Npm.install (fun p -> { p with WorkingDirectory = cache })
+    let installed =
+        if Directory.Exists(Path.Combine(cache, "node_modules")) then
+            Ok()
+        else
+            try
+                Npm.install (fun p -> { p with WorkingDirectory = cache })
+                Ok()
+            with e ->
+                Error $"npm install in {cache} failed - {e.Message}"
 
+    installed
+    |> Result.bind (fun () ->
         match Xantham.TypeScript.Wire.Tsc.locate cache with
         | Some tsc -> Ok tsc
-        | None -> Error $"tsc not found at {cache}"
-    else
-        match Xantham.TypeScript.Wire.Tsc.locate cache with
-        | Some tsc -> Ok tsc
-        | None -> Error $"tsc not found at {cache}"
+        | None -> Error $"tsc not found at {cache}")
     |> Result.map (fun tsc -> Environment.SetEnvironmentVariable("XANTHAM_TSGO_EXE", tsc))
 
-/// Checks the cache for a compiler executable, and sets the environment variable if found.
-/// Else no-op.
+/// Points `XANTHAM_TSGO_EXE` at the cached compiler, when one is cached and the variable does
+/// not already name an existing file. The compiler precedence is `XANTHAM_TSGO_EXE`, then the
+/// cache, then the walk up from the package directory.
 let private checkCache () =
-    Xantham.TypeScript.Wire.Tsc.locate cache
-    |> Option.iter (fun tsc -> Environment.SetEnvironmentVariable("XANTHAM_TSGO_EXE", tsc))
+    match Environment.GetEnvironmentVariable "XANTHAM_TSGO_EXE" with
+    | path when not (String.IsNullOrWhiteSpace path) && File.Exists path -> ()
+    | _ ->
+        Xantham.TypeScript.Wire.Tsc.locate cache
+        |> Option.iter (fun tsc -> Environment.SetEnvironmentVariable("XANTHAM_TSGO_EXE", tsc))
+
+/// The `tsc version --json` payload for the cached compiler at `path`, or for none cached.
+let tscVersionJson (path: string option) =
+    match path with
+    | Some tsc ->
+        JsonSerializer.Serialize
+            {|
+                version = Spec.tscVersion
+                path = tsc
+            |}
+    | None ->
+        JsonSerializer.Serialize
+            {|
+                version = Spec.tscVersion
+                path = (null: string)
+                error = "not found. run `xantham tsc init`"
+            |}
 
 
 /// One invocation, over the writers the caller supplies. The entry point calls it against the
@@ -230,21 +267,25 @@ let run (out: TextWriter) (err: TextWriter) (argv: string[]) : int =
                                     inputs Options.useJsonOutput
 
                                     setAction (fun useJsonOutput ->
-                                        match Xantham.TypeScript.Wire.Tsc.locate cache with
+                                        let located = Xantham.TypeScript.Wire.Tsc.locate cache
+
+                                        match located with
                                         | Some tsc ->
                                             if useJsonOutput then
-                                                $"{{\"version\":\"{Spec.tscVersion}\",\"path\":\"{tsc}\"}}"
+                                                tscVersionJson located
                                             else
                                                 $"{Spec.tscVersion} cached at: {tsc}"
                                             |> out.WriteLine
+
+                                            Exit.Generated
                                         | None ->
                                             if useJsonOutput then
-                                                $"{{\"version\":\"{Spec.tscVersion}\",\"path\":null,\"error\":\"not found. run `xantham tsc init`\"}}"
+                                                tscVersionJson located
                                             else
                                                 $"{Spec.tscVersion} not found in cache. Run `xantham tsc init`."
                                             |> err.WriteLine
 
-                                        Exit.Generated)
+                                            Exit.Failed)
                                 }
                                 command "clean" {
                                     description "remove all cached xantham compilers"

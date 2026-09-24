@@ -85,6 +85,33 @@ F# type, or widened. See [Dependencies and shared types](dependencies.md) for ex
 `resolveNoInfer: true` maps TypeScript's `NoInfer<T>` directly to `T`.
 The default preserves `NoInfer<T>` through the support library.
 
+## Add overloads per union arm
+
+`unionArmOverloads` synthesizes one overload per arm beside a member whose parameter is an
+erased union, so `animate(targets: TargetsParam)` also gains `animate(targets: string)` and
+`animate(targets: string[])`. The feature is opt-in: enabling it makes existing `!^` casts at
+those call sites ambiguous (FS0041).
+
+```json title="Enable union arm overloads"
+{
+  "unionArmOverloads": {
+    "enabled": true,
+    "maxArms": 4,
+    "policy": "single"
+  }
+}
+```
+
+| Field | Default | Meaning |
+|-------|---------|---------|
+| `enabled` | `false` | Synthesize one overload per arm beside the union member. |
+| `maxArms` | `4` | The largest arm count that expands, at least 2. A union with more arms keeps the union member alone and reports why. |
+| `policy` | `"single"` | Which union parameters expand. Only `"single"` is accepted: a member with exactly one union parameter. `"linear"` is reserved and rejected. |
+
+Every expanded or declined member is reported under the `UA` finding codes, so a member left
+unchanged names the condition it failed. See [Troubleshooting](troubleshooting.md) for reading
+findings.
+
 ## Generate your own standard library
 
 `compilerLib` controls the layout when generating a combined TypeScript library binding:

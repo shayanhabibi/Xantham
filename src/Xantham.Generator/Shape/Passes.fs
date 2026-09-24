@@ -12,6 +12,7 @@ let passes: Pass<ShapeModel> list =
         Anonymous.synthesizeAnonymous
         ConstructorObjects.nameConstructorObjects
         FreeTypeParams.bindFreeTypeParams
+        MixedUnionCensus.countMixedUnions
         LiteralUnions.classifyLiteralUnions
         TaggedUnions.detectTaggedUnions
         Callbacks.shapeCallbacks

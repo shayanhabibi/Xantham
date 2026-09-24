@@ -30,58 +30,9 @@ let resolveExportCollisions: Pass<ShapeModel> =
                     let mutable findings: Finding list = []
                     let emit finding = findings <- findings @ [ finding ]
 
-                    let abbrevs =
-                        model.Decls
-                        |> List.choose (function
-                            | FsAbbrev decl -> Some(decl.Name, decl.Target)
-                            | _ -> None)
-                        |> Map.ofList
-
-                    /// The reference with abbreviations expanded, the way the compiler compares
-                    /// it. A cycle stops at its first repeated name.
-                    let rec normalize (visited: Set<string>) (reference: FsTypeRef) : FsTypeRef =
-                        let recur = normalize visited
-
-                        match reference with
-                        | FsNamed name when Map.containsKey name abbrevs && not (Set.contains name visited) ->
-                            normalize (Set.add name visited) abbrevs[name]
-                        | FsOption inner -> FsOption(recur inner)
-                        | FsArray element -> FsArray(recur element)
-                        | FsTuple components -> FsTuple(List.map recur components)
-                        | FsErasedUnion arms -> FsErasedUnion(List.map recur arms)
-                        | FsDelegate(args, ret) -> FsDelegate(List.map recur args, recur ret)
-                        | FsFunc(argument, ret) -> FsFunc(recur argument, recur ret)
-                        | FsApp(name, args) -> FsApp(name, List.map recur args)
-                        | FsBranded(primitive, measure) -> FsBranded(recur primitive, measure)
-                        | other -> other
-
-                    /// A reference with the signature's own type variables renamed by position:
-                    /// .NET overload resolution does not see a type parameter's name.
-                    let rec renameTypeVars (rename: Map<string, string>) (reference: FsTypeRef) : FsTypeRef =
-                        let recur = renameTypeVars rename
-
-                        match reference with
-                        | FsTypeVar name -> FsTypeVar(rename |> Map.tryFind name |> Option.defaultValue name)
-                        | FsOption inner -> FsOption(recur inner)
-                        | FsArray element -> FsArray(recur element)
-                        | FsTuple components -> FsTuple(List.map recur components)
-                        | FsErasedUnion arms -> FsErasedUnion(List.map recur arms)
-                        | FsDelegate(args, ret) -> FsDelegate(List.map recur args, recur ret)
-                        | FsFunc(argument, ret) -> FsFunc(recur argument, recur ret)
-                        | FsApp(name, args) -> FsApp(name, List.map recur args)
-                        | FsBranded(primitive, measure) -> FsBranded(recur primitive, measure)
-                        | other -> other
-
-                    let compiled (typeParameters: FsTypeParam list) (reference: FsTypeRef) =
-                        let rename = typeParameters |> List.mapi (fun i p -> p.Name, $"T{i}") |> Map.ofList
-                        normalize Set.empty (renameTypeVars rename reference)
-
-                    /// The compiled parameter signature: optionality, rest and type per position,
-                    /// plus generic arity.
-                    let parameterKey (typeParameters: FsTypeParam list) (parameters: FsParam list) =
-                        typeParameters.Length,
-                        parameters
-                        |> List.map (fun p -> p.Optional, p.Rest, compiled typeParameters p.Type)
+                    let abbrevs = abbreviations model.Decls
+                    let compiled = CompiledSignature.compiled abbrevs
+                    let parameterKey = CompiledSignature.parameterKey abbrevs
 
                     let bodyParts (m: FsExportMember) =
                         match m.Body with
@@ -113,25 +64,7 @@ let resolveExportCollisions: Pass<ShapeModel> =
                             | other -> [ other ])
                         |> List.distinctBy (compiled typeParameters)
 
-                    /// Whether `shorter`'s parameters are a prefix of `longer`'s and the rest of
-                    /// `longer` may be omitted at the call.
-                    let ambiguousPrefix
-                        (shorter: FsTypeParam list * FsParam list)
-                        (longer: FsTypeParam list * FsParam list)
-                        =
-                        let shorterTypes, shorterParams = shorter
-                        let longerTypes, longerParams = longer
-
-                        shorterParams.Length < longerParams.Length
-                        && shorterTypes.Length = longerTypes.Length
-                        && List.forall2
-                            (fun (a: FsParam) (b: FsParam) ->
-                                a.Rest = b.Rest && compiled shorterTypes a.Type = compiled longerTypes b.Type)
-                            shorterParams
-                            (List.take shorterParams.Length longerParams)
-                        && (longerParams
-                            |> List.skip shorterParams.Length
-                            |> List.forall (fun p -> p.Optional || p.Rest))
+                    let ambiguousPrefix = CompiledSignature.ambiguousPrefix abbrevs
 
                     let relate (earlier: OwnedExportMember) (later: OwnedExportMember) : Relation =
                         let a = earlier.Member

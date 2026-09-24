@@ -681,6 +681,26 @@ module Naming =
             | text when Char.IsLetter text[0] -> text
             | text -> "N" + text
 
+    /// A single-segment type name in the shape F# admits as a declaration: a name carrying a
+    /// character FS0883 rejects even under backticks (`$`, `+`, `&`, `[`, `]`, `/`, `\`, `*`,
+    /// `"`, `` ` `` or `.`) reads as its `identifierName`, so `$ZodType` reads `ZodType`. Every
+    /// other name, spaces and keywords included, is returned unchanged.
+    let typeNameSegment (name: string) =
+        if name |> Seq.exists (fun c -> "$+&[]/\\*\"`.".Contains c) then
+            identifierName name
+        else
+            name
+
+    /// A type variable's name in the shape F# admits after the tick: each character outside
+    /// letters, digits and underscore reads as an underscore, so `$T` is written `'_T`.
+    let typeVariable (name: string) =
+        if nestable name then
+            name
+        else
+            name
+            |> Seq.map (fun c -> if Char.IsLetterOrDigit c then c else '_')
+            |> String.Concat
+
     /// A package's module name: `@scope/pkg-name` -> `Scope.PkgName`.
     ///
     /// The name is taken from the runtime package, so a DefinitelyTyped package is named for the
