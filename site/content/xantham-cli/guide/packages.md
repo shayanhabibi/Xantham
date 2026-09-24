@@ -75,11 +75,24 @@ See the <a href="/Xantham/reference/xantham-fable-core-ts/">standard-library ref
 
 **Xantham.Fable.Node**
 
-Bindings for `@types/node` are under development. The package is currently marked
-as a stub in the repository; treat it as work in progress for this release.
+```bash frame=terminal
+dotnet add package Xantham.Fable.Node
+```
 
-For a specific Node package, generate from its installed declarations and review
-the resulting findings and compile errors.
+Generated bindings for `@types/node`, published from 0.1.0 and generated at the
+`@types/node` version pinned in the repository. Consume it alongside
+`Xantham.Fable.Core.TS`, which supplies the ECMAScript and DOM types Node's
+declarations reference; both support packages arrive as dependencies.
+
+```fsharp
+open Fable.Core.TS
+open Node
+```
+
+Every declaration sits under the top-level `Node` module.
+
+For a different `@types/node` version, generate from its installed declarations and
+review the resulting findings and compile errors.
 
 ## TypeScript.Wire is separate
 
