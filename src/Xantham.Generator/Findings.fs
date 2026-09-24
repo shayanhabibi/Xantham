@@ -397,7 +397,7 @@ module Finding =
 type TypeReference =
     | [<Widened>] SelfReferenceThroughUnnamed
     | [<Widened>] TypeNotResolved of reason: string
-    | [<Escape>] MissingFromTypeTable of typeId: int
+    | [<Escape>] MissingFromTypeTable
     | [<Widened>] LoneEnumMemberToFloat
     | [<Widened>] LoneEnumMemberToString
     | [<Widened>] StringLiteralToString
@@ -506,7 +506,7 @@ type TypeReference =
             match this with
             | SelfReferenceThroughUnnamed -> "type refers to itself through unnamed shapes; widened to obj"
             | TypeNotResolved reason -> $"type not resolved ({reason}); widened to obj"
-            | MissingFromTypeTable typeId -> $"type#{typeId} missing from the type table; widened to obj"
+            | MissingFromTypeTable -> "referenced type missing from the type table; widened to obj"
             | LoneEnumMemberToFloat -> "lone enum member widened to float"
             | LoneEnumMemberToString -> "lone enum member widened to string"
             | StringLiteralToString -> "string literal type widened to string (doc-noted, §4.2)"
@@ -622,15 +622,16 @@ type TypeReference =
 /// Type parameter binding: `Shape.typeParamsOf`, `aliasTypeParams`, key variables and erasure.
 [<Prefix "TP">]
 type TypeParameters =
-    | [<Widened>] UnnamedTypeParameter of id: int
+    /// `position` is the parameter's index in the declaration's type-parameter list.
+    | [<Widened>] UnnamedTypeParameter of position: int
     | [<Ergonomic>] ConstraintDropped of name: string
     | [<Ergonomic>] GenericFunctionHoisted
     | [<Ergonomic>] KeyWithIndexedAccess of operand: string * result: string
     | [<Ergonomic>] KeyOverOperand of operand: string
     | [<Widened>] TypeParameterErased of name: string
-    /// Wave two, lane A (recon blocker 2). `TP001` interpolates a checker-assigned type id into
-    /// its message, and ids are handed out in the order answers arrive - so the manifest differs
-    /// run to run wherever it fires. Counted the way `RT001` counts the frontier instead.
+    /// Wave two, lane A (recon blocker 2). Pre-declared for a `TP001` that interpolated a
+    /// checker-assigned type id into its message, making the manifest differ run to run.
+    /// `TP001` now carries the parameter's position instead.
     ///
     /// Wave three, lane G: no pass constructs this. It is retained rather than retired because
     /// retiring it renumbers `TP008`, and the key is quoted by four source files and by the
@@ -650,7 +651,8 @@ type TypeParameters =
     interface IFindingKind with
         member this.Message =
             match this with
-            | UnnamedTypeParameter id -> $"type parameter #{id} has no name to write; its uses widen to obj"
+            | UnnamedTypeParameter position ->
+                $"type parameter at position {position} has no name to write; its uses widen to obj"
             | ConstraintDropped name -> $"constraint on '{name}' has no F# form and is dropped (§4.9)"
             | GenericFunctionHoisted -> "generic function type hoisted onto the alias; F# has no rank-2 form (§4.9)"
             | KeyWithIndexedAccess(operand, result) ->

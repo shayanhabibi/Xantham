@@ -1515,11 +1515,7 @@ and internal typeRefOnPath
     | None ->
         match Map.tryFind typeId model.NotFollowed with
         | Some reason -> FsObj, [ Finding.make owner (TypeReference.TypeNotResolved reason) ]
-        | None ->
-            FsObj,
-            [
-                Finding.make owner (TypeReference.MissingFromTypeTable(typeId / uom<typeId>))
-            ]
+        | None -> FsObj, [ Finding.make owner TypeReference.MissingFromTypeTable ]
     | Some facts ->
         let has f = flag f facts
 
@@ -2377,16 +2373,15 @@ let typeParamsOf
 
     let named =
         ids
-        |> List.choose (fun id ->
+        |> List.indexed
+        |> List.choose (fun (position, id) ->
             match
                 Map.tryFind id model.Types
                 |> Option.bind (_.SymbolName >> Option.map (fun value -> value / uom<symbolName>))
             with
             | Some name -> Some(id, name)
             | None ->
-                findings <-
-                    findings
-                    @ [ Finding.make owner (TypeParameters.UnnamedTypeParameter(id / uom<typeId>)) ]
+                findings <- findings @ [ Finding.make owner (TypeParameters.UnnamedTypeParameter position) ]
 
                 None)
 
