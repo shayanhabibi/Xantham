@@ -31,7 +31,8 @@ form keeps it, and `Origin.Num 3.5` is a direct application with no `!^` needed.
 returned zero eligible unions and this plan was closed on that basis; the second run, against
 raw `TypeFacts` rather than rendered `FsTypeRef`s, returned **11 eligible out of 45**. The
 first number was a measurement artifact — see "Step 0 result" below. The design is settled and
-empirically validated against Fable 5.13.0. What is not settled is whether 11 unions justify a
+empirically validated against Fable 5.13.0; the repository pins the `fable` tool at 5.0.0, and
+the validation is unverified there. What is not settled is whether 11 unions justify a
 new decl case, a new render template, and a runtime round-trip test. Everything marked
 *verified* was observed in emitted JavaScript, not recalled.
 

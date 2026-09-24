@@ -5,10 +5,10 @@ Fable 5 emits or what its runtime library supports. Each entry carries the TypeS
 generator emits for it, the JavaScript Fable produces, and F# you can write instead. Entry 6 is
 closed - the generator emits the setter now - and is kept for the compilation rule it turns on.
 
-Every claim here was compiled and run against this repository's pins - the `fable` tool 5.0.0,
-`Fable.Core` 5.2.0, `fable-library-js` 5.0.0 - and every workaround is executed by the run gate
-(`tests/Xantham.Generator.RunGate`) against `tests/fixtures/fable-workaround-lab/index.js`. The
-two FABLE warnings that gate prints are entries 4 and 5 reporting themselves.
+The workarounds here were compiled and run against this repository's pins - the `fable` tool
+5.0.0, `Fable.Core` 5.2.0, `fable-library-js` 5.0.0 - and every workaround is executed by the run
+gate (`tests/Xantham.Generator.RunGate`) against `tests/fixtures/fable-workaround-lab/index.js`.
+The two FABLE warnings that gate prints are entries 4 and 5 reporting themselves.
 
 ## Scope
 

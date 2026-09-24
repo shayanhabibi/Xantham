@@ -191,9 +191,9 @@ documented result of that combination.
 
 ### Callbacks are where the choice actually bites
 
-Measured 2026-09-22 (Fable 5.13.0), and it reverses the intuitive answer. A union-case
-constructor gets no lambda-to-delegate coercion — that applies at method-argument position
-only:
+Measured 2026-09-22 against Fable 5.13.0 (the repository pins 5.0.0; unverified there), and
+it reverses the intuitive answer. A union-case constructor gets no lambda-to-delegate coercion —
+that applies at method-argument position only:
 
 | Position | Bare lambda | Emitted JS |
 |---|---|---|

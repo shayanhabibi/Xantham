@@ -81,7 +81,8 @@ missing table row.
 ## Fable runtime type tests
 
 Measured against Fable 5.13.0 on 2026-09-22 while designing erased-DU mapping for mixed
-literal/typed unions. These constrain any pass that puts a payload arm on an `[<Erase>]` union.
+literal/typed unions. The repository pins the `fable` tool at 5.0.0, and these results are
+unverified there. These constrain any pass that puts a payload arm on an `[<Erase>]` union.
 Full table and provenance: `docs/.ai/plans/2026-09-22-mixed-literal-unions.md`.
 
 **Two arms that share a runtime test are a silent failure.** `float[]` and `(float * float)`
