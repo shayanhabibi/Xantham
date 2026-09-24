@@ -96,18 +96,28 @@ let nameExports: Pass<ShapeModel> =
                     // granted. A contested name is visible only from the whole list, and the
                     // namespaced declaration is as often the first claimant as the second - it is
                     // the one with somewhere else to go either way.
+                    let exportsById = declarationExports ctx model |> Map.ofList
+
                     let claimants =
                         declarationExports ctx model
                         |> List.filter (fun (typeId, _) -> not (Map.containsKey typeId model.DeclNames))
                         |> List.map (fun (typeId, export) ->
                             typeId,
                             export.Order,
-                            fsName fallback export,
+                            Naming.typeNameSegment (fsName fallback export),
                             namespaceOf export,
                             originOf export,
                             pathOf export)
 
                     let declared = model.DeclNames |> Map.toList |> List.map snd |> Set.ofList
+
+                    // A sanitised name yields to a declaration spelling it verbatim: `$ZodType`
+                    // reads `ZodType2` beside an exported `ZodType`, whichever is harvested first.
+                    let verbatim =
+                        declarationExports ctx model
+                        |> List.map (snd >> fsName fallback)
+                        |> List.filter (fun name -> Naming.typeNameSegment name = name)
+                        |> Set.ofList
 
                     let contested =
                         claimants
@@ -126,7 +136,29 @@ let nameExports: Pass<ShapeModel> =
                                     | [], Some ns when Set.contains preferred contested -> nestUnder ns preferred, true
                                     | [], _ -> preferred, false
 
-                                let name = claim taken wanted
+                                let source =
+                                    Map.tryFind typeId exportsById
+                                    |> Option.map (fsName fallback)
+                                    |> Option.defaultValue preferred
+
+                                let sanitised = source <> preferred
+
+                                let name =
+                                    if sanitised then
+                                        claim (Set.union taken verbatim) wanted
+                                    else
+                                        claim taken wanted
+
+                                let findings =
+                                    if sanitised then
+                                        findings
+                                        @ [
+                                            Finding.make
+                                                name
+                                                (SynthesizeAnonymous.NameSanitisedForIdentifier(source, name))
+                                        ]
+                                    else
+                                        findings
 
                                 let findings =
                                     if nestedUnderNamespace && name.Contains "." then

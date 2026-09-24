@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "package": "dollar-name-lab",
+  "module": "DollarNameLab",
+  "counts": {
+    "exact": 2,
+    "ergonomic": 7,
+    "widened": 0,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "NE - name-exports",
+      "total": 5,
+      "exact": 1,
+      "ergonomic": 4
+    },
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 1,
+      "ergonomic": 1
+    },
+    {
+      "pass": "SE - shape-exports",
+      "total": 1,
+      "ergonomic": 1
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 6,
+      "ergonomic": 6
+    }
+  ]
+}

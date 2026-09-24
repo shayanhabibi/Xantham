@@ -838,8 +838,9 @@ type SynthesizeAnonymous =
     /// named, so the reference carries the named operands and widens the rest.
     | [<Widened>] IntersectionOperandNotHoisted of name: string
     | [<Exact>] NameNestedUnderOwner of nestedAs: string
-    /// Wave seven, lane AI. The synthesized name carries characters an F# declaration name
-    /// admits; the source key spells them differently.
+    /// Wave seven, lane AI. The declared name carries characters an F# declaration name
+    /// admits; the source name (a member key, an exported type or a type parameter) spells them
+    /// differently.
     | [<Ergonomic>] NameSanitisedForIdentifier of key: string * sanitised: string
 
     /// Wave twelve, lane BB. A multi-argument callback declared as a named delegate. Its
@@ -857,7 +858,7 @@ type SynthesizeAnonymous =
             | NameNestedUnderOwner nestedAs -> $"anonymous shape named {nestedAs} under the declaration that owns it"
             | CallbackDelegateNamed declaredAs -> $"callback declared as the named delegate {declaredAs}"
             | NameSanitisedForIdentifier(key, sanitised) ->
-                $"member key {key} declared as {sanitised}; the key spells characters a declaration name refuses"
+                $"{key} declared as {sanitised}; the source name spells characters an F# declaration name refuses"
 
 /// `shape-interfaces`.
 [<Prefix("SI", "shape-interfaces")>]

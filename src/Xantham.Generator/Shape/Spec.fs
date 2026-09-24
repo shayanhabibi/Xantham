@@ -2385,6 +2385,16 @@ let typeParamsOf
 
                 None)
 
+    for _, name in named do
+        let written = Naming.typeVariable name
+
+        if written <> name then
+            findings <-
+                findings
+                @ [
+                    Finding.make owner (SynthesizeAnonymous.NameSanitisedForIdentifier(name, written))
+                ]
+
     // Layered onto whatever is already in scope rather than replacing it: a generic *method*
     // binds its own parameters on top of its declaration's, and `read<K extends keyof T>` has
     // to see both.

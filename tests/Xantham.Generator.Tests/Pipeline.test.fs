@@ -5096,3 +5096,35 @@ let overloadArityTests =
                           [ "Writer.pad" ]
                           "only the pair F# cannot separate is dropped" ])
     ]
+
+[<Tests>]
+let dollarNameTests =
+    testList "dollar name fixture" [
+        yield!
+            fixtureTests "dollar-name-lab" (handFixture "dollar-name-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a `$` name declares as an F# identifier and imports as JavaScript spells it" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.isFalse (source.Contains "type ``$") "no declaration keeps the `$`"
+                      Expect.isFalse (source.Contains "'$") "no type variable keeps the `$`"
+                      Expect.stringContains source "type Shape =" "the interface"
+                      Expect.stringContains source "type Box<'_T> =" "the type parameter"
+                      Expect.stringContains source "\"$Cls\"" "the class imports under its JavaScript name"
+
+                      let sanitised =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Key = "SY005")
+                          |> List.map _.Symbol
+
+                      Expect.contains sanitised "Shape" "the interface is reported"
+                      Expect.contains sanitised "Cls" "and the class"
+                      Expect.contains sanitised "Taken2" "and the name that yields to a verbatim one"
+
+                      let unrepresented =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Key = "AC001")
+                          |> List.map _.Symbol
+
+                      Expect.isEmpty unrepresented "every sanitised declaration represents its export" ])
+    ]
