@@ -30,12 +30,19 @@ jobs:
     steps:
       # Checkout source code
       - uses: actions/checkout@v7
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
       - name: Setup .NET
         uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
+      - name: Restore tools
+        run: dotnet tool restore
       - name: Run CI
-        # `Baked.NuGet.apiKey` reads NUGET_API_KEY when no `--nuget-key` is given.
+        # `Baked.NuGet.apiKey` reads NUGET_API_KEY when no `--nuget-key` is given. `--run-gate`
+        # adds the Fable run gate ahead of packing, as the test workflow runs it.
         env:
           NUGET_API_KEY: ${{ secrets.NUGET_KEY }}
-        run: dotnet fsi build.fsx -- publish
+        run: dotnet fsi build.fsx -- publish --run-gate

@@ -278,8 +278,7 @@ module Stages =
                     Spec.srcProjects
                     |> List.filter (function
                         | { Name = "Xantham.TypeScript.Wire" }
-                        | { Name = "Xantham.Fable.Core" }
-                        | { Name = "Xantham.Fable.Core.TS" } -> true
+                        | { Name = "Xantham.Fable.Core" } -> true
                         | _ -> false)
                     |> List.map _.RelativePath
                     |> InputSpec.ret
