@@ -135,7 +135,8 @@ directly, and nested builds carry a `global.json` in a temp directory outside th
 newer SDK stays eligible.
 
 **`tools/workspace.fsx` exports `XANTHAM_TSGO_EXE` from any checkout**, not only a worktree, so
-the catalog suites run in the main checkout.
+the catalog suites run in the main checkout. Only a worktree skips `npm install`: the main
+checkout owns its install, so a `package.json` typescript pin bump reaches the exported path.
 
 ## Open threads
 
