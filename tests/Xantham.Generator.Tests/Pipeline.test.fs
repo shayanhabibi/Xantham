@@ -213,8 +213,23 @@ let private goldenMismatch (label: string) (rendered: string) (golden: string) =
               --stat` and the manifest counts - see .claude/rules/generator-fixtures.md."
         )
 
+/// Committed files under a fixture's golden directory that a run is not expected to write, as
+/// paths relative to that directory with `/` separators. The corpus carries none today.
+let private keptGolden (_relative: string) = false
+
+/// Every file under `goldenDir`, relative to it with `/` separators.
+let private goldenFiles (goldenDir: string) =
+    if Directory.Exists goldenDir then
+        Directory.GetFiles(goldenDir, "*", SearchOption.AllDirectories)
+        |> Array.map (fun path -> Path.GetRelativePath(goldenDir, path).Replace('\\', '/'))
+        |> Array.sort
+        |> Array.toList
+    else
+        []
+
 /// The golden diff for one fixture: every rendered file matches its committed text, byte for
-/// byte (`XANTHAM_UPDATE_GOLDEN=1` rewrites the corpus instead - review the diff).
+/// byte, and the golden directory holds no file the run did not render (`XANTHAM_UPDATE_GOLDEN=1`
+/// rewrites the corpus and deletes those files instead - review the diff).
 let private matchesGoldens (fixture: string) (config: GeneratorConfig) (package: string) =
     let goldenDir = Path.Combine(__SOURCE_DIRECTORY__, "golden", fixture)
     let rendered = Async.RunSynchronously(Pipeline.generate config package)
@@ -234,16 +249,41 @@ let private matchesGoldens (fixture: string) (config: GeneratorConfig) (package:
             Directory.CreateDirectory(Path.GetDirectoryName path) |> ignore
             File.WriteAllText(path, content, Text.UTF8Encoding false)
     else
-        for name, content in rendered.Files do
-            match readGolden goldenDir name with
-            | None ->
-                failtest
-                    $"golden {fixture}/{name} does not exist - run once with XANTHAM_UPDATE_GOLDEN=1 \
-                      and review the diff"
-            | Some golden ->
-                match goldenMismatch $"{fixture}/{name}" content golden with
-                | Some report -> failtest report
-                | None -> ()
+        let reports =
+            rendered.Files
+            |> List.choose (fun (name, content) ->
+                match readGolden goldenDir name with
+                | None ->
+                    Some(
+                        $"golden {fixture}/{name} does not exist - run once with XANTHAM_UPDATE_GOLDEN=1 \
+                          and review the diff"
+                    )
+                | Some golden -> goldenMismatch $"{fixture}/{name}" content golden)
+
+        match reports with
+        | [] -> ()
+        | reports -> failtest (String.concat "\n\n" reports)
+
+    let renderedNames = rendered.Files |> List.map fst |> Set.ofList
+
+    let stale =
+        goldenFiles goldenDir
+        |> List.filter (fun name -> not (renderedNames.Contains name || keptGolden name))
+
+    if updateGoldens then
+        for name in stale do
+            File.Delete(Path.Combine(goldenDir, name))
+    else
+        match stale with
+        | [] -> ()
+        | stale ->
+            let listed =
+                stale |> List.map (fun name -> $"  {fixture}/{name}") |> String.concat "\n"
+
+            failtest
+                $"golden/{fixture} holds files this run did not render (the compile gate compiles \
+                  every .fs file there):\n{listed}\n\
+                  Run once with XANTHAM_UPDATE_GOLDEN=1 to delete them, and review the diff."
 
     rendered
 
@@ -256,6 +296,31 @@ let private unionArmConfig =
                 Enabled = true
             }
     }
+
+/// Fixtures whose goldens depend on the host file system's case sensitivity. `solid-js` ships
+/// `types/render/Suspense.d.ts`; the compiler reports that path case-folded on Windows, where the
+/// goldens are generated, so they record `suspense.d.ts` and order its declarations after
+/// `component.d.ts`. On Linux the path keeps its capital, sorts first, and moves `SuspenseList`
+/// ahead of `Component`. The goldens will hold on both once `Grouping.sourceOrderKey` and the
+/// manifest's `file` field read one casing on every platform.
+let private caseFoldSensitive = set [ "solid-js" ]
+
+/// Runs `check`; on Linux, for a `caseFoldSensitive` fixture, a failure is printed to stdout and
+/// the test is skipped rather than failed.
+let private caseFoldGuard (fixture: string) (check: unit -> unit) =
+    if OperatingSystem.IsLinux() && caseFoldSensitive.Contains fixture then
+        try
+            check ()
+        with
+        | :? IgnoreException -> reraise ()
+        | failure ->
+            printfn $"{fixture} differs on Linux (case-folded declaration paths):\n{failure.Message}"
+
+            skiptest
+                $"{fixture} differs on Linux: the goldens record Windows' case-folded declaration \
+                  paths - the difference is printed above"
+    else
+        check ()
 
 let private fixtureTests (fixture: string) (package: string option) (config: GeneratorConfig) extra =
     match Tsc.locate __SOURCE_DIRECTORY__, package with
@@ -292,13 +357,9 @@ let private fixtureTests (fixture: string) (package: string option) (config: Gen
                     regenerate the goldens (XANTHAM_UPDATE_GOLDEN=1) in the same commit." ]
     | Some _, Some package ->
         [ testCase $"{fixture} generates the committed goldens" <| fun _ ->
-              // TODO fix solid-js on CI
-              if fixture.Contains("solid-js") && OperatingSystem.IsLinux() then skiptest "solid-js" else
-              matchesGoldens fixture config package |> ignore
+              caseFoldGuard fixture (fun () -> matchesGoldens fixture config package |> ignore)
 
           testCase $"{fixture} generation is deterministic run to run" <| fun _ ->
-              // TODO fix solid-js on CI
-              if fixture.Contains("solid-js") && OperatingSystem.IsLinux() then skiptest "solid-js" else
               let first = Async.RunSynchronously(Pipeline.generate config package)
               let second = Async.RunSynchronously(Pipeline.generate config package)
 
