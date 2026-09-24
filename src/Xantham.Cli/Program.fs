@@ -83,19 +83,30 @@ let private emit (out: TextWriter) (err: TextWriter) (options: GenerateOptions) 
             Exit.Generated
     with e ->
         err.WriteLine $"xantham: generating {packageDir} failed - {e.Message}"
+
+        if (Xantham.TypeScript.Wire.Tsc.locate packageDir).IsNone then
+            err.WriteLine "xantham: run `xantham tsc init` to cache the pinned compiler"
+
         Exit.Failed
 
 let private generate (out: TextWriter) (err: TextWriter) (options: GenerateOptions) =
     let packageDir = Path.GetFullPath options.PackageDir
 
-    match refusePackage packageDir with
-    | Some message ->
+    // An unrecognised option binds as the package-dir argument.
+    let refusal =
+        if options.PackageDir.StartsWith "-" then
+            Some(Exit.Usage, $"unrecognised option {options.PackageDir}")
+        else
+            refusePackage packageDir |> Option.map (fun message -> Exit.NoPackage, message)
+
+    match refusal with
+    | Some(code, message) ->
         err.WriteLine $"xantham: {message}"
-        Exit.NoPackage
+        code
     | None ->
         match
             (try
-                Ok options.Config
+                Ok(options.Config())
              with e ->
                  Error e.Message)
         with

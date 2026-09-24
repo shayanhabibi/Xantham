@@ -123,27 +123,29 @@ module Options =
         }
 
 module internal Xantham =
-    /// The configuration for a run: `xantham.json` under the package directory, or under
-    /// `--config` when that names a directory. A `--config` naming the file itself reads it under
-    /// whatever name it carries.
+    /// Reads the configuration for a run when called: `xantham.json` under the package
+    /// directory, or under `--config` when that names a directory. A `--config` naming the file
+    /// itself reads it under whatever name it carries. A refused configuration raises from the
+    /// call, inside the command's own handler.
     let loadConfig =
         input {
             let! config = Options.config
             and! packageDir = Options.packageDir
 
             return
-                match config with
-                | None -> GeneratorConfig.load packageDir
-                | Some path when Directory.Exists path -> GeneratorConfig.load path
-                | Some path when not (File.Exists path) -> failwith $"no configuration at {path}"
-                | Some path -> GeneratorConfig.loadFile path
+                fun () ->
+                    match config with
+                    | None -> GeneratorConfig.load packageDir
+                    | Some path when Directory.Exists path -> GeneratorConfig.load path
+                    | Some path when not (File.Exists path) -> failwith $"no configuration at {path}"
+                    | Some path -> GeneratorConfig.loadFile path
         }
 
     type GenerateOptions =
         {
             PackageDir: string
             Out: string
-            Config: GeneratorConfig
+            Config: unit -> GeneratorConfig
             Quiet: bool
             Json: bool
         }
