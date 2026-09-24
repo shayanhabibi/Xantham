@@ -66,6 +66,18 @@ type Exports =
     [<Import("tint", "union-arm-overload-lab")>]
     static member tint (value: string) : string = jsNative
     /// <summary>
+    /// Declines: the <c>(x: string)</c> arm is a prefix of the second declared overload, whose tail is
+    /// optional, so a call supplying <c>x</c> alone selects either.
+    /// </summary>
+    [<Import("prefix", "union-arm-overload-lab")>]
+    static member prefix (x: U2<string, float>) : string = jsNative
+    /// <summary>
+    /// Declines: the <c>(x: string)</c> arm is a prefix of the second declared overload, whose tail is
+    /// optional, so a call supplying <c>x</c> alone selects either.
+    /// </summary>
+    [<Import("prefix", "union-arm-overload-lab")>]
+    static member prefix (x: string, ?y: float) : string = jsNative
+    /// <summary>
     /// Declines: five arms against a cap of four.
     /// </summary>
     [<Import("wide", "union-arm-overload-lab")>]

@@ -1789,6 +1789,33 @@ property losing DurableObjectClass<T> in a consumer program. The producer's phan
 contract remains unchanged; no catalog compatibility guard is relaxed. Full measurements
 are recorded in `docs/.ai/footguns.md`.
 
+## Generator review fixes (2026-09-24)
+
+- **Overload keys are structural.** `dedupe-overloads` keys a signature by the
+  `signatureKey` tuple itself. The earlier `.ToString()` key printed three list elements and
+  an ellipsis, so overloads that differ past their third parameter collapsed as `DO001`.
+  `overload-arity-lab` pins the separation for methods and `Invoke`, and the negative (a
+  fourth parameter that widens to one F# type). `solid-js`: `Store.SetStoreFunction.Invoke`
+  regains 4 overloads, `DO001` 4 -> 0. `animejs`: `Utils.mapRange` regains its 4-parameter
+  overload, `DO001` 16 -> 15.
+- **Catalog hashes print canonically.** The constraint and API fields of a declaration
+  catalog hash a canonical printer (`DeclarationCatalog.Canonical`): every case and list
+  element is printed at any length. `sprintf "%A"` stopped at 100 list elements, so two
+  interfaces differing in their 101st member hashed alike. The hash format changed with the
+  generator assembly, which already invalidates every earlier catalog.
+- **Union-arm collisions include ambiguous prefixes.** `expand-union-arms` declines a member
+  (`UA004`) when an arm and a declared overload share a compiled signature, or when one is a
+  prefix of the other with an omissible tail. The comparison lives in
+  `Spec.CompiledSignature`, shared with `resolve-export-collisions`.
+- **Findings carry no checker ids.** `RT002` reports under `<type-table>`, `TR003` has no
+  payload, and `TP001` carries the type parameter's position. Checker ids are assigned in
+  answer order, so a manifest quoting one differed run to run.
+- **`$` in declaration and type-parameter names.** An exported type whose name spells a
+  character FS0883 rejects under backticks declares as its identifier shape (`$Shape` ->
+  `Shape`), yielding to a verbatim name it collides with (`$Taken` -> `Taken2`). A type
+  variable writes each non-identifier character as `_` (`$T` -> `'_T`). Both report `SY005`;
+  imports keep the JavaScript name. `dollar-name-lab` pins each position.
+
 # Easy Nits 
 
 To include in scope when a phases implementation/attempt ends up being small/quick.

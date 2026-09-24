@@ -2781,6 +2781,15 @@ let pipelineTests =
                           [ "UA004" ]
                           "the collision is recorded against the member that declined"
 
+                  testCase "an arm that is a prefix of a declared overload with an optional tail refuses the member" <| fun _ ->
+                      let source = (rendered ()).Files |> List.head |> snd
+
+                      Expect.isFalse
+                          (source.Contains "static member prefix (x: string) : string")
+                          "a call `prefix \"a\"` would select the arm and the declared overload alike"
+
+                      Expect.equal (findingsFor "Exports.prefix") [ "UA004" ] "the ambiguity is recorded as a collision"
+
                   testCase "a union over the cap keeps its union member alone" <| fun _ ->
                       Expect.equal (findingsFor "Exports.wide") [ "UA002" ] "five arms against a cap of four"
 
@@ -5115,4 +5124,68 @@ let catalogClassInheritanceTests =
     testList "catalog class inheritance fixture" [
         yield!
             fixtureTests "catalog-class-inheritance-lab" package config (fun _ -> [])
+    ]
+
+[<Tests>]
+let overloadArityTests =
+    testList "overload arity fixture" [
+        yield!
+            fixtureTests "overload-arity-lab" (handFixture "overload-arity-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "overloads separated past the third parameter both survive" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains
+                          source
+                          "abstract write: a: string * b: string * c: string * d: string -> unit"
+                          "the string overload"
+
+                      Expect.stringContains
+                          source
+                          "abstract write: a: string * b: string * c: string * d: float -> unit"
+                          "and the float overload"
+
+                      Expect.stringContains
+                          source
+                          "abstract Invoke: a: string * b: string * c: string * d: float -> unit"
+                          "call signatures separate the same way"
+
+                      Expect.equal
+                          (rendered.Findings
+                           |> List.filter (fun f -> f.Key = "DO001")
+                           |> List.map _.Symbol)
+                          [ "Writer.pad" ]
+                          "only the pair F# cannot separate is dropped" ])
+    ]
+
+[<Tests>]
+let dollarNameTests =
+    testList "dollar name fixture" [
+        yield!
+            fixtureTests "dollar-name-lab" (handFixture "dollar-name-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a `$` name declares as an F# identifier and imports as JavaScript spells it" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.isFalse (source.Contains "type ``$") "no declaration keeps the `$`"
+                      Expect.isFalse (source.Contains "'$") "no type variable keeps the `$`"
+                      Expect.stringContains source "type Shape =" "the interface"
+                      Expect.stringContains source "type Box<'_T> =" "the type parameter"
+                      Expect.stringContains source "\"$Cls\"" "the class imports under its JavaScript name"
+
+                      let sanitised =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Key = "SY005")
+                          |> List.map _.Symbol
+
+                      Expect.contains sanitised "Shape" "the interface is reported"
+                      Expect.contains sanitised "Cls" "and the class"
+                      Expect.contains sanitised "Taken2" "and the name that yields to a verbatim one"
+
+                      let unrepresented =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Key = "AC001")
+                          |> List.map _.Symbol
+
+                      Expect.isEmpty unrepresented "every sanitised declaration represents its export" ])
     ]

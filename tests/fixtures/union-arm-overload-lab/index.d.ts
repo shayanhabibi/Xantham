@@ -24,6 +24,13 @@ export declare function collapse(items: number[] | ReadonlyArray<number>): strin
 export declare function tint(value: string | number): string;
 export declare function tint(value: string): string;
 
+/**
+ * Declines: the `(x: string)` arm is a prefix of the second declared overload, whose tail is
+ * optional, so a call supplying `x` alone selects either.
+ */
+export declare function prefix(x: string | number): string;
+export declare function prefix(x: string, y?: number): string;
+
 /** Declines: five arms against a cap of four. */
 export declare function wide(value: string | number | boolean | number[] | string[]): string;
 

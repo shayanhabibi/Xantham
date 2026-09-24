@@ -114,7 +114,10 @@ let shapeAliases: Pass<ShapeModel> =
                             if not (hasAny SymbolFlags.Type export.Symbol.Flags) then
                                 None
                             else
-                                let name = String.concat "." (exportPath export @ [ fsName fallback export ])
+                                let name =
+                                    String.concat
+                                        "."
+                                        (exportPath export @ [ Naming.typeNameSegment (fsName fallback export) ])
 
                                 let definingOwner typeId =
                                     Map.tryFind typeId definingExports

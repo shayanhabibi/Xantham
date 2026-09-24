@@ -1,0 +1,6 @@
+{
+  "name": "dollar-name-lab",
+  "type": "module",
+  "types": "index.d.ts",
+  "description": "Hand-authored lab: `$` in declaration and type-parameter names reduces to an F# identifier, with the JavaScript name kept on the import."
+}
