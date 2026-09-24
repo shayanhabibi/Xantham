@@ -13,8 +13,8 @@ open Xantham.TypeScript.Wire.Proto
 module Batch =
 
     /// The methods that change server state: they create or free a snapshot or program, write
-    /// files, or toggle profiling. A batch refused as a whole has already executed them, so they
-    /// are reported as failed with the batch error and are never re-sent.
+    /// files, or toggle profiling. A batch refused as a whole reports them failed with the batch
+    /// error; they will not be re-sent.
     let sideEffectingMethods =
         HashSet<string>
             [
@@ -43,12 +43,9 @@ module Batch =
                 many requests
         with
         | TsGoError _ as batchError when requests.Length > 1 ->
-            // The server refused the batch as a whole, not one member of it: a batch response is
-            // marshalled in one piece, so a single result that cannot be encoded (verified live:
-            // a number literal type whose value is `1e999` is `+Inf` to Go's JSON encoder) fails
-            // every request travelling with it. The channel survived - the refusal is an
-            // ordinary error frame - so replay the read-only members one by one and let only the
-            // guilty one fail.
+            // One unencodable result fails the whole batch as an ordinary error frame (a number
+            // literal type of `1e999` is `+Inf` to Go's JSON encoder). Replaying the read-only
+            // members singly confines the failure to the member that caused it.
             requests
             |> Array.map (fun request ->
                 if sideEffectingMethods.Contains request.Method then
@@ -59,8 +56,7 @@ module Batch =
                     with error ->
                         Error error)
         | error ->
-            // The channel failed, and keeps failing every later request with the same error, so
-            // nobody in this group gets an answer.
+            // The channel failed; every member receives its error.
             Array.create requests.Length (Error error)
 
 /// <summary>
@@ -78,10 +74,12 @@ type TscMailbox(exePath, cwd, ?callbacks: IDictionary<string, TsGoCallback>) =
     let cancellation = new CancellationTokenSource()
     let mutable disposed = 0
 
-    // Every reply not yet completed. Dispose fails them, since the agent stops with them queued.
-    let pending = ConcurrentDictionary<TaskCompletionSource<Result<byte[], exn>>, unit>()
+    // Every reply not yet completed. Dispose fails all of them.
+    let pending =
+        ConcurrentDictionary<TaskCompletionSource<Result<byte[], exn>>, unit>()
 
-    let disposedError () = ObjectDisposedException(nameof TscMailbox) :> exn
+    let disposedError () =
+        ObjectDisposedException(nameof TscMailbox) :> exn
 
     // Replies carry the failure rather than raising inside the agent
     let agent =

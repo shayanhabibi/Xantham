@@ -299,8 +299,7 @@ module internal Msgpack =
         | -1 -> failwith "tsgo closed the pipe mid-frame"
         | b -> byte b
 
-    // A pipe returns whatever has arrived, so one `Read` can fill less than `count`. The same
-    // loop runs on every target, netstandard2.1 included.
+    // Reads exactly `count` bytes across short pipe reads, on every target.
     let private readExactly (stream: Stream) (count: int) =
         let buffer = Array.zeroCreate<byte> count
         let mutable offset = 0
@@ -578,14 +577,12 @@ type TscChannel(exePath: string, cwd: string, ?callbacks: IDictionary<string, Ts
     let input = proc.StandardInput.BaseStream
     let output = proc.StandardOutput.BaseStream
 
-    // The first transport failure, with the server's stderr attached. The stream is unusable
-    // after it, so every later request fails with it instead of reading a half-written frame.
+    // The first transport failure, with the server's stderr attached. Every later request fails
+    // with it.
     let mutable faulted: exn option = None
 
-    // A transport failure almost never happens on its own account: the server died, and it
-    // says why on stderr before it goes. That text is already being drained into `stderr`.
-    // Waits are bounded because a server that is still running has a different problem and
-    // must not hang the caller as well.
+    // Wraps `e` with the server's exit code and drained stderr, where a dying server reports its
+    // cause. The waits are bounded, so a server still running will not hang the caller.
     let transportFailure (method: string) (e: exn) =
         proc.WaitForExit 3000 |> ignore
         drain.Wait 3000 |> ignore

@@ -220,7 +220,12 @@ let private checkCache () =
 /// The `tsc version --json` payload for the cached compiler at `path`, or for none cached.
 let tscVersionJson (path: string option) =
     match path with
-    | Some tsc -> JsonSerializer.Serialize {| version = Spec.tscVersion; path = tsc |}
+    | Some tsc ->
+        JsonSerializer.Serialize
+            {|
+                version = Spec.tscVersion
+                path = tsc
+            |}
     | None ->
         JsonSerializer.Serialize
             {|
