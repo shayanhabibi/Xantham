@@ -299,13 +299,17 @@ module internal Msgpack =
         | -1 -> failwith "tsgo closed the pipe mid-frame"
         | b -> byte b
 
+    // A pipe returns whatever has arrived, so one `Read` can fill less than `count`. The same
+    // loop runs on every target, netstandard2.1 included.
     let private readExactly (stream: Stream) (count: int) =
         let buffer = Array.zeroCreate<byte> count
-#if !NETSTANDARD2_1
-        stream.ReadExactly(buffer, 0, count)
-#else
-        stream.Read(buffer, 0, count) |> ignore
-#endif
+        let mutable offset = 0
+
+        while offset < count do
+            match stream.Read(buffer, offset, count - offset) with
+            | 0 -> failwith "tsgo closed the pipe mid-frame"
+            | read -> offset <- offset + read
+
         buffer
 
     let private readBin (stream: Stream) =
@@ -692,9 +696,9 @@ type TscChannel(exePath: string, cwd: string, ?callbacks: IDictionary<string, Ts
             drain.Wait 1000 |> ignore
             proc.Dispose()
 
-/// The version-5 binary AST returned by `getSourceFile`: one blob per file, from which every
-/// node is readable with no further round-trips. All integers here are **little-endian**, unlike
-/// the msgpack envelope that carried them.
+/// The binary AST returned by `getSourceFile`, at version `ProtocolVersion`: one blob per file,
+/// from which every node is readable with no further round-trips. All integers here are
+/// **little-endian**, unlike the msgpack envelope that carried them.
 [<RequireQualifiedAccess>]
 module Ast =
 
