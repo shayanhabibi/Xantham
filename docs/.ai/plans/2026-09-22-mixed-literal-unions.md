@@ -31,7 +31,8 @@ form keeps it, and `Origin.Num 3.5` is a direct application with no `!^` needed.
 returned zero eligible unions and this plan was closed on that basis; the second run, against
 raw `TypeFacts` rather than rendered `FsTypeRef`s, returned **11 eligible out of 45**. The
 first number was a measurement artifact — see "Step 0 result" below. The design is settled and
-empirically validated against Fable 5.13.0. What is not settled is whether 11 unions justify a
+empirically validated against Fable 5.13.0; the repository pins the `fable` tool at 5.0.0, and
+the validation is unverified there. What is not settled is whether 11 unions justify a
 new decl case, a new render template, and a runtime round-trip test. Everything marked
 *verified* was observed in emitted JavaScript, not recalled.
 
@@ -139,7 +140,7 @@ error here whenever the sole literal is lowercase.
 
 ## Step 0 — go/no-go gate
 
-- [x] Wire the classifier from `mixed-union-classifier.fsx` (see "Prototype" below) into a
+- [x] Wire the classifier (see "Prototype" below; the census is `Shape/MixedUnionCensus.fs`) into a
       throwaway counting pass. No model or render changes.
 - [x] Over Anime.js and two other packages, count: unions mixing string literals with
       non-literal members; and of those, how many pass every condition below.

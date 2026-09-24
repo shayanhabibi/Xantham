@@ -377,7 +377,7 @@ and swapping them changes module resolution without erroring.
 **Failure mode:** was the worst kind, which is why the typed layer exists. A wrong reply shape is
 not an error frame: it is a Go panic - `json: unable to unmarshal JSON string into Go struct
 { Content *string }` - that kills the process mid-request, so the caller sees only
-`tsc closed the pipe mid-frame` with the real message on stderr. A failed callback is equally
+`tsgo closed the pipe mid-frame` with the real message on stderr. A failed callback is equally
 terminal by design: the server treats `MSG_CALL_ERROR` as unrecoverable and exits, so a raising
 callback spends the channel.
 
