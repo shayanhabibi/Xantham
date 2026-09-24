@@ -55,20 +55,26 @@ let build = input {
 `tools/workspace.fsx` is a `#load`-only helper (not a command script) that both `build.fsx` and
 `tools/generate-wire.fsx` use to answer "which checkout has the dependencies?".
 
+`Workspace.ensureTsc` exports the nearest compiler as `XANTHAM_TSGO_EXE` in every checkout, which
+`Tsc.locate` honours ahead of its parent-directory walk, so suites that run from temp directories
+find it too. It returns the compiler only when it is *borrowed* — outside the checkout's own
+`node_modules`. The `npm install` stage in `build.fsx` runs exactly when nothing is borrowed.
+
 An agent worktree under `.claude/worktrees/` carries tracked files only, so it has no
-`node_modules`. Rather than install the pin twice, `Workspace.ensureTsc` finds the main
-checkout's compiler and exports it as `XANTHAM_TSGO_EXE`, which `Tsc.locate` honours ahead of its
-parent-directory walk; `npm install` is then skipped and the live tests run against the same
-binary the main checkout uses. `typescriptPackage` and `nodeModulesRoot` resolve the generators'
-inputs the same way — worktree first, then the main checkout.
+`node_modules`. Rather than install the pin twice, it borrows the main checkout's compiler, skips
+`npm install`, and runs the live tests against the same binary the main checkout uses.
+`typescriptPackage` and `nodeModulesRoot` resolve the generators' inputs the same way — worktree
+first, then the main checkout.
 
 - Detection is "`.git` is a file, not a directory", so it does not depend on where the worktree
   sits. The main checkout is found through the worktree's `commondir`.
-- Only worktrees get the redirect. In the main checkout `ensureTsc` returns `None` and changes
-  nothing, so a pin bump is picked up normally.
-- An `XANTHAM_TSGO_EXE` already in the environment always wins.
+- The main checkout owns its install: `ensureTsc` returns `None`, `npm install` runs (a no-op when
+  `package-lock.json` is satisfied), and a `package.json` pin bump reaches the exported path. A
+  worktree picks up a pin bump only once the main checkout has installed it.
+- An `XANTHAM_TSGO_EXE` already in the environment always wins; it counts as borrowed unless it is
+  the checkout's own compiler.
 - Generated output still goes to the worktree — only *inputs* are borrowed.
-- Borrowing also exports `XANTHAM_REQUIRE_TSC=1`. Once a compiler is known to be on disk, a live
+- Exporting also sets `XANTHAM_REQUIRE_TSC=1`. Once a compiler is known to be on disk, a live
   suite that skipped itself is a broken run, not an unconfigured one, and silence there would
   make a worktree look green while testing nothing. Export `XANTHAM_REQUIRE_TSC=0` to opt out.
 - Consequence: with the override set, the `tsc` layout test skips itself by design — it asserts

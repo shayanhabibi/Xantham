@@ -302,9 +302,9 @@ module Stages =
     /// the shipped schema out of that package, and `Tsc.locate` walks parent directories, so the
     /// same install also serves as the live `tsc --api` server for anything run under the repo.
     ///
-    /// An agent worktree has no `node_modules` of its own, so it borrows the main checkout's
-    /// install instead of downloading the pin a second time - `Workspace.ensureTsc` exports it as
-    /// `XANTHAM_TSGO_EXE` for every later stage, and there is then nothing left to install.
+    /// `Workspace.ensureTsc` exports the compiler as `XANTHAM_TSGO_EXE` for every later stage. A
+    /// checkout with its own install runs `npm install`, so a `package.json` pin bump reaches the
+    /// exported path; an agent worktree borrows the main checkout's install and installs nothing.
     let deps =
         input {
             let! quick = Options.quick
