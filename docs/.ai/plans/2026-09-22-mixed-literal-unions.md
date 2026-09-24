@@ -139,7 +139,7 @@ error here whenever the sole literal is lowercase.
 
 ## Step 0 — go/no-go gate
 
-- [x] Wire the classifier from `mixed-union-classifier.fsx` (see "Prototype" below) into a
+- [x] Wire the classifier (see "Prototype" below; the census is `Shape/MixedUnionCensus.fs`) into a
       throwaway counting pass. No model or render changes.
 - [x] Over Anime.js and two other packages, count: unions mixing string literals with
       non-literal members; and of those, how many pass every condition below.
