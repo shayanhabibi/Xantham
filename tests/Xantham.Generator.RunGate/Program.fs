@@ -1270,6 +1270,16 @@ let private callbackMixedForms () =
 /// so each claim reads the `length` of the function JavaScript received beside the result of
 /// calling it with all its arguments at once, and the non-callback arm of the same union is read
 /// beside it.
+/// `expand-union-arms` overloads (union-arm-overload-lab): the delegate arm takes a bare lambda,
+/// which crosses at the delegate's declared arity; the string arm crosses as its own value.
+let private unionArmOverloads () =
+    equal
+        "a bare lambda on the delegate arm overload crosses at its declared arity"
+        "2:got:1:2"
+        (UnionArmOverloadLab.Exports.apply (fun a b -> $"got:{a}:{b}"))
+
+    equal "the string arm overload crosses as its own value" "text:plain" (UnionArmOverloadLab.Exports.apply "plain")
+
 let private callbackUnionArmForms () =
     let attempt (f: unit -> string) =
         try
@@ -2117,6 +2127,7 @@ let main _ =
     callbackTupledForms ()
     callbackMixedForms ()
     callbackUnionArmForms ()
+    unionArmOverloads ()
     callbackUnionNestingForms ()
     callbackNamedDelegateForms ()
     generatedDelegateForms ()
