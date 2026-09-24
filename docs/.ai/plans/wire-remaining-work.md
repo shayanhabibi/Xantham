@@ -39,7 +39,7 @@ you, the sync and async APIs are unusable.
 2. Decide the treatment of non-optional `JsonObject` fields (`Paths`, and any sibling). Either
    the schema genuinely requires them — in which case `Default` supplies an empty `JsonObject`
    — or they are optional upstream and the generator's type mapping is wrong. Check
-   `dist/api/sync/api.d.ts` before choosing; record the answer in `docs/wire-hand-written.md`
+   `dist/api/sync/api.d.ts` before choosing; record the answer in `site/content/dev/hand-written.md`
    if it turns out to be a transcribed fact rather than a derived one.
 3. Regenerate (`dotnet fsi tools/generate-wire.fsx generate proto`) and rewrite `tests/Test.fsx`
    against the new form — it collapses from ~110 lines to one.
@@ -67,7 +67,7 @@ Two findings worth keeping:
 - **`paths` is not a type-mapping bug.** The schema declares `paths?: Record<string, string[]>`
   and the generator maps bare `JsonNode`/`JsonObject` fields to nullable references rather than
   value options, so its absent form is `null`, not `ValueNone`. Nothing to change, and nothing
-  to add to `docs/wire-hand-written.md`: it is derived, not transcribed.
+  to add to `site/content/dev/hand-written.md`: it is derived, not transcribed.
 
 ---
 

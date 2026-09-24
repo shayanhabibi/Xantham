@@ -281,7 +281,7 @@ New projects (names step around the archive, which is invisible to the solution 
   lookup checks root declarations; a package exposing only named subpaths requires an explicit
   input. Conditional environment selection remains the caller's responsibility. Bootstrap,
   CLI, schema and `entry-selection-lab` tests cover selection and refusal paths, including
-  `.d.mts` and `.d.cts`. See [entry selection](../../generator-usage.md#select-a-declaration-entry).
+  `.d.mts` and `.d.cts`. See [entry selection](../../../site/content/xantham-cli/guide/usage.md).
 
   Two things `load` still leaves to a caller. It is addressed by *directory*, so `--config`
   pointing at a file under another name reads it through a staged copy; a `loadFile` taking

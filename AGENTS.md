@@ -6,7 +6,7 @@ into a typed layer. Generated bindings target **Fable 5.x only**: if a mapping n
 Fable 5 provides, use it; a lossy mapping is lossy because of F# or a missing binding, never
 because of the Fable version.
 
-Consumer documentation lives under `docs/`; AI/agent notes live under `docs/.ai/`, indexed by
+Consumer documentation lives under `site/content/`; AI/agent notes live under `docs/.ai/`, indexed by
 `docs/.ai/README.md`. Before changing generator behaviour, read `docs/.ai/footguns.md`: it
 carries the compiler-API traps, catalog identity rules and pass invariants that earlier waves
 paid for.
@@ -101,7 +101,7 @@ dominated by generated-file internals on the Wire project — treat it as candid
 ## Architecture notes
 
 - Nothing hand-transcribed is generated: facts transcribed by a person are catalogued in
-  `docs/wire-hand-written.md`, with how each was derived and how to update it.
+  `site/content/dev/hand-written.md`, with how each was derived and how to update it.
 - The generator is nano-passes over accumulating per-tier records in linear lists — source order
   is execution order. `docs/.ai/plans/generator-architecture.md` carries the phase decisions
   (O1–O7); `generator-type-mapping.md` carries the per-construct mapping. Update the relevant
@@ -112,7 +112,7 @@ dominated by generated-file internals on the Wire project — treat it as candid
   needs a table row taking the next unused number under its prefix, a retired case keeps its row,
   and `Findings.test.fs` pins the table.
 - `AST` is read in place out of one blob; `Node<'Tag>` is a struct over a blob index, accessed
-  through the typed layer, never raw indices — see `docs/wire-navigation.md` for the map.
+  through the typed layer, never raw indices — see `site/content/wire/navigation.md` for the map.
 - `tests/Xantham.Generator.CompileGate` is deliberately not an Expecto test: it is a plain project,
   so it runs on every build rather than only under `build.fsx -- test`.
 
