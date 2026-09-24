@@ -209,6 +209,27 @@ let commandTests =
                 Expect.equal code 1 "usage"
                 Expect.stringContains err "--bogus" "the option is named"
 
+        testCase "the tsc version payload is JSON, with a Windows path escaped" <| fun _ ->
+            let path = @"C:\Users\someone\.cache\xantham\tsc.exe"
+
+            use found = Text.Json.JsonDocument.Parse(Xantham.Cli.Program.tscVersionJson (Some path))
+            found.RootElement.GetProperty("path").GetString() |> Flip.Expect.equal "the path round-trips" path
+
+            use missing = Text.Json.JsonDocument.Parse(Xantham.Cli.Program.tscVersionJson None)
+            missing.RootElement.GetProperty("path").ValueKind
+            |> Flip.Expect.equal "no cached compiler is a null path" Text.Json.JsonValueKind.Null
+
+        // Whether this machine has the compiler cached decides the stream and the code, not the shape.
+        testCase "tsc version --json exits 0 only with a cached compiler" <| fun _ ->
+            let out = new StringWriter()
+            let err = new StringWriter()
+            let code = Xantham.Cli.Program.run out err [| "tsc"; "version"; "--json" |]
+            let text = if code = 0 then out.ToString() else err.ToString()
+
+            use doc = Text.Json.JsonDocument.Parse text
+            let cached = doc.RootElement.GetProperty("path").ValueKind = Text.Json.JsonValueKind.String
+            code |> Flip.Expect.equal "the exit code follows the cache" (if cached then 0 else 4)
+
         testCase "an unknown command is a usage error" <| fun _ ->
             invoke [ "compile" ] <| fun (code, _, _, _) -> Expect.equal code 1 "usage"
 

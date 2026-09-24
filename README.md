@@ -40,7 +40,7 @@ you are using:
 ```bash
 xantham schema
 
-xantham schema --output xantham.schema.json
+xantham schema -o xantham.schema.json
 ```
 
 [See the Docs](https://shayanhabibi.github.io/Xantham) for more information.
