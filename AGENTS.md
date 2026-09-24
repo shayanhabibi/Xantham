@@ -54,7 +54,7 @@ live `tsc --api` server.
 - `dotnet build Xantham.slnx` — build. `dotnet test` — run the Expecto suite.
 - `dotnet fsi build.fsx -- <build|test|generate|docs|pack|publish|bump>` — full pipeline.
   `--quick` skips restore, clean, format and installs; `--no-format` skips only `dotnet fantomas`,
-  so a full run leaves the working tree unmodified.
+  so sources are not reformatted (`npm install` and `pack`'s version stamp still write tracked files).
 - `dotnet fsi build.fsx -- <command> --help` — the options a command takes, generated from its
   stages; the authority on which flag belongs to which command.
 - `dotnet fsi build.fsx -- <command> --explain` — the resolved stage tree and the commands each

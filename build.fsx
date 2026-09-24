@@ -78,7 +78,7 @@ module Options =
     /// Skips only the `format` stage; restore, clean and installs still run.
     let noFormat =
         Input.option<bool> "--no-format"
-        |> Input.description "Skip `dotnet fantomas`, leaving the working tree unmodified"
+        |> Input.description "Skip `dotnet fantomas`, so sources are not reformatted"
 
     let config =
         Baked.Input.DotNet.configString
