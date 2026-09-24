@@ -18,21 +18,24 @@ env:
   # build that tested nothing. This turns that skip into a failure - see `Tsc.test.fs`.
   XANTHAM_REQUIRE_TSC: 1
 
+# Queue rather than cancel: a cancelled run can stop between two `dotnet nuget push` calls and
+# leave a release half-published.
 concurrency:
-  group: ${{ github.workflow }}
-  cancel-in-progress: true
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   tests:
     runs-on: ubuntu-latest
     steps:
       # Checkout source code
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v6
         with:
-          # The library multi-targets net10.0, and the runner's preinstalled SDK is older, so
-          # without this the build fails before any test runs.
-          dotnet-version: '10.0.x'
+          global-json-file: global.json
       - name: Run CI
-        run: dotnet fsi build.fsx -- publish --nuget-key ${{ secrets.NUGET_KEY }}
+        # `Baked.NuGet.apiKey` reads NUGET_API_KEY when no `--nuget-key` is given.
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_KEY }}
+        run: dotnet fsi build.fsx -- publish
