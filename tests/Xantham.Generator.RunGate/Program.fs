@@ -2163,4 +2163,8 @@ let main _ =
             eprintfn $"run gate FAILED: {claim}"
 
         eprintfn $"run gate: {failed.Length} of {passed + failed.Length} checks failed"
+        // Fable discards `main`'s return value; node reports failure through `process.exitCode`.
+#if FABLE_COMPILER
+        emitJsStatement 1 "process.exitCode = $0"
+#endif
         1
