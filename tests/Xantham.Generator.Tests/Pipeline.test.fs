@@ -5055,3 +5055,35 @@ let catalogClassInheritanceTests =
         yield!
             fixtureTests "catalog-class-inheritance-lab" package config (fun _ -> [])
     ]
+
+[<Tests>]
+let overloadArityTests =
+    testList "overload arity fixture" [
+        yield!
+            fixtureTests "overload-arity-lab" (handFixture "overload-arity-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "overloads separated past the third parameter both survive" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains
+                          source
+                          "abstract write: a: string * b: string * c: string * d: string -> unit"
+                          "the string overload"
+
+                      Expect.stringContains
+                          source
+                          "abstract write: a: string * b: string * c: string * d: float -> unit"
+                          "and the float overload"
+
+                      Expect.stringContains
+                          source
+                          "abstract Invoke: a: string * b: string * c: string * d: float -> unit"
+                          "call signatures separate the same way"
+
+                      Expect.equal
+                          (rendered.Findings
+                           |> List.filter (fun f -> f.Key = "DO001")
+                           |> List.map _.Symbol)
+                          [ "Writer.pad" ]
+                          "only the pair F# cannot separate is dropped" ])
+    ]

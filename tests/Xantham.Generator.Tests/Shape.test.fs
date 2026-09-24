@@ -3569,6 +3569,68 @@ let shapePassTests =
                     [ FsNamed "DOMTargets"; FsString ]
                     "first of the obj pair survives; the string overload is distinct"
 
+        // Signatures sharing their first three parameters and differing past them: a key printed
+        // with `List.ToString()` stops at three elements and made these one signature.
+        testCase "dedupe-overloads keeps overloads that differ past the third parameter" <| fun _ ->
+            let parameter name reference =
+                { Name = name
+                  Optional = false
+                  Rest = false
+                  Type = reference }
+
+            let parameters last =
+                [ parameter "a" FsString
+                  parameter "b" FsString
+                  parameter "c" FsString
+                  parameter "d" last ]
+
+            let signature last =
+                { Docs = ""
+                  Tags = []
+                  TypeParameters = []
+                  Parameters = parameters last
+                  Return = FsUnit }
+
+            let model =
+                { Build.shapeModel [] with
+                    Decls =
+                        [ FsInterface
+                              { Name = "Store"
+                                Docs = ""
+                                Tags = []
+                                Order = None
+                                TypeParameters = []
+                                Inherits = []
+                                Members =
+                                  [ FsMethod
+                                        { Name = "set"
+                                          Docs = ""
+                                          Tags = []
+                                          TypeParameters = []
+                                          Parameters = parameters FsString
+                                          Return = FsUnit }
+                                    FsMethod
+                                        { Name = "set"
+                                          Docs = ""
+                                          Tags = []
+                                          TypeParameters = []
+                                          Parameters = parameters FsFloat
+                                          Return = FsUnit }
+                                    FsInvoke(signature FsString)
+                                    FsInvoke(signature FsFloat)
+                                    FsConstructor(signature FsString)
+                                    FsConstructor(signature FsFloat) ]
+                                Entrypoint = None
+                                CreateOverloads = []
+                                Statics = [] } ] }
+
+            let deduped, findings = Build.runPass Overloads.dedupeOverloads model
+
+            Expect.isEmpty findings "no pair widens to one F# signature"
+
+            match deduped.Decls |> List.pick (function FsInterface d -> Some d | _ -> None) with
+            | decl -> Expect.equal decl.Members.Length 6 "every overload survives"
+
         // A method whose two call signatures differ only in the string literal typing their
         // second parameter: the collision `dedupe-overloads` would otherwise price, and the one
         // a retained literal repairs.
