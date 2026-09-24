@@ -28,6 +28,12 @@
         <None Include="README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 
+    <!-- Fable compiles a package from its `fable/` sources, and the inline helpers have no body
+         in the DLL. docs/.ai/footguns.md, "Fable consumption of bindings". -->
+    <ItemGroup>
+        <Content Include="*.fsproj; **\*.fs" Exclude="**\*.fs.js; obj\**; bin\**" PackagePath="fable\" />
+    </ItemGroup>
+
     <ItemGroup>
         <!-- Fable.Core 5+, pinned: the compile gate carries the same pin, because generated
              bindings and the gate agree on one Fable.Core. -->

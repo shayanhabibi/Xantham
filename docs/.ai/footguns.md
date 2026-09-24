@@ -123,9 +123,9 @@ The run gate catches this only for members it calls, so a new hand-written membe
 in `tests/Xantham.Generator.RunGate/Program.fs` (`bindingExtensions`).
 
 `Xantham.Fable.Core` is the exception: its `KeyOf`/`TypeKeyOf` helpers are `inline`, so it is
-compiled from source, and excluding it fails with `Cannot find inline member`. Its package
-therefore needs its sources under `fable/`. `0.1.0-alpha.1` ships `lib/` alone, so a NuGet
-consumer calling those helpers fails the same way — an open thread.
+compiled from source, and excluding it fails with `Cannot find inline member`. Its package ships
+its sources under `fable/` for the same reason; a package without them fails the same way at a
+consumer's first helper call.
 
 ## Build and test environment
 
