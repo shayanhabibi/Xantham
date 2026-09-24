@@ -28,7 +28,7 @@ xantham generate node_modules/some-package -o bindings --config xantham.json
 ```
 
 The argument is a package directory holding a `package.json` and the `node_modules` its
-declarations resolve through. `xantham schema --output xantham.schema.json` writes the JSON
+declarations resolve through. `xantham schema -o xantham.schema.json` writes the JSON
 Schema for the configuration file.
 
 Documentation: <https://shayanhabibi.github.io/Xantham/xantham-cli/>
