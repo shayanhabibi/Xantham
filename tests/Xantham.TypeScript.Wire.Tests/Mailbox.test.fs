@@ -1,6 +1,8 @@
 ﻿module Xantham.TypeScript.Wire.Tests.Mailbox
 
+open System
 open System.IO
+open System.Threading
 open Expecto
 open Xantham.TypeScript.Wire
 
@@ -160,7 +162,75 @@ let mailboxTests =
 
             // Timed rather than open-ended: a mailbox that failed to shut down would otherwise
             // hang the suite instead of failing it.
-            Expect.throws
+            Expect.throwsT<ObjectDisposedException>
                 (fun () -> Async.RunSynchronously(mailbox.parseCommandLine commandLine, timeout = 2000) |> ignore)
                 "nothing is served once the mailbox and its channel are closed")
+
+        // The agent stops with messages still queued. Each of their callers has to hear back,
+        // with an answer or with the disposal, rather than wait forever.
+        testCase "requests queued at disposal are all answered" <| withMailbox (fun mailbox ->
+            let calls =
+                [| for i in 1 .. 50 ->
+                    Async.StartAsTask(mailbox.parseCommandLine(commandLine = [| "--strict"; $"file{i}.ts" |])) |]
+
+            mailbox.Dispose()
+
+            let all = Tasks.Task.WhenAll(calls |> Array.map (fun call -> call :> Tasks.Task))
+            all.ContinueWith(ignore).Wait 10_000 |> Flip.Expect.isTrue "every caller completes"
+
+            for call in calls do
+                if call.IsFaulted then
+                    match call.Exception.InnerException with
+                    | :? ObjectDisposedException -> ()
+                    | :? IOException -> ()
+                    | other -> failtest $"a queued request failed with {other}")
+    ]
+
+/// The batch dispatch rule, with no server: `one` and `many` stand in for the channel.
+[<Tests>]
+let batchTests =
+    let entry method = ProtoJson.batchEntryNoParams method
+
+    testList "mailbox batch" [
+        // A whole-batch refusal arrives after the server has executed every member, so a replay
+        // would run a mutating request twice.
+        testCase "a refused batch replays read-only requests and never re-sends a mutating one" <| fun _ ->
+            let sent = ResizeArray<string>()
+
+            let one (request: Proto.BatchRequest) =
+                sent.Add request.Method
+                [| 1uy |]
+
+            let many (_: Proto.BatchRequest[]) : Result<byte[], exn>[] =
+                raise (TsGoError(Proto.Method.BatchRequests, "json: unsupported value: +Inf"))
+
+            let results =
+                Batch.dispatch one many [| entry Proto.Method.GetAnyType; entry Proto.Method.Release; entry Proto.Method.GetStringType |]
+
+            List.ofSeq sent
+            |> Flip.Expect.equal "only the read-only requests are replayed" [ Proto.Method.GetAnyType; Proto.Method.GetStringType ]
+
+            match results with
+            | [| Ok _; Error(TsGoError(method, _)); Ok _ |] ->
+                method |> Flip.Expect.equal "the release carries the batch's own error" Proto.Method.BatchRequests
+            | other -> failtest $"unexpected results %A{other}"
+
+        testCase "a transport failure is every member's result, with nothing replayed" <| fun _ ->
+            let sent = ResizeArray<string>()
+
+            let one (request: Proto.BatchRequest) =
+                sent.Add request.Method
+                [||]
+
+            let failure = IOException "closed"
+            let many (_: Proto.BatchRequest[]) : Result<byte[], exn>[] = raise failure
+
+            let results = Batch.dispatch one many [| entry Proto.Method.GetAnyType; entry Proto.Method.GetStringType |]
+
+            sent.Count |> Flip.Expect.equal "nothing replayed" 0
+
+            for result in results do
+                match result with
+                | Error e -> Expect.isTrue (obj.ReferenceEquals(e, failure)) "the channel's own error"
+                | Ok _ -> failtest "a failed transport answered"
     ]

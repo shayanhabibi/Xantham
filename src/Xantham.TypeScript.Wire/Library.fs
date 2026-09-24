@@ -299,13 +299,17 @@ module internal Msgpack =
         | -1 -> failwith "tsgo closed the pipe mid-frame"
         | b -> byte b
 
+    // A pipe returns whatever has arrived, so one `Read` can fill less than `count`. The same
+    // loop runs on every target, netstandard2.1 included.
     let private readExactly (stream: Stream) (count: int) =
         let buffer = Array.zeroCreate<byte> count
-#if !NETSTANDARD2_1
-        stream.ReadExactly(buffer, 0, count)
-#else
-        stream.Read(buffer, 0, count) |> ignore
-#endif
+        let mutable offset = 0
+
+        while offset < count do
+            match stream.Read(buffer, offset, count - offset) with
+            | 0 -> failwith "tsgo closed the pipe mid-frame"
+            | read -> offset <- offset + read
+
         buffer
 
     let private readBin (stream: Stream) =
@@ -574,38 +578,62 @@ type TscChannel(exePath: string, cwd: string, ?callbacks: IDictionary<string, Ts
     let input = proc.StandardInput.BaseStream
     let output = proc.StandardOutput.BaseStream
 
+    // The first transport failure, with the server's stderr attached. The stream is unusable
+    // after it, so every later request fails with it instead of reading a half-written frame.
+    let mutable faulted: exn option = None
+
+    // A transport failure almost never happens on its own account: the server died, and it
+    // says why on stderr before it goes. That text is already being drained into `stderr`.
+    // Waits are bounded because a server that is still running has a different problem and
+    // must not hang the caller as well.
+    let transportFailure (method: string) (e: exn) =
+        proc.WaitForExit 3000 |> ignore
+        drain.Wait 3000 |> ignore
+
+        let code =
+            if proc.HasExited then
+                string proc.ExitCode
+            else
+                "still running"
+
+        let diagnostics = lock stderr (fun () -> stderr.ToString())
+        IOException($"{e.Message}\n--- tsgo method={method} exit={code} stderr ---\n{diagnostics}", e)
+
     member _.Diagnostics = lock stderr (fun () -> stderr.ToString())
+
+    /// The process behind the channel.
+    member internal _.Process = proc
 
     /// <param name="method">The protocol method name.</param>
     /// <param name="payload">payload</param>
     /// <returns>Response in bytes</returns>
+    /// <exception cref="T:System.IO.IOException">
+    /// The transport failed, on this request or an earlier one. The message carries the server's
+    /// exit code and stderr.
+    /// </exception>
     member _.Request(method: string, payload: byte[]) : byte[] =
+        match faulted with
+        | Some first -> raise (IOException($"the channel failed earlier: {first.Message}", first))
+        | None -> ()
+
         let methodBytes = Encoding.UTF8.GetBytes method
-        Msgpack.writeFrame input MessageType.Request (ReadOnlySpan methodBytes) (ReadOnlySpan payload)
+
+        let transport (operation: unit -> 'T) : 'T =
+            try
+                operation ()
+            with e ->
+                let failure = transportFailure method e
+                faulted <- Some failure
+                raise failure
+
+        transport (fun () ->
+            Msgpack.writeFrame input MessageType.Request (ReadOnlySpan methodBytes) (ReadOnlySpan payload))
 
         let mutable result = ValueNone
 
         while result.IsNone do
-            // A frame read almost never fails on its own account: it fails because the server
-            // died, and the server says why on stderr before it goes. That text is already
-            // being drained into `stderr`, and dropping it here leaves only "closed the pipe
-            // mid-frame" - true, and useless. Waits are bounded because a server that is still
-            // running has a different problem and must not hang the caller as well.
             let messageType, responseMethod, responsePayload =
-                try
-                    Msgpack.readFrame output
-                with e ->
-                    proc.WaitForExit 3000 |> ignore
-                    drain.Wait 3000 |> ignore
-
-                    let code =
-                        if proc.HasExited then
-                            string proc.ExitCode
-                        else
-                            "still running"
-
-                    let diagnostics = lock stderr (fun () -> stderr.ToString())
-                    failwith $"{e.Message}\n--- tsgo method={method} exit={code} stderr ---\n{diagnostics}"
+                transport (fun () -> Msgpack.readFrame output)
 
             match messageType with
             | MessageType.Response -> result <- ValueSome responsePayload
@@ -615,31 +643,18 @@ type TscChannel(exePath: string, cwd: string, ?callbacks: IDictionary<string, Ts
                 // the server will continue toward our response.
                 let name = Encoding.UTF8.GetString responseMethod
 
-                match callbacks.TryGetValue name with
-                | true, callback ->
-                    let reply =
+                let messageType, reply =
+                    match callbacks.TryGetValue name with
+                    | true, callback ->
                         try
                             let value = callback (Encoding.UTF8.GetString responsePayload)
-                            Ok(Encoding.UTF8.GetBytes value)
+                            MessageType.CallResponse, Encoding.UTF8.GetBytes value
                         with e ->
-                            Error(Encoding.UTF8.GetBytes e.Message)
+                            MessageType.CallError, Encoding.UTF8.GetBytes e.Message
+                    | _ -> MessageType.CallError, Encoding.UTF8.GetBytes $"no callback registered for {name}"
 
-                    match reply with
-                    | Ok bytes ->
-                        Msgpack.writeFrame
-                            input
-                            MessageType.CallResponse
-                            (ReadOnlySpan responseMethod)
-                            (ReadOnlySpan bytes)
-                    | Error bytes ->
-                        Msgpack.writeFrame
-                            input
-                            MessageType.CallError
-                            (ReadOnlySpan responseMethod)
-                            (ReadOnlySpan bytes)
-                | _ ->
-                    let message = Encoding.UTF8.GetBytes $"no callback registered for {name}"
-                    Msgpack.writeFrame input MessageType.CallError (ReadOnlySpan responseMethod) (ReadOnlySpan message)
+                transport (fun () ->
+                    Msgpack.writeFrame input messageType (ReadOnlySpan responseMethod) (ReadOnlySpan reply))
             | other -> failwithf $"unexpected frame type %A{other} from tsgo"
 
         result.Value
@@ -692,9 +707,9 @@ type TscChannel(exePath: string, cwd: string, ?callbacks: IDictionary<string, Ts
             drain.Wait 1000 |> ignore
             proc.Dispose()
 
-/// The version-5 binary AST returned by `getSourceFile`: one blob per file, from which every
-/// node is readable with no further round-trips. All integers here are **little-endian**, unlike
-/// the msgpack envelope that carried them.
+/// The binary AST returned by `getSourceFile`, at version `ProtocolVersion`: one blob per file,
+/// from which every node is readable with no further round-trips. All integers here are
+/// **little-endian**, unlike the msgpack envelope that carried them.
 [<RequireQualifiedAccess>]
 module Ast =
 

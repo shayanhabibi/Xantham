@@ -152,46 +152,44 @@ let commandTests =
     testList "generator cli" [
         let inline (=!>) entry message = entry, message
 
-        // TODO - FSharp.SystemCommandLine parsing causes earlier failure due to non existent file.
-        //          So these all fail correctly, but not for the reasons we originally prepared the tests for.
-        // testTheory "invalid declaration inputs are configuration errors" [
-        //     "null" =!> "entry must be a string"
-        //     "42" =!> "entry must be a string"
-        //     "true" =!> "entry must be a string"
-        //     "[]" =!> "entry must be a string"
-        //     "{}" =!> "entry must be a string"
-        //     "\"\"" =!> "entry must be a nonempty relative path"
-        //     "\" \"" =!> "entry must be a nonempty relative path"
-        //     (Text.Json.JsonSerializer.Serialize(Path.GetTempPath())) =!> "entry must be a relative path"
-        //     "\"../outside.d.ts\"" =!> "entry must stay within the package directory"
-        //     "\"package.json\"" =!> "entry must name a TypeScript file"
-        //     "\"dist/missing.d.ts\"" =!> "entry file does not exist"
-        // ] <| fun (entry, message) ->
-        //     refusesConfig message ("\"entry\": " + entry)
-        //     ||> Flip.Expect.equal "selection fails before generation writes output"
-        //
-        // testTheory "invalid runtime imports are configuration errors" [
-        //     "null" =!> "runtime must be a string"
-        //     "42" =!> "runtime must be a string"
-        //     "true" =!> "runtime must be a string"
-        //     "[]" =!> "runtime must be a string"
-        //     "{}" =!> "runtime must be a string"
-        //     "\"\"" =!> "runtime must be a nonempty string"
-        //     "\" \"" =!> "runtime must be a nonempty string"
-        // ] <| fun (runtime, message) ->
-        //     refusesConfig message ("\"entry\": \"dist/adapter.d.ts\", \"runtime\": " + runtime)
-        //     ||> Flip.Expect.equal "an invalid import cannot fall back to the package root"
-        //
-        // testTheory "invalid ambient type packages are configuration errors" [
-        //     "null" =!> "types must be an array of nonempty strings"
-        //     "42" =!> "types must be an array of nonempty strings"
-        //     "\"provider\"" =!> "types must be an array of nonempty strings"
-        //     "[42]" =!> "types must be an array of nonempty strings"
-        //     "[\"\"]" =!> "types must be an array of nonempty strings"
-        //     "[\" \"]" =!> "types must be an array of nonempty strings"
-        // ] <| fun (types, message) ->
-        //     refusesConfig message ("\"types\": " + types)
-        //     ||> Flip.Expect.equal "an invalid ambient selection cannot fall back to automatic discovery"
+        testTheory "invalid declaration inputs are configuration errors" [
+            "null" =!> "entry must be a string"
+            "42" =!> "entry must be a string"
+            "true" =!> "entry must be a string"
+            "[]" =!> "entry must be a string"
+            "{}" =!> "entry must be a string"
+            "\"\"" =!> "entry must be a nonempty relative path"
+            "\" \"" =!> "entry must be a nonempty relative path"
+            (Text.Json.JsonSerializer.Serialize(Path.GetTempPath())) =!> "entry must be a relative path"
+            "\"../outside.d.ts\"" =!> "entry must stay within the package directory"
+            "\"package.json\"" =!> "entry must name a TypeScript file"
+            "\"dist/missing.d.ts\"" =!> "entry file does not exist"
+        ] <| fun (entry, message) ->
+            refusesConfig message ("\"entry\": " + entry)
+            ||> Flip.Expect.equal "selection fails before generation writes output"
+
+        testTheory "invalid runtime imports are configuration errors" [
+            "null" =!> "runtime must be a string"
+            "42" =!> "runtime must be a string"
+            "true" =!> "runtime must be a string"
+            "[]" =!> "runtime must be a string"
+            "{}" =!> "runtime must be a string"
+            "\"\"" =!> "runtime must be a nonempty string"
+            "\" \"" =!> "runtime must be a nonempty string"
+        ] <| fun (runtime, message) ->
+            refusesConfig message ("\"entry\": \"dist/adapter.d.ts\", \"runtime\": " + runtime)
+            ||> Flip.Expect.equal "an invalid import cannot fall back to the package root"
+
+        testTheory "invalid ambient type packages are configuration errors" [
+            "null" =!> "types must be an array of nonempty strings"
+            "42" =!> "types must be an array of nonempty strings"
+            "\"provider\"" =!> "types must be an array of nonempty strings"
+            "[42]" =!> "types must be an array of nonempty strings"
+            "[\"\"]" =!> "types must be an array of nonempty strings"
+            "[\" \"]" =!> "types must be an array of nonempty strings"
+        ] <| fun (types, message) ->
+            refusesConfig message ("\"types\": " + types)
+            ||> Flip.Expect.equal "an invalid ambient selection cannot fall back to automatic discovery"
 
         testCase "a path with no directory is refused" <| fun _ ->
             invoke [ "generate"; Path.Combine(root, "no-such-package") ]
@@ -208,7 +206,29 @@ let commandTests =
         testCase "an unknown option is a usage error" <| fun _ ->
             invoke [ "generate"; "--bogus" ]
             <| fun (code, _, err, _) ->
-                Expect.equal code 2 "usage"
+                Expect.equal code 1 "usage"
+                Expect.stringContains err "--bogus" "the option is named"
+
+        testCase "the tsc version payload is JSON, with a Windows path escaped" <| fun _ ->
+            let path = @"C:\Users\someone\.cache\xantham\tsc.exe"
+
+            use found = Text.Json.JsonDocument.Parse(Xantham.Cli.Program.tscVersionJson (Some path))
+            found.RootElement.GetProperty("path").GetString() |> Flip.Expect.equal "the path round-trips" path
+
+            use missing = Text.Json.JsonDocument.Parse(Xantham.Cli.Program.tscVersionJson None)
+            missing.RootElement.GetProperty("path").ValueKind
+            |> Flip.Expect.equal "no cached compiler is a null path" Text.Json.JsonValueKind.Null
+
+        // Whether this machine has the compiler cached decides the stream and the code, not the shape.
+        testCase "tsc version --json exits 0 only with a cached compiler" <| fun _ ->
+            let out = new StringWriter()
+            let err = new StringWriter()
+            let code = Xantham.Cli.Program.run out err [| "tsc"; "version"; "--json" |]
+            let text = if code = 0 then out.ToString() else err.ToString()
+
+            use doc = Text.Json.JsonDocument.Parse text
+            let cached = doc.RootElement.GetProperty("path").ValueKind = Text.Json.JsonValueKind.String
+            code |> Flip.Expect.equal "the exit code follows the cache" (if cached then 0 else 4)
 
         testCase "an unknown command is a usage error" <| fun _ ->
             invoke [ "compile" ] <| fun (code, _, _, _) -> Expect.equal code 1 "usage"
@@ -232,24 +252,23 @@ let commandTests =
             finally
                 Directory.Delete(package, true)
 
-        // TODO - needs to be updated for new CLI
-        // testCase "a refused xantham.json exits before generation" <| fun _ ->
-        //     let package =
-        //         Path.Combine(Path.GetTempPath(), "xantham-cli-cfg-" + Guid.NewGuid().ToString "N")
-        //
-        //     Directory.CreateDirectory package |> ignore
-        //
-        //     try
-        //         File.WriteAllText(Path.Combine(package, "package.json"), """{ "name": "cfg", "types": "index.d.ts" }""")
-        //         File.WriteAllText(Path.Combine(package, "index.d.ts"), "export declare const one: number;\n")
-        //         File.WriteAllText(Path.Combine(package, "xantham.json"), """{ "groups": { "dep": "nonsense" } }""")
-        //
-        //         invoke [ "generate"; package ]
-        //         <| fun (code, _, err, _) ->
-        //             Expect.equal code 3 "configuration refused"
-        //             Expect.stringContains err "unknown disposition" "the loader's own refusal is reported"
-        //     finally
-        //         Directory.Delete(package, true)
+        testCase "a refused xantham.json exits before generation" <| fun _ ->
+            let package =
+                Path.Combine(Path.GetTempPath(), "xantham-cli-cfg-" + Guid.NewGuid().ToString "N")
+
+            Directory.CreateDirectory package |> ignore
+
+            try
+                File.WriteAllText(Path.Combine(package, "package.json"), """{ "name": "cfg", "types": "index.d.ts" }""")
+                File.WriteAllText(Path.Combine(package, "index.d.ts"), "export declare const one: number;\n")
+                File.WriteAllText(Path.Combine(package, "xantham.json"), """{ "groups": { "dep": "nonsense" } }""")
+
+                invoke [ "generate"; package ]
+                <| fun (code, _, err, _) ->
+                    Expect.equal code 3 "configuration refused"
+                    Expect.stringContains err "unknown disposition" "the loader's own refusal is reported"
+            finally
+                Directory.Delete(package, true)
     ]
 
 [<Tests>]
@@ -271,7 +290,7 @@ let generationTests =
                 "adapter.d.mts" ==> "adapter.mjs"
                 "adapter.d.cts" ==> "adapter.cjs"
             ] <| fun (entry, runtime) ->
-                let package = Path.Combine(root, "tests", "fixtures", "entry-selection-" + Guid.NewGuid().ToString "N")
+                let package = Path.Combine(Path.GetTempPath(), "xantham-entry-selection-" + Guid.NewGuid().ToString "N")
                 Directory.CreateDirectory package |> ignore
 
                 try

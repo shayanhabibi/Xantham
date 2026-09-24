@@ -409,4 +409,26 @@ let liveTests =
 
         testCase "release frees the snapshot" <| withSession (fun channel snapshot _ ->
             Api.release channel { Snapshot = snapshot.Snapshot })
+
+        // A dead server fails the next request with its exit code and stderr, whether the write
+        // or the read notices first; every request after that fails with the same report and
+        // leaves the stream alone.
+        testCase "a dead server fails every later request with the first failure's report" <| withSession (fun channel _ _ ->
+            channel.Process.Kill()
+            channel.Process.WaitForExit()
+
+            let failure () =
+                try
+                    Api.initialize channel |> ignore
+                    failtest "a dead server answered"
+                with :? IOException as e ->
+                    e
+
+            let first = failure ()
+
+            first.Message |> Flip.Expect.stringContains "the first failure carries the server's report" "--- tsgo method=initialize exit="
+
+            let second = failure ()
+            obj.ReferenceEquals(second.InnerException, first) |> Flip.Expect.isTrue "the later failure wraps the first"
+            second.Message |> Flip.Expect.stringContains "the later failure carries the first" first.Message)
     ]
