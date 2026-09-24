@@ -11,8 +11,16 @@ Both are run as `dotnet fsi <script> -- <command>`.
 
 ## Core Libraries
 
-- **Partas.Build** — the `rootCommand`/`command`/`stage`/`input` DSL, plus the `Baked.*` prefabs
-  for common inputs and pipelines.
+- **Partas.Build** — the `rootCommand`/`command`/`stage`/`input` DSL.
+- **Partas.Build.Baked** — a separate package of prefab inputs: `Baked.Dotnet.config`,
+  `Baked.NuGet.apiKey` (falls back to `NUGET_API_KEY`), `Baked.SemVer.*`, `Baked.Common.isCI`.
+  Each `BuildOption<'T>` is read through `.option` or `.argument`. Its version must track the
+  Partas.Build pin: Baked 0.1.1 is compiled against Partas.Build 0.5.0, and its prefab stages
+  (`Baked.SemVer.Stages.*`) throw `MissingMethodException` under 0.6.x. `build.fsx`'s `bump` is
+  therefore a local stage over `Baked.SemVer.Version.IO.bumpVersion`; keep it local until a Baked
+  release built against the current Partas.Build ships.
+- Every script pins every `#r "nuget: ..."` to an exact version. `build.fsx` shells to the
+  `tools/*.fsx` scripts, so a floating reference in one of them breaks the pipeline.
 - **Partas.TypeProvider.BuildHelper** — the `Repo` provider: `Repo.Project.*` for project and
   solution paths, `Repo.FileSystem.*` for directories.
 

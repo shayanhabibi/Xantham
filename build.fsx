@@ -1,7 +1,8 @@
-﻿#r "nuget: Partas.Build, 0.4.0-alpha.3"
+﻿#r "nuget: Partas.Build, 0.6.5"
+#r "nuget: Partas.Build.Baked, 0.1.1"
 #r "nuget: Partas.TypeProvider.BuildHelper, 0.2.5"
-#r "nuget: Str"
-#r "nuget: Fake.IO.FileSystem"
+#r "nuget: Str, 0.24.1"
+#r "nuget: Fake.IO.FileSystem, 6.1.4"
 
 #load "tools/workspace.fsx"
 
@@ -76,14 +77,18 @@ module Options =
         |> Input.description "Skip setup steps, such as installing dependencies"
 
     let config =
-        Baked.Input.DotNet.configString
+        Baked.Dotnet.config.option
+        |> Input.desc "Build configuration"
         |> InputSpec.ofInput
         |> InputSpec.map (Option.defaultValue "Release")
 
     let projects =
-        Spec.srcProjects
-        |> List.map _.Name
-        |> Baked.Input.Project.target
+        Input.option<string list> "--project"
+        |> Input.alias "-p"
+        |> Input.arity Arity.OneOrMore
+        |> Input.desc "Target project(s)"
+        |> Input.acceptOnlyFromAmong (Spec.srcProjects |> List.map _.Name)
+        |> Input.allowMultipleArgumentsPerToken
         |> Input.def (Spec.publishable |> List.map _.Name)
         |> Input.customParser (fun res ->
             res.Tokens
@@ -107,7 +112,9 @@ module Options =
         |> Input.def false
 
     let skipTests =
-        Input.option<bool> "--skip-tests" |> Input.description "Skip running tests"
+        Input.option<bool> "--skip-tests"
+        |> Input.description "Skip running tests"
+        |> Input.def false
 
     type Generate =
         | Ast
@@ -556,7 +563,7 @@ module Stages =
 
     let publish =
         input {
-            let! apiKey = Baked.Input.NuGet.apiKeyOrEnv
+            let! apiKey = Baked.NuGet.apiKey.option
             let path = "bin/*.nupkg"
 
             return
@@ -565,8 +572,36 @@ module Stages =
                     when' apiKey.IsSome
                     failIfIgnored
 
-                    run
+                    runSensitive
                         $"dotnet nuget push {path} -k {apiKey.Value} -s https://api.nuget.org/v3/index.json --skip-duplicate"
+                }
+        }
+
+    /// Bumps `<Version>` in each selected project by the kind given as the argument, patch by
+    /// default. Skipped on CI.
+    // `Baked.SemVer.Stages.bumpArgument` throws MissingMethodException under Partas.Build 0.6.5
+    // (Partas.Build.Baked 0.1.1 targets 0.5.0). Replace this with it once Baked is rebuilt.
+    let bump =
+        input {
+            let! ci = Baked.Common.isCI
+            and! kind = Baked.SemVer.bump.argument
+            and! projects = Options.projects |> InputSpec.map (List.map _.RelativePath)
+
+            return
+                stage "bump" {
+                    when' (not ci)
+
+                    run (fun _ ->
+                        projects
+                        |> List.tryPick (fun project ->
+                            let path = System.IO.Path.Combine(__SOURCE_DIRECTORY__, project)
+
+                            match Baked.SemVer.Version.IO.bumpVersion path (defaultArg kind Baked.SemVer.Patch) with
+                            | Ok(previous, next) ->
+                                printfn $"%s{project}: %s{previous} -> %s{next}"
+                                None
+                            | Error error -> Some(Error $"%s{project}: %s{error.Message}"))
+                        |> Option.defaultValue (Ok()))
                 }
         }
 
@@ -579,11 +614,7 @@ exit (
             Stages.format
         }
 
-        command "bump" {
-            Baked.Pipelines.bumpArgument
-                (Spec.srcProjects |> List.map _.RelativePath)
-                (Options.projects |> InputSpec.map (List.map _.RelativePath))
-        }
+        command "bump" { Stages.bump }
 
         command "build" {
             Stages.restore

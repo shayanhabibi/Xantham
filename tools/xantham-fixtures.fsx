@@ -1,6 +1,6 @@
-﻿#r "nuget: Str"
+﻿#r "nuget: Str, 0.24.1"
 #r "nuget: Partas.TypeProvider.BuildHelper, 0.2.5"
-#r "nuget: Partas.Build, 0.3.0"
+#r "nuget: Partas.Build, 0.6.5"
 #load "workspace.fsx"
 
 open System.IO
@@ -37,7 +37,8 @@ type Fixture = Fixture of string
 
 type FixtureGroup = FixtureGroup of Fixture list
 
-/// The rungs `init` installs. **Distinct**, and `List.distinct` keeps it so: `init` runs these
+/// The rungs `init` installs: the npm fixtures the e2e suite reads, each pinned in
+/// `tests/fixtures/pins.json`. **Distinct**, and `List.distinct` keeps it so: `init` runs these
 /// four at a time, and two entries naming one fixture are two workers writing one directory -
 /// two `package.json` creates and two `npm install`s interleaved in the same place. That is what
 /// left `..."*"}}260901.1"}}` on disk and failed the next install with `EJSONPARSE`. Fixtures
@@ -46,32 +47,16 @@ type FixtureGroup = FixtureGroup of Fixture list
 let fixtures =
     List.distinct
         [
-            Fixture "@cloudflare/workers-types"
-            Fixture "@types/node"
-            Fixture "@types/semver"
-            Fixture "@types/lodash"
-            Fixture "@types/d3"
-            Fixture "@types/three"
-            Fixture "typescript"
-            Fixture "@cloudflare/ai-chat"
-            Fixture "@cloudflare/dynamic-workflows"
-            Fixture "@cloudflare/sandbox"
-            Fixture "@cloudflare/shell"
-            Fixture "@cloudflare/think"
-            Fixture "@cloudflare/voice"
-            Fixture "@cloudflare/worker-bundler"
-            Fixture "@cloudflare/puppeteer"
-            Fixture "@cloudflare/containers"
-            Fixture "solid-js"
             Fixture "ansi-regex"
-            Fixture "type-fest"
             Fixture "animejs"
-            Fixture "agents"
+            Fixture "@cloudflare/workers-types"
+            Fixture "solid-js"
+            Fixture "type-fest"
         ]
 
 /// The versions `tests/fixtures/pins.json` pins the litmus rungs at (JSONC, like every other
-/// configuration Xantham reads). A pinned fixture is installed as `name@version`, exactly, so
-/// that a fresh install reproduces the committed goldens; an unpinned one floats. The e2e
+/// configuration Xantham reads). A fixture is installed as `name@version`, exactly, so that a
+/// fresh install reproduces the committed goldens; `init` fails on a fixture with no pin. The e2e
 /// suite reports an install that disagrees with this file as drift rather than as a golden
 /// diff, so installing anything else here just fails later, more confusingly.
 let pins: Map<string, string> =
@@ -166,16 +151,17 @@ module Stage =
                     }
 
                     let spec =
-                        match Map.tryFind fixture pins with
-                        | Some version -> $"{fixture}@{version} --save-exact"
-                        | None -> ""
+                        Map.tryFind fixture pins
+                        |> Option.map (fun version -> $"{fixture}@{version} --save-exact")
 
-                    if cleanInstall then
+                    match spec with
+                    | None -> stage "pin" { run (fun _ -> Error $"{fixture} has no pin in tests/fixtures/pins.json") }
+                    | Some spec when cleanInstall ->
                         stage "npm clean install" {
                             workingDir fixturePath
                             run $"npm install {spec} --no-audit --no-fund --no-package-lock --clean-install"
                         }
-                    else
+                    | Some spec ->
                         stage "npm install" {
                             workingDir fixturePath
                             run $"npm install {spec} --no-audit --no-fund --no-package-lock"
@@ -183,13 +169,15 @@ module Stage =
                 }
         }
 
-rootCommand fsi.CommandLineArgs[1..] {
-    command "init" {
-        stage "parallel/initialise fixtures" {
-            parallel' 4
+exit (
+    rootCommand fsi.CommandLineArgs[1..] {
+        command "init" {
+            stage "parallel/initialise fixtures" {
+                parallel' 4
 
-            for fixture in fixtures do
-                Stage.initialiseFixture (InputSpec.ret fixture)
+                for fixture in fixtures do
+                    Stage.initialiseFixture (InputSpec.ret fixture)
+            }
         }
     }
-}
+)
