@@ -27,13 +27,17 @@
              conflicted in. All of them follow the hand-written file above, which they
              are allowed to reference.
 
-             The two wildcards below are one ordering rule rather than a list: a run that
-             ships a group writes it under `groups/` (O7), and the module naming its types
-             refers to it, so `groups/` compiles first. F# resolves a reference into an
-             earlier file only, and a wildcard's own order is the filesystem's. Every other
-             golden is an independent module, so a new fixture needs no line here.
+             F# resolves a reference into an earlier file only, and a wildcard's own order is
+             the filesystem's, so the items below are ordered in three steps. A run that ships
+             a group writes it under `groups/` (O7), and the module naming its types refers to
+             it, so `groups/` compiles first. Two goldens are generated against another
+             golden's module, and each dependency is named next: `cross-package-dep` before
+             `cross-package-lab`, and `alias-copy-dep-lab` before `alias-copy-lab`. Every
+             remaining golden is an independent module, so a new fixture needs no line here
+             unless it is generated against another golden, in which case its dependency joins
+             the named pairs and the last wildcard's Exclude.
 
-             Both wildcards exclude the open goldens. O7's `reference` disposition renders a
+             The wildcards exclude the open goldens. O7's `reference` disposition renders a
              group's types as names templated into another package's module, so a golden
              generated against it compiles only where the gated corpus also ships that module.
              The corpus is the unit of closure, not the run: `cross-package-lab` is generated
@@ -49,8 +53,14 @@
         <Compile Include="..\Xantham.Generator.Tests\golden\**\groups\*.fs"
                  Exclude="..\Xantham.Generator.Tests\golden\**\*.open.fs;..\Xantham.Generator.Tests\golden\compiler-lib-ownership-lab\**\*.fs"
                  Link="golden\%(RecursiveDir)%(Filename)%(Extension)" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\cross-package-dep\*.fs"
+                 Exclude="..\Xantham.Generator.Tests\golden\cross-package-dep\*.open.fs"
+                 Link="golden\cross-package-dep\%(Filename)%(Extension)" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\alias-copy-dep-lab\*.fs"
+                 Exclude="..\Xantham.Generator.Tests\golden\alias-copy-dep-lab\*.open.fs"
+                 Link="golden\alias-copy-dep-lab\%(Filename)%(Extension)" />
         <Compile Include="..\Xantham.Generator.Tests\golden\**\*.fs"
-                 Exclude="..\Xantham.Generator.Tests\golden\**\groups\*.fs;..\Xantham.Generator.Tests\golden\**\*.open.fs;..\Xantham.Generator.Tests\golden\compiler-lib-ownership-lab\**\*.fs"
+                 Exclude="..\Xantham.Generator.Tests\golden\**\groups\*.fs;..\Xantham.Generator.Tests\golden\cross-package-dep\*.fs;..\Xantham.Generator.Tests\golden\alias-copy-dep-lab\*.fs;..\Xantham.Generator.Tests\golden\**\*.open.fs;..\Xantham.Generator.Tests\golden\compiler-lib-ownership-lab\**\*.fs"
                  Link="golden\%(RecursiveDir)%(Filename)%(Extension)" />
         <Compile Include="DefaultIntersectionConsumer.fs" />
         <Compile Include="GroupedDomAliasesConsumer.fs" />
