@@ -1,6 +1,11 @@
 ﻿# Ignore generated files
 *.generated.fs
 
+# Generated bindings, too large to format (see .claude/rules/style.md). `build.fsx -- generate
+# --only compiler-lib|node-lib` writes them.
+src/Xantham.Fable.Core.TS/Fable.Core.TS.fs
+src/Xantham.Fable.Node/Node.fs
+
 # Ignore the golden corpus
 **/golden/**/*.fs
 
