@@ -66,17 +66,41 @@ type Exports =
     [<Import("tint", "union-arm-overload-lab")>]
     static member tint (value: string) : string = jsNative
     /// <summary>
-    /// Declines: the <c>(x: string)</c> arm is a prefix of the second declared overload, whose tail is
-    /// optional, so a call supplying <c>x</c> alone selects either.
+    /// Expands: the <c>(x: string)</c> arm is a prefix of the second declared overload, whose tail is
+    /// optional. A call supplying <c>x</c> alone selects the arm, which leaves no optional unsupplied.
     /// </summary>
     [<Import("prefix", "union-arm-overload-lab")>]
     static member prefix (x: U2<string, float>) : string = jsNative
     /// <summary>
-    /// Declines: the <c>(x: string)</c> arm is a prefix of the second declared overload, whose tail is
-    /// optional, so a call supplying <c>x</c> alone selects either.
+    /// Expands: the <c>(x: string)</c> arm is a prefix of the second declared overload, whose tail is
+    /// optional. A call supplying <c>x</c> alone selects the arm, which leaves no optional unsupplied.
+    /// </summary>
+    [<Import("prefix", "union-arm-overload-lab")>]
+    static member prefix (x: string) : string = jsNative
+    /// <summary>
+    /// Expands: the <c>(x: string)</c> arm is a prefix of the second declared overload, whose tail is
+    /// optional. A call supplying <c>x</c> alone selects the arm, which leaves no optional unsupplied.
+    /// </summary>
+    [<Import("prefix", "union-arm-overload-lab")>]
+    static member prefix (x: float) : string = jsNative
+    /// <summary>
+    /// Expands: the <c>(x: string)</c> arm is a prefix of the second declared overload, whose tail is
+    /// optional. A call supplying <c>x</c> alone selects the arm, which leaves no optional unsupplied.
     /// </summary>
     [<Import("prefix", "union-arm-overload-lab")>]
     static member prefix (x: string, ?y: float) : string = jsNative
+    /// <summary>
+    /// Declines: the <c>(x: string, ?y: float)</c> arm and the second declared overload both leave an
+    /// optional unsupplied at a call supplying <c>x</c> alone, so that call selects either.
+    /// </summary>
+    [<Import("ambiguous", "union-arm-overload-lab")>]
+    static member ambiguous (x: U2<string, float>, ?y: float) : string = jsNative
+    /// <summary>
+    /// Declines: the <c>(x: string, ?y: float)</c> arm and the second declared overload both leave an
+    /// optional unsupplied at a call supplying <c>x</c> alone, so that call selects either.
+    /// </summary>
+    [<Import("ambiguous", "union-arm-overload-lab")>]
+    static member ambiguous (x: string, ?y: float, ?z: bool) : string = jsNative
     /// <summary>
     /// Declines: five arms against a cap of four.
     /// </summary>

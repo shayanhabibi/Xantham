@@ -11,8 +11,7 @@ type private Relation =
     | Collapsed
     /// One compiled parameter signature, different returns.
     | ReturnOnly
-    /// A shorter parameter list that is a prefix of a longer one whose tail is optional or rest:
-    /// a call supplying the prefix alone selects either.
+    /// Signatures that one call selects alike (`CompiledSignature.ambiguousCall`).
     | AmbiguousCall
     /// Distinct compiled signatures the compiler keeps apart.
     | Distinct
@@ -64,7 +63,7 @@ let resolveExportCollisions: Pass<ShapeModel> =
                             | other -> [ other ])
                         |> List.distinctBy (compiled typeParameters)
 
-                    let ambiguousPrefix = CompiledSignature.ambiguousPrefix abbrevs
+                    let ambiguousCall = CompiledSignature.ambiguousCall abbrevs
 
                     let relate (earlier: OwnedExportMember) (later: OwnedExportMember) : Relation =
                         let a = earlier.Member
@@ -92,10 +91,7 @@ let resolveExportCollisions: Pass<ShapeModel> =
                                         Collapsed
                                     else
                                         ReturnOnly
-                                elif
-                                    ambiguousPrefix (a.TypeParameters, parametersA) (b.TypeParameters, parametersB)
-                                    || ambiguousPrefix (b.TypeParameters, parametersB) (a.TypeParameters, parametersA)
-                                then
+                                elif ambiguousCall (a.TypeParameters, parametersA) (b.TypeParameters, parametersB) then
                                     AmbiguousCall
                                 else
                                     Distinct
@@ -117,12 +113,16 @@ let resolveExportCollisions: Pass<ShapeModel> =
                                 | _ -> [ owned.Member.Name ])
                             |> Set.ofList
 
+                        // Each rename, keyed by the name it replaced.
+                        let mutable renamedFrom: Map<string, string> = Map.empty
+
                         let allocate (name: string) =
                             let candidate =
                                 Seq.initInfinite (fun i -> $"{name}_Overload{i + 2}")
                                 |> Seq.find (fun candidate -> not (Set.contains candidate taken))
 
                             taken <- Set.add candidate taken
+                            renamedFrom <- Map.add candidate name renamedFrom
                             candidate
 
                         // Candidates fold left in harvest order: each one is placed against the
@@ -131,17 +131,38 @@ let resolveExportCollisions: Pass<ShapeModel> =
                             let name = candidate.Member.Name
                             let siblings = settled |> List.filter (fun s -> s.Member.Name = name)
 
+                            // Members this pass renamed from `name`: each accepts a merge, and
+                            // its new name sits outside `name`'s call forms.
+                            let renamedSiblings =
+                                settled
+                                |> List.filter (fun s -> Map.tryFind s.Member.Name renamedFrom = Some name)
+
+                            // Merging into a sibling takes precedence over renaming away from
+                            // one.
                             let related =
-                                siblings
-                                |> List.map (fun sibling -> sibling, relate sibling candidate)
-                                |> List.tryFind (fun (_, relation) -> relation <> Distinct)
+                                let merges (_, relation) =
+                                    relation <> Distinct && relation <> AmbiguousCall
+
+                                let relations =
+                                    siblings |> List.map (fun sibling -> sibling, relate sibling candidate)
+
+                                relations
+                                |> List.tryFind merges
+                                |> Option.orElse (
+                                    renamedSiblings
+                                    |> List.map (fun sibling -> sibling, relate sibling candidate)
+                                    |> List.tryFind merges
+                                )
+                                |> Option.orElse (
+                                    relations |> List.tryFind (fun (_, relation) -> relation = AmbiguousCall)
+                                )
 
                             match related with
                             | None -> settled @ [ candidate ]
                             | Some(sibling, Occurrence) ->
                                 emit (
                                     Finding.make
-                                        (symbol name)
+                                        (symbol sibling.Member.Name)
                                         (DedupeOverloads.ExportOccurrenceConsolidated(owner, candidate.ExportName, 2))
                                 )
 
@@ -168,10 +189,10 @@ let resolveExportCollisions: Pass<ShapeModel> =
                                         }
                                     else
                                         s)
-                            | Some(_, Collapsed) ->
+                            | Some(sibling, Collapsed) ->
                                 emit (
                                     Finding.make
-                                        (symbol name)
+                                        (symbol sibling.Member.Name)
                                         (DedupeOverloads.ExportDeclarationsConsolidated(owner, candidate.ExportName, 2))
                                 )
 
@@ -184,7 +205,7 @@ let resolveExportCollisions: Pass<ShapeModel> =
 
                                 emit (
                                     Finding.make
-                                        (symbol name)
+                                        (symbol sibling.Member.Name)
                                         (DedupeOverloads.ExportReturnTypesUnioned(
                                             owner,
                                             candidate.ExportName,

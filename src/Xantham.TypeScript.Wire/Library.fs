@@ -446,81 +446,89 @@ module internal Msgpack =
 
 [<RequireQualifiedAccess>]
 module Tsc =
-    /// <summary>
-    /// Locates the native compiler by walking up from <paramref name="searchRoot"/> looking for an npm install.
-    /// </summary>
-    /// <param name="searchRoot">The directory to start searching from.</param>
-    let locate (searchRoot: string) =
-        let rid =
-            let platform =
+    let private rid =
+        let platform =
 #if !NETSTANDARD2_1
-                if OperatingSystem.IsWindows() then "win32"
-                elif OperatingSystem.IsMacOS() then "darwin"
-                elif OperatingSystem.IsFreeBSD() then "freebsd"
-                else "linux"
+            if OperatingSystem.IsWindows() then "win32"
+            elif OperatingSystem.IsMacOS() then "darwin"
+            elif OperatingSystem.IsFreeBSD() then "freebsd"
+            else "linux"
 #else
-                if
-                    System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
-                        System.Runtime.InteropServices.OSPlatform.Windows
-                    )
-                then
-                    "win32"
-                elif
-                    System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
-                        System.Runtime.InteropServices.OSPlatform.OSX
-                    )
-                then
-                    "darwin"
-                elif
-                    System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
-                        System.Runtime.InteropServices.OSPlatform.Linux
-                    )
-                then
-                    "linux"
-                else
-                    "freebsd"
-#endif
-
-
-            let arch =
-                match Runtime.InteropServices.RuntimeInformation.OSArchitecture with
-                | Runtime.InteropServices.Architecture.Arm64 -> "arm64"
-                | Runtime.InteropServices.Architecture.Arm -> "arm"
-                | _ -> "x64"
-
-            $"{platform}-{arch}"
-
-#if !NETSTANDARD2_1
-        let extension = if OperatingSystem.IsWindows() then ".exe" else ""
-#else
-        let extension =
             if
                 System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
                     System.Runtime.InteropServices.OSPlatform.Windows
                 )
             then
-                ".exe"
+                "win32"
+            elif
+                System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
+                    System.Runtime.InteropServices.OSPlatform.OSX
+                )
+            then
+                "darwin"
+            elif
+                System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
+                    System.Runtime.InteropServices.OSPlatform.Linux
+                )
+            then
+                "linux"
             else
-                ""
+                "freebsd"
 #endif
 
-        // Platform package and executable stem, most current layout first.
-        let layouts = [ $"typescript-{rid}", "tsc"; $"native-preview-{rid}", "tsgo" ]
 
+        let arch =
+            match Runtime.InteropServices.RuntimeInformation.OSArchitecture with
+            | Runtime.InteropServices.Architecture.Arm64 -> "arm64"
+            | Runtime.InteropServices.Architecture.Arm -> "arm"
+            | _ -> "x64"
+
+        $"{platform}-{arch}"
+
+#if !NETSTANDARD2_1
+    let private extension = if OperatingSystem.IsWindows() then ".exe" else ""
+#else
+    let private extension =
+        if
+            System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
+                System.Runtime.InteropServices.OSPlatform.Windows
+            )
+        then
+            ".exe"
+        else
+            ""
+#endif
+
+    // Platform package and executable stem, most current layout first.
+    let private layouts =
+        [ $"typescript-{rid}", "tsc"; $"native-preview-{rid}", "tsgo" ]
+
+    /// <summary>
+    /// The native compiler of the npm install rooted at <paramref name="installRoot"/>: the
+    /// platform executable under its <c>node_modules/@typescript</c>, when present. The result
+    /// depends exclusively on the directory.
+    /// </summary>
+    /// <param name="installRoot">The directory holding the install's <c>node_modules</c>.</param>
+    let locateAt (installRoot: string) =
+        layouts
+        |> List.tryPick (fun (package, stem) ->
+            let path =
+                Path.Combine(installRoot, "node_modules", "@typescript", package, "lib", stem + extension)
+
+            if File.Exists path then Some path else None)
+
+    /// <summary>
+    /// Locates the native compiler: <c>XANTHAM_TSGO_EXE</c> when set to an existing file,
+    /// otherwise the nearest npm install at or above <paramref name="searchRoot"/>.
+    /// </summary>
+    /// <param name="searchRoot">The directory to start searching from.</param>
+    let locate (searchRoot: string) =
         let rec walk (dir: DirectoryInfo) =
             if isNull (box dir) then
                 None
             else
-                let candidate =
-                    layouts
-                    |> List.tryPick (fun (package, stem) ->
-                        let path =
-                            Path.Combine(dir.FullName, "node_modules", "@typescript", package, "lib", stem + extension)
-
-                        if File.Exists path then Some path else None)
-
-                match candidate with
-                | Some _ -> candidate
+                match locateAt dir.FullName with
+                | Some _ as candidate -> candidate
                 | None -> walk dir.Parent
 
         match Environment.GetEnvironmentVariable "XANTHAM_TSGO_EXE" with
@@ -582,16 +590,26 @@ type TscChannel(exePath: string, cwd: string, ?callbacks: IDictionary<string, Ts
     let mutable faulted: exn option = None
 
     // Wraps `e` with the server's exit code and drained stderr, where a dying server reports its
-    // cause. The waits are bounded, so a server still running will not hang the caller.
+    // cause. Each wait is bounded at three seconds. The exit code reads `still running` for a live
+    // server and `disposed` once the channel's Dispose has released the process.
     let transportFailure (method: string) (e: exn) =
-        proc.WaitForExit 3000 |> ignore
-        drain.Wait 3000 |> ignore
-
         let code =
-            if proc.HasExited then
-                string proc.ExitCode
-            else
-                "still running"
+            try
+                proc.WaitForExit 3000 |> ignore
+
+                if proc.HasExited then
+                    string proc.ExitCode
+                else
+                    "still running"
+            with
+            | :? InvalidOperationException
+            | :? ObjectDisposedException -> "disposed"
+
+        // A drain faulted by the process's disposal leaves the stderr collected so far.
+        try
+            drain.Wait 3000 |> ignore
+        with :? AggregateException ->
+            ()
 
         let diagnostics = lock stderr (fun () -> stderr.ToString())
         IOException($"{e.Message}\n--- tsgo method={method} exit={code} stderr ---\n{diagnostics}", e)

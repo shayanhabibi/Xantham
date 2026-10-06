@@ -153,11 +153,9 @@ let expandUnionArms: Pass<ShapeModel> =
                             | _ -> [ owned ]
 
                         let expandContainer (container: FsExportContainer) =
-                            // Every signature the container already has. A synthesized arm that
-                            // one call could select alongside a declared overload - one compiled
-                            // signature, or a prefix with an omissible tail - declines the member.
-                            // Built once, before expansion, and not added to: two members expanding
-                            // into each other's space is the collision this catches.
+                            // The container's declared signatures, fixed before expansion. A
+                            // synthesized arm that one call could select alongside any of them
+                            // declines the member.
                             let taken =
                                 container.Members
                                 |> List.choose (fun owned ->

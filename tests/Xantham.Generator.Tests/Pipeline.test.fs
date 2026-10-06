@@ -383,19 +383,14 @@ let private unexplainedDrops (rendered: RenderModel) =
 [<Tests>]
 let configTests =
     let withConfig (json: string) (test: GeneratorConfig -> unit) =
-        let dir = Path.Combine(Path.GetTempPath(), "xantham-config-" + Guid.NewGuid().ToString "N")
-        Directory.CreateDirectory dir |> ignore
-
-        try
-            File.WriteAllText(Path.Combine(dir, "xantham.json"), json)
-            test (GeneratorConfig.load dir)
-        finally
-            Directory.Delete(dir, true)
+        use dir = Scratch.directory "xantham-config"
+        File.WriteAllText(Path.Combine(dir.Path, "xantham.json"), json)
+        test (GeneratorConfig.load dir.Path)
 
     testList "generator config" [
         testCase "a missing file is the default" <| fun _ ->
-            let dir = Path.Combine(Path.GetTempPath(), "xantham-config-" + Guid.NewGuid().ToString "N")
-            Expect.equal (GeneratorConfig.load dir) GeneratorConfig.Default "nothing configured"
+            use dir = Scratch.directory "xantham-config"
+            Expect.equal (GeneratorConfig.load dir.Path) GeneratorConfig.Default "nothing configured"
 
         testCase "compilerLib defaults to the TypeScript library layout" <| fun _ ->
             let layout = GeneratorConfig.Default.CompilerLib |> CompilerLibLayout.create
@@ -2781,14 +2776,34 @@ let pipelineTests =
                           [ "UA004" ]
                           "the collision is recorded against the member that declined"
 
-                  testCase "an arm that is a prefix of a declared overload with an optional tail refuses the member" <| fun _ ->
+                  testCase "an arm that is a prefix of a declared overload with an optional tail expands" <| fun _ ->
+                      let source = (rendered ()).Files |> List.head |> snd
+
+                      Expect.stringContains
+                          source
+                          "static member prefix (x: string) : string"
+                          "a call `prefix \"a\"` selects the arm, which leaves no optional unsupplied"
+
+                      Expect.stringContains source "static member prefix (x: float) : string" "every arm is synthesized"
+
+                      Expect.stringContains
+                          source
+                          "static member prefix (x: string, ?y: float) : string"
+                          "beside the overload TypeScript declared"
+
+                      Expect.equal (findingsFor "Exports.prefix") [ "UA001" ] "the expansion is recorded"
+
+                  testCase "an arm leaving an optional unsupplied beside a declared overload doing the same refuses the member" <| fun _ ->
                       let source = (rendered ()).Files |> List.head |> snd
 
                       Expect.isFalse
-                          (source.Contains "static member prefix (x: string) : string")
-                          "a call `prefix \"a\"` would select the arm and the declared overload alike"
+                          (source.Contains "static member ambiguous (x: string, ?y: float) : string")
+                          "a call `ambiguous \"a\"` would select the arm and the declared overload alike"
 
-                      Expect.equal (findingsFor "Exports.prefix") [ "UA004" ] "the ambiguity is recorded as a collision"
+                      Expect.equal
+                          (findingsFor "Exports.ambiguous")
+                          [ "UA004" ]
+                          "the ambiguity is recorded as a collision"
 
                   testCase "a union over the cap keeps its union member alone" <| fun _ ->
                       Expect.equal (findingsFor "Exports.wide") [ "UA002" ] "five arms against a cap of four"
@@ -3750,7 +3765,7 @@ let pipelineTests =
                       Expect.isEmpty
                           (rendered.Findings |> List.filter (fun f -> f.Key = "SE002"))
                           "a configured runtime was not derived, so there is nothing to report" ])
-        // The fixture behind docs/fable5-workarounds.md. Each declaration is one documented
+        // The fixture behind docs/.ai/fable5-workarounds.md. Each declaration is one documented
         // Fable 5 loss; the assertions pin the emitted shape the document quotes, and the run
         // gate proves the workaround against tests/fixtures/fable-workaround-lab/index.js.
         yield!
@@ -3787,7 +3802,7 @@ let pipelineTests =
                               "abstract notify: count: float -> string"
                               "a member the consumer has to supply" ])
 
-        // Wave four lane O (docs/fable5-workarounds.md §3). A method reads as a delegate-typed
+        // Wave four lane O (docs/.ai/fable5-workarounds.md §3). A method reads as a delegate-typed
         // Create parameter; the four negatives keep getting no Create, each with its reason.
         yield!
             fixtureTests
@@ -5181,6 +5196,19 @@ let dollarNameTests =
                       Expect.contains sanitised "Shape" "the interface is reported"
                       Expect.contains sanitised "Cls" "and the class"
                       Expect.contains sanitised "Taken2" "and the name that yields to a verbatim one"
+                      Expect.stringContains source "type Early =" "a verbatim name harvested second keeps it"
+                      Expect.stringContains source "type Early2 =" "and the sanitised one harvested first yields"
+                      Expect.contains sanitised "Early2" "the yielding name is reported"
+                      Expect.contains sanitised "Apart" "a sanitised name keeps a spelling verbatim only elsewhere"
+                      Expect.isFalse (source.Contains "Apart2") "so it takes no suffix"
+                      Expect.stringContains source "type Pair<'_T2, '_T> =" "a colliding type variable takes a suffix"
+                      Expect.stringContains source "type Lone<'_T> =" "a lone `$` avoids the wildcard"
+                      Expect.stringContains source "'_T2" "a method variable yields to its declaration's"
+                      Expect.stringContains
+                          source
+                          "Create (map: ('_T2 -> '_T)) : Inner<'_T>"
+                          "a verbatim method variable yields to a sanitised enclosing one"
+                      Expect.isFalse (source.Contains "'_ ") "no type variable is the wildcard"
 
                       let unrepresented =
                           rendered.Findings

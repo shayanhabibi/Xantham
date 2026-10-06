@@ -4,7 +4,7 @@
   "module": "UnionArmOverloadLab",
   "counts": {
     "exact": 2,
-    "ergonomic": 7,
+    "ergonomic": 8,
     "widened": 0,
     "escape": 0
   },
@@ -21,13 +21,13 @@
     },
     {
       "pass": "SE - shape-exports",
-      "total": 4,
-      "ergonomic": 4
+      "total": 10,
+      "ergonomic": 10
     },
     {
       "pass": "UA - expand-union-arms",
-      "total": 5,
-      "ergonomic": 5
+      "total": 6,
+      "ergonomic": 6
     }
   ]
 }

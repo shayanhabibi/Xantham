@@ -55,10 +55,13 @@ let build = input {
 `tools/workspace.fsx` is a `#load`-only helper (not a command script) that both `build.fsx` and
 `tools/generate-wire.fsx` use to answer "which checkout has the dependencies?".
 
-`Workspace.ensureTsc` exports the nearest compiler as `XANTHAM_TSGO_EXE` in every checkout, which
-`Tsc.locate` honours ahead of its parent-directory walk, so suites that run from temp directories
-find it too. It returns the compiler only when it is *borrowed* — outside the checkout's own
-`node_modules`. The `npm install` stage in `build.fsx` runs exactly when nothing is borrowed.
+`Workspace.ensureTsc` exports the nearest compiler as `XANTHAM_TSGO_EXE`, which `Tsc.locate`
+honours ahead of its parent-directory walk. It runs while the stages are built, before
+`npm install`, so a fresh checkout (the CI runner) exports nothing: there a package outside the
+repository resolves no compiler, which is why test scratch lives under `tests/.scratch/`
+(`.claude/rules/tests.md`). It returns the compiler only when it is *borrowed* — outside the
+checkout's own `node_modules`. The `npm install` stage in `build.fsx` runs exactly when nothing is
+borrowed.
 
 An agent worktree under `.claude/worktrees/` carries tracked files only, so it has no
 `node_modules`. Rather than install the pin twice, it borrows the main checkout's compiler, skips

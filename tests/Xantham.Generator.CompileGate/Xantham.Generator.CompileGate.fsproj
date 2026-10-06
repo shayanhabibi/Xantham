@@ -64,6 +64,7 @@
                  Link="golden\%(RecursiveDir)%(Filename)%(Extension)" />
         <Compile Include="DefaultIntersectionConsumer.fs" />
         <Compile Include="GroupedDomAliasesConsumer.fs" />
+        <Compile Include="UnionArmOverloadConsumer.fs" />
     </ItemGroup>
 
     <ItemGroup>

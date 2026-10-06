@@ -410,9 +410,9 @@ let liveTests =
         testCase "release frees the snapshot" <| withSession (fun channel snapshot _ ->
             Api.release channel { Snapshot = snapshot.Snapshot })
 
-        // A dead server fails the next request with its exit code and stderr, whether the write
-        // or the read notices first; every request after that fails with the same report and
-        // leaves the stream alone.
+        // A dead server fails the next request with its exit code and stderr, whichever of the
+        // write or the read fails first. Every later request fails with the same report and
+        // leaves the stream untouched.
         testCase "a dead server fails every later request with the first failure's report" <| withSession (fun channel _ _ ->
             channel.Process.Kill()
             channel.Process.WaitForExit()

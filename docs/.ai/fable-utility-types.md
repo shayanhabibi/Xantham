@@ -1,8 +1,9 @@
 # TypeScript's utility types, and which of them Fable can help with
 
 Counts are corpus-wide over 55 fixtures at `62bd44e` (wave fourteen, batch one composed), from
-`dotnet fsi build.fsx -- findings` and from the committed `symbols.jsonl`. Pins are `Fable.Core`
-**5.2.0**, the `fable` tool 5.0.0, `fable-library-js` 5.0.0.
+`dotnet fsi build.fsx -- findings` and from the committed `symbols.jsonl`. Pins at the time were
+`Fable.Core` **5.2.0**, the `fable` tool 5.0.0, `fable-library-js` 5.0.0; the `fable` tool pin is
+now 5.17.2.
 
 **Answer inline, in the `(ANSWER)` blocks, as you did for `fable5-workarounds.md`.**
 

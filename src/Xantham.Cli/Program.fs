@@ -202,19 +202,19 @@ let private ensureInstall () =
 
     installed
     |> Result.bind (fun () ->
-        match Xantham.TypeScript.Wire.Tsc.locate cache with
+        match Xantham.TypeScript.Wire.Tsc.locateAt cache with
         | Some tsc -> Ok tsc
         | None -> Error $"tsc not found at {cache}")
     |> Result.map (fun tsc -> Environment.SetEnvironmentVariable("XANTHAM_TSGO_EXE", tsc))
 
-/// Points `XANTHAM_TSGO_EXE` at the cached compiler, when one is cached and the variable does
-/// not already name an existing file. The compiler precedence is `XANTHAM_TSGO_EXE`, then the
+/// Points `XANTHAM_TSGO_EXE` at the cached compiler, when one is cached and the variable is
+/// not already set to an existing file. The compiler precedence is `XANTHAM_TSGO_EXE`, then the
 /// cache, then the walk up from the package directory.
 let private checkCache () =
     match Environment.GetEnvironmentVariable "XANTHAM_TSGO_EXE" with
     | path when not (String.IsNullOrWhiteSpace path) && File.Exists path -> ()
     | _ ->
-        Xantham.TypeScript.Wire.Tsc.locate cache
+        Xantham.TypeScript.Wire.Tsc.locateAt cache
         |> Option.iter (fun tsc -> Environment.SetEnvironmentVariable("XANTHAM_TSGO_EXE", tsc))
 
 /// The `tsc version --json` payload for the cached compiler at `path`, or for none cached.
@@ -234,6 +234,29 @@ let tscVersionJson (path: string option) =
                 error = "not found. run `xantham tsc init`"
             |}
 
+/// `tsc version` against the compiler cache at `cacheDir`: the compiler installed there on `out`,
+/// with exit code `Exit.Generated`, or the not-cached report on `err`, with `Exit.Failed`. The
+/// result depends exclusively on the install in `cacheDir`.
+let tscVersion (out: TextWriter) (err: TextWriter) (useJsonOutput: bool) (cacheDir: string) =
+    let located = Xantham.TypeScript.Wire.Tsc.locateAt cacheDir
+
+    match located with
+    | Some tsc ->
+        if useJsonOutput then
+            tscVersionJson located
+        else
+            $"{Spec.tscVersion} cached at: {tsc}"
+        |> out.WriteLine
+
+        Exit.Generated
+    | None ->
+        if useJsonOutput then
+            tscVersionJson located
+        else
+            $"{Spec.tscVersion} not found in cache. Run `xantham tsc init`."
+        |> err.WriteLine
+
+        Exit.Failed
 
 /// One invocation, over the writers the caller supplies. The entry point calls it against the
 /// console; the acceptance test calls it against a string writer.
@@ -266,26 +289,7 @@ let run (out: TextWriter) (err: TextWriter) (argv: string[]) : int =
                                     description "show the xantham typescript compiler version"
                                     inputs Options.useJsonOutput
 
-                                    setAction (fun useJsonOutput ->
-                                        let located = Xantham.TypeScript.Wire.Tsc.locate cache
-
-                                        match located with
-                                        | Some tsc ->
-                                            if useJsonOutput then
-                                                tscVersionJson located
-                                            else
-                                                $"{Spec.tscVersion} cached at: {tsc}"
-                                            |> out.WriteLine
-
-                                            Exit.Generated
-                                        | None ->
-                                            if useJsonOutput then
-                                                tscVersionJson located
-                                            else
-                                                $"{Spec.tscVersion} not found in cache. Run `xantham tsc init`."
-                                            |> err.WriteLine
-
-                                            Exit.Failed)
+                                    setAction (fun useJsonOutput -> tscVersion out err useJsonOutput cache)
                                 }
                                 command "clean" {
                                     description "remove all cached xantham compilers"

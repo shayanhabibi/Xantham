@@ -1,0 +1,16 @@
+﻿<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Fable.TypeScript" type="mocha-javascript-test-runner">
+    <node-interpreter>project</node-interpreter>
+    <node-options>--enable-source-maps</node-options>
+    <mocha-package>$PROJECT_DIR$/node_modules/mocha</mocha-package>
+    <working-directory>$PROJECT_DIR$</working-directory>
+    <pass-parent-env>true</pass-parent-env>
+    <ui>bdd</ui>
+    <extra-mocha-options>--enable-source-maps -n prof</extra-mocha-options>
+    <test-kind>PATTERN</test-kind>
+    <test-pattern>tests/Xantham.TypeScript.Tests/**/*.test.fs.js</test-pattern>
+    <method v="2">
+      <option name="ToolBeforeRunTask" enabled="true" actionId="Tool_External Tools_dotnet fable" />
+    </method>
+  </configuration>
+</component>

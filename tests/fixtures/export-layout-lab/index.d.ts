@@ -18,6 +18,13 @@ declare module "layout-lab" {
 
     export function dispatch(kind: "left"): "left";
     export function dispatch(kind: "right"): "right";
+
+    // After `url.parse`: `locate ("p", true)` selects the second and third overloads alike, so
+    // the third is renamed, and the fourth merges its return into the renamed third.
+    export function locate(path: string): string;
+    export function locate(path: string, strict: false | undefined, depth?: number): string;
+    export function locate(path: string, strict: true, depth?: number): number;
+    export function locate(path: string, strict: boolean, depth?: number): boolean;
 }
 
 declare module "layout-lab/strict" {
