@@ -205,6 +205,11 @@ let findingsTests =
                     "GE.GroupModuleCollision GE003 escape"
                     "GE.GroupModuleFromNamespace GE004 escape"
                     "GE.ParameterNameEscaped GE005 ergonomic"
+                    "CU.AttributeAdded CU001 exact"
+                    "CU.CompanionEmitted CU002 ergonomic"
+                    "CU.MemberOmitted CU003 widened"
+                    "CU.InteropReplaced CU004 escape"
+                    "CU.DeclarationReplaced CU005 escape"
                   ]
 
               Expect.equal
@@ -219,7 +224,7 @@ let findingsTests =
               Expect.equal (FindingCatalogue.passLabel "name-exports") "NE - name-exports" "a pass with a union"
 
               let passes = FindingCatalogue.passPrefixes |> Map.toList |> List.map fst
-              Expect.equal passes.Length 17 "every per-pass union names its pass"
+              Expect.equal passes.Length 18 "every per-pass union names its pass"
 
           testCase "a finding derives name, key, tier, payload and message from its kind" <| fun _ ->
               let finding = Finding.make "Options.legacy" (TypeReference.UnionTooWide(10, 9))

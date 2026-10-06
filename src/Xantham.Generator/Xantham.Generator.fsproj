@@ -51,6 +51,8 @@
         <Compile Include="Customization\Semantics.fs" />
         <Compile Include="Customization\Output.fs" />
         <Compile Include="Customization\Apply.fs" />
+        <Compile Include="Customization\Provenance.fs" />
+        <Compile Include="Customization\Compile.fs" />
         <Compile Include="Pipeline.fs" />
     </ItemGroup>
 

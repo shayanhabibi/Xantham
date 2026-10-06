@@ -479,6 +479,11 @@ module Stages =
                         run
                             "dotnet fable . -o fable-out --noCache --exclude Xantham.Fable.Core.TS --run node --import ./register.mjs fable-out/Program.js"
                     }
+
+                    stage "customization Partas gate" {
+                        when' runGate
+                        run "node tests/Xantham.Generator.PartasGate/verify.mjs"
+                    }
                 }
         }
 

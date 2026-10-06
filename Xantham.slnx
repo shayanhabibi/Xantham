@@ -23,5 +23,9 @@
     <Project Path="tests/Xantham.Generator.RunGate/Xantham.Generator.RunGate.fsproj" />
   </Folder>
     <Project Path="tools/tools.fsproj" />
+  <Folder Name="/tools/" />
+  <Folder Name="/tools/customization-example/">
+    <Project Path="tools/customization-example/CustomizationExample.fsproj" />
+  </Folder>
   <Project Path="site/site.fsproj" />
 </Solution>

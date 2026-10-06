@@ -105,6 +105,11 @@ Simply launching the script should not perform any actions. Instead, commands sh
 
 - ** DO ** create localised scripts for finer grain tasks.
 
+The optional `test --run-gate` path includes `tests/Xantham.Generator.PartasGate/verify.mjs`.
+It authenticates a checked-in Partas source snapshot, generates its companions with the example
+executable, and restores the gate's npm lockfile. All generated projects live under
+`tests/.scratch/partas-gate`; it requires no sibling repository.
+
 See ./tools/generate-wire.fsx
 These scripts may require more input, provide less defaults, and be more specific.
 We can route commands to these scripts. But the `build.fsx` command should have *default* behaviour

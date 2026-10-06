@@ -1840,3 +1840,22 @@ To include in scope when a phases implementation/attempt ends up being small/qui
 ## Generator customization (2026-10-06)
 
 The supported extension seam projects immutable semantic facts after ordinary shaping. Ordered F# extensions return structured attribute edits and independent marker/property companions. Pipeline.generateWith and runWith preserve the ordinary entry points with empty registration. The renderer receives an explicit annotation plan; no callback runs inside printing. Companion properties reuse resolved F# type references and preserve readonly access. Referenced source declarations retain semantic selection even when ordinary output omits them.
+
+Explicit interface replacement preserves declaration identity while selecting resolved property
+contracts and base references. Heritage consumers of a changed contract are rejected.
+Customization findings use the CU prefix; source mapping findings follow companion properties.
+Manifests record ordered extension identities, sorted configuration, and companion source hashes.
+Catalog variants retain the authenticated original API alongside the customized API hash and
+extension profile. Empty registration retains the legacy manifest and catalog bytes.
+Variants with a changed declaration contract are rejected for reference reuse. Raw non-generic
+interface fragments require `generateValidatedWith` and a configured .NET validation compiler;
+their declared export witnesses and the complete generated output compile before returning.
+Raw fragments cannot produce declaration catalogs.
+Catalog reference ownership is authenticated before callbacks; referenced targets are immutable.
+Companions render after catalog redirects so their property types name the compiled producer API.
+Variant metadata is an optional JSON sidecar field; the existing public Catalog record is preserved.
+Customization finalization invariant: semantic member targets include materialized exports
+and methods, while property companion selection stays property-only. Attribute type arguments
+use authenticated producer names; both interface and concrete entrypoint renderers consume the
+same annotations. Replacement signatures reject unbound type variables, and companion namespaces
+cannot enter occupied generated modules/types.
