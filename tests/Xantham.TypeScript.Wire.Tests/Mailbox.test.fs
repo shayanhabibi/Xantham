@@ -166,24 +166,69 @@ let mailboxTests =
                 (fun () -> Async.RunSynchronously(mailbox.parseCommandLine commandLine, timeout = 2000) |> ignore)
                 "nothing is served once the mailbox and its channel are closed")
 
-        // The agent stops with messages still queued. Each of their callers has to hear back,
-        // with an answer or with the disposal, rather than wait forever.
-        testCase "requests queued at disposal are all answered" <| withMailbox (fun mailbox ->
-            let calls =
-                [| for i in 1 .. 50 ->
-                    Async.StartAsTask(mailbox.parseCommandLine(commandLine = [| "--strict"; $"file{i}.ts" |])) |]
+        // The agent is held inside a callback while 50 requests queue behind it. The disposal
+        // sweep completes every queued request with ObjectDisposedException, and the held request
+        // completes on a live channel once released.
+        testCase "requests queued at disposal are all answered" <| fun () ->
+            match exePath with
+            | None -> ()
+            | Some exe ->
+                use entered = new ManualResetEventSlim(false)
+                use release = new ManualResetEventSlim(false)
+                let virtualFile = Path.Combine(fixtures, "held.ts").Replace('\\', '/')
 
-            mailbox.Dispose()
+                let fs =
+                    { VirtualFileSystem.Default with
+                        ReadFile =
+                            ValueSome(fun path ->
+                                if path = virtualFile then
+                                    entered.Set()
+                                    release.Wait 10_000 |> ignore
+                                    Content "export const held = 1;\n"
+                                else
+                                    FallBack)
+                        FileExists = ValueSome(fun path -> if path = virtualFile then ValueSome true else ValueNone) }
 
-            let all = Tasks.Task.WhenAll(calls |> Array.map (fun call -> call :> Tasks.Task))
-            all.ContinueWith(ignore).Wait 10_000 |> Flip.Expect.isTrue "every caller completes"
+                // Released on every exit, a failed assertion included.
+                use _ = { new IDisposable with member _.Dispose() = release.Set() }
+                use mailbox = new TscMailbox(exe, fixtures, VirtualFileSystem.callbacks fs)
+                mailbox.initialize () |> Async.RunSynchronously |> ignore
 
-            for call in calls do
-                if call.IsFaulted then
-                    match call.Exception.InnerException with
-                    | :? ObjectDisposedException -> ()
-                    | :? IOException -> ()
-                    | other -> failtest $"a queued request failed with {other}")
+                let held =
+                    Async.StartAsTask(
+                        mailbox.createProgram(
+                            { Proto.CreateProgramParams.Default with
+                                RootFiles = ValueSome [| Proto.DocumentIdentifier.FileName virtualFile |] }
+                        )
+                    )
+
+                entered.Wait 10_000 |> Flip.Expect.isTrue "the agent is held inside the callback"
+
+                // Started immediately, so each is registered and queued before Dispose runs.
+                let calls =
+                    [| for i in 1 .. 50 ->
+                        Async.StartImmediateAsTask(
+                            mailbox.parseCommandLine(commandLine = [| "--strict"; $"file{i}.ts" |])
+                        ) |]
+
+                let disposing = Tasks.Task.Run(fun () -> mailbox.Dispose())
+
+                let all = Tasks.Task.WhenAll(calls |> Array.map (fun call -> call :> Tasks.Task))
+                let answered = all.ContinueWith(ignore).Wait 10_000
+                release.Set()
+                answered |> Flip.Expect.isTrue "every queued caller completes while the agent is held"
+
+                for call in calls do
+                    match call.Exception with
+                    | null -> failtest "a queued request was answered by the held agent"
+                    | e ->
+                        match e.InnerException with
+                        | :? ObjectDisposedException -> ()
+                        | other -> failtest $"a queued request failed with {other}"
+
+                disposing.Wait 10_000 |> Flip.Expect.isTrue "Dispose returns once the held batch finishes"
+
+                (held :> Tasks.Task).ContinueWith(ignore).Wait 10_000 |> Flip.Expect.isTrue "the held caller completes"
     ]
 
 /// The batch dispatch rule, with no server: `one` and `many` stand in for the channel.
@@ -192,8 +237,8 @@ let batchTests =
     let entry method = ProtoJson.batchEntryNoParams method
 
     testList "mailbox batch" [
-        // A whole-batch refusal arrives after the server has executed every member, so a replay
-        // would run a mutating request twice.
+        // The server executes every member of a batch before refusing it whole. Re-sending a
+        // mutating member repeats its effect.
         testCase "a refused batch replays read-only requests and never re-sends a mutating one" <| fun _ ->
             let sent = ResizeArray<string>()
 

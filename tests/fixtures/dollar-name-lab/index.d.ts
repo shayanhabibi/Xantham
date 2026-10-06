@@ -33,5 +33,44 @@ export interface $Taken {
     d: string;
 }
 
+/** Negative, harvested first: `$Early` reads `Early2`, and the verbatim `Early` keeps its name. */
+export interface $Early {
+    e: string;
+}
+export interface Early {
+    f: string;
+}
+
+/** Apart: `$Apart` keeps `Apart`, since the verbatim `Apart` nests under `Ns`. */
+export interface $Apart {
+    g: string;
+}
+export declare namespace Ns {
+    interface Apart {
+        h: string;
+    }
+}
+
+/** Colliding type parameters: `$T` reads `'_T2` beside a verbatim `_T`. */
+export interface Pair<$T, _T> {
+    first: $T;
+    second: _T;
+}
+
+/** A lone `$` type parameter: written `'_T`, never the wildcard `'_`. */
+export interface Lone<$> {
+    v: $;
+}
+
+/** A method's `$T` yields to the enclosing `_T` in scope: written `'_T2`. */
+export interface Outer<_T> {
+    map<$T>(value: $T): _T;
+}
+
+/** A method's verbatim `_T` reads `'_T2` beside the enclosing `$T`, written `'_T`. */
+export interface Inner<$T> {
+    map<_T>(value: _T): $T;
+}
+
 /** References each sanitised name, so the reference positions are gated too. */
-export declare function use(shape: $Shape, alias: $Alias, cls: $Cls, box: Box<string>, taken: $Taken): Taken;
+export declare function use(shape: $Shape, alias: $Alias, cls: $Cls, box: Box<string>, taken: $Taken, early: $Early, apart: $Apart, nsApart: Ns.Apart, pair: Pair<string, number>, lone: Lone<string>, inner: Inner<string>): Taken;

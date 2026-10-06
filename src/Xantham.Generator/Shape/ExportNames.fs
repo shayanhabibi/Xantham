@@ -111,14 +111,6 @@ let nameExports: Pass<ShapeModel> =
 
                     let declared = model.DeclNames |> Map.toList |> List.map snd |> Set.ofList
 
-                    // A sanitised name yields to a declaration spelling it verbatim: `$ZodType`
-                    // reads `ZodType2` beside an exported `ZodType`, whichever is harvested first.
-                    let verbatim =
-                        declarationExports ctx model
-                        |> List.map (snd >> fsName fallback)
-                        |> List.filter (fun name -> Naming.typeNameSegment name = name)
-                        |> Set.ofList
-
                     let contested =
                         claimants
                         |> List.countBy (fun (_, _, preferred, _, _, _) -> preferred)
@@ -126,21 +118,34 @@ let nameExports: Pass<ShapeModel> =
                         |> List.map fst
                         |> Set.ofList
 
+                    /// The full spelling preferred by a claimant, and whether it nests under
+                    /// its namespace to take it.
+                    let wantedOf preferred owner path =
+                        match path, owner with
+                        | (_ :: _ as path), _ -> (path @ [ preferred ]) |> String.concat ".", false
+                        | [], Some ns when Set.contains preferred contested -> nestUnder ns preferred, true
+                        | [], _ -> preferred, false
+
+                    let sourceOf typeId preferred =
+                        Map.tryFind typeId exportsById
+                        |> Option.map (fsName fallback)
+                        |> Option.defaultValue preferred
+
+                    // A sanitised name yields to a declaration spelling it verbatim at the same
+                    // path: `$ZodType` reads `ZodType2` beside an exported `ZodType`, whichever
+                    // is harvested first.
+                    let verbatim =
+                        claimants
+                        |> List.filter (fun (typeId, _, preferred, _, _, _) -> sourceOf typeId preferred = preferred)
+                        |> List.map (fun (_, _, preferred, owner, _, path) -> wantedOf preferred owner path |> fst)
+                        |> Set.ofList
+
                     let names, orders, _, findings =
                         claimants
                         |> List.fold
                             (fun (names, orders, taken, findings) (typeId, order, preferred, owner, origin, path) ->
-                                let wanted, nestedUnderNamespace =
-                                    match path, owner with
-                                    | (_ :: _ as path), _ -> (path @ [ preferred ]) |> String.concat ".", false
-                                    | [], Some ns when Set.contains preferred contested -> nestUnder ns preferred, true
-                                    | [], _ -> preferred, false
-
-                                let source =
-                                    Map.tryFind typeId exportsById
-                                    |> Option.map (fsName fallback)
-                                    |> Option.defaultValue preferred
-
+                                let wanted, nestedUnderNamespace = wantedOf preferred owner path
+                                let source = sourceOf typeId preferred
                                 let sanitised = source <> preferred
 
                                 let name =

@@ -561,6 +561,49 @@ module Stages =
                 }
         }
 
+    /// Fails unless the package packed from the project into `bin/` carries the project file and
+    /// every `<Compile Include>` source under `fable/`: the sources a Fable consumer compiles in
+    /// place of the DLL.
+    let private checkFableSources (relativePath: string) =
+        stage "check-fable-sources" {
+            run (fun _ ->
+                let projectPath = System.IO.Path.Combine(__SOURCE_DIRECTORY__, relativePath)
+                let project = System.Xml.Linq.XDocument.Load projectPath
+
+                let elements (name: string) =
+                    project.Descendants(System.Xml.Linq.XName.Get name)
+
+                match elements "Version" |> Seq.tryHead with
+                | None -> Error $"%s{relativePath}: no <Version> to name the package by."
+                | Some version ->
+                    let packageName =
+                        $"%s{System.IO.Path.GetFileNameWithoutExtension projectPath}.%s{version.Value}.nupkg"
+
+                    let package = System.IO.Path.Combine(__SOURCE_DIRECTORY__, "bin", packageName)
+
+                    let expected =
+                        System.IO.Path.GetFileName projectPath
+                        :: [
+                            for compile in elements "Compile" ->
+                                compile.Attribute(System.Xml.Linq.XName.Get "Include").Value
+                        ]
+                        |> List.map (fun file -> "fable/" + file.Replace('\\', '/'))
+
+                    if not (System.IO.File.Exists package) then
+                        Error $"bin/%s{packageName} is missing, so its Fable sources cannot be checked."
+                    else
+                        use archive = System.IO.Compression.ZipFile.OpenRead package
+                        let entries = archive.Entries |> Seq.map _.FullName |> set
+
+                        match expected |> List.filter (entries.Contains >> not) with
+                        | [] -> Ok()
+                        | missing ->
+                            let listed = String.concat ", " missing
+
+                            Error
+                                $"bin/%s{packageName} lacks %s{listed}. Fable consumers compile the package from these sources; check the `fable/` Content item in %s{relativePath}.")
+        }
+
     let pack =
         input {
             let! projects = Options.projects
@@ -568,6 +611,10 @@ module Stages =
 
             let cliProject =
                 projects |> List.tryFind (_.Path >> (=) Repo.Project.``Xantham.Cli``.Path)
+
+            let fableCoreProject =
+                projects
+                |> List.tryFind (_.Path >> (=) Repo.Project.``Xantham.Fable.Core``.Path)
 
             return
                 stage "pack" {
@@ -586,6 +633,8 @@ module Stages =
                             run (cmd $"dotnet restore {project.Path} -v q")
                             run (cmd $"dotnet pack {project.Path} -c {config} --no-build --no-restore -v q -o bin")
                         }
+
+                    whenSome fableCoreProject (fun project -> checkFableSources project.RelativePath)
                 }
         }
 
@@ -621,16 +670,54 @@ module Stages =
                     when' (not ci)
 
                     run (fun _ ->
-                        projects
-                        |> List.tryPick (fun project ->
-                            let path = System.IO.Path.Combine(__SOURCE_DIRECTORY__, project)
+                        let paths =
+                            projects
+                            |> List.map (fun project -> project, System.IO.Path.Combine(__SOURCE_DIRECTORY__, project))
 
-                            match Baked.SemVer.Version.IO.bumpVersion path (defaultArg kind Baked.SemVer.Patch) with
-                            | Ok(previous, next) ->
-                                printfn $"%s{project}: %s{previous} -> %s{next}"
-                                None
-                            | Error error -> Some(Error $"%s{project}: %s{error.Message}"))
-                        |> Option.defaultValue (Ok()))
+                        let report (errors: string list) = Error(String.concat "\n" errors)
+
+                        let unwritable =
+                            paths
+                            |> List.choose (fun (project, path) ->
+                                try
+                                    let version =
+                                        System.Xml.Linq.XDocument
+                                            .Load(path)
+                                            .Descendants(System.Xml.Linq.XName.Get "Version")
+                                        |> Seq.tryHead
+
+                                    match version with
+                                    | None -> Some $"%s{project}: no <Version> to bump"
+                                    | Some version when
+                                        not (
+                                            System.Text.RegularExpressions.Regex.IsMatch(
+                                                version.Value.Trim(),
+                                                @"^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$"
+                                            )
+                                        )
+                                        ->
+                                        Some $"%s{project}: <Version> %s{version.Value} is not a SemVer version"
+                                    | Some _ when System.IO.FileInfo(path).IsReadOnly ->
+                                        Some $"%s{project}: the file is read-only"
+                                    | Some _ -> None
+                                with error ->
+                                    Some $"%s{project}: %s{error.Message}")
+
+                        match unwritable with
+                        | [] ->
+                            paths
+                            |> List.choose (fun (project, path) ->
+                                match
+                                    Baked.SemVer.Version.IO.bumpVersion path (defaultArg kind Baked.SemVer.Patch)
+                                with
+                                | Ok(previous, next) ->
+                                    printfn $"%s{project}: %s{previous} -> %s{next}"
+                                    None
+                                | Error error -> Some $"%s{project}: %s{error.Message}")
+                            |> function
+                                | [] -> Ok()
+                                | errors -> report errors
+                        | errors -> report ("No project was bumped." :: errors))
                 }
         }
 

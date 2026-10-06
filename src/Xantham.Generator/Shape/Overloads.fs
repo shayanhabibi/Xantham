@@ -73,36 +73,11 @@ let dedupeOverloads: Pass<ShapeModel> =
 
                     let abbrevs = abbreviations model.Decls
 
-                    /// The reference with abbreviations expanded, so `TargetsParam` and
-                    /// `DOMTargetsParam` (both `obj`) compare equal the way the compiler sees them.
-                    /// Shared with `expand-union-arms`, which resolves the same names.
-                    let normalize (visited: Set<string>) (reference: FsTypeRef) : FsTypeRef =
-                        expandAbbreviations abbrevs visited reference
-
-                    /// A reference with its own signature's type variables renamed by declaration
-                    /// order, so `<A extends T>(value: A): A` and `<B extends T>(value: B): B`
-                    /// compare equal once their dropped constraints leave both as `'T0 -> 'T0` -
-                    /// .NET overload resolution does not see a type parameter's name.
-                    let rec renameTypeVars (rename: Map<string, string>) (reference: FsTypeRef) : FsTypeRef =
-                        let recur = renameTypeVars rename
-
-                        match reference with
-                        | FsTypeVar name -> FsTypeVar(rename |> Map.tryFind name |> Option.defaultValue name)
-                        | FsOption inner -> FsOption(recur inner)
-                        | FsArray element -> FsArray(recur element)
-                        | FsTuple components -> FsTuple(List.map recur components)
-                        | FsErasedUnion arms -> FsErasedUnion(List.map recur arms)
-                        | FsDelegate(args, ret) -> FsDelegate(List.map recur args, recur ret)
-                        | FsFunc(argument, ret) -> FsFunc(recur argument, recur ret)
-                        | FsApp(name, args) -> FsApp(name, List.map recur args)
-                        | FsBranded(primitive, measure) -> FsBranded(recur primitive, measure)
-                        | other -> other
-
-                    let signatureKey (typeParameters: FsTypeParam list) (parameters: FsParam list) =
-                        let rename = typeParameters |> List.mapi (fun i p -> p.Name, $"T{i}") |> Map.ofList
-
-                        parameters
-                        |> List.map (fun p -> p.Optional, p.Rest, normalize Set.empty (renameTypeVars rename p.Type))
+                    /// Two overloads with one key are one .NET signature: `TargetsParam` and
+                    /// `DOMTargetsParam` (both `obj`) compare equal, as do `<A extends T>(value: A): A`
+                    /// and `<B extends T>(value: B): B` once their dropped constraints leave both as
+                    /// `'T0 -> 'T0`. `M<'A>(x)` and `M(x)` differ in generic arity, so their keys differ.
+                    let signatureKey = CompiledSignature.parameterKey abbrevs
 
                     let keyBounded = keyBoundedOverloads model
 

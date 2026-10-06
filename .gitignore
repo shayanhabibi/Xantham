@@ -24,6 +24,8 @@ node_modules/
 xantham-out/
 
 # Tests
+# Per-test scratch directories (`Scratch.fs`); tests never write under the system temp directory.
+tests/.scratch/
 tests/**/output.json
 tests/**/package-lock.json
 tests/fixtures/**/*

@@ -61,6 +61,67 @@ type Taken2 =
     [<ParamObject; Emit("$0")>]
     static member Create (d: string) : Taken2 = jsNative
 
+/// <summary>
+/// Negative, harvested first: <c>$Early</c> reads <c>Early2</c>, and the verbatim <c>Early</c> keeps its name.
+/// </summary>
+[<Interface>]
+type Early2 =
+    abstract e: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (e: string) : Early2 = jsNative
+
+[<Interface>]
+type Early =
+    abstract f: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (f: string) : Early = jsNative
+
+/// <summary>
+/// Apart: <c>$Apart</c> keeps <c>Apart</c>, since the verbatim <c>Apart</c> nests under <c>Ns</c>.
+/// </summary>
+[<Interface>]
+type Apart =
+    abstract g: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (g: string) : Apart = jsNative
+
+/// <summary>
+/// Colliding type parameters: <c>$T</c> reads <c>'_T2</c> beside a verbatim <c>_T</c>.
+/// </summary>
+[<Interface>]
+type Pair<'_T2, '_T> =
+    abstract first: '_T2 with get, set
+    abstract second: '_T with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (first: '_T2, second: '_T) : Pair<'_T2, '_T> = jsNative
+
+/// <summary>
+/// A lone <c>$</c> type parameter: written <c>'_T</c>, never the wildcard <c>'_</c>.
+/// </summary>
+[<Interface>]
+type Lone<'_T> =
+    abstract v: '_T with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (v: '_T) : Lone<'_T> = jsNative
+
+/// <summary>
+/// A method's <c>$T</c> yields to the enclosing <c>_T</c> in scope: written <c>'_T2</c>.
+/// </summary>
+[<Interface>]
+type Outer<'_T> =
+    abstract map<'_T2>: value: '_T2 -> '_T
+    [<ParamObject; Emit("$0")>]
+    static member Create (map: ('_T2 -> '_T)) : Outer<'_T> = jsNative
+
+/// <summary>
+/// A method's verbatim <c>_T</c> reads <c>'_T2</c> beside the enclosing <c>$T</c>, written <c>'_T</c>.
+/// </summary>
+[<Interface>]
+type Inner<'_T> =
+    abstract map<'_T2>: value: '_T2 -> '_T
+    [<ParamObject; Emit("$0")>]
+    static member Create (map: ('_T2 -> '_T)) : Inner<'_T> = jsNative
+
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
@@ -78,4 +139,11 @@ type Exports =
     /// References each sanitised name, so the reference positions are gated too.
     /// </summary>
     [<Import("use", "dollar-name-lab")>]
-    static member ``use`` (shape: Shape, alias: Alias, cls: Cls, box: Box<string>, taken: Taken2) : Taken = jsNative
+    static member ``use`` (shape: Shape, alias: Alias, cls: Cls, box: Box<string>, taken: Taken2, early: Early2, apart: Apart, nsApart: Ns.Apart, pair: Pair<string, float>, lone: Lone<string>, inner: Inner<string>) : Taken = jsNative
+
+module Ns =
+    [<Interface>]
+    type Apart =
+        abstract h: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (h: string) : Apart = jsNative

@@ -114,6 +114,23 @@ let tests =
 
               Expect.isFalse (source.Contains "pick_Overload2") "a return-only pair is unioned, not renamed"
 
+              Expect.stringContains
+                  source
+                  "static member locate (path: string) : string = jsNative"
+                  "a prefix beside an optional tail keeps its name"
+
+              Expect.stringContains
+                  source
+                  "static member locate (path: string, ?strict: bool, ?depth: float) : string = jsNative"
+                  "the optional form keeps its name beside the prefix"
+
+              Expect.stringContains
+                  source
+                  "static member locate_Overload2 (path: string, strict: bool, ?depth: float) : U2<float, bool> = jsNative"
+                  "the required form one call shares with the optional form is renamed, and absorbs the later return"
+
+              Expect.isFalse (source.Contains "locate_Overload3") "the later return-only overload merges rather than renaming again"
+
               Expect.equal
                   (occurrences "[<Import(\"dispatch\", \"layout-lab\")>]" source)
                   2
@@ -133,7 +150,7 @@ let tests =
                   |> List.filter (fun finding -> finding.Key = "DO008")
                   |> List.map _.Symbol
 
-              Expect.equal unioned [ "Exports.pick" ] "the union is recorded against the container-qualified member"
+              Expect.equal unioned [ "Exports.pick"; "Exports.locate_Overload2" ] "each union is recorded against the container-qualified member it widened"
 
               let dropped =
                   rendered.Findings

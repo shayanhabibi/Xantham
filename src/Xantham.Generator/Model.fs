@@ -692,14 +692,23 @@ module Naming =
             name
 
     /// A type variable's name in the shape F# admits after the tick: each character outside
-    /// letters, digits and underscore reads as an underscore, so `$T` is written `'_T`.
+    /// letters, digits and underscore reads as an underscore, so `$T` is written `'_T`. A name
+    /// made only of underscores gains a trailing `T`, so `$` is written `'_T` rather than the
+    /// wildcard `'_`. The result is not unique: `Shape.typeParamsOf` suffixes a spelling shared
+    /// within a declaration's scope.
     let typeVariable (name: string) =
-        if nestable name then
-            name
+        let written =
+            if nestable name then
+                name
+            else
+                name
+                |> Seq.map (fun c -> if Char.IsLetterOrDigit c then c else '_')
+                |> String.Concat
+
+        if written |> Seq.forall ((=) '_') then
+            written + "T"
         else
-            name
-            |> Seq.map (fun c -> if Char.IsLetterOrDigit c then c else '_')
-            |> String.Concat
+            written
 
     /// A package's module name: `@scope/pkg-name` -> `Scope.PkgName`.
     ///

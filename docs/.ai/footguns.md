@@ -81,8 +81,7 @@ missing table row.
 ## Fable runtime type tests
 
 Measured against Fable 5.13.0 on 2026-09-22 while designing erased-DU mapping for mixed
-literal/typed unions. The repository pins the `fable` tool at 5.0.0, and these results are
-unverified there. These constrain any pass that puts a payload arm on an `[<Erase>]` union.
+literal/typed unions; they predate the repository's `fable` tool pin of 5.17.2. These constrain any pass that puts a payload arm on an `[<Erase>]` union.
 Full table and provenance: `docs/.ai/plans/2026-09-22-mixed-literal-unions.md`.
 
 **Two arms that share a runtime test are a silent failure.** `float[]` and `(float * float)`
@@ -114,8 +113,10 @@ alone. The run gate reproduces that with `--exclude Xantham.Fable.Core.TS`, whic
 Fable compile from 22.7s to 6.3s (Fable 5.0.0, 2026-09-24). From the DLL, Fable resolves only
 attributes (`Emit`, `Import`, `Global`, `Erase`, `ParamObject`, `CompiledValue`) and interfaces.
 Every member of the bindings, generated or hand-written, must therefore be an attribute-carrying
-member or an abstract one. An `inline` member or a member with a body fails at the consumer's
-call site:
+member or an abstract one. The exception is `op_ErasedCast` on an `[<Erase>]` union: Fable
+special-cases it, so the generated `static member op_ErasedCast(x) = CaseN x` bodies (199 in
+`Xantham.Fable.Core.TS`) compile from the DLL. Any other `inline` member or member with a body
+fails at the consumer's call site:
 
 - under a `Fable.Core.*` namespace, as `… is not supported, try updating fable tool`;
 - elsewhere, as `Cannot find the body of inline member`.
@@ -132,8 +133,8 @@ consumer's first helper call.
 
 **Nested `dotnet build` inside a test stalls under `dotnet test`.** Idle MSBuild nodes hold the
 test host's stdout, reproduced three times in one lane. `build.fsx` runs the Expecto executables
-directly, and nested builds carry a `global.json` in a temp directory outside the repository so a
-newer SDK stays eligible.
+directly, and nested builds carry a copy of the root `global.json` beside their scratch project
+inside the repository (`.claude/rules/tests.md`).
 
 **`tools/workspace.fsx` exports `XANTHAM_TSGO_EXE` from any checkout**, not only a worktree, so
 the catalog suites run in the main checkout. Only a worktree skips `npm install`: the main

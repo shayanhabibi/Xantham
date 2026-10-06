@@ -1078,7 +1078,7 @@ batch on disjoint pass files. The corpus stands at 30 fixtures. `TR018` fell 197
 ergonomic 1,061, widened 365, escape 115, from 374 widened.
 
 The wave was scoped by the user's dispositions rather than by the corpus. Four of the six losses
-in `docs/fable5-workarounds.md` are closed as unresolvable and carry no work in any wave. Two
+in `docs/.ai/fable5-workarounds.md` are closed as unresolvable and carry no work in any wave. Two
 carried work and both landed, so **§3 and §6 of that document are now closed**. Deprioritising
 `@types/three` cost the previous wave-four list its second item: `alignOperands` stands at 45 on
 `three` against 1 on cloudflare, so with the rung out of scope the lane had no justification and
@@ -1803,18 +1803,28 @@ are recorded in `docs/.ai/footguns.md`.
   element is printed at any length. `sprintf "%A"` stopped at 100 list elements, so two
   interfaces differing in their 101st member hashed alike. The hash format changed with the
   generator assembly, which already invalidates every earlier catalog.
-- **Union-arm collisions include ambiguous prefixes.** `expand-union-arms` declines a member
-  (`UA004`) when an arm and a declared overload share a compiled signature, or when one is a
-  prefix of the other with an omissible tail. The comparison lives in
-  `Spec.CompiledSignature`, shared with `resolve-export-collisions`.
+- **Union-arm and export collisions are call-level.** `expand-union-arms` declines a member
+  (`UA004`) and `resolve-export-collisions` renames one (`AmbiguousCall`) when two signatures
+  share a compiled parameter signature, or when one opens the other with an omissible tail and
+  some call leaves an optional unsupplied in both, or in neither
+  (`CompiledSignature.ambiguousCall`). An optional parameter compares by its rendered `?name: T`
+  type. `(x)` beside `(x, ?y)` expands and keeps its name, since F# prefers the candidate with no
+  unsupplied optional; `(x, ?y)` beside `(x, ?y, ?z)` declines, and `(u, ?q, ?s)` beside
+  `(u, q, ?s)` renames the second. A later candidate whose return alone differs from a renamed
+  member merges into it (`DO008`), so `@types/node`'s four `url.parse` overloads emit
+  `parse(u)`, `parse(u, ?q, ?s)` and `parse_Overload2(u, q, ?s)`. `dedupe-overloads` keys on
+  `CompiledSignature.parameterKey`, generic arity included, so `M<'A>(x)` and `M(x)` both
+  survive.
 - **Findings carry no checker ids.** `RT002` reports under `<type-table>`, `TR003` has no
   payload, and `TP001` carries the type parameter's position. Checker ids are assigned in
   answer order, so a manifest quoting one differed run to run.
 - **`$` in declaration and type-parameter names.** An exported type whose name spells a
   character FS0883 rejects under backticks declares as its identifier shape (`$Shape` ->
-  `Shape`), yielding to a verbatim name it collides with (`$Taken` -> `Taken2`). A type
-  variable writes each non-identifier character as `_` (`$T` -> `'_T`). Both report `SY005`;
-  imports keep the JavaScript name. `dollar-name-lab` pins each position.
+  `Shape`), yielding to a verbatim name at the same path it collides with (`$Taken` ->
+  `Taken2`, in either harvest order). A type variable writes each non-identifier character as
+  `_` (`$T` -> `'_T`, a lone `$` -> `'_T`), suffixed where it collides with a variable in scope
+  (`<$T, _T>` -> `<'_T2, '_T>`). Both report `SY005` with the written name; imports keep the
+  JavaScript name. `dollar-name-lab` pins each position.
 
 # Easy Nits 
 

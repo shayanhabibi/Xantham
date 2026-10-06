@@ -19,6 +19,8 @@ paid for.
 - `.claude/rules/generator-fixtures.md` — the generator, its tests, `tests/fixtures/`:
   small-lab-first workflow, the fast test loop, which generator lists are append-only.
 - `.claude/rules/style.md` — `**/*.fs`: Fantomas formatting defaults and exceptions.
+- `.claude/rules/tests.md` — `tests/**`, `tools/**/*.fs*`: scratch files live under the gitignored
+  `tests/.scratch/`, never the system temp directory.
 - `.claude/rules/upstream.md` — `tools/tsc-ast/**`: vendoring upstream TypeScript sources.
 
 ## Compile-gate dependency pin

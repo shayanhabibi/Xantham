@@ -15,8 +15,9 @@ answer is different in kind — a name that Fable.Core adds, or that this reposi
 `src/Xantham.Fable.Core`, closes one of these outright. Nothing about Fable's compilation model
 has to change.
 
-Every claim is verified against the pins this repository builds on: `Fable.Core` **5.2.0**, the
-`fable` tool 5.0.0, `fable-library-js` 5.0.0. The inventory method is
+Every claim is verified against the pins this repository built on at the time: `Fable.Core`
+**5.2.0**, the `fable` tool 5.0.0, `fable-library-js` 5.0.0. The `fable` tool pin is now 5.17.2;
+`Fable.Core` is unchanged. The inventory method is
 `fcs_nuget_types Fable.Core` against `tests/Xantham.Generator.CompileGate`, which resolves the
 exact assembly the compile gate compiles against.
 

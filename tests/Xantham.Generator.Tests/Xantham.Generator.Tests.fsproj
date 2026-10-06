@@ -7,6 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Include="Scratch.fs" />
         <Compile Include="Build.fs" />
         <Compile Include="Fixtures.fs" />
         <Compile Include="Measures.test.fs" />

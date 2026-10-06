@@ -159,6 +159,11 @@ index was otherwise rewritten: they still describe the Fable/Decoder pipeline, w
 until phase 6 says otherwise. `docs/Documentation/` is still empty - it is fsdocs' own directory,
 not ours.
 
+**Retired since.** `docs/index.md`, `docs/wire-navigation.md` and `docs/wire-hand-written.md` no
+longer exist; `site/content/` replaced them. The navigation map is
+`site/content/wire/navigation.md` and the hand-written register is
+`site/content/dev/hand-written.md`.
+
 ---
 
 ## Phase 5 — Protocol document's own open items — DONE

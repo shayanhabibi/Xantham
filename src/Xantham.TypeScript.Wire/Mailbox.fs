@@ -13,8 +13,9 @@ open Xantham.TypeScript.Wire.Proto
 module Batch =
 
     /// The methods that change server state: they create or free a snapshot or program, write
-    /// files, or toggle profiling. A batch refused as a whole reports them failed with the batch
-    /// error; they will not be re-sent.
+    /// files, or toggle profiling. In a batch refused as a whole, each reports the batch error and
+    /// is never re-sent. Its outcome is then unknown: the server may already have applied its
+    /// effect.
     let sideEffectingMethods =
         HashSet<string>
             [
@@ -67,12 +68,18 @@ module Batch =
 /// <para>Lone callers never batch, and costs nothing extra. The synchronous api is generated to avoid unwrapping
 /// async replies in small PoCs.</para>
 /// <para>The mailbox, under pressure, outperforms serial usage by a factor of 2.1-2.3 times.</para>
+/// <para>A member of <see cref="P:Xantham.TypeScript.Wire.Batch.sideEffectingMethods"/> that fails with a
+/// whole-batch <c>TsGoError</c> has an unknown outcome: the server may already have applied its effect.</para>
 /// </remarks>
 type TscMailbox(exePath, cwd, ?callbacks: IDictionary<string, TsGoCallback>) =
     let channel = new TscChannel(exePath, cwd, ?callbacks = callbacks)
 
     let cancellation = new CancellationTokenSource()
     let mutable disposed = 0
+
+    // 1 while the agent dispatches a batch. Dispose waits for it to clear before closing the
+    // channel.
+    let mutable busy = 0
 
     // Every reply not yet completed. Dispose fails all of them.
     let pending =
@@ -135,7 +142,16 @@ type TscMailbox(exePath, cwd, ?callbacks: IDictionary<string, TsGoCallback>) =
                             let! first = inbox.Receive()
                             let! batch = drain (ResizeArray [ first ])
                             let requests = batch |> Seq.map fst |> Array.ofSeq
-                            let results = Batch.dispatch one many requests
+                            Interlocked.Exchange(&busy, 1) |> ignore
+
+                            let results =
+                                try
+                                    if Volatile.Read &disposed = 1 then
+                                        Array.create requests.Length (Error(disposedError ()))
+                                    else
+                                        Batch.dispatch one many requests
+                                finally
+                                    Volatile.Write(&busy, 0)
 
                             batch
                             |> Seq.iteri (fun i (_, reply: TaskCompletionSource<_>) ->
@@ -158,7 +174,7 @@ type TscMailbox(exePath, cwd, ?callbacks: IDictionary<string, TsGoCallback>) =
                 TaskCompletionSource<Result<byte[], exn>>(TaskCreationOptions.RunContinuationsAsynchronously)
 
             pending[reply] <- ()
-            // A Dispose between the check above and the registration has already swept `pending`.
+            //FOR-REVIEW a Dispose landing between the first check and the registration has already swept `pending`; this second check fails the reply that sweep missed.
             if Volatile.Read &disposed = 1 then
                 reply.TrySetResult(Error(disposedError ())) |> ignore
             else
@@ -246,7 +262,8 @@ type TscMailbox(exePath, cwd, ?callbacks: IDictionary<string, TsGoCallback>) =
         }
 
     /// Stops the agent and closes the channel, which is owned here. Requests still queued fail
-    /// with `ObjectDisposedException`, as does every later request. Idempotent.
+    /// with `ObjectDisposedException`, as does every later request. A batch already sent gets up
+    /// to two seconds to finish before the channel closes. Idempotent.
     member _.Dispose() =
         if Interlocked.Exchange(&disposed, 1) = 0 then
             for reply in pending.Keys do
@@ -254,6 +271,8 @@ type TscMailbox(exePath, cwd, ?callbacks: IDictionary<string, TsGoCallback>) =
 
             pending.Clear()
             cancellation.Cancel()
+            //FOR-REVIEW cancellation cannot interrupt a synchronous channel request; closing the channel under one would race its transport-failure path on the disposed process.
+            SpinWait.SpinUntil((fun () -> Volatile.Read &busy = 0), 2000) |> ignore
             (agent :> IDisposable).Dispose()
             cancellation.Dispose()
             (channel :> IDisposable).Dispose()

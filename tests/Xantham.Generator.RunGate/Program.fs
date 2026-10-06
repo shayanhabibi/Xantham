@@ -332,7 +332,7 @@ let private taggedUnions () =
             (width, height, radius)
     | PhaseBLab.Shape.Circle radius -> check $"a JavaScript-built round-rect matched Circle {radius}" false
 
-/// The workarounds of docs/fable5-workarounds.md, each read back through
+/// The workarounds of docs/.ai/fable5-workarounds.md, each read back through
 /// `tests/fixtures/fable-workaround-lab/index.js`. Where the document says the direct F#
 /// spelling misbehaves, the misbehaviour is checked beside the workaround: a workaround is worth
 /// what the failure it avoids is worth, and only running both settles which is which. The FABLE

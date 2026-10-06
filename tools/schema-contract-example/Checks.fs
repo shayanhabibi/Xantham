@@ -20,8 +20,11 @@ module Checks =
             failwithf "%s: expected %A, got %A" label expected actual
 
     let private load (json: string) =
-        let path =
-            Path.Combine(Path.GetTempPath(), $"xantham-schema-{Guid.NewGuid():N}.json")
+        let scratch =
+            Path.GetFullPath(Path.Combine(__SOURCE_DIRECTORY__, "..", "..", "tests", ".scratch"))
+
+        Directory.CreateDirectory scratch |> ignore
+        let path = Path.Combine(scratch, $"xantham-schema-{Guid.NewGuid():N}.json")
 
         try
             File.WriteAllText(path, json)

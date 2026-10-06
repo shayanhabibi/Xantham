@@ -1,17 +1,8 @@
-/// Measurement pass for `docs/.ai/plans/2026-09-22-mixed-literal-unions.md` Step 0.
-/// Inert unless `XANTHAM_MIXED_UNION_CENSUS` names a file to append to, so it can sit in the
-/// pass list without touching a single golden.
-///
-/// It is committed rather than thrown away because that plan's Step 0 is a go/no-go gate whose
-/// instruction on reopening is "re-run the counting pass, do not re-argue the design". The
-/// first census was written, run, and reverted, which is how a wrong count went unchallenged
-/// long enough to close the plan. Keeping it makes the number reproducible.
-///
-/// It reads raw `TypeFacts` rather than rendered `FsTypeRef`s on purpose. String literals are
-/// widened to `FsString` inside the shared reader (`Spec.fs:1542`), so any census written
-/// against shaped references sees `U3<float, string, float[]>` where the source said
-/// `number | "first" | "center" | "last" | "random" | Array<number>` - and scores a union that
-/// never had a bare `string` arm as though it had one.
+/// Measurement pass for `docs/.ai/plans/2026-09-22-mixed-literal-unions.md` Step 0: appends one
+/// JSON row per union type mixing literal and typed arms, with its eligibility for an erased-DU
+/// mapping. Inert unless `XANTHAM_MIXED_UNION_CENSUS` is set to the file to append to.
+/// Arms are classified from raw `TypeFacts`, so string literals count as literals rather than as
+/// `string`; the plan's "Step 0 result" section records the rationale.
 module Xantham.Generator.Shape.MixedUnionCensus
 
 open System
