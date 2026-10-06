@@ -38,3 +38,32 @@ type OddKeys =
     abstract ``quote"key``: string with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (``aria-label``: string, ``quote"key``: string) : OddKeys = jsNative
+
+[<Interface>]
+type Left =
+    inherit Properties<string>
+    abstract value: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (value: string, stamp: string) : Left = jsNative
+
+[<Interface>]
+type Right =
+    inherit Properties<string>
+    abstract value: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (value: string, stamp: string) : Right = jsNative
+
+[<Interface>]
+type Diamond =
+    inherit Left
+    inherit Right
+    abstract optional: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (value: string, stamp: string, ?optional: string) : Diamond = jsNative
+
+[<Interface>]
+type Override =
+    inherit Properties<string>
+    abstract value: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (value: string, stamp: string) : Override = jsNative
