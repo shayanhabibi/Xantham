@@ -24,3 +24,6 @@ src/xantham-libs/
 
 # Retained generation experiments are diagnostic output.
 **/.partition-work/
+
+# Scratch consumers may contain copied external compiler-plugin sources.
+tests/.scratch/

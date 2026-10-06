@@ -65,6 +65,7 @@
         <Compile Include="DefaultIntersectionConsumer.fs" />
         <Compile Include="GroupedDomAliasesConsumer.fs" />
         <Compile Include="UnionArmOverloadConsumer.fs" />
+        <Compile Include="CustomizationConsumer.fs" />
     </ItemGroup>
 
     <ItemGroup>
