@@ -4,10 +4,16 @@ description: Register F# extensions to annotate bindings and generate component 
 order: 7
 ---
 
-Use `Xantham.Generator.Customization` when a package needs additional member attributes or a
-component-facing API. Extensions are ordinary F# values registered with the generator library.
+<p class="xantham-lead">
+Use `Xantham.Generator.Customization` when a package needs additional member attributes, or a component-facing API.
+</p>
+
+
+Extensions are ordinary F# values registered with the generator library.
 `Pipeline.generateWith extensions config input` returns output; `Pipeline.runWith extensions
-config input output` writes it. The existing `generate` and `run` functions retain their behavior.
+config input output` writes it. 
+
+The existing `generate` and `run` functions retain their behavior.
 An empty registration produces the same sources, manifest and declaration catalog.
 
 ## Add an attribute
@@ -24,28 +30,44 @@ let attributes : GeneratorExtension =
           | Some input ->
               let property =
                   Semantic.properties input snapshot
-                  |> List.find (fun p -> Semantic.jsName p snapshot = "disabled")
-              let attribute = Attribute.create "System.Obsolete" [AttributeValue.String "Use enabled"]
+                  |> List.find (fun p ->
+                      Semantic.jsName p snapshot = "disabled")
+              let attribute =
+                  Attribute.create
+                      "System.Obsolete"
+                      [AttributeValue.String "Use enabled"]
               Ok (Semantic.outputTargets property snapshot
-                  |> List.fold (fun edits target -> Edits.addAttribute target attribute edits) Edits.empty) }
+                  |> List.fold (fun edits target ->
+                      Edits.addAttribute target attribute edits)
+                      Edits.empty) }
 ```
 
-Attribute arguments support strings, booleans, integers, resolved type references, enum values
-and arrays. `Attribute.onGetter` and `onSetter` select an accessor. Identical attributes coalesce;
-distinct attributes retain registration order. Attributes that change Fable interop require
-`Edits.replaceInterop target (Interop.property "javascript-key")`, an explicit Escape edit.
+* Attribute arguments support:
 
-`Semantic.members snapshot` includes instance methods and concrete exported functions/values,
-so their `outputTargets` can receive member attributes too. `Semantic.properties source snapshot`
-selects only properties for the companion adapter. Accessor attributes and property interop
-edits require a property target. Type-valued arguments use the final producer-qualified names.
-
-Every callback reads the original immutable snapshot. Declaration selection uses canonical
-package identity and path. `Semantic.tryFind "typescript/lib" ["HTMLElement"] snapshot` selects
-the compiler's DOM declaration. `Semantic.descendants root snapshot` follows explicit heritage,
-including the root, aliases and instantiated bases. A structural lookalike or an `implements`
-clause does not establish this relationship. `Semantic.implementedTypes` is a separate query.
-Missing source metadata is available through `Semantic.diagnostics`; ambiguous selection fails.
+    * strings
+    * booleans
+    * integers
+    * resolved type references
+    * enum values
+    * arrays
+* `Attribute.onGetter` and `onSetter` select an accessor. 
+* Identical attributes coalesce; distinct attributes retain registration order. 
+* Attributes that change Fable interop require `Edits.replaceInterop target (Interop.property "javascript-key")`, 
+an explicit Escape edit.
+* `Semantic.members snapshot` includes instance methods and concrete exported functions/values,
+so their `outputTargets` can receive member attributes too.
+* `Semantic.properties source snapshot` selects only properties for the companion adapter. 
+* Accessor attributes and property interop edits require a property target. 
+* Type-valued arguments use the final producer-qualified names.
+* Every callback reads the original immutable snapshot. 
+* Declaration selection uses canonical package identity and path. 
+* `Semantic.tryFind "typescript/lib" ["HTMLElement"] snapshot` selects
+the compiler's DOM declaration. 
+* `Semantic.descendants root snapshot` follows explicit heritage,
+including the root, aliases and instantiated bases. 
+* A structural lookalike or an `implements` clause does not establish this relationship.
+* `Semantic.implementedTypes` is a separate query.
+* Missing source metadata is available through `Semantic.diagnostics`; ambiguous selection fails.
 
 ## Generate component properties
 
@@ -116,8 +138,8 @@ let main arguments =
 Put this in a console project referencing `Xantham.Generator` and pass the input and output
 directories. A runnable version is checked in under `tools/customization-example`:
 
-```powershell
-rtk dotnet run --project tools/customization-example -- tests/fixtures/customization-dom-lab tests/.scratch/my-components
+```bash
+dotnet run --project tools/customization-example -- tests/fixtures/customization-dom-lab tests/.scratch/my-components
 ```
 
 The generated companion contains an empty marker and optional extension properties:
@@ -181,8 +203,8 @@ plugin/source packaging. Direct Emit companions can be distributed as a binding 
 
 From a configured checkout, run the focused generator tests and the framework acceptance gate:
 
-```powershell
-rtk dotnet fsi build.fsx -- test --quick --filter customization --run-gate
+```bash
+dotnet fsi build.fsx -- test --quick --filter customization --run-gate
 ```
 
 The gate generates the HTMLElement companion through the public API, compiles a component with

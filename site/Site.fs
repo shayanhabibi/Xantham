@@ -70,6 +70,8 @@ let navbar =
                             Menu.page "xantham-cli/guide/packages"
                             Menu.page "xantham-cli/guide/configuration"
                             Menu.page "xantham-cli/guide/dependencies"
+                            Menu.page "xantham-cli/guide/customization"
+                            |> Menu.badge Badge.New
                             Menu.page "xantham-cli/guide/troubleshooting"
                         ]
                     Menu.link "Source" "https://github.com/shayanhabibi/xantham"
