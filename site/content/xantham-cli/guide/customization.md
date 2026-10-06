@@ -215,7 +215,7 @@ including inherited properties and escaped JavaScript keys. The generator tests 
 compile attributed interfaces, constructor-backed classes, exported functions/values, and
 referenced-producer consumers; assigning a readonly companion property must fail compilation.
 
-For the complete regression suite, use `rtk dotnet fsi build.fsx -- test --run-gate`.
+For the complete regression suite, use `dotnet fsi build.fsx -- test --run-gate`.
 The Partas source snapshot and npm lockfile are checked in under
 `tests/Xantham.Generator.PartasGate`; the gate needs no sibling Partas checkout.
 
