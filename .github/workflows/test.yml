@@ -35,6 +35,8 @@ jobs:
           global-json-file: global.json
       - name: Restore tools
         run: dotnet tool restore
+      - name: Check build command behavior
+        run: node tools/verify-build.mjs
       # On CI the format stage runs `fantomas --check`, so an unformatted commit fails here rather
       # than being rewritten. `--run-gate` adds the Fable run gate, which `dotnet fable` from the
       # tool manifest drives.

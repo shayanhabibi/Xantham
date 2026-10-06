@@ -93,6 +93,11 @@ module Options =
         |> Input.alias "-q"
         |> Input.description "Skip setup steps, such as installing dependencies"
 
+    let noFormat =
+        Input.option<bool> "--no-format"
+        |> Input.description "Skip source formatting locally; CI still checks formatting"
+        |> Input.def false
+
     let config =
         Baked.Dotnet.config.option
         |> Input.desc "Build configuration"
@@ -217,11 +222,12 @@ module Stages =
         input {
             let! quick = Options.quick
             and! ci = Baked.Common.isCI
+            and! noFormat = Options.noFormat
 
             return
                 stage "format" {
                     workingDir Repo.FileSystem.``.``
-                    when' (not quick)
+                    when' (not quick && (ci || not noFormat))
 
                     run (
                         if ci then
@@ -261,11 +267,8 @@ module Stages =
                     quiet
                     when' (List.isEmpty projects |> not)
 
-                    if projects.Length > 1 then
-                        for project in projects do
-                            stage $"build-{project}" { run (cmd $"dotnet build {project} -c {config} -v q") }
-                    else
-                        stage $"build-{projects[0]}" { run (cmd $"dotnet build {projects[0]} -c {config} -v q") }
+                    for project in projects do
+                        stage $"build-{project}" { run (cmd $"dotnet build {project} -c {config} -v q") }
                 }
         }
 
@@ -382,14 +385,18 @@ module Stages =
                         run
                             "dotnet run --project src/Xantham.Cli -- generate tools/fable-core-ts-input -o src/Xantham.Fable.Core.TS"
 
-                        run
-                            "powershell -NoProfile -Command \"Move-Item -Force src/Xantham.Fable.Core.TS/groups/Fable.Core.TS.fs src/Xantham.Fable.Core.TS/Fable.Core.TS.fs\""
+                        run (fun _ ->
+                            let output =
+                                System.IO.Path.Combine(__SOURCE_DIRECTORY__, "src", "Xantham.Fable.Core.TS")
 
-                        run
-                            "powershell -NoProfile -Command \"Remove-Item -Force src/Xantham.Fable.Core.TS/FableCoreTsInput.fs\""
+                            System.IO.File.Move(
+                                System.IO.Path.Combine(output, "groups", "Fable.Core.TS.fs"),
+                                System.IO.Path.Combine(output, "Fable.Core.TS.fs"),
+                                true
+                            )
 
-                        run
-                            "powershell -NoProfile -Command \"Remove-Item -Force src/Xantham.Fable.Core.TS/symbols.jsonl\""
+                            System.IO.File.Delete(System.IO.Path.Combine(output, "FableCoreTsInput.fs"))
+                            System.IO.File.Delete(System.IO.Path.Combine(output, "symbols.jsonl")))
                     }
                     // The node library is a shipped artifact, not a normal generator input:
                     // opt in explicitly so ordinary generated-layer runs do not rewrite it.
@@ -643,20 +650,35 @@ module Stages =
                 }
         }
 
+    /// Requires a NuGet key before the publish pipeline runs setup or builds packages.
+    let requireApiKey =
+        input {
+            let! apiKey = Baked.NuGet.apiKey.option
+
+            return
+                stage "require nuget key" {
+                    when' apiKey.IsSome
+                    failIfIgnored
+                    echo "NuGet key supplied"
+                }
+        }
+
     let publish =
         input {
             let! apiKey = Baked.NuGet.apiKey.option
             let path = "bin/*.nupkg"
-            let key = defaultArg apiKey ""
 
             return
                 stage "publish" {
                     workingDir Repo.FileSystem.``.``
-                    when' apiKey.IsSome
-                    failIfIgnored
 
-                    runSensitive
-                        $"dotnet nuget push {path} -k {key} -s https://api.nuget.org/v3/index.json --skip-duplicate"
+                    whenSome apiKey (fun key ->
+                        stage "nuget push" {
+                            run (
+                                cmd $"dotnet nuget push {path} -s https://api.nuget.org/v3/index.json --skip-duplicate"
+                                |> Cmd.secretOption "-k" key
+                            )
+                        })
                 }
         }
 
@@ -762,6 +784,7 @@ exit (
         }
 
         command "publish" {
+            Stages.requireApiKey
             Stages.restore
             Stages.clean
             Stages.format
