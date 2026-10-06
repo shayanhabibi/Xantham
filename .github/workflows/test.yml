@@ -2,18 +2,15 @@ name: Test
 on:
   pull_request:
   push:
-    branches:
-      - develop
-      - master
+    branches: [develop, master]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 env:
+  DOTNET_NOLOGO: true
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
-  # The live tests skip themselves when no `tsc` is installed, which on a runner would be a green
-  # build that tested nothing. This turns that skip into a failure - see `Tsc.test.fs`.
   XANTHAM_REQUIRE_TSC: 1
 
 concurrency:
@@ -23,22 +20,26 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v7
-      - name: Setup Node
-        uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          node-version: 22
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v6
-        with:
-          global-json-file: global.json
-      - name: Restore tools
-        run: dotnet tool restore
+          persist-credentials: false
+      - uses: ./.github/actions/setup
       - name: Check build command behavior
         run: node tools/verify-build.mjs
-      # On CI the format stage runs `fantomas --check`, so an unformatted commit fails here rather
-      # than being rewritten. `--run-gate` adds the Fable run gate, which `dotnet fable` from the
-      # tool manifest drives.
+      - name: Check golden provenance and tagging
+        run: node --test tools/golden-provenance.test.mjs tools/golden-tag.test.mjs
       - name: Test
-        run: dotnet fsi build.fsx -- test --run-gate
+        run: dotnet fsi build.fsx -- test --ci --run-gate
+      - name: Record golden provenance
+        env:
+          SOURCE_COMMIT: ${{ github.sha }}
+        run: node tools/golden-provenance.mjs --commit "$SOURCE_COMMIT"
+      - name: Upload verified goldens
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: goldens-${{ github.sha }}
+          path: tests/.scratch/golden-artifact
+          if-no-files-found: error
+          retention-days: 90

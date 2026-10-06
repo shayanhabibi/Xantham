@@ -72,7 +72,7 @@ module Spec =
     let srcProjects = projects |> List.filter _.RelativePath.StartsWith("src")
     let testProjects = projects |> List.filter _.RelativePath.StartsWith("test")
 
-    /// The three projects `pack` emits and `publish` pushes. `Xantham.Cli` packs as a tool and
+    /// The projects `pack` emits and `publish` pushes. `Xantham.Cli` packs as a tool and
     /// carries `Xantham.Generator`'s assembly inside its own package.
     let publishable =
         let names =
@@ -268,7 +268,19 @@ module Stages =
                     when' (List.isEmpty projects |> not)
 
                     for project in projects do
-                        stage $"build-{project}" { run (cmd $"dotnet build {project} -c {config} -v q") }
+                        stage $"build-{project}" { run (cmd $"dotnet build {project} -c {config} --no-restore -v q") }
+                }
+        }
+
+    let buildWithoutTests =
+        input {
+            let! skipTests = Options.skipTests
+            and! buildStage = build (Options.projects |> InputSpec.map (List.map _.RelativePath))
+
+            return
+                stage "build without tests" {
+                    when' skipTests
+                    buildStage
                 }
         }
 
@@ -305,19 +317,19 @@ module Stages =
     /// same install also serves as the live `tsc --api` server for anything run under the repo.
     ///
     /// `Workspace.ensureTsc` exports the compiler as `XANTHAM_TSGO_EXE` for every later stage. A
-    /// checkout with its own install runs `npm install`, so a `package.json` pin bump reaches the
-    /// exported path; an agent worktree borrows the main checkout's install and installs nothing.
+    /// checkout with its own install runs `npm ci`, using the committed lockfile. An agent
+    /// worktree borrows the main checkout's install and installs nothing.
     let deps =
         input {
             let! quick = Options.quick
             let borrowed = Workspace.ensureTsc __SOURCE_DIRECTORY__
 
             return
-                stage "npm install" {
+                stage "npm ci" {
                     quiet
                     when' (not quick && borrowed.IsNone)
                     workingDir Repo.FileSystem.``.``
-                    run "npm install"
+                    run "npm ci --no-audit --no-fund"
                 }
         }
 
@@ -460,7 +472,7 @@ module Stages =
             return
                 stage "test" {
                     when' (not skipTests)
-                    run (cmd $"dotnet build {Repo.Project.SolutionFile} -c {config} -v q")
+                    run (cmd $"dotnet build {Repo.Project.SolutionFile} -c {config} --no-restore -v q")
 
                     // Regeneration is a *separate* run of the same suite, not a mode of the
                     // checking one: with `XANTHAM_UPDATE_GOLDEN` set the e2e tests write the
@@ -663,6 +675,59 @@ module Stages =
                 }
         }
 
+    /// Accepts the selected package set with filenames matching the checked-out project versions.
+    let validatePackages =
+        input {
+            let! projects = Options.projects
+
+            return
+                stage "validate packages" {
+                    run (fun _ ->
+                        let expected =
+                            projects
+                            |> List.map (fun project ->
+                                let document = System.Xml.Linq.XDocument.Load project.Path
+
+                                let value name =
+                                    document.Descendants(System.Xml.Linq.XName.Get name)
+                                    |> Seq.tryHead
+                                    |> Option.map _.Value
+
+                                let id = value "PackageId" |> Option.defaultValue project.Name
+
+                                let version =
+                                    value "Version"
+                                    |> Option.defaultWith (fun () -> failwith $"{project.Name}: missing Version")
+
+                                $"{id}.{version}.nupkg")
+                            |> set
+
+                        let directory = System.IO.Path.Combine(__SOURCE_DIRECTORY__, "bin")
+
+                        let actual =
+                            if System.IO.Directory.Exists directory then
+                                System.IO.Directory.GetFiles(directory, "*.nupkg")
+                                |> Array.map System.IO.Path.GetFileName
+                                |> set
+                            else
+                                Set.empty
+
+                        if actual <> expected then
+                            let missing = String.concat ", " (Set.difference expected actual)
+                            let unexpected = String.concat ", " (Set.difference actual expected)
+                            Error $"Package set differs. Missing: {missing}. Unexpected: {unexpected}."
+                        else
+                            for package in actual do
+                                use archive =
+                                    System.IO.Compression.ZipFile.OpenRead(System.IO.Path.Combine(directory, package))
+
+                                if archive.Entries |> Seq.exists (_.FullName.EndsWith(".nuspec")) |> not then
+                                    failwith $"{package}: missing package metadata"
+
+                            Ok())
+                }
+        }
+
     let publish =
         input {
             let! apiKey = Baked.NuGet.apiKey.option
@@ -784,15 +849,22 @@ exit (
         }
 
         command "publish" {
+            command "artifacts" {
+                Stages.requireApiKey
+                Stages.validatePackages
+                Stages.publish
+            }
+
             Stages.requireApiKey
             Stages.restore
             Stages.clean
             Stages.format
-            Stages.build (Options.projects |> InputSpec.map (List.map _.RelativePath))
+            Stages.buildWithoutTests
             Stages.deps
             Stages.fixtures
             Stages.test
             Stages.pack
+            Stages.validatePackages
             Stages.publish
         }
 
@@ -811,11 +883,12 @@ exit (
             Stages.restore
             Stages.clean
             Stages.format
-            Stages.build (Options.projects |> InputSpec.map (List.map _.RelativePath))
+            Stages.buildWithoutTests
             Stages.deps
             Stages.fixtures
             Stages.test
             Stages.pack
+            Stages.validatePackages
         }
     }
 )

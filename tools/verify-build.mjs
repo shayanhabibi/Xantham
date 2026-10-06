@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import fs from "node:fs";
+import path from "node:path";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const environment = { ...process.env };
@@ -49,4 +51,34 @@ assert.equal(singleProject.status, 0, singleProject.output);
 assert.match(singleProject.output, /build-src\/Xantham.Cli\/Xantham.Cli.fsproj/);
 assert.doesNotMatch(singleProject.output, /build-src\/Xantham.Fable.Core/);
 
-console.log("Build checks passed: early key rejection, masked explain, local formatting skip, CI formatting check, single-project build.");
+const artifacts = build("publish", "artifacts", "--nuget-key", sentinel, "--explain");
+assert.equal(artifacts.status, 0, artifacts.output);
+assert.match(artifacts.output, /validate packages/);
+assert.doesNotMatch(artifacts.output, /dotnet restore|dotnet build|dotnet pack|npm install|npm ci/);
+assert.doesNotMatch(artifacts.output, new RegExp(sentinel));
+assert.ok(artifacts.output.indexOf("validate packages") < artifacts.output.indexOf("dotnet nuget push"));
+
+const bin = path.join(root, "bin");
+fs.mkdirSync(bin, { recursive: true });
+const unexpected = path.join(bin, `build-check-${process.pid}.nupkg`);
+fs.writeFileSync(unexpected, "Unexpected package", { flag: "wx" });
+try {
+  const refused = build("publish", "artifacts", "--nuget-key", sentinel);
+  assert.notEqual(refused.status, 0, refused.output);
+  assert.match(refused.output, /Package set differs/);
+  assert.doesNotMatch(refused.output, /dotnet nuget push/);
+} finally {
+  fs.unlinkSync(unexpected);
+}
+
+const pack = build("pack", "--ci", "--explain");
+assert.equal(pack.status, 0, pack.output);
+assert.match(pack.output, /build without tests\s+\(skipped\)/);
+assert.equal((pack.output.match(/dotnet build .*Xantham\.slnx/g) ?? []).length, 1, "Pack builds the solution once before testing");
+
+const skipped = build("pack", "--skip-tests", "--explain");
+assert.equal(skipped.status, 0, skipped.output);
+assert.doesNotMatch(skipped.output, /build without tests\s+\(skipped\)/);
+assert.match(skipped.output, /test\s+\(skipped\)/);
+
+console.log("Build checks passed: early key rejection, masked explain, formatting, project selection, artifact publishing, single pack build.");

@@ -57,22 +57,22 @@ let build = input {
 
 `Workspace.ensureTsc` exports the nearest compiler as `XANTHAM_TSGO_EXE`, which `Tsc.locate`
 honours ahead of its parent-directory walk. It runs while the stages are built, before
-`npm install`, so a fresh checkout (the CI runner) exports nothing: there a package outside the
+`npm ci`, so a fresh checkout (the CI runner) exports nothing: there a package outside the
 repository resolves no compiler, which is why test scratch lives under `tests/.scratch/`
 (`.claude/rules/tests.md`). It returns the compiler only when it is *borrowed* — outside the
-checkout's own `node_modules`. The `npm install` stage in `build.fsx` runs exactly when nothing is
+checkout's own `node_modules`. The `npm ci` stage in `build.fsx` runs exactly when nothing is
 borrowed.
 
 An agent worktree under `.claude/worktrees/` carries tracked files only, so it has no
 `node_modules`. Rather than install the pin twice, it borrows the main checkout's compiler, skips
-`npm install`, and runs the live tests against the same binary the main checkout uses.
+`npm ci`, and runs the live tests against the same binary the main checkout uses.
 `typescriptPackage` and `nodeModulesRoot` resolve the generators' inputs the same way — worktree
 first, then the main checkout.
 
 - Detection is "`.git` is a file, not a directory", so it does not depend on where the worktree
   sits. The main checkout is found through the worktree's `commondir`.
-- The main checkout owns its install: `ensureTsc` returns `None`, `npm install` runs (a no-op when
-  `package-lock.json` is satisfied), and a `package.json` pin bump reaches the exported path. A
+- The main checkout owns its install: `ensureTsc` returns `None`, `npm ci` installs the committed
+  `package-lock.json`, and a pin bump reaches the exported path. Update both manifests together. A
   worktree picks up a pin bump only once the main checkout has installed it.
 - An `XANTHAM_TSGO_EXE` already in the environment always wins; it counts as borrowed unless it is
   the checkout's own compiler.

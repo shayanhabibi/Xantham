@@ -8,7 +8,7 @@ order: 1
 
 ## Prerequisites
 
-Install the .NET 10 SDK, Node.js, npm, and Git.
+Install the .NET SDK selected by `global.json`, Node.js 24 (see `.node-version`), npm, and Git.
 
 ```bash frame=terminal
 git clone https://github.com/shayanhabibi/Xantham.git
@@ -18,7 +18,7 @@ dotnet build Xantham.slnx
 ```
 
 The root `package.json` pins the TypeScript compiler used by the generator and
-live compiler tests.
+live compiler tests. The pipeline installs the committed npm lockfile with `npm ci`.
 
 ## Run the test pipeline
 
@@ -39,6 +39,31 @@ dotnet fsi build.fsx -- test --run-gate
 
 The compile-gate projects are ordinary projects: a solution build compiles their
 goldens. The run gate validates selected JavaScript behavior.
+
+`--quick` reuses existing dependencies and build setup. `--no-format` skips local
+formatting while retaining setup; CI checks formatting. Use `--explain` to inspect
+the resolved stages without running them.
+
+## CI, packages and golden provenance
+
+The Test workflow runs the complete suite and runtime gates. Each successful run
+uploads the committed corpus as `golden/<fixture>/...` in an artifact alongside
+`provenance.json`: the checked-out source commit and SHA-256 of every golden file.
+Golden contents retain their exact bytes. The artifact contains the checked,
+committed corpus; it does not regenerate or rewrite goldens. The known Linux
+Solid golden differences remain reported by the suite.
+
+After a successful master push, the Tag goldens workflow creates an annotated
+`goldens/<full-commit-hash>` Git tag pointing to the tested source commit. Its
+annotation records the run and artifact digest. Reruns preserve an existing tag.
+Artifacts are retained for 90 days; tags remain in Git. Pull-request runs upload
+provenance artifacts but do not create tags.
+
+The Publish workflow runs `pack --ci --run-gate`, transfers the verified packages
+to a separate job, then runs `publish artifacts --ci`. The NuGet key is exposed
+only to that final upload step. Local `publish` still runs the complete pipeline.
+The artifact command checks package filenames against selected project versions
+and rejects missing or unexpected packages before uploading.
 
 ## Run the local CLI
 
