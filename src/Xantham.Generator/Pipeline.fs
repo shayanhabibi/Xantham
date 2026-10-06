@@ -421,7 +421,7 @@ let toRender (ctx: Context) (shape: ShapeModel) (findings: Finding list) : Rende
 
 /// Runs the whole pipeline against a package directory and returns the rendered model without
 /// touching the output directory - what tests diff against goldens.
-let generate (config: GeneratorConfig) (packageDir: string) : Async<RenderModel> =
+let generateWith (extensions: Customization.GeneratorExtension list) (config: GeneratorConfig) (packageDir: string) : Async<RenderModel> =
     async {
         let! mailbox, ctx = Bootstrap.start config packageDir
         use _ = mailbox :> IDisposable
@@ -437,6 +437,15 @@ let generate (config: GeneratorConfig) (packageDir: string) : Async<RenderModel>
 
         let! compilerOnly = compilerOnlyScope ctx
 
+        let! annotations, companions =
+            if extensions.IsEmpty then async.Return (Map.empty, [])
+            else async {
+                let! snapshot = Customization.Semantics.project ctx shape (harvestFindings @ resolveFindings @ shapeFindings)
+                let annotations, companions = Customization.Apply.evaluate extensions snapshot
+                let foreign = groupModulesForScope compilerOnly ctx shape |> List.collect (fun group -> group.Decls |> List.map (fun decl -> let name = Render.declName decl in name, group.Module + "." + name)) |> Map.ofList
+                return annotations, Customization.Output.render foreign snapshot companions
+            }
+
         let! shape, catalog =
             DeclarationCatalog.apply ctx shape (groupModulesForScope compilerOnly ctx shape)
 
@@ -446,7 +455,7 @@ let generate (config: GeneratorConfig) (packageDir: string) : Async<RenderModel>
         // emission found: a pass reads the findings the model carries, not the ones the fold
         // is still accumulating.
         let! sourced, sourceFindings =
-            runTier ctx [ Render.renderSources (groupModulesForScope compilerOnly ctx shape) ] render
+            runTier ctx [ Render.renderSourcesWith annotations (groupModulesForScope compilerOnly ctx shape) ] render
 
         let! rendered, manifestFindings =
             runTier
@@ -460,18 +469,20 @@ let generate (config: GeneratorConfig) (packageDir: string) : Async<RenderModel>
             { rendered with
                 Findings = rendered.Findings @ manifestFindings
                 Files =
-                    rendered.Files
+                    rendered.Files @ companions
                     @ (catalog |> Option.map (fun text -> "declarations.json", text) |> Option.toList)
             }
     }
+
+let generate config packageDir = generateWith [] config packageDir
 
 let private utf8NoBom = Text.UTF8Encoding false
 
 /// Runs the pipeline and writes the rendered files into `outDir`, creating it and the `groups/`
 /// directory a shipped group is written under if needed.
-let run (config: GeneratorConfig) (packageDir: string) (outDir: string) : Async<RunReport> =
+let runWith extensions (config: GeneratorConfig) (packageDir: string) (outDir: string) : Async<RunReport> =
     async {
-        let! rendered = generate config packageDir
+        let! rendered = generateWith extensions config packageDir
         Directory.CreateDirectory outDir |> ignore
 
         for name, content in rendered.Files do
@@ -488,3 +499,5 @@ let run (config: GeneratorConfig) (packageDir: string) (outDir: string) : Async<
                 ShadowedByLib = rendered.ShadowedByLib
             }
     }
+
+let run config packageDir outDir = runWith [] config packageDir outDir

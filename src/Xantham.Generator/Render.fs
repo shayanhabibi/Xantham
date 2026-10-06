@@ -600,14 +600,24 @@ let private declRef (name: string) (typeParameters: FsTypeParam list) =
 
         $"{ident name}<{parameters}>"
 
-let private renderMember (m: FsMember) =
+let private renderMemberWith (attributes: Map<string, (string * string) list>) (m: FsMember) =
     match m with
     | FsProperty p ->
         [
             yield! docLines "    " p.Docs p.Tags
-            let mutability = if p.ReadOnly then "" else " with get, set"
+            let annotations = Map.tryFind p.Name attributes |> Option.defaultValue []
+            for site, text in annotations do
+                if site = "member" then yield $"    [<{text}>]"
+            let accessor site =
+                let texts = annotations |> List.choose (fun (target, text) -> if target = site then Some text else None)
+                if texts.IsEmpty then site else "[<" + String.concat "; " texts + ">] " + site
+            let mutability =
+                if annotations |> List.exists (fun (site, _) -> site <> "member") then
+                    " with " + accessor "get" + (if p.ReadOnly then "" else ", " + accessor "set")
+                elif p.ReadOnly then "" else " with get, set"
             yield $"    abstract {ident p.Name}: {printType p.Type}{mutability}"
         ]
+
     | FsMethod m ->
         [
             yield! docLines "    " m.Docs m.Tags
@@ -641,6 +651,8 @@ let private renderMember (m: FsMember) =
             let head = declHead "Invoke" c.TypeParameters
             yield $"    abstract {head}{memberColon head} {renderAbstractSignature c.Parameters c.Return}"
         ]
+
+let private renderMember m = renderMemberWith Map.empty m
 
 /// One binding attribute at `indent`, optionally carrying a second attribute inside the same
 /// brackets. A global names its own path off `globalThis`; an import names its specifier - the
@@ -757,7 +769,7 @@ let private renderEntrypointClass
                 yield! renderBound runtimePackage None m
     ]
 
-let private renderInterface (runtimePackage: string<importSpecifier>) (decl: FsInterfaceDecl) =
+let private renderInterface attributes (runtimePackage: string<importSpecifier>) (decl: FsInterfaceDecl) =
     [
         yield! docLines "" decl.Docs decl.Tags
 
@@ -781,7 +793,7 @@ let private renderInterface (runtimePackage: string<importSpecifier>) (decl: FsI
                 yield $"    inherit {printType baseRef}"
 
             for m in members do
-                yield! renderMember m
+                yield! renderMemberWith attributes m
 
             // D3/§4.4 construction ergonomics: the ParamObject Create compiles a call into the
             // object literal the TS API expects; `$0` emits the (erased) argument object itself.
@@ -1026,7 +1038,7 @@ let private indented (indent: string) (line: string) = if line = "" then "" else
 /// off the full path rather than its own last segment.
 let rec private nestedBlocks
     (specifiers: Map<string list, string<importSpecifier>>)
-    (render: FsDecl -> string list)
+    (render: string list -> FsDecl -> string list)
     (indent: string)
     (entered: string list)
     (entries: (string list * FsDecl) list)
@@ -1045,7 +1057,7 @@ let rec private nestedBlocks
     |> List.indexed
     |> List.collect (fun (i, (path, decl)) ->
         match path with
-        | [] -> [ render decl |> List.map (indented indent) ]
+        | [] -> [ render entered decl |> List.map (indented indent) ]
         | head :: _ when Map.find head opensAt = i ->
             let children =
                 entries
@@ -1090,6 +1102,8 @@ let rec private qualifyRef (foreign: Map<string, string>) =
     | FsBranded(primitive, measure) -> FsBranded(qualifyRef foreign primitive, qualifyName foreign measure)
     | FsNamed name -> FsNamed(qualifyName foreign name)
     | primitive -> primitive
+
+let internal qualifyType foreign reference = qualifyRef foreign reference
 
 let private qualifyParam foreign (parameter: FsParam) =
     { parameter with
@@ -1380,7 +1394,7 @@ let private relativeQualification (scope: string list) (target: string) =
 
 /// A group's declarations, each reference to another module's name qualified, rendered at
 /// `indent` in the order the shape tier fixed.
-let private renderBody (autoOpenExports: bool) (group: GroupModule) (foreign: Map<string, string>) (indent: string) =
+let private renderBody annotations (autoOpenExports: bool) (group: GroupModule) (foreign: Map<string, string>) (indent: string) =
     let decls =
         if Map.isEmpty foreign then
             group.Decls
@@ -1441,12 +1455,14 @@ let private renderBody (autoOpenExports: bool) (group: GroupModule) (foreign: Ma
             scope, references)
         |> Map.ofList
 
-    let render =
+    let render scope =
         function
         | FsInterface decl ->
+            let name = String.concat "." (scope @ [decl.Name])
+            let attributes = annotations |> Map.toList |> List.choose (fun ((target, memberName), values) -> if target = name then Some(memberName, values) else None) |> Map.ofList
             match decl.Entrypoint with
             | Some entrypoint -> renderEntrypointClass group.RuntimePackage decl entrypoint
-            | None -> renderInterface group.RuntimePackage decl
+            | None -> renderInterface attributes group.RuntimePackage decl
         | FsStringEnum decl -> renderStringEnum decl
         | FsTaggedUnion decl -> renderTaggedUnion decl
         | FsEnum decl -> renderEnum decl
@@ -1487,8 +1503,8 @@ let private renderFooter (decls: FsDecl list) =
 
 /// One `.fs` file: header, opens, declarations in the order the shape tier fixed. `module rec`
 /// so declaration order never fights reference order.
-let private renderModule (autoOpenExports: bool) (group: GroupModule) (foreign: Map<string, string>) =
-    let body, decls = renderBody autoOpenExports group foreign ""
+let private renderModule annotations (autoOpenExports: bool) (group: GroupModule) (foreign: Map<string, string>) =
+    let body, decls = renderBody annotations autoOpenExports group foreign ""
 
     String.concat
         "\n"
@@ -1508,6 +1524,7 @@ let private compilerLibChild (layout: CompilerLibLayout) =
 /// The compiler library's two families live under one recursive root module. References still
 /// use each child's canonical module name, regardless of whether that child is auto-opened.
 let private renderCompilerLib
+    annotations
     (autoOpenExports: bool)
     (layout: CompilerLibLayout)
     (groups: GroupModule list)
@@ -1521,7 +1538,7 @@ let private renderCompilerLib
                 let moduleName = compilerLibModule layout family
 
                 let body, decls =
-                    renderBody autoOpenExports { group with Module = moduleName } (foreignTo group) "    "
+                    renderBody annotations autoOpenExports { group with Module = moduleName } (foreignTo group) "    "
 
                 family, body, decls))
         |> List.sortBy (fun (family, _, _) -> family)
@@ -1553,6 +1570,7 @@ let private renderCompilerLib
 /// One `.fs` file holding every group of a namespace, each as a nested module under
 /// `namespace rec`, so the modules reference each other's types in both directions.
 let private renderNamespace
+    annotations
     (autoOpenExports: bool)
     (ns: string)
     (groups: GroupModule list)
@@ -1560,7 +1578,7 @@ let private renderNamespace
     =
     let rendered =
         groups
-        |> List.map (fun group -> group, renderBody autoOpenExports group (foreignTo group) "    ")
+        |> List.map (fun group -> group, renderBody annotations autoOpenExports group (foreignTo group) "    ")
 
     let modules =
         rendered
@@ -1586,7 +1604,7 @@ let private renderNamespace
 /// naming its types.
 ///
 /// An empty plan writes the entry package alone, from every declaration the model carries.
-let renderSources (modules: GroupModule list) : Pass<RenderModel> =
+let internal renderSourcesWith annotations (modules: GroupModule list) : Pass<RenderModel> =
     {
         Name = "render-source"
         Run =
@@ -1670,6 +1688,7 @@ let renderSources (modules: GroupModule list) : Pass<RenderModel> =
 
                             file,
                             renderModule
+                                annotations
                                 ctx.Config.AutoOpenExports
                                 { group with
                                     Module = effectiveModule group
@@ -1683,7 +1702,7 @@ let renderSources (modules: GroupModule list) : Pass<RenderModel> =
                         |> List.groupBy fst
                         |> List.map (fun (ns, groups) ->
                             $"groups/{ns}.fs",
-                            renderNamespace ctx.Config.AutoOpenExports ns (List.map snd groups) foreignTo)
+                            renderNamespace annotations ctx.Config.AutoOpenExports ns (List.map snd groups) foreignTo)
 
                     let compilerLib = ordered |> List.filter (fun group -> group.CompilerLib.IsSome)
 
@@ -1693,7 +1712,7 @@ let renderSources (modules: GroupModule list) : Pass<RenderModel> =
                         | groups ->
                             [
                                 $"groups/{compilerLibLayout.RootModule}.fs",
-                                renderCompilerLib ctx.Config.AutoOpenExports compilerLibLayout groups foreignTo
+                                renderCompilerLib annotations ctx.Config.AutoOpenExports compilerLibLayout groups foreignTo
                             ]
 
                     let files = files @ namespaced @ compilerLibFile
@@ -1768,6 +1787,8 @@ let renderSources (modules: GroupModule list) : Pass<RenderModel> =
                             Degraded(model, findings)
                 }
     }
+
+let renderSources modules = renderSourcesWith Map.empty modules
 
 /// The top-level symbol a finding belongs to: the qualified name cut at the first member or
 /// parameter qualifier.

@@ -49,6 +49,8 @@
         <Compile Include="Customization\Contract.fsi" />
         <Compile Include="Customization\Contract.fs" />
         <Compile Include="Customization\Semantics.fs" />
+        <Compile Include="Customization\Output.fs" />
+        <Compile Include="Customization\Apply.fs" />
         <Compile Include="Pipeline.fs" />
     </ItemGroup>
 

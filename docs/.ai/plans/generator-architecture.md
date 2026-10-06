@@ -1836,3 +1836,7 @@ To include in scope when a phases implementation/attempt ends up being small/qui
   - Tests should fail quickly if a pass name & prefix is not unique.
   - Add this as a prefix to the key of a finding as such: `XX:TY001`
   - This will allow grepping a stage by `XX:`and a finding by `:XX000`
+
+## Generator customization (2026-10-06)
+
+The supported extension seam projects immutable semantic facts after ordinary shaping. Ordered F# extensions return structured attribute edits and independent marker/property companions. Pipeline.generateWith and runWith preserve the ordinary entry points with empty registration. The renderer receives an explicit annotation plan; no callback runs inside printing. Companion properties reuse resolved F# type references and preserve readonly access. Referenced source declarations retain semantic selection even when ordinary output omits them.

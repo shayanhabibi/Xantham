@@ -8,6 +8,22 @@ type OutputTarget = private OutputTarget of string * string option * bool
 type BindingType = private BindingType of FsTypeRef
 type ExtensionDiagnostic = private ExtensionDiagnostic of string * string * string option
 
+type AttributeValue =
+    | String of string
+    | Boolean of bool
+    | Integer of int
+    | Type of BindingType
+    | Enum of typeName: string * caseName: string
+    | Array of AttributeValue list
+
+type AttributeSpec = private AttributeSpec of string * AttributeValue list * string
+type CompanionSpec = private CompanionSpec of string * string * SourceType * SourceMember list * BindingType list * string
+type internal Edit =
+    | AddAttribute of OutputTarget * AttributeSpec
+    | EmitCompanion of CompanionSpec
+type EditBatch = private EditBatch of Edit list
+type ExtensionIdentity = { Id: string; Version: string; Configuration: Map<string, string> }
+
 type internal SemanticTypeInfo =
     { Key: string
       Package: string
@@ -37,6 +53,20 @@ type SemanticSnapshot =
           Members: Map<string, SemanticMemberInfo>
           Diagnostics: ExtensionDiagnostic list }
 
+type GeneratorExtension =
+    { Identity: ExtensionIdentity
+      Transform: SemanticSnapshot -> Result<EditBatch, ExtensionDiagnostic list> }
+
+module Attribute =
+    let create name arguments = AttributeSpec(name, arguments, "member")
+    let onGetter (AttributeSpec(name, arguments, _)) = AttributeSpec(name, arguments, "get")
+    let onSetter (AttributeSpec(name, arguments, _)) = AttributeSpec(name, arguments, "set")
+
+module Edits =
+    let empty = EditBatch []
+    let addAttribute target attribute (EditBatch edits) = EditBatch(edits @ [AddAttribute(target, attribute)])
+    let emitCompanion companion (EditBatch edits) = EditBatch(edits @ [EmitCompanion companion])
+
 module Diagnostic =
     let code (ExtensionDiagnostic(code, _, _)) = code
     let message (ExtensionDiagnostic(_, message, _)) = message
@@ -47,6 +77,9 @@ module BindingType =
     let display (BindingType value) = Render.printType value
 
 module internal ContractData =
+    let edits (EditBatch edits) = edits
+    let attributeInfo (AttributeSpec(name, arguments, target)) = name, arguments, target
+    let companionInfo (CompanionSpec(ns, name, source, members, bases, mode)) = ns, name, source, members, bases, mode
     let snapshot (types: SemanticTypeInfo list) (members: SemanticMemberInfo list) diagnostics =
         { Types = types |> List.map (fun t -> t.Key, t) |> Map.ofList
           Members = members |> List.map (fun m -> m.Key, m) |> Map.ofList
@@ -101,3 +134,9 @@ module Semantic =
     let isSameDeclaration left right model = identity left model = identity right model
     let implementedTypes source model = (ContractData.typeInfo source model).Implemented |> List.map SourceType
     let diagnostics model = model.Diagnostics
+
+module Companion =
+    let create ns name source model = CompanionSpec(ns, name, source, Semantic.properties source model, [], "erase")
+    let directProperties (CompanionSpec(ns, name, source, members, bases, _)) = CompanionSpec(ns, name, source, members, bases, "direct")
+    let withProperties members (CompanionSpec(ns, name, source, _, bases, mode)) = CompanionSpec(ns, name, source, members, bases, mode)
+    let withBases bases (CompanionSpec(ns, name, source, members, _, mode)) = CompanionSpec(ns, name, source, members, bases, mode)

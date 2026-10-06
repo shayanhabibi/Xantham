@@ -8,6 +8,36 @@ type OutputTarget
 type BindingType
 type SemanticSnapshot
 type ExtensionDiagnostic
+type AttributeValue =
+    | String of string
+    | Boolean of bool
+    | Integer of int
+    | Type of BindingType
+    | Enum of typeName: string * caseName: string
+    | Array of AttributeValue list
+type AttributeSpec
+type CompanionSpec
+type EditBatch
+type ExtensionIdentity = { Id: string; Version: string; Configuration: Map<string, string> }
+type GeneratorExtension =
+    { Identity: ExtensionIdentity
+      Transform: SemanticSnapshot -> Result<EditBatch, ExtensionDiagnostic list> }
+
+module Attribute =
+    val create: string -> AttributeValue list -> AttributeSpec
+    val onGetter: AttributeSpec -> AttributeSpec
+    val onSetter: AttributeSpec -> AttributeSpec
+
+module Edits =
+    val empty: EditBatch
+    val addAttribute: OutputTarget -> AttributeSpec -> EditBatch -> EditBatch
+    val emitCompanion: CompanionSpec -> EditBatch -> EditBatch
+
+module Companion =
+    val create: string -> string -> SourceType -> SemanticSnapshot -> CompanionSpec
+    val directProperties: CompanionSpec -> CompanionSpec
+    val withProperties: SourceMember list -> CompanionSpec -> CompanionSpec
+    val withBases: BindingType list -> CompanionSpec -> CompanionSpec
 
 module Diagnostic =
     val code: ExtensionDiagnostic -> string
@@ -60,7 +90,13 @@ type internal SemanticMemberInfo =
       Type: FsTypeRef
       Targets: (string * string * bool) list }
 
+type internal Edit =
+    | AddAttribute of OutputTarget * AttributeSpec
+    | EmitCompanion of CompanionSpec
 module internal ContractData =
+    val edits: EditBatch -> Edit list
+    val attributeInfo: AttributeSpec -> string * AttributeValue list * string
+    val companionInfo: CompanionSpec -> string * string * SourceType * SourceMember list * BindingType list * string
     val snapshot: SemanticTypeInfo list -> SemanticMemberInfo list -> ExtensionDiagnostic list -> SemanticSnapshot
     val typeInfo: SourceType -> SemanticSnapshot -> SemanticTypeInfo
     val memberInfo: SourceMember -> SemanticSnapshot -> SemanticMemberInfo
