@@ -93,6 +93,26 @@ The tested Partas plugin recognizes extensions under `Partas.Solid`; this compon
 a checksummed Partas 3.0.0 source snapshot. Erased framework companions require the framework's
 plugin/source packaging. Direct Emit companions can be distributed as a binding DLL.
 
+## Verify a customization
+
+From a configured checkout, run the focused generator tests and the framework acceptance gate:
+
+```powershell
+rtk dotnet fsi build.fsx -- test --quick --filter customization --run-gate
+```
+
+The gate generates the HTMLElement companion through the public API, compiles a component with
+no abstract property implementations using the real Partas plugin, checks the emitted JSX,
+and renders it with Solid to verify the input's `value` and `title`. It also executes direct
+getters/setters against JavaScript objects from both generated source and a compiled binding DLL,
+including inherited properties and escaped JavaScript keys. The generator tests separately
+compile attributed interfaces, constructor-backed classes, exported functions/values, and
+referenced-producer consumers; assigning a readonly companion property must fail compilation.
+
+For the complete regression suite, use `rtk dotnet fsi build.fsx -- test --run-gate`.
+The Partas source snapshot and npm lockfile are checked in under
+`tests/Xantham.Generator.PartasGate`; the gate needs no sibling Partas checkout.
+
 ## Replace a declaration explicitly
 
 `Replacement.marker` replaces an owned interface with a marker, preserving its binding name.
