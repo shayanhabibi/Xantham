@@ -60,12 +60,96 @@ The default accessor mode uses erased stubs for a framework plugin.
 including keys requiring escaping. Those accessors work when the bindings are consumed as a DLL.
 Methods and indexers are excluded from this property adapter and recorded in findings.
 
-The executable example selects a real HTMLElement descendant and emits `value`, inherited
-`title`, and readonly `tagName`:
+For example, suppose the input package is named `customization-dom-lab` and exports:
+
+```typescript
+export interface Input extends HTMLInputElement {
+    custom?: string;
+}
+```
+
+This F# generator selects `Input` through the compiler's actual HTMLElement ancestry and emits
+only `value`, inherited `title`, and readonly `tagName`:
+
+```fsharp
+open Xantham.Generator
+open Xantham.Generator.Customization
+
+let domProperties : GeneratorExtension =
+    { Identity =
+        { Id = "example.dom-properties"
+          Version = "1"
+          Configuration = Map.ofList ["owner", "customization-dom-lab"] }
+      Transform = fun snapshot ->
+          let input =
+              Semantic.tryFind "typescript/lib" ["HTMLElement"] snapshot
+              |> Option.bind (fun root ->
+                  Semantic.descendants root snapshot
+                  |> List.tryFind (fun source ->
+                      Semantic.package source snapshot = "customization-dom-lab"
+                      && Semantic.path source snapshot = ["Input"]))
+
+          match input with
+          | None ->
+              Error [Diagnostic.create "example/missing-input"
+                         "Expected Input to inherit from HTMLElement." None]
+          | Some input ->
+              let properties =
+                  Semantic.properties input snapshot
+                  |> List.filter (fun property ->
+                      List.contains (Semantic.jsName property snapshot)
+                          ["value"; "title"; "tagName"])
+              let companion =
+                  Companion.create "Partas.Solid.CustomizationAcceptance"
+                      "InputProperties" input snapshot
+                  |> Companion.withProperties properties
+              Ok (Edits.empty |> Edits.emitCompanion companion) }
+
+[<EntryPoint>]
+let main arguments =
+    Pipeline.runWith [domProperties] GeneratorConfig.Default arguments[0] arguments[1]
+    |> Async.RunSynchronously
+    |> ignore
+    0
+```
+
+Put this in a console project referencing `Xantham.Generator` and pass the input and output
+directories. A runnable version is checked in under `tools/customization-example`:
 
 ```powershell
 rtk dotnet run --project tools/customization-example -- tests/fixtures/customization-dom-lab tests/.scratch/my-components
 ```
+
+The generated companion contains an empty marker and optional extension properties:
+
+```fsharp
+namespace Partas.Solid.CustomizationAcceptance
+open Fable.Core
+open Fable.Core.JsInterop
+
+[<Interface>]
+type InputProperties = interface end
+
+[<AutoOpen>]
+module InputPropertiesExtensions =
+    type InputProperties with
+        [<Erase>]
+        member _.tagName: string = jsNative
+
+        [<Erase>]
+        member _.title
+            with get (): string = jsNative
+            and set (value: string) = ()
+
+        [<Erase>]
+        member _.value
+            with get (): string = jsNative
+            and set (value: string) = ()
+```
+
+An implementing component supplies no bodies for those properties. For direct JavaScript
+access instead of Partas plugin stubs, pipe the companion through `Companion.directProperties`
+before `Edits.emitCompanion`; the runnable example exposes that mode with `--direct`.
 
 Its generated marker is `Partas.Solid.CustomizationAcceptance.InputProperties`. Compile the
 generated companion file before this consumer, alongside Partas.Solid and its actual Fable plugin:
