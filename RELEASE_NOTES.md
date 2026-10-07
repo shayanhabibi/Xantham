@@ -71,6 +71,9 @@
   `Xantham.Fable.Core`, `Xantham.Fable.Core.TS` and `Xantham.Fable.Node` 0.1.1.
 - The tool takes a minor version bump for the changed generated overload signatures, export
   collision names and refreshed bindings, alongside generator customisation support.
+- Library packages keep their `FSharp.Core` build references private so F# consumers supply
+  their own version. Tested build baselines are 4.7.2 for the Fable packages, 8.0.100 for Wire
+  and 9.0.100 for the generator; the generator requires FSharp.Core 9 or newer at runtime.
 - Build scripts use Partas.Build 0.7.0 and Partas.Build.Baked 0.1.2 from the temporary
   feed documented in the Partas.Build repository.
 

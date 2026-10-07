@@ -11,6 +11,7 @@
         <TargetFrameworks>netstandard2.1;net8.0</TargetFrameworks>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <Version>0.1.1</Version>
+        <FSharpCoreImplicitPackageVersion>4.7.2</FSharpCoreImplicitPackageVersion>
         <AssemblyVersion>0.0.0.0</AssemblyVersion>
     </PropertyGroup>
 

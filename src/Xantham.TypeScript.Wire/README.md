@@ -131,3 +131,7 @@ the types rather than in a comment.
 - [Protocol notes](https://github.com/shayanhabibi/Xantham/blob/master/docs/.ai/plans/tsgo-protocol.md) — the wire protocol itself, verified against live byte traces.
 
 Licensed under Apache-2.0.
+# FSharp.Core compatibility
+
+F# consumers supply `FSharp.Core` 8.0.100 or newer. The package's build reference is private,
+so its NuGet metadata does not impose the build SDK's FSharp.Core version.

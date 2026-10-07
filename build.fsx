@@ -727,8 +727,21 @@ module Stages =
                                 use archive =
                                     System.IO.Compression.ZipFile.OpenRead(System.IO.Path.Combine(directory, package))
 
-                                if archive.Entries |> Seq.exists (_.FullName.EndsWith(".nuspec")) |> not then
-                                    failwith $"{package}: missing package metadata"
+                                match archive.Entries |> Seq.tryFind (_.FullName.EndsWith(".nuspec")) with
+                                | None -> failwith $"{package}: missing package metadata"
+                                | Some metadata ->
+                                    use stream = metadata.Open()
+                                    let document = System.Xml.Linq.XDocument.Load stream
+
+                                    if
+                                        document.Descendants()
+                                        |> Seq.exists (fun element ->
+                                            element.Name.LocalName = "dependency"
+                                            && match element.Attribute(System.Xml.Linq.XName.Get "id") with
+                                               | null -> false
+                                               | id -> id.Value = "FSharp.Core")
+                                    then
+                                        failwith $"{package}: FSharp.Core must remain a private build dependency"
 
                             Ok())
                 }
