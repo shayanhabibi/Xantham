@@ -11,7 +11,9 @@ conversations. No additional approving reviewer is required. Auto-merge is avail
 pull-request and check requirements for direct pushes; push-triggered tests still run.
 Write-enabled repository deploy keys also bypass this develop rule so the release
 workflow can push version/changelog commits. There is one release deploy key;
-its private key is held in the `RELEASE_DEPLOY_KEY` repository secret.
+its private key is held in the `RELEASE_DEPLOY_KEY` secret in the
+`release-preparation` environment. Only master workflows can access that
+environment, without a manual approval step; feature workflows cannot read the key.
 The history protection and master rules have no bot exception. Other contributors
 use pull requests.
 

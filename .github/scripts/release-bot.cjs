@@ -13,6 +13,7 @@ function releaseRequest(context) {
     return { number: context.payload.issue.number, preview: !!command[1] };
   }
   if (context.eventName !== 'workflow_dispatch' || !maintainers.has(context.payload.sender?.id)) throw new Error('Only the release maintainers can request a release.');
+  if (context.ref !== 'refs/heads/master') throw new Error('Run release preparation from master.');
   const number = Number(context.payload.inputs?.pr);
   if (!Number.isSafeInteger(number) || number <= 0) throw new Error('A release PR number is required.');
   return { number, preview: context.payload.inputs?.preview !== 'false' };
@@ -71,6 +72,12 @@ async function finish({ github, context, core, root, request, sshKey, push = pus
   if (git('rev-parse', 'HEAD') !== request.head) throw new Error('Checkout does not match the authorized PR commit.');
   const paths = git('diff', '--name-only', 'HEAD').split('\n').filter(Boolean);
   verifyChangedPaths(paths);
+  for (const file of paths.filter(file => file.endsWith('.fsproj'))) {
+    const before = git('show', `HEAD:${file}`);
+    const after = fs.readFileSync(path.join(root, file), 'utf8').trim();
+    const stripVersion = xml => xml.replace(/<Version>[^<]+<\/Version>/, '<Version>RELEASE</Version>');
+    if (stripVersion(before) !== stripVersion(after)) throw new Error('Release preparation may only change Version inside project files.');
+  }
   if (git('ls-files', '--others', '--exclude-standard').trim()) throw new Error('Release preparation created unexpected untracked files.');
   validateVersions(request.base, root);
   const diff = git('diff', '--stat');
