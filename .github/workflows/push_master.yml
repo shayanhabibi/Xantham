@@ -1,5 +1,7 @@
 name: Publish
 on:
+  pull_request:
+    branches: [master]
   push:
     branches: [master]
     paths:
@@ -28,11 +30,11 @@ env:
 # Complete each package upload before starting another release.
 concurrency:
   group: publish-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   package:
-    if: github.ref == 'refs/heads/master'
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -53,6 +55,7 @@ jobs:
           retention-days: 14
 
   publish:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
     needs: package
     runs-on: ubuntu-latest
     timeout-minutes: 10
