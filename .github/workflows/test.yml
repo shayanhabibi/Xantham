@@ -1,12 +1,14 @@
 name: Test
 on:
   pull_request:
+    branches: [develop, master]
   push:
     branches: [develop, master]
   workflow_dispatch:
 
 permissions:
   contents: read
+  actions: read
 
 env:
   DOTNET_NOLOGO: true
@@ -20,23 +22,36 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
+      - name: Reuse exact-commit develop tests for release PRs
+        id: develop-tests
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            const reuseDevelopTests = require('./.github/scripts/reuse-develop-tests.cjs');
+            await reuseDevelopTests({ github, context, core });
       - uses: ./.github/actions/setup
+        if: steps.develop-tests.outputs.reused != 'true'
       - name: Check build command behavior
+        if: steps.develop-tests.outputs.reused != 'true'
         run: node tools/verify-build.mjs
       - name: Check golden provenance and tagging
-        run: node --test tools/golden-provenance.test.mjs tools/golden-tag.test.mjs
+        if: steps.develop-tests.outputs.reused != 'true'
+        run: node --test tools/golden-provenance.test.mjs tools/golden-tag.test.mjs .github/scripts/reuse-develop-tests.test.cjs
       - name: Test
+        if: steps.develop-tests.outputs.reused != 'true'
         run: dotnet fsi build.fsx -- test --ci --run-gate
       - name: Record golden provenance
+        if: steps.develop-tests.outputs.reused != 'true'
         env:
           SOURCE_COMMIT: ${{ github.sha }}
         run: node tools/golden-provenance.mjs --commit "$SOURCE_COMMIT"
       - name: Upload verified goldens
+        if: steps.develop-tests.outputs.reused != 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: goldens-${{ github.sha }}

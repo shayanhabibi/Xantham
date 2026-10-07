@@ -161,9 +161,14 @@ let mailboxTests =
             mailbox.Dispose()
 
             // Timed rather than open-ended: a mailbox that failed to shut down would otherwise
-            // hang the suite instead of failing it.
+            // hang the suite instead of failing it. Start on this thread so a busy thread pool
+            // cannot consume the timeout before the disposed-state guard executes.
+            let response = Async.StartImmediateAsTask(mailbox.parseCommandLine commandLine)
+            use completion = (response :> IAsyncResult).AsyncWaitHandle
+            completion.WaitOne 2000 |> Flip.Expect.isTrue "the disposed request completes promptly"
+
             Expect.throwsT<ObjectDisposedException>
-                (fun () -> Async.RunSynchronously(mailbox.parseCommandLine commandLine, timeout = 2000) |> ignore)
+                (fun () -> response.GetAwaiter().GetResult() |> ignore)
                 "nothing is served once the mailbox and its channel are closed")
 
         // The agent is held inside a callback while 50 requests queue behind it. The disposal
