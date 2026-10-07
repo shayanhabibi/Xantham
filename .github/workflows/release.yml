@@ -22,14 +22,14 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  release:
+  generate:
     if: github.event_name == 'workflow_dispatch' || (github.event.issue.pull_request && startsWith(github.event.comment.body, '/release'))
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    permissions:
-      contents: write
-      pull-requests: read
-      actions: write
+    outputs:
+      requested: ${{ steps.request.outputs.requested }}
+      head: ${{ steps.request.outputs.head }}
+      base: ${{ steps.request.outputs.base }}
     steps:
       # Execute the wrapper from protected master, not from a PR's code.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -59,28 +59,57 @@ jobs:
         working-directory: release
         run: |
           git switch -C develop
-          dotnet tool restore
-          dotnet shipit --mode local --allow-branch develop --skip-merge-commit
+          SHIPIT_VERSION=$(node -p "require('../trusted/.config/dotnet-tools.json').tools['easybuild.shipit'].version")
+          dotnet tool install EasyBuild.ShipIt --version "$SHIPIT_VERSION" --tool-path "$RUNNER_TEMP/shipit"
+          "$RUNNER_TEMP/shipit/shipit" --mode local --allow-branch develop --skip-merge-commit
           git diff > ../release.patch
-      - name: Validate, push and start required checks
-        if: steps.request.outputs.requested == 'true'
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
-        env:
-          RELEASE_PR: ${{ steps.request.outputs.pr }}
-          RELEASE_PREVIEW: ${{ steps.request.outputs.preview }}
-          RELEASE_HEAD: ${{ steps.request.outputs.head }}
-          RELEASE_BASE: ${{ steps.request.outputs.base }}
-          RELEASE_TOKEN: ${{ github.token }}
-        with:
-          script: |
-            await require('./trusted/.github/scripts/release-bot.cjs').finish({ github, context, core,
-              root: require('node:path').resolve('release'), token: process.env.RELEASE_TOKEN,
-              request: { number: Number(process.env.RELEASE_PR), preview: process.env.RELEASE_PREVIEW === 'true',
-                head: process.env.RELEASE_HEAD, base: process.env.RELEASE_BASE } });
       - name: Upload release diff
-        if: always() && steps.request.outputs.requested == 'true'
+        if: steps.request.outputs.requested == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: release-diff-${{ github.run_id }}
           path: release.patch
-          if-no-files-found: ignore
+          if-no-files-found: error
+
+  finalize:
+    needs: generate
+    if: needs.generate.outputs.requested == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      pull-requests: read
+      actions: write
+    steps:
+      # A fresh runner: no tools, hooks or scripts from develop execute here.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: master
+          path: trusted
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ needs.generate.outputs.head }}
+          path: release
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: release-diff-${{ github.run_id }}
+          path: patch
+      - name: Validate, push and start required checks
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        env:
+          RELEASE_HEAD: ${{ needs.generate.outputs.head }}
+          RELEASE_BASE: ${{ needs.generate.outputs.base }}
+          RELEASE_TOKEN: ${{ github.token }}
+        with:
+          script: |
+            const bot = require('./trusted/.github/scripts/release-bot.cjs');
+            const request = bot.releaseRequest(context);
+            if (!request) throw new Error('Missing authorized release request.');
+            const root = require('node:path').resolve('release');
+            const patch = require('node:fs').readFileSync('patch/release.patch');
+            if (patch.length) require('node:child_process').execFileSync('git', ['apply', '--whitespace=error', '-'], { cwd: root, input: patch });
+            await bot.finish({ github, context, core, root, token: process.env.RELEASE_TOKEN,
+              request: { ...request, head: process.env.RELEASE_HEAD, base: process.env.RELEASE_BASE } });

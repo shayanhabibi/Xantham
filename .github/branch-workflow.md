@@ -54,6 +54,8 @@ The comment workflow uses `github-actions[bot]` and the built-in token, with no
 additional secrets. Token pushes do not trigger normal push CI, so it explicitly
 dispatches Test, package verification, and PR title verification on develop.
 Manual package verification on develop cannot publish. The wrapper runs from
-protected master, checks the maintainer identity and current PR commits, and
+protected master. ShipIt runs in a separate read-only job; finalization applies
+its patch on a fresh runner without executing tools or hooks from develop.
+It checks the maintainer identity and current PR commits, and
 only commits the six package project files and changelogs. It rejects stale
 versions, unexpected file changes, and branches that moved during preparation.
