@@ -610,8 +610,9 @@ module Stages =
                         $"%s{System.IO.Path.GetFileNameWithoutExtension projectPath}.%s{version.Value}.nupkg"
 
                     let package = System.IO.Path.Combine(__SOURCE_DIRECTORY__, "bin", packageName)
-                    
-                    let inline (</>) a b = System.IO.Path.Combine((a : string), (b: string))
+
+                    let inline (</>) a b =
+                        System.IO.Path.Combine((a: string), (b: string))
 
                     let expected =
                         System.IO.Path.GetFileName projectPath
