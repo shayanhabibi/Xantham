@@ -6,6 +6,7 @@ open System.IO
 open System.Security.Cryptography
 open System.Text
 open System.Text.Json
+open System.Text.Json.Nodes
 open Xantham.TypeScript.Wire
 open Xantham.Generator.Measure
 
@@ -38,6 +39,16 @@ type Owner =
     {
         Name: string
         Dependencies: string array
+    }
+
+[<CLIMutable>]
+type private Variant =
+    {
+        Identity: string
+        BaseApi: string
+        Api: string
+        ContractChanged: bool
+        Profile: string
     }
 
 [<CLIMutable>]
@@ -1062,14 +1073,22 @@ module Canonical =
         | FsNamed name -> node "named" [ text name ]
 
 /// Redirects matching F# references, retains public aliases and value imports, and emits a catalog.
-let apply (ctx: Context) (shape: ShapeModel) (groups: Render.GroupModule list) =
+let internal applyWith
+    customizationProfile
+    annotations
+    (originalShape: ShapeModel)
+    (ctx: Context)
+    (shape: ShapeModel)
+    (groups: Render.GroupModule list)
+    =
     async {
         if
             not ctx.Config.DeclarationCatalog
             && List.isEmpty ctx.Config.DeclarationReferences
         then
-            return shape, None
+            return shape, None, Map.empty
         else
+            let originalShape, _, _ = classValues ctx originalShape groups
             let shape, groups, classValues = classValues ctx shape groups
             let inferenceProfile = profile ctx.Config
             let compiler = compiler ctx
@@ -1079,14 +1098,13 @@ let apply (ctx: Context) (shape: ShapeModel) (groups: Render.GroupModule list) =
 
             let owner = Naming.groupModule ctx.Config ctx.PackageName EntryPackage
 
-            let catalogs =
+            let catalogPaths =
                 ctx.Config.DeclarationReferences
-                |> List.map (fun path ->
-                    load
-                        inferenceProfile
-                        compiler
-                        generator
-                        (Path.GetFullPath(Path.Combine(ctx.PackageDir / uom<dirPath>, path))))
+                |> List.map (fun path -> Path.GetFullPath(Path.Combine(ctx.PackageDir / uom<dirPath>, path)))
+
+            let catalogs =
+                catalogPaths
+                |> List.map (fun path -> load inferenceProfile compiler generator path)
 
             let inherited =
                 catalogs
@@ -1097,6 +1115,44 @@ let apply (ctx: Context) (shape: ShapeModel) (groups: Render.GroupModule list) =
                     | [ entry ] -> key, entry
                     | _ -> fail $"references disagree on declaration {key}")
                 |> Map.ofList
+
+            let inheritedVariants =
+                catalogPaths
+                |> List.collect (fun path ->
+                    use document = JsonDocument.Parse(File.ReadAllText path)
+
+                    match document.RootElement.TryGetProperty "variants" with
+                    | true, variants ->
+                        variants.EnumerateArray()
+                        |> Seq.map (fun variant ->
+                            {
+                                Identity = variant.GetProperty("identity").GetString()
+                                BaseApi = variant.GetProperty("baseApi").GetString()
+                                Api = variant.GetProperty("api").GetString()
+                                ContractChanged = variant.GetProperty("contractChanged").GetBoolean()
+                                Profile = variant.GetProperty("profile").GetString()
+                            })
+                        |> Seq.toList
+                    | _ -> [])
+                |> List.groupBy _.Identity
+                |> List.map (fun (identity, variants) ->
+                    match List.distinct variants with
+                    | [ variant ] -> identity, variant
+                    | _ -> fail $"customization variants disagree on declaration {identity}")
+                |> Map.ofList
+
+            let profilesConflict expected actual =
+                let entries text =
+                    use document = JsonDocument.Parse(text: string)
+
+                    document.RootElement.GetProperty("extensions").EnumerateArray()
+                    |> Seq.map (fun entry -> entry.GetProperty("id").GetString(), entry.GetRawText())
+                    |> Map.ofSeq
+
+                let left, right = entries expected, entries actual
+
+                left
+                |> Map.exists (fun id value -> Map.tryFind id right |> Option.exists ((<>) value))
 
             let rawHandles =
                 [
@@ -1369,6 +1425,8 @@ let apply (ctx: Context) (shape: ShapeModel) (groups: Render.GroupModule list) =
 
                 hashText api
 
+            let mutable ownedVariants = []
+
             let owned =
                 reusableDeclarations shape.Decls
                 |> List.choose (fun decl ->
@@ -1384,12 +1442,63 @@ let apply (ctx: Context) (shape: ShapeModel) (groups: Render.GroupModule list) =
                             if producer.Constraints <> constraints then
                                 fail $"constraint mismatch for {name} ({producer.FSharpName})"
 
-                            if producer.Api <> surface decl then
+                            let expectedApi =
+                                match Map.tryFind producer.Identity inheritedVariants with
+                                | None -> producer.Api
+                                | Some variant ->
+                                    if variant.Api <> producer.Api then
+                                        fail $"customization variant API mismatch for {name}"
+
+                                    if variant.ContractChanged then
+                                        fail $"customization replacement changed the TypeScript contract for {name}"
+
+                                    if
+                                        customizationProfile
+                                        |> Option.exists (fun expected -> profilesConflict expected variant.Profile)
+                                    then
+                                        fail $"customization profile mismatch for {name}"
+
+                                    variant.BaseApi
+
+                            if expectedApi <> surface decl then
                                 fail $"F# API mismatch for {name} ({producer.FSharpName})"
 
                             None
                         | None ->
                             let identity = identities[name]
+
+                            let attributeEdits =
+                                annotations |> Map.toList |> List.filter (fun ((target, _), _) -> target = name)
+
+                            let originalApi =
+                                originalShape.Decls
+                                |> List.tryFind (fun d -> Render.declName d = name)
+                                |> Option.map surface
+                                |> Option.defaultValue (surface decl)
+
+                            let api =
+                                if
+                                    customizationProfile.IsNone
+                                    || (attributeEdits.IsEmpty && originalApi = surface decl)
+                                then
+                                    surface decl
+                                else
+                                    let descriptor = customizationProfile |> Option.defaultValue ""
+                                    let api = hashText (surface decl + json attributeEdits + descriptor)
+
+                                    ownedVariants <-
+                                        ownedVariants
+                                        @ [
+                                            {
+                                                Identity = identity.Key
+                                                BaseApi = originalApi
+                                                Api = api
+                                                ContractChanged = originalApi <> surface decl
+                                                Profile = descriptor
+                                            }
+                                        ]
+
+                                    api
 
                             Some
                                 {
@@ -1400,7 +1509,7 @@ let apply (ctx: Context) (shape: ShapeModel) (groups: Render.GroupModule list) =
                                     FSharpName = modules[name] + "." + name
                                     Arity = List.length (parameters decl)
                                     Constraints = constraints
-                                    Api = surface decl
+                                    Api = api
                                     Owner = owner
                                 }))
 
@@ -1535,10 +1644,45 @@ let apply (ctx: Context) (shape: ShapeModel) (groups: Render.GroupModule list) =
                     Declarations = List.toArray allDeclarations
                 }
 
-            return
-                { shape with Decls = declarations },
+            let variants =
+                (inheritedVariants |> Map.toList |> List.map snd) @ ownedVariants
+                |> List.distinct
+                |> List.sortBy _.Identity
+
+            let serialized =
+                let text = JsonSerializer.Serialize(catalog, options)
+
+                if variants.IsEmpty then
+                    text
+                else
+                    let document = JsonNode.Parse text
+
+                    let values =
+                        variants
+                        |> List.map (fun variant ->
+                            {|
+                                identity = variant.Identity
+                                baseApi = variant.BaseApi
+                                api = variant.Api
+                                contractChanged = variant.ContractChanged
+                                profile = variant.Profile
+                            |})
+                        |> List.toArray
+
+                    document["variants"] <- JsonSerializer.SerializeToNode(values, options)
+                    document.ToJsonString options
+
+            let outputCatalog =
                 if ctx.Config.DeclarationCatalog then
-                    Some(JsonSerializer.Serialize(catalog, options) + "\n")
+                    Some(serialized + "\n")
                 else
                     None
+
+            return { shape with Decls = declarations }, outputCatalog, redirects
+    }
+
+let apply ctx shape groups =
+    async {
+        let! shape, catalog, _ = applyWith None Map.empty shape ctx shape groups
+        return shape, catalog
     }

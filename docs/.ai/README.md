@@ -11,6 +11,11 @@ notes for the agents and people who come after them. It is not rendered to the s
   living documents and are updated in the same commit as a behaviour change.
 - `footguns.md` — facts that constrain future changes: compiler-API traps, declaration-catalog
   identity rules, pass invariants, and the threads left open when a lane closed.
+- `plans/2026-10-06-generator-customization-design.md`,
+  `plans/2026-10-06-generator-customization.md`, and
+  `plans/2026-10-06-generator-customization-execution.md` — customization design, implementation
+  plan, and verified results/rulings for `agent/generator-customization`. Consumer instructions
+  live in `site/content/xantham-cli/guide/customization.md`.
 - `fable5-workarounds.md`, `fable-binding-gaps.md`, `fable-utility-types.md` — what Fable 5 and
   `Fable.Core` cost a generated binding. `fable5-workarounds-user-response.md` holds the user's
   answers to `fable5-workarounds.md`, section by section.

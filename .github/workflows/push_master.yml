@@ -1,48 +1,74 @@
-﻿name: CI
+name: Publish
 on:
   push:
-    branches:
-      - master
+    branches: [master]
     paths:
-      - '**.fs'
-      - 'src/**/**.fsproj'
-      - 'package.json'
-      - '!site/Site.fs'
-      - '!**/*.fsx'
-      - '!build.fsx'
-  workflow_dispatch: 
+      - 'src/**'
+      - 'tests/**'
+      - 'tools/**'
+      - 'build.fsx'
+      - 'Xantham.slnx'
+      - 'Directory.Build.*'
+      - 'global.json'
+      - 'dotnet-tools.json'
+      - 'package*.json'
+      - '.node-version'
+      - '.github/actions/**'
+      - '.github/workflows/push_master.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 env:
+  DOTNET_NOLOGO: true
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
-  # The live tests skip themselves when no `tsc` is installed, which on a runner would be a green
-  # build that tested nothing. This turns that skip into a failure - see `Tsc.test.fs`.
   XANTHAM_REQUIRE_TSC: 1
 
-# Queue rather than cancel: a cancelled run can stop between two `dotnet nuget push` calls and
-# leave a release half-published.
+# Complete each package upload before starting another release.
 concurrency:
   group: publish-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  tests:
+  package:
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
-      # Checkout source code
-      - uses: actions/checkout@v7
-      - name: Setup Node
-        uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          node-version: 22
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v6
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Check build command behavior
+        run: node tools/verify-build.mjs
+      - name: Verify and pack
+        run: dotnet fsi build.fsx -- pack --ci --run-gate
+      - name: Upload packages
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
-          global-json-file: global.json
-      - name: Restore tools
-        run: dotnet tool restore
-      - name: Run CI
-        # `Baked.NuGet.apiKey` reads NUGET_API_KEY when no `--nuget-key` is given. `--run-gate`
-        # adds the Fable run gate ahead of packing, as the test workflow runs it.
+          name: packages-${{ github.sha }}
+          path: bin/*.nupkg
+          if-no-files-found: error
+          retention-days: 14
+
+  publish:
+    needs: package
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          npm-cache: 'false'
+      - name: Download verified packages
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: packages-${{ github.sha }}
+          path: bin
+      - name: Publish verified packages
         env:
           NUGET_API_KEY: ${{ secrets.NUGET_KEY }}
-        run: dotnet fsi build.fsx -- publish --run-gate
+        run: dotnet fsi build.fsx -- publish artifacts --ci

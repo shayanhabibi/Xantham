@@ -1,4 +1,4 @@
-﻿#r "nuget: Partas.Build, 0.6.5"
+#r "nuget: Partas.Build, 0.6.5"
 #r "nuget: Partas.Build.Baked, 0.1.1"
 #r "nuget: Partas.TypeProvider.BuildHelper, 0.2.5"
 #r "nuget: Str, 0.24.1"
@@ -72,7 +72,7 @@ module Spec =
     let srcProjects = projects |> List.filter _.RelativePath.StartsWith("src")
     let testProjects = projects |> List.filter _.RelativePath.StartsWith("test")
 
-    /// The three projects `pack` emits and `publish` pushes. `Xantham.Cli` packs as a tool and
+    /// The projects `pack` emits and `publish` pushes. `Xantham.Cli` packs as a tool and
     /// carries `Xantham.Generator`'s assembly inside its own package.
     let publishable =
         let names =
@@ -92,6 +92,11 @@ module Options =
         Input.option<bool> "--quick"
         |> Input.alias "-q"
         |> Input.description "Skip setup steps, such as installing dependencies"
+
+    let noFormat =
+        Input.option<bool> "--no-format"
+        |> Input.description "Skip source formatting locally; CI still checks formatting"
+        |> Input.def false
 
     let config =
         Baked.Dotnet.config.option
@@ -217,11 +222,12 @@ module Stages =
         input {
             let! quick = Options.quick
             and! ci = Baked.Common.isCI
+            and! noFormat = Options.noFormat
 
             return
                 stage "format" {
                     workingDir Repo.FileSystem.``.``
-                    when' (not quick)
+                    when' (not quick && (ci || not noFormat))
 
                     run (
                         if ci then
@@ -261,11 +267,20 @@ module Stages =
                     quiet
                     when' (List.isEmpty projects |> not)
 
-                    if projects.Length > 1 then
-                        for project in projects do
-                            stage $"build-{project}" { run (cmd $"dotnet build {project} -c {config} -v q") }
-                    else
-                        stage $"build-{projects[0]}" { run (cmd $"dotnet build {projects[0]} -c {config} -v q") }
+                    for project in projects do
+                        stage $"build-{project}" { run (cmd $"dotnet build {project} -c {config} --no-restore -v q") }
+                }
+        }
+
+    let buildWithoutTests =
+        input {
+            let! skipTests = Options.skipTests
+            and! buildStage = build (Options.projects |> InputSpec.map (List.map _.RelativePath))
+
+            return
+                stage "build without tests" {
+                    when' skipTests
+                    buildStage
                 }
         }
 
@@ -302,19 +317,19 @@ module Stages =
     /// same install also serves as the live `tsc --api` server for anything run under the repo.
     ///
     /// `Workspace.ensureTsc` exports the compiler as `XANTHAM_TSGO_EXE` for every later stage. A
-    /// checkout with its own install runs `npm install`, so a `package.json` pin bump reaches the
-    /// exported path; an agent worktree borrows the main checkout's install and installs nothing.
+    /// checkout with its own install runs `npm ci`, using the committed lockfile. An agent
+    /// worktree borrows the main checkout's install and installs nothing.
     let deps =
         input {
             let! quick = Options.quick
             let borrowed = Workspace.ensureTsc __SOURCE_DIRECTORY__
 
             return
-                stage "npm install" {
+                stage "npm ci" {
                     quiet
                     when' (not quick && borrowed.IsNone)
                     workingDir Repo.FileSystem.``.``
-                    run "npm install"
+                    run "npm ci --no-audit --no-fund"
                 }
         }
 
@@ -382,14 +397,18 @@ module Stages =
                         run
                             "dotnet run --project src/Xantham.Cli -- generate tools/fable-core-ts-input -o src/Xantham.Fable.Core.TS"
 
-                        run
-                            "powershell -NoProfile -Command \"Move-Item -Force src/Xantham.Fable.Core.TS/groups/Fable.Core.TS.fs src/Xantham.Fable.Core.TS/Fable.Core.TS.fs\""
+                        run (fun _ ->
+                            let output =
+                                System.IO.Path.Combine(__SOURCE_DIRECTORY__, "src", "Xantham.Fable.Core.TS")
 
-                        run
-                            "powershell -NoProfile -Command \"Remove-Item -Force src/Xantham.Fable.Core.TS/FableCoreTsInput.fs\""
+                            System.IO.File.Move(
+                                System.IO.Path.Combine(output, "groups", "Fable.Core.TS.fs"),
+                                System.IO.Path.Combine(output, "Fable.Core.TS.fs"),
+                                true
+                            )
 
-                        run
-                            "powershell -NoProfile -Command \"Remove-Item -Force src/Xantham.Fable.Core.TS/symbols.jsonl\""
+                            System.IO.File.Delete(System.IO.Path.Combine(output, "FableCoreTsInput.fs"))
+                            System.IO.File.Delete(System.IO.Path.Combine(output, "symbols.jsonl")))
                     }
                     // The node library is a shipped artifact, not a normal generator input:
                     // opt in explicitly so ordinary generated-layer runs do not rewrite it.
@@ -453,7 +472,7 @@ module Stages =
             return
                 stage "test" {
                     when' (not skipTests)
-                    run (cmd $"dotnet build {Repo.Project.SolutionFile} -c {config} -v q")
+                    run (cmd $"dotnet build {Repo.Project.SolutionFile} -c {config} --no-restore -v q")
 
                     // Regeneration is a *separate* run of the same suite, not a mode of the
                     // checking one: with `XANTHAM_UPDATE_GOLDEN` set the e2e tests write the
@@ -478,6 +497,11 @@ module Stages =
 
                         run
                             "dotnet fable . -o fable-out --noCache --exclude Xantham.Fable.Core.TS --run node --import ./register.mjs fable-out/Program.js"
+                    }
+
+                    stage "customization Partas gate" {
+                        when' runGate
+                        run "node tests/Xantham.Generator.PartasGate/verify.mjs"
                     }
                 }
         }
@@ -638,20 +662,88 @@ module Stages =
                 }
         }
 
+    /// Requires a NuGet key before the publish pipeline runs setup or builds packages.
+    let requireApiKey =
+        input {
+            let! apiKey = Baked.NuGet.apiKey.option
+
+            return
+                stage "require nuget key" {
+                    when' apiKey.IsSome
+                    failIfIgnored
+                    echo "NuGet key supplied"
+                }
+        }
+
+    /// Accepts the selected package set with filenames matching the checked-out project versions.
+    let validatePackages =
+        input {
+            let! projects = Options.projects
+
+            return
+                stage "validate packages" {
+                    run (fun _ ->
+                        let expected =
+                            projects
+                            |> List.map (fun project ->
+                                let document = System.Xml.Linq.XDocument.Load project.Path
+
+                                let value name =
+                                    document.Descendants(System.Xml.Linq.XName.Get name)
+                                    |> Seq.tryHead
+                                    |> Option.map _.Value
+
+                                let id = value "PackageId" |> Option.defaultValue project.Name
+
+                                let version =
+                                    value "Version"
+                                    |> Option.defaultWith (fun () -> failwith $"{project.Name}: missing Version")
+
+                                $"{id}.{version}.nupkg")
+                            |> set
+
+                        let directory = System.IO.Path.Combine(__SOURCE_DIRECTORY__, "bin")
+
+                        let actual =
+                            if System.IO.Directory.Exists directory then
+                                System.IO.Directory.GetFiles(directory, "*.nupkg")
+                                |> Array.map System.IO.Path.GetFileName
+                                |> set
+                            else
+                                Set.empty
+
+                        if actual <> expected then
+                            let missing = String.concat ", " (Set.difference expected actual)
+                            let unexpected = String.concat ", " (Set.difference actual expected)
+                            Error $"Package set differs. Missing: {missing}. Unexpected: {unexpected}."
+                        else
+                            for package in actual do
+                                use archive =
+                                    System.IO.Compression.ZipFile.OpenRead(System.IO.Path.Combine(directory, package))
+
+                                if archive.Entries |> Seq.exists (_.FullName.EndsWith(".nuspec")) |> not then
+                                    failwith $"{package}: missing package metadata"
+
+                            Ok())
+                }
+        }
+
     let publish =
         input {
             let! apiKey = Baked.NuGet.apiKey.option
             let path = "bin/*.nupkg"
-            let key = defaultArg apiKey ""
 
             return
                 stage "publish" {
                     workingDir Repo.FileSystem.``.``
-                    when' apiKey.IsSome
-                    failIfIgnored
 
-                    runSensitive
-                        $"dotnet nuget push {path} -k {key} -s https://api.nuget.org/v3/index.json --skip-duplicate"
+                    whenSome apiKey (fun key ->
+                        stage "nuget push" {
+                            run (
+                                cmd $"dotnet nuget push {path} -s https://api.nuget.org/v3/index.json --skip-duplicate"
+                                |> Cmd.secretOption "-k" key
+                            )
+                        })
                 }
         }
 
@@ -757,14 +849,22 @@ exit (
         }
 
         command "publish" {
+            command "artifacts" {
+                Stages.requireApiKey
+                Stages.validatePackages
+                Stages.publish
+            }
+
+            Stages.requireApiKey
             Stages.restore
             Stages.clean
             Stages.format
-            Stages.build (Options.projects |> InputSpec.map (List.map _.RelativePath))
+            Stages.buildWithoutTests
             Stages.deps
             Stages.fixtures
             Stages.test
             Stages.pack
+            Stages.validatePackages
             Stages.publish
         }
 
@@ -783,11 +883,12 @@ exit (
             Stages.restore
             Stages.clean
             Stages.format
-            Stages.build (Options.projects |> InputSpec.map (List.map _.RelativePath))
+            Stages.buildWithoutTests
             Stages.deps
             Stages.fixtures
             Stages.test
             Stages.pack
+            Stages.validatePackages
         }
     }
 )

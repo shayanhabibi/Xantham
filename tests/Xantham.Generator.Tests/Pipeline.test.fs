@@ -5217,3 +5217,9 @@ let dollarNameTests =
 
                       Expect.isEmpty unrepresented "every sanitised declaration represents its export" ])
     ]
+
+[<Tests>]
+let customizationFixtureTests =
+    testList "customization fixture" [
+        yield! fixtureTests "customization-lab" (handFixture "customization-lab") GeneratorConfig.Default (fun _ -> [])
+    ]

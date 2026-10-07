@@ -67,6 +67,11 @@ live `tsc --api` server.
   narrows by test name, `--run-gate` adds the Fable run gate; the inner loop is in
   `.claude/rules/generator-fixtures.md`.
 - `dotnet fsi build.fsx -- <build|test|generate|docs|pack|publish|bump>` — full pipeline.
+  `--no-format` skips local source formatting while retaining restore, clean and installs;
+  CI still checks formatting. Other stages may write tracked files.
+- `dotnet fsi build.fsx -- <command> --help` — the options supported by that command.
+- `dotnet fsi build.fsx -- <command> --explain` — show the resolved stage plan without running it;
+  secret command arguments are masked.
 - `dotnet fsi build.fsx -- generate [--only ast|proto|session|compiler-lib|node-lib|schema]
   [--sync]` — routes to `tools/generate-wire.fsx`; `--sync` re-vendors upstream sources first
   (network). `node-lib` regenerates `src/Xantham.Fable.Node` and runs only when named.

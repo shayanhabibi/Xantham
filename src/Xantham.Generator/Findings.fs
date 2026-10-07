@@ -241,6 +241,11 @@ module FindingCodes =
             "GE.GroupModuleCollision", "GE003"
             "GE.GroupModuleFromNamespace", "GE004"
             "GE.ParameterNameEscaped", "GE005"
+            "CU.AttributeAdded", "CU001"
+            "CU.CompanionEmitted", "CU002"
+            "CU.MemberOmitted", "CU003"
+            "CU.InteropReplaced", "CU004"
+            "CU.DeclarationReplaced", "CU005"
         ]
 
     let private byName = Map.ofList table
@@ -1183,6 +1188,23 @@ type EmitGroups =
             | ParameterNameEscaped(sourceName, parameterName) ->
                 $"parameter {sourceName} is written {parameterName} to avoid an F# pattern constructor; its JavaScript name is preserved"
 
+[<Prefix("CU", "customize-output")>]
+type CustomizeOutput =
+    | [<Exact>] AttributeAdded of extensionId: string
+    | [<Ergonomic>] CompanionEmitted of extensionId: string
+    | [<Widened>] MemberOmitted of extensionId: string * memberName: string
+    | [<Escape>] InteropReplaced of extensionId: string
+    | [<Escape>] DeclarationReplaced of extensionId: string
+
+    interface IFindingKind with
+        member this.Message =
+            match this with
+            | AttributeAdded id -> $"attribute added by {id}"
+            | CompanionEmitted id -> $"property companion emitted by {id}"
+            | MemberOmitted(id, memberName) -> $"{id} omitted companion member {memberName}"
+            | InteropReplaced id -> $"interop behavior replaced by {id}"
+            | DeclarationReplaced id -> $"declaration contract replaced by {id}"
+
 module FindingCatalogue =
     /// Every finding union, in the order the manifest legend lists them. The snapshot test
     /// enumerates these; a union missing here has keys nothing guards.
@@ -1209,6 +1231,7 @@ module FindingCatalogue =
             typeof<DropOrphanDelegates>
             typeof<AuditCoverage>
             typeof<EmitGroups>
+            typeof<CustomizeOutput>
         ]
 
     /// Pass name -> the key prefix of the union that pass owns. Passes without a union never

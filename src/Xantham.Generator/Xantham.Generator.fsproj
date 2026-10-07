@@ -8,6 +8,7 @@
         <!-- The order is the pipeline's order: the model first, then one file per tier in the
              order the tiers run, then the fold that sequences them. -->
         <Compile Include="Measures.fs" />
+        <Compile Include="AssemblyInfo.fs" />
         <Compile Include="Findings.fs" />
         <Compile Include="Model.fs" />
         <Compile Include="Bootstrap.fs" />
@@ -45,6 +46,13 @@
         <Compile Include="Shape\Passes.fs" />
         <Compile Include="Render.fs" />
         <Compile Include="DeclarationCatalog.fs" />
+        <Compile Include="Customization\Contract.fsi" />
+        <Compile Include="Customization\Contract.fs" />
+        <Compile Include="Customization\Semantics.fs" />
+        <Compile Include="Customization\Output.fs" />
+        <Compile Include="Customization\Apply.fs" />
+        <Compile Include="Customization\Provenance.fs" />
+        <Compile Include="Customization\Compile.fs" />
         <Compile Include="Pipeline.fs" />
     </ItemGroup>
 

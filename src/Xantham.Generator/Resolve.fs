@@ -1564,3 +1564,24 @@ let resolveDeclarationIdentities: Pass<ResolveModel> =
 
 let passes: Pass<ResolveModel> list =
     [ resolveExportTypes; resolveTypeTable; resolveDeclarationIdentities ]
+
+let internal customizationFacts (ctx: Context) (facts: TypeFacts) =
+    async {
+        let! properties = ctx.Session.getPropertiesOfType facts.Response.Id
+
+        let! members =
+            properties
+            |> ValueOption.defaultValue [||]
+            |> Array.map (resolveMember ctx true)
+            |> Async.Parallel
+
+        let! bases = ctx.Session.getBaseTypes facts.Response.Id
+
+        return
+            { facts with
+                Members = members |> Array.map fst |> Array.toList
+                BaseTypes = bases |> ValueOption.defaultValue [||] |> Array.map _.TypeId |> Array.toList
+            },
+            (members |> Array.map snd |> Array.toList)
+            @ (bases |> ValueOption.defaultValue [||] |> Array.toList)
+    }

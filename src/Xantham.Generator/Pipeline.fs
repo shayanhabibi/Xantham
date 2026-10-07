@@ -421,7 +421,12 @@ let toRender (ctx: Context) (shape: ShapeModel) (findings: Finding list) : Rende
 
 /// Runs the whole pipeline against a package directory and returns the rendered model without
 /// touching the output directory - what tests diff against goldens.
-let generate (config: GeneratorConfig) (packageDir: string) : Async<RenderModel> =
+let private generateCore
+    compiler
+    (extensions: Customization.GeneratorExtension list)
+    (config: GeneratorConfig)
+    (packageDir: string)
+    : Async<RenderModel> =
     async {
         let! mailbox, ctx = Bootstrap.start config packageDir
         use _ = mailbox :> IDisposable
@@ -437,16 +442,108 @@ let generate (config: GeneratorConfig) (packageDir: string) : Async<RenderModel>
 
         let! compilerOnly = compilerOnlyScope ctx
 
-        let! shape, catalog =
-            DeclarationCatalog.apply ctx shape (groupModulesForScope compilerOnly ctx shape)
+        let extensionProfile =
+            if extensions.IsEmpty then
+                None
+            else
+                Some(Customization.Provenance.profile extensions)
 
-        let render = toRender ctx shape (harvestFindings @ resolveFindings @ shapeFindings)
+        let! annotations, companionSpecs, replacements, customizationFindings, semanticSnapshot =
+            if extensions.IsEmpty then
+                async.Return(Map.empty, [], Map.empty, [], None)
+            else
+                async {
+                    let! snapshot =
+                        Customization.Semantics.project ctx shape (harvestFindings @ resolveFindings @ shapeFindings)
+
+                    let! _, _, referencedNames =
+                        DeclarationCatalog.applyWith
+                            extensionProfile
+                            Map.empty
+                            shape
+                            ctx
+                            shape
+                            (groupModulesForScope compilerOnly ctx shape)
+
+                    let snapshot = Customization.ContractData.withReferences referencedNames snapshot
+
+                    let foreign =
+                        groupModulesForScope compilerOnly ctx shape
+                        |> List.collect (fun group ->
+                            group.Decls
+                            |> List.map (fun decl ->
+                                let name = Render.declName decl in name, group.Module + "." + name))
+                        |> Map.ofList
+
+                    let foreign =
+                        Map.fold (fun names key value -> Map.add key value names) foreign referencedNames
+
+                    let annotations, companions, replacements, findings =
+                        Customization.Apply.evaluate foreign extensions snapshot
+
+                    return annotations, companions, replacements, findings, Some snapshot
+                }
+
+        let originalShape = shape
+        let shape = Customization.Apply.replace replacements shape
+
+        let raw =
+            replacements
+            |> Map.toList
+            |> List.choose (fun (name, spec) ->
+                let _, _, raw = Customization.ContractData.replacementInfo spec
+                raw |> Option.map (fun (source, _) -> name, source))
+            |> Map.ofList
+
+        if not (Map.isEmpty raw) then
+            if config.DeclarationCatalog then
+                invalidOp "customization/raw-catalog: raw replacement APIs cannot be authenticated"
+
+            if Option.isNone compiler then
+                invalidOp "customization/compiler-required: raw replacements require generateValidatedWith"
+
+        let! shape, catalog, referencedNames =
+            DeclarationCatalog.applyWith
+                extensionProfile
+                annotations
+                originalShape
+                ctx
+                shape
+                (groupModulesForScope compilerOnly ctx shape)
+
+        let foreign =
+            groupModulesForScope compilerOnly ctx shape
+            |> List.collect (fun group ->
+                group.Decls
+                |> List.map (fun decl -> let name = Render.declName decl in name, group.Module + "." + name))
+            |> Map.ofList
+
+        let qualified =
+            Map.fold (fun names key value -> Map.add key value names) foreign referencedNames
+
+        let companions =
+            semanticSnapshot
+            |> Option.map (fun snapshot ->
+                Customization.Output.render
+                    qualified
+                    (groupModulesForScope compilerOnly ctx shape |> List.map _.Module)
+                    snapshot
+                    companionSpecs)
+            |> Option.defaultValue []
+
+        let render =
+            toRender ctx shape (harvestFindings @ resolveFindings @ shapeFindings @ customizationFindings)
 
         // The two halves of the render tier run separately so the manifest reports what group
         // emission found: a pass reads the findings the model carries, not the ones the fold
         // is still accumulating.
         let! sourced, sourceFindings =
-            runTier ctx [ Render.renderSources (groupModulesForScope compilerOnly ctx shape) ] render
+            runTier
+                ctx
+                [
+                    Render.renderSourcesCustomized annotations raw (groupModulesForScope compilerOnly ctx shape)
+                ]
+                render
 
         let! rendered, manifestFindings =
             runTier
@@ -456,22 +553,50 @@ let generate (config: GeneratorConfig) (packageDir: string) : Async<RenderModel>
                     Findings = sourced.Findings @ sourceFindings
                 }
 
-        return
+        let result =
             { rendered with
                 Findings = rendered.Findings @ manifestFindings
                 Files =
-                    rendered.Files
+                    (rendered.Files @ companions
+                     |> Customization.Provenance.attach extensions companions)
                     @ (catalog |> Option.map (fun text -> "declarations.json", text) |> Option.toList)
             }
+
+        match compiler with
+        | None -> ()
+        | Some compiler ->
+            let contracts =
+                groupModulesForScope compilerOnly ctx shape
+                |> List.collect (fun group ->
+                    group.Decls
+                    |> List.choose (fun decl ->
+                        let name = Render.declName decl in
+
+                        if Map.containsKey name raw then
+                            Some(group.Module + "." + name)
+                        else
+                            None))
+
+            do! Customization.Compile.validate compiler result.Files contracts
+
+        return result
     }
+
+let generateWith extensions config packageDir =
+    generateCore None extensions config packageDir
+
+let generateValidatedWith compiler extensions config packageDir =
+    generateCore (Some compiler) extensions config packageDir
+
+let generate config packageDir = generateWith [] config packageDir
 
 let private utf8NoBom = Text.UTF8Encoding false
 
 /// Runs the pipeline and writes the rendered files into `outDir`, creating it and the `groups/`
 /// directory a shipped group is written under if needed.
-let run (config: GeneratorConfig) (packageDir: string) (outDir: string) : Async<RunReport> =
+let runWith extensions (config: GeneratorConfig) (packageDir: string) (outDir: string) : Async<RunReport> =
     async {
-        let! rendered = generate config packageDir
+        let! rendered = generateWith extensions config packageDir
         Directory.CreateDirectory outDir |> ignore
 
         for name, content in rendered.Files do
@@ -488,3 +613,5 @@ let run (config: GeneratorConfig) (packageDir: string) (outDir: string) : Async<
                 ShadowedByLib = rendered.ShadowedByLib
             }
     }
+
+let run config packageDir outDir = runWith [] config packageDir outDir

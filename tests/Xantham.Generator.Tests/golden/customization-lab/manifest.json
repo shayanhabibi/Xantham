@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "package": "customization-lab",
+  "module": "CustomizationLab",
+  "counts": {
+    "exact": 0,
+    "ergonomic": 7,
+    "widened": 1,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 10,
+      "exact": 7,
+      "ergonomic": 2,
+      "widened": 1
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 8,
+      "ergonomic": 8
+    }
+  ]
+}

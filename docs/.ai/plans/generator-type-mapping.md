@@ -935,3 +935,12 @@ demand zero silent drops).
 **Discard:** the JSON IR and everything that existed to serve it (`Common.Types.fs`,
 Decoder) — the Wire's checker access is the IR now; the syntax-driven type resolver — the
 checker replaces it; the Fable-compiled extractor — Wire is .NET end to end.
+
+## Customization property companions (2026-10-06)
+
+Companions use checker-effective property types, including instantiated generic bases and
+readonly/optional flags. A marker interface carries independent optional extension properties.
+Direct access writes Emit attributes on getter/setter methods using JSON-escaped original
+JavaScript keys; framework adapters can choose erased property stubs. Methods and indexers are
+excluded with CU003, and the source property's mapping findings remain attached to the companion.
+Explicit declaration replacement records CU005 (Escape); interop replacement records CU004.

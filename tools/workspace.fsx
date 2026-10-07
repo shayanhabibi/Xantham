@@ -3,7 +3,7 @@
 ///
 /// Agents work in linked git worktrees under `.claude/worktrees/`. A worktree carries every
 /// tracked file but none of the gitignored trees, so `node_modules/` is absent on a fresh one.
-/// Rather than have each agent re-run `npm install` for a pin that is already on disk, the
+/// Rather than have each agent re-run `npm ci` for a pin that is already on disk, the
 /// scripts borrow the main checkout's install: the compiler is exported through
 /// `XANTHAM_TSGO_EXE`, which `Tsc.locate` honours ahead of its parent-directory walk, and the
 /// `typescript` package directory is handed to the generators as a path.
@@ -20,7 +20,7 @@ open System.IO
 let TscEnvVar = "XANTHAM_TSGO_EXE"
 
 /// Turns the live suite's "no compiler, so skip" into a failure. The suite skips itself when
-/// `Tsc.locate` comes back empty, which is right for a working copy with no `npm install` and
+/// `Tsc.locate` comes back empty, which is right for a working copy with no compiler install and
 /// wrong anywhere a compiler is known to be present - a run that skipped everything is a green
 /// build that tested nothing.
 [<Literal>]
@@ -119,7 +119,7 @@ let tscLibDir (root: string) =
     | Some exe -> Path.GetDirectoryName exe
     | None -> Path.Combine(Path.GetFullPath root, "node_modules", "@typescript", $"typescript-{rid}", "lib")
 
-/// The nearest checkout carrying an `npm install`. Node would find it anyway by walking parents
+/// The nearest checkout carrying a compiler install. Node would find it anyway by walking parents
 /// out of a worktree, since worktrees are nested under the repository - this makes the choice
 /// explicit, and keeps a worktree resolving the same install the main checkout does.
 let nodeModulesRoot (root: string) =
@@ -145,7 +145,7 @@ let typescriptPackage (root: string) =
 ///
 /// Returns the compiler only when it lives outside `root`'s own `node_modules` - borrowed from
 /// the main checkout, or pinned elsewhere through the environment. `None` means `root` owns its
-/// install (or has none), and `npm install` there is what keeps it on the `package.json` pin.
+/// install (or has none), and `npm ci` there installs the committed lockfile.
 ///
 /// Exporting also sets `XANTHAM_REQUIRE_TSC`, because once a compiler is known to be on disk a
 /// skipped live suite is a broken run rather than an unconfigured one. Export
