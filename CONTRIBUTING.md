@@ -40,6 +40,8 @@ There is no separate release-preparation branch or PR, and contributors need no
 release commands or credentials. `/release` prepares packages; it never merges
 the PR or publishes them. If CI dispatch fails after the push, rerun `/release`
 to start the checks again without another version commit.
+If the workflow reports that develop or master moved during preparation, rerun
+the command against the updated PR; the bot will never force-push over new work.
 
 ShipIt calculates six independent package versions from conventional commits.
 If validation reports a changed package that was not bumped (for example a
@@ -58,7 +60,7 @@ These local commands do not push. The XML updater preserves
 The local tool is EasyBuild.ShipIt 3.1.0, requiring the repository's .NET 10 SDK.
 The manifest lives in `.config/dotnet-tools.json`. `build.fsx -- shipit setup`
 restores registered tools; `shipit version` and `shipit conventions` inspect them.
-On a release-preparation branch, pass `--allow-branch <branch-name>` to preview
+For a local preview from another branch, pass `--allow-branch <branch-name>`
 explicitly. The default allowed branch is develop, including for dry runs in 3.1.0.
 
 Each `src/*/CHANGELOG.md` starts from the package version and commit verified in
