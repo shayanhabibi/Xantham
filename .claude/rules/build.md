@@ -14,11 +14,13 @@ Both are run as `dotnet fsi <script> -- <command>`.
 - **Partas.Build** — the `rootCommand`/`command`/`stage`/`input` DSL.
 - **Partas.Build.Baked** — a separate package of prefab inputs: `Baked.Dotnet.config`,
   `Baked.NuGet.apiKey` (falls back to `NUGET_API_KEY`), `Baked.SemVer.*`, `Baked.Common.isCI`.
-  Each `BuildOption<'T>` is read through `.option` or `.argument`. Its version must track the
-  Partas.Build pin: Baked 0.1.1 is compiled against Partas.Build 0.5.0, and its prefab stages
-  (`Baked.SemVer.Stages.*`) throw `MissingMethodException` under 0.6.x. `build.fsx`'s `bump` is
-  therefore a local stage over `Baked.SemVer.Version.IO.bumpVersion`; keep it local until a Baked
-  release built against the current Partas.Build ships.
+  Each `BuildOption<'T>` is read through `.option` or `.argument`. Pin compatible releases:
+  Partas.Build 0.8.0 and Partas.Build.Baked 0.2.0.
+- **Partas.Build.EasyBuild.ShipIt 0.1.0** — release preparation via the repository-local
+  EasyBuild.ShipIt 3.1.0 tool. `bump` updates per-package changelogs and `<Version>` locally;
+  it defaults to `develop` and skips merge commits. Do not chain a Baked.SemVer bump.
+  Keep `<AssemblyVersion>` at 0.0.0.0. `release check` checks affected packages and dependents
+  against `XANTHAM_RELEASE_BASE` (default `origin/master`). Publishing remains on master.
 - Every script pins every `#r "nuget: ..."` to an exact version. `build.fsx` shells to the
   `tools/*.fsx` scripts, so a floating reference in one of them breaks the pipeline.
 - **Partas.TypeProvider.BuildHelper** — the `Repo` provider: `Repo.Project.*` for project and
