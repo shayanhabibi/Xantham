@@ -19,33 +19,40 @@ advance a version. Maintainers review those cases during release preparation.
 
 ## Preparing a release
 
-Release preparation is a maintainer task. ShipIt operates locally; it does not
-push commits, create PRs, or publish packages through the commands below.
+Release preparation is a maintainer task, handled on the release PR:
 
-1. Fetch complete history and update develop with a fast-forward pull.
-2. Restore tools with `dotnet tool restore`.
-3. On develop, preview `dotnet fsi build.fsx -- bump --dry-run`.
-4. Review the proposed six independent package versions and changelog entries.
-   The changelog inputs include transitive project dependencies. For an intended
-   version override, add `force_version: 0.2.0` (using the desired version) to
-   that package's changelog front matter and preview again. ShipIt removes this
-   override when applying it. Review breaking changes explicitly while versions
-   remain below 1.0.
-5. Apply `dotnet fsi build.fsx -- bump`. This updates each affected package's
-   `<Version>` and changelog, preserving `<AssemblyVersion>0.0.0.0</AssemblyVersion>`.
-   The former `bump patch|minor|major` numeric interface is replaced by this command.
-6. Run `dotnet fsi build.fsx -- release check`. It compares with `origin/master`
-   and rejects stale versions in changed packages and their transitive consumers.
-   Set `XANTHAM_RELEASE_BASE` to a different fetched commit only when deliberately
-   validating another release base.
-7. Create a branch from this develop checkout, commit the changes as
-   `chore: prepare package release`, and open a release-preparation PR into develop.
-   Merge it after checks pass. Include all accumulated source changes in the
-   version review; applying another bump after preparation can advance versions twice.
-8. Open develop → master and merge with a **merge commit**, preserving shared history.
-   The master push packs, validates, and publishes to the temporary
+1. Open a PR from `develop` into `master`.
+2. Comment `/release preview` if you want to inspect the proposed versions first.
+   The **Prepare release** workflow summary includes the result and its artifacts
+   include the complete release diff.
+3. Comment `/release`. The bot runs ShipIt, checks all changed packages and their
+   transitive consumers have newer versions, then commits the versions and
+   changelogs directly to develop and starts the required CI checks.
+4. Review that diff and merge the PR with a **merge commit** once checks pass.
+   The master push publishes verified packages to the temporary
    [Cloudsmith feed](https://app.cloudsmith.com/shayanhabibi/r/xantham).
    Verify the Publish workflow and feed versions, then merge master back into develop.
+
+Only `shayanhabibi` and `houstonhaynes` can issue release commands. The workflow
+also has a manual **Run workflow** entry with a PR number and preview switch.
+There is no separate release-preparation branch or PR, and contributors need no
+release commands or credentials. `/release` prepares packages; it never merges
+the PR or publishes them. If CI dispatch fails after the push, rerun `/release`
+to start the checks again without another version commit.
+
+ShipIt calculates six independent package versions from conventional commits.
+If validation reports a changed package that was not bumped (for example a
+dependency upgrade with a `build` commit), add `force_version: 0.2.0` using the
+intended version to that package's changelog front matter on develop, then rerun
+the command. ShipIt consumes that override. Review breaking changes explicitly
+while versions remain below 1.0. Avoid further source changes after preparing a
+release: another preparation can advance versions again.
+
+For local troubleshooting on develop, use `dotnet fsi build.fsx -- bump --dry-run`
+to preview, `dotnet fsi build.fsx -- bump` to apply, and
+`dotnet fsi build.fsx -- release check` to validate against `origin/master`.
+These local commands do not push. The XML updater preserves
+`<AssemblyVersion>0.0.0.0</AssemblyVersion>`.
 
 The local tool is EasyBuild.ShipIt 3.1.0, requiring the repository's .NET 10 SDK.
 The manifest lives in `.config/dotnet-tools.json`. `build.fsx -- shipit setup`
@@ -57,7 +64,8 @@ Each `src/*/CHANGELOG.md` starts from the package version and commit verified in
 the last Cloudsmith release. ShipIt owns the release history from this point onward.
 Its XML updater changes only the project Version. Do not combine it with a separate
 numeric version bump, or run upstream `init github`: that setup disables merge
-commits used by our branch workflow. Automated release PR creation is not enabled.
+commits used by our branch workflow. The comment workflow updates the existing
+develop-to-master PR instead of creating another release PR.
 Keep changelogs with LF line endings: ShipIt 3.1.0's front-matter parser does not
 recognize CRLF. The repository's `.gitattributes` enforces LF on checkout.
 
