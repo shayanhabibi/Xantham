@@ -33,5 +33,12 @@ jobs:
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         with:
           script: |
+            const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRun, {
+              ...context.repo, run_id: context.payload.workflow_run.id, per_page: 100
+            });
+            if (!jobs.some(job => job.name === 'test' && job.steps.some(step => step.name === 'Test' && step.conclusion === 'success'))) {
+              core.info('No full test execution in this run; no new verified golden tag.');
+              return;
+            }
             const tagGoldens = require('./.github/scripts/tag-goldens.cjs');
             await tagGoldens({ github, context, core });
