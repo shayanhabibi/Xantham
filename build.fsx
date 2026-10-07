@@ -1,4 +1,4 @@
-#i "nuget: https://nuget.cloudsmith.io/shayanhabibi/shayanhabibi-partas-build/v3/index.json"
+﻿#i "nuget: https://nuget.cloudsmith.io/shayanhabibi/shayanhabibi-partas-build/v3/index.json"
 #r "nuget: Partas.Build, 0.7.0"
 #r "nuget: Partas.Build.Baked, 0.1.2"
 #r "nuget: Partas.TypeProvider.BuildHelper, 0.2.5"
@@ -610,6 +610,8 @@ module Stages =
                         $"%s{System.IO.Path.GetFileNameWithoutExtension projectPath}.%s{version.Value}.nupkg"
 
                     let package = System.IO.Path.Combine(__SOURCE_DIRECTORY__, "bin", packageName)
+                    
+                    let inline (</>) a b = System.IO.Path.Combine((a : string), (b: string))
 
                     let expected =
                         System.IO.Path.GetFileName projectPath
@@ -617,7 +619,7 @@ module Stages =
                             for compile in elements "Compile" ->
                                 compile.Attribute(System.Xml.Linq.XName.Get "Include").Value
                         ]
-                        |> List.map (fun file -> "fable/" + file.Replace('\\', '/'))
+                        |> List.map (fun file -> "fable" </> file)
 
                     if not (System.IO.File.Exists package) then
                         Error $"bin/%s{packageName} is missing, so its Fable sources cannot be checked."
