@@ -1,5 +1,65 @@
 # Release Notes
 
+## Unreleased
+
+### Xantham.TypeScript.Wire
+
+- A frame split across several pipe reads is read to its end rather than failing as a short read.
+- Every transport failure raises an `IOException` carrying the server's exit code and stderr, and
+  faults the channel: later requests fail with the same error.
+- A batch the server refuses as a whole replays only its read-only members. Methods that change
+  server state (`Batch.sideEffectingMethods`) fail with the batch error and are not sent twice.
+  Their outcome is unknown: the server may already have applied their effect.
+- `TscMailbox.Dispose` fails every queued request with `ObjectDisposedException`, and gives a
+  batch already sent up to two seconds to finish before closing the channel.
+- `Tsc.locateAt` finds the compiler of an npm install directory. Its result depends exclusively
+  on the directory.
+
+### xantham
+
+- `unionArmOverloads` in `xantham.json`: a module-level export whose sole parameter is an erased
+  union gains one overload per arm. Off by default, because the overloads make existing
+  `f(!^ x)` calls ambiguous. An arm that would make a declared overload's call ambiguous is
+  declined.
+- `dedupe-overloads` keeps overloads that differ after their third parameter; solid-js's
+  `SetStoreFunction.Invoke` regains four. It also keeps overloads that differ in generic arity
+  alone: `M<'A>(x)` and `M(x)` both survive.
+- `resolve-export-collisions` renames an export overload only where one call selects both it and
+  a sibling (F# `FS0041`): `f(x)` beside `f(x, ?y)` keeps its name. A colliding overload merges
+  into a sibling, including one already renamed, in preference to taking an `_OverloadN` name, so
+  some previously renamed members return to their declared name and return a union instead. The
+  merge findings (`DO006`, `DO008`, `DO009`) are reported under the member merged into.
+- Declaration catalogs hash every member and type in full. Interfaces that differed only after
+  their hundredth member used to hash alike. Existing catalogs rehash once.
+- `RT002`, `TR003` and `TP001` no longer quote checker type ids, so the manifest is the same from
+  run to run.
+- Exported type names containing `$` (zod v4's `$ZodType`) declare under their identifier shape.
+- A refused `xantham.json` exits with the configuration code, and an unknown option is reported
+  instead of being read as the package directory.
+- An existing `XANTHAM_TSGO_EXE` takes precedence over the cached compiler; it used to be
+  overwritten by it.
+- `tsc version`, with or without `--json`, exits non-zero when no compiler is cached. `--json`
+  writes valid JSON for Windows paths.
+- `tsc version` and `tsc init` inspect the cache directory alone, and report the compiler
+  installed there rather than the one set by `XANTHAM_TSGO_EXE`. A failed `tsc init` exits with
+  npm's message.
+- The package ships a README.
+
+### Xantham.Fable.Core
+
+- The package ships its F# sources under `fable/`, so Fable can compile the `inline`
+  `KeyOf`/`TypeKeyOf` helpers from a NuGet reference.
+
+### Xantham.Fable.Core.TS
+
+- `TSExtensions.Utils.toJSFunc` is an `[<Emit>]` member. As an `inline` member it failed when
+  Fable consumed the package as a DLL.
+
+### Xantham.Fable.Node
+
+- `README.md` and `xantham.json` are no longer delivered to consumers as content files; the
+  README is the package readme.
+
 ## 0.1.0
 
 First release of `Xantham.TypeScript.Wire`.

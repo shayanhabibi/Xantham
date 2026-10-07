@@ -50,7 +50,7 @@ Fidelity tiers used throughout:
 | **Widened** | Strictly more values accepted/produced than TS allows (e.g. template literal → `string`). Safe to *read*, lossy to *write*. |
 | **Escape** | `obj` / dynamic. Present deliberately, marked, never silent. |
 
-A hard lesson carried from the archive (`prevent-silent-drops-progress.md`): the pre-Wire
+A hard lesson carried from the archive: the pre-Wire
 pipeline's worst failures were *silent* — a construct it did not understand was dropped and
 nobody noticed until a consumer needed it. The generator must make "I widened this" and "I
 dropped this" loud: tier annotations in doc comments, a per-run report of every Widened/Escape
@@ -129,7 +129,7 @@ the checker to decide what F# type is written there.
 Memoize on `TypeResponse.Id`. Type ids are stable within a snapshot, which gives us
 hash-consing of anonymous structural types (emit once, reference thereafter) and cycle
 detection for free — the archived pipeline's stack overflows on `three`/`solid-js`/
-`typescript` (`litmus-tests.md`) were exactly the cost of not having stable ids and doing
+`typescript` were exactly the cost of not having stable ids and doing
 recursive descent over syntax.
 
 ---
@@ -404,7 +404,7 @@ result exact. `tests/fixtures/brand-lab` pins all of it under the live compiler,
 included, and its golden compiles against the support package in the gate.
 
 *Landed (wave four, lane P) — three of the four intersections that used to widen.*
-`docs/.ai/plans/generator-tr018-recon.md` attributed every `TR018` site to one of four causes; three
+A reconnaissance (since retired) attributed every `TR018` site to one of four causes; three
 of them now have an answer, and the fourth (a type-parameter operand) is left as the contract it
 always was.
 
@@ -487,6 +487,10 @@ parameter is erased: every use of it widened away" findings gone, because a gene
 use of `'T` was inside a `Promise` now carries it. The escape count *rose* (38 -> 49) for the
 honest reason - an `any` inside a `Promise` used to be invisible inside the widened wrapper
 and is now reported at its own position.
+
+*Superseded (2026-09-10, c9463e9).* Generated bindings now take the DOM from
+`Xantham.Fable.Core.TS`; `tools/browser-gen/generate.fsx`, the `Naming.BrowserBindings` table
+and its compile gate were removed. The entry below records the design as it stood.
 
 *Landed (2026-09-02, phase D) - the DOM half of the same group.* `EventTarget`, `HTMLElement`,
 `Blob` and the rest are bound by the `Fable.Browser.*` family, so generated bindings now

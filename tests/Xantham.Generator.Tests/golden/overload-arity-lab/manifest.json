@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "package": "overload-arity-lab",
+  "module": "OverloadArityLab",
+  "counts": {
+    "exact": 2,
+    "ergonomic": 1,
+    "widened": 1,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 1,
+      "ergonomic": 1
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 2,
+      "ergonomic": 2
+    },
+    {
+      "pass": "DO - dedupe-overloads",
+      "total": 1,
+      "widened": 1
+    }
+  ]
+}

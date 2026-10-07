@@ -281,7 +281,7 @@ New projects (names step around the archive, which is invisible to the solution 
   lookup checks root declarations; a package exposing only named subpaths requires an explicit
   input. Conditional environment selection remains the caller's responsibility. Bootstrap,
   CLI, schema and `entry-selection-lab` tests cover selection and refusal paths, including
-  `.d.mts` and `.d.cts`. See [entry selection](../../generator-usage.md#select-a-declaration-entry).
+  `.d.mts` and `.d.cts`. See [entry selection](../../../site/content/xantham-cli/guide/usage.md).
 
   Two things `load` still leaves to a caller. It is addressed by *directory*, so `--config`
   pointing at a file under another name reads it through a staged copy; a `loadFile` taking
@@ -1078,7 +1078,7 @@ batch on disjoint pass files. The corpus stands at 30 fixtures. `TR018` fell 197
 ergonomic 1,061, widened 365, escape 115, from 374 widened.
 
 The wave was scoped by the user's dispositions rather than by the corpus. Four of the six losses
-in `docs/fable5-workarounds.md` are closed as unresolvable and carry no work in any wave. Two
+in `docs/.ai/fable5-workarounds.md` are closed as unresolvable and carry no work in any wave. Two
 carried work and both landed, so **§3 and §6 of that document are now closed**. Deprioritising
 `@types/three` cost the previous wave-four list its second item: `alignOperands` stands at 45 on
 `three` against 1 on cloudflare, so with the rung out of scope the lane had no justification and
@@ -1788,6 +1788,43 @@ and retains stale-input rejection. It reproduces the Workers FacetStartupOptions
 property losing DurableObjectClass<T> in a consumer program. The producer's phantom
 contract remains unchanged; no catalog compatibility guard is relaxed. Full measurements
 are recorded in `docs/.ai/footguns.md`.
+
+## Generator review fixes (2026-09-24)
+
+- **Overload keys are structural.** `dedupe-overloads` keys a signature by the
+  `signatureKey` tuple itself. The earlier `.ToString()` key printed three list elements and
+  an ellipsis, so overloads that differ past their third parameter collapsed as `DO001`.
+  `overload-arity-lab` pins the separation for methods and `Invoke`, and the negative (a
+  fourth parameter that widens to one F# type). `solid-js`: `Store.SetStoreFunction.Invoke`
+  regains 4 overloads, `DO001` 4 -> 0. `animejs`: `Utils.mapRange` regains its 4-parameter
+  overload, `DO001` 16 -> 15.
+- **Catalog hashes print canonically.** The constraint and API fields of a declaration
+  catalog hash a canonical printer (`DeclarationCatalog.Canonical`): every case and list
+  element is printed at any length. `sprintf "%A"` stopped at 100 list elements, so two
+  interfaces differing in their 101st member hashed alike. The hash format changed with the
+  generator assembly, which already invalidates every earlier catalog.
+- **Union-arm and export collisions are call-level.** `expand-union-arms` declines a member
+  (`UA004`) and `resolve-export-collisions` renames one (`AmbiguousCall`) when two signatures
+  share a compiled parameter signature, or when one opens the other with an omissible tail and
+  some call leaves an optional unsupplied in both, or in neither
+  (`CompiledSignature.ambiguousCall`). An optional parameter compares by its rendered `?name: T`
+  type. `(x)` beside `(x, ?y)` expands and keeps its name, since F# prefers the candidate with no
+  unsupplied optional; `(x, ?y)` beside `(x, ?y, ?z)` declines, and `(u, ?q, ?s)` beside
+  `(u, q, ?s)` renames the second. A later candidate whose return alone differs from a renamed
+  member merges into it (`DO008`), so `@types/node`'s four `url.parse` overloads emit
+  `parse(u)`, `parse(u, ?q, ?s)` and `parse_Overload2(u, q, ?s)`. `dedupe-overloads` keys on
+  `CompiledSignature.parameterKey`, generic arity included, so `M<'A>(x)` and `M(x)` both
+  survive.
+- **Findings carry no checker ids.** `RT002` reports under `<type-table>`, `TR003` has no
+  payload, and `TP001` carries the type parameter's position. Checker ids are assigned in
+  answer order, so a manifest quoting one differed run to run.
+- **`$` in declaration and type-parameter names.** An exported type whose name spells a
+  character FS0883 rejects under backticks declares as its identifier shape (`$Shape` ->
+  `Shape`), yielding to a verbatim name at the same path it collides with (`$Taken` ->
+  `Taken2`, in either harvest order). A type variable writes each non-identifier character as
+  `_` (`$T` -> `'_T`, a lone `$` -> `'_T`), suffixed where it collides with a variable in scope
+  (`<$T, _T>` -> `<'_T2, '_T>`). Both report `SY005` with the written name; imports keep the
+  JavaScript name. `dollar-name-lab` pins each position.
 
 # Easy Nits 
 

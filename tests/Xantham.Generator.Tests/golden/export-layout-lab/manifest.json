@@ -4,8 +4,8 @@
   "module": "LayoutLab",
   "counts": {
     "exact": 15,
-    "ergonomic": 1,
-    "widened": 1,
+    "ergonomic": 2,
+    "widened": 2,
     "escape": 0
   },
   "passes": [
@@ -16,8 +16,9 @@
     },
     {
       "pass": "SE - shape-exports",
-      "total": 4,
-      "exact": 4
+      "total": 12,
+      "exact": 4,
+      "ergonomic": 8
     },
     {
       "pass": "SP - synthesize-paramobjects",
@@ -31,8 +32,9 @@
     },
     {
       "pass": "resolve-export-collisions",
-      "total": 1,
-      "widened": 1
+      "total": 3,
+      "ergonomic": 1,
+      "widened": 2
     }
   ]
 }

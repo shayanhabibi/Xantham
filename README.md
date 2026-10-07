@@ -40,7 +40,7 @@ you are using:
 ```bash
 xantham schema
 
-xantham schema --output xantham.schema.json
+xantham schema -o xantham.schema.json
 ```
 
 [See the Docs](https://shayanhabibi.github.io/Xantham) for more information.
@@ -74,7 +74,7 @@ asynchronously in-process.
 dotnet add package Xantham.TypeScript.Wire
 ```
 
-The wire protocol and its usage are explained [in the docs](https://shayanhabibi.github.io/Xantham/docs/wire).
+The wire protocol and its usage are explained [in the docs](https://shayanhabibi.github.io/Xantham/wire/).
 You can also observe its usage from our implementation of the generator.
 
 ---

@@ -1,0 +1,42 @@
+name: Test
+on:
+  pull_request:
+  push:
+    branches:
+      - develop
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  # The live tests skip themselves when no `tsc` is installed, which on a runner would be a green
+  # build that tested nothing. This turns that skip into a failure - see `Tsc.test.fs`.
+  XANTHAM_REQUIRE_TSC: 1
+
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+      - name: Restore tools
+        run: dotnet tool restore
+      # On CI the format stage runs `fantomas --check`, so an unformatted commit fails here rather
+      # than being rewritten. `--run-gate` adds the Fable run gate, which `dotnet fable` from the
+      # tool manifest drives.
+      - name: Test
+        run: dotnet fsi build.fsx -- test --run-gate

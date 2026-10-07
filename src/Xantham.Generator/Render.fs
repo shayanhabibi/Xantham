@@ -176,7 +176,7 @@ let rec private printTypeIn (atomic: bool) =
     // bare spelling is a method, and `abstract make: seed: float -> (float -> string)` is a
     // one-parameter method returning a callback, where the bare spelling takes two parameters.
     | FsFunc(argument, returns) -> $"({printTypeIn true argument} -> {printTypeIn true returns})"
-    | FsTypeVar name -> $"'{name}"
+    | FsTypeVar name -> $"'{Naming.typeVariable name}"
     // A brand (§4.6, D11): `string<UserId>` for the non-numeric primitives, through the
     // support package's measure-annotated abbreviations, and an ordinary measure application
     // for numbers. Both erase to the primitive, which is all the JavaScript ever sees.
@@ -562,13 +562,15 @@ let private declHead (name: string) (typeParameters: FsTypeParam list) =
         ident name
     else
         let parameters =
-            typeParameters |> List.map (fun p -> $"'{p.Name}") |> String.concat ", "
+            typeParameters
+            |> List.map (fun p -> $"'{Naming.typeVariable p.Name}")
+            |> String.concat ", "
 
         let constraints =
             typeParameters
             |> List.choose (fun p ->
                 p.Constraint
-                |> Option.map (fun bound -> $"'{p.Name} :> {printTypeIn true bound}"))
+                |> Option.map (fun bound -> $"'{Naming.typeVariable p.Name} :> {printTypeIn true bound}"))
 
         match constraints with
         | [] -> $"{ident name}<{parameters}>"
@@ -592,7 +594,9 @@ let private declRef (name: string) (typeParameters: FsTypeParam list) =
         ident name
     else
         let parameters =
-            typeParameters |> List.map (fun p -> $"'{p.Name}") |> String.concat ", "
+            typeParameters
+            |> List.map (fun p -> $"'{Naming.typeVariable p.Name}")
+            |> String.concat ", "
 
         $"{ident name}<{parameters}>"
 

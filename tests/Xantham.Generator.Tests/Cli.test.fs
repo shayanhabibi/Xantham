@@ -26,32 +26,21 @@ let private required =
 /// Runs the command in a scratch output directory, handing the test the exit code, the two
 /// streams and the directory.
 let private invoke (args: string list) (test: int * string * string * string -> 'T) : 'T =
-    let outDir =
-        Path.Combine(Path.GetTempPath(), "xantham-cli-" + Guid.NewGuid().ToString "N")
-
+    use scratch = Scratch.directory "xantham-cli"
+    let outDir = Path.Combine(scratch.Path, "out")
     let out = new StringWriter()
     let err = new StringWriter()
-
-    try
-        let code = Xantham.Cli.Program.run out err (Array.ofList (args @ [ "-o"; outDir; "--banner"; "never" ]))
-        test (code, out.ToString(), err.ToString(), outDir)
-    finally
-        if Directory.Exists outDir then
-            Directory.Delete(outDir, true)
+    let code = Xantham.Cli.Program.run out err (Array.ofList (args @ [ "-o"; outDir; "--banner"; "never" ]))
+    test (code, out.ToString(), err.ToString(), outDir)
 
 let private refusesConfig (message: string) (settings: string) =
-    let configDir = Path.Combine(Path.GetTempPath(), "xantham-entry-config-" + Guid.NewGuid().ToString "N")
-    Directory.CreateDirectory configDir |> ignore
+    use configDir = Scratch.directory "xantham-entry-config"
+    let config = Path.Combine(configDir.Path, "selection.json")
+    File.WriteAllText(config, "{ " + settings + " }")
 
-    try
-        let config = Path.Combine(configDir, "selection.json")
-        File.WriteAllText(config, "{ " + settings + " }")
-
-        invoke [ "generate"; Path.Combine(root, "tests", "fixtures", "entry-selection-lab"); "--config"; config ]
-        <| fun (code, _, err, outDir) ->
-            (3, true, false), (code, err.Contains message, Directory.Exists outDir)
-    finally
-        Directory.Delete(configDir, true)
+    invoke [ "generate"; Path.Combine(root, "tests", "fixtures", "entry-selection-lab"); "--config"; config ]
+    <| fun (code, _, err, outDir) ->
+        (3, true, false), (code, err.Contains message, Directory.Exists outDir)
 
 /// Every file the command wrote, against what the pipeline renders for the same package and
 /// configuration.
@@ -101,19 +90,15 @@ let schemaTests =
                      `dotnet fsi build.fsx -- generate --only schema`."
 
         testCase "the schema command binds and writes its optional output path" <| fun _ ->
-            let destination = Path.Combine(Path.GetTempPath(), "xantham-schema-" + Guid.NewGuid().ToString "N")
+            use scratch = Scratch.directory "xantham-schema"
+            let destination = Path.Combine(scratch.Path, "xantham.schema.json")
             let out = new StringWriter()
             let err = new StringWriter()
+            let code = Xantham.Cli.Program.run out err [| "schema"; "-o"; destination |]
 
-            try
-                let code = Xantham.Cli.Program.run out err [| "schema"; "-o"; destination |]
-
-                Expect.equal code 0 "the command accepts its optional path"
-                Expect.isEmpty (err.ToString()) "a successful write has no diagnostics"
-                Expect.equal (File.ReadAllText destination) (Xantham.Cli.Schema.json ()) "the requested file is the emitted schema"
-            finally
-                if File.Exists destination then
-                    File.Delete destination
+            Expect.equal code 0 "the command accepts its optional path"
+            Expect.isEmpty (err.ToString()) "a successful write has no diagnostics"
+            Expect.equal (File.ReadAllText destination) (Xantham.Cli.Schema.json ()) "the requested file is the emitted schema"
 
         testCase "every disposition the schema offers is one the loader accepts" <| fun _ ->
             use doc = Text.Json.JsonDocument.Parse(File.ReadAllText committed)
@@ -132,19 +117,13 @@ let schemaTests =
 
             Expect.isNonEmpty offered "the schema offers at least one disposition"
 
-            let dir =
-                Path.Combine(Path.GetTempPath(), "xantham-schema-" + Guid.NewGuid().ToString "N")
+            use dir = Scratch.directory "xantham-schema"
 
-            Directory.CreateDirectory dir |> ignore
+            for name in offered do
+                File.WriteAllText(Path.Combine(dir.Path, "xantham.json"), $"""{{ "groups": {{ "dep": "{name}" }} }}""")
 
-            try
-                for name in offered do
-                    File.WriteAllText(Path.Combine(dir, "xantham.json"), $"""{{ "groups": {{ "dep": "{name}" }} }}""")
-
-                    let config = GeneratorConfig.load dir
-                    Expect.isTrue (Map.containsKey ("dep" * uom<npmDependency>) config.Groups) $"the loader accepts '{name}'"
-            finally
-                Directory.Delete(dir, true)
+                let config = GeneratorConfig.load dir.Path
+                Expect.isTrue (Map.containsKey ("dep" * uom<npmDependency>) config.Groups) $"the loader accepts '{name}'"
     ]
 
 [<Tests>]
@@ -152,46 +131,44 @@ let commandTests =
     testList "generator cli" [
         let inline (=!>) entry message = entry, message
 
-        // TODO - FSharp.SystemCommandLine parsing causes earlier failure due to non existent file.
-        //          So these all fail correctly, but not for the reasons we originally prepared the tests for.
-        // testTheory "invalid declaration inputs are configuration errors" [
-        //     "null" =!> "entry must be a string"
-        //     "42" =!> "entry must be a string"
-        //     "true" =!> "entry must be a string"
-        //     "[]" =!> "entry must be a string"
-        //     "{}" =!> "entry must be a string"
-        //     "\"\"" =!> "entry must be a nonempty relative path"
-        //     "\" \"" =!> "entry must be a nonempty relative path"
-        //     (Text.Json.JsonSerializer.Serialize(Path.GetTempPath())) =!> "entry must be a relative path"
-        //     "\"../outside.d.ts\"" =!> "entry must stay within the package directory"
-        //     "\"package.json\"" =!> "entry must name a TypeScript file"
-        //     "\"dist/missing.d.ts\"" =!> "entry file does not exist"
-        // ] <| fun (entry, message) ->
-        //     refusesConfig message ("\"entry\": " + entry)
-        //     ||> Flip.Expect.equal "selection fails before generation writes output"
-        //
-        // testTheory "invalid runtime imports are configuration errors" [
-        //     "null" =!> "runtime must be a string"
-        //     "42" =!> "runtime must be a string"
-        //     "true" =!> "runtime must be a string"
-        //     "[]" =!> "runtime must be a string"
-        //     "{}" =!> "runtime must be a string"
-        //     "\"\"" =!> "runtime must be a nonempty string"
-        //     "\" \"" =!> "runtime must be a nonempty string"
-        // ] <| fun (runtime, message) ->
-        //     refusesConfig message ("\"entry\": \"dist/adapter.d.ts\", \"runtime\": " + runtime)
-        //     ||> Flip.Expect.equal "an invalid import cannot fall back to the package root"
-        //
-        // testTheory "invalid ambient type packages are configuration errors" [
-        //     "null" =!> "types must be an array of nonempty strings"
-        //     "42" =!> "types must be an array of nonempty strings"
-        //     "\"provider\"" =!> "types must be an array of nonempty strings"
-        //     "[42]" =!> "types must be an array of nonempty strings"
-        //     "[\"\"]" =!> "types must be an array of nonempty strings"
-        //     "[\" \"]" =!> "types must be an array of nonempty strings"
-        // ] <| fun (types, message) ->
-        //     refusesConfig message ("\"types\": " + types)
-        //     ||> Flip.Expect.equal "an invalid ambient selection cannot fall back to automatic discovery"
+        testTheory "invalid declaration inputs are configuration errors" [
+            "null" =!> "entry must be a string"
+            "42" =!> "entry must be a string"
+            "true" =!> "entry must be a string"
+            "[]" =!> "entry must be a string"
+            "{}" =!> "entry must be a string"
+            "\"\"" =!> "entry must be a nonempty relative path"
+            "\" \"" =!> "entry must be a nonempty relative path"
+            (Text.Json.JsonSerializer.Serialize(root)) =!> "entry must be a relative path"
+            "\"../outside.d.ts\"" =!> "entry must stay within the package directory"
+            "\"package.json\"" =!> "entry must name a TypeScript file"
+            "\"dist/missing.d.ts\"" =!> "entry file does not exist"
+        ] <| fun (entry, message) ->
+            refusesConfig message ("\"entry\": " + entry)
+            ||> Flip.Expect.equal "selection fails before generation writes output"
+
+        testTheory "invalid runtime imports are configuration errors" [
+            "null" =!> "runtime must be a string"
+            "42" =!> "runtime must be a string"
+            "true" =!> "runtime must be a string"
+            "[]" =!> "runtime must be a string"
+            "{}" =!> "runtime must be a string"
+            "\"\"" =!> "runtime must be a nonempty string"
+            "\" \"" =!> "runtime must be a nonempty string"
+        ] <| fun (runtime, message) ->
+            refusesConfig message ("\"entry\": \"dist/adapter.d.ts\", \"runtime\": " + runtime)
+            ||> Flip.Expect.equal "an invalid import cannot fall back to the package root"
+
+        testTheory "invalid ambient type packages are configuration errors" [
+            "null" =!> "types must be an array of nonempty strings"
+            "42" =!> "types must be an array of nonempty strings"
+            "\"provider\"" =!> "types must be an array of nonempty strings"
+            "[42]" =!> "types must be an array of nonempty strings"
+            "[\"\"]" =!> "types must be an array of nonempty strings"
+            "[\" \"]" =!> "types must be an array of nonempty strings"
+        ] <| fun (types, message) ->
+            refusesConfig message ("\"types\": " + types)
+            ||> Flip.Expect.equal "an invalid ambient selection cannot fall back to automatic discovery"
 
         testCase "a path with no directory is refused" <| fun _ ->
             invoke [ "generate"; Path.Combine(root, "no-such-package") ]
@@ -208,48 +185,84 @@ let commandTests =
         testCase "an unknown option is a usage error" <| fun _ ->
             invoke [ "generate"; "--bogus" ]
             <| fun (code, _, err, _) ->
-                Expect.equal code 2 "usage"
+                Expect.equal code 1 "usage"
+                Expect.stringContains err "--bogus" "the option is named"
+
+        testCase "the tsc version payload is JSON, with a Windows path escaped" <| fun _ ->
+            let path = @"C:\Users\someone\.cache\xantham\tsc.exe"
+
+            use found = Text.Json.JsonDocument.Parse(Xantham.Cli.Program.tscVersionJson (Some path))
+            found.RootElement.GetProperty("path").GetString() |> Flip.Expect.equal "the path round-trips" path
+
+            use missing = Text.Json.JsonDocument.Parse(Xantham.Cli.Program.tscVersionJson None)
+            missing.RootElement.GetProperty("path").ValueKind
+            |> Flip.Expect.equal "no cached compiler is a null path" Text.Json.JsonValueKind.Null
+
+        // An empty cache fails whatever `XANTHAM_TSGO_EXE` is set to.
+        testCase "tsc version fails on an empty cache" <| fun _ ->
+            use cache = Scratch.directory "xantham-tsc-cache"
+
+            for useJson in [ true; false ] do
+                let out = new StringWriter()
+                let err = new StringWriter()
+                let code = Xantham.Cli.Program.tscVersion out err useJson cache.Path
+
+                code |> Flip.Expect.equal $"not cached (json={useJson})" 4
+                out.ToString() |> Flip.Expect.equal "nothing on stdout" ""
+
+                if useJson then
+                    use doc = Text.Json.JsonDocument.Parse(err.ToString())
+                    doc.RootElement.GetProperty("path").ValueKind
+                    |> Flip.Expect.equal "no path" Text.Json.JsonValueKind.Null
+
+        testCase "tsc version reports the compiler installed in the cache" <| fun _ ->
+            let root = Path.GetFullPath(Path.Combine(__SOURCE_DIRECTORY__, "..", ".."))
+
+            match Tsc.locateAt root with
+            | None -> skiptest "run `npm install` at the repository root"
+            | Some installed ->
+                use cache = Scratch.directory "xantham-tsc-cache"
+                let copy = Path.Combine(cache.Path, Path.GetRelativePath(root, installed))
+                Directory.CreateDirectory(Path.GetDirectoryName copy) |> ignore
+                File.WriteAllText(copy, "")
+
+                let out = new StringWriter()
+                let err = new StringWriter()
+                let code = Xantham.Cli.Program.tscVersion out err true cache.Path
+
+                code |> Flip.Expect.equal "cached" 0
+                use doc = Text.Json.JsonDocument.Parse(out.ToString())
+                doc.RootElement.GetProperty("path").GetString() |> Flip.Expect.equal "the cached path" copy
 
         testCase "an unknown command is a usage error" <| fun _ ->
             invoke [ "compile" ] <| fun (code, _, _, _) -> Expect.equal code 1 "usage"
 
         testCase "a package with subpaths but no root export passes pre-flight" <| fun _ ->
-            let package =
-                Path.Combine(Path.GetTempPath(), "xantham-rootless-" + Guid.NewGuid().ToString "N")
+            use scratch = Scratch.directory "xantham-rootless"
+            let package = scratch.Path
 
-            Directory.CreateDirectory package |> ignore
+            File.WriteAllText(
+                Path.Combine(package, "package.json"),
+                """{ "name": "rootless", "exports": { "./a": { "types": "./a.d.ts" } } }"""
+            )
 
-            try
-                File.WriteAllText(
-                    Path.Combine(package, "package.json"),
-                    """{ "name": "rootless", "exports": { "./a": { "types": "./a.d.ts" } } }"""
-                )
+            File.WriteAllText(Path.Combine(package, "a.d.ts"), "export declare const v: number;")
 
-                File.WriteAllText(Path.Combine(package, "a.d.ts"), "export declare const v: number;")
+            let config = GeneratorConfig.load package
+            Bootstrap.publicPaths config package |> ignore
 
-                let config = GeneratorConfig.load package
-                Bootstrap.publicPaths config package |> ignore
-            finally
-                Directory.Delete(package, true)
+        testCase "a refused xantham.json exits before generation" <| fun _ ->
+            use scratch = Scratch.directory "xantham-cli-cfg"
+            let package = scratch.Path
 
-        // TODO - needs to be updated for new CLI
-        // testCase "a refused xantham.json exits before generation" <| fun _ ->
-        //     let package =
-        //         Path.Combine(Path.GetTempPath(), "xantham-cli-cfg-" + Guid.NewGuid().ToString "N")
-        //
-        //     Directory.CreateDirectory package |> ignore
-        //
-        //     try
-        //         File.WriteAllText(Path.Combine(package, "package.json"), """{ "name": "cfg", "types": "index.d.ts" }""")
-        //         File.WriteAllText(Path.Combine(package, "index.d.ts"), "export declare const one: number;\n")
-        //         File.WriteAllText(Path.Combine(package, "xantham.json"), """{ "groups": { "dep": "nonsense" } }""")
-        //
-        //         invoke [ "generate"; package ]
-        //         <| fun (code, _, err, _) ->
-        //             Expect.equal code 3 "configuration refused"
-        //             Expect.stringContains err "unknown disposition" "the loader's own refusal is reported"
-        //     finally
-        //         Directory.Delete(package, true)
+            File.WriteAllText(Path.Combine(package, "package.json"), """{ "name": "cfg", "types": "index.d.ts" }""")
+            File.WriteAllText(Path.Combine(package, "index.d.ts"), "export declare const one: number;\n")
+            File.WriteAllText(Path.Combine(package, "xantham.json"), """{ "groups": { "dep": "nonsense" } }""")
+
+            invoke [ "generate"; package ]
+            <| fun (code, _, err, _) ->
+                Expect.equal code 3 "configuration refused"
+                Expect.stringContains err "unknown disposition" "the loader's own refusal is reported"
     ]
 
 [<Tests>]
@@ -271,48 +284,40 @@ let generationTests =
                 "adapter.d.mts" ==> "adapter.mjs"
                 "adapter.d.cts" ==> "adapter.cjs"
             ] <| fun (entry, runtime) ->
-                let package = Path.Combine(root, "tests", "fixtures", "entry-selection-" + Guid.NewGuid().ToString "N")
-                Directory.CreateDirectory package |> ignore
+                use scratch = Scratch.directory "xantham-entry-selection"
+                let package = scratch.Path
 
-                try
-                    File.WriteAllText(Path.Combine(package, "package.json"),
-                        $$"""{ "name": "subpath-only", "exports": { "./adapter": { "types": "./{{entry}}", "default": "./{{runtime}}" } } }""")
-                    File.WriteAllText(Path.Combine(package, entry), "export declare function adapt(value: string): string;")
-                    File.WriteAllText(Path.Combine(package, "xantham.json"),
-                        $$"""{ "entry": "{{entry}}", "runtime": "subpath-only/adapter", "module": "SubpathAdapter" }""")
+                File.WriteAllText(Path.Combine(package, "package.json"),
+                    $$"""{ "name": "subpath-only", "exports": { "./adapter": { "types": "./{{entry}}", "default": "./{{runtime}}" } } }""")
+                File.WriteAllText(Path.Combine(package, entry), "export declare function adapt(value: string): string;")
+                File.WriteAllText(Path.Combine(package, "xantham.json"),
+                    $$"""{ "entry": "{{entry}}", "runtime": "subpath-only/adapter", "module": "SubpathAdapter" }""")
 
-                    invoke [ "generate"; package ]
-                    <| fun (code, _, _, outDir) ->
-                        code |> Flip.Expect.equal "an explicit input bypasses root discovery" 0
-                        File.ReadAllText(Path.Combine(outDir, "SubpathAdapter.fs"))
-                        |> fun source -> source.Contains "Import(\"adapt\", \"subpath-only/adapter\")"
-                        |> Flip.Expect.equal "the emitted import addresses the selected public subpath" true
-                finally
-                    Directory.Delete(package, true)
+                invoke [ "generate"; package ]
+                <| fun (code, _, err, outDir) ->
+                    code |> Flip.Expect.equal $"an explicit input bypasses root discovery\n{err}" 0
+                    File.ReadAllText(Path.Combine(outDir, "SubpathAdapter.fs"))
+                    |> fun source -> source.Contains "Import(\"adapt\", \"subpath-only/adapter\")"
+                    |> Flip.Expect.equal "the emitted import addresses the selected public subpath" true
 
             testCase "an external config selects a declaration and its public runtime import" <| fun _ ->
                 let package = Path.Combine(root, "tests", "fixtures", "entry-selection-lab")
-                let configDir = Path.Combine(Path.GetTempPath(), "xantham-entry-config-" + Guid.NewGuid().ToString "N")
-                Directory.CreateDirectory configDir |> ignore
+                use configDir = Scratch.directory "xantham-entry-config"
+                let config = Path.Combine(configDir.Path, "adapter.json")
+                File.Copy(Path.Combine(package, "xantham.json"), config)
 
-                try
-                    let config = Path.Combine(configDir, "adapter.json")
-                    File.Copy(Path.Combine(package, "xantham.json"), config)
-
-                    invoke [ "generate"; package; "--config"; config ]
-                    <| fun (code, _, _, outDir) ->
-                        code |> Flip.Expect.equal "the configured declaration exists under the package" 0
-                        let source = Directory.GetFiles(outDir, "*.fs") |> Array.map File.ReadAllText |> String.concat "\n"
-                        source.Contains "module rec EntrySelectionLab.Adapter"
-                        |> Flip.Expect.equal "module controls the F# name" true
-                        source.Contains "adapterValue"
-                        |> Flip.Expect.equal "entry selects the adapter declaration" true
-                        source.Contains "rootValue"
-                        |> Flip.Expect.equal "the package root is a separate generation input" false
-                        source.Contains "Import(\"adapterValue\", \"entry-selection-lab/adapter\")"
-                        |> Flip.Expect.equal "runtime preserves the public JavaScript subpath" true
-                finally
-                    Directory.Delete(configDir, true)
+                invoke [ "generate"; package; "--config"; config ]
+                <| fun (code, _, _, outDir) ->
+                    code |> Flip.Expect.equal "the configured declaration exists under the package" 0
+                    let source = Directory.GetFiles(outDir, "*.fs") |> Array.map File.ReadAllText |> String.concat "\n"
+                    source.Contains "module rec EntrySelectionLab.Adapter"
+                    |> Flip.Expect.equal "module controls the F# name" true
+                    source.Contains "adapterValue"
+                    |> Flip.Expect.equal "entry selects the adapter declaration" true
+                    source.Contains "rootValue"
+                    |> Flip.Expect.equal "the package root is a separate generation input" false
+                    source.Contains "Import(\"adapterValue\", \"entry-selection-lab/adapter\")"
+                    |> Flip.Expect.equal "runtime preserves the public JavaScript subpath" true
 
             testCase "the command writes what the pipeline renders, for a package with no configuration" <| fun _ ->
                 matchesPipeline "lab"
@@ -386,22 +391,15 @@ let generationTests =
                     Expect.equal err "" "nothing on standard error, warning included"
 
             testCase "configuring `lib` is the remedy the warning names, and it silences the warning" <| fun _ ->
-                let config =
-                    Path.Combine(Path.GetTempPath(), "xantham-cli-cfg-" + Guid.NewGuid().ToString "N")
+                use config = Scratch.directory "xantham-cli-cfg"
+                File.WriteAllText(Path.Combine(config.Path, "xantham.json"), """{ "lib": ["esnext"] }""")
 
-                Directory.CreateDirectory config |> ignore
-
-                try
-                    File.WriteAllText(Path.Combine(config, "xantham.json"), """{ "lib": ["esnext"] }""")
-
-                    invoke
-                        [ "generate"
-                          Path.Combine(root, "tests", "fixtures", "dom-shadow-lab")
-                          "--config"
-                          config ]
-                    <| fun (code, _, err, _) ->
-                        Expect.equal code 0 "the command reports success"
-                        Expect.isFalse (err.Contains "default-lib declaration") "no default lib loaded, nothing shadowed"
-                finally
-                    Directory.Delete(config, true)
+                invoke
+                    [ "generate"
+                      Path.Combine(root, "tests", "fixtures", "dom-shadow-lab")
+                      "--config"
+                      config.Path ]
+                <| fun (code, _, err, _) ->
+                    Expect.equal code 0 "the command reports success"
+                    Expect.isFalse (err.Contains "default-lib declaration") "no default lib loaded, nothing shadowed"
         ]

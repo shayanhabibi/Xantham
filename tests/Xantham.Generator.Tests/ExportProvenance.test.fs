@@ -36,6 +36,9 @@ let private run executable directory arguments =
 let private compile directory (source: string) (consumer: string) =
     // The consumer builds with the repository's SDK.
     File.Copy(Path.Combine(__SOURCE_DIRECTORY__, "..", "..", "global.json"), Path.Combine(directory, "global.json"), true)
+    // The consumer builds as an external project: these empty files end MSBuild's upward search for `Directory.Build.*`.
+    for file in [ "Directory.Build.props"; "Directory.Build.targets" ] do
+        File.WriteAllText(Path.Combine(directory, file), "<Project />")
     File.WriteAllText(Path.Combine(directory, "Binding.fs"), source)
     File.WriteAllText(Path.Combine(directory, "Consumer.fs"), consumer)
     let coreTs = Path.Combine(__SOURCE_DIRECTORY__, "..", "..", "src", "Xantham.Fable.Core.TS", "Xantham.Fable.Core.TS.fsproj") |> Path.GetFullPath
@@ -86,18 +89,16 @@ let tests =
             generate entry |> sourceOf |> importedNames |> Flip.Expect.equal entry expected
 
         testCase "type shapes remain usable without runtime exports" <| fun _ ->
-            let directory = Path.Combine(Path.GetTempPath(), "xantham-type-only-" + Guid.NewGuid().ToString "N")
-            Directory.CreateDirectory directory |> ignore
-            try
-                let rendered = generate "index.d.ts"
-                rendered.Findings
-                |> List.exists (fun finding -> finding.Symbol = "hidden" && finding.Kind :? AuditCoverage)
-                |> Flip.Expect.equal "a type-only function has no direct type or runtime name to emit" false
-                let source = sourceOf rendered
-                let code, output = compile directory source consumer
-                code |> Flip.Expect.equal output 0
-                for expression in [ "Exports.hidden message"; "Exports.Client message"; "Client.create message" ] do
-                    let code, output = compile directory source (consumer + "\nlet invalid = " + expression + "\n")
-                    (code <> 0 && output.Contains "FS0039") |> Flip.Expect.equal output true
-            finally Directory.Delete(directory, true)
+            use scratch = Scratch.directory "xantham-type-only"
+            let directory = scratch.Path
+            let rendered = generate "index.d.ts"
+            rendered.Findings
+            |> List.exists (fun finding -> finding.Symbol = "hidden" && finding.Kind :? AuditCoverage)
+            |> Flip.Expect.equal "a type-only function has no direct type or runtime name to emit" false
+            let source = sourceOf rendered
+            let code, output = compile directory source consumer
+            code |> Flip.Expect.equal output 0
+            for expression in [ "Exports.hidden message"; "Exports.Client message"; "Client.create message" ] do
+                let code, output = compile directory source (consumer + "\nlet invalid = " + expression + "\n")
+                (code <> 0 && output.Contains "FS0039") |> Flip.Expect.equal output true
     ]

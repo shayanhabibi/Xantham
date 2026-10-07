@@ -15,7 +15,7 @@ let apiOptions =
         Sources =
             let root = AbsolutePath.create __SOURCE_DIRECTORY__ |> AbsolutePath.directory
 
-            [ "Xantham.TypeScript.Wire"; "Xantham.Fable.Core.TS"; "Xantham.Fable.Core" ]
+            [ "Xantham.TypeScript.Wire"; "Xantham.Fable.Core" ]
             |> List.choose (fun project ->
                 Glob.files root $"src/{project}/*/Release/*/{project}.dll"
                 |> List.tryHead
@@ -98,7 +98,7 @@ let theme =
     Theme.defaults
     |> navbar
     |> Theme.favIcon "/branding/xantham-logo-electric-cyan.svg"
-    |> Theme.editUrl "https://github.com/shayanhabibi/xantham/edit/main/site"
+    |> Theme.editUrl "https://github.com/shayanhabibi/xantham/edit/develop/site"
     |> Theme.footer (
         Html.div
             [

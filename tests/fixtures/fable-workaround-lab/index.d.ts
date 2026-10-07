@@ -1,4 +1,4 @@
-// The declarations behind docs/fable5-workarounds.md. Each one is the smallest TypeScript that
+// The declarations behind docs/.ai/fable5-workarounds.md. Each one is the smallest TypeScript that
 // produces a binding whose loss is Fable 5's compilation model rather than F#'s type system,
 // and the run gate exercises the documented workaround against `index.js` for every one.
 

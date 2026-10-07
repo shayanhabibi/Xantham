@@ -1,8 +1,9 @@
 # TypeScript's utility types, and which of them Fable can help with
 
 Counts are corpus-wide over 55 fixtures at `62bd44e` (wave fourteen, batch one composed), from
-`dotnet fsi build.fsx -- findings` and from the committed `symbols.jsonl`. Pins are `Fable.Core`
-**5.2.0**, the `fable` tool 5.0.0, `fable-library-js` 5.0.0.
+`dotnet fsi build.fsx -- findings` and from the committed `symbols.jsonl`. Pins at the time were
+`Fable.Core` **5.2.0**, the `fable` tool 5.0.0, `fable-library-js` 5.0.0; the `fable` tool pin is
+now 5.17.2.
 
 **Answer inline, in the `(ANSWER)` blocks, as you did for `fable5-workarounds.md`.**
 
@@ -189,7 +190,7 @@ Wave thirteen's lane CH made an object whose whole content is one index signatur
 `MB004` from 140 to 63 and now carries **221 sites** under `TR059`
 (`TR.IndexSignatureAsRecord`, ergonomic). It works, and it is gated at the run gate.
 
-The point for you is that **this repository declares the type, in `src/Xantham.Fable.Core/Record.fs`,
+The point for you is that **this repository declares the type, in `src/Xantham.Fable.Core/Library.fs`,
 because `Fable.Core` ships nothing for it.** Every generated binding therefore depends on a support
 assembly of ours for its single commonest construct.
 

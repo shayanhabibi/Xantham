@@ -106,7 +106,12 @@ A member expands when every condition holds:
 - that union's arm count is at most the configured cap;
 - the arms are pairwise distinct as F# signatures after mapping;
 - no synthesised signature collides with an existing member of the same name, including the
-  TypeScript-declared overloads that survived dedupe.
+  TypeScript-declared overloads that survived dedupe. Two signatures collide
+  (`CompiledSignature.overlaps`) when they compile to one parameter signature, or when one
+  opens the other with an omissible tail and a call leaves an optional unsupplied in both,
+  or in neither. An arm `(x)` beside a declared `(x, ?y)` does not collide, since F# prefers
+  the candidate with no unsupplied optional; an arm `(x, ?y)` beside `(x, ?y, ?z)` is FS0041
+  and does.
 
 A collapsing arm set disqualifies the whole member. `U2<string, string>` yields two identical
 signatures and FS0041 at every call site, and a partial arm set would be an API whose shape
@@ -191,9 +196,9 @@ documented result of that combination.
 
 ### Callbacks are where the choice actually bites
 
-Measured 2026-09-22 (Fable 5.13.0), and it reverses the intuitive answer. A union-case
-constructor gets no lambda-to-delegate coercion — that applies at method-argument position
-only:
+Measured 2026-09-22 against Fable 5.13.0 (before the repository pinned 5.17.2), and
+it reverses the intuitive answer. A union-case constructor gets no lambda-to-delegate coercion —
+that applies at method-argument position only:
 
 | Position | Bare lambda | Emitted JS |
 |---|---|---|
@@ -223,8 +228,8 @@ so neither rule substitutes for the other.
 
 This was marked resolved on 2026-09-22 on the strength of a mixed-union Step 0 run reporting
 **zero** eligible unions. That run was wrong: it read rendered `FsTypeRef`s, where string
-literals have already been widened to `FsString` at `Spec.fs:1542`. Re-measured against raw
-`TypeFacts`, the gate returns **11 eligible of 45**. See
+literals have already been widened to `FsString` in the `StringLiteralToString` arm of
+`typeRefOnPath` in `Spec.fs`. Re-measured against raw `TypeFacts`, the gate returns **11 eligible of 45**. See
 `2026-09-22-mixed-literal-unions.md` § *Step 0 result*.
 
 So the action item below is **not** discharged. The mixed-union pass is undecided rather than
@@ -261,5 +266,24 @@ are identical `FsTypeRef`s (`number[] | ReadonlyArray<number>`) are already dedu
 — and is exercised in `Shape.test.fs` against a hand-built model, with the lab fixture
 documenting why the source-level case does not reach it.
 
+**Collision is call-level, measured 2026-09-24.** Commit 26df955 declined an arm that is a
+prefix of a declared overload whose tail is omissible, citing FS0041 for `f "a"` against
+`f(x: string)` beside `f(x: string, ?y: float)`. That call compiles (the optional-tail row
+above), and so does a `ParamArray` tail. Probed under `dotnet fsi` against Fable.Core 5.2.0,
+static and interface members alike: FS0041 needs both candidates to leave an optional
+unsupplied, as `(x, ?y)` beside `(x, ?y, ?z)` does at `p "a"`, or neither with the supplied
+positions alike, as `(x, y)` beside `(x, ?y)` does at `p ("a", 1.0)`. `(x, ?y)` beside
+`(x, y, ?z)` resolves at every arity. Overloads differing only in generic arity resolve to the
+non-generic one. `union-arm-overload-lab` pins `prefix` as an expansion and `ambiguous` as the
+`UA004` negative; `Shape.test.fs` carries the probed pairs.
+
+`(x, ?y: string)` beside `(x, ?y: float)` is FS0041 at `p "a"` too, and `overlaps` does not
+report it: the supplied positions agree but the signatures share no typed prefix.
+`resolve-export-collisions` applies the same `ambiguousCall`. Before, it renamed on any omissible
+prefix, which renamed the resolvable `(x)` beside `(x, ?y)` in `@types/node` (`url.parse`, five
+`child_process` members). Under the narrow predicate those keep their names, and the same-arity
+`url.parse(u, ?q, ?s)` beside `parse(u, q, ?s)` still renames: an optional parameter compares by
+its rendered `?name: T` type, not its `T option` reference. `export-layout-lab`'s `locate` pins
+that shape.
 **Config-aware pass harness.** `Build.runPassWith` was added so a pass that ships disabled can
 be unit-tested at all; `Build.runPass` takes the disabled early return and asserts nothing.

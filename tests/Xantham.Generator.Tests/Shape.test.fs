@@ -3365,7 +3365,7 @@ let shapePassTests =
                 | overloads -> failtest $"expected one two-parameter overload, got %A{overloads}"
             | decls -> failtest $"expected the interface back, got %A{decls}"
 
-        // Wave four lane O (docs/fable5-workarounds.md §3). A method reads as the delegate a
+        // Wave four lane O (docs/.ai/fable5-workarounds.md §3). A method reads as the delegate a
         // function-valued property of the same signature already carries.
         let paramObjectDecl name members =
             FsInterface
@@ -3568,6 +3568,119 @@ let shapePassTests =
                          | FsIndexer i -> i.Value))
                     [ FsNamed "DOMTargets"; FsString ]
                     "first of the obj pair survives; the string overload is distinct"
+
+        // Signatures sharing their first three parameters and differing past them: a key printed
+        // with `List.ToString()` stops at three elements and made these one signature.
+        testCase "dedupe-overloads keeps overloads that differ past the third parameter" <| fun _ ->
+            let parameter name reference =
+                { Name = name
+                  Optional = false
+                  Rest = false
+                  Type = reference }
+
+            let parameters last =
+                [ parameter "a" FsString
+                  parameter "b" FsString
+                  parameter "c" FsString
+                  parameter "d" last ]
+
+            let signature last =
+                { Docs = ""
+                  Tags = []
+                  TypeParameters = []
+                  Parameters = parameters last
+                  Return = FsUnit }
+
+            let model =
+                { Build.shapeModel [] with
+                    Decls =
+                        [ FsInterface
+                              { Name = "Store"
+                                Docs = ""
+                                Tags = []
+                                Order = None
+                                TypeParameters = []
+                                Inherits = []
+                                Members =
+                                  [ FsMethod
+                                        { Name = "set"
+                                          Docs = ""
+                                          Tags = []
+                                          TypeParameters = []
+                                          Parameters = parameters FsString
+                                          Return = FsUnit }
+                                    FsMethod
+                                        { Name = "set"
+                                          Docs = ""
+                                          Tags = []
+                                          TypeParameters = []
+                                          Parameters = parameters FsFloat
+                                          Return = FsUnit }
+                                    FsInvoke(signature FsString)
+                                    FsInvoke(signature FsFloat)
+                                    FsConstructor(signature FsString)
+                                    FsConstructor(signature FsFloat) ]
+                                Entrypoint = None
+                                CreateOverloads = []
+                                Statics = [] } ] }
+
+            let deduped, findings = Build.runPass Overloads.dedupeOverloads model
+
+            Expect.isEmpty findings "no pair widens to one F# signature"
+
+            match deduped.Decls |> List.pick (function FsInterface d -> Some d | _ -> None) with
+            | decl -> Expect.equal decl.Members.Length 6 "every overload survives"
+
+        // `M<'A>(x: string)` and `M(x: string)` are two .NET signatures: generic arity separates
+        // them, and F# resolves a call to the non-generic one.
+        testCase "dedupe-overloads keeps overloads that differ only in generic arity" <| fun _ ->
+            let method' typeParameters =
+                FsMethod
+                    { Name = "read"
+                      Docs = ""
+                      Tags = []
+                      TypeParameters = typeParameters
+                      Parameters =
+                        [ { Name = "x"
+                            Optional = false
+                            Rest = false
+                            Type = FsString } ]
+                      Return = FsString }
+
+            let model =
+                { Build.shapeModel [] with
+                    Decls =
+                        [ FsInterface
+                              { Name = "Store"
+                                Docs = ""
+                                Tags = []
+                                Order = None
+                                TypeParameters = []
+                                Inherits = []
+                                Members =
+                                  [ method' [ { Name = "A"; Constraint = None } ]
+                                    method' []
+                                    method' [ { Name = "B"; Constraint = None } ] ]
+                                Entrypoint = None
+                                CreateOverloads = []
+                                Statics = [] } ] }
+
+            let deduped, findings = Build.runPass Overloads.dedupeOverloads model
+
+            Expect.equal
+                (findings |> List.map (fun f -> f.Key, f.Symbol))
+                [ "DO001", "Store.read" ]
+                "only the second generic overload repeats a signature"
+
+            match deduped.Decls |> List.pick (function FsInterface d -> Some d | _ -> None) with
+            | decl ->
+                Expect.equal
+                    (decl.Members
+                     |> List.map (function
+                         | FsMethod m -> m.TypeParameters.Length
+                         | _ -> -1))
+                    [ 1; 0 ]
+                    "the generic and the non-generic overload both survive"
 
         // A method whose two call signatures differ only in the string literal typing their
         // second parameter: the collision `dedupe-overloads` would otherwise price, and the one
@@ -4712,4 +4825,70 @@ let unionArmOverloadTests =
 
             Expect.equal (signatures expanded) (signatures model) "nothing is synthesized"
             Expect.isEmpty findings "and nothing is reported"
+    ]
+
+// Each row is a pair of static-member overloads probed under dotnet fsi against Fable.Core 5.2.0,
+// called with the arguments the pair shares.
+[<Tests>]
+let compiledSignatureOverlapTests =
+    let required name typeRef =
+        { Name = name
+          Optional = false
+          Rest = false
+          Type = typeRef }
+
+    let optional name typeRef =
+        { required name typeRef with Optional = true }
+
+    let rest name typeRef =
+        { required name typeRef with Rest = true }
+
+    let overlaps a b =
+        Spec.CompiledSignature.overlaps Map.empty ([], a) ([], b)
+
+    let row name expected a b =
+        testCase name <| fun _ ->
+            Expect.equal (overlaps a b) expected "one direction"
+            Expect.equal (overlaps b a) expected "and the other"
+
+    testList "CompiledSignature.overlaps" [
+        row "(x) beside (x, ?y) resolves to (x)" false [ required "x" FsString ] [
+            required "x" FsString
+            optional "y" FsFloat
+        ]
+        row "(x) beside (x, ...r) resolves to (x)" false [ required "x" FsString ] [
+            required "x" FsString
+            rest "r" (FsArray FsFloat)
+        ]
+        row "(x, ?y) beside (x, ?y, ?z) is FS0041" true [ required "x" FsString; optional "y" FsFloat ] [
+            required "x" FsString
+            optional "y" FsFloat
+            optional "z" FsBool
+        ]
+        row "(x, ?y) beside (x, y, ?z) resolves to (x, ?y) at two arguments" false [
+            required "x" FsString
+            optional "y" FsFloat
+        ] [ required "x" FsString; required "y" FsFloat; optional "z" FsBool ]
+        row "(x) beside (x) is one signature" true [ required "x" FsString ] [ required "x" FsString ]
+        row "(x, y) beside (x, ?y) is FS0041" true [ required "x" FsString; required "y" FsFloat ] [
+            required "x" FsString
+            optional "y" FsFloat
+        ]
+        // `url.parse`: an optional parameter's reference arrives `option`-wrapped and renders unwrapped.
+        row "(x, ?y, ?z) beside (x, y, ?z) is FS0041 at two arguments" true [
+            required "x" FsString
+            optional "y" (FsOption FsBool)
+            optional "z" (FsOption FsBool)
+        ] [ required "x" FsString; required "y" FsBool; optional "z" (FsOption FsBool) ]
+        row "(x: string, ?y) beside (x: float, ?y, ?z) resolves by type" false [
+            required "x" FsString
+            optional "y" FsFloat
+        ] [ required "x" FsFloat; optional "y" FsFloat; optional "z" FsBool ]
+
+        testCase "generic arity separates otherwise equal signatures" <| fun _ ->
+            let parameters = [ required "x" FsString ]
+
+            Expect.isFalse
+                (Spec.CompiledSignature.overlaps Map.empty ([ { Name = "A"; Constraint = None } ], parameters) ([], parameters))
+                "F# resolves the call to the non-generic overload"
     ]

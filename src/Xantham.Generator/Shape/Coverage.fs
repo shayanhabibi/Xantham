@@ -43,11 +43,13 @@ let auditCoverage: Pass<ShapeModel> =
 
                     // An export is represented by a declaration carrying its name, by a declaration nested
                     // under a module of its name (a TS namespace), or by a declaration whose final segment is
-                    // its name (a specifier-scoped or namespace-contested type).
+                    // its name (a specifier-scoped or namespace-contested type), or by a declaration
+                    // carrying the name assigned by `name-exports` (`$Shape` declared `Shape`).
                     let represented (export: HarvestedExport) =
                         let exported = name export
 
                         Set.contains exported generated
+                        || Set.contains (qualifiedName export) generated
                         || generated
                            |> Set.exists (fun declared ->
                                declared.StartsWith(exported + ".") || declared.EndsWith("." + exported))

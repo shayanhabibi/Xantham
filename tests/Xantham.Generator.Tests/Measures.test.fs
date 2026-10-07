@@ -8,29 +8,26 @@ open Xantham.Generator
 
 /// Compile against the built consumer surface, rather than testing only helper inference.
 let private compile source =
-    let directory = Path.Combine(Path.GetTempPath(), "xantham-measures-" + Guid.NewGuid().ToString("N"))
-    Directory.CreateDirectory directory |> ignore
-    try
-        let script = Path.Combine(directory, "check.fsx")
-        let assembly = typeof<GeneratorConfig>.Assembly.Location.Replace("\"", "\"\"")
-        File.WriteAllText(script, $"#r @\"{assembly}\"\nopen Xantham.Generator\n{source}\n")
-        let start = ProcessStartInfo("dotnet")
-        start.UseShellExecute <- false
-        start.CreateNoWindow <- true
-        start.RedirectStandardOutput <- true
-        start.RedirectStandardError <- true
-        for argument in [ "fsi"; "--exec"; "--nologo"; script ] do
-            start.ArgumentList.Add argument
-        use child = Process.Start start
-        let output = child.StandardOutput.ReadToEndAsync()
-        let errors = child.StandardError.ReadToEndAsync()
-        if not (child.WaitForExit 30000) then
-            child.Kill(true)
-            child.WaitForExit()
-            failtest "measure compilation exceeded 30 seconds"
-        child.ExitCode, output.GetAwaiter().GetResult() + errors.GetAwaiter().GetResult()
-    finally
-        Directory.Delete(directory, true)
+    use scratch = Scratch.directory "xantham-measures"
+    let directory = scratch.Path
+    let script = Path.Combine(directory, "check.fsx")
+    let assembly = typeof<GeneratorConfig>.Assembly.Location.Replace("\"", "\"\"")
+    File.WriteAllText(script, $"#r @\"{assembly}\"\nopen Xantham.Generator\n{source}\n")
+    let start = ProcessStartInfo("dotnet")
+    start.UseShellExecute <- false
+    start.CreateNoWindow <- true
+    start.RedirectStandardOutput <- true
+    start.RedirectStandardError <- true
+    for argument in [ "fsi"; "--exec"; "--nologo"; script ] do
+        start.ArgumentList.Add argument
+    use child = Process.Start start
+    let output = child.StandardOutput.ReadToEndAsync()
+    let errors = child.StandardError.ReadToEndAsync()
+    if not (child.WaitForExit 30000) then
+        child.Kill(true)
+        child.WaitForExit()
+        failtest "measure compilation exceeded 30 seconds"
+    child.ExitCode, output.GetAwaiter().GetResult() + errors.GetAwaiter().GetResult()
 
 [<Tests>]
 let tests =

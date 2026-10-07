@@ -213,8 +213,23 @@ let private goldenMismatch (label: string) (rendered: string) (golden: string) =
               --stat` and the manifest counts - see .claude/rules/generator-fixtures.md."
         )
 
+/// Committed files under a fixture's golden directory that a run is not expected to write, as
+/// paths relative to that directory with `/` separators. The corpus carries none today.
+let private keptGolden (_relative: string) = false
+
+/// Every file under `goldenDir`, relative to it with `/` separators.
+let private goldenFiles (goldenDir: string) =
+    if Directory.Exists goldenDir then
+        Directory.GetFiles(goldenDir, "*", SearchOption.AllDirectories)
+        |> Array.map (fun path -> Path.GetRelativePath(goldenDir, path).Replace('\\', '/'))
+        |> Array.sort
+        |> Array.toList
+    else
+        []
+
 /// The golden diff for one fixture: every rendered file matches its committed text, byte for
-/// byte (`XANTHAM_UPDATE_GOLDEN=1` rewrites the corpus instead - review the diff).
+/// byte, and the golden directory holds no file the run did not render (`XANTHAM_UPDATE_GOLDEN=1`
+/// rewrites the corpus and deletes those files instead - review the diff).
 let private matchesGoldens (fixture: string) (config: GeneratorConfig) (package: string) =
     let goldenDir = Path.Combine(__SOURCE_DIRECTORY__, "golden", fixture)
     let rendered = Async.RunSynchronously(Pipeline.generate config package)
@@ -234,16 +249,41 @@ let private matchesGoldens (fixture: string) (config: GeneratorConfig) (package:
             Directory.CreateDirectory(Path.GetDirectoryName path) |> ignore
             File.WriteAllText(path, content, Text.UTF8Encoding false)
     else
-        for name, content in rendered.Files do
-            match readGolden goldenDir name with
-            | None ->
-                failtest
-                    $"golden {fixture}/{name} does not exist - run once with XANTHAM_UPDATE_GOLDEN=1 \
-                      and review the diff"
-            | Some golden ->
-                match goldenMismatch $"{fixture}/{name}" content golden with
-                | Some report -> failtest report
-                | None -> ()
+        let reports =
+            rendered.Files
+            |> List.choose (fun (name, content) ->
+                match readGolden goldenDir name with
+                | None ->
+                    Some(
+                        $"golden {fixture}/{name} does not exist - run once with XANTHAM_UPDATE_GOLDEN=1 \
+                          and review the diff"
+                    )
+                | Some golden -> goldenMismatch $"{fixture}/{name}" content golden)
+
+        match reports with
+        | [] -> ()
+        | reports -> failtest (String.concat "\n\n" reports)
+
+    let renderedNames = rendered.Files |> List.map fst |> Set.ofList
+
+    let stale =
+        goldenFiles goldenDir
+        |> List.filter (fun name -> not (renderedNames.Contains name || keptGolden name))
+
+    if updateGoldens then
+        for name in stale do
+            File.Delete(Path.Combine(goldenDir, name))
+    else
+        match stale with
+        | [] -> ()
+        | stale ->
+            let listed =
+                stale |> List.map (fun name -> $"  {fixture}/{name}") |> String.concat "\n"
+
+            failtest
+                $"golden/{fixture} holds files this run did not render (the compile gate compiles \
+                  every .fs file there):\n{listed}\n\
+                  Run once with XANTHAM_UPDATE_GOLDEN=1 to delete them, and review the diff."
 
     rendered
 
@@ -256,6 +296,31 @@ let private unionArmConfig =
                 Enabled = true
             }
     }
+
+/// Fixtures whose goldens depend on the host file system's case sensitivity. `solid-js` ships
+/// `types/render/Suspense.d.ts`; the compiler reports that path case-folded on Windows, where the
+/// goldens are generated, so they record `suspense.d.ts` and order its declarations after
+/// `component.d.ts`. On Linux the path keeps its capital, sorts first, and moves `SuspenseList`
+/// ahead of `Component`. The goldens will hold on both once `Grouping.sourceOrderKey` and the
+/// manifest's `file` field read one casing on every platform.
+let private caseFoldSensitive = set [ "solid-js" ]
+
+/// Runs `check`; on Linux, for a `caseFoldSensitive` fixture, a failure is printed to stdout and
+/// the test is skipped rather than failed.
+let private caseFoldGuard (fixture: string) (check: unit -> unit) =
+    if OperatingSystem.IsLinux() && caseFoldSensitive.Contains fixture then
+        try
+            check ()
+        with
+        | :? IgnoreException -> reraise ()
+        | failure ->
+            printfn $"{fixture} differs on Linux (case-folded declaration paths):\n{failure.Message}"
+
+            skiptest
+                $"{fixture} differs on Linux: the goldens record Windows' case-folded declaration \
+                  paths - the difference is printed above"
+    else
+        check ()
 
 let private fixtureTests (fixture: string) (package: string option) (config: GeneratorConfig) extra =
     match Tsc.locate __SOURCE_DIRECTORY__, package with
@@ -292,13 +357,9 @@ let private fixtureTests (fixture: string) (package: string option) (config: Gen
                     regenerate the goldens (XANTHAM_UPDATE_GOLDEN=1) in the same commit." ]
     | Some _, Some package ->
         [ testCase $"{fixture} generates the committed goldens" <| fun _ ->
-              // TODO fix solid-js on CI
-              if fixture.Contains("solid-js") && OperatingSystem.IsLinux() then skiptest "solid-js" else
-              matchesGoldens fixture config package |> ignore
+              caseFoldGuard fixture (fun () -> matchesGoldens fixture config package |> ignore)
 
           testCase $"{fixture} generation is deterministic run to run" <| fun _ ->
-              // TODO fix solid-js on CI
-              if fixture.Contains("solid-js") && OperatingSystem.IsLinux() then skiptest "solid-js" else
               let first = Async.RunSynchronously(Pipeline.generate config package)
               let second = Async.RunSynchronously(Pipeline.generate config package)
 
@@ -322,19 +383,14 @@ let private unexplainedDrops (rendered: RenderModel) =
 [<Tests>]
 let configTests =
     let withConfig (json: string) (test: GeneratorConfig -> unit) =
-        let dir = Path.Combine(Path.GetTempPath(), "xantham-config-" + Guid.NewGuid().ToString "N")
-        Directory.CreateDirectory dir |> ignore
-
-        try
-            File.WriteAllText(Path.Combine(dir, "xantham.json"), json)
-            test (GeneratorConfig.load dir)
-        finally
-            Directory.Delete(dir, true)
+        use dir = Scratch.directory "xantham-config"
+        File.WriteAllText(Path.Combine(dir.Path, "xantham.json"), json)
+        test (GeneratorConfig.load dir.Path)
 
     testList "generator config" [
         testCase "a missing file is the default" <| fun _ ->
-            let dir = Path.Combine(Path.GetTempPath(), "xantham-config-" + Guid.NewGuid().ToString "N")
-            Expect.equal (GeneratorConfig.load dir) GeneratorConfig.Default "nothing configured"
+            use dir = Scratch.directory "xantham-config"
+            Expect.equal (GeneratorConfig.load dir.Path) GeneratorConfig.Default "nothing configured"
 
         testCase "compilerLib defaults to the TypeScript library layout" <| fun _ ->
             let layout = GeneratorConfig.Default.CompilerLib |> CompilerLibLayout.create
@@ -2720,6 +2776,35 @@ let pipelineTests =
                           [ "UA004" ]
                           "the collision is recorded against the member that declined"
 
+                  testCase "an arm that is a prefix of a declared overload with an optional tail expands" <| fun _ ->
+                      let source = (rendered ()).Files |> List.head |> snd
+
+                      Expect.stringContains
+                          source
+                          "static member prefix (x: string) : string"
+                          "a call `prefix \"a\"` selects the arm, which leaves no optional unsupplied"
+
+                      Expect.stringContains source "static member prefix (x: float) : string" "every arm is synthesized"
+
+                      Expect.stringContains
+                          source
+                          "static member prefix (x: string, ?y: float) : string"
+                          "beside the overload TypeScript declared"
+
+                      Expect.equal (findingsFor "Exports.prefix") [ "UA001" ] "the expansion is recorded"
+
+                  testCase "an arm leaving an optional unsupplied beside a declared overload doing the same refuses the member" <| fun _ ->
+                      let source = (rendered ()).Files |> List.head |> snd
+
+                      Expect.isFalse
+                          (source.Contains "static member ambiguous (x: string, ?y: float) : string")
+                          "a call `ambiguous \"a\"` would select the arm and the declared overload alike"
+
+                      Expect.equal
+                          (findingsFor "Exports.ambiguous")
+                          [ "UA004" ]
+                          "the ambiguity is recorded as a collision"
+
                   testCase "a union over the cap keeps its union member alone" <| fun _ ->
                       Expect.equal (findingsFor "Exports.wide") [ "UA002" ] "five arms against a cap of four"
 
@@ -3680,7 +3765,7 @@ let pipelineTests =
                       Expect.isEmpty
                           (rendered.Findings |> List.filter (fun f -> f.Key = "SE002"))
                           "a configured runtime was not derived, so there is nothing to report" ])
-        // The fixture behind docs/fable5-workarounds.md. Each declaration is one documented
+        // The fixture behind docs/.ai/fable5-workarounds.md. Each declaration is one documented
         // Fable 5 loss; the assertions pin the emitted shape the document quotes, and the run
         // gate proves the workaround against tests/fixtures/fable-workaround-lab/index.js.
         yield!
@@ -3717,7 +3802,7 @@ let pipelineTests =
                               "abstract notify: count: float -> string"
                               "a member the consumer has to supply" ])
 
-        // Wave four lane O (docs/fable5-workarounds.md §3). A method reads as a delegate-typed
+        // Wave four lane O (docs/.ai/fable5-workarounds.md §3). A method reads as a delegate-typed
         // Create parameter; the four negatives keep getting no Create, each with its reason.
         yield!
             fixtureTests
@@ -5054,4 +5139,81 @@ let catalogClassInheritanceTests =
     testList "catalog class inheritance fixture" [
         yield!
             fixtureTests "catalog-class-inheritance-lab" package config (fun _ -> [])
+    ]
+
+[<Tests>]
+let overloadArityTests =
+    testList "overload arity fixture" [
+        yield!
+            fixtureTests "overload-arity-lab" (handFixture "overload-arity-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "overloads separated past the third parameter both survive" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains
+                          source
+                          "abstract write: a: string * b: string * c: string * d: string -> unit"
+                          "the string overload"
+
+                      Expect.stringContains
+                          source
+                          "abstract write: a: string * b: string * c: string * d: float -> unit"
+                          "and the float overload"
+
+                      Expect.stringContains
+                          source
+                          "abstract Invoke: a: string * b: string * c: string * d: float -> unit"
+                          "call signatures separate the same way"
+
+                      Expect.equal
+                          (rendered.Findings
+                           |> List.filter (fun f -> f.Key = "DO001")
+                           |> List.map _.Symbol)
+                          [ "Writer.pad" ]
+                          "only the pair F# cannot separate is dropped" ])
+    ]
+
+[<Tests>]
+let dollarNameTests =
+    testList "dollar name fixture" [
+        yield!
+            fixtureTests "dollar-name-lab" (handFixture "dollar-name-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a `$` name declares as an F# identifier and imports as JavaScript spells it" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.isFalse (source.Contains "type ``$") "no declaration keeps the `$`"
+                      Expect.isFalse (source.Contains "'$") "no type variable keeps the `$`"
+                      Expect.stringContains source "type Shape =" "the interface"
+                      Expect.stringContains source "type Box<'_T> =" "the type parameter"
+                      Expect.stringContains source "\"$Cls\"" "the class imports under its JavaScript name"
+
+                      let sanitised =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Key = "SY005")
+                          |> List.map _.Symbol
+
+                      Expect.contains sanitised "Shape" "the interface is reported"
+                      Expect.contains sanitised "Cls" "and the class"
+                      Expect.contains sanitised "Taken2" "and the name that yields to a verbatim one"
+                      Expect.stringContains source "type Early =" "a verbatim name harvested second keeps it"
+                      Expect.stringContains source "type Early2 =" "and the sanitised one harvested first yields"
+                      Expect.contains sanitised "Early2" "the yielding name is reported"
+                      Expect.contains sanitised "Apart" "a sanitised name keeps a spelling verbatim only elsewhere"
+                      Expect.isFalse (source.Contains "Apart2") "so it takes no suffix"
+                      Expect.stringContains source "type Pair<'_T2, '_T> =" "a colliding type variable takes a suffix"
+                      Expect.stringContains source "type Lone<'_T> =" "a lone `$` avoids the wildcard"
+                      Expect.stringContains source "'_T2" "a method variable yields to its declaration's"
+                      Expect.stringContains
+                          source
+                          "Create (map: ('_T2 -> '_T)) : Inner<'_T>"
+                          "a verbatim method variable yields to a sanitised enclosing one"
+                      Expect.isFalse (source.Contains "'_ ") "no type variable is the wildcard"
+
+                      let unrepresented =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Key = "AC001")
+                          |> List.map _.Symbol
+
+                      Expect.isEmpty unrepresented "every sanitised declaration represents its export" ])
     ]

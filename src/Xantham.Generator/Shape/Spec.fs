@@ -1515,11 +1515,7 @@ and internal typeRefOnPath
     | None ->
         match Map.tryFind typeId model.NotFollowed with
         | Some reason -> FsObj, [ Finding.make owner (TypeReference.TypeNotResolved reason) ]
-        | None ->
-            FsObj,
-            [
-                Finding.make owner (TypeReference.MissingFromTypeTable(typeId / uom<typeId>))
-            ]
+        | None -> FsObj, [ Finding.make owner TypeReference.MissingFromTypeTable ]
     | Some facts ->
         let has f = flag f facts
 
@@ -2377,18 +2373,61 @@ let typeParamsOf
 
     let named =
         ids
-        |> List.choose (fun id ->
+        |> List.indexed
+        |> List.choose (fun (position, id) ->
             match
                 Map.tryFind id model.Types
                 |> Option.bind (_.SymbolName >> Option.map (fun value -> value / uom<symbolName>))
             with
             | Some name -> Some(id, name)
             | None ->
-                findings <-
-                    findings
-                    @ [ Finding.make owner (TypeParameters.UnnamedTypeParameter(id / uom<typeId>)) ]
+                findings <- findings @ [ Finding.make owner (TypeParameters.UnnamedTypeParameter position) ]
 
                 None)
+
+    // A sanitised spelling yields to every name already in scope and to each verbatim name in
+    // the list, taking the first free numeric suffix: `<$T, _T>` is written `<'_T2, '_T>`.
+    let verbatim =
+        named
+        |> List.map snd
+        |> List.filter (fun name -> Naming.typeVariable name = name)
+        |> Set.ofList
+
+    // Written names in scope that differ from their TypeScript spelling. A verbatim name equal
+    // to one of these takes a suffix too: in `Outer<$T> { map<_T>() }` the method's `_T` is
+    // written `'_T2` beside the enclosing `'_T`.
+    let sanitisedInScope =
+        model.TypeVars
+        |> Map.toList
+        |> List.choose (fun (id, written) ->
+            match Map.tryFind id model.Types |> Option.bind _.SymbolName with
+            | Some name when name / uom<symbolName> <> written -> Some written
+            | _ -> None)
+        |> Set.ofList
+
+    let named =
+        named
+        |> List.fold
+            (fun (written, taken) (id, name) ->
+                let spelled = Naming.typeVariable name
+
+                if spelled = name && not (Set.contains name sanitisedInScope) then
+                    written @ [ id, name ], taken
+                else
+                    let free =
+                        Seq.initInfinite (fun index -> index)
+                        |> Seq.map (fun index -> if index = 0 then spelled else $"{spelled}{index + 1}")
+                        |> Seq.find (fun candidate -> not (Set.contains candidate taken))
+
+                    findings <-
+                        findings
+                        @ [
+                            Finding.make owner (SynthesizeAnonymous.NameSanitisedForIdentifier(name, free))
+                        ]
+
+                    written @ [ id, free ], Set.add free taken)
+            ([], model.TypeVars |> Map.toList |> List.map snd |> Set.ofList |> Set.union verbatim)
+        |> fst
 
     // Layered onto whatever is already in scope rather than replacing it: a generic *method*
     // binds its own parameters on top of its declaration's, and `read<K extends keyof T>` has
@@ -2499,7 +2538,7 @@ let internal aliasTypeParams (ctx: Context) (model: ShapeModel) (owner: string) 
         groups
         |> List.choose (fun (identity, group) ->
             match identity, group with
-            | Ok(name, _), _ :: (_ :: _ as tail) -> Some(name, tail, group.Length)
+            | Ok(name, _), head :: (_ :: _ as tail) -> Some(name, head, tail, group.Length)
             | _ -> None)
 
     let parameters, scope, findings =
@@ -2509,12 +2548,14 @@ let internal aliasTypeParams (ctx: Context) (model: ShapeModel) (owner: string) 
     let scope =
         collapsed
         |> List.fold
-            (fun bound (name, tail, _) -> tail |> List.fold (fun bound id -> Map.add id name bound) bound)
+            (fun bound (_, head, tail, _) ->
+                let written = Map.find head bound
+                tail |> List.fold (fun bound id -> Map.add id written bound) bound)
             scope
 
     let collapseFindings =
         collapsed
-        |> List.map (fun (name, _, declared) ->
+        |> List.map (fun (name, _, _, declared) ->
             Finding.make owner (TypeParameters.DuplicateTypeParameterCollapsed(name, declared)))
 
     let hoistFindings =
@@ -3199,3 +3240,120 @@ let rec expandAbbreviations (abbrevs: Map<string, FsTypeRef>) (visited: Set<stri
     | FsDelegate(args, ret) -> FsDelegate(List.map recur args, recur ret)
     | FsFunc(argument, ret) -> FsFunc(recur argument, recur ret)
     | other -> other
+
+/// Signatures as .NET overload resolution compares them: abbreviations expanded at every depth and
+/// a signature's own type variables renamed by position.
+module CompiledSignature =
+    /// The reference with every abbreviation expanded, at any depth. A cycle stops at its first
+    /// repeated name.
+    let rec normalize (abbrevs: Map<string, FsTypeRef>) (visited: Set<string>) (reference: FsTypeRef) : FsTypeRef =
+        let recur = normalize abbrevs visited
+
+        match reference with
+        | FsNamed name when Map.containsKey name abbrevs && not (Set.contains name visited) ->
+            normalize abbrevs (Set.add name visited) abbrevs[name]
+        | FsOption inner -> FsOption(recur inner)
+        | FsArray element -> FsArray(recur element)
+        | FsTuple components -> FsTuple(List.map recur components)
+        | FsErasedUnion arms -> FsErasedUnion(List.map recur arms)
+        | FsDelegate(args, ret) -> FsDelegate(List.map recur args, recur ret)
+        | FsFunc(argument, ret) -> FsFunc(recur argument, recur ret)
+        | FsApp(name, args) -> FsApp(name, List.map recur args)
+        | FsBranded(primitive, measure) -> FsBranded(recur primitive, measure)
+        | other -> other
+
+    let rec private renameTypeVars (rename: Map<string, string>) (reference: FsTypeRef) : FsTypeRef =
+        let recur = renameTypeVars rename
+
+        match reference with
+        | FsTypeVar name -> FsTypeVar(rename |> Map.tryFind name |> Option.defaultValue name)
+        | FsOption inner -> FsOption(recur inner)
+        | FsArray element -> FsArray(recur element)
+        | FsTuple components -> FsTuple(List.map recur components)
+        | FsErasedUnion arms -> FsErasedUnion(List.map recur arms)
+        | FsDelegate(args, ret) -> FsDelegate(List.map recur args, recur ret)
+        | FsFunc(argument, ret) -> FsFunc(recur argument, recur ret)
+        | FsApp(name, args) -> FsApp(name, List.map recur args)
+        | FsBranded(primitive, measure) -> FsBranded(recur primitive, measure)
+        | other -> other
+
+    /// The reference as the compiler sees it inside a signature declaring `typeParameters`: the
+    /// signature's own type variables are renamed by position, then abbreviations expand.
+    let compiled (abbrevs: Map<string, FsTypeRef>) (typeParameters: FsTypeParam list) (reference: FsTypeRef) =
+        let rename = typeParameters |> List.mapi (fun i p -> p.Name, $"T{i}") |> Map.ofList
+
+        normalize abbrevs Set.empty (renameTypeVars rename reference)
+
+    /// The compiled parameter signature: generic arity, plus optionality, rest and type per
+    /// position.
+    let parameterKey (abbrevs: Map<string, FsTypeRef>) (typeParameters: FsTypeParam list) (parameters: FsParam list) =
+        typeParameters.Length,
+        parameters
+        |> List.map (fun p -> p.Optional, p.Rest, compiled abbrevs typeParameters p.Type)
+
+    /// The parameter's type as written in its slot: an optional parameter renders `?name: T`
+    /// for a `T option` reference.
+    let private slotType (abbrevs: Map<string, FsTypeRef>) (typeParameters: FsTypeParam list) (p: FsParam) =
+        match p.Type with
+        | FsOption inner when p.Optional -> compiled abbrevs typeParameters inner
+        | other -> compiled abbrevs typeParameters other
+
+    /// Whether `longer` begins with `shorter`'s parameter types and the rest of `longer` may be
+    /// omitted at the call. The two may be the same length, differing in optionality alone.
+    let private typedPrefix
+        (abbrevs: Map<string, FsTypeRef>)
+        (shorter: FsTypeParam list * FsParam list)
+        (longer: FsTypeParam list * FsParam list)
+        =
+        let shorterTypes, shorterParams = shorter
+        let longerTypes, longerParams = longer
+
+        shorterParams.Length <= longerParams.Length
+        && shorterTypes.Length = longerTypes.Length
+        && List.forall2
+            (fun (a: FsParam) (b: FsParam) ->
+                a.Rest = b.Rest
+                && slotType abbrevs shorterTypes a = slotType abbrevs longerTypes b)
+            shorterParams
+            (List.take shorterParams.Length longerParams)
+        && (longerParams
+            |> List.skip shorterParams.Length
+            |> List.forall (fun p -> p.Optional || p.Rest))
+
+    /// Whether one signature's parameters are a typed prefix of the other's and some call selects
+    /// either, which F# reports as FS0041: the call supplies an argument count both accept and
+    /// leaves an optional parameter unsupplied in both or in neither, and likewise a `ParamArray`.
+    /// `(x)` beside `(x, ?y)` resolves to `(x)` at every call; `(x, ?y)` beside `(x, ?y, ?z)` is
+    /// ambiguous at the call supplying `x` alone, and `(x, ?y)` beside `(x, y)` at the call
+    /// supplying both. Generic arity separates otherwise equal signatures.
+    let ambiguousCall
+        (abbrevs: Map<string, FsTypeRef>)
+        (a: FsTypeParam list * FsParam list)
+        (b: FsTypeParam list * FsParam list)
+        =
+        let aParams = snd a
+        let bParams = snd b
+
+        let accepts (parameters: FsParam list) supplied =
+            parameters |> List.skip supplied |> List.forall (fun p -> p.Optional || p.Rest)
+
+        let leaves (kind: FsParam -> bool) (parameters: FsParam list) supplied =
+            parameters |> List.skip supplied |> List.exists kind
+
+        (typedPrefix abbrevs a b || typedPrefix abbrevs b a)
+        && [ 0 .. min aParams.Length bParams.Length ]
+           |> List.exists (fun supplied ->
+               accepts aParams supplied
+               && accepts bParams supplied
+               && leaves _.Optional aParams supplied = leaves _.Optional bParams supplied
+               && leaves _.Rest aParams supplied = leaves _.Rest bParams supplied)
+
+    /// Whether a call can select either signature: one compiled parameter signature, or an
+    /// `ambiguousCall`.
+    let overlaps
+        (abbrevs: Map<string, FsTypeRef>)
+        (a: FsTypeParam list * FsParam list)
+        (b: FsTypeParam list * FsParam list)
+        =
+        parameterKey abbrevs (fst a) (snd a) = parameterKey abbrevs (fst b) (snd b)
+        || ambiguousCall abbrevs a b

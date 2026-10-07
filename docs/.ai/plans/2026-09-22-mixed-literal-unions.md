@@ -31,7 +31,8 @@ form keeps it, and `Origin.Num 3.5` is a direct application with no `!^` needed.
 returned zero eligible unions and this plan was closed on that basis; the second run, against
 raw `TypeFacts` rather than rendered `FsTypeRef`s, returned **11 eligible out of 45**. The
 first number was a measurement artifact — see "Step 0 result" below. The design is settled and
-empirically validated against Fable 5.13.0. What is not settled is whether 11 unions justify a
+empirically validated against Fable 5.13.0, before the repository pinned the `fable` tool at
+5.17.2. What is not settled is whether 11 unions justify a
 new decl case, a new render template, and a runtime round-trip test. Everything marked
 *verified* was observed in emitted JavaScript, not recalled.
 
@@ -139,7 +140,7 @@ error here whenever the sole literal is lowercase.
 
 ## Step 0 — go/no-go gate
 
-- [x] Wire the classifier from `mixed-union-classifier.fsx` (see "Prototype" below) into a
+- [x] Wire the classifier (see "Prototype" below; the census is `Shape/MixedUnionCensus.fs`) into a
       throwaway counting pass. No model or render changes.
 - [x] Over Anime.js and two other packages, count: unions mixing string literals with
       non-literal members; and of those, how many pass every condition below.
@@ -168,9 +169,9 @@ counted as *eligible*, so every number below is an upper bound.
 
 An earlier run of this step reported 18 unique and 0 eligible, and this plan was closed on it.
 That census read rendered `FsTypeRef`s. String literals are widened to `FsString` inside the
-shared type-reference reader (`Spec.fs:1542`), so it saw `U3<float, string, float[]>` where the
-source said `number | "first" | "center" | "last" | "random" | Array<number>` and scored a
-union that never had a bare `string` arm as though it had one. That put 12 unions in a
+shared type-reference reader (the `StringLiteralToString` arm of `typeRefOnPath` in `Spec.fs`),
+so it saw `U3<float, string, float[]>` where the source said
+`number | "first" | "center" | "last" | "random" | Array<number>` and scored a union that never had a bare `string` arm as though it had one. That put 12 unions in a
 `Str`-arm bucket that does not exist, and the literals it was supposed to be counting had
 already been destroyed before it looked.
 

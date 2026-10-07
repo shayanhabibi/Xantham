@@ -1,6 +1,8 @@
 ﻿module Xantham.TypeScript.Wire.Tests.Mailbox
 
+open System
 open System.IO
+open System.Threading
 open Expecto
 open Xantham.TypeScript.Wire
 
@@ -160,7 +162,120 @@ let mailboxTests =
 
             // Timed rather than open-ended: a mailbox that failed to shut down would otherwise
             // hang the suite instead of failing it.
-            Expect.throws
+            Expect.throwsT<ObjectDisposedException>
                 (fun () -> Async.RunSynchronously(mailbox.parseCommandLine commandLine, timeout = 2000) |> ignore)
                 "nothing is served once the mailbox and its channel are closed")
+
+        // The agent is held inside a callback while 50 requests queue behind it. The disposal
+        // sweep completes every queued request with ObjectDisposedException, and the held request
+        // completes on a live channel once released.
+        testCase "requests queued at disposal are all answered" <| fun () ->
+            match exePath with
+            | None -> ()
+            | Some exe ->
+                use entered = new ManualResetEventSlim(false)
+                use release = new ManualResetEventSlim(false)
+                let virtualFile = Path.Combine(fixtures, "held.ts").Replace('\\', '/')
+
+                let fs =
+                    { VirtualFileSystem.Default with
+                        ReadFile =
+                            ValueSome(fun path ->
+                                if path = virtualFile then
+                                    entered.Set()
+                                    release.Wait 10_000 |> ignore
+                                    Content "export const held = 1;\n"
+                                else
+                                    FallBack)
+                        FileExists = ValueSome(fun path -> if path = virtualFile then ValueSome true else ValueNone) }
+
+                // Released on every exit, a failed assertion included.
+                use _ = { new IDisposable with member _.Dispose() = release.Set() }
+                use mailbox = new TscMailbox(exe, fixtures, VirtualFileSystem.callbacks fs)
+                mailbox.initialize () |> Async.RunSynchronously |> ignore
+
+                let held =
+                    Async.StartAsTask(
+                        mailbox.createProgram(
+                            { Proto.CreateProgramParams.Default with
+                                RootFiles = ValueSome [| Proto.DocumentIdentifier.FileName virtualFile |] }
+                        )
+                    )
+
+                entered.Wait 10_000 |> Flip.Expect.isTrue "the agent is held inside the callback"
+
+                // Started immediately, so each is registered and queued before Dispose runs.
+                let calls =
+                    [| for i in 1 .. 50 ->
+                        Async.StartImmediateAsTask(
+                            mailbox.parseCommandLine(commandLine = [| "--strict"; $"file{i}.ts" |])
+                        ) |]
+
+                let disposing = Tasks.Task.Run(fun () -> mailbox.Dispose())
+
+                let all = Tasks.Task.WhenAll(calls |> Array.map (fun call -> call :> Tasks.Task))
+                let answered = all.ContinueWith(ignore).Wait 10_000
+                release.Set()
+                answered |> Flip.Expect.isTrue "every queued caller completes while the agent is held"
+
+                for call in calls do
+                    match call.Exception with
+                    | null -> failtest "a queued request was answered by the held agent"
+                    | e ->
+                        match e.InnerException with
+                        | :? ObjectDisposedException -> ()
+                        | other -> failtest $"a queued request failed with {other}"
+
+                disposing.Wait 10_000 |> Flip.Expect.isTrue "Dispose returns once the held batch finishes"
+
+                (held :> Tasks.Task).ContinueWith(ignore).Wait 10_000 |> Flip.Expect.isTrue "the held caller completes"
+    ]
+
+/// The batch dispatch rule, with no server: `one` and `many` stand in for the channel.
+[<Tests>]
+let batchTests =
+    let entry method = ProtoJson.batchEntryNoParams method
+
+    testList "mailbox batch" [
+        // The server executes every member of a batch before refusing it whole. Re-sending a
+        // mutating member repeats its effect.
+        testCase "a refused batch replays read-only requests and never re-sends a mutating one" <| fun _ ->
+            let sent = ResizeArray<string>()
+
+            let one (request: Proto.BatchRequest) =
+                sent.Add request.Method
+                [| 1uy |]
+
+            let many (_: Proto.BatchRequest[]) : Result<byte[], exn>[] =
+                raise (TsGoError(Proto.Method.BatchRequests, "json: unsupported value: +Inf"))
+
+            let results =
+                Batch.dispatch one many [| entry Proto.Method.GetAnyType; entry Proto.Method.Release; entry Proto.Method.GetStringType |]
+
+            List.ofSeq sent
+            |> Flip.Expect.equal "only the read-only requests are replayed" [ Proto.Method.GetAnyType; Proto.Method.GetStringType ]
+
+            match results with
+            | [| Ok _; Error(TsGoError(method, _)); Ok _ |] ->
+                method |> Flip.Expect.equal "the release carries the batch's own error" Proto.Method.BatchRequests
+            | other -> failtest $"unexpected results %A{other}"
+
+        testCase "a transport failure is every member's result, with nothing replayed" <| fun _ ->
+            let sent = ResizeArray<string>()
+
+            let one (request: Proto.BatchRequest) =
+                sent.Add request.Method
+                [||]
+
+            let failure = IOException "closed"
+            let many (_: Proto.BatchRequest[]) : Result<byte[], exn>[] = raise failure
+
+            let results = Batch.dispatch one many [| entry Proto.Method.GetAnyType; entry Proto.Method.GetStringType |]
+
+            sent.Count |> Flip.Expect.equal "nothing replayed" 0
+
+            for result in results do
+                match result with
+                | Error e -> Expect.isTrue (obj.ReferenceEquals(e, failure)) "the channel's own error"
+                | Ok _ -> failtest "a failed transport answered"
     ]

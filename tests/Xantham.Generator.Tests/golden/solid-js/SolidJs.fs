@@ -2514,6 +2514,12 @@ module Store =
         [<Emit("$0($1...)")>]
         abstract Invoke<'K1, 'K2, 'K3, 'K4, 'K5, 'K6>: k1: U3<'K1, 'K1[], U2<Func<obj, float, bool>, StorePathRange>> * k2: U3<'K2, 'K2[], U2<Func<obj, float, bool>, StorePathRange>> * k3: U3<'K3, 'K3[], U2<Func<obj, float, bool>, StorePathRange>> * k4: U3<'K4, 'K4[], U2<Func<obj, float, bool>, StorePathRange>> * k5: U3<'K5, 'K5[], U2<Func<obj, float, bool>, StorePathRange>> * k6: U3<'K6, 'K6[], U2<Func<obj, float, bool>, StorePathRange>> * k7: obj * setter: obj -> unit
         [<Emit("$0($1...)")>]
+        abstract Invoke<'K1, 'K2, 'K3, 'K4, 'K5>: k1: U3<'K1, 'K1[], U2<Func<obj, float, bool>, StorePathRange>> * k2: U3<'K2, 'K2[], U2<Func<obj, float, bool>, StorePathRange>> * k3: U3<'K3, 'K3[], U2<Func<obj, float, bool>, StorePathRange>> * k4: U3<'K4, 'K4[], U2<Func<obj, float, bool>, StorePathRange>> * k5: U3<'K5, 'K5[], U2<Func<obj, float, bool>, StorePathRange>> * k6: obj * setter: obj -> unit
+        [<Emit("$0($1...)")>]
+        abstract Invoke<'K1, 'K2, 'K3, 'K4>: k1: U3<'K1, 'K1[], U2<Func<obj, float, bool>, StorePathRange>> * k2: U3<'K2, 'K2[], U2<Func<obj, float, bool>, StorePathRange>> * k3: U3<'K3, 'K3[], U2<Func<obj, float, bool>, StorePathRange>> * k4: U3<'K4, 'K4[], U2<Func<obj, float, bool>, StorePathRange>> * k5: obj * setter: obj -> unit
+        [<Emit("$0($1...)")>]
+        abstract Invoke<'K1, 'K2, 'K3>: k1: U3<'K1, 'K1[], U2<Func<obj, float, bool>, StorePathRange>> * k2: U3<'K2, 'K2[], U2<Func<obj, float, bool>, StorePathRange>> * k3: U3<'K3, 'K3[], U2<Func<obj, float, bool>, StorePathRange>> * k4: obj * setter: obj -> unit
+        [<Emit("$0($1...)")>]
         abstract Invoke<'K1, 'K2>: k1: U3<'K1, 'K1[], U2<Func<obj, float, bool>, StorePathRange>> * k2: U3<'K2, 'K2[], U2<Func<obj, float, bool>, StorePathRange>> * k3: obj * setter: obj -> unit
         [<Emit("$0($1...)")>]
         abstract Invoke<'K1>: k1: U3<'K1, 'K1[], U2<Func<obj, float, bool>, StorePathRange>> * k2: obj * setter: obj -> unit
@@ -2521,6 +2527,8 @@ module Store =
         abstract Invoke: k1: obj * setter: obj -> unit
         [<Emit("$0($1...)")>]
         abstract Invoke: setter: obj -> unit
+        [<Emit("$0($1...)")>]
+        abstract Invoke<'K1, 'K2, 'K3, 'K4, 'K5, 'K6, 'K7>: k1: U3<'K1, 'K1[], U2<Func<obj, float, bool>, StorePathRange>> * k2: U3<'K2, 'K2[], U2<Func<obj, float, bool>, StorePathRange>> * k3: U3<'K3, 'K3[], U2<Func<obj, float, bool>, StorePathRange>> * k4: U3<'K4, 'K4[], U2<Func<obj, float, bool>, StorePathRange>> * k5: U3<'K5, 'K5[], U2<Func<obj, float, bool>, StorePathRange>> * k6: U3<'K6, 'K6[], U2<Func<obj, float, bool>, StorePathRange>> * k7: U3<'K7, 'K7[], U2<Func<obj, float, bool>, StorePathRange>> * [<ParamArray>] rest: obj -> unit
 
     type StoreReturn<'T> = 'T * Action<obj, obj, obj, obj, obj, obj, obj, obj>
 

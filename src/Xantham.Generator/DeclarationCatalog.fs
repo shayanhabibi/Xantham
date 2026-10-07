@@ -1020,6 +1020,47 @@ let private classValues (ctx: Context) (shape: ShapeModel) (groups: Render.Group
 
     shape, groups, values
 
+/// The text hashed into a catalog's constraint and API fields. Distinct values print distinctly,
+/// at any length.
+module Canonical =
+    let text (value: string) = JsonSerializer.Serialize value
+
+    let node (tag: string) (children: string list) =
+        tag + "(" + String.concat "," children + ")"
+
+    let list (print: 'T -> string) (items: 'T list) =
+        "[" + (items |> List.map print |> String.concat ",") + "]"
+
+    let option (print: 'T -> string) (value: 'T option) =
+        match value with
+        | Some value -> node "some" [ print value ]
+        | None -> "none"
+
+    let literal =
+        function
+        | LitString value -> node "string" [ text value ]
+        | LitNumber value -> node "number" [ value.ToString("R", Globalization.CultureInfo.InvariantCulture) ]
+        | LitBool value -> node "bool" [ string value ]
+
+    let rec reference (value: FsTypeRef) =
+        match value with
+        | FsBool -> "bool"
+        | FsString -> "string"
+        | FsFloat -> "float"
+        | FsBigInt -> "bigint"
+        | FsUnit -> "unit"
+        | FsObj -> "obj"
+        | FsOption inner -> node "option" [ reference inner ]
+        | FsArray inner -> node "array" [ reference inner ]
+        | FsTuple items -> node "tuple" [ list reference items ]
+        | FsErasedUnion items -> node "union" [ list reference items ]
+        | FsDelegate(arguments, returns) -> node "delegate" [ list reference arguments; reference returns ]
+        | FsFunc(argument, returns) -> node "func" [ reference argument; reference returns ]
+        | FsTypeVar name -> node "var" [ text name ]
+        | FsApp(name, arguments) -> node "app" [ text name; list reference arguments ]
+        | FsBranded(primitive, measure) -> node "branded" [ reference primitive; text measure ]
+        | FsNamed name -> node "named" [ text name ]
+
 /// Redirects matching F# references, retains public aliases and value imports, and emits a catalog.
 let apply (ctx: Context) (shape: ShapeModel) (groups: Render.GroupModule list) =
     async {
@@ -1193,7 +1234,8 @@ let apply (ctx: Context) (shape: ShapeModel) (groups: Render.GroupModule list) =
                 let canonical = canonicalReference Set.empty vars
 
                 parameters
-                |> List.map (fun parameter -> parameter.Constraint |> Option.map canonical |> sprintf "%A")
+                |> List.map (fun parameter ->
+                    parameter.Constraint |> Canonical.option (canonical >> Canonical.reference))
                 |> List.toArray
 
             let surface decl =
@@ -1206,71 +1248,123 @@ let apply (ctx: Context) (shape: ShapeModel) (groups: Render.GroupModule list) =
 
                 let vars = bind "type:" (parameters decl) Map.empty
 
+                let typeText vars = reference vars >> Canonical.reference
+
                 let parameter vars (parameter: FsParam) =
-                    parameter.Optional, parameter.Rest, reference vars parameter.Type
+                    Canonical.node
+                        "param"
+                        [
+                            string parameter.Optional
+                            string parameter.Rest
+                            typeText vars parameter.Type
+                        ]
 
                 let signature parameters args returns =
                     let vars = bind "method:" parameters vars
 
-                    sprintf
-                        "%A"
-                        (parameters
-                         |> List.map (fun parameter -> Option.map (reference vars) parameter.Constraint),
-                         List.map (parameter vars) args,
-                         reference vars returns)
+                    Canonical.node
+                        "signature"
+                        [
+                            parameters
+                            |> Canonical.list (fun parameter -> Canonical.option (typeText vars) parameter.Constraint)
+                            Canonical.list (parameter vars) args
+                            typeText vars returns
+                        ]
 
                 let member_ =
                     function
                     | FsProperty property ->
-                        sprintf "%A" ("property", property.Name, property.ReadOnly, reference vars property.Type)
+                        Canonical.node
+                            "property"
+                            [
+                                Canonical.text property.Name
+                                string property.ReadOnly
+                                typeText vars property.Type
+                            ]
                     | FsMethod method_ ->
-                        sprintf
-                            "%A"
-                            ("method", method_.Name, signature method_.TypeParameters method_.Parameters method_.Return)
+                        Canonical.node
+                            "method"
+                            [
+                                Canonical.text method_.Name
+                                signature method_.TypeParameters method_.Parameters method_.Return
+                            ]
                     | FsConstructor constructor ->
                         "constructor:"
                         + signature constructor.TypeParameters constructor.Parameters constructor.Return
                     | FsInvoke invoke -> "invoke:" + signature invoke.TypeParameters invoke.Parameters invoke.Return
                     | FsIndexer index ->
-                        sprintf "%A" ("index", index.ReadOnly, reference vars index.Key, reference vars index.Value)
+                        Canonical.node
+                            "index"
+                            [ string index.ReadOnly; typeText vars index.Key; typeText vars index.Value ]
 
                 let api =
                     match decl with
                     | FsInterface interface_ ->
                         let entrypoint =
                             interface_.Entrypoint
-                            |> Option.map (fun entrypoint ->
-                                List.map (parameter vars) entrypoint.Parameters,
-                                Option.map (reference vars) entrypoint.Inherits)
+                            |> Canonical.option (fun entrypoint ->
+                                Canonical.node
+                                    "entrypoint"
+                                    [
+                                        Canonical.list (parameter vars) entrypoint.Parameters
+                                        Canonical.option (typeText vars) entrypoint.Inherits
+                                    ])
 
-                        sprintf
-                            "%A"
-                            ("interface",
-                             List.map (reference vars) interface_.Inherits,
-                             interface_.Members |> List.map member_ |> List.sort,
-                             entrypoint)
-                    | FsAbbrev abbrev -> sprintf "%A" ("alias", reference vars abbrev.Target)
+                        Canonical.node
+                            "interface"
+                            [
+                                Canonical.list (typeText vars) interface_.Inherits
+                                interface_.Members |> List.map member_ |> List.sort |> Canonical.list id
+                                entrypoint
+                            ]
+                    | FsAbbrev abbrev -> Canonical.node "alias" [ typeText vars abbrev.Target ]
                     | FsDelegateType delegate_ ->
-                        sprintf
-                            "%A"
-                            ("delegate",
-                             delegate_.Parameters
-                             |> List.map (fun parameter -> reference vars parameter.Type),
-                             reference vars delegate_.Return)
-                    | FsStringEnum enum -> sprintf "%A" ("string-enum", enum.Cases)
-                    | FsEnum enum -> sprintf "%A" ("enum", enum.Cases)
+                        Canonical.node
+                            "delegate"
+                            [
+                                delegate_.Parameters
+                                |> Canonical.list (fun parameter -> typeText vars parameter.Type)
+                                typeText vars delegate_.Return
+                            ]
+                    | FsStringEnum enum ->
+                        enum.Cases
+                        |> Canonical.list (fun case ->
+                            Canonical.node
+                                "case"
+                                [
+                                    Canonical.text case.Name
+                                    Canonical.option Canonical.text case.CompiledName
+                                    Canonical.option Canonical.literal case.CompiledValue
+                                ])
+                        |> List.singleton
+                        |> Canonical.node "string-enum"
+                    | FsEnum enum ->
+                        enum.Cases
+                        |> Canonical.list (fun (name, value) ->
+                            Canonical.node "case" [ Canonical.text name; string value ])
+                        |> List.singleton
+                        |> Canonical.node "enum"
                     | FsTaggedUnion union ->
-                        sprintf
-                            "%A"
-                            ("tagged",
-                             union.Tag,
-                             union.Cases
-                             |> List.map (fun case ->
-                                 case.Name,
-                                 case.CompiledName,
-                                 case.Fields |> List.map (fun field -> field.Name, reference vars field.Type)))
-                    | FsPhantom phantom -> sprintf "%A" ("phantom", reference vars phantom.Carrier)
-                    | FsMeasure measure -> sprintf "%A" ("measure", reference vars measure.Primitive)
+                        Canonical.node
+                            "tagged"
+                            [
+                                Canonical.text union.Tag
+                                union.Cases
+                                |> Canonical.list (fun case ->
+                                    Canonical.node
+                                        "case"
+                                        [
+                                            Canonical.text case.Name
+                                            Canonical.option Canonical.text case.CompiledName
+                                            case.Fields
+                                            |> Canonical.list (fun field ->
+                                                Canonical.node
+                                                    "field"
+                                                    [ Canonical.text field.Name; typeText vars field.Type ])
+                                        ])
+                            ]
+                    | FsPhantom phantom -> Canonical.node "phantom" [ typeText vars phantom.Carrier ]
+                    | FsMeasure measure -> Canonical.node "measure" [ typeText vars measure.Primitive ]
                     | FsExports _ -> "exports"
 
                 hashText api

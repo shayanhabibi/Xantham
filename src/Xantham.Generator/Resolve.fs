@@ -1461,7 +1461,7 @@ let resolveTypeTable: Pass<ResolveModel> =
                                         for ty, result in results do
                                             match result with
                                             | Error reason ->
-                                                Finding.make $"type#{ty.Id}" (ResolveTypeTable.TypeNotResolved reason)
+                                                Finding.make "<type-table>" (ResolveTypeTable.TypeNotResolved reason)
                                             | Ok _ -> ()
                                     ]
 

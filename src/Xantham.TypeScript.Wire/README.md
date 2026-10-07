@@ -89,7 +89,7 @@ let! names = mailbox.getSourceFileNames(snapshot, project)
 
 ## Reading the AST
 
-Navigate through the typed layer rather than raw indexes — see `docs/wire-navigation.md`:
+Navigate through the typed layer rather than raw indexes — see [Navigation](https://shayanhabibi.github.io/Xantham/wire/navigation/):
 
 ```fsharp
 open Xantham.TypeScript.Wire.Patterns
@@ -125,9 +125,9 @@ the types rather than in a comment.
 
 ## Documentation
 
-- `docs/wire-navigation.md` — the typed layer, tags, views and the escape hatches.
-- `docs/wire-hand-written.md` — every fact in the pipeline transcribed from upstream rather than
+- [Navigation](https://shayanhabibi.github.io/Xantham/wire/navigation/) — the typed layer, tags, views and the escape hatches.
+- [Hand-written register](https://shayanhabibi.github.io/Xantham/dev/hand-written/) — every fact in the pipeline transcribed from upstream rather than
   derived from its schema, with how to update each one.
-- `docs/plans/tsgo-protocol.md` — the wire protocol itself, verified against live byte traces.
+- [Protocol notes](https://github.com/shayanhabibi/Xantham/blob/master/docs/.ai/plans/tsgo-protocol.md) — the wire protocol itself, verified against live byte traces.
 
 Licensed under Apache-2.0.

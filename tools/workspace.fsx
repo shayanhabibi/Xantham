@@ -143,25 +143,41 @@ let typescriptPackage (root: string) =
 /// Every checkout exports the nearest install it finds, so the main checkout and its
 /// worktrees drive one compiler.
 ///
-/// Borrowing also sets `XANTHAM_REQUIRE_TSC`, because once a compiler is known to be on disk a
+/// Returns the compiler only when it lives outside `root`'s own `node_modules` - borrowed from
+/// the main checkout, or pinned elsewhere through the environment. `None` means `root` owns its
+/// install (or has none), and `npm install` there is what keeps it on the `package.json` pin.
+///
+/// Exporting also sets `XANTHAM_REQUIRE_TSC`, because once a compiler is known to be on disk a
 /// skipped live suite is a broken run rather than an unconfigured one. Export
 /// `XANTHAM_REQUIRE_TSC=0` before the command to opt back out.
 let ensureTsc (root: string) : string option =
     let requireTsc () =
         if String.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable RequireTscEnvVar) then
             Environment.SetEnvironmentVariable(RequireTscEnvVar, "1")
-            printfn $"worktree: %s{RequireTscEnvVar}=1 - live tests must run, not skip"
+            printfn $"workspace: %s{RequireTscEnvVar}=1 - live tests must run, not skip"
+
+    let own = tscExeIn (Path.GetFullPath root)
+
+    let borrowed (exe: string) =
+        match own with
+        | Some own when String.Equals(Path.GetFullPath own, Path.GetFullPath exe, StringComparison.OrdinalIgnoreCase) ->
+            None
+        | _ -> Some exe
 
     match Environment.GetEnvironmentVariable TscEnvVar with
     | existing when not (String.IsNullOrWhiteSpace existing) && File.Exists existing ->
         requireTsc ()
-        Some existing
+        borrowed existing
     | _ ->
         match searchRoots root |> List.tryPick tscExeIn with
         | None -> None
         | Some exe ->
             Environment.SetEnvironmentVariable(TscEnvVar, exe)
-            printfn $"worktree: borrowing %s{exe}"
-            printfn $"worktree: %s{TscEnvVar} exported for this run"
+
+            match borrowed exe with
+            | Some _ -> printfn $"workspace: borrowing %s{exe}"
+            | None -> printfn $"workspace: using %s{exe}"
+
+            printfn $"workspace: %s{TscEnvVar} exported for this run"
             requireTsc ()
-            Some exe
+            borrowed exe

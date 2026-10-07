@@ -1472,3 +1472,34 @@ let numberPayload (value: Identity.Adapter.Options<float>) : float option =
                     code |> Flip.Expect.equal output 0
                 finally Directory.Delete(directory, true)
         ]
+
+[<Tests>]
+let wideSurfaceTests =
+    match Tsc.locate __SOURCE_DIRECTORY__ with
+    | None -> testCase "declaration catalog wide surface skipped - no compiler" <| fun _ -> skiptest "no tsc"
+    | Some _ ->
+        testCase "declaration catalog API hash covers every member of a 101-member interface" <| fun _ ->
+            let directory = Path.Combine(temporaryRoot, "xantham-catalog-wide-" + Guid.NewGuid().ToString "N")
+            Directory.CreateDirectory directory |> ignore
+            try
+                // Member names sort in declaration order, so the member that differs sorts last.
+                let api (last: string) =
+                    let package = Path.Combine(directory, last)
+                    let members = [ for index in 0..99 -> $"    m{index:D3}: string;" ] @ [ $"    m100: {last};" ]
+                    writePackageFile package "package.json" """{"name":"wide-lab","version":"1.0.0","types":"index.d.ts"}"""
+                    writePackageFile package "index.d.ts" ("export interface Wide {\n" + String.concat "\n" members + "\n}\n")
+                    let config =
+                        { GeneratorConfig.Default with
+                            ModuleName = Some "Identity.Root"
+                            Lib = Some [ "esnext" ]
+                            Types = Some []
+                            DeclarationCatalog = true }
+                    let output = Path.Combine(package, "out")
+                    Pipeline.run config package output |> Async.RunSynchronously |> ignore
+                    let catalog =
+                        JsonSerializer.Deserialize<DeclarationCatalog.Catalog>(
+                            File.ReadAllText(Path.Combine(output, "declarations.json")),
+                            JsonSerializerOptions(PropertyNameCaseInsensitive = true))
+                    (catalog.Declarations |> Array.find (fun declaration -> declaration.FSharpName = "Identity.Root.Wide")).Api
+                Expect.notEqual (api "string") (api "number") "the 101st member participates in the API hash"
+            finally Directory.Delete(directory, true)

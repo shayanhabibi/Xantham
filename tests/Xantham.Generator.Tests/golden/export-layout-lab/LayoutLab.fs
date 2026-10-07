@@ -35,6 +35,12 @@ type Exports =
     static member dispatch (kind: Exports.Left) : Exports.Left = jsNative
     [<Import("dispatch", "layout-lab")>]
     static member dispatch (kind: Exports.Right) : Exports.Right = jsNative
+    [<Import("locate", "layout-lab")>]
+    static member locate (path: string) : string = jsNative
+    [<Import("locate", "layout-lab")>]
+    static member locate (path: string, ?strict: bool, ?depth: float) : string = jsNative
+    [<Import("locate", "layout-lab")>]
+    static member locate_Overload2 (path: string, strict: bool, ?depth: float) : U2<float, bool> = jsNative
 
 /// <summary>layout-lab/aliases</summary>
 module Aliases =
