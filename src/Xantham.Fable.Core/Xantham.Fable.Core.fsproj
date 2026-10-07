@@ -32,7 +32,7 @@
     <!-- Fable compiles a package from its `fable/` sources, and the inline helpers have no body
          in the DLL. docs/.ai/footguns.md, "Fable consumption of bindings". -->
     <ItemGroup>
-        <Content Include="*.fsproj; **\*.fs" Exclude="**\*.fs.js; obj\**; bin\**" PackagePath="fable\" />
+        <Content Include="Xantham.Fable.Core.fsproj;Library.fs;Helpers.fs" Pack="true" PackagePath="fable/" />
     </ItemGroup>
 
     <ItemGroup>
