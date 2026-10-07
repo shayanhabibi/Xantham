@@ -1,0 +1,86 @@
+name: Prepare release
+on:
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: Open develop-to-master PR number
+        required: true
+        type: string
+      preview:
+        description: Preview without pushing or dispatching checks
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: release-develop
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.event_name == 'workflow_dispatch' || (github.event.issue.pull_request && startsWith(github.event.comment.body, '/release'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      pull-requests: read
+      actions: write
+    steps:
+      # Execute the wrapper from protected master, not from a PR's code.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: master
+          path: trusted
+          persist-credentials: false
+      - name: Authorize release request
+        id: request
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            await require('./trusted/.github/scripts/release-bot.cjs').prepare({ github, context, core });
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        if: steps.request.outputs.requested == 'true'
+        with:
+          ref: ${{ steps.request.outputs.head }}
+          path: release
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
+        if: steps.request.outputs.requested == 'true'
+        with:
+          global-json-file: release/global.json
+      - name: Generate versions and changelogs with ShipIt
+        if: steps.request.outputs.requested == 'true'
+        working-directory: release
+        run: |
+          git switch -C develop
+          dotnet tool restore
+          dotnet shipit --mode local --allow-branch develop --skip-merge-commit
+          git diff > ../release.patch
+      - name: Validate, push and start required checks
+        if: steps.request.outputs.requested == 'true'
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        env:
+          RELEASE_PR: ${{ steps.request.outputs.pr }}
+          RELEASE_PREVIEW: ${{ steps.request.outputs.preview }}
+          RELEASE_HEAD: ${{ steps.request.outputs.head }}
+          RELEASE_BASE: ${{ steps.request.outputs.base }}
+          RELEASE_TOKEN: ${{ github.token }}
+        with:
+          script: |
+            await require('./trusted/.github/scripts/release-bot.cjs').finish({ github, context, core,
+              root: require('node:path').resolve('release'), token: process.env.RELEASE_TOKEN,
+              request: { number: Number(process.env.RELEASE_PR), preview: process.env.RELEASE_PREVIEW === 'true',
+                head: process.env.RELEASE_HEAD, base: process.env.RELEASE_BASE } });
+      - name: Upload release diff
+        if: always() && steps.request.outputs.requested == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: release-diff-${{ github.run_id }}
+          path: release.patch
+          if-no-files-found: ignore

@@ -5,7 +5,7 @@ function eligiblePullRequest(context) {
 }
 
 function successfulRun(runs, sha, repository) {
-  return runs.find(run => run.event === 'push' && run.head_branch === 'develop' &&
+  return runs.find(run => ['push', 'workflow_dispatch'].includes(run.event) && run.head_branch === 'develop' &&
     run.head_sha === sha && run.head_repository?.full_name === repository &&
     run.status === 'completed' && run.conclusion === 'success');
 }
@@ -22,7 +22,7 @@ module.exports = async function reuseDevelopTests({ github, context, core, sleep
   }
   for (let attempt = 0; attempt < 7; attempt++) {
     const response = await github.rest.actions.listWorkflowRuns({ owner, repo, workflow_id: 'test.yml',
-      branch: 'develop', event: 'push', head_sha: pr.head.sha, per_page: 100 });
+      branch: 'develop', head_sha: pr.head.sha, per_page: 100 });
     const runs = response.data.workflow_runs;
     const passed = successfulRun(runs, pr.head.sha, `${owner}/${repo}`);
     if (passed) {

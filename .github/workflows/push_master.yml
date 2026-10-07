@@ -36,7 +36,7 @@ jobs:
   package:
     outputs:
       full: ${{ steps.scope.outputs.full }}
-    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/master'
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/develop')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -56,7 +56,7 @@ jobs:
       - name: Verify release versions and dependent packages
         run: node .github/scripts/release-versions.cjs
         env:
-          XANTHAM_RELEASE_BASE: ${{ github.event.pull_request.base.sha || github.event.before || github.sha }}
+          XANTHAM_RELEASE_BASE: ${{ github.event.pull_request.base.sha || github.event.before || (github.ref == 'refs/heads/develop' && 'origin/master') || github.sha }}
       - uses: ./.github/actions/setup
         if: steps.scope.outputs.full == 'true'
       - name: Check build command behavior
@@ -67,13 +67,14 @@ jobs:
       - name: Verify and pack
         if: steps.scope.outputs.full == 'true'
         run: |
-          if [ "$EVENT_NAME" = "pull_request" ]; then
+          if [ "$EVENT_NAME" = "pull_request" ] || [ "$BRANCH_REF" = "refs/heads/develop" ]; then
             dotnet fsi build.fsx -- pack --ci --skip-tests
           else
             dotnet fsi build.fsx -- pack --ci --run-gate
           fi
         env:
           EVENT_NAME: ${{ github.event_name }}
+          BRANCH_REF: ${{ github.ref }}
       - name: Upload packages
         if: steps.scope.outputs.full == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7

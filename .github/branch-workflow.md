@@ -9,11 +9,16 @@ conversations. No additional approving reviewer is required. Auto-merge is avail
 
 `develop` requires the `test` and `conventional-title` checks. `shayanhabibi` and `houstonhaynes` can bypass its
 pull-request and check requirements for direct pushes; push-triggered tests still run.
-Other contributors use pull requests.
+The GitHub Actions integration also bypasses this develop rule so the release
+workflow can push version/changelog commits. This exception applies to Actions
+jobs with write tokens; keep write permissions limited to trusted workflows.
+The history protection and master rules have no bot exception. Other contributors
+use pull requests.
 
 Feature PRs use conventional titles and squash merging; release PRs from develop
 preserve history with merge commits. Maintainers prepare versions and changelogs
-locally using ShipIt; see [CONTRIBUTING.md](../CONTRIBUTING.md). The master package
+with `/release` on the develop-to-master PR using ShipIt; see
+[CONTRIBUTING.md](../CONTRIBUTING.md). The master package
 check rejects unchanged versions in affected packages and their dependent packages.
 
 `master` requires `test`, `package`, and `conventional-title`, with no bypass actors. The Publish workflow
@@ -25,7 +30,8 @@ and golden tagging remain restricted to `master`.
 The protection rules are configured in GitHub under Settings → Rules → Rulesets:
 
 - Branch history: force-push and deletion protection for both branches, no bypass.
-- Develop integration: PR and test requirements, with the two named user exceptions.
+- Develop integration: PR and test requirements, with the two named user exceptions
+  and the GitHub Actions integration exception for release preparation.
 - Master releases: PR, test, and package requirements, no bypass.
 
 Do not add path filters to required PR checks: every PR must receive their check results.
@@ -37,9 +43,17 @@ changes run full verification; unrecognized files and incomplete diffs do too. M
 runs always request full verification. A quick-check run is never reused as full-test
 evidence and never creates a verified golden tag.
 
-For same-repository `develop` → `master` PRs, `test` can reuse a successful push-triggered
+For same-repository `develop` → `master` PRs, `test` can reuse a successful push-triggered or manually dispatched
 Test workflow for the exact head commit, provided `master` is its ancestor. This ensures
 the proposed merge has the same source tree as the tested commit. If that run is still
 pending, the check waits in five-minute intervals; absent, failed, or incompatible evidence
 falls back to the full suite. Other PRs run the full suite. Release PR packing builds and
 validates packages without duplicating the suite; master publishing retains full validation.
+
+The comment workflow uses `github-actions[bot]` and the built-in token, with no
+additional secrets. Token pushes do not trigger normal push CI, so it explicitly
+dispatches Test, package verification, and PR title verification on develop.
+Manual package verification on develop cannot publish. The wrapper runs from
+protected master, checks the maintainer identity and current PR commits, and
+only commits the six package project files and changelogs. It rejects stale
+versions, unexpected file changes, and branches that moved during preparation.
