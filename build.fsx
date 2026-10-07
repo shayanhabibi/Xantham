@@ -611,22 +611,23 @@ module Stages =
 
                     let package = System.IO.Path.Combine(__SOURCE_DIRECTORY__, "bin", packageName)
 
-                    let inline (</>) a b =
-                        System.IO.Path.Combine((a: string), (b: string))
-
                     let expected =
                         System.IO.Path.GetFileName projectPath
                         :: [
                             for compile in elements "Compile" ->
                                 compile.Attribute(System.Xml.Linq.XName.Get "Include").Value
                         ]
-                        |> List.map (fun file -> "fable" </> file)
+                        |> List.map (fun file -> "fable/" + file.Replace('\\', '/'))
 
                     if not (System.IO.File.Exists package) then
                         Error $"bin/%s{packageName} is missing, so its Fable sources cannot be checked."
                     else
                         use archive = System.IO.Compression.ZipFile.OpenRead package
-                        let entries = archive.Entries |> Seq.map _.FullName |> set
+
+                        let entries =
+                            archive.Entries
+                            |> Seq.map (fun entry -> entry.FullName.Replace('\\', '/'))
+                            |> set
 
                         match expected |> List.filter (entries.Contains >> not) with
                         | [] -> Ok()
