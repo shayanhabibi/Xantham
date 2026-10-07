@@ -74,6 +74,7 @@ jobs:
   finalize:
     needs: generate
     if: needs.generate.outputs.requested == 'true'
+    environment: release-preparation
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -81,6 +82,7 @@ jobs:
       pull-requests: read
       actions: write
     steps:
+      # Only master can access this environment's deploy key. No approval is needed.
       # A fresh runner: no tools, hooks or scripts from develop execute here.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:

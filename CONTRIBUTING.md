@@ -34,7 +34,8 @@ Release preparation is a maintainer task, handled on the release PR:
    Verify the Publish workflow and feed versions, then merge master back into develop.
 
 Only `shayanhabibi` and `houstonhaynes` can issue release commands. The workflow
-also has a manual **Run workflow** entry with a PR number and preview switch.
+also has a manual **Run workflow** entry: select **master**, then provide the PR
+number and preview switch. The comment commands use master automatically.
 There is no separate release-preparation branch or PR, and contributors need no
 release commands or credentials. `/release` prepares packages; it never merges
 the PR or publishes them. If CI dispatch fails after the push, rerun `/release`

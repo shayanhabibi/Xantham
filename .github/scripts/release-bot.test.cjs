@@ -22,6 +22,9 @@ test('commands are exact, maintainer-only, and PR-only', () => {
   delete issue.payload.issue.pull_request;
   assert.equal(bot.releaseRequest(issue), null);
   assert.throws(() => bot.releaseRequest({ eventName: 'workflow_dispatch', payload: { sender: { id: 12 } } }), /maintainers/);
+  const manual = { eventName: 'workflow_dispatch', ref: 'refs/heads/master', payload: { sender: { id: 57953499 }, inputs: { pr: '1', preview: 'true' } } };
+  assert.deepEqual(bot.releaseRequest(manual), { number: 1, preview: true });
+  assert.throws(() => bot.releaseRequest({ ...manual, ref: 'refs/heads/develop' }), /from master/);
 });
 test('closed, fork and feature PRs cannot publish release updates', () => {
   bot.verifyPullRequest(pr(), 'owner/repo');
@@ -102,6 +105,13 @@ test('stale versions and moved PRs fail before pushing or dispatching', async t 
   fs.writeFileSync(f.xml, fs.readFileSync(f.xml, 'utf8').replace('1.0.0', '1.0.1'));
   f.input.github.rest.pulls.get = async () => ({ data: pr() });
   await assert.rejects(bot.finish(f.input), /moved/);
+  assert.equal(f.git('rev-parse', 'HEAD'), f.head);
+  assert.deepEqual(f.dispatched, []);
+});
+test('project changes outside Version cannot enter a release commit', async t => {
+  const f = fixture(t);
+  fs.appendFileSync(f.xml, '<Import Project="unexpected.targets"/>\n');
+  await assert.rejects(bot.finish(f.input), /only change Version/);
   assert.equal(f.git('rev-parse', 'HEAD'), f.head);
   assert.deepEqual(f.dispatched, []);
 });
