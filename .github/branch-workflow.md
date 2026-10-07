@@ -7,7 +7,7 @@ Both branches block deletion and force pushes, including for maintainers. Pull r
 require successful GitHub Actions checks, an up-to-date branch, and resolved review
 conversations. No additional approving reviewer is required. Auto-merge is available.
 
-`develop` requires the `test` check. `shayanhabibi` and `houstonhaynes` can bypass its
+`develop` requires the `test` and `conventional-title` checks. `shayanhabibi` and `houstonhaynes` can bypass its
 pull-request and check requirements for direct pushes; push-triggered tests still run.
 Other contributors use pull requests.
 
@@ -16,7 +16,7 @@ preserve history with merge commits. Maintainers prepare versions and changelogs
 locally using ShipIt; see [CONTRIBUTING.md](../CONTRIBUTING.md). The master package
 check rejects unchanged versions in affected packages and their dependent packages.
 
-`master` requires `test` and `package`, with no bypass actors. The Publish workflow
+`master` requires `test`, `package`, and `conventional-title`, with no bypass actors. The Publish workflow
 packs and validates every pull request to `master` without publishing credentials.
 Only the subsequent `master` push (or manual dispatch on `master`) can publish the
 verified package artifact to the temporary Cloudsmith feed. Documentation deployment
