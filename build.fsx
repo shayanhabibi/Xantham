@@ -1,4 +1,4 @@
-﻿#r "nuget: Partas.Build, 0.6.5"
+#r "nuget: Partas.Build, 0.6.5"
 #r "nuget: Partas.Build.Baked, 0.1.1"
 #r "nuget: Partas.TypeProvider.BuildHelper, 0.2.5"
 #r "nuget: Str, 0.24.1"
