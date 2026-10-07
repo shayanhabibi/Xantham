@@ -70,5 +70,5 @@ jobs:
           path: bin
       - name: Publish verified packages
         env:
-          NUGET_API_KEY: ${{ secrets.NUGET_KEY }}
-        run: dotnet fsi build.fsx -- publish artifacts --ci
+          NUGET_API_KEY: ${{ secrets.CLOUDSMITH_API_KEY }}
+        run: dotnet fsi build.fsx -- publish artifacts --ci --nuget-source https://nuget.cloudsmith.io/shayanhabibi/xantham/v3/index.json

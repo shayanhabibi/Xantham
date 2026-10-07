@@ -2,7 +2,19 @@
 
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
+        <Version>0.1.0</Version>
+        <AssemblyVersion>0.0.0.0</AssemblyVersion>
+        <IsPackable>true</IsPackable>
+        <PackageId>Xantham.Generator</PackageId>
+        <Authors>Shayan Habibi</Authors>
+        <Description>TypeScript-to-F# Fable bindings generator for customisations and applications that embed the generation pipeline.</Description>
+        <PackageTags>typescript;fsharp;fable;bindings;codegen</PackageTags>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
 
     <ItemGroup>
         <!-- The order is the pipeline's order: the model first, then one file per tier in the

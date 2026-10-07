@@ -1,6 +1,7 @@
-﻿#r "nuget: Str, 0.24.1"
+#i "nuget: https://nuget.cloudsmith.io/shayanhabibi/shayanhabibi-partas-build/v3/index.json"
+#r "nuget: Str, 0.24.1"
 #r "nuget: Partas.TypeProvider.BuildHelper, 0.2.5"
-#r "nuget: Partas.Build, 0.6.5"
+#r "nuget: Partas.Build, 0.7.0"
 #load "workspace.fsx"
 
 open System.IO

@@ -60,6 +60,18 @@
 - `README.md` and `xantham.json` are no longer delivered to consumers as content files; the
   README is the package readme.
 
+## Upcoming Cloudsmith release
+
+- New releases are temporarily published to the
+  [Xantham Cloudsmith feed](https://app.cloudsmith.com/shayanhabibi/r/xantham) while NuGet
+  package ownership is transferred back to the author.
+- `Xantham.Generator` 0.1.0 is published independently for customisations and applications
+  that embed the generation pipeline; the `xantham` tool continues to include it.
+- Release preparation versions: `Xantham.TypeScript.Wire` 0.2.1; `xantham`,
+  `Xantham.Fable.Core`, `Xantham.Fable.Core.TS` and `Xantham.Fable.Node` 0.1.1.
+- Build scripts use Partas.Build 0.7.0 and Partas.Build.Baked 0.1.2 from the temporary
+  feed documented in the Partas.Build repository.
+
 ## 0.1.0
 
 First release of `Xantham.TypeScript.Wire`.

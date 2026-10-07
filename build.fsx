@@ -1,5 +1,6 @@
-#r "nuget: Partas.Build, 0.6.5"
-#r "nuget: Partas.Build.Baked, 0.1.1"
+#i "nuget: https://nuget.cloudsmith.io/shayanhabibi/shayanhabibi-partas-build/v3/index.json"
+#r "nuget: Partas.Build, 0.7.0"
+#r "nuget: Partas.Build.Baked, 0.1.2"
 #r "nuget: Partas.TypeProvider.BuildHelper, 0.2.5"
 #r "nuget: Str, 0.24.1"
 #r "nuget: Fake.IO.FileSystem, 6.1.4"
@@ -72,8 +73,7 @@ module Spec =
     let srcProjects = projects |> List.filter _.RelativePath.StartsWith("src")
     let testProjects = projects |> List.filter _.RelativePath.StartsWith("test")
 
-    /// The projects `pack` emits and `publish` pushes. `Xantham.Cli` packs as a tool and
-    /// carries `Xantham.Generator`'s assembly inside its own package.
+    /// The packages emitted by `pack` and pushed by `publish`.
     let publishable =
         let names =
             set
@@ -83,6 +83,7 @@ module Spec =
                     "Xantham.Fable.Core.TS"
                     "Xantham.Fable.Node"
                     "Xantham.Cli"
+                    "Xantham.Generator"
                 ]
 
         srcProjects |> List.filter (fun project -> names.Contains project.Name)
@@ -132,6 +133,11 @@ module Options =
         |> Input.alias "-w"
         |> Input.description "Run in watch mode."
         |> Input.def false
+
+    let nugetSource =
+        Input.option<string> "--nuget-source"
+        |> Input.def "https://nuget.cloudsmith.io/shayanhabibi/xantham/v3/index.json"
+        |> Input.description "NuGet feed URL for publishing"
 
     let skipTests =
         Input.option<bool> "--skip-tests"
@@ -731,6 +737,7 @@ module Stages =
     let publish =
         input {
             let! apiKey = Baked.NuGet.apiKey.option
+            and! source = Options.nugetSource
             let path = "bin/*.nupkg"
 
             return
@@ -740,7 +747,7 @@ module Stages =
                     whenSome apiKey (fun key ->
                         stage "nuget push" {
                             run (
-                                cmd $"dotnet nuget push {path} -s https://api.nuget.org/v3/index.json --skip-duplicate"
+                                cmd $"dotnet nuget push {path} -s {source} --skip-duplicate"
                                 |> Cmd.secretOption "-k" key
                             )
                         })

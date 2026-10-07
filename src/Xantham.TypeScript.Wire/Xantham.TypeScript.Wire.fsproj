@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFrameworks>net10.0;net8.0;netstandard2.1</TargetFrameworks>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <Version>0.2.0</Version><AssemblyVersion>0.0.0.0</AssemblyVersion></PropertyGroup>
+    <Version>0.2.1</Version><AssemblyVersion>0.0.0.0</AssemblyVersion></PropertyGroup>
 
     <PropertyGroup>
         <Authors>Shayan Habibi</Authors>
