@@ -12,7 +12,7 @@ on:
       - 'Xantham.slnx'
       - 'Directory.Build.*'
       - 'global.json'
-      - 'dotnet-tools.json'
+      - '.config/dotnet-tools.json'
       - 'package*.json'
       - '.node-version'
       - '.github/actions/**'
@@ -43,6 +43,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
+          fetch-depth: 0
       - name: Detect source and build input changes
         id: scope
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
@@ -52,11 +53,17 @@ jobs:
             await verificationScope({ github, context, core });
       - name: Check CI policy
         run: node --test .github/scripts/*.test.cjs
+      - name: Verify release versions and dependent packages
+        run: node .github/scripts/release-versions.cjs
+        env:
+          XANTHAM_RELEASE_BASE: ${{ github.event.pull_request.base.sha || github.event.before || github.sha }}
       - uses: ./.github/actions/setup
         if: steps.scope.outputs.full == 'true'
       - name: Check build command behavior
         if: steps.scope.outputs.full == 'true'
-        run: node tools/verify-build.mjs
+        run: |
+          node tools/verify-build.mjs
+          node tools/verify-release.mjs
       - name: Verify and pack
         if: steps.scope.outputs.full == 'true'
         run: |

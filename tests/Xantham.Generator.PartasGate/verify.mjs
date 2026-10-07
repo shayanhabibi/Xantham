@@ -28,7 +28,8 @@ const xml = value => value.replaceAll("&", "&amp;").replaceAll("'", "&apos;");
 function project(directory, name, files, references = []) {
   write(`${directory}/${name}.fsproj`, `<Project Sdk='Microsoft.NET.Sdk'><PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup><ItemGroup>${files.map(f => `<Compile Include='${xml(f)}' />`).join("")}<PackageReference Include='Fable.Core' Version='5.2.0' />${references.map(r => `<ProjectReference Include='${xml(r)}' />`).join("")}</ItemGroup></Project>`);
 }
-for (const file of ["global.json", "dotnet-tools.json"]) fs.copyFileSync(path.join(root, file), path.join(scratch, file));
+fs.copyFileSync(path.join(root, "global.json"), path.join(scratch, "global.json"));
+write(".config/dotnet-tools.json", fs.readFileSync(path.join(root, ".config/dotnet-tools.json"), "utf8"));
 for (const name of ["Directory.Build.props", "Directory.Build.targets"]) write(name, "<Project />");
 write("package.json", '{"type":"module"}');
 run("dotnet", ["fsi", path.join(gate, "extract.fsx"), path.join(gate, "partas-source.zip"), path.join(scratch, "vendor")]);

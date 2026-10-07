@@ -1,0 +1,65 @@
+# Contributing
+
+Start feature branches from `develop` and open pull requests into `develop`.
+Use a conventional PR title, such as `feat(generator): support a new mapping`,
+`fix(wire): correct decoding`, or `docs: explain customization`.
+Maintainers squash feature PRs using the PR title as the commit title. Direct
+maintainer pushes to develop use conventional commit messages too.
+
+Contributors do not bump package versions, generate release changelogs, or need
+publishing credentials. Run `dotnet tool restore`, then use
+`dotnet fsi build.fsx -- test` for normal validation. Generator changes also follow
+the fixture and golden workflow described in the repository's agent notes.
+
+`feat` and `perf` produce minor releases; `fix` produces patch releases. An `!`
+after the type/scope or a `BREAKING CHANGE:` footer signals a breaking release.
+Changes such as dependency upgrades or refactors still need a package release
+when they change shipped artifacts, even if their commit type does not automatically
+advance a version. Maintainers review those cases during release preparation.
+
+## Preparing a release
+
+Release preparation is a maintainer task. ShipIt operates locally; it does not
+push commits, create PRs, or publish packages through the commands below.
+
+1. Fetch complete history and update develop with a fast-forward pull.
+2. Restore tools with `dotnet tool restore`.
+3. On develop, preview `dotnet fsi build.fsx -- bump --dry-run`.
+4. Review the proposed six independent package versions and changelog entries.
+   The changelog inputs include transitive project dependencies. For an intended
+   version override, add `force_version: 0.2.0` (using the desired version) to
+   that package's changelog front matter and preview again. ShipIt removes this
+   override when applying it. Review breaking changes explicitly while versions
+   remain below 1.0.
+5. Apply `dotnet fsi build.fsx -- bump`. This updates each affected package's
+   `<Version>` and changelog, preserving `<AssemblyVersion>0.0.0.0</AssemblyVersion>`.
+   The former `bump patch|minor|major` numeric interface is replaced by this command.
+6. Run `dotnet fsi build.fsx -- release check`. It compares with `origin/master`
+   and rejects stale versions in changed packages and their transitive consumers.
+   Set `XANTHAM_RELEASE_BASE` to a different fetched commit only when deliberately
+   validating another release base.
+7. Create a branch from this develop checkout, commit the changes as
+   `chore: prepare package release`, and open a release-preparation PR into develop.
+   Merge it after checks pass. Include all accumulated source changes in the
+   version review; applying another bump after preparation can advance versions twice.
+8. Open develop → master and merge with a **merge commit**, preserving shared history.
+   The master push packs, validates, and publishes to the temporary
+   [Cloudsmith feed](https://app.cloudsmith.com/shayanhabibi/r/xantham).
+   Verify the Publish workflow and feed versions, then merge master back into develop.
+
+The local tool is EasyBuild.ShipIt 3.1.0, requiring the repository's .NET 10 SDK.
+The manifest lives in `.config/dotnet-tools.json`. `build.fsx -- shipit setup`
+restores registered tools; `shipit version` and `shipit conventions` inspect them.
+On a release-preparation branch, pass `--allow-branch <branch-name>` to preview
+explicitly. The default allowed branch is develop, including for dry runs in 3.1.0.
+
+Each `src/*/CHANGELOG.md` starts from the package version and commit verified in
+the last Cloudsmith release. ShipIt owns the release history from this point onward.
+Its XML updater changes only the project Version. Do not combine it with a separate
+numeric version bump, or run upstream `init github`: that setup disables merge
+commits used by our branch workflow. Automated release PR creation is not enabled.
+Keep changelogs with LF line endings: ShipIt 3.1.0's front-matter parser does not
+recognize CRLF. The repository's `.gitattributes` enforces LF on checkout.
+
+See [.github/branch-workflow.md](.github/branch-workflow.md) for branch protections,
+quick CI checks and reuse of develop's successful test run for master release PRs.
