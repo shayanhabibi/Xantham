@@ -37,9 +37,9 @@ test('waits five minutes for exact-commit evidence, then reuses it', async () =>
   const f = fixture();
   let calls = 0;
   const waits = [];
-  const github = { rest: {
+  const github = { paginate: async () => [{ name: 'test', steps: [{ name: 'Test', conclusion: 'success' }] }], rest: {
     repos: { compareCommits: async () => ({ data: { merge_base_commit: { sha: 'base' } } }) },
-    actions: { listWorkflowRuns: async () => ({ data: { workflow_runs: [calls++ ? f.run : { ...f.run, status: 'in_progress', conclusion: null }] } }) }
+    actions: { listJobsForWorkflowRun() {}, listWorkflowRuns: async () => ({ data: { workflow_runs: [calls++ ? f.run : { ...f.run, status: 'in_progress', conclusion: null }] } }) }
   } };
   await reuse({ ...f, github, sleep: async ms => waits.push(ms) });
   assert.deepEqual(waits, [300000]);
@@ -63,4 +63,14 @@ test('missing or failed evidence runs full tests', async () => {
     await reuse({ ...f, github });
     assert.equal(f.output.reused, 'false');
   }
+});
+
+test('a successful quick-check run is not full-test evidence', async () => {
+  const f = fixture();
+  const github = { paginate: async () => [{ name: 'test', steps: [{ name: 'Test', conclusion: 'skipped' }] }], rest: {
+    repos: { compareCommits: async () => ({ data: { merge_base_commit: { sha: 'base' } } }) },
+    actions: { listJobsForWorkflowRun() {}, listWorkflowRuns: async () => ({ data: { workflow_runs: [f.run] } }) }
+  } };
+  await reuse({ ...f, github });
+  assert.equal(f.output.reused, 'false');
 });

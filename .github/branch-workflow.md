@@ -25,6 +25,13 @@ The protection rules are configured in GitHub under Settings → Rules → Rules
 
 Do not add path filters to required PR checks: every PR must receive their check results.
 
+Documentation and workflow-only changes run quick CI-policy and golden-tooling checks,
+without building, packing, publishing, or running the expensive suite. Required check
+jobs still report a result. Source, project, script, dependency, fixture, and build-input
+changes run full verification; unrecognized files and incomplete diffs do too. Manual
+runs always request full verification. A quick-check run is never reused as full-test
+evidence and never creates a verified golden tag.
+
 For same-repository `develop` → `master` PRs, `test` can reuse a successful push-triggered
 Test workflow for the exact head commit, provided `master` is its ancestor. This ensures
 the proposed merge has the same source tree as the tested commit. If that run is still

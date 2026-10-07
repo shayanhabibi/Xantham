@@ -26,6 +26,13 @@ module.exports = async function reuseDevelopTests({ github, context, core, sleep
     const runs = response.data.workflow_runs;
     const passed = successfulRun(runs, pr.head.sha, `${owner}/${repo}`);
     if (passed) {
+      const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRun, {
+        owner, repo, run_id: passed.id, per_page: 100
+      });
+      if (!jobs.some(job => job.name === 'test' && job.steps.some(step => step.name === 'Test' && step.conclusion === 'success'))) {
+        core.info('The develop run only performed quick checks; run the full suite.');
+        return;
+      }
       core.setOutput('reused', 'true');
       await core.summary.addHeading('Reused develop tests').addLink(`Exact commit ${pr.head.sha}`, passed.html_url)
         .addRaw('\nMaster is an ancestor of this tested commit; the merge has the same source tree.\n').write();
