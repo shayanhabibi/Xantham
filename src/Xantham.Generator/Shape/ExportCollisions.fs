@@ -11,8 +11,7 @@ type private Relation =
     | Collapsed
     /// One compiled parameter signature, different returns.
     | ReturnOnly
-    /// A shorter parameter list that is a prefix of a longer one whose tail is optional or rest:
-    /// a call supplying the prefix alone selects either.
+    /// Signatures that one call selects alike (`CompiledSignature.ambiguousCall`).
     | AmbiguousCall
     /// Distinct compiled signatures the compiler keeps apart.
     | Distinct
@@ -30,58 +29,9 @@ let resolveExportCollisions: Pass<ShapeModel> =
                     let mutable findings: Finding list = []
                     let emit finding = findings <- findings @ [ finding ]
 
-                    let abbrevs =
-                        model.Decls
-                        |> List.choose (function
-                            | FsAbbrev decl -> Some(decl.Name, decl.Target)
-                            | _ -> None)
-                        |> Map.ofList
-
-                    /// The reference with abbreviations expanded, the way the compiler compares
-                    /// it. A cycle stops at its first repeated name.
-                    let rec normalize (visited: Set<string>) (reference: FsTypeRef) : FsTypeRef =
-                        let recur = normalize visited
-
-                        match reference with
-                        | FsNamed name when Map.containsKey name abbrevs && not (Set.contains name visited) ->
-                            normalize (Set.add name visited) abbrevs[name]
-                        | FsOption inner -> FsOption(recur inner)
-                        | FsArray element -> FsArray(recur element)
-                        | FsTuple components -> FsTuple(List.map recur components)
-                        | FsErasedUnion arms -> FsErasedUnion(List.map recur arms)
-                        | FsDelegate(args, ret) -> FsDelegate(List.map recur args, recur ret)
-                        | FsFunc(argument, ret) -> FsFunc(recur argument, recur ret)
-                        | FsApp(name, args) -> FsApp(name, List.map recur args)
-                        | FsBranded(primitive, measure) -> FsBranded(recur primitive, measure)
-                        | other -> other
-
-                    /// A reference with the signature's own type variables renamed by position:
-                    /// .NET overload resolution does not see a type parameter's name.
-                    let rec renameTypeVars (rename: Map<string, string>) (reference: FsTypeRef) : FsTypeRef =
-                        let recur = renameTypeVars rename
-
-                        match reference with
-                        | FsTypeVar name -> FsTypeVar(rename |> Map.tryFind name |> Option.defaultValue name)
-                        | FsOption inner -> FsOption(recur inner)
-                        | FsArray element -> FsArray(recur element)
-                        | FsTuple components -> FsTuple(List.map recur components)
-                        | FsErasedUnion arms -> FsErasedUnion(List.map recur arms)
-                        | FsDelegate(args, ret) -> FsDelegate(List.map recur args, recur ret)
-                        | FsFunc(argument, ret) -> FsFunc(recur argument, recur ret)
-                        | FsApp(name, args) -> FsApp(name, List.map recur args)
-                        | FsBranded(primitive, measure) -> FsBranded(recur primitive, measure)
-                        | other -> other
-
-                    let compiled (typeParameters: FsTypeParam list) (reference: FsTypeRef) =
-                        let rename = typeParameters |> List.mapi (fun i p -> p.Name, $"T{i}") |> Map.ofList
-                        normalize Set.empty (renameTypeVars rename reference)
-
-                    /// The compiled parameter signature: optionality, rest and type per position,
-                    /// plus generic arity.
-                    let parameterKey (typeParameters: FsTypeParam list) (parameters: FsParam list) =
-                        typeParameters.Length,
-                        parameters
-                        |> List.map (fun p -> p.Optional, p.Rest, compiled typeParameters p.Type)
+                    let abbrevs = abbreviations model.Decls
+                    let compiled = CompiledSignature.compiled abbrevs
+                    let parameterKey = CompiledSignature.parameterKey abbrevs
 
                     let bodyParts (m: FsExportMember) =
                         match m.Body with
@@ -113,25 +63,7 @@ let resolveExportCollisions: Pass<ShapeModel> =
                             | other -> [ other ])
                         |> List.distinctBy (compiled typeParameters)
 
-                    /// Whether `shorter`'s parameters are a prefix of `longer`'s and the rest of
-                    /// `longer` may be omitted at the call.
-                    let ambiguousPrefix
-                        (shorter: FsTypeParam list * FsParam list)
-                        (longer: FsTypeParam list * FsParam list)
-                        =
-                        let shorterTypes, shorterParams = shorter
-                        let longerTypes, longerParams = longer
-
-                        shorterParams.Length < longerParams.Length
-                        && shorterTypes.Length = longerTypes.Length
-                        && List.forall2
-                            (fun (a: FsParam) (b: FsParam) ->
-                                a.Rest = b.Rest && compiled shorterTypes a.Type = compiled longerTypes b.Type)
-                            shorterParams
-                            (List.take shorterParams.Length longerParams)
-                        && (longerParams
-                            |> List.skip shorterParams.Length
-                            |> List.forall (fun p -> p.Optional || p.Rest))
+                    let ambiguousCall = CompiledSignature.ambiguousCall abbrevs
 
                     let relate (earlier: OwnedExportMember) (later: OwnedExportMember) : Relation =
                         let a = earlier.Member
@@ -159,10 +91,7 @@ let resolveExportCollisions: Pass<ShapeModel> =
                                         Collapsed
                                     else
                                         ReturnOnly
-                                elif
-                                    ambiguousPrefix (a.TypeParameters, parametersA) (b.TypeParameters, parametersB)
-                                    || ambiguousPrefix (b.TypeParameters, parametersB) (a.TypeParameters, parametersA)
-                                then
+                                elif ambiguousCall (a.TypeParameters, parametersA) (b.TypeParameters, parametersB) then
                                     AmbiguousCall
                                 else
                                     Distinct
@@ -184,12 +113,16 @@ let resolveExportCollisions: Pass<ShapeModel> =
                                 | _ -> [ owned.Member.Name ])
                             |> Set.ofList
 
+                        // Each rename, keyed by the name it replaced.
+                        let mutable renamedFrom: Map<string, string> = Map.empty
+
                         let allocate (name: string) =
                             let candidate =
                                 Seq.initInfinite (fun i -> $"{name}_Overload{i + 2}")
                                 |> Seq.find (fun candidate -> not (Set.contains candidate taken))
 
                             taken <- Set.add candidate taken
+                            renamedFrom <- Map.add candidate name renamedFrom
                             candidate
 
                         // Candidates fold left in harvest order: each one is placed against the
@@ -198,17 +131,38 @@ let resolveExportCollisions: Pass<ShapeModel> =
                             let name = candidate.Member.Name
                             let siblings = settled |> List.filter (fun s -> s.Member.Name = name)
 
+                            // Members this pass renamed from `name`: each accepts a merge, and
+                            // its new name sits outside `name`'s call forms.
+                            let renamedSiblings =
+                                settled
+                                |> List.filter (fun s -> Map.tryFind s.Member.Name renamedFrom = Some name)
+
+                            // Merging into a sibling takes precedence over renaming away from
+                            // one.
                             let related =
-                                siblings
-                                |> List.map (fun sibling -> sibling, relate sibling candidate)
-                                |> List.tryFind (fun (_, relation) -> relation <> Distinct)
+                                let merges (_, relation) =
+                                    relation <> Distinct && relation <> AmbiguousCall
+
+                                let relations =
+                                    siblings |> List.map (fun sibling -> sibling, relate sibling candidate)
+
+                                relations
+                                |> List.tryFind merges
+                                |> Option.orElse (
+                                    renamedSiblings
+                                    |> List.map (fun sibling -> sibling, relate sibling candidate)
+                                    |> List.tryFind merges
+                                )
+                                |> Option.orElse (
+                                    relations |> List.tryFind (fun (_, relation) -> relation = AmbiguousCall)
+                                )
 
                             match related with
                             | None -> settled @ [ candidate ]
                             | Some(sibling, Occurrence) ->
                                 emit (
                                     Finding.make
-                                        (symbol name)
+                                        (symbol sibling.Member.Name)
                                         (DedupeOverloads.ExportOccurrenceConsolidated(owner, candidate.ExportName, 2))
                                 )
 
@@ -235,10 +189,10 @@ let resolveExportCollisions: Pass<ShapeModel> =
                                         }
                                     else
                                         s)
-                            | Some(_, Collapsed) ->
+                            | Some(sibling, Collapsed) ->
                                 emit (
                                     Finding.make
-                                        (symbol name)
+                                        (symbol sibling.Member.Name)
                                         (DedupeOverloads.ExportDeclarationsConsolidated(owner, candidate.ExportName, 2))
                                 )
 
@@ -251,7 +205,7 @@ let resolveExportCollisions: Pass<ShapeModel> =
 
                                 emit (
                                     Finding.make
-                                        (symbol name)
+                                        (symbol sibling.Member.Name)
                                         (DedupeOverloads.ExportReturnTypesUnioned(
                                             owner,
                                             candidate.ExportName,

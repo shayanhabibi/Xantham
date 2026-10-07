@@ -7,6 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Include="Scratch.fs" />
         <Compile Include="Build.fs" />
         <Compile Include="Fixtures.fs" />
         <Compile Include="Measures.test.fs" />
@@ -19,6 +20,7 @@
         <Compile Include="Ownership.test.fs" />
         <Compile Include="DeclarationCatalog.test.fs" />
         <Compile Include="Pipeline.test.fs" />
+        <Compile Include="Customization.test.fs" />
         <Compile Include="ExportLayout.test.fs" />
         <Compile Include="ExportLayoutPaths.test.fs" />
         <Compile Include="Bootstrap.test.fs" />

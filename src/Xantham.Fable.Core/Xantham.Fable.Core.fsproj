@@ -10,7 +10,8 @@
              net8.0 compile gate can reference the package without a downgrade. -->
         <TargetFrameworks>netstandard2.1;net8.0</TargetFrameworks>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <Version>0.1.0</Version>
+        <Version>0.1.1</Version>
+        <FSharpCoreImplicitPackageVersion>4.7.2</FSharpCoreImplicitPackageVersion>
         <AssemblyVersion>0.0.0.0</AssemblyVersion>
     </PropertyGroup>
 
@@ -26,6 +27,12 @@
         <Compile Include="Library.fs" />
         <Compile Include="Helpers.fs" />
         <None Include="README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
+
+    <!-- Fable compiles a package from its `fable/` sources, and the inline helpers have no body
+         in the DLL. docs/.ai/footguns.md, "Fable consumption of bindings". -->
+    <ItemGroup>
+        <Content Include="*.fsproj; **\*.fs" Exclude="**\*.fs.js; obj\**; bin\**" PackagePath="fable\" />
     </ItemGroup>
 
     <ItemGroup>

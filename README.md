@@ -1,5 +1,25 @@
 ![Xantham](static/xantham-resource-pack/assets/workflow-banner.png)
 
+> [!WARNING]
+> **New Xantham releases are temporarily published to Cloudsmith.** I am waiting for NuGet
+> support to transfer package ownership back to me. Until the transfer is complete, use the
+> [Xantham Cloudsmith feed](https://app.cloudsmith.com/shayanhabibi/r/xantham) for the tool,
+> generator and companion packages. Older releases remain on nuget.org.
+>
+> **NuGet source:** <https://nuget.cloudsmith.io/shayanhabibi/xantham/v3/index.json>
+>
+> This warning will be removed and publishing will return to nuget.org once the transfer is complete.
+
+Add the temporary source alongside nuget.org so package dependencies can also be restored:
+
+```bash
+dotnet nuget add source https://nuget.cloudsmith.io/shayanhabibi/xantham/v3/index.json --name xantham-temporary
+```
+
+Release CI publishes to this source using the repository secret `CLOUDSMITH_API_KEY`.
+When ownership is restored, remove the temporary warnings, switch the default and CI
+`--nuget-source` back to `https://api.nuget.org/v3/index.json`, and restore the NuGet credential.
+
 <div>
   
 ![NuGet Version](https://img.shields.io/nuget/v/xantham?label=xantham)
@@ -40,15 +60,17 @@ you are using:
 ```bash
 xantham schema
 
-xantham schema --output xantham.schema.json
+xantham schema -o xantham.schema.json
 ```
 
 [See the Docs](https://shayanhabibi.github.io/Xantham) for more information.
 
-> [!NOTE]
-> The generator implementation is packaged with the tool, and is not distributed independently.
-> You are, however, free to fork/clone the repo and make an implementation from the generator
-> in line with the provided license.
+The generator is also published as `Xantham.Generator` for customisations and applications
+that embed the generation pipeline. It includes a dependency on `Xantham.TypeScript.Wire`.
+
+```bash
+dotnet add package Xantham.Generator
+```
 
 ---
 
@@ -74,7 +96,7 @@ asynchronously in-process.
 dotnet add package Xantham.TypeScript.Wire
 ```
 
-The wire protocol and its usage are explained [in the docs](https://shayanhabibi.github.io/Xantham/docs/wire).
+The wire protocol and its usage are explained [in the docs](https://shayanhabibi.github.io/Xantham/wire/).
 You can also observe its usage from our implementation of the generator.
 
 ---

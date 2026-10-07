@@ -70,7 +70,7 @@ let nameConstructorObjects: Pass<ShapeModel> =
                     facts.SymbolName
                     |> Option.filter (isSyntheticName >> not)
                     |> Option.map (fun value -> value / uom<symbolName>))
-                |> Option.map Naming.pascalSegment
+                |> Option.map (Naming.pascalSegment >> Naming.typeNameSegment)
                 |> Option.orElseWith instanceName
                 |> Option.defaultValue path
 
@@ -138,7 +138,7 @@ let nameConstructorObjects: Pass<ShapeModel> =
             match Map.tryFind export.Symbol.SymbolId model.ExportTypes |> Option.bind _.Value with
             | None -> ()
             | Some typeId ->
-                let path = Naming.pascalSegment (fsName fallback export)
+                let path = Naming.typeNameSegment (Naming.pascalSegment (fsName fallback export))
 
                 if hasAny SymbolFlags.Class export.Symbol.Flags then
                     // A class's own static side stays `shape-classes`'s, but a static *of type*

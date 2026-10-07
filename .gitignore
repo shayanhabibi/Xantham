@@ -24,8 +24,11 @@ node_modules/
 xantham-out/
 
 # Tests
+# Per-test scratch directories (`Scratch.fs`); tests never write under the system temp directory.
+tests/.scratch/
 tests/**/output.json
 tests/**/package-lock.json
+!tests/Xantham.Generator.PartasGate/package-lock.json
 tests/fixtures/**/*
 # ... except the hand-authored lab fixtures, which are source: the committed goldens are
 # generated from them, so an ignored copy would make them unreproducible.

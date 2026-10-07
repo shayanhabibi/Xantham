@@ -285,8 +285,8 @@ let start (config: GeneratorConfig) (packageDir: string) : Async<TscMailbox * Co
             | Some exe -> exe
             | None ->
                 failwith
-                    $"no TypeScript compiler found above {packageDir} - run `npm install` at the \
-                      repository root, or set XANTHAM_TSGO_EXE"
+                    $"no TypeScript compiler found above {packageDir} - install the `typescript` \
+                      npm package above it, or set XANTHAM_TSGO_EXE"
 
         let mailbox = new TscMailbox(exe, packageDir)
 

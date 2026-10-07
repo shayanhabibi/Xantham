@@ -223,6 +223,10 @@ module FindingCodes =
             "DO.ExportMemberRenamed", "DO007"
             "DO.ExportReturnTypesUnioned", "DO008"
             "DO.ExportDeclarationsConsolidated", "DO009"
+            "UA.ArmOverloadsSynthesized", "UA001"
+            "UA.ArmCountExceedsCap", "UA002"
+            "UA.ArmsCollapseToOneSignature", "UA003"
+            "UA.ArmOverloadCollides", "UA004"
             "RA.GenericAliasDropped", "RA001"
             "RA.ReferenceToDroppedAlias", "RA002"
             "RA.GenericWithoutArguments", "RA003"
@@ -237,6 +241,11 @@ module FindingCodes =
             "GE.GroupModuleCollision", "GE003"
             "GE.GroupModuleFromNamespace", "GE004"
             "GE.ParameterNameEscaped", "GE005"
+            "CU.AttributeAdded", "CU001"
+            "CU.CompanionEmitted", "CU002"
+            "CU.MemberOmitted", "CU003"
+            "CU.InteropReplaced", "CU004"
+            "CU.DeclarationReplaced", "CU005"
         ]
 
     let private byName = Map.ofList table
@@ -393,7 +402,7 @@ module Finding =
 type TypeReference =
     | [<Widened>] SelfReferenceThroughUnnamed
     | [<Widened>] TypeNotResolved of reason: string
-    | [<Escape>] MissingFromTypeTable of typeId: int
+    | [<Escape>] MissingFromTypeTable
     | [<Widened>] LoneEnumMemberToFloat
     | [<Widened>] LoneEnumMemberToString
     | [<Widened>] StringLiteralToString
@@ -502,7 +511,7 @@ type TypeReference =
             match this with
             | SelfReferenceThroughUnnamed -> "type refers to itself through unnamed shapes; widened to obj"
             | TypeNotResolved reason -> $"type not resolved ({reason}); widened to obj"
-            | MissingFromTypeTable typeId -> $"type#{typeId} missing from the type table; widened to obj"
+            | MissingFromTypeTable -> "referenced type missing from the type table; widened to obj"
             | LoneEnumMemberToFloat -> "lone enum member widened to float"
             | LoneEnumMemberToString -> "lone enum member widened to string"
             | StringLiteralToString -> "string literal type widened to string (doc-noted, §4.2)"
@@ -618,20 +627,14 @@ type TypeReference =
 /// Type parameter binding: `Shape.typeParamsOf`, `aliasTypeParams`, key variables and erasure.
 [<Prefix "TP">]
 type TypeParameters =
-    | [<Widened>] UnnamedTypeParameter of id: int
+    /// `position` is the parameter's index in the declaration's type-parameter list.
+    | [<Widened>] UnnamedTypeParameter of position: int
     | [<Ergonomic>] ConstraintDropped of name: string
     | [<Ergonomic>] GenericFunctionHoisted
     | [<Ergonomic>] KeyWithIndexedAccess of operand: string * result: string
     | [<Ergonomic>] KeyOverOperand of operand: string
     | [<Widened>] TypeParameterErased of name: string
-    /// Wave two, lane A (recon blocker 2). `TP001` interpolates a checker-assigned type id into
-    /// its message, and ids are handed out in the order answers arrive - so the manifest differs
-    /// run to run wherever it fires. Counted the way `RT001` counts the frontier instead.
-    ///
-    /// Wave three, lane G: no pass constructs this. It is retained rather than retired because
-    /// retiring it renumbers `TP008`, and the key is quoted by four source files and by the
-    /// measurements two plan documents record. Delete it only alongside a renumbering already
-    /// being paid for.
+    /// Retired: retained so `TP007` stays reserved to this case.
     | [<Widened>] UnnamedTypeParametersCounted of count: int
     /// Wave two, lane C. TypeScript's `extends` is structural and F#'s `:>` is nominal, so a
     /// constraint the run cannot prove nominally is dropped from the rendered head rather than
@@ -646,7 +649,8 @@ type TypeParameters =
     interface IFindingKind with
         member this.Message =
             match this with
-            | UnnamedTypeParameter id -> $"type parameter #{id} has no name to write; its uses widen to obj"
+            | UnnamedTypeParameter position ->
+                $"type parameter at position {position} has no name to write; its uses widen to obj"
             | ConstraintDropped name -> $"constraint on '{name}' has no F# form and is dropped (§4.9)"
             | GenericFunctionHoisted -> "generic function type hoisted onto the alias; F# has no rank-2 form (§4.9)"
             | KeyWithIndexedAccess(operand, result) ->
@@ -832,8 +836,9 @@ type SynthesizeAnonymous =
     /// named, so the reference carries the named operands and widens the rest.
     | [<Widened>] IntersectionOperandNotHoisted of name: string
     | [<Exact>] NameNestedUnderOwner of nestedAs: string
-    /// Wave seven, lane AI. The synthesized name carries characters an F# declaration name
-    /// admits; the source key spells them differently.
+    /// Wave seven, lane AI. The declared name carries characters an F# declaration name
+    /// admits; the source name (a member key, an exported type or a type parameter) spells them
+    /// differently.
     | [<Ergonomic>] NameSanitisedForIdentifier of key: string * sanitised: string
 
     /// Wave twelve, lane BB. A multi-argument callback declared as a named delegate. Its
@@ -851,7 +856,7 @@ type SynthesizeAnonymous =
             | NameNestedUnderOwner nestedAs -> $"anonymous shape named {nestedAs} under the declaration that owns it"
             | CallbackDelegateNamed declaredAs -> $"callback declared as the named delegate {declaredAs}"
             | NameSanitisedForIdentifier(key, sanitised) ->
-                $"member key {key} declared as {sanitised}; the key spells characters a declaration name refuses"
+                $"{key} declared as {sanitised}; the source name spells characters an F# declaration name refuses"
 
 /// `shape-interfaces`.
 [<Prefix("SI", "shape-interfaces")>]
@@ -1070,6 +1075,35 @@ type DedupeOverloads =
             | KeyofConstrainedOverloadDropped parameter ->
                 $"overload dropped; parameter {parameter} separates only by a keyof-constrained type parameter"
 
+/// `expand-union-arms`. The refusal cases carry the weight: a consumer who enables the feature
+/// and finds a member unchanged reads the manifest to learn which condition it failed.
+[<Prefix("UA", "expand-union-arms")>]
+type ExpandUnionArms =
+    /// The member gained one overload per arm beside its union member. Arm overloads add a call
+    /// path rather than recovering fidelity, so the member keeps the grade its union earned.
+    | [<Ergonomic>] ArmOverloadsSynthesized of parameter: string * arms: int
+    /// The union has more arms than `maxArms` admits. The union member stands alone.
+    | [<Ergonomic>] ArmCountExceedsCap of parameter: string * arms: int * cap: int
+    /// Two arms map to one F# signature, so every synthesised call site would be FS0041. A
+    /// partial arm set would be an API whose shape depends on which arms happened to survive,
+    /// so the whole member declines.
+    | [<Ergonomic>] ArmsCollapseToOneSignature of parameter: string
+    /// A synthesised signature collides with a member the declaration already has, including a
+    /// TypeScript-declared overload that survived dedupe.
+    | [<Ergonomic>] ArmOverloadCollides of parameter: string * memberName: string
+
+    interface IFindingKind with
+        member this.Message =
+            match this with
+            | ArmOverloadsSynthesized(parameter, arms) ->
+                $"parameter {parameter} expanded to {arms} arm overloads beside the union member"
+            | ArmCountExceedsCap(parameter, arms, cap) ->
+                $"parameter {parameter} not expanded: {arms} arms exceeds the configured cap of {cap}"
+            | ArmsCollapseToOneSignature parameter ->
+                $"parameter {parameter} not expanded: its arms map to one F# signature"
+            | ArmOverloadCollides(parameter, memberName) ->
+                $"parameter {parameter} not expanded: a synthesized signature collides with {memberName}"
+
 /// `repair-arity`.
 [<Prefix("RA", "repair-arity")>]
 type RepairArity =
@@ -1154,6 +1188,23 @@ type EmitGroups =
             | ParameterNameEscaped(sourceName, parameterName) ->
                 $"parameter {sourceName} is written {parameterName} to avoid an F# pattern constructor; its JavaScript name is preserved"
 
+[<Prefix("CU", "customize-output")>]
+type CustomizeOutput =
+    | [<Exact>] AttributeAdded of extensionId: string
+    | [<Ergonomic>] CompanionEmitted of extensionId: string
+    | [<Widened>] MemberOmitted of extensionId: string * memberName: string
+    | [<Escape>] InteropReplaced of extensionId: string
+    | [<Escape>] DeclarationReplaced of extensionId: string
+
+    interface IFindingKind with
+        member this.Message =
+            match this with
+            | AttributeAdded id -> $"attribute added by {id}"
+            | CompanionEmitted id -> $"property companion emitted by {id}"
+            | MemberOmitted(id, memberName) -> $"{id} omitted companion member {memberName}"
+            | InteropReplaced id -> $"interop behavior replaced by {id}"
+            | DeclarationReplaced id -> $"declaration contract replaced by {id}"
+
 module FindingCatalogue =
     /// Every finding union, in the order the manifest legend lists them. The snapshot test
     /// enumerates these; a union missing here has keys nothing guards.
@@ -1175,10 +1226,12 @@ module FindingCatalogue =
             typeof<ShapeExports>
             typeof<SynthesizeParamObjects>
             typeof<DedupeOverloads>
+            typeof<ExpandUnionArms>
             typeof<RepairArity>
             typeof<DropOrphanDelegates>
             typeof<AuditCoverage>
             typeof<EmitGroups>
+            typeof<CustomizeOutput>
         ]
 
     /// Pass name -> the key prefix of the union that pass owns. Passes without a union never

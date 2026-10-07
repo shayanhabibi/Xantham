@@ -121,15 +121,15 @@ A bug found in a large fixture is written up as the smallest `.d.ts` that reprod
 full. A citation into a huge generated file is nearly worthless to whoever picks the work up; a
 five-line reproducer is the whole handoff.
 
-### Record a missing Fable.Core name in `docs/fable-binding-gaps.md`
+### Record a missing Fable.Core name in `docs/.ai/fable-binding-gaps.md`
 
 When a mapping is blocked because **`Fable.Core` ships no name to bind to** - "there is no
-`JS.Iterable`, so this widens" - add a section to `docs/fable-binding-gaps.md` and leave its
+`JS.Iterable`, so this widens" - add a section to `docs/.ai/fable-binding-gaps.md` and leave its
 `(ANSWER)` block empty for the user. A finding says a site widened; that document says what would
 close it, and it is where the user answers whether to bind the name in `src/Xantham.Fable.Core`,
 raise it upstream, or accept the loss.
 
-This is a different question from the two documents beside it. `docs/fable5-workarounds.md` is
+This is a different question from the two documents beside it. `docs/.ai/fable5-workarounds.md` is
 Fable's compilation model losing something; a form F# lacks is neither. Verify the absence against
 the pinned assembly - `fcs_nuget_types Fable.Core` against `tests/Xantham.Generator.CompileGate`,
 or a compile error quoted with its code. **A text or metadata search over the assembly is not

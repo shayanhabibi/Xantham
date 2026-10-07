@@ -96,13 +96,15 @@ let nameExports: Pass<ShapeModel> =
                     // granted. A contested name is visible only from the whole list, and the
                     // namespaced declaration is as often the first claimant as the second - it is
                     // the one with somewhere else to go either way.
+                    let exportsById = declarationExports ctx model |> Map.ofList
+
                     let claimants =
                         declarationExports ctx model
                         |> List.filter (fun (typeId, _) -> not (Map.containsKey typeId model.DeclNames))
                         |> List.map (fun (typeId, export) ->
                             typeId,
                             export.Order,
-                            fsName fallback export,
+                            Naming.typeNameSegment (fsName fallback export),
                             namespaceOf export,
                             originOf export,
                             pathOf export)
@@ -116,17 +118,52 @@ let nameExports: Pass<ShapeModel> =
                         |> List.map fst
                         |> Set.ofList
 
+                    /// The full spelling preferred by a claimant, and whether it nests under
+                    /// its namespace to take it.
+                    let wantedOf preferred owner path =
+                        match path, owner with
+                        | (_ :: _ as path), _ -> (path @ [ preferred ]) |> String.concat ".", false
+                        | [], Some ns when Set.contains preferred contested -> nestUnder ns preferred, true
+                        | [], _ -> preferred, false
+
+                    let sourceOf typeId preferred =
+                        Map.tryFind typeId exportsById
+                        |> Option.map (fsName fallback)
+                        |> Option.defaultValue preferred
+
+                    // A sanitised name yields to a declaration spelling it verbatim at the same
+                    // path: `$ZodType` reads `ZodType2` beside an exported `ZodType`, whichever
+                    // is harvested first.
+                    let verbatim =
+                        claimants
+                        |> List.filter (fun (typeId, _, preferred, _, _, _) -> sourceOf typeId preferred = preferred)
+                        |> List.map (fun (_, _, preferred, owner, _, path) -> wantedOf preferred owner path |> fst)
+                        |> Set.ofList
+
                     let names, orders, _, findings =
                         claimants
                         |> List.fold
                             (fun (names, orders, taken, findings) (typeId, order, preferred, owner, origin, path) ->
-                                let wanted, nestedUnderNamespace =
-                                    match path, owner with
-                                    | (_ :: _ as path), _ -> (path @ [ preferred ]) |> String.concat ".", false
-                                    | [], Some ns when Set.contains preferred contested -> nestUnder ns preferred, true
-                                    | [], _ -> preferred, false
+                                let wanted, nestedUnderNamespace = wantedOf preferred owner path
+                                let source = sourceOf typeId preferred
+                                let sanitised = source <> preferred
 
-                                let name = claim taken wanted
+                                let name =
+                                    if sanitised then
+                                        claim (Set.union taken verbatim) wanted
+                                    else
+                                        claim taken wanted
+
+                                let findings =
+                                    if sanitised then
+                                        findings
+                                        @ [
+                                            Finding.make
+                                                name
+                                                (SynthesizeAnonymous.NameSanitisedForIdentifier(source, name))
+                                        ]
+                                    else
+                                        findings
 
                                 let findings =
                                     if nestedUnderNamespace && name.Contains "." then

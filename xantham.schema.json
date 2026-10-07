@@ -104,6 +104,29 @@
         "minLength": 1
       },
       "description": "Exact public export keys (\".\" or concrete \"./path\") mapped to TypeScript files within the input package. Only these inputs are generated; include \".\" explicitly to select the root. Use for expanded wildcards, conditional declarations and separate runtime environments. Mutually exclusive with entry and subpaths."
+    },
+    "unionArmOverloads": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Synthesize one overload per arm beside the union member. Defaults to false."
+        },
+        "maxArms": {
+          "type": "integer",
+          "minimum": 2,
+          "description": "The largest arm count that expands. A union with more arms keeps the union member alone. Defaults to 4."
+        },
+        "policy": {
+          "type": "string",
+          "enum": [
+            "single"
+          ],
+          "description": "Which union parameters expand. Only \"single\" is accepted; \"linear\" is reserved."
+        }
+      },
+      "description": "Synthesized overloads beside a member whose parameter is an erased union, one per arm. Disabled by default: enabling it makes existing `!^` casts at those call sites ambiguous."
     }
   },
   "$defs": {

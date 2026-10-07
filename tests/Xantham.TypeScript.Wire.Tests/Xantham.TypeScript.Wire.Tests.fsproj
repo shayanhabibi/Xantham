@@ -8,6 +8,7 @@
 
     <ItemGroup>
         <Compile Include="Tsc.test.fs" />
+        <Compile Include="Frame.test.fs" />
         <Compile Include="Json.test.fs" />
         <Compile Include="Live.test.fs" />
         <Compile Include="Mailbox.test.fs" />

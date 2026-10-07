@@ -3,7 +3,7 @@
 Places where a generated binding widens because **`Fable.Core` ships no name to bind to**, not
 because Fable's compilation model loses something and not because F# has no form.
 
-`docs/fable5-workarounds.md` sorts every loss into three causes and covers only the second:
+`docs/.ai/fable5-workarounds.md` sorts every loss into three causes and covers only the second:
 
 1. **F# has no form.** Rank-2 types, structural subtyping, singleton literal types.
 2. **Fable 5's compilation model.** What the emitted JavaScript or the Fable runtime does.
@@ -15,8 +15,9 @@ answer is different in kind — a name that Fable.Core adds, or that this reposi
 `src/Xantham.Fable.Core`, closes one of these outright. Nothing about Fable's compilation model
 has to change.
 
-Every claim is verified against the pins this repository builds on: `Fable.Core` **5.2.0**, the
-`fable` tool 5.0.0, `fable-library-js` 5.0.0. The inventory method is
+Every claim is verified against the pins this repository built on at the time: `Fable.Core`
+**5.2.0**, the `fable` tool 5.0.0, `fable-library-js` 5.0.0. The `fable` tool pin is now 5.17.2;
+`Fable.Core` is unchanged. The inventory method is
 `fcs_nuget_types Fable.Core` against `tests/Xantham.Generator.CompileGate`, which resolves the
 exact assembly the compile gate compiles against.
 

@@ -11,8 +11,16 @@ Both are run as `dotnet fsi <script> -- <command>`.
 
 ## Core Libraries
 
-- **Partas.Build** — the `rootCommand`/`command`/`stage`/`input` DSL, plus the `Baked.*` prefabs
-  for common inputs and pipelines.
+- **Partas.Build** — the `rootCommand`/`command`/`stage`/`input` DSL.
+- **Partas.Build.Baked** — a separate package of prefab inputs: `Baked.Dotnet.config`,
+  `Baked.NuGet.apiKey` (falls back to `NUGET_API_KEY`), `Baked.SemVer.*`, `Baked.Common.isCI`.
+  Each `BuildOption<'T>` is read through `.option` or `.argument`. Its version must track the
+  Partas.Build pin: Baked 0.1.1 is compiled against Partas.Build 0.5.0, and its prefab stages
+  (`Baked.SemVer.Stages.*`) throw `MissingMethodException` under 0.6.x. `build.fsx`'s `bump` is
+  therefore a local stage over `Baked.SemVer.Version.IO.bumpVersion`; keep it local until a Baked
+  release built against the current Partas.Build ships.
+- Every script pins every `#r "nuget: ..."` to an exact version. `build.fsx` shells to the
+  `tools/*.fsx` scripts, so a floating reference in one of them breaks the pipeline.
 - **Partas.TypeProvider.BuildHelper** — the `Repo` provider: `Repo.Project.*` for project and
   solution paths, `Repo.FileSystem.*` for directories.
 
@@ -47,20 +55,29 @@ let build = input {
 `tools/workspace.fsx` is a `#load`-only helper (not a command script) that both `build.fsx` and
 `tools/generate-wire.fsx` use to answer "which checkout has the dependencies?".
 
+`Workspace.ensureTsc` exports the nearest compiler as `XANTHAM_TSGO_EXE`, which `Tsc.locate`
+honours ahead of its parent-directory walk. It runs while the stages are built, before
+`npm ci`, so a fresh checkout (the CI runner) exports nothing: there a package outside the
+repository resolves no compiler, which is why test scratch lives under `tests/.scratch/`
+(`.claude/rules/tests.md`). It returns the compiler only when it is *borrowed* — outside the
+checkout's own `node_modules`. The `npm ci` stage in `build.fsx` runs exactly when nothing is
+borrowed.
+
 An agent worktree under `.claude/worktrees/` carries tracked files only, so it has no
-`node_modules`. Rather than install the pin twice, `Workspace.ensureTsc` finds the main
-checkout's compiler and exports it as `XANTHAM_TSGO_EXE`, which `Tsc.locate` honours ahead of its
-parent-directory walk; `npm install` is then skipped and the live tests run against the same
-binary the main checkout uses. `typescriptPackage` and `nodeModulesRoot` resolve the generators'
-inputs the same way — worktree first, then the main checkout.
+`node_modules`. Rather than install the pin twice, it borrows the main checkout's compiler, skips
+`npm ci`, and runs the live tests against the same binary the main checkout uses.
+`typescriptPackage` and `nodeModulesRoot` resolve the generators' inputs the same way — worktree
+first, then the main checkout.
 
 - Detection is "`.git` is a file, not a directory", so it does not depend on where the worktree
   sits. The main checkout is found through the worktree's `commondir`.
-- Only worktrees get the redirect. In the main checkout `ensureTsc` returns `None` and changes
-  nothing, so a pin bump is picked up normally.
-- An `XANTHAM_TSGO_EXE` already in the environment always wins.
+- The main checkout owns its install: `ensureTsc` returns `None`, `npm ci` installs the committed
+  `package-lock.json`, and a pin bump reaches the exported path. Update both manifests together. A
+  worktree picks up a pin bump only once the main checkout has installed it.
+- An `XANTHAM_TSGO_EXE` already in the environment always wins; it counts as borrowed unless it is
+  the checkout's own compiler.
 - Generated output still goes to the worktree — only *inputs* are borrowed.
-- Borrowing also exports `XANTHAM_REQUIRE_TSC=1`. Once a compiler is known to be on disk, a live
+- Exporting also sets `XANTHAM_REQUIRE_TSC=1`. Once a compiler is known to be on disk, a live
   suite that skipped itself is a broken run, not an unconfigured one, and silence there would
   make a worktree look green while testing nothing. Export `XANTHAM_REQUIRE_TSC=0` to opt out.
 - Consequence: with the override set, the `tsc` layout test skips itself by design — it asserts
@@ -87,6 +104,11 @@ default to the most general and safe defaults.
 Simply launching the script should not perform any actions. Instead, commands should be used to trigger specific actions.
 
 - ** DO ** create localised scripts for finer grain tasks.
+
+The optional `test --run-gate` path includes `tests/Xantham.Generator.PartasGate/verify.mjs`.
+It authenticates a checked-in Partas source snapshot, generates its companions with the example
+executable, and restores the gate's npm lockfile. All generated projects live under
+`tests/.scratch/partas-gate`; it requires no sibling repository.
 
 See ./tools/generate-wire.fsx
 These scripts may require more input, provide less defaults, and be more specific.

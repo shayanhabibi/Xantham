@@ -10,57 +10,46 @@ let private publicInputsFixture =
     Path.GetFullPath(Path.Combine(__SOURCE_DIRECTORY__, "..", "fixtures", "public-inputs-lab"))
 
 let private selection expected (manifest: string) =
-    let package = Path.Combine(Path.GetTempPath(), "xantham-entry-" + Guid.NewGuid().ToString "N")
-    Directory.CreateDirectory package |> ignore
+    use scratch = Scratch.directory "xantham-entry"
+    let package = scratch.Path
+    File.WriteAllText(Path.Combine(package, "package.json"), manifest)
+    File.WriteAllText(Path.Combine(package, "index.d.ts"), "export declare const fallback: number;")
 
-    try
-        File.WriteAllText(Path.Combine(package, "package.json"), manifest)
-        File.WriteAllText(Path.Combine(package, "index.d.ts"), "export declare const fallback: number;")
+    let actual =
+        try
+            Bootstrap.entryFile package
+            |> fun path -> Path.GetRelativePath(package, path).Replace('\\', '/')
+            |> Ok
+        with e ->
+            Error(e.Message.Replace(package, "<package>"))
 
-        let actual =
-            try
-                Bootstrap.entryFile package
-                |> fun path -> Path.GetRelativePath(package, path).Replace('\\', '/')
-                |> Ok
-            with e ->
-                Error(e.Message.Replace(package, "<package>"))
-
-        actual, expected
-    finally
-        Directory.Delete(package, true)
+    actual, expected
 
 let private explicitSelection expected (selected: string) =
-    let package = Path.Combine(Path.GetTempPath(), "xantham-entry-" + Guid.NewGuid().ToString "N")
+    use scratch = Scratch.directory "xantham-entry"
+    let package = scratch.Path
     let path = Path.Combine(package, selected)
     Directory.CreateDirectory(Path.GetDirectoryName path) |> ignore
-
-    try
-        File.WriteAllText(path, "export declare const selected: number;")
-        let config = { GeneratorConfig.Default with Entry = Some selected }
-        let actual = Bootstrap.resolveEntryFile config package |> fun entry -> Path.GetRelativePath(package, entry).Replace('\\', '/')
-        actual, expected
-    finally
-        Directory.Delete(package, true)
+    File.WriteAllText(path, "export declare const selected: number;")
+    let config = { GeneratorConfig.Default with Entry = Some selected }
+    let actual = Bootstrap.resolveEntryFile config package |> fun entry -> Path.GetRelativePath(package, entry).Replace('\\', '/')
+    actual, expected
 
 let private enumeration (files: string list) (manifest: string) =
-    let package = Path.Combine(Path.GetTempPath(), "xantham-paths-" + Guid.NewGuid().ToString "N")
-    Directory.CreateDirectory package |> ignore
+    use scratch = Scratch.directory "xantham-paths"
+    let package = scratch.Path
+    File.WriteAllText(Path.Combine(package, "package.json"), manifest)
 
-    try
-        File.WriteAllText(Path.Combine(package, "package.json"), manifest)
+    for file in files do
+        let path = Path.Combine(package, file)
+        Directory.CreateDirectory(Path.GetDirectoryName path) |> ignore
+        File.WriteAllText(path, "export declare const value: number;")
 
-        for file in files do
-            let path = Path.Combine(package, file)
-            Directory.CreateDirectory(Path.GetDirectoryName path) |> ignore
-            File.WriteAllText(path, "export declare const value: number;")
+    let paths, skipped = Bootstrap.publicPaths GeneratorConfig.Default package
 
-        let paths, skipped = Bootstrap.publicPaths GeneratorConfig.Default package
-
-        paths
-        |> List.map (fun p -> p.Key, Path.GetRelativePath(package, p.File / uom<declFile>).Replace('\\', '/')),
-        skipped |> List.map fst
-    finally
-        Directory.Delete(package, true)
+    paths
+    |> List.map (fun p -> p.Key, Path.GetRelativePath(package, p.File / uom<declFile>).Replace('\\', '/')),
+    skipped |> List.map fst
 
 [<Tests>]
 let tests =
@@ -98,11 +87,10 @@ let tests =
             "[]"; "{}"; "null"; "{\"./card\":null}"; "{\"./card\":\"\"}"
             "{\"./card\":\"types/card.d.ts\",\"./card\":\"types/card.d.ts\"}"
         ] <| fun json ->
-            let file = Path.GetTempFileName()
-            try
-                File.WriteAllText(file, "{\"publicInputs\":" + json + "}")
-                Expect.throws (fun () -> GeneratorConfig.loadFile file |> ignore) "invalid selections must not be silently normalized"
-            finally File.Delete file
+            use scratch = Scratch.directory "xantham-public-inputs"
+            let file = Path.Combine(scratch.Path, "xantham.json")
+            File.WriteAllText(file, "{\"publicInputs\":" + json + "}")
+            Expect.throws (fun () -> GeneratorConfig.loadFile file |> ignore) "invalid selections must not be silently normalized"
 
         let inline (==>) manifest entry = manifest, Ok entry
         let inline (=!>) manifest message = manifest, Error message
@@ -182,43 +170,35 @@ let tests =
             |> Flip.Expect.equal "root first, subpaths ordinal, skipped keys listed" expected
 
         testCase "a configured entry is the root alone" <| fun _ ->
-            let package = Path.Combine(Path.GetTempPath(), "xantham-paths-" + Guid.NewGuid().ToString "N")
+            use scratch = Scratch.directory "xantham-paths"
+            let package = scratch.Path
             Directory.CreateDirectory(Path.Combine(package, "dist")) |> ignore
-            try
-                File.WriteAllText(Path.Combine(package, "package.json"), """{ "exports": { ".": { "types": "./dist/root.d.ts" }, "./adapter": { "types": "./dist/adapter.d.ts" } } }""")
-                File.WriteAllText(Path.Combine(package, "dist", "root.d.ts"), "export declare const r: number;")
-                File.WriteAllText(Path.Combine(package, "dist", "adapter.d.ts"), "export declare const a: number;")
-                let config = { GeneratorConfig.Default with Entry = Some "dist/adapter.d.ts" }
-                let paths, skipped = Bootstrap.publicPaths config package
-                Expect.equal (paths |> List.map _.Key) [ "." ] "entry is the only path"
-                Expect.isEmpty skipped "nothing skipped"
-            finally
-                Directory.Delete(package, true)
+            File.WriteAllText(Path.Combine(package, "package.json"), """{ "exports": { ".": { "types": "./dist/root.d.ts" }, "./adapter": { "types": "./dist/adapter.d.ts" } } }""")
+            File.WriteAllText(Path.Combine(package, "dist", "root.d.ts"), "export declare const r: number;")
+            File.WriteAllText(Path.Combine(package, "dist", "adapter.d.ts"), "export declare const a: number;")
+            let config = { GeneratorConfig.Default with Entry = Some "dist/adapter.d.ts" }
+            let paths, skipped = Bootstrap.publicPaths config package
+            Expect.equal (paths |> List.map _.Key) [ "." ] "entry is the only path"
+            Expect.isEmpty skipped "nothing skipped"
 
         testCase "a subpaths allowlist restricts enumeration and rejects unknown keys" <| fun _ ->
-            let package = Path.Combine(Path.GetTempPath(), "xantham-paths-" + Guid.NewGuid().ToString "N")
-            Directory.CreateDirectory package |> ignore
-            try
-                File.WriteAllText(Path.Combine(package, "package.json"), """{ "exports": { ".": { "types": "./root.d.ts" }, "./a": { "types": "./a.d.ts" }, "./b": { "types": "./b.d.ts" } } }""")
-                for f in [ "root.d.ts"; "a.d.ts"; "b.d.ts" ] do
-                    File.WriteAllText(Path.Combine(package, f), "export declare const v: number;")
-                let config = { GeneratorConfig.Default with Subpaths = Some [ "./b" ] }
-                let paths, _ = Bootstrap.publicPaths config package
-                Expect.equal (paths |> List.map _.Key) [ "."; "./b" ] "root plus the allowlisted key"
-                let bad = { GeneratorConfig.Default with Subpaths = Some [ "./missing" ] }
-                Expect.throwsC (fun () -> Bootstrap.publicPaths bad package |> ignore) (fun e ->
-                    Expect.stringContains e.Message "./missing" "the unknown key is named")
-            finally
-                Directory.Delete(package, true)
+            use scratch = Scratch.directory "xantham-paths"
+            let package = scratch.Path
+            File.WriteAllText(Path.Combine(package, "package.json"), """{ "exports": { ".": { "types": "./root.d.ts" }, "./a": { "types": "./a.d.ts" }, "./b": { "types": "./b.d.ts" } } }""")
+            for f in [ "root.d.ts"; "a.d.ts"; "b.d.ts" ] do
+                File.WriteAllText(Path.Combine(package, f), "export declare const v: number;")
+            let config = { GeneratorConfig.Default with Subpaths = Some [ "./b" ] }
+            let paths, _ = Bootstrap.publicPaths config package
+            Expect.equal (paths |> List.map _.Key) [ "."; "./b" ] "root plus the allowlisted key"
+            let bad = { GeneratorConfig.Default with Subpaths = Some [ "./missing" ] }
+            Expect.throwsC (fun () -> Bootstrap.publicPaths bad package |> ignore) (fun e ->
+                Expect.stringContains e.Message "./missing" "the unknown key is named")
 
         testCase "a root-less map yields subpaths and no root" <| fun _ ->
-            let package = Path.Combine(Path.GetTempPath(), "xantham-paths-" + Guid.NewGuid().ToString "N")
-            Directory.CreateDirectory package |> ignore
-            try
-                File.WriteAllText(Path.Combine(package, "package.json"), """{ "exports": { "./a": { "types": "./a.d.ts" } } }""")
-                File.WriteAllText(Path.Combine(package, "a.d.ts"), "export declare const v: number;")
-                let paths, _ = Bootstrap.publicPaths GeneratorConfig.Default package
-                Expect.equal (paths |> List.map _.Key) [ "./a" ] "no root path"
-            finally
-                Directory.Delete(package, true)
+            use scratch = Scratch.directory "xantham-paths"
+            let package = scratch.Path
+            File.WriteAllText(Path.Combine(package, "package.json"), """{ "exports": { "./a": { "types": "./a.d.ts" } } }""")
+            File.WriteAllText(Path.Combine(package, "a.d.ts"), "export declare const v: number;")
+            let paths, _ = Bootstrap.publicPaths GeneratorConfig.Default package
+            Expect.equal (paths |> List.map _.Key) [ "./a" ] "no root path"
     ]

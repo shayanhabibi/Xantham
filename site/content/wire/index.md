@@ -257,7 +257,7 @@ match Api.getSourceFile channel { Snapshot = snapshot.Snapshot; Project = projec
 | ValueNone -> failwith "not in this project"
 | ValueSome ast ->
     printfn $"%d{ast.NodeCount} nodes in %s{Ast.fileName ast}"
-    Node.root ast   // Node<SourceFile> - continue in wire-navigation.md
+    Node.root ast   // Node<SourceFile> - continue in navigation.md
 ```
 
 One request brings the whole file: every node is readable from the blob with no further round

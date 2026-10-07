@@ -1,6 +1,7 @@
-#r "nuget: Partas.Build, 0.3.0"
+#i "nuget: https://nuget.cloudsmith.io/shayanhabibi/shayanhabibi-partas-build/v3/index.json"
+#r "nuget: Partas.Build, 0.7.0"
 #r "nuget: Partas.TypeProvider.BuildHelper, 0.2.5"
-#r "nuget: Str"
+#r "nuget: Str, 0.24.1"
 
 #load "workspace.fsx"
 
@@ -305,17 +306,19 @@ let generateSession =
             }
     }
 
-rootCommand fsi.CommandLineArgs[1..] {
-    command "sync" { command "tsc-ast" { syncTscAst } }
+exit (
+    rootCommand fsi.CommandLineArgs[1..] {
+        command "sync" { command "tsc-ast" { syncTscAst } }
 
-    command "generate" {
-        command "proto" { generateProto }
+        command "generate" {
+            command "proto" { generateProto }
 
-        command "ast" {
-            requireUpstream
-            generateAst
+            command "ast" {
+                requireUpstream
+                generateAst
+            }
+
+            command "session" { generateSession }
         }
-
-        command "session" { generateSession }
     }
-}
+)

@@ -2,12 +2,26 @@
 
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
+        <Version>0.1.0</Version>
+        <FSharpCoreImplicitPackageVersion>9.0.100</FSharpCoreImplicitPackageVersion>
+        <AssemblyVersion>0.0.0.0</AssemblyVersion>
+        <IsPackable>true</IsPackable>
+        <PackageId>Xantham.Generator</PackageId>
+        <Authors>Shayan Habibi</Authors>
+        <Description>TypeScript-to-F# Fable bindings generator for customisations and applications that embed the generation pipeline.</Description>
+        <PackageTags>typescript;fsharp;fable;bindings;codegen</PackageTags>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
 
     <ItemGroup>
         <!-- The order is the pipeline's order: the model first, then one file per tier in the
              order the tiers run, then the fold that sequences them. -->
         <Compile Include="Measures.fs" />
+        <Compile Include="AssemblyInfo.fs" />
         <Compile Include="Findings.fs" />
         <Compile Include="Model.fs" />
         <Compile Include="Bootstrap.fs" />
@@ -25,6 +39,7 @@
         <Compile Include="Shape\Anonymous.fs" />
         <Compile Include="Shape\ConstructorObjects.fs" />
         <Compile Include="Shape\FreeTypeParams.fs" />
+        <Compile Include="Shape\MixedUnionCensus.fs" />
         <Compile Include="Shape\LiteralUnions.fs" />
         <Compile Include="Shape\TaggedUnions.fs" />
         <Compile Include="Shape\Callbacks.fs" />
@@ -35,6 +50,7 @@
         <Compile Include="Shape\ParamObjects.fs" />
         <Compile Include="Shape\Inherited.fs" />
         <Compile Include="Shape\Overloads.fs" />
+        <Compile Include="Shape\UnionArms.fs" />
         <Compile Include="Shape\Arity.fs" />
         <Compile Include="Shape\Ordering.fs" />
         <Compile Include="Shape\ExportCollisions.fs" />
@@ -43,6 +59,13 @@
         <Compile Include="Shape\Passes.fs" />
         <Compile Include="Render.fs" />
         <Compile Include="DeclarationCatalog.fs" />
+        <Compile Include="Customization\Contract.fsi" />
+        <Compile Include="Customization\Contract.fs" />
+        <Compile Include="Customization\Semantics.fs" />
+        <Compile Include="Customization\Output.fs" />
+        <Compile Include="Customization\Apply.fs" />
+        <Compile Include="Customization\Provenance.fs" />
+        <Compile Include="Customization\Compile.fs" />
         <Compile Include="Pipeline.fs" />
     </ItemGroup>
 

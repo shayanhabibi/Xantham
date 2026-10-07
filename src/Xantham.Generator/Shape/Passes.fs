@@ -12,6 +12,7 @@ let passes: Pass<ShapeModel> list =
         Anonymous.synthesizeAnonymous
         ConstructorObjects.nameConstructorObjects
         FreeTypeParams.bindFreeTypeParams
+        MixedUnionCensus.countMixedUnions
         LiteralUnions.classifyLiteralUnions
         TaggedUnions.detectTaggedUnions
         Callbacks.shapeCallbacks
@@ -23,6 +24,7 @@ let passes: Pass<ShapeModel> list =
         Inherited.dropInherited
         Overloads.dedupeOverloads
         Ordering.orderDeclarations
+        UnionArms.expandUnionArms
         Arity.repairArity
         Arity.normalizeObjUnions
         ExportCollisions.resolveExportCollisions

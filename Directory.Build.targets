@@ -1,6 +1,6 @@
-﻿<Project>
-    <PropertyGroup Condition="'$(IsExcludedFromRootBuild)' == 'true'">
-        <BuildDependsOn>BeforeBuild;AfterBuild</BuildDependsOn>
-        <CompileDependsOn />
-    </PropertyGroup>
+<Project>
+    <ItemGroup>
+        <!-- F# consumers supply FSharp.Core; the build reference stays private to each package. -->
+        <PackageReference Update="FSharp.Core" PrivateAssets="all" />
+    </ItemGroup>
 </Project>

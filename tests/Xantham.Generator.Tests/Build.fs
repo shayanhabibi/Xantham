@@ -130,6 +130,12 @@ let runPass (pass: Pass<'Model>) (model: 'Model) : 'Model * Finding list =
     | Advanced advanced -> advanced, []
     | Degraded(degraded, findings) -> degraded, findings
 
+/// `runPass` under an edited config, for the passes a default run leaves switched off.
+let runPassWith (config: GeneratorConfig) (pass: Pass<'Model>) (model: 'Model) : 'Model * Finding list =
+    match Async.RunSynchronously(pass.Run { context with Config = config } model) with
+    | Advanced advanced -> advanced, []
+    | Degraded(degraded, findings) -> degraded, findings
+
 // The primitive corner of a type table, under the ids the tests refer to them by.
 let stringType = facts (typeResponse 1 TypeFlags.String)
 let numberType = facts (typeResponse 2 TypeFlags.Number)

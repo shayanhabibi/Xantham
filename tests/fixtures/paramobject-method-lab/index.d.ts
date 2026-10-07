@@ -1,4 +1,4 @@
-// Hand-authored fixture for wave four lane O: docs/fable5-workarounds.md §3. An interface
+// Hand-authored fixture for wave four lane O: docs/.ai/fable5-workarounds.md §3. An interface
 // declaring a method still gains a `[<ParamObject; Emit("$0")>]` Create, with the method bound
 // to a delegate-typed parameter - the same type a function-valued property of that signature
 // already carries (D5). The delegate receives no `this`; that is a later question.

@@ -1,6 +1,6 @@
 # Union arm overloads at parameter position
 
-Status: design approved 2026-09-22, unimplemented.
+Status: implemented 2026-09-22, shipped disabled.
 Closes the deferred half of **D4** (`generator-type-mapping.md` §4.5).
 
 `generator-architecture.md` records the state this design starts from: "`U_n` already satisfies
@@ -106,7 +106,12 @@ A member expands when every condition holds:
 - that union's arm count is at most the configured cap;
 - the arms are pairwise distinct as F# signatures after mapping;
 - no synthesised signature collides with an existing member of the same name, including the
-  TypeScript-declared overloads that survived dedupe.
+  TypeScript-declared overloads that survived dedupe. Two signatures collide
+  (`CompiledSignature.overlaps`) when they compile to one parameter signature, or when one
+  opens the other with an omissible tail and a call leaves an optional unsupplied in both,
+  or in neither. An arm `(x)` beside a declared `(x, ?y)` does not collide, since F# prefers
+  the candidate with no unsupplied optional; an arm `(x, ?y)` beside `(x, ?y, ?z)` is FS0041
+  and does.
 
 A collapsing arm set disqualifies the whole member. `U2<string, string>` yields two identical
 signatures and FS0041 at every call site, and a partial arm set would be an API whose shape
@@ -191,9 +196,9 @@ documented result of that combination.
 
 ### Callbacks are where the choice actually bites
 
-Measured 2026-09-22 (Fable 5.13.0), and it reverses the intuitive answer. A union-case
-constructor gets no lambda-to-delegate coercion — that applies at method-argument position
-only:
+Measured 2026-09-22 against Fable 5.13.0 (before the repository pinned 5.17.2), and
+it reverses the intuitive answer. A union-case constructor gets no lambda-to-delegate coercion —
+that applies at method-argument position only:
 
 | Position | Bare lambda | Emitted JS |
 |---|---|---|
@@ -219,12 +224,17 @@ since `float[]` and `string[]` are distinct signatures sharing one `isArrayLike`
 the mixed-union pass accepts would pass the collapsing check here; the reverse does not hold,
 so neither rule substitutes for the other.
 
-### Corpus numbers have a dependency — resolved 2026-09-22, no change
+### Corpus numbers have a dependency — still open
 
-The mixed-union Step 0 gate ran and returned **zero** eligible unions across all 108 packages,
-so that pass will not be built and claims nothing. The counts below stand as measured and the
-`maxArms` analysis needs no recomputation. The paragraph that follows is kept for its reasoning;
-its action item is discharged.
+This was marked resolved on 2026-09-22 on the strength of a mixed-union Step 0 run reporting
+**zero** eligible unions. That run was wrong: it read rendered `FsTypeRef`s, where string
+literals have already been widened to `FsString` in the `StringLiteralToString` arm of
+`typeRefOnPath` in `Spec.fs`. Re-measured against raw `TypeFacts`, the gate returns **11 eligible of 45**. See
+`2026-09-22-mixed-literal-unions.md` § *Step 0 result*.
+
+So the action item below is **not** discharged. The mixed-union pass is undecided rather than
+declined, and if it is built it will claim unions out of the population the counts below were
+measured over.
 
 
 
@@ -234,3 +244,46 @@ pass claims leaves that population, including some of the six-arm cluster that c
 the 239 uncapped overloads. Those figures, and the `maxArms` cap analysis resting on them,
 must be recomputed once the mixed-union Step 0 measurement lands. Both features ship disabled,
 so there is no release-ordering hazard — only a measurement one.
+
+
+## Implementation notes — 2026-09-22
+
+Shipped as `Shape/UnionArms.fs`, pass `expand-union-arms`, findings `UA001`–`UA004`. Three
+things the design did not anticipate:
+
+**Pass position.** The design said "after `dedupe-overloads`", which is necessary but not
+sufficient. Exports do not become an `FsExports` container until `order-declarations` builds
+one from `model.ExportMembers`; before that they are a flat list with no container name to key
+findings on, and a pass sitting earlier rewrites `model.Decls` where no export lives. The pass
+runs after `order-declarations`, which is after `dedupe-overloads`, so the design constraint
+holds.
+
+**`UA003` is unreachable from TypeScript source.** Arms that are one F# signature but distinct
+`FsTypeRef`s cannot be written: TypeScript reduces a union by type identity before Xantham
+reads it, so `number[] | Ids` with `type Ids = number[]` arrives as a single arm, and arms that
+are identical `FsTypeRef`s (`number[] | ReadonlyArray<number>`) are already deduped by
+`erasedUnionRef`. The guard is kept — an API that collapses would be FS0041 at every call site
+— and is exercised in `Shape.test.fs` against a hand-built model, with the lab fixture
+documenting why the source-level case does not reach it.
+
+**Collision is call-level, measured 2026-09-24.** Commit 26df955 declined an arm that is a
+prefix of a declared overload whose tail is omissible, citing FS0041 for `f "a"` against
+`f(x: string)` beside `f(x: string, ?y: float)`. That call compiles (the optional-tail row
+above), and so does a `ParamArray` tail. Probed under `dotnet fsi` against Fable.Core 5.2.0,
+static and interface members alike: FS0041 needs both candidates to leave an optional
+unsupplied, as `(x, ?y)` beside `(x, ?y, ?z)` does at `p "a"`, or neither with the supplied
+positions alike, as `(x, y)` beside `(x, ?y)` does at `p ("a", 1.0)`. `(x, ?y)` beside
+`(x, y, ?z)` resolves at every arity. Overloads differing only in generic arity resolve to the
+non-generic one. `union-arm-overload-lab` pins `prefix` as an expansion and `ambiguous` as the
+`UA004` negative; `Shape.test.fs` carries the probed pairs.
+
+`(x, ?y: string)` beside `(x, ?y: float)` is FS0041 at `p "a"` too, and `overlaps` does not
+report it: the supplied positions agree but the signatures share no typed prefix.
+`resolve-export-collisions` applies the same `ambiguousCall`. Before, it renamed on any omissible
+prefix, which renamed the resolvable `(x)` beside `(x, ?y)` in `@types/node` (`url.parse`, five
+`child_process` members). Under the narrow predicate those keep their names, and the same-arity
+`url.parse(u, ?q, ?s)` beside `parse(u, q, ?s)` still renames: an optional parameter compares by
+its rendered `?name: T` type, not its `T option` reference. `export-layout-lab`'s `locate` pins
+that shape.
+**Config-aware pass harness.** `Build.runPassWith` was added so a pass that ships disabled can
+be unit-tested at all; `Build.runPass` takes the disabled early return and asserts nothing.
