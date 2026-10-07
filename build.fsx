@@ -1,6 +1,7 @@
 ﻿#i "nuget: https://nuget.cloudsmith.io/shayanhabibi/shayanhabibi-partas-build/v3/index.json"
-#r "nuget: Partas.Build, 0.7.0"
-#r "nuget: Partas.Build.Baked, 0.1.2"
+#r "nuget: Partas.Build, 0.8.0"
+#r "nuget: Partas.Build.Baked, 0.2.0"
+#r "nuget: Partas.Build.EasyBuild.ShipIt, 0.1.0"
 #r "nuget: Partas.TypeProvider.BuildHelper, 0.2.5"
 #r "nuget: Str, 0.24.1"
 #r "nuget: Fake.IO.FileSystem, 6.1.4"
@@ -771,71 +772,22 @@ module Stages =
                 }
         }
 
-    /// Bumps `<Version>` in each selected project by the kind given as the argument, patch by
-    /// default. Skipped on CI.
-    // `Baked.SemVer.Stages.bumpArgument` throws MissingMethodException under Partas.Build 0.6.5
-    // (Partas.Build.Baked 0.1.1 targets 0.5.0). Replace this with it once Baked is rebuilt.
+    /// Prepare independent releases locally; preserve merge history between branches.
     let bump =
-        input {
-            let! ci = Baked.Common.isCI
-            and! kind = Baked.SemVer.bump.argument
-            and! projects = Options.projects |> InputSpec.map (List.map _.RelativePath)
+        Partas.Build.EasyBuild.ShipIt.Inputs.bump
+        |> InputSpec.map (fun options ->
+            { options with
+                AllowedBranches =
+                    if options.AllowedBranches = [ "main" ] then
+                        [ "develop" ]
+                    else
+                        options.AllowedBranches
+                SkipMergeCommit = true
+            })
+        |> Partas.Build.EasyBuild.ShipIt.Stages.bumpWith
 
-            return
-                stage "bump" {
-                    when' (not ci)
-
-                    run (fun _ ->
-                        let paths =
-                            projects
-                            |> List.map (fun project -> project, System.IO.Path.Combine(__SOURCE_DIRECTORY__, project))
-
-                        let report (errors: string list) = Error(String.concat "\n" errors)
-
-                        let unwritable =
-                            paths
-                            |> List.choose (fun (project, path) ->
-                                try
-                                    let version =
-                                        System.Xml.Linq.XDocument
-                                            .Load(path)
-                                            .Descendants(System.Xml.Linq.XName.Get "Version")
-                                        |> Seq.tryHead
-
-                                    match version with
-                                    | None -> Some $"%s{project}: no <Version> to bump"
-                                    | Some version when
-                                        not (
-                                            System.Text.RegularExpressions.Regex.IsMatch(
-                                                version.Value.Trim(),
-                                                @"^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$"
-                                            )
-                                        )
-                                        ->
-                                        Some $"%s{project}: <Version> %s{version.Value} is not a SemVer version"
-                                    | Some _ when System.IO.FileInfo(path).IsReadOnly ->
-                                        Some $"%s{project}: the file is read-only"
-                                    | Some _ -> None
-                                with error ->
-                                    Some $"%s{project}: %s{error.Message}")
-
-                        match unwritable with
-                        | [] ->
-                            paths
-                            |> List.choose (fun (project, path) ->
-                                match
-                                    Baked.SemVer.Version.IO.bumpVersion path (defaultArg kind Baked.SemVer.Patch)
-                                with
-                                | Ok(previous, next) ->
-                                    printfn $"%s{project}: %s{previous} -> %s{next}"
-                                    None
-                                | Error error -> Some $"%s{project}: %s{error.Message}")
-                            |> function
-                                | [] -> Ok()
-                                | errors -> report errors
-                        | errors -> report ("No project was bumped." :: errors))
-                }
-        }
+    let validateRelease =
+        stage "validate release versions" { run "node .github/scripts/release-versions.cjs" }
 
 exit (
     rootCommand fsi.CommandLineArgs[1..] {
@@ -847,6 +799,15 @@ exit (
         }
 
         command "bump" { Stages.bump }
+
+        command "release" { command "check" { Stages.validateRelease } }
+
+        command "shipit" {
+            command "setup" { Partas.Build.EasyBuild.ShipIt.Stages.setup }
+            command "version" { Partas.Build.EasyBuild.ShipIt.Stages.version }
+            command "conventions" { Partas.Build.EasyBuild.ShipIt.Stages.conventions }
+            command "bump" { Stages.bump }
+        }
 
         command "build" {
             Stages.restore

@@ -9,6 +9,7 @@ const environment = { ...process.env };
 delete environment.NUGET_API_KEY;
 
 function build(...args) {
+  if (args.includes("--explain")) args.push("--json");
   const result = spawnSync("dotnet", ["fsi", "build.fsx", "--", ...args], {
     cwd: root,
     env: environment,
@@ -16,7 +17,24 @@ function build(...args) {
     timeout: 120_000,
   });
   assert.ifError(result.error);
-  return { status: result.status, output: result.stdout + result.stderr };
+  let output = result.stdout + result.stderr;
+  if (result.status === 0 && args.includes("--explain")) {
+    const start = result.stdout.indexOf('{');
+    const explanation = JSON.parse(result.stdout.slice(start));
+    assert.equal(explanation.formatVersion, 1);
+    const lines = [];
+    function stage(value, parentSkipped = false) {
+      const skipped = parentSkipped || value.status === "skipped";
+      lines.push(`${value.name}${skipped ? " (skipped)" : ""}`);
+      for (const step of value.steps) {
+        if (step.stage) stage(step.stage, skipped);
+        else if (!skipped && step.label) lines.push(step.label);
+      }
+    }
+    for (const pipeline of explanation.pipelines) for (const value of pipeline.stages) stage(value);
+    output = lines.join("\n") + result.stderr;
+  }
+  return { status: result.status, output };
 }
 
 const publish = build("publish", "--explain");
@@ -80,5 +98,10 @@ const skipped = build("pack", "--skip-tests", "--explain");
 assert.equal(skipped.status, 0, skipped.output);
 assert.doesNotMatch(skipped.output, /build without tests\s+\(skipped\)/);
 assert.match(skipped.output, /test\s+\(skipped\)/);
+
+const bump = build("bump", "--dry-run", "--explain");
+assert.equal(bump.status, 0, bump.output);
+assert.match(bump.output, /dotnet shipit --allow-branch develop --mode local --skip-merge-commit --dry-run/);
+assert.doesNotMatch(bump.output, /--mode (push|pull-request)|dotnet nuget push/);
 
 console.log("Build checks passed: early key rejection, masked explain, formatting, project selection, artifact publishing, single pack build.");

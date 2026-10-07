@@ -1,5 +1,5 @@
 #i "nuget: https://nuget.cloudsmith.io/shayanhabibi/shayanhabibi-partas-build/v3/index.json"
-#r "nuget: Partas.Build, 0.7.0"
+#r "nuget: Partas.Build, 0.8.0"
 #r "nuget: Partas.TypeProvider.BuildHelper, 0.2.5"
 #r "nuget: Str, 0.24.1"
 

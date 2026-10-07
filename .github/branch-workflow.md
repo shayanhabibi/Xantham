@@ -11,6 +11,11 @@ conversations. No additional approving reviewer is required. Auto-merge is avail
 pull-request and check requirements for direct pushes; push-triggered tests still run.
 Other contributors use pull requests.
 
+Feature PRs use conventional titles and squash merging; release PRs from develop
+preserve history with merge commits. Maintainers prepare versions and changelogs
+locally using ShipIt; see [CONTRIBUTING.md](../CONTRIBUTING.md). The master package
+check rejects unchanged versions in affected packages and their dependent packages.
+
 `master` requires `test` and `package`, with no bypass actors. The Publish workflow
 packs and validates every pull request to `master` without publishing credentials.
 Only the subsequent `master` push (or manual dispatch on `master`) can publish the
