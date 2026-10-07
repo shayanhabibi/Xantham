@@ -45,7 +45,14 @@ jobs:
       - name: Check build command behavior
         run: node tools/verify-build.mjs
       - name: Verify and pack
-        run: dotnet fsi build.fsx -- pack --ci --run-gate
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            dotnet fsi build.fsx -- pack --ci --skip-tests
+          else
+            dotnet fsi build.fsx -- pack --ci --run-gate
+          fi
+        env:
+          EVENT_NAME: ${{ github.event_name }}
       - name: Upload packages
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:

@@ -24,3 +24,10 @@ The protection rules are configured in GitHub under Settings → Rules → Rules
 - Master releases: PR, test, and package requirements, no bypass.
 
 Do not add path filters to required PR checks: every PR must receive their check results.
+
+For same-repository `develop` → `master` PRs, `test` can reuse a successful push-triggered
+Test workflow for the exact head commit, provided `master` is its ancestor. This ensures
+the proposed merge has the same source tree as the tested commit. If that run is still
+pending, the check waits in five-minute intervals; absent, failed, or incompatible evidence
+falls back to the full suite. Other PRs run the full suite. Release PR packing builds and
+validates packages without duplicating the suite; master publishing retains full validation.
