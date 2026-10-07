@@ -77,7 +77,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
-      contents: write
+      contents: read
       pull-requests: read
       actions: write
     steps:
@@ -102,7 +102,7 @@ jobs:
         env:
           RELEASE_HEAD: ${{ needs.generate.outputs.head }}
           RELEASE_BASE: ${{ needs.generate.outputs.base }}
-          RELEASE_TOKEN: ${{ github.token }}
+          RELEASE_DEPLOY_KEY: ${{ secrets.RELEASE_DEPLOY_KEY }}
         with:
           script: |
             const bot = require('./trusted/.github/scripts/release-bot.cjs');
@@ -111,5 +111,5 @@ jobs:
             const root = require('node:path').resolve('release');
             const patch = require('node:fs').readFileSync('patch/release.patch');
             if (patch.length) require('node:child_process').execFileSync('git', ['apply', '--whitespace=error', '-'], { cwd: root, input: patch });
-            await bot.finish({ github, context, core, root, token: process.env.RELEASE_TOKEN,
+            await bot.finish({ github, context, core, root, sshKey: process.env.RELEASE_DEPLOY_KEY,
               request: { ...request, head: process.env.RELEASE_HEAD, base: process.env.RELEASE_BASE } });

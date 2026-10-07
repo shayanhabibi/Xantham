@@ -9,9 +9,9 @@ conversations. No additional approving reviewer is required. Auto-merge is avail
 
 `develop` requires the `test` and `conventional-title` checks. `shayanhabibi` and `houstonhaynes` can bypass its
 pull-request and check requirements for direct pushes; push-triggered tests still run.
-The GitHub Actions integration also bypasses this develop rule so the release
-workflow can push version/changelog commits. This exception applies to Actions
-jobs with write tokens; keep write permissions limited to trusted workflows.
+Write-enabled repository deploy keys also bypass this develop rule so the release
+workflow can push version/changelog commits. There is one release deploy key;
+its private key is held in the `RELEASE_DEPLOY_KEY` repository secret.
 The history protection and master rules have no bot exception. Other contributors
 use pull requests.
 
@@ -31,7 +31,7 @@ The protection rules are configured in GitHub under Settings → Rules → Rules
 
 - Branch history: force-push and deletion protection for both branches, no bypass.
 - Develop integration: PR and test requirements, with the two named user exceptions
-  and the GitHub Actions integration exception for release preparation.
+  and the deploy-key exception for release preparation.
 - Master releases: PR, test, and package requirements, no bypass.
 
 Do not add path filters to required PR checks: every PR must receive their check results.
@@ -50,9 +50,10 @@ pending, the check waits in five-minute intervals; absent, failed, or incompatib
 falls back to the full suite. Other PRs run the full suite. Release PR packing builds and
 validates packages without duplicating the suite; master publishing retains full validation.
 
-The comment workflow uses `github-actions[bot]` and the built-in token, with no
-additional secrets. Token pushes do not trigger normal push CI, so it explicitly
-dispatches Test, package verification, and PR title verification on develop.
+The comment workflow uses `github-actions[bot]` as the commit author and a
+repository deploy key for pushes, which trigger normal push and PR CI.
+The built-in token reads PR metadata and explicitly dispatches Test, package
+verification, and PR title verification when retrying without a new version commit.
 Manual package verification on develop cannot publish. The wrapper runs from
 protected master. ShipIt runs in a separate read-only job; finalization applies
 its patch on a fresh runner without executing tools or hooks from develop.
