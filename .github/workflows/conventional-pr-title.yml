@@ -3,8 +3,15 @@ on:
   pull_request_target:
     branches: [develop, master]
     types: [opened, edited, reopened, synchronize]
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: Open develop-to-master PR number
+        required: true
+        type: string
 permissions:
   contents: read
+  pull-requests: read
 jobs:
   conventional-title:
     runs-on: ubuntu-latest
@@ -13,9 +20,16 @@ jobs:
       - uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         with:
           script: |
-            const pr = context.payload.pull_request;
+            const pr = context.eventName === 'workflow_dispatch'
+              ? (await github.rest.pulls.get({ ...context.repo, pull_number: Number(context.payload.inputs.pr) })).data
+              : context.payload.pull_request;
             const release = pr.base.ref === 'master' && pr.head.ref === 'develop' &&
               pr.head.repo.full_name === context.repo.owner + '/' + context.repo.repo;
+            if (context.eventName === 'workflow_dispatch' &&
+                (!release || pr.state !== 'open' || context.ref !== 'refs/heads/develop' || pr.head.sha !== context.sha)) {
+              core.setFailed('Manual title verification must match the current open develop-to-master PR.');
+              return;
+            }
             if (!release && !/^(feat|fix|perf|refactor|revert|build|ci|docs|style|test|chore)(\([^)\r\n]+\))?!?: \S[^\r\n]*$/.test(pr.title)) {
               core.setFailed('Use a conventional PR title, e.g. feat(generator): support a new mapping or fix(wire): correct decoding.');
             }

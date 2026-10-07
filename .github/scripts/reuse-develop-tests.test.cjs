@@ -24,13 +24,15 @@ test('only same-repository develop to master PRs qualify', () => {
   assert.equal(reuse.eligiblePullRequest(context), false);
 });
 
-test('evidence must be successful push tests on the exact trusted develop commit', () => {
+test('evidence must be successful push or manual tests on the exact trusted develop commit', () => {
   const { run } = fixture();
   for (const change of [{ head_sha: 'older' }, { event: 'pull_request' }, { head_branch: 'feature' },
     { conclusion: 'failure' }, { status: 'in_progress' }, { head_repository: { full_name: 'fork/repo' } }]) {
     assert.equal(reuse.successfulRun([{ ...run, ...change }], 'head', 'owner/repo'), undefined);
   }
   assert.equal(reuse.successfulRun([run], 'head', 'owner/repo'), run);
+  const manual = { ...run, event: 'workflow_dispatch' };
+  assert.equal(reuse.successfulRun([manual], 'head', 'owner/repo'), manual);
 });
 
 test('waits five minutes for exact-commit evidence, then reuses it', async () => {

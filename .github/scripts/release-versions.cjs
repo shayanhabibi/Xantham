@@ -48,8 +48,7 @@ function validateVersions(packages, files) {
   return affected;
 }
 
-function run(base = process.env.XANTHAM_RELEASE_BASE || 'origin/master') {
-  const root = path.resolve(__dirname, '../..');
+function run(base = process.env.XANTHAM_RELEASE_BASE || 'origin/master', root = path.resolve(__dirname, '../..')) {
   const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim();
   if (!/^[A-Za-z0-9][A-Za-z0-9_./-]*$/.test(base) || /^0+$/.test(base)) throw new Error('A valid, existing release base is required. Fetch full Git history.');
   git('merge-base', '--is-ancestor', base, 'HEAD');
