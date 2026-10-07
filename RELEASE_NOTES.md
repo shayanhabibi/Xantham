@@ -15,7 +15,7 @@
 - `Tsc.locateAt` finds the compiler of an npm install directory. Its result depends exclusively
   on the directory.
 
-### xantham
+### xantham 0.2.0
 
 - `unionArmOverloads` in `xantham.json`: a module-level export whose sole parameter is an erased
   union gains one overload per arm. Off by default, because the overloads make existing
@@ -67,8 +67,10 @@
   package ownership is transferred back to the author.
 - `Xantham.Generator` 0.1.0 is published independently for customisations and applications
   that embed the generation pipeline; the `xantham` tool continues to include it.
-- Release preparation versions: `Xantham.TypeScript.Wire` 0.2.1; `xantham`,
+- Release preparation versions: `xantham` 0.2.0; `Xantham.TypeScript.Wire` 0.2.1;
   `Xantham.Fable.Core`, `Xantham.Fable.Core.TS` and `Xantham.Fable.Node` 0.1.1.
+- The tool takes a minor version bump for the changed generated overload signatures, export
+  collision names and refreshed bindings, alongside generator customisation support.
 - Build scripts use Partas.Build 0.7.0 and Partas.Build.Baked 0.1.2 from the temporary
   feed documented in the Partas.Build repository.
 
