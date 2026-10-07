@@ -65,7 +65,8 @@ function fixture(t) {
   fs.writeFileSync(xml, fs.readFileSync(xml, 'utf8').replace('1.0.0', '1.0.1'));
   const dispatched = [];
   const summary = { addHeading() { return this; }, addRaw() { return this; }, async write() {} };
-  const input = { root, context: { repo: { owner: 'owner', repo: 'repo' } }, token: 'fake-token',
+  const input = { root, context: { repo: { owner: 'owner', repo: 'repo' } },
+    push: async () => { git('push', 'origin', 'HEAD:refs/heads/develop'); },
     request: { number: 1, preview: false, head, base }, core: { summary }, github: { rest: {
       pulls: { get: async () => ({ data: { ...pr(), head: { ...pr().head, sha: head }, base: { ...pr().base, sha: base } } }) },
       actions: { createWorkflowDispatch: async args => dispatched.push(args) }
@@ -80,18 +81,19 @@ test('preview validates versions but does not commit, push, or dispatch', async 
   assert.equal(f.git('ls-remote', 'origin', 'refs/heads/develop').split('\t')[0], f.head);
   assert.deepEqual(f.dispatched, []);
 });
-test('release pushes once with bot identity and dispatches all required checks; retries are idempotent', async t => {
+test('release pushes once with bot identity; retries dispatch checks without another version commit', async t => {
   const f = fixture(t);
   await bot.finish(f.input);
   const published = f.git('rev-parse', 'HEAD');
   assert.notEqual(published, f.head);
   assert.equal(f.git('ls-remote', 'origin', 'refs/heads/develop').split('\t')[0], published);
   assert.equal(f.git('log', '-1', '--format=%an'), 'github-actions[bot]');
-  assert.deepEqual(f.dispatched.map(x => x.workflow_id), ['test.yml', 'push_master.yml', 'conventional-pr-title.yml']);
+  assert.deepEqual(f.dispatched, []);
   f.input.request.head = published;
   f.input.github.rest.pulls.get = async () => ({ data: { ...pr(), head: { ...pr().head, sha: published }, base: { ...pr().base, sha: f.input.request.base } } });
   await bot.finish(f.input);
   assert.equal(f.git('rev-parse', 'HEAD'), published);
+  assert.deepEqual(f.dispatched.map(x => x.workflow_id), ['test.yml', 'push_master.yml', 'conventional-pr-title.yml']);
 });
 test('stale versions and moved PRs fail before pushing or dispatching', async t => {
   const f = fixture(t);
