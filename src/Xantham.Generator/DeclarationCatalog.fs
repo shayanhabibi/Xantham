@@ -412,7 +412,24 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                         facts.Declarations
 
                 if List.isEmpty handles then
-                    literalUnionIdentity true facts
+                    match facts.NonNullableAlias with
+                    | Some alias ->
+                        typeIdentity (id :: visited) bindings alias
+                        |> Option.map (fun identity ->
+                            // Nullable identity retains the alias used by the shaped F# reference.
+                            let nullish =
+                                facts.UnionMembers
+                                |> List.choose (fun memberId ->
+                                    Map.tryFind memberId shape.Types
+                                    |> Option.filter Shape.Spec.isNullish
+                                    |> Option.map (fun member_ -> intrinsicArgumentKey member_.Response))
+                                |> List.sort
+
+                            { identity with
+                                Key = hashText (json ("nullable-alias", identity.Key, nullish))
+                                Role = "nullable-alias"
+                            })
+                    | None -> literalUnionIdentity true facts
                 else
                     let role =
                         if List.isEmpty facts.ConstructSignatures then

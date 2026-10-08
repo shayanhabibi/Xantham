@@ -1826,6 +1826,13 @@ are recorded in `docs/.ai/footguns.md`.
   (`<$T, _T>` -> `<'_T2, '_T>`). Both report `SY005` with the written name; imports keep the
   JavaScript name. `dollar-name-lab` pins each position.
 
+## Nullable catalogue identities (2026-10-08)
+
+Nullable structural catalogue identities retain the compiler-recovered non-nullable alias
+selected by shaping. Equal literal values remain distinct when their F# references name
+different aliases. `catalog-mapped-options-lab` covers named versus anonymous locale options
+through `Pick`; the catalogue compatibility guard continues to reject conflicting APIs.
+
 # Easy Nits 
 
 To include in scope when a phases implementation/attempt ends up being small/quick.

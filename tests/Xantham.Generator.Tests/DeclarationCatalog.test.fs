@@ -100,6 +100,35 @@ let accept (client: Identity.Adapter.Client) = Identity.Root.Exports.``use`` cli
 """
 
 [<Tests>]
+let mappedOptionsTests =
+    testCase "declaration catalog mapped options preserve named and anonymous literal references" <| fun _ ->
+        let directory = Path.Combine(temporaryRoot, "xantham-mapped-options-" + Guid.NewGuid().ToString "N")
+        Directory.CreateDirectory directory |> ignore
+        try
+            let package = Path.GetFullPath(Path.Combine(fixture, "..", "catalog-mapped-options-lab"))
+            let config = configured directory "Root" "index.d.ts" [||]
+            Pipeline.run config package (Path.Combine(directory, "root")) |> Async.RunSynchronously |> ignore
+            let catalog =
+                JsonSerializer.Deserialize<DeclarationCatalog.Catalog>(
+                    File.ReadAllText(Path.Combine(directory, "root", "declarations.json")),
+                    JsonSerializerOptions(PropertyNameCaseInsensitive = true))
+            let options name =
+                catalog.Declarations |> Array.find (fun declaration -> declaration.FSharpName = "Identity.Root." + name + ".SupportedLocalesOf.Options")
+            Expect.notEqual (options "First").Identity (options "Second").Identity "named literal references retain distinct mapped identities"
+            let consumer = """module Identity.Consumer
+let first (value: Identity.Root.First.SupportedLocalesOf.Options) : Identity.Root.LocaleMatcher option = value.localeMatcher
+let second (value: Identity.Root.Second.SupportedLocalesOf.Options) : Identity.Root.SecondOptions.LocaleMatcher option = value.localeMatcher
+"""
+            let sources = [ "root/Identity.Root.fs" ]
+            let code, output = compileConsumer directory sources consumer
+            Expect.equal code 0 output
+            let invalid = consumer + "\nlet invalid (first: Identity.Root.First.SupportedLocalesOf.Options) (second: Identity.Root.Second.SupportedLocalesOf.Options) = first.localeMatcher <- second.localeMatcher\n"
+            let code, output = compileConsumer directory sources invalid
+            Expect.notEqual code 0 "same literals do not erase named F# type identity"
+            Expect.stringContains output "FS0193" "the incompatible literal enums reject cross-assignment"
+        finally Directory.Delete(directory, true)
+
+[<Tests>]
 let classImplementsTests =
     match Tsc.locate __SOURCE_DIRECTORY__ with
     | None -> testCase "class implements catalog skipped - no compiler" <| fun _ -> skiptest "no tsc"
