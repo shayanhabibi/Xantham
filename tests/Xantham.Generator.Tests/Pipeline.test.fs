@@ -5096,6 +5096,15 @@ let catalogAliasApiTests =
     ]
 
 [<Tests>]
+let catalogMappedOptionsTests =
+    testList "catalog mapped options fixture" [
+        yield!
+            fixtureTests "catalog-mapped-options-lab" (handFixture "catalog-mapped-options-lab")
+                { GeneratorConfig.Default with Lib = Some [ "esnext" ]; Types = Some [] }
+                (fun _ -> [])
+    ]
+
+[<Tests>]
 let catalogRecursiveJsonTests =
     let package = handFixture "catalog-recursive-json-lab"
     let config = { handConfig package with DeclarationCatalog = false }

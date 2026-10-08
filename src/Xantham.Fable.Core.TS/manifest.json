@@ -3,16 +3,16 @@
   "package": "fable-core-ts-input",
   "module": "FableCoreTsInput",
   "counts": {
-    "exact": 1279,
-    "ergonomic": 1844,
-    "widened": 632,
+    "exact": 1303,
+    "ergonomic": 1749,
+    "widened": 577,
     "escape": 660
   },
   "passes": [
     {
       "pass": "SY - synthesize-anonymous",
-      "total": 1038,
-      "exact": 1038
+      "total": 1017,
+      "exact": 1017
     },
     {
       "pass": "LU - classify-literal-unions",
@@ -36,16 +36,16 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 83790,
+      "total": 83746,
       "exact": 878,
-      "ergonomic": 55948,
+      "ergonomic": 55904,
       "widened": 9503,
       "escape": 17461
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 107,
-      "ergonomic": 18,
+      "total": 108,
+      "ergonomic": 19,
       "widened": 81,
       "escape": 8
     },
@@ -63,8 +63,8 @@
     },
     {
       "pass": "DO - dedupe-overloads",
-      "total": 169,
-      "widened": 169
+      "total": 141,
+      "widened": 141
     },
     {
       "pass": "RA - repair-arity",
@@ -79,9 +79,9 @@
     },
     {
       "pass": "resolve-export-collisions",
-      "total": 21,
-      "ergonomic": 15,
-      "widened": 6
+      "total": 20,
+      "ergonomic": 8,
+      "widened": 12
     },
     {
       "pass": "DD - drop-orphan-delegates",
