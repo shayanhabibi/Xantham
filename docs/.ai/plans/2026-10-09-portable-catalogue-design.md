@@ -1,6 +1,6 @@
 # Portable declaration catalogue compatibility
 
-Status: proposed for written-spec review. Implements the compatibility slice of
+Status: approved for implementation planning on 2026-10-09. Implements the compatibility slice of
 [issue #110](https://github.com/shayanhabibi/Xantham/issues/110).
 
 ## Outcome and scope
