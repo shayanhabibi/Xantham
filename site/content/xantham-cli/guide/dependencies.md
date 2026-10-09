@@ -102,6 +102,22 @@ output directory; reference the file selected for the current run.
 The consumer reuses the producer's F# identities while retaining its own imports.
 Compile producers first, following the catalog's ordered `owners` list.
 
+## Choose a shared owner before generating related libraries
+
+Identical anonymous literal unions share a structural catalog identity. Two independent
+producers can emit that identity as different F# enum types; a consumer referencing both
+catalogs rejects the conflicting owners. Catalog order does not choose a winner.
+
+Choose the owner explicitly in the generation graph. Generate producer A first, then put
+A's `declarations.json` in producer B's `declarationReferences` and regenerate B. Consumers
+can then reference both catalogs. B's generated API uses A's enum, and B's catalog records
+its dependency on A. Compile and package that dependency as part of B's public API.
+
+Make this ownership choice consistently across a binding family and regenerate its affected
+producers together. Selecting a preferred catalog only in the final consumer cannot change
+the distinct enum types already compiled into the producers. Named literal aliases retain
+their own declaration identities even when their values match.
+
 ## Keep catalogs compatible
 
 New catalogs use schema 2. Related bindings can reuse catalogs across Windows and Linux

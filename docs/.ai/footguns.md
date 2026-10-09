@@ -60,6 +60,10 @@ the corresponding lab under `tests/fixtures/` is the reducer.
 - **The source closure follows the sources selected for canonical identities**, not the alias
   files of every occurrence. Two independent packages that both write `Record<string, unknown>`
   share a canonical identity and must not authenticate different alias files.
+- **Export-only handles do not anchor transitive source closures.** An indexed projection can
+  export a compiler-interned anonymous type from a consumer file. Keep that handle for the
+  projection's own identity, but traverse intrinsic type declarations when authenticating its
+  owner's sources. Explicit named aliases still carry their declaration files.
 - **Named literal aliases keep independent identities at equal values.** Collapsing them by value
   was tried and reverted: named aliases lost their declaration handles, private same-valued
   aliases became one F# type, and alias declaration files vanished from source closures. Nine
@@ -74,6 +78,15 @@ the corresponding lab under `tests/fixtures/` is the reducer.
 - **A diagnostic that fails deliberately before output is not acceptance evidence.** Several lanes
   recorded a probe reaching a *later* mismatch as proof of the earlier fix; that establishes the
   earlier guard passes and nothing about the run as a whole.
+- **Shared anonymous literals need a producer ownership decision.** Two independently generated
+  producers can expose different F# enum types under the same structural catalog identity.
+  Regenerate dependent producers against the selected owner's catalog; a consumer-only preference
+  cannot change the enum types in their compiled APIs. The ownership lab compiles indexed field
+  calls and transfers, not just whole options objects, and retains independent-ownership rejection.
+- **A `never` generic default does not invalidate its nominal constraint.** Preserve the declared
+  bound and apply the ordinary argument check at concrete uses. Dropping the bound on a callback's
+  type parameter can give its result a different F# constraint from the exported generic alias
+  with the same catalog identity. The generic-defaults lab covers this without nullable types.
 
 ## Generator passes
 

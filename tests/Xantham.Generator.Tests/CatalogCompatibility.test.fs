@@ -38,6 +38,14 @@ let tests =
         testCase "portable contract accepts rebuilt generator and platform binary" <| fun _ ->
             validateContract 2 "compiler-producer" "generator-producer" "profile" (Some expected.Contract)
 
+        testCase "catalog composition requires regenerated source closures and constraints" <| fun _ ->
+            rejects "identity version" (fun () ->
+                validateContract 2 expected.Compiler expected.Generator "profile"
+                    (Some { expected.Contract with IdentityVersion = 1 }))
+            rejects "API version" (fun () ->
+                validateContract 2 expected.Compiler expected.Generator "profile"
+                    (Some { expected.Contract with ApiVersion = 1 }))
+
         testCase "binary contract requires identical executable fingerprint" <| fun _ ->
             let binary = { expected with Contract = current (Binary 8u) }
             validate "producer.json" 2 binary binary.Compiler "different-generator" "profile" (Some binary.Contract)
@@ -75,11 +83,11 @@ let tests =
             Expect.equal (readText (document.ToJsonString())) (Some binary) "binary metadata round trips"
 
         for name, change in [
-            "contract version", fun c -> { c with ContractVersion = 2 }
-            "identity version", fun c -> { c with IdentityVersion = 2 }
-            "API version", fun c -> { c with ApiVersion = 2 }
-            "inference version", fun c -> { c with InferenceVersion = 2 }
-            "customization version", fun c -> { c with CustomizationVersion = 2 }
+            "contract version", fun c -> { c with ContractVersion = c.ContractVersion + 1 }
+            "identity version", fun c -> { c with IdentityVersion = c.IdentityVersion + 1 }
+            "API version", fun c -> { c with ApiVersion = c.ApiVersion + 1 }
+            "inference version", fun c -> { c with InferenceVersion = c.InferenceVersion + 1 }
+            "customization version", fun c -> { c with CustomizationVersion = c.CustomizationVersion + 1 }
             "compiler version", fun c -> { c with Compiler = TypeScriptPackage("7.2.0", String.replicate 40 "a", 8u) }
             "compiler revision", fun c -> { c with Compiler = TypeScriptPackage("7.1.0-dev.20260902.1", String.replicate 40 "b", 8u) }
             "AST protocol", fun c -> { c with Compiler = TypeScriptPackage("7.1.0-dev.20260902.1", String.replicate 40 "a", 9u) }

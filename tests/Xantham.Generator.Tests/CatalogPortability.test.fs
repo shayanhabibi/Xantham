@@ -65,17 +65,17 @@ let private testsFor compression =
     let withProducer = withProducer compression
     let assertRejected = assertRejected compression
     testList ("catalog portability " + string compression) [
-        for key, replacement in [
-            "schemaVersion", "\"schemaVersion\":2,\"schemaVersion\":2"
-            "contractVersion", "\"contractVersion\":1,\"contractVersion\":1"
-            "apiVersion", "\"apiVersion\":1,\"apiVersion\":\"invalid\""
-        ] do
+        for key in [ "schemaVersion"; "contractVersion"; "apiVersion" ] do
             testCase ("duplicate or malformed metadata " + key) <| fun () ->
                 withProducer (fun directory package _ config catalog ->
                     let text = readText catalog
-                    let original = if key = "schemaVersion" then "\"schemaVersion\": 2" else "\"" + key + "\": 1"
+                    let document = JsonNode.Parse text
+                    let metadata = if key = "schemaVersion" then document else document["compatibility"]
+                    let value = metadata[key].ToJsonString()
+                    let originalCompact = "\"" + key + "\":" + value
+                    let duplicate = if key = "apiVersion" then "\"invalid\"" else value
+                    let replacement = originalCompact + ",\"" + key + "\":" + duplicate
                     let compact = text.Replace(": ", ":").Replace(":\r\n", ":")
-                    let originalCompact = original.Replace(": ", ":")
                     Expect.stringContains compact originalCompact "mutation targets real metadata"
                     writeText catalog (compact.Replace(originalCompact, replacement))
                     let output = Path.Combine(directory, "duplicate")
@@ -154,7 +154,7 @@ let private testsFor compression =
             testCase ("pipeline rejects incompatible " + key) <| fun _ ->
                 assertRejected part (fun document ->
                     let metadata = document["compatibility"]
-                    metadata[key] <- JsonValue.Create 2)
+                    metadata[key] <- JsonValue.Create(metadata[key].GetValue<int>() + 1))
 
         testCase "schema two cannot omit compatibility" <| fun _ ->
             assertRejected "compatibility" (fun document -> document.AsObject().Remove "compatibility" |> ignore)

@@ -678,7 +678,11 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
             yield! facts.Conditional |> Option.bind _.Branch |> Option.map snd |> Option.toList
         ]
 
-    let canonicalTypes = byType
+    // Export-only handles anchor public aliases. Transitive source closures use intrinsic
+    // type declarations.
+    let canonicalTypes =
+        byType
+        |> Map.filter (fun id _ -> not (List.isEmpty shape.Types[id].Declarations))
 
     let closure id =
         let bound =

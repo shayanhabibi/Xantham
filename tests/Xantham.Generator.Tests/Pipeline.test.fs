@@ -5076,6 +5076,22 @@ let literalAliasIdentityTests =
     ]
 
 [<Tests>]
+let literalUnionOwnershipTests =
+    let package = handFixture "literal-union-ownership-lab"
+    let config = { handConfig package with DeclarationCatalog = false }
+    testList "literal union ownership fixture" [
+        yield! fixtureTests "literal-union-ownership-lab" package config (fun _ -> [])
+    ]
+
+[<Tests>]
+let catalogGenericDefaultsTests =
+    let package = handFixture "catalog-generic-defaults-lab"
+    let config = { handConfig package with DeclarationCatalog = false }
+    testList "catalog generic defaults fixture" [
+        yield! fixtureTests "catalog-generic-defaults-lab" package config (fun _ -> [])
+    ]
+
+[<Tests>]
 let groupedDomAliasTests =
     testList "grouped DOM alias fixture" [
         yield!
@@ -5234,4 +5250,12 @@ let dollarNameTests =
 let customizationFixtureTests =
     testList "customization fixture" [
         yield! fixtureTests "customization-lab" (handFixture "customization-lab") GeneratorConfig.Default (fun _ -> [])
+    ]
+
+[<Tests>]
+let catalogSourceProjectionTests =
+    let package = handFixture "catalog-source-projection-lab"
+    let config = { handConfig package with DeclarationCatalog = false }
+    testList "catalog source projection fixture" [
+        yield! fixtureTests "catalog-source-projection-lab" package config (fun _ -> [])
     ]

@@ -932,13 +932,16 @@ let internal satisfiesNominally (model: ShapeModel) (boundId: int<Measure.typeId
 /// (`TP008`) *and* the reference stops rewriting arguments to it (`TR044` falls silent), so
 /// the argument TypeScript resolved survives. Where it is true the head keeps `:>` and
 /// `TR044` still widens whatever cannot satisfy it.
+/// A `never` default retains the bound; concrete uses apply the normal argument check.
 let internal constraintProvenNominal
     (model: ShapeModel)
     (parameterId: int<Measure.typeId>)
     (boundId: int<Measure.typeId>)
     =
     match Map.tryFind parameterId model.Types |> Option.bind _.Default with
-    | Some fallback when fallback <> parameterId -> satisfiesNominally model boundId fallback
+    | Some fallback when fallback <> parameterId ->
+        (Map.tryFind fallback model.Types |> Option.exists (flag TypeFlags.Never))
+        || satisfiesNominally model boundId fallback
     | _ -> true
 
 /// A reference as the phrase a finding message names it by. Source-file spelling - module
@@ -2060,14 +2063,16 @@ and internal appliedRefTo
                 && (arrayElement model bound).IsNone
                 && not (isTuple bound)
                 && not (isPureCallback bound)
+                && not (isPureIndexSignature bound)
                 ->
                 Map.tryFind boundId model.DeclNames
+                |> Option.map FsNamed
                 |> Option.orElseWith (fun () ->
-                    libBinding ctx model self owner bound
-                    |> Option.bind (function
-                        | FsNamed name, [] when name <> "JS.Function" -> Some name
-                        | _ -> None))
-                |> Option.map (fun name -> boundId, name)
+                    match typeRef ctx model self owner boundId with
+                    | FsApp _ as reference, _ -> Some reference
+                    | FsNamed name, [] when name <> "JS.Function" -> Some(FsNamed name)
+                    | _ -> None)
+                |> Option.map (fun reference -> boundId, reference)
             | _ -> None)
 
     let satisfies = satisfiesNominally model
@@ -2097,27 +2102,33 @@ and internal appliedRefTo
             | Some(_, bound), FsObj ->
                 findings <-
                     findings
-                    @ [ Finding.make owner (TypeReference.ConstrainedArgumentWidened(name, bound)) ]
+                    @ [
+                        Finding.make owner (TypeReference.ConstrainedArgumentWidened(name, typeSpelling bound))
+                    ]
 
-                FsNamed bound
-            | Some(boundId, bound), FsTypeVar variable when statedConstraint argument <> Some(boundId, bound) ->
+                bound
+            | Some(boundId, bound), FsTypeVar variable when statedConstraint argument |> Option.map snd <> Some bound ->
                 findings <-
                     findings
                     @ [
-                        Finding.make owner (TypeReference.ArgumentNotBoundWithConstraint(variable, name, bound))
+                        Finding.make
+                            owner
+                            (TypeReference.ArgumentNotBoundWithConstraint(variable, name, typeSpelling bound))
                     ]
 
-                FsNamed bound
+                bound
             | Some(boundId, bound), (FsNamed shown | FsApp(shown, _)) when
-                shown <> bound && not (satisfies boundId argument)
+                reference <> bound && not (satisfies boundId argument)
                 ->
                 findings <-
                     findings
                     @ [
-                        Finding.make owner (TypeReference.ArgumentNotASubtypeOfConstraint(shown, name, bound))
+                        Finding.make
+                            owner
+                            (TypeReference.ArgumentNotASubtypeOfConstraint(shown, name, typeSpelling bound))
                     ]
 
-                FsNamed bound
+                bound
             // TypeScript admits a primitive against a structural bound - `string` has `length` -
             // where `:>` admits it nowhere, so a sealed form is written as the constraint too.
             | Some(boundId, bound), _ when sealedForm reference && not (satisfies boundId argument) ->
@@ -2126,10 +2137,14 @@ and internal appliedRefTo
                     @ [
                         Finding.make
                             owner
-                            (TypeReference.ArgumentNotASubtypeOfConstraint(typeSpelling reference, name, bound))
+                            (TypeReference.ArgumentNotASubtypeOfConstraint(
+                                typeSpelling reference,
+                                name,
+                                typeSpelling bound
+                            ))
                     ]
 
-                FsNamed bound
+                bound
             | _ -> reference)
 
     FsApp(name, mapped), findings
