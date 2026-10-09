@@ -53,6 +53,20 @@ and anonymous literal types inside mapped options. Its existing typed regression
 preserved. The public NuGet `xantham` 0.1.0 package records commit `c68c15f`, predating
 this repair; merged source and published tools are separate evidence.
 
+**Named branch follow-up, 2026-10-09 (audit only).** The retained
+`origin/fix/core-ts-catalogue-identities` tip is
+`4e5ee38c88f72e172d99b6a4bb2d23437944256c`. GitHub records that exact head as merged
+into `develop` through #109 at `1d2bd62c548f64650075ea308c6845335f5d1b4c`.
+Both commits have the identical tree `daaf1b69e0a67b9747233de835c7caa276fcb0cd`;
+their complete file diff is empty. The merge is an ancestor of both `develop`
+`2a1aafe` and the audited checkpoint `11481ee`. No additional fix from that tip
+needs integration. The live remote no longer advertises the named branch; this
+conclusion does not cover unpublished local additions. Its change preserves nullable
+alias identities, not anonymous-owner arbitration or a new mixed-union emitter.
+The accepted develop reproductions and final gate already include it, so this
+history check requires no baseline rerun. The owner requested an audit and left
+integration into `develop` to Shayan; this follow-up changes only this report.
+
 After fetching both refs, the audit built clean `develop` and reran the literal kit,
 TanStack reducer and real package, two Pi reducers, and both Pi producer profiles.
 Every relevant failure reproduced with freshly generated develop catalogs. The literal
@@ -241,7 +255,10 @@ template was retrieved with `schema → find → pgq → sources`: Bozzetto
 that Bozzetto is now indexed; retrieval subsequently verified the same text. LAN workers
 provided bounded first-pass readings; their unverified suggestions were not accepted.
 
-**Growth.** `git diff --shortstat 2a1aafe..HEAD`: 37 files changed, 223067 insertions(+), 221931 deletions(-).
+**Growth.** Implementation checkpoint `git diff --shortstat 2a1aafe..11481ee`:
+37 files changed, 223067 insertions(+), 221931 deletions(-).
+The report-only follow-up (`git diff --shortstat 11481ee..HEAD`) changes one file,
+with 18 insertions and one deletion; it introduces no files or additional authority.
 CloudEdge `git diff --shortstat 3bf0861..HEAD` is also empty; it has no audit edits.
 The Xantham checkpoint contains 37 affected files, including 26 new files. The
 catalog alone accounts for +221,912/−221,898 lines, with no emitted Core.TS change.
