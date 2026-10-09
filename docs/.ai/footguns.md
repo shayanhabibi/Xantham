@@ -28,9 +28,31 @@ exact source-byte hash. Their root manifest fingerprint covers canonical name, e
 version and normalized full gitHead; intervening manifests remain byte-authenticated.
 Recognized compiler release metadata must match the library metadata. Binary fallback
 permits an absent gitHead while retaining exact executable authentication. Other package
-sources retain raw manifest hashes. Identity contract 3 rejects earlier platform-coloured
+sources retain raw manifest hashes. Identity contract 4 rejects earlier platform-coloured
 catalogs before reuse. Core.TS regeneration must match the committed semantic catalogue
 on both operating systems; compiler/generator binary provenance may differ.
+
+**Compiler-library shipping must not depend on module exports.** `harvestGlobals` also runs
+when `typescript/lib` is `ship`. For module-only inputs, read global scope through a verified
+default-library source, not the module entry: module locals can hide library names, and
+module exports must not be harvested again as global values. Public global scripts retain
+their own scope. Type-only global declarations can reuse Core.TS; new global values change
+`typeof globalThis` and its transitive source closure, which remains authenticated.
+
+**Computed-member escaped names contain compiler-session IDs.** A name such as
+`__@match@1085` is not portable identity. Catalogue structural member keys and parent roles
+use the full normalized declaration-handle set for computed keys, with a disjoint encoding
+for ordinary names. Equal unique-symbol spellings from different declarations remain distinct;
+computed keys without declaration evidence get no fabricated portable key. Identity contract 4
+requires regenerating catalogues built before this correction. The small harvest lab locks the
+scope boundary; the Core.TS entry matrix authenticates and compiles complete catalogue reuse.
+
+**Intrinsic types are shared by unrelated exports.** A boolean value or alias cannot lend
+its declaration handles to every alias of the checker's boolean type. Intrinsic alias identities
+come from their own declarations, without type-wide export handles or generated parent roles.
+Pure index signatures reference `JS.Record` / `JS.ReadonlyRecord` explicitly: a bare support name
+can accidentally resolve to a shipped library phantom or a local type. Inference contract 2 and API contract 3
+requires regeneration for this mapping correction.
 
 **Brotli completion requires the decoder's Done status.** Catalogue file transport accepts
 exactly one complete stream and checks buffered and subsequent bytes for trailing data.

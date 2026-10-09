@@ -426,6 +426,10 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
         else
             match Map.tryFind id shape.Types with
             | None -> None
+            | Some facts when intrinsicArgumentKey facts.Response <> "" ->
+                // Intrinsic checker types are shared by unrelated exports. Their aliases
+                // belong to the individual declaration, never the aggregate export handles.
+                None
             | Some facts ->
                 let flags = facts.Response.ObjectFlags |> ValueOption.defaultValue ObjectFlags.None
 
@@ -590,7 +594,10 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                                     facts.Members
                                     |> List.map (fun member_ ->
                                         json (
-                                            member_.Symbol.Name,
+                                            CatalogMember.key (normalizeHandle sourceFiles) member_.Symbol
+                                            |> Option.defaultWith (fun () ->
+                                                complete <- false
+                                                ""),
                                             member_.Optional,
                                             member_.ReadOnly,
                                             partKey member_.TypeId
@@ -736,7 +743,9 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
     let edges (facts: TypeFacts) =
         [
             for member_ in facts.Members do
-                yield member_.TypeId, "member:" + member_.Symbol.Name
+                match CatalogMember.key (normalizeHandle sourceFiles) member_.Symbol with
+                | Some key -> yield member_.TypeId, "member:" + key
+                | None -> ()
             for index, info in List.indexed facts.IndexInfos do
                 yield info.KeyTypeId, $"index:{index}:key"
                 yield info.ValueTypeId, $"index:{index}:value"
@@ -767,7 +776,11 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
             |> List.collect (fun (id, parent) ->
                 edges shape.Types[id]
                 |> List.choose (fun (child, role) ->
-                    if Map.containsKey child byType || not (Map.containsKey child shape.Types) then
+                    if
+                        Map.containsKey child byType
+                        || not (Map.containsKey child shape.Types)
+                        || intrinsicArgumentKey shape.Types[child].Response <> ""
+                    then
                         None
                     else
                         Some(

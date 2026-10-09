@@ -6313,11 +6313,11 @@ type PackageJson =
     /// <br /><br />
     /// <a href="https://nodejs.org/api/packages.html#subpath-imports">Read more.</a>
     /// </summary>
-    abstract imports: Record<string, U3<string, U2<string, PackageJson.Exports.Item>[], PackageJson.Exports.Item> option> option with get, set
+    abstract imports: JS.Record<string, U3<string, U2<string, PackageJson.Exports.Item>[], PackageJson.Exports.Item> option> option with get, set
     /// <summary>
     /// The executable files that should be installed into the <c>PATH</c>.
     /// </summary>
-    abstract bin: U2<string, Record<string, string option>> option with get, set
+    abstract bin: U2<string, JS.Record<string, string option>> option with get, set
     /// <summary>
     /// Filenames to put in place for the <c>man</c> program to find.
     /// </summary>
@@ -6341,23 +6341,23 @@ type PackageJson =
     /// <summary>
     /// The dependencies of the package.
     /// </summary>
-    abstract dependencies: Record<string, string option> option with get, set
+    abstract dependencies: JS.Record<string, string option> option with get, set
     /// <summary>
     /// Additional tooling dependencies that are not required for the package to work. Usually test, build, or documentation tooling.
     /// </summary>
-    abstract devDependencies: Record<string, string option> option with get, set
+    abstract devDependencies: JS.Record<string, string option> option with get, set
     /// <summary>
     /// Dependencies that are skipped if they fail to install.
     /// </summary>
-    abstract optionalDependencies: Record<string, string option> option with get, set
+    abstract optionalDependencies: JS.Record<string, string option> option with get, set
     /// <summary>
     /// Dependencies that will usually be required by the package user directly or via another dependency.
     /// </summary>
-    abstract peerDependencies: Record<string, string option> option with get, set
+    abstract peerDependencies: JS.Record<string, string option> option with get, set
     /// <summary>
     /// Indicate peer dependencies that are optional.
     /// </summary>
-    abstract peerDependenciesMeta: Record<string, PackageJson.PeerDependenciesMeta.Item option> option with get, set
+    abstract peerDependenciesMeta: JS.Record<string, PackageJson.PeerDependenciesMeta.Item option> option with get, set
     /// <summary>
     /// Package names that are bundled when the package is published.
     /// </summary>
@@ -6426,7 +6426,7 @@ type PackageJson =
     /// <summary>
     /// A hint to JavaScript bundlers or component tools when packaging modules for client side use.
     /// </summary>
-    abstract browser: U2<string, Record<string, U2<string, bool> option>> option with get, set
+    abstract browser: U2<string, JS.Record<string, U2<string, bool> option>> option with get, set
     /// <summary>
     /// Denote which files in your project are "pure" and therefore safe for Webpack to prune if unused.
     /// <br /><br />
@@ -6440,7 +6440,7 @@ type PackageJson =
     /// <summary>
     /// Version selection map of TypeScript.
     /// </summary>
-    abstract typesVersions: Record<string, Record<string, string[] option> option> option with get, set
+    abstract typesVersions: JS.Record<string, JS.Record<string, string[] option> option> option with get, set
     /// <summary>
     /// Location of the bundled TypeScript declaration file. Alias of <c>types</c>.
     /// </summary>
@@ -6454,7 +6454,7 @@ type PackageJson =
     /// <summary>
     /// Selective version resolutions. Allows the definition of custom package versions inside dependencies without manual edits in the <c>yarn.lock</c> file.
     /// </summary>
-    abstract resolutions: Record<string, string option> option with get, set
+    abstract resolutions: JS.Record<string, string option> option with get, set
     /// <summary>
     /// JSPM configuration.
     /// </summary>
@@ -11277,7 +11277,7 @@ module TsConfigJson =
         /// <summary>
         /// Specify path mapping to be computed relative to baseUrl option.
         /// </summary>
-        abstract paths: Record<string, string[]> option with get, set
+        abstract paths: JS.Record<string, string[]> option with get, set
         /// <summary>
         /// List of TypeScript language server plugins to load.
         /// </summary>

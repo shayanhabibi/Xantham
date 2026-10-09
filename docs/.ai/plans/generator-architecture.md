@@ -1973,10 +1973,52 @@ restored `Record` and allowed the original exported-function consumer to reuse t
 Core.TS catalogue with all authentication enabled. The experiment was reverted after diagnosis;
 the production fix needs harvest regression coverage and full gates, not relaxed API checks.
 
-Validation: the full `build.fsx -- test --run-gate` pipeline passed, including the
-Generator and Wire suites, Fable run gate and customization Partas gate. The 28 new
-library identity/reuse cases cover all eight package names, complete Core.TS semantic
-re-emission, compiled aliases and reader rejection paths. Five Node portability and
-provenance checks passed. All 254 checked golden/Core.TS binding and manifest hashes
+Validation of the OS identity wave: the full `build.fsx -- test --run-gate` pipeline passed,
+including the Generator and Wire suites, Fable run gate and customization Partas gate.
+The 28 new library identity/reuse cases cover all eight package names, complete Core.TS
+semantic re-emission, compiled aliases and reader rejection paths. Five Node portability
+and provenance checks passed. All 254 checked golden/Core.TS binding and manifest hashes
 remained unchanged. Independent review found no defects; actual Linux execution remains
 for CI, while the Windows regression authenticates the Linux-origin source-byte baseline.
+
+## Compiler-library entry invariance and computed keys (2026-10-10)
+
+Compiler-library `ship` runs harvest globals even when the entry module exports values or
+types. Module-only inputs query an actual default-library source's global scope: querying
+the entry scope duplicated module exports as globals and let local names hide library names.
+Explicit global public inputs retain their own scope. The small scripthost harvest lab
+compares the complete library declaration set across entry forms and checks that Reference,
+Widen and Map continue to withhold library globals. Programs with `no-default-lib` retain
+module exports without reharvesting them as globals.
+
+Drilling the Core.TS matrix exposed a second false mismatch in `String`: structural identities
+hashed escaped computed-member names such as `__@match@1085`. The numeric suffix is a
+compiler-session allocation, so even fresh compiler-only producers could differ. Computed
+member keys now authenticate normalized declaration handles; ordinary names have a disjoint
+encoding. Structural member hashing and inferred parent roles share this key. Missing computed
+declarations do not fall back to a session ID. Identity contract advances from 3 to 4; the
+Customization and policy contracts remain unchanged. Intrinsic checker
+types no longer borrow aggregate export handles or inferred parent roles: their named aliases
+retain their own declaration handles. The identity bump covers both corrections.
+
+Pure index-signature references use explicit `JS.Record` / `JS.ReadonlyRecord` support names.
+Previously a bare `Record` could bind to the shipped library's phantom or a local declaration;
+arity repair qualified it only for some consumers, causing different emitted APIs. Inference
+contract advances to 2 and API contract to 3 for this emitted ABI correction. Core.TS and dependent producers require
+regeneration; source and API authentication remain strict.
+
+The full Core.TS matrix covers function, value, interface, namespace, default, re-export,
+unrelated export, primitive aliases, local Record/ReadonlyRecord collisions, type-only global
+and mixed public entries, with
+reader authentication and compiled Record/AudioWorkletNodeOptions aliases. A global function
+adds a genuine `typeof globalThis` member: its changed source closure must still reject reuse
+of the unaugmented Core.TS catalogue. This is distinct from the false entry-dependent hashes.
+
+Validation: the full Windows `build.fsx -- test --run-gate` pipeline passed: 1,249 Generator
+tests, 99 Wire tests (one existing ignored case in each suite), 468 Fable checks and the real
+Partas customization gate. This wave adds 24 regression cases, including private/equal-valued
+literal alias reuse. All 118 golden-generation cases and five Node provenance/portability
+checks passed. Independent review's literal-alias and emitted-ABI probes were addressed.
+The 14 changed existing binding files differ only in explicit support-record qualification;
+all existing findings manifests and compiler input bytes are unchanged. Three new binding/
+manifest hashes cover the scripthost lab. Actual Linux execution remains for CI.

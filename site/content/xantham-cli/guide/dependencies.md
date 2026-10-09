@@ -128,8 +128,10 @@ TypeScript standard-library catalogue sources use the logical package name `type
 on every OS and CPU. Their identities retain the exact release, source revision, library
 path and source bytes. Platform distribution names and OS/CPU packaging fields do not
 change library identities. Other packages retain their manifest and source authentication.
-Regenerate Core.TS and dependent catalogues together when upgrading from identity contract
-2 to 3; the older platform-specific catalogues are rejected before reuse.
+Computed-member identities also exclude the compiler's session-local symbol numbers.
+Regenerate Core.TS and dependent catalogues together when upgrading to identity contract 4
+with API contract 3 and inference contract 2 (which consistently qualify index-signature support types);
+older catalogues are rejected before reuse.
 Custom compiler executables without verifiable package metadata require identical compiler
 binary hashes. Matching TypeScript major/minor versions alone is insufficient.
 

@@ -29,9 +29,9 @@ type Producer =
 let current compiler =
     {
         ContractVersion = 1
-        IdentityVersion = 3
-        ApiVersion = 2
-        InferenceVersion = 1
+        IdentityVersion = 4
+        ApiVersion = 3
+        InferenceVersion = 2
         CustomizationVersion = 1
         Compiler = compiler
     }

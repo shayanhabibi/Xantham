@@ -2235,8 +2235,8 @@ and internal delegateRef
 /// A pure index signature with no name of its own, resolved through the support package
 /// rather than minted a declaration (§4.10, TR059): `Record<'Key, 'Value>` for a writable
 /// index, `ReadonlyRecord<'Key, 'Value>` for a readonly one - the get-only form a readonly
-/// index signature already renders as `MB.IndexSignatureAsIndexer`. Both names reach a
-/// generated module through `open Fable.Core.JS`, which the support package shadows.
+/// index signature already renders as `MB.IndexSignatureAsIndexer`. Qualified names retain
+/// the support declaration even when a shipped library or consumer declares `Record`.
 and internal recordRef
     (ctx: Context)
     (model: ShapeModel)
@@ -2250,7 +2250,7 @@ and internal recordRef
 
     let name = if info.IsReadonly then "ReadonlyRecord" else "Record"
 
-    FsApp(name, [ key; value ]),
+    FsApp(Naming.SupportBindings.qualify name, [ key; value ]),
     keyFindings
     @ valueFindings
     @ [

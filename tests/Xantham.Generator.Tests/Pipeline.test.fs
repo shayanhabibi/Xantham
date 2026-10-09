@@ -4458,7 +4458,7 @@ let pipelineTests =
 
                           Expect.stringContains
                               source
-                              "abstract values: ReadonlyRecord<string, bool>"
+                              "abstract values: JS.ReadonlyRecord<string, bool>"
                               "a readonly inline index signature reads ReadonlyRecord, with no setter"
 
                       testCase "a named index-signature declaration keeps minting its own name" <| fun _ ->
@@ -5258,4 +5258,11 @@ let catalogSourceProjectionTests =
     let config = { handConfig package with DeclarationCatalog = false }
     testList "catalog source projection fixture" [
         yield! fixtureTests "catalog-source-projection-lab" package config (fun _ -> [])
+    ]
+
+[<Tests>]
+let catalogLibraryEntryFixtureTests =
+    let package = handFixture "catalog-library-entry-lab"
+    testList "catalog library entry fixture" [
+        yield! fixtureTests "catalog-library-entry-lab" package (handConfig package) (fun _ -> [])
     ]

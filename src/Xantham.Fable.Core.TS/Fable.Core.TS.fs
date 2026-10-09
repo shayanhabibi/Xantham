@@ -11370,7 +11370,7 @@ module Es =
         /// </summary>
         /// <param name="o">Object that contains the properties and methods. This can be an object that you created or an existing Document Object Model (DOM) object.</param>
         /// <param name="o">Object that contains the properties and methods. This can be an object that you created or an existing Document Object Model (DOM) object.</param>
-        abstract values<'T>: o: U2<ArrayLike<'T>, Record<string, 'T>> -> 'T[]
+        abstract values<'T>: o: U2<ArrayLike<'T>, JS.Record<string, 'T>> -> 'T[]
         /// <summary>
         /// Returns an array of values of the enumerable own properties of an object
         /// </summary>
@@ -11382,7 +11382,7 @@ module Es =
         /// </summary>
         /// <param name="o">Object that contains the properties and methods. This can be an object that you created or an existing Document Object Model (DOM) object.</param>
         /// <param name="o">Object that contains the properties and methods. This can be an object that you created or an existing Document Object Model (DOM) object.</param>
-        abstract entries<'T>: o: U2<ArrayLike<'T>, Record<string, 'T>> -> (string * 'T)[]
+        abstract entries<'T>: o: U2<ArrayLike<'T>, JS.Record<string, 'T>> -> (string * 'T)[]
         /// <summary>
         /// Returns an array of key/values of the enumerable own properties of an object
         /// </summary>
@@ -11399,7 +11399,7 @@ module Es =
         /// </summary>
         /// <param name="entries">An iterable object that contains key-value entries for properties and methods.</param>
         /// <param name="entries">An iterable object that contains key-value entries for properties and methods.</param>
-        abstract fromEntries<'T>: entries: Iterable<(PropertyKey * 'T), obj, obj> -> Record<string, 'T>
+        abstract fromEntries<'T>: entries: Iterable<(PropertyKey * 'T), obj, obj> -> JS.Record<string, 'T>
         /// <summary>
         /// Returns an object created by key-value entries for properties and methods
         /// </summary>
@@ -20736,10 +20736,10 @@ module Dom =
         abstract numberOfInputs: float option with get, set
         abstract numberOfOutputs: float option with get, set
         abstract outputChannelCount: float[] option with get, set
-        abstract parameterData: Fable.Core.TS.Es.Record<string, float> option with get, set
+        abstract parameterData: JS.Record<string, float> option with get, set
         abstract processorOptions: obj option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?numberOfInputs: float, ?numberOfOutputs: float, ?outputChannelCount: float[], ?parameterData: Fable.Core.TS.Es.Record<string, float>, ?processorOptions: obj, ?channelCount: float, ?channelCountMode: ChannelCountMode, ?channelInterpretation: ChannelInterpretation) : AudioWorkletNodeOptions = jsNative
+        static member Create (?numberOfInputs: float, ?numberOfOutputs: float, ?outputChannelCount: float[], ?parameterData: JS.Record<string, float>, ?processorOptions: obj, ?channelCount: float, ?channelCountMode: ChannelCountMode, ?channelInterpretation: ChannelInterpretation) : AudioWorkletNodeOptions = jsNative
 
     [<Interface>]
     type AuthenticationExtensionsClientInputs =
@@ -20817,16 +20817,16 @@ module Dom =
     [<Interface>]
     type AuthenticationExtensionsPRFInputs =
         abstract eval: AuthenticationExtensionsPRFValues option with get, set
-        abstract evalByCredential: Fable.Core.TS.Es.Record<string, AuthenticationExtensionsPRFValues> option with get, set
+        abstract evalByCredential: JS.Record<string, AuthenticationExtensionsPRFValues> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?eval: AuthenticationExtensionsPRFValues, ?evalByCredential: Fable.Core.TS.Es.Record<string, AuthenticationExtensionsPRFValues>) : AuthenticationExtensionsPRFInputs = jsNative
+        static member Create (?eval: AuthenticationExtensionsPRFValues, ?evalByCredential: JS.Record<string, AuthenticationExtensionsPRFValues>) : AuthenticationExtensionsPRFInputs = jsNative
 
     [<Interface>]
     type AuthenticationExtensionsPRFInputsJSON =
         abstract eval: AuthenticationExtensionsPRFValuesJSON option with get, set
-        abstract evalByCredential: Fable.Core.TS.Es.Record<string, AuthenticationExtensionsPRFValuesJSON> option with get, set
+        abstract evalByCredential: JS.Record<string, AuthenticationExtensionsPRFValuesJSON> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?eval: AuthenticationExtensionsPRFValuesJSON, ?evalByCredential: Fable.Core.TS.Es.Record<string, AuthenticationExtensionsPRFValuesJSON>) : AuthenticationExtensionsPRFInputsJSON = jsNative
+        static member Create (?eval: AuthenticationExtensionsPRFValuesJSON, ?evalByCredential: JS.Record<string, AuthenticationExtensionsPRFValuesJSON>) : AuthenticationExtensionsPRFInputsJSON = jsNative
 
     [<Interface>]
     type AuthenticationExtensionsPRFOutputs =
@@ -21325,15 +21325,15 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Instance/exports">MDN Reference</a>
         /// </summary>
-        abstract exports: Fable.Core.TS.Es.Record<string, ExportValue>
+        abstract exports: JS.Record<string, ExportValue>
         [<ParamObject; Emit("$0")>]
-        static member Create (exports: Fable.Core.TS.Es.Record<string, ExportValue>) : Instance = jsNative
+        static member Create (exports: JS.Record<string, ExportValue>) : Instance = jsNative
 
     type InstanceConstructor =
         [<EmitConstructor>]
-        abstract Create: ``module``: obj * ?importObject: Fable.Core.TS.Es.Record<string, Fable.Core.TS.Es.Record<string, ImportValue>> -> Instance
+        abstract Create: ``module``: obj * ?importObject: JS.Record<string, JS.Record<string, ImportValue>> -> Instance
 
-    type InstantiateStreaming = delegate of source: U2<Fable.Core.TS.Es.PromiseLike<Response>, Response> * importObject: Fable.Core.TS.Es.Record<string, Fable.Core.TS.Es.Record<string, ImportValue>> option * options: WebAssemblyCompileOptions option -> Fable.Core.TS.Es.Promise<WebAssemblyInstantiatedSource>
+    type InstantiateStreaming = delegate of source: U2<Fable.Core.TS.Es.PromiseLike<Response>, Response> * importObject: JS.Record<string, JS.Record<string, ImportValue>> option * options: WebAssemblyCompileOptions option -> Fable.Core.TS.Es.Promise<WebAssemblyInstantiatedSource>
 
     [<Interface>]
     type LinkError =
@@ -21534,11 +21534,11 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/instantiate_static">MDN Reference</a>
         /// </summary>
-        abstract instantiate: bytes: BufferSource * ?importObject: Fable.Core.TS.Es.Record<string, Fable.Core.TS.Es.Record<string, ImportValue>> * ?options: WebAssemblyCompileOptions -> Fable.Core.TS.Es.Promise<WebAssemblyInstantiatedSource>
+        abstract instantiate: bytes: BufferSource * ?importObject: JS.Record<string, JS.Record<string, ImportValue>> * ?options: WebAssemblyCompileOptions -> Fable.Core.TS.Es.Promise<WebAssemblyInstantiatedSource>
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/instantiate_static">MDN Reference</a>
         /// </summary>
-        abstract instantiate: moduleObject: obj * ?importObject: Fable.Core.TS.Es.Record<string, Fable.Core.TS.Es.Record<string, ImportValue>> -> Fable.Core.TS.Es.Promise<Instance>
+        abstract instantiate: moduleObject: obj * ?importObject: JS.Record<string, JS.Record<string, ImportValue>> -> Fable.Core.TS.Es.Promise<Instance>
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/instantiateStreaming_static">MDN Reference</a>
         /// </summary>
@@ -22352,9 +22352,9 @@ module Dom =
         inherit GPUObjectDescriptorBase
         abstract defaultQueue: GPUQueueDescriptor option with get, set
         abstract requiredFeatures: GPUFeatureName[] option with get, set
-        abstract requiredLimits: Fable.Core.TS.Es.Record<string, float option> option with get, set
+        abstract requiredLimits: JS.Record<string, float option> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?defaultQueue: GPUQueueDescriptor, ?requiredFeatures: GPUFeatureName[], ?requiredLimits: Fable.Core.TS.Es.Record<string, float option>, ?label: string) : GPUDeviceDescriptor = jsNative
+        static member Create (?defaultQueue: GPUQueueDescriptor, ?requiredFeatures: GPUFeatureName[], ?requiredLimits: JS.Record<string, float option>, ?label: string) : GPUDeviceDescriptor = jsNative
 
     [<Interface>]
     type GPUExtent3DDict =
@@ -22379,7 +22379,7 @@ module Dom =
         inherit GPUProgrammableStage
         abstract targets: GPUColorTargetState option[] with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (targets: GPUColorTargetState option[], ``module``: GPUShaderModule, ?constants: Fable.Core.TS.Es.Record<string, float>, ?entryPoint: string) : GPUFragmentState = jsNative
+        static member Create (targets: GPUColorTargetState option[], ``module``: GPUShaderModule, ?constants: JS.Record<string, float>, ?entryPoint: string) : GPUFragmentState = jsNative
 
     [<Interface>]
     type GPUMultisampleState =
@@ -22442,11 +22442,11 @@ module Dom =
 
     [<Interface>]
     type GPUProgrammableStage =
-        abstract constants: Fable.Core.TS.Es.Record<string, float> option with get, set
+        abstract constants: JS.Record<string, float> option with get, set
         abstract entryPoint: string option with get, set
         abstract ``module``: GPUShaderModule with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (``module``: GPUShaderModule, ?constants: Fable.Core.TS.Es.Record<string, float>, ?entryPoint: string) : GPUProgrammableStage = jsNative
+        static member Create (``module``: GPUShaderModule, ?constants: JS.Record<string, float>, ?entryPoint: string) : GPUProgrammableStage = jsNative
 
     [<Interface>]
     type GPUQuerySetDescriptor =
@@ -22680,7 +22680,7 @@ module Dom =
         inherit GPUProgrammableStage
         abstract buffers: GPUVertexBufferLayout option[] option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (``module``: GPUShaderModule, ?buffers: GPUVertexBufferLayout option[], ?constants: Fable.Core.TS.Es.Record<string, float>, ?entryPoint: string) : GPUVertexState = jsNative
+        static member Create (``module``: GPUShaderModule, ?buffers: GPUVertexBufferLayout option[], ?constants: JS.Record<string, float>, ?entryPoint: string) : GPUVertexState = jsNative
 
     [<Interface>]
     type GainOptions =
@@ -23919,9 +23919,9 @@ module Dom =
     type PushSubscriptionJSON =
         abstract endpoint: string option with get, set
         abstract expirationTime: float option with get, set
-        abstract keys: Fable.Core.TS.Es.Record<string, string> option with get, set
+        abstract keys: JS.Record<string, string> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?endpoint: string, ?expirationTime: float, ?keys: Fable.Core.TS.Es.Record<string, string>) : PushSubscriptionJSON = jsNative
+        static member Create (?endpoint: string, ?expirationTime: float, ?keys: JS.Record<string, string>) : PushSubscriptionJSON = jsNative
 
     [<Interface>]
     type PushSubscriptionOptionsInit =
@@ -24184,7 +24184,7 @@ module Dom =
         abstract nackCount: float option with get, set
         abstract pliCount: float option with get, set
         abstract qpSum: float option with get, set
-        abstract qualityLimitationDurations: Fable.Core.TS.Es.Record<string, float> option with get, set
+        abstract qualityLimitationDurations: JS.Record<string, float> option with get, set
         abstract qualityLimitationReason: RTCQualityLimitationReason option with get, set
         abstract qualityLimitationResolutionChanges: float option with get, set
         abstract remoteId: string option with get, set
@@ -25003,10 +25003,10 @@ module Dom =
 
     [<Interface>]
     type URLPatternComponentResult =
-        abstract groups: Fable.Core.TS.Es.Record<string, string option> with get, set
+        abstract groups: JS.Record<string, string option> with get, set
         abstract input: string with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (groups: Fable.Core.TS.Es.Record<string, string option>, input: string) : URLPatternComponentResult = jsNative
+        static member Create (groups: JS.Record<string, string option>, input: string) : URLPatternComponentResult = jsNative
 
     [<Interface>]
     type URLPatternInit =
@@ -34036,7 +34036,7 @@ module Dom =
         /// </summary>
         abstract supports: ``type``: string -> bool
         [<EmitConstructor>]
-        abstract Create: items: Fable.Core.TS.Es.Record<string, U3<string, Blob, Fable.Core.TS.Es.PromiseLike<U2<string, Blob>>>> * ?options: ClipboardItemOptions -> ClipboardItem
+        abstract Create: items: JS.Record<string, U3<string, Blob, Fable.Core.TS.Es.PromiseLike<U2<string, Blob>>>> * ?options: ClipboardItemOptions -> ClipboardItem
 
     /// <summary>
     /// A <b><c>CloseEvent</c></b> is sent to clients using WebSockets when the connection is closed. This is delivered to the listener indicated by the WebSocket object's onclose attribute.
@@ -62793,7 +62793,7 @@ module Dom =
 
     type URLSearchParamsConstructor =
         [<EmitConstructor>]
-        abstract Create: ?init: U4<string, string[][], Fable.Core.TS.Es.Record<string, string>, URLSearchParams> -> URLSearchParams
+        abstract Create: ?init: U4<string, string[][], JS.Record<string, string>, URLSearchParams> -> URLSearchParams
 
     /// <summary>
     /// The <b><c>UserActivation</c></b> interface provides information about whether a user is currently interacting with the page, or has completed an interaction since page load.
@@ -69422,7 +69422,7 @@ module Dom =
 
     type HashAlgorithmIdentifier = AlgorithmIdentifier
 
-    type HeadersInit = U3<(string * string)[], Headers, Fable.Core.TS.Es.Record<string, string>>
+    type HeadersInit = U3<(string * string)[], Headers, JS.Record<string, string>>
 
     type IDBValidKey = U6<string, float, obj[], Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<Fable.Core.TS.Es.ArrayBuffer>, Fable.Core.TS.Es.Date>
 
@@ -69462,7 +69462,7 @@ module Dom =
 
     type PerformanceEntryList = PerformanceEntry[]
 
-    type PublicKeyCredentialClientCapabilities = Fable.Core.TS.Es.Record<string, bool>
+    type PublicKeyCredentialClientCapabilities = JS.Record<string, bool>
 
     type RTCRtpReceiverTransform = RTCRtpScriptTransform
 
