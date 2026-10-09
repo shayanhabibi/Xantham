@@ -46,6 +46,11 @@ let private assertRejected part (mutate: JsonNode -> unit) =
 [<Tests>]
 let tests =
     testList "catalog portability" [
+        testCase "compression record copy preserves inference authentication" <| fun _ ->
+            withProducer (fun directory package _ config _ ->
+                let compressedConsumer = { config with DeclarationCatalogCompression = CatalogCompression.Brotli }
+                let report = Pipeline.run compressedConsumer package (Path.Combine(directory, "different-output-compression")) |> Async.RunSynchronously
+                Expect.contains report.OutputFiles "declarations.json.br" "output format is independent of authenticated inference")
         testCase "equivalent portable toolchains generate a compiled consumer" <| fun _ ->
             withProducer (fun directory package _ config catalog ->
                 edit catalog (fun document ->

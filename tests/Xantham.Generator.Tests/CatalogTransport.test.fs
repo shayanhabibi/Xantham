@@ -107,3 +107,67 @@ let tests = testList "catalog transport" [
         decoder.CopyTo output
         Expect.sequenceEqual (output.ToArray()) (Encoding.UTF8.GetBytes json) "independent decoder"
 ]
+
+let private loadConfig (json: string) =
+    use scratch = Scratch.directory "catalog-config"
+    let path = Path.Combine(scratch.Path, "xantham.json")
+    File.WriteAllText(path, json)
+    GeneratorConfig.loadFile path
+
+[<Tests>]
+let configTests = testList "catalog compression config" [
+    for json, enabled, compression in [
+        "{}", false, CatalogCompression.Uncompressed
+        """{"declarationCatalog":false}""", false, CatalogCompression.Uncompressed
+        """{"declarationCatalog":true}""", true, CatalogCompression.Uncompressed
+        """{"declarationCatalog":{"enabled":true}}""", true, CatalogCompression.Uncompressed
+        """{"declarationCatalog":{"enabled":true,"compression":"none"}}""", true, CatalogCompression.Uncompressed
+        """{"declarationCatalog":{"enabled":true,"compression":"brotli"}}""", true, CatalogCompression.Brotli
+        """{"declarationCatalog":{"enabled":false,"compression":"brotli"}}""", false, CatalogCompression.Brotli
+    ] do
+        testCase json <| fun () ->
+            let config = loadConfig json
+            Expect.equal config.DeclarationCatalog enabled "emission"
+            Expect.equal config.DeclarationCatalogCompression compression "transport"
+            let copied = { config with ModuleName = Some "Copy" }
+            Expect.equal copied.DeclarationCatalogCompression compression "record copy"
+    for value in ["null"; "1"; "\"brotli\""; "{}"; "{\"enabled\":1}"; "{\"enabled\":true,\"compression\":null}"; "{\"enabled\":true,\"compression\":1}"; "{\"enabled\":true,\"compression\":\"gzip\"}"] do
+        testCase ("reject " + value) <| fun () ->
+            Expect.throwsC
+                (fun () -> loadConfig ("{\"declarationCatalog\":" + value + "}") |> ignore)
+                (fun error -> Expect.stringContains error.Message "declarationCatalog" "option diagnostic")
+    testCase "schema offers boolean or explicit enabled and compression" <| fun () ->
+        use document = System.Text.Json.JsonDocument.Parse(Xantham.Cli.Schema.json())
+        let properties = document.RootElement.GetProperty("properties")
+        Expect.isFalse (fst (properties.TryGetProperty("declarationCatalogCompression"))) "combined JSON property"
+        let forms = properties.GetProperty("declarationCatalog").GetProperty("oneOf").EnumerateArray() |> Seq.toArray
+        Expect.equal (forms[0].GetProperty("type").GetString()) "boolean" "legacy form"
+        let options = forms[1]
+        Expect.sequenceEqual (options.GetProperty("required").EnumerateArray() |> Seq.map _.GetString()) ["enabled"] "required emission flag"
+        Expect.sequenceEqual (options.GetProperty("properties").GetProperty("compression").GetProperty("enum").EnumerateArray() |> Seq.map _.GetString()) ["none"; "brotli"] "supported codecs"
+    testCase "producer disk output and text API preserve identical JSON bytes" <| fun () ->
+        use scratch = Scratch.directory "catalog-output"
+        let package = Path.GetFullPath(Path.Combine(__SOURCE_DIRECTORY__, "..", "fixtures", "catalog-portability-lab", "node_modules", "catalog-portability-owner-lab"))
+        let config = { GeneratorConfig.Default with DeclarationCatalog = true; ModuleName = Some "Transport.Root"; Lib = Some ["esnext"]; Types = Some [] }
+        let plain = Path.Combine(scratch.Path, "plain")
+        let compressed = Path.Combine(scratch.Path, "brotli")
+        let report = Pipeline.run config package plain |> Async.RunSynchronously
+        let brotliConfig = { config with DeclarationCatalogCompression = CatalogCompression.Brotli }
+        let compressedReport = Pipeline.run brotliConfig package compressed |> Async.RunSynchronously
+        Expect.contains report.OutputFiles "declarations.json" "plain name"
+        Expect.contains compressedReport.OutputFiles "declarations.json.br" "compressed name"
+        Expect.isFalse (File.Exists(Path.Combine(compressed, "declarations.json"))) "only requested output"
+        use file = File.OpenRead(Path.Combine(compressed, "declarations.json.br"))
+        use decoder = new BrotliStream(file, CompressionMode.Decompress)
+        use output = new MemoryStream()
+        decoder.CopyTo output
+        Expect.sequenceEqual (output.ToArray()) (File.ReadAllBytes(Path.Combine(plain, "declarations.json"))) "identical JSON bytes"
+        for name in report.OutputFiles |> List.filter (fun name -> name <> "declarations.json") do
+            Expect.sequenceEqual (File.ReadAllBytes(Path.Combine(compressed, name))) (File.ReadAllBytes(Path.Combine(plain, name))) name
+        let rendered = Pipeline.generate brotliConfig package |> Async.RunSynchronously
+        let json = rendered.Files |> List.find (fst >> (=) "declarations.json") |> snd
+        Expect.sequenceEqual (Encoding.UTF8.GetBytes json) (output.ToArray()) "generation returns JSON text"
+        let disabled = Path.Combine(scratch.Path, "disabled")
+        let disabledReport = Pipeline.run { brotliConfig with DeclarationCatalog = false } package disabled |> Async.RunSynchronously
+        Expect.isFalse (disabledReport.OutputFiles |> List.exists (fun name -> name.StartsWith("declarations.json"))) "disabled emission"
+]

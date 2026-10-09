@@ -604,15 +604,29 @@ let runWith extensions (config: GeneratorConfig) (packageDir: string) (outDir: s
         let! rendered = generateWith extensions config packageDir
         Directory.CreateDirectory outDir |> ignore
 
+        let outputName name =
+            if
+                name = "declarations.json"
+                && config.DeclarationCatalogCompression = CatalogCompression.Brotli
+            then
+                name + ".br"
+            else
+                name
+
         for name, content in rendered.Files do
-            let path = Path.Combine(outDir, name)
+            let writtenName = outputName name
+            let path = Path.Combine(outDir, writtenName)
             Directory.CreateDirectory(Path.GetDirectoryName path) |> ignore
-            File.WriteAllText(path, content, utf8NoBom)
+
+            if writtenName <> name then
+                CatalogTransport.writeBrotli path content
+            else
+                File.WriteAllText(path, content, utf8NoBom)
 
         return
             {
                 ModuleName = rendered.ModuleName
-                OutputFiles = rendered.Files |> List.map fst
+                OutputFiles = rendered.Files |> List.map (fst >> outputName)
                 Findings = rendered.Findings
                 Counts = Render.counts (Render.symbolTiers rendered)
                 ShadowedByLib = rendered.ShadowedByLib
