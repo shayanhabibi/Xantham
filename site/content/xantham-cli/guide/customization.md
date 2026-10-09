@@ -297,9 +297,9 @@ Decode before an `option` conversion can erase the distinction. An absent proper
 present property containing `undefined` both yield the same JavaScript value; this API does not
 inspect property presence.
 
-The generated DU is a companion representation. Call `encode` at an outgoing JavaScript boundary
-and `decode` on incoming raw values. Ordinary generated signatures retain their existing types;
-this increment does not automatically replace or wrap those signatures. Equal string sets still
+The literal-union DU is a companion representation. Call `encode` at an outgoing JavaScript boundary
+and `decode` on incoming raw values, or use the operation adapter below to generate the call boundary.
+Ordinary generated signatures retain their existing types. Equal string sets still
 produce distinct F# types when selected separately. Convert through `encode`/`decode` when needed.
 Overlapping sets may accept the same primitive, so decoding proves membership, not which source
 union produced it. Preserve an outer application DU if that provenance matters.
@@ -312,6 +312,57 @@ the manifest. `CU006` marks the raw-source extension boundary as Escape; the sou
 hashes, extension identity and selection configuration are recorded under `projections`.
 Projection metadata does not change raw declaration catalogs or require ordinary consumers to
 register the same companion policy.
+
+### Carry contracts into operations
+
+`Operations.create` generates an input contract and a typed method that performs the conversion
+internally. `Operations.createShared` shares the first input contract across selected methods
+with identical resolved shapes. For example, given a generated `ProjectionLab.Session`:
+
+```fsharp
+let submit =
+    { Package = "projection-lab"
+      ReceiverPath = ["Session"]
+      MethodName = "submit"
+      ParameterName = "input"
+      FieldName = None
+      ReceiverType = "ProjectionLab.Session"
+      ModuleName = "Projected.Submit"
+      TypeName = "Input"
+      FunctionName = "submit" }
+
+let operations =
+    Operations.create
+        { Id = "example.operations"; Version = "1"; Configuration = Map.empty }
+        "tests/.scratch/myriad-inputs"
+        [submit]
+
+// After generation, callers use the contract directly.
+// Projected.Submit.submit session (Projected.Submit.Input.Text "hello") None
+```
+
+The adapter reads the selected method argument before Shape. It supports primitive values,
+arrays, data records and unions, including Pi's text-or-content-array input. Required literal
+properties are encoded automatically; an image payload cannot accidentally carry the text tag.
+Other method arguments and results retain their generated SDK types. The receiver type must
+match the selected TypeScript declaration's final emitted owner, including catalog references.
+
+Optional payload fields use an outer `option`: `None` omits the property; a present `Undefined`
+case writes an own property containing undefined. `Null` remains distinct. A selected
+`FieldName = Some "thinkingLevel"` produces a method accepting an optional DU, provided the
+selected field and all omitted siblings are optional. The method constructs the object argument;
+the remaining method arguments are forwarded with their original order and optionality.
+
+For shared inputs, pass all operation selections to `Operations.createShared` with the same
+`TypeName`. Their modules remain distinct; later modules alias the first module's contract.
+Different resolved shapes reject with `myriad/shared-shape-mismatch`. Ordinary `create`
+continues to generate independent types.
+
+Overloads, generic methods/receivers, recursive or opaque payloads, indexed/callable objects,
+computed/symbol keys and unsupported source-reference forms reject explicitly. These are
+resolved value contracts; `exactOptionalPropertyTypes` write semantics are not promised.
+The compiler gate validates all generated source, and the Fable gate validates the JavaScript
+boundary. Runtime helpers must be shipped as Fable source with the consuming library.
 
 The checked-in example accepts one selected union and caller-owned scratch/reference paths:
 

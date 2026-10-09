@@ -17,6 +17,34 @@ type ResolvedUnionArm =
     | Null
     | Undefined
 
+[<RequireQualifiedAccess>]
+type ResolvedValueShape =
+    | String
+    | Number
+    | Boolean
+    | Null
+    | Undefined
+    | StringLiteral of string
+    | Array of ResolvedValueShape
+    | Record of ResolvedValueField list
+    | Union of ResolvedValueShape list
+
+and ResolvedValueField =
+    {
+        Name: string
+        Optional: bool
+        Shape: ResolvedValueShape
+    }
+
+type ResolvedOperation =
+    {
+        MethodName: string
+        ParameterNames: string list
+        ParameterOptional: bool list
+        ParameterIndex: int
+        FieldName: string option
+    }
+
 type internal ResolvedSourceInfo =
     {
         Package: string
@@ -26,14 +54,34 @@ type internal ResolvedSourceInfo =
         Union: Result<ResolvedUnionArm list, ExtensionDiagnostic list>
     }
 
+type internal ResolvedOperationQuery = string * string list * string * string * string option
+
+type internal ResolvedOperationInfo =
+    {
+        Source: ResolvedSourceInfo
+        Shape: Result<ResolvedValueShape, ExtensionDiagnostic list>
+        Operation: Result<ResolvedOperation, ExtensionDiagnostic list>
+        ReceiverTypeId: int<Measure.typeId> option
+    }
+
 type ResolvedSnapshot =
     private
         {
             Nonce: System.Guid
-            Sources: ResolvedSourceInfo list
+            mutable Sources: ResolvedSourceInfo list
+            mutable Operations: Map<int, ResolvedOperationQuery * ResolvedOperationInfo>
+            OperationLookup: (ResolvedOperationQuery -> ResolvedOperationInfo option) option
         }
 
-type ProjectionCompanion = private ProjectionCompanion of System.Guid * string * string * string * string list * string
+type ProjectionCompanion =
+    private | ProjectionCompanion of
+        System.Guid *
+        string *
+        string *
+        string *
+        string list *
+        string *
+        (int<Measure.typeId> * string) option
 
 type AttributeValue =
     | String of string
@@ -178,6 +226,29 @@ module Resolved =
             let name = String.concat "." path
             invalidOp $"projection/ambiguous-declaration: {package}/{name}"
 
+    let private tryOperation query snapshot =
+        lock snapshot (fun () ->
+            match
+                snapshot.Operations
+                |> Map.toList
+                |> List.tryFind (fun (_, (selected, _)) -> selected = query)
+            with
+            | Some(index, _) -> Some(ResolvedSource(snapshot.Nonce, index))
+            | None ->
+                snapshot.OperationLookup
+                |> Option.bind (fun lookup -> lookup query)
+                |> Option.map (fun info ->
+                    let index = snapshot.Sources.Length
+                    snapshot.Sources <- snapshot.Sources @ [ info.Source ]
+                    snapshot.Operations <- Map.add index (query, info) snapshot.Operations
+                    ResolvedSource(snapshot.Nonce, index)))
+
+    let tryFindParameter package receiver methodName parameter snapshot =
+        tryOperation (package, receiver, methodName, parameter, None) snapshot
+
+    let tryFindParameterField package receiver methodName parameter field snapshot =
+        tryOperation (package, receiver, methodName, parameter, Some field) snapshot
+
     let package source snapshot = (info source snapshot).Package
     let path source snapshot = (info source snapshot).Path
 
@@ -195,10 +266,53 @@ module Resolved =
                     Diagnostic.create "projection/stale-source" "The source belongs to another resolved snapshot" None
                 ]
 
+    let shape (ResolvedSource(nonce, index) as source) snapshot =
+        match tryInfo source snapshot with
+        | None ->
+            Error
+                [
+                    Diagnostic.create "projection/stale-source" "The source belongs to another resolved snapshot" None
+                ]
+        | Some info ->
+            match Map.tryFind index snapshot.Operations with
+            | Some(_, operation) -> operation.Shape
+            | None ->
+                info.Union
+                |> Result.map (fun arms ->
+                    arms
+                    |> List.map (function
+                        | ResolvedUnionArm.StringLiteral value -> ResolvedValueShape.StringLiteral value
+                        | ResolvedUnionArm.Number -> ResolvedValueShape.Number
+                        | ResolvedUnionArm.Null -> ResolvedValueShape.Null
+                        | ResolvedUnionArm.Undefined -> ResolvedValueShape.Undefined)
+                    |> function
+                        | [ value ] -> value
+                        | values -> ResolvedValueShape.Union values)
+
+    let operation (ResolvedSource(_, index) as source) snapshot =
+        match tryInfo source snapshot with
+        | None ->
+            Error
+                [
+                    Diagnostic.create "projection/stale-source" "The source belongs to another resolved snapshot" None
+                ]
+        | Some _ ->
+            match Map.tryFind index snapshot.Operations with
+            | Some(_, operation) -> operation.Operation
+            | None ->
+                Error
+                    [
+                        Diagnostic.create
+                            "projection/operation-required"
+                            "The selected source is not an operation parameter"
+                            None
+                    ]
+
     let diagnostics snapshot =
         snapshot.Sources
+        |> List.mapi (fun index _ -> shape (ResolvedSource(snapshot.Nonce, index)) snapshot)
         |> List.collect (fun source ->
-            match source.Union with
+            match source with
             | Ok _ -> []
             | Error diagnostics -> diagnostics)
 
@@ -208,22 +322,54 @@ module ProjectionCompanion =
     let create source fileName exportedTypeNames sourceText snapshot =
         let info = Resolved.selected source snapshot
 
-        match info.Union, info.Declaration, info.Fingerprint with
+        if Resolved.operation source snapshot |> Result.isOk then
+            invalidArg "source" "projection/operation-factory-required: operation plans require a receiver assertion"
+
+        match Resolved.shape source snapshot, info.Declaration, info.Fingerprint with
         | Ok _, Some identity, Some fingerprint ->
-            ProjectionCompanion(snapshot.Nonce, identity, fingerprint, fileName, exportedTypeNames, sourceText)
+            ProjectionCompanion(snapshot.Nonce, identity, fingerprint, fileName, exportedTypeNames, sourceText, None)
         | _ -> invalidArg "source" "projection/unsupported-source: the selected union has unresolved diagnostics"
+
+    let forOperation (ResolvedSource(_, index) as source) receiverType fileName exportedTypeNames sourceText snapshot =
+        let info = Resolved.selected source snapshot
+
+        match
+            Resolved.operation source snapshot,
+            info.Declaration,
+            info.Fingerprint,
+            Map.tryFind index snapshot.Operations
+        with
+        | Ok _, Some identity, Some fingerprint, Some(_, { ReceiverTypeId = Some receiver }) ->
+            ProjectionCompanion(
+                snapshot.Nonce,
+                identity,
+                fingerprint,
+                fileName,
+                exportedTypeNames,
+                sourceText,
+                Some(receiver, receiverType)
+            )
+        | _ -> invalidArg "source" "projection/unsupported-operation: the selected operation has unresolved diagnostics"
 
 module internal ContractData =
     let resolvedSnapshot sources =
         {
             Nonce = System.Guid.NewGuid()
             Sources = sources
+            Operations = Map.empty
+            OperationLookup = None
         }
 
-    let projectionCompanionInfo (ProjectionCompanion(_, identity, fingerprint, file, names, text)) =
+    let withOperationLookup lookup snapshot =
+        { snapshot with
+            OperationLookup = Some lookup
+        }
+
+    let projectionCompanionInfo (ProjectionCompanion(_, identity, fingerprint, file, names, text, _)) =
         identity, fingerprint, file, names, text
 
-    let projectionCompanionIsCurrent snapshot (ProjectionCompanion(nonce, _, _, _, _, _)) = snapshot.Nonce = nonce
+    let projectionCompanionIsCurrent snapshot (ProjectionCompanion(nonce, _, _, _, _, _, _)) = snapshot.Nonce = nonce
+    let projectionReceiver (ProjectionCompanion(_, _, _, _, _, _, receiver)) = receiver
 
     let edits (EditBatch edits) = edits
     let attributeInfo (AttributeSpec(name, arguments, target)) = name, arguments, target

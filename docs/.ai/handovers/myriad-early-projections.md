@@ -1,4 +1,105 @@
-# Handoff: early Myriad union projections, 2026-10-09
+# Handoff: typed Agents/Pi operations, 2026-10-09
+
+**Scope:** carry before-Shape value contracts through generated SDK method calls, with
+explicit shared input ownership and an executable CloudEdge Agents/Pi integration.
+This increment supersedes MP-2 below for the selected instance methods; raw SDK surfaces
+outside those selections retain their reported losses.
+
+**Heads:** both primary checkouts use `fix/myriad-early-projections`. Xantham increment base
+`0cab4e95992d519a05b3cc43ef9e3c13dd2656df`; CloudEdge base
+`3bf08618837910e433b779cf6c0396fc900a1080`. Shayan owns integration into develop.
+All current implementation, builds, tests and mutations ran in the primary checkouts.
+
+**Gates (E):** `tests/.scratch/strict-operation-audit/` contains the source binding,
+full acceptance log and mutation receipts. The user explicitly forbids Bozzetto for
+F#/Fable work, so suites ran directly, serializing shared build dependencies.
+
+```text
+full acceptance (182.614s): generator 1233 passed / 1 ignored; Wire 99 passed / 1 ignored; 0 failures
+Fable RunGate: 525 checks passed; Partas JSX and runtime gate passed
+projection focused: 30 passed, 0 ignored, 0 failed (write and check)
+core source mutants: 5 compiled/killed; operation guard mutants: 3 compiled/killed
+runtime output mutants: 4 compiled/killed; recursive layout disabled: FS0039 as expected
+acceptance binding: all 15,673 source/config/compiler/fixture input hashes unchanged
+```
+
+Reproduce Xantham acceptance: `dotnet fsi build.fsx -- test --run-gate`.
+CloudEdge's `docs/sdk-build.md#agents-pi-operations` documents its pinned
+source-backed generation, static consumer and local workerd gate. The new profile is
+selected explicitly; it does not substitute an older published CLI.
+
+**Binding:** `acceptance.before.json` / `acceptance.after.json` bind source, configuration,
+installed compiler and fixture declarations. The core mutation receipt predates three
+formatting changes and the export-placement fix; `core-mutants/verify-binding.py` reconstructs
+both prior source hashes exactly. Final composed acceptance covers the current files.
+Runtime and operation-guard mutations changed actual primary files sequentially and restored
+their bytes. Restore/setup failures and a zero-test filter attempt are excluded from evidence.
+
+**Rule ledger (E):** permanent controls are in `ResolvedProjection.test.fs`,
+`Projection.test.fs`, `Pipeline.test.fs` and RunGate `Projections.fs`.
+
+| Rule / owner | Positive control | Negative control | Discriminating mutation |
+| --- | --- | --- | --- |
+| Complete source facts / Semantics | string, tagged records, arrays, optional fields | unresolved/empty/recursive arms | swallow incomplete union constituents |
+| Source identity / Resolve and Semantics | same facts retain occurrence identity | defining declaration content changes fingerprint | omit imported source closure |
+| Authoritative arrays / Semantics | globally augmented built-in Array | local Array namesake | disable checker array predicate |
+| Declared keys / Resolve and Semantics | ordinary and escaped record keys | escaped operation metadata, computed/symbol keys | bypass declared operation key agreement |
+| Selected-field construction / Semantics | optional selected field and optional siblings | required selected field or sibling | admit required selected field |
+| Receiver ownership / Pipeline | actual Session receiver | same method on incompatible OtherSession | bypass final qualified receiver check |
+| Shared contract / Myriad Operations | two methods consume one owner's Value | mismatched resolved shapes | bypass shared-shape agreement |
+| Exact JS boundary / Myriad and RunGate | text/image payloads and distinct presence | null string rejected before SDK call | wrong tag, omitted→present undefined, unsafe own-property write, accept null string |
+| Recursive groups / Pipeline and Render | two-package cycle compiles in one namespace | separate-file cycle fails; invalid namespace refuses | disable recursive grouping → FS0039 |
+| Export ownership / Pipeline | colliding dependency type and public subpath | entry exports cannot move to dependency owner | disable explicit entry-export placement |
+
+**Shape matrix:** primitive strings/numbers/booleans, string literals, arrays, data records,
+value unions and optional record fields are admitted. Required literal tags are supplied by
+encoders. `None` omits a property; `Some Undefined` writes it; `Null` is distinct. The source
+matrix refuses overloaded/generic/rest calls, generic/recursive/indexed/callable payloads,
+computed/symbol keys and untracked ImportType/TypeQuery references. Invalid F# inputs,
+independent input DUs and image records missing MIME type fail compilation. The receiver
+counterexample has the same method name and a different parameter type.
+
+**Measurements:** the expanded lab has 7 Exact / 7 Ergonomic / 4 Widened / 0 Escape.
+Its old finite declarations and codec goldens retain their original mappings. Operation
+projections add their own CU006 boundary findings; they do not suppress raw losses.
+The full corpus passes without changes outside the expanded projection lab and new recursive lab. Real CloudEdge measurements are recorded with its acceptance ledger.
+
+**Growth:** `git diff --shortstat 0cab4e9..HEAD`: 42 files changed, 2943 insertions(+), 77 deletions(-), Xantham only. CloudEdge records its separate growth and new-file owners in its SDK build handoff.
+
+| New files | Owner and one-line reason |
+| --- | --- |
+| `src/Xantham.Generator.Myriad/Operations.fs` | Existing Myriad adapter: emit recursive input contracts and typed calls from the authenticated early snapshot, separate from finite literal codecs. |
+| `golden/projection-operations/ProjectionOperations.{Input,Thinking,Queue,Fields,Shared,SharedNext}.fs` under Generator.Tests | Existing golden/RunGate owner: pin independent and shared contracts, actual calls and property-presence behavior. |
+| `tests/fixtures/recursive-groups-lab/node_modules/recursive-groups-lab/{index.d.ts,api.d.ts,package.json,xantham.json}` | Fixture owner: minimal entry side of a declaration cycle and colliding public subpath. |
+| `tests/fixtures/recursive-groups-lab/node_modules/recursive-peer-lab/{index.d.ts,package.json}` | Same fixture owner: dependency side of the cycle and colliding type. |
+| `golden/recursive-groups-lab/{groups/RecursiveGroupsLab.fs,manifest.json,symbols.jsonl}` under Generator.Tests | Existing Pipeline golden owner: compile and measure the recursive representation and export placement. |
+
+No new resolver, identity authority or parsing of widened F# output was introduced. Resolve,
+Semantics, Contract, Pipeline and the existing namespace renderer retain their respective facts.
+
+**Context sources:** schema was fresh/latest with matching snapshot/current ID
+`0cbe94d87d33e4cd8d2f3f0437fa2b9860db04e798b93d6efa5d56ca09edcb97`.
+Xantham, CloudEdge and Myriad are absent, so bounded direct reads and uncommitted diffs were
+permitted; indexed find→pgq→sources did not apply. LAN workers assisted bounded first-pass
+reading. F# semantic MCP tools were unavailable; compiler and runtime gates supply the evidence.
+One independent reviewer checked this composed increment and its bound receipts.
+
+**Residuals:** OP-1 unsupported calls/shapes fail with `projection/unsupported-operation` or
+`projection/unsupported-shape`; missing facts use `projection/incomplete-operation` or
+`projection/incomplete-shape`. Support is bounded, not a general TS-to-F# type equivalence.
+OP-2 unselected SDK operations/results keep their raw mappings; this delivers the four
+PiHarness/PiSession submit/prompt input contracts and typed factory context. The closed owner
+ships reached PiAI/PiDurable/Chord types, not standalone PiAI/PiDurable value-export libraries.
+OP-3 property values/presence are modeled, without claiming `exactOptionalPropertyTypes` write
+semantics. OP-4 overlapping values cannot recover their declaration of origin; sharing requires
+explicit `createShared` coordination. Earlier CORETS-1 audit residual remains separate.
+
+**Owner decisions needed:** none. **Review:** no remaining Xantham findings; the independent reviewer verified all 12 mutation bindings. CloudEdge final integration receipts are reviewed in its handoff.
+Retire this handover on merge after retaining the architecture and footgun records.
+
+---
+
+## Accepted predecessor: early Myriad union projections, 2026-10-09
 
 **Scope:** opt-in companion generation between Resolve and Shape, preserving selected union
 membership and distinct null/undefined values with normal F# DUs, codecs and active patterns.

@@ -224,3 +224,25 @@ Myriad adapter's `Decoded|Invalid` matches through a strict raw-value decoder in
 It does not pattern-match an erased union or recover the originating alias from shared strings.
 An optional-property presence test requires separate object facts; decoding its read value
 cannot distinguish absence from an explicitly present `undefined` property.
+
+**Typed operations must authenticate their receiver after placement.** Before-Shape method
+facts carry their receiver token into `ProjectionCompanion.forOperation`. Pipeline checks its
+final qualified type after catalog application. A caller-supplied F# name plus an `unbox` is
+insufficient: another receiver can have the same method name with an incompatible argument.
+
+**Array identity comes from the checker.** Global augmentation can classify the built-in
+`Array<T>` under `@types/node`. Use `Session.isArrayType`, retaining the non-tuple/one-argument
+guards. A local interface named `Array<T>` is not evidence of JavaScript array representation.
+
+**Operation property keys come from typed declarations.** Checker symbol names escape leading
+double underscores (`__proto__` becomes `___proto__`). Record projections recover the declaration
+spelling and use allocated F# field names; computed/symbol keys reject. Emit own data properties
+with `Object.defineProperty`: ordinary assignment to `__proto__` invokes the prototype setter.
+Optional record and selected-field inputs have an outer option for omission, separate from
+present undefined. Selected-field projections must reject required selected fields and required
+siblings. The contract describes resolved values, not `exactOptionalPropertyTypes` writes.
+
+**Shared operation input contracts require an explicit owner.** `Operations.createShared`
+aliases the first selection's emitted types only after exact resolved-shape agreement.
+Each method still authenticates its own occurrence and source closure. Automatic value-set
+deduplication would silently merge independent contracts.

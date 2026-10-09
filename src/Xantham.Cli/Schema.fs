@@ -35,6 +35,11 @@ let private configKeys =
           `FSharp.CloudEdge` reads `FSharp.CloudEdge.Agents`. Both sides of a reference configure the \
           same namespace.")
 
+            "RecursiveGroups",
+            ("recursiveGroups",
+             "Write the entry and shipped dependency modules in one recursive namespace file. \
+          Requires namespace and immediate child module names. Defaults to false.")
+
             "Groups",
             ("groups",
              "What the generator does with each package boundary its declarations reach (decision O7), keyed \

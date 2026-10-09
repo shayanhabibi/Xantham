@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "package": "recursive-groups-lab",
+  "module": "RecursiveGroupsLab.Entry",
+  "counts": {
+    "exact": 2,
+    "ergonomic": 3,
+    "widened": 0,
+    "escape": 1
+  },
+  "passes": [
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 3,
+      "ergonomic": 3
+    },
+    {
+      "pass": "",
+      "total": 1,
+      "escape": 1
+    },
+    {
+      "pass": "render-source",
+      "total": 1,
+      "exact": 1
+    }
+  ]
+}

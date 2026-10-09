@@ -240,15 +240,19 @@ let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel)
             | None -> Map.tryFind name origins |> Option.defaultValue Unclassified
 
     let sourceGroupOf decl =
-        let origin =
-            match Render.declName decl with
-            | name when Map.containsKey name origins -> originOf name
-            | name ->
-                secondaryAliasOrder decl
-                |> Option.map (fun order -> Grouping.classifyFile ctx.PackageDir (order.File / uom<node>))
-                |> Option.defaultWith (fun () -> name |> originOf)
+        match decl with
+        | FsExports { Owner = EntryModule }
+        | FsExports { Owner = AmbientModule _ } -> EntryPackage
+        | _ ->
+            let origin =
+                match Render.declName decl with
+                | name when Map.containsKey name origins -> originOf name
+                | name ->
+                    secondaryAliasOrder decl
+                    |> Option.map (fun order -> Grouping.classifyFile ctx.PackageDir (order.File / uom<node>))
+                    |> Option.defaultWith (fun () -> name |> originOf)
 
-        emittingGroup ctx origin
+            emittingGroup ctx origin
 
     let compilerAliases =
         shape.Decls
@@ -326,6 +330,22 @@ let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel)
     let placed = shape.Decls |> List.groupBy placementOf |> Map.ofList
     let entrySpecifiers = moduleSpecifiers shape
 
+    let recursiveNamespace (moduleName: string) =
+        if ctx.Config.RecursiveGroups then
+            match ctx.Config.Namespace with
+            | Some ns when
+                moduleName.LastIndexOf '.' > 0
+                && moduleName.Substring(0, moduleName.LastIndexOf '.') = ns
+                ->
+                Some ns
+            | Some ns ->
+                invalidArg
+                    "config"
+                    $"xantham.json: recursiveGroups requires module '{moduleName}' to be an immediate child of namespace '{ns}'"
+            | None -> invalidArg "config" "xantham.json: recursiveGroups requires namespace"
+        else
+            None
+
     let moduleOf (origin: PackageId, family: string) : Render.GroupModule =
         let decls = placed |> Map.tryFind (origin, family) |> Option.defaultValue []
 
@@ -335,7 +355,7 @@ let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel)
                 Group = ctx.PackageName
                 IsEntry = true
                 Module = moduleName ctx
-                Namespace = None
+                Namespace = recursiveNamespace (moduleName ctx)
                 RuntimePackage = GeneratorConfig.runtimePackage ctx.Config ctx.PackageName
                 CompilerLib = None
                 ModuleSpecifiers = entrySpecifiers
@@ -350,7 +370,9 @@ let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel)
                      else
                          compilerLibLayout.EsQualifiedModule),
                     None
-                | origin -> Naming.groupModule ctx.Config ctx.PackageName origin, None
+                | origin ->
+                    let name = Naming.groupModule ctx.Config ctx.PackageName origin
+                    name, recursiveNamespace name
 
             {
                 Group = key
@@ -547,6 +569,20 @@ let private generateCore
 
         let qualified =
             Map.fold (fun names key value -> Map.add key value names) foreign referencedNames
+
+        for _, plan in projectionPlans do
+            match Customization.ContractData.projectionReceiver plan with
+            | None -> ()
+            | Some(receiver, expected) ->
+                let actual =
+                    Shape.Spec.typeRef ctx shape None "projection receiver" receiver
+                    |> fst
+                    |> Render.qualifyType qualified
+                    |> Render.printType
+
+                if actual <> expected then
+                    invalidOp
+                        $"projection/receiver-mismatch: the selected declaration is emitted as {actual}, not {expected}"
 
         let companions =
             semanticSnapshot

@@ -14,6 +14,10 @@
       "type": "string",
       "description": "The F# namespace a package family is written under. The entry package takes it, and each group named under `groups` takes `<namespace>.<Leaf>`, so `@cloudedge/agents` under `FSharp.CloudEdge` reads `FSharp.CloudEdge.Agents`. Both sides of a reference configure the same namespace."
     },
+    "recursiveGroups": {
+      "type": "boolean",
+      "description": "Write the entry and shipped dependency modules in one recursive namespace file. Requires namespace and immediate child module names. Defaults to false."
+    },
     "groups": {
       "type": "object",
       "additionalProperties": {

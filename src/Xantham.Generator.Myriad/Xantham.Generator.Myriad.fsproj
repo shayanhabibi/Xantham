@@ -14,6 +14,7 @@
     <ItemGroup>
         <None Include="README.md" Pack="true" PackagePath="\" />
         <Compile Include="LiteralUnions.fs" />
+        <Compile Include="Operations.fs" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="../Xantham.Generator/Xantham.Generator.fsproj" />

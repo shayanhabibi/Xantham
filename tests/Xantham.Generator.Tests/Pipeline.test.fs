@@ -234,12 +234,14 @@ let private matchesGoldens (fixture: string) (config: GeneratorConfig) (package:
     let goldenDir = Path.Combine(__SOURCE_DIRECTORY__, "golden", fixture)
     let rendered = Async.RunSynchronously(Pipeline.generate config package)
 
-    // A shipped group is written under `groups/` (O7); what every run owes is the entry
-    // package's module and the manifest's two halves.
+    let ordinaryFiles =
+        if config.RecursiveGroups then [ "manifest.json"; "symbols.jsonl" ]
+        else [ $"{rendered.ModuleName}.fs"; "manifest.json"; "symbols.jsonl" ]
+
     Expect.equal
         (rendered.Files |> List.map fst |> List.filter (fun name -> not (name.StartsWith "groups/")))
-        [ $"{rendered.ModuleName}.fs"; "manifest.json"; "symbols.jsonl" ]
-        "the entry module, the aggregate manifest and the per-symbol lines"
+        ordinaryFiles
+        "the configured entry layout, the aggregate manifest and the per-symbol lines"
 
     if updateGoldens then
         Directory.CreateDirectory goldenDir |> ignore
@@ -5264,3 +5266,45 @@ let catalogSourceProjectionTests =
 let projectionLab =
     testList "projection-lab"
         (fixtureTests "projection-lab" (handFixture "projection-lab") GeneratorConfig.Default (fun _ -> []))
+
+[<Tests>]
+let recursiveGroupTests =
+    let package = handInstalledFixture "recursive-groups-lab"
+    let config = handConfig package
+    let placement config =
+        Pipeline.groupModules { Build.context with Config = config } (Build.shapeModel [])
+
+    testList "recursive groups" [
+        testCase "configuration opts in explicitly" <| fun _ ->
+            Expect.isFalse GeneratorConfig.Default.RecursiveGroups "ordinary runs retain their existing layout"
+            Expect.isTrue config.RecursiveGroups "the JSON key reaches the placement configuration"
+            Expect.equal (placement GeneratorConfig.Default |> List.head).Namespace None "ordinary entry stays a module"
+
+        testCase "missing namespace is rejected" <| fun _ ->
+            Expect.throwsT<System.ArgumentException>
+                (fun () -> placement { config with Namespace = None } |> ignore)
+                "the namespace is explicit"
+
+        testCase "entry must be an immediate child of the namespace" <| fun _ ->
+            for name in [ "Other.Entry"; "RecursiveGroupsLab.Nested.Entry"; "RecursiveGroupsLab" ] do
+                Expect.throwsT<System.ArgumentException>
+                    (fun () -> placement { config with ModuleName = Some name } |> ignore)
+                    "each module occupies one child namespace level"
+
+        yield! fixtureTests "recursive-groups-lab" package config (fun package -> [
+            testCase "cyclic packages share a recursive namespace source" <| fun _ ->
+                let rendered = Async.RunSynchronously(Pipeline.generate config package)
+                let files = rendered.Files |> Map.ofList
+                let source = files |> Map.find "groups/RecursiveGroupsLab.fs"
+                Expect.stringContains source "namespace rec RecursiveGroupsLab" "both directions resolve within the file"
+                Expect.stringContains source "module Entry =" "entry retains its qualified module"
+                Expect.stringContains source "module RecursivePeerLab =" "dependency retains its qualified module"
+                Expect.stringContains source "RecursiveGroupsLab.Entry.Root" "dependency points back to the entry"
+                Expect.stringContains source "RecursiveGroupsLab.RecursivePeerLab.Peer" "entry points to the dependency"
+                Expect.equal (files |> Map.keys |> Seq.filter _.EndsWith(".fs") |> Seq.length) 1 "one source contains the cycle"
+                let entry = source.Split("module RecursivePeerLab =")[0]
+                Expect.stringContains entry "module Collision =" "public subpath keeps its entry owner despite a dependency type sharing the parent name"
+                Expect.stringContains entry "static member status" "entry owns the subpath value exports"
+                Expect.stringContains entry "Import(\"status\", \"recursive-groups-lab/collision/api\")" "public import path is preserved"
+        ])
+    ]

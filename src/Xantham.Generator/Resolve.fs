@@ -397,6 +397,138 @@ let internal declarationHasTypeParameters (ctx: Context) (symbol: SymbolResponse
                 | None -> return Ok(declarations |> Array.exists ((=) (Ok true)))
     }
 
+let internal declarationMemberName (ctx: Context) (symbol: SymbolResponse) =
+    async {
+        let declarations = symbol.Declarations |> ValueOption.defaultValue [||]
+
+        let! names =
+            declarations
+            |> Array.map (fun declaration ->
+                async {
+                    match NodeHandle.parse declaration with
+                    | ValueNone -> return None
+                    | ValueSome handle ->
+                        let! source = sourceFile ctx handle.Path
+
+                        match source with
+                        | ValueNone -> return None
+                        | ValueSome source ->
+                            let node = Node.ofIndex<AnyNode> source handle.Index
+
+                            let name =
+                                match node.Kind with
+                                | SyntaxKind.PropertySignature ->
+                                    Node.retag<AnyNode, PropertySignatureDeclaration> node
+                                    |> PropertySignatureDeclaration.name
+                                | SyntaxKind.PropertyDeclaration ->
+                                    Node.retag<AnyNode, PropertyDeclaration> node |> PropertyDeclaration.name
+                                | SyntaxKind.MethodSignature ->
+                                    Node.retag<AnyNode, MethodSignatureDeclaration> node
+                                    |> MethodSignatureDeclaration.name
+                                | SyntaxKind.MethodDeclaration ->
+                                    Node.retag<AnyNode, MethodDeclaration> node |> MethodDeclaration.name
+                                | _ -> ValueNone
+
+                            return
+                                name
+                                |> ValueOption.bind (fun name ->
+                                    match name.Kind with
+                                    | SyntaxKind.Identifier
+                                    | SyntaxKind.StringLiteral -> name.Text
+                                    | SyntaxKind.NumericLiteral when name.Text = ValueSome symbol.Name -> name.Text
+                                    | _ -> ValueNone)
+                                |> ValueOption.toOption
+                })
+            |> Async.Sequential
+
+        return
+            match names |> Array.distinct with
+            | [| Some name |] -> Some name
+            | _ -> None
+    }
+
+/// Declaration sources referenced by selected type annotations, including imported aliases.
+let internal declarationTypeClosure (ctx: Context) (roots: string<declHandle> list) =
+    async {
+        let mutable pending = roots
+        let mutable visited = Set.empty
+        let mutable generic = false
+        let mutable failure = None
+
+        while not pending.IsEmpty && failure.IsNone do
+            let declaration = pending.Head
+            pending <- pending.Tail
+
+            if not (Set.contains declaration visited) then
+                visited <- Set.add declaration visited
+
+                if visited.Count > 512 then
+                    failure <- Some "Selected declaration source closure exceeds 512 declarations"
+                else
+                    match NodeHandle.parse (declaration / uom<_>) with
+                    | ValueNone -> failure <- Some "A selected type has a malformed declaration handle"
+                    | ValueSome handle ->
+                        let! source = attempt (sourceFile ctx handle.Path)
+
+                        match source with
+                        | Error reason -> failure <- Some reason
+                        | Ok ValueNone -> failure <- Some "A selected declaration source is unavailable"
+                        | Ok(ValueSome source) ->
+                            let node = Node.ofIndex<AnyNode> source handle.Index
+
+                            if node.Kind = SyntaxKind.TypeAliasDeclaration then
+                                generic <-
+                                    generic
+                                    || (Node.retag<AnyNode, TypeAliasDeclaration> node
+                                        |> TypeAliasDeclaration.typeParameters
+                                        |> Seq.isEmpty
+                                        |> not)
+
+                            for child in Seq.append [ node ] (Node.descendants node) do
+                                if child.Kind = SyntaxKind.ImportType || child.Kind = SyntaxKind.TypeQuery then
+                                    failure <-
+                                        Some
+                                            "Import types and type queries are outside the authenticated source closure contract"
+                                elif child.Kind = SyntaxKind.TypeReference then
+                                    match TypeReferenceNode.typeName (Node.retag<AnyNode, TypeReferenceNode> child) with
+                                    | ValueNone -> failure <- Some "A selected type reference has no name"
+                                    | ValueSome name ->
+                                        let location =
+                                            NodeHandle.format
+                                                {
+                                                    Index = Node.index name
+                                                    Kind = name.Kind
+                                                    Path = handle.Path
+                                                }
+
+                                        let! symbol = ctx.Session.getSymbolAtLocation location
+
+                                        match symbol with
+                                        | ValueNone -> failure <- Some "A selected type reference has no symbol"
+                                        | ValueSome symbol ->
+                                            let! symbol =
+                                                if symbol.Flags.HasFlag SymbolFlags.Alias then
+                                                    ctx.Session.getAliasedSymbol symbol.Id
+                                                else
+                                                    async.Return symbol
+
+                                            if Grouping.classify ctx.PackageDir (ValueSome symbol) <> CompilerLib then
+                                                let declarations =
+                                                    symbol.DeclarationHandles
+                                                    |> ValueOption.defaultValue [||]
+                                                    |> Array.toList
+
+                                                if declarations.IsEmpty then
+                                                    failure <- Some "A selected type reference has no declaration"
+                                                else
+                                                    pending <- pending @ declarations
+
+        return
+            match failure with
+            | Some reason -> Error reason
+            | None -> Ok(Set.toList visited, generic)
+    }
+
 /// The instantiated interface contracts explicitly declared by a class's `implements` clauses.
 let private implementedTypes (ctx: Context) (symbol: SymbolResponse voption) : Async<TypeResponse list> =
     async {

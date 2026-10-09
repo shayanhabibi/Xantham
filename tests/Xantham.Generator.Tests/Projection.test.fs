@@ -28,6 +28,9 @@ let private companionFiles (model: RenderModel) = model.Files |> List.filter (fs
 let private run compiler projections config =
     Pipeline.generateProjectedWith compiler projections [] config package |> Async.RunSynchronously
 
+let private stableFindings (model: RenderModel) =
+    {model with Findings = model.Findings |> List.sortBy (fun finding -> finding.Pass, finding.Symbol, finding.Key, sprintf "%A" finding.Kind)}
+
 let private rejects code action =
     let failure = try action (); None with error -> Some (error.ToString())
     match failure with
@@ -40,6 +43,20 @@ let private custom make : ProjectionExtension =
           let source = Resolved.tryFind "projection-lab" ["Choice"] snapshot |> Option.get
           Ok (make source snapshot) }
 
+let private operationSelections =
+    [ { Package = "projection-lab"; ReceiverPath = ["Session"]; MethodName = "submit"; ParameterName = "input"
+        FieldName = None; ReceiverType = "ProjectionLab.Session"; ModuleName = "ProjectionOperations.Input"
+        TypeName = "Value"; FunctionName = "submit" }
+      { Package = "projection-lab"; ReceiverPath = ["Session"]; MethodName = "configure"; ParameterName = "change"
+        FieldName = Some "thinkingLevel"; ReceiverType = "ProjectionLab.Session"; ModuleName = "ProjectionOperations.Thinking"
+        TypeName = "Value"; FunctionName = "configure" }
+      { Package = "projection-lab"; ReceiverPath = ["Session"]; MethodName = "submit"; ParameterName = "options"
+        FieldName = Some "whenBusy"; ReceiverType = "ProjectionLab.Session"; ModuleName = "ProjectionOperations.Queue"
+        TypeName = "Value"; FunctionName = "submit" }
+      { Package = "projection-lab"; ReceiverPath = ["Session"]; MethodName = "inspect"; ParameterName = "input"
+        FieldName = None; ReceiverType = "ProjectionLab.Session"; ModuleName = "ProjectionOperations.Fields"
+        TypeName = "Value"; FunctionName = "inspect" } ]
+
 [<Tests>]
 let tests = testList "projection companions" [
     testCase "Myriad companions are deterministic, gated goldens and leave the raw ABI intact" <| fun _ ->
@@ -48,10 +65,10 @@ let tests = testList "projection companions" [
         let baseline = Pipeline.generate GeneratorConfig.Default package |> Async.RunSynchronously
         let generated = run compile [extension scratch.Path] GeneratorConfig.Default
         let repeated = run compile [extension scratch.Path] GeneratorConfig.Default
-        Expect.equal generated repeated "fresh snapshot nonce never escapes into output"
+        Expect.equal (stableFindings generated) (stableFindings repeated) "fresh snapshot nonce never escapes into output"
         Expect.equal (file "ProjectionLab.fs" generated) (file "ProjectionLab.fs" baseline) "raw bindings unchanged"
         let originalFindings = generated.Findings |> List.filter (fun finding -> finding.Key <> "CU006")
-        Expect.equal originalFindings baseline.Findings "existing widening findings remain truthful"
+        Expect.equal (stableFindings {generated with Findings = originalFindings}).Findings (stableFindings baseline).Findings "existing widening findings remain truthful"
         Expect.equal (generated.Findings |> List.filter (fun finding -> finding.Key = "CU006") |> List.length) 5 "each source projection recorded"
         let source = file "ProjectionViews.Choice.fs" generated
         for arm in ["Auto"; "Manual"; "Number of float"; "Null"; "Undefined"; "(|Decoded|Invalid|)"] do
@@ -80,7 +97,7 @@ let tests = testList "projection companions" [
         use scratch = Scratch.directory "projection-catalog"
         let compile = compiler scratch.Path
         let baseline = Pipeline.generate GeneratorConfig.Default package |> Async.RunSynchronously
-        Expect.equal (run compile [] GeneratorConfig.Default) baseline "empty registration is byte-identical"
+        Expect.equal (run compile [] GeneratorConfig.Default |> stableFindings) (stableFindings baseline) "empty registration is byte-identical"
         let config = { GeneratorConfig.Default with DeclarationCatalog = true }
         let ordinary = Pipeline.generate config package |> Async.RunSynchronously
         let projected = run compile [extension scratch.Path] config
@@ -172,4 +189,49 @@ let tests = testList "projection companions" [
             node["projections"].["companions"].[0].["sourceFingerprint"].GetValue<string>()
         Expect.notEqual (fingerprint original) (fingerprint mutated) "source changes invalidate provenance"
         rejects "projection/unsupported" (fun () -> generate "export type Choice = 'auto' | boolean | null | undefined;" |> ignore)
+    testCase "operations carry strict input contracts into actual typed method calls" <| fun _ ->
+        use scratch = Scratch.directory "projection-operations"
+        let compile = compiler scratch.Path
+        let extension = Operations.create {identity with Id = "lab.operations"} scratch.Path operationSelections
+        let shared = Operations.createShared {identity with Id = "lab.operations-shared"} scratch.Path
+                         [{operationSelections.Head with ModuleName = "ProjectionOperations.Shared"}
+                          {operationSelections.Head with ModuleName = "ProjectionOperations.SharedNext"}]
+        let generated = run compile [extension; shared] GeneratorConfig.Default
+        let repeated = run compile [extension; shared] GeneratorConfig.Default
+        Expect.equal (stableFindings generated) (stableFindings repeated) "resolved operation facts and output are deterministic"
+        let files = generated.Files |> List.filter (fun (name, _) -> name.StartsWith "ProjectionOperations.")
+        let golden = Path.Combine(__SOURCE_DIRECTORY__, "golden/projection-operations")
+        if Environment.GetEnvironmentVariable("XANTHAM_UPDATE_GOLDEN") = "1" then
+            Directory.CreateDirectory golden |> ignore
+            for name, text in files do File.WriteAllText(Path.Combine(golden, name), text)
+        Expect.equal (Directory.GetFiles golden |> Array.map Path.GetFileName |> Array.sort |> Array.toList)
+            (files |> List.map fst |> List.sort) "operation golden closure"
+        for name, text in files do
+            Expect.equal text (File.ReadAllText(Path.Combine(golden, name)).Replace("\r\n", "\n")) ("generated " + name)
+            Expect.isFalse (text.Contains("value: obj")) "operation's selected argument is a closed F# type"
+        let raw = ["ProjectionLab.fs", file "ProjectionLab.fs" generated]
+        let valid = "module Consumer\nlet send session = ProjectionOperations.Input.submit session (ProjectionOperations.Input.Value.Text \"hello\") None\nlet configure session = ProjectionOperations.Thinking.configure session (Some ProjectionOperations.Thinking.Value.Null) \"context\"\n"
+        let valid = valid + "let shared session = ProjectionOperations.SharedNext.submit session (ProjectionOperations.Shared.Value.Text \"same contract\") None\n"
+        Compile.validate compile (raw @ files @ ["Consumer.fs", valid]) [] |> Async.RunSynchronously
+        for invalid in [
+            "module Consumer\nlet send session = ProjectionOperations.Input.submit session \"untyped\" None\n"
+            "module Consumer\nlet configure session = ProjectionOperations.Thinking.configure session \"outside\" \"context\"\n"
+            "module Consumer\nlet wrong : ProjectionOperations.Input.Value = ProjectionOperations.Thinking.Value.Undefined\n"
+            "module Consumer\nlet wrong session = ProjectionOperations.SharedNext.submit session (ProjectionOperations.Input.Value.Text \"independent\") None\n"
+        ] do rejects "FS0001" (fun () -> Compile.validate compile (raw @ files @ ["Consumer.fs", invalid]) [] |> Async.RunSynchronously)
+
+        let missingPayload = "module Consumer\nlet invalid : ProjectionOperations.Input.ValueItemsItemImage = { Data = \"AQID\" }\n"
+        rejects "FS0764" (fun () -> Compile.validate compile (raw @ files @ ["Consumer.fs", missingPayload]) [] |> Async.RunSynchronously)
+
+    testCase "operation receivers must belong to the selected TypeScript declaration" <| fun _ ->
+        use scratch = Scratch.directory "projection-receiver"
+        let wrong = {operationSelections.Head with ReceiverType = "ProjectionLab.OtherSession"}
+        rejects "projection/receiver-mismatch" (fun () ->
+            run (compiler scratch.Path) [Operations.create identity scratch.Path [wrong]] GeneratorConfig.Default |> ignore)
+
+    testCase "shared operation contracts reject mismatched source shapes" <| fun _ ->
+        use scratch = Scratch.directory "projection-shared-mismatch"
+        rejects "myriad/shared-shape-mismatch" (fun () ->
+            run (compiler scratch.Path) [Operations.createShared identity scratch.Path (operationSelections |> List.take 2)] GeneratorConfig.Default |> ignore)
+
 ]

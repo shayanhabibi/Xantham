@@ -163,3 +163,201 @@ let tests =
             let requiresExisting (_: GeneratorExtension) = ()
             requiresExisting existing
     ]
+
+let private operationPackage (path: string) (source: string) =
+    File.WriteAllText(Path.Combine(path, "package.json"), "{\"name\":\"projection-operations\",\"types\":\"index.d.ts\"}")
+    File.WriteAllText(Path.Combine(path, "index.d.ts"), source)
+
+let private inputModel = """
+export interface TextContent { type: 'text'; text: string; textSignature?: string; '__proto__'?: string; }
+export interface ImageContent { type: 'image'; data: string; mimeType: string; }
+export type UserInput = string | (TextContent | ImageContent)[];
+export interface Options { whenBusy?: 'followUp' | 'steer'; session?: string; }
+export interface Harness {
+  submit(input: UserInput, options?: Options): Promise<void>;
+  configure(change: { level?: 'low' | 'high' | null; other?: string }, context: string): void;
+  equal(input: UserInput): void;
+}
+"""
+
+let private operationSource name parameter model =
+    Resolved.tryFindParameter "projection-operations" ["Harness"] name parameter model |> Option.defaultWith (fun () -> failtest "missing operation")
+
+let private operationPlan source model =
+    ProjectionCompanion.forOperation source "Raw.Harness" "Operation.fs" ["Projected.Value"] "module Projected" model
+
+[<Tests>]
+let operationTests =
+    testList "projection resolved operations" [
+        testCase "input arrays preserve tagged records and optional properties before Shape" <| fun _ ->
+            use scratch = Scratch.directory "projection-operation-shape"
+            operationPackage scratch.Path inputModel
+            let server, ctx, resolved = resolve scratch.Path
+            use _ = server
+            let model = snapshot ctx resolved
+            let source = operationSource "submit" "input" model
+            let shape = Resolved.shape source model |> Result.defaultWith (fun errors -> failtestf "%A" errors)
+            let records =
+                match shape with
+                | ResolvedValueShape.Union arms ->
+                    Expect.contains arms ResolvedValueShape.String "plain text remains accepted"
+                    arms |> List.pick (function ResolvedValueShape.Array(ResolvedValueShape.Union records) -> Some records | _ -> None)
+                | _ -> failtest "expected text or content array"
+            Expect.equal records.Length 2 "text and image remain distinct arms"
+            for tag, required in ["text", ["text"]; "image", ["data"; "mimeType"]] do
+                let fields = records |> List.pick (function ResolvedValueShape.Record fields when fields |> List.exists (fun field -> field.Name = "type" && field.Shape = ResolvedValueShape.StringLiteral tag) -> Some fields | _ -> None)
+                for name in required do
+                    Expect.contains fields {Name = name; Optional = false; Shape = ResolvedValueShape.String} "required payload has an exact primitive shape"
+                if tag = "text" then
+                    Expect.isTrue (fields |> List.exists (fun field -> field.Name = "__proto__")) "declared spelling replaces the compiler's escaped symbol name"
+                    Expect.isFalse (fields |> List.exists (fun field -> field.Name = "___proto__")) "compiler escape is not a JavaScript property key"
+                    let signature = fields |> List.find (fun field -> field.Name = "textSignature")
+                    Expect.isTrue signature.Optional "property presence survives"
+                    match signature.Shape with
+                    | ResolvedValueShape.Union arms -> Expect.contains arms ResolvedValueShape.Undefined "present undefined remains distinct from absence"
+                    | _ -> failtest "optional property must retain undefined"
+            let operation = Resolved.operation source model |> Result.defaultWith (fun errors -> failtestf "%A" errors)
+            Expect.equal operation.ParameterNames ["input"; "options"] "call argument order"
+            Expect.equal operation.ParameterOptional [false; true] "optional argument can be forwarded as an option"
+            Expect.equal operation.FieldName None "whole parameter projection"
+            Expect.isSome (ContractData.projectionReceiver (operationPlan source model)) "late binding receives a sealed receiver assertion"
+            Expect.throws (fun () -> create source model |> ignore) "operation source cannot bypass receiver authentication"
+
+        testCase "field projection supports optional object parameters and tri-state values" <| fun _ ->
+            use scratch = Scratch.directory "projection-operation-fields"
+            operationPackage scratch.Path inputModel
+            let server, ctx, resolved = resolve scratch.Path
+            use _ = server
+            let model = snapshot ctx resolved
+            for methodName, parameter, field in ["configure", "change", "level"; "submit", "options", "whenBusy"] do
+                let source = Resolved.tryFindParameterField "projection-operations" ["Harness"] methodName parameter field model |> Option.get
+                let shape = Resolved.shape source model |> Result.defaultWith (fun errors -> failtestf "%A" errors)
+                match shape with
+                | ResolvedValueShape.Union arms ->
+                    Expect.contains arms ResolvedValueShape.Undefined "optional property can explicitly carry undefined"
+                    if field = "level" then Expect.contains arms ResolvedValueShape.Null "null is independent of undefined"
+                | _ -> failtest "expected finite union"
+                let operation = Resolved.operation source model |> Result.defaultWith (fun errors -> failtestf "%A" errors)
+                Expect.equal operation.FieldName (Some field) "field plan is explicit"
+                Expect.equal operation.ParameterIndex (if methodName = "submit" then 1 else 0) "selected parameter index"
+                operationPlan source model |> ignore
+
+        testCase "compiler array identity survives global augmentation but rejects a local namesake" <| fun _ ->
+            use scratch = Scratch.directory "projection-operation-arrays"
+            operationPackage scratch.Path """
+declare global { interface Array<T> { readonly projectionMarker?: string; } }
+export interface Array<T> { item: T; }
+export interface Harness {
+  mutable(input: string[]): void;
+  readonly(input: readonly string[]): void;
+  namesake(input: Array<string>): void;
+}
+"""
+            let server, ctx, resolved = resolve scratch.Path
+            use _ = server
+            let model = snapshot ctx resolved
+            for name in ["mutable"; "readonly"] do
+                let source = operationSource name "input" model
+                Expect.equal (Resolved.shape source model) (Ok(ResolvedValueShape.Array ResolvedValueShape.String)) "compiler array predicate governs the representation"
+                operationPlan source model |> ignore
+            let namesake = operationSource "namesake" "input" model
+            Expect.isError (Resolved.shape namesake model) "a generic interface named Array does not establish JavaScript array semantics"
+
+        testCase "operation selection refuses unsafe call and value shapes" <| fun _ ->
+            use scratch = Scratch.directory "projection-operation-negative"
+            operationPackage scratch.Path """
+export interface Recursive { next: Recursive; }
+export type Phantom<T> = 'same';
+declare const brand: unique symbol;
+declare const level: 'low' | 'high';
+export interface SymbolRecord { [brand]: 'x'; text: string; }
+export interface Harness {
+  required(change: { level?: 'low'; required: string }): void;
+  selectedRequired(change: { level: 'low' }): void;
+  escapedField(change: { '__proto__'?: 'low' }): void;
+  '__proto__'(input: string): void;
+  overloaded(input: string): void; overloaded(input: number): void;
+  generic<T>(input: T): void;
+  rest(...input: string[]): void;
+  recursive(input: Recursive): void;
+  indexed(input: { [key: string]: string }): void;
+  callable(input: () => void): void;
+  phantom(input: Phantom<string>): void;
+  symbolic(input: SymbolRecord): void;
+  queried(input: typeof level): void;
+  imported(input: import('./values').Level): void;
+}
+"""
+            File.WriteAllText(Path.Combine(scratch.Path, "values.d.ts"), "export type Level = 'low' | 'high';")
+            let server, ctx, resolved = resolve scratch.Path
+            use _ = server
+            let model = snapshot ctx resolved
+            let required = Resolved.tryFindParameterField "projection-operations" ["Harness"] "required" "change" "level" model |> Option.get
+            Expect.isTrue (Resolved.shape required model |> hasCode "projection/unsupported-operation") "required siblings cannot be dropped"
+            let selectedRequired = Resolved.tryFindParameterField "projection-operations" ["Harness"] "selectedRequired" "change" "level" model |> Option.get
+            Expect.isTrue (Resolved.shape selectedRequired model |> hasCode "projection/unsupported-operation") "the wrapper cannot offer omission of a required selected field"
+            let escapedField = Resolved.tryFindParameterField "projection-operations" ["Harness"] "escapedField" "change" "___proto__" model |> Option.get
+            Expect.isTrue (Resolved.shape escapedField model |> hasCode "projection/unsupported-operation") "checker-escaped field names cannot authenticate the wrong JavaScript key"
+            let escapedMethod = operationSource "___proto__" "input" model
+            Expect.isTrue (Resolved.shape escapedMethod model |> hasCode "projection/unsupported-operation") "checker-escaped method names cannot authenticate the wrong JavaScript call"
+            for name in ["overloaded"; "generic"; "rest"; "recursive"; "indexed"; "callable"; "phantom"; "symbolic"; "queried"; "imported"] do
+                let source = operationSource name "input" model
+                Expect.isError (Resolved.shape source model) name
+                Expect.isError (Resolved.operation source model) "invalid values do not yield an operation plan"
+                Expect.throws (fun () -> operationPlan source model |> ignore) "invalid source cannot authenticate a companion"
+
+        testCase "equal parameter values keep occurrence identity and reject stale plans" <| fun _ ->
+            use scratch = Scratch.directory "projection-operation-identities"
+            operationPackage scratch.Path inputModel
+            let server, ctx, resolved = resolve scratch.Path
+            use _ = server
+            let model = snapshot ctx resolved
+            let first, second = operationSource "submit" "input" model, operationSource "equal" "input" model
+            Expect.equal (Resolved.shape first model) (Resolved.shape second model) "control uses the same value shape"
+            Expect.notEqual (Resolved.identity first model) (Resolved.identity second model) "method and parameter declarations authenticate occurrence"
+            let plan = operationPlan first model
+            let next = snapshot ctx resolved
+            Expect.isFalse (ContractData.projectionCompanionIsCurrent next plan) "cached operation plan is rejected"
+            Expect.isTrue (Resolved.shape first next |> hasCode "projection/stale-source") "foreign operation token diagnoses"
+            Expect.throws (fun () -> operationPlan first next |> ignore) "foreign operation token cannot authenticate a receiver"
+
+        testCase "missing operation constituents cannot narrow the accepted value set" <| fun _ ->
+            use scratch = Scratch.directory "projection-operation-incomplete"
+            operationPackage scratch.Path inputModel
+            let server, ctx, resolved = resolve scratch.Path
+            use _ = server
+            let exported = resolved.Harvest.Exports |> List.find (fun item -> item.ExportName = "Harness")
+            let receiver = resolved.Types[resolved.ExportTypes[exported.Symbol.SymbolId].Declared |> Option.get]
+            let method_ = receiver.Members |> List.find (fun member_ -> member_.Symbol.Name = "submit")
+            let signature = resolved.Types[method_.TypeId].CallSignatures |> List.exactlyOne
+            let input = signature.Parameters.Head.TypeId
+            let arm = resolved.Types[input].UnionMembers.Head
+            let controls =
+                [ { resolved with Types = Map.remove arm resolved.Types }
+                  { resolved with NotFollowed = Map.add arm "controlled unresolved operation constituent" resolved.NotFollowed }
+                  { resolved with Types = Map.add input { resolved.Types[input] with UnionMembers = [] } resolved.Types }
+                  { resolved with Types = Map.add input { resolved.Types[input] with UnionMembers = [input] } resolved.Types } ]
+            for control in controls do
+                let model = snapshot ctx control
+                let source = operationSource "submit" "input" model
+                Expect.isError (Resolved.shape source model) "incomplete values must not silently disappear"
+                Expect.isError (Resolved.operation source model) "incomplete values cannot produce call metadata"
+                Expect.throws (fun () -> operationPlan source model |> ignore) "no authenticated partial operation"
+
+        testCase "selected imported declaration content authenticates the operation fingerprint" <| fun _ ->
+            use scratch = Scratch.directory "projection-operation-import"
+            operationPackage scratch.Path "import type {Level} from './values'; export interface Harness { set(change: { level?: Level|null }): void; }"
+            let values = Path.Combine(scratch.Path, "values.d.ts")
+            File.WriteAllText(values, "export type Level = 'low' | 'high';")
+            let server, ctx, resolved = resolve scratch.Path
+            use _ = server
+            let selected snapshot = Resolved.tryFindParameterField "projection-operations" ["Harness"] "set" "change" "level" snapshot |> Option.get
+            let first = snapshot ctx resolved
+            let firstSource = selected first
+            let firstHash = fingerprint (operationPlan firstSource first)
+            File.AppendAllText(values, "\n// retained values, changed dependency source\n")
+            let next = snapshot ctx resolved
+            let nextSource = selected next
+            Expect.equal (Resolved.shape firstSource first) (Resolved.shape nextSource next) "control preserves value facts"
+            Expect.notEqual firstHash (fingerprint (operationPlan nextSource next)) "imported source content must affect operation provenance"
+    ]

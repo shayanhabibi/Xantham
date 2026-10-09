@@ -1210,6 +1210,16 @@ section above.
   assertion about a run performed elsewhere. A run configuring no namespace raises none and
   emits exactly what it emitted before.
 
+  *Recursive package output (2026-10-09).* `recursiveGroups: true` places the entry and
+  shipped dependency modules in the renderer's existing `namespace rec` bundle at
+  `groups/<namespace>.fs`. Configuration requires an explicit namespace and immediate
+  child module names; compiler-library placement retains its own layout. The default
+  keeps separate module files. This is an O7 placement choice: catalog identities,
+  qualified names and source ownership retain their existing contracts. The
+  `recursive-groups-lab` gates a two-package declaration cycle through the normal golden
+  corpus and compile gate. Entry and ambient export blocks retain their declared entry
+  owner; a dependency type sharing a public subpath's name cannot redirect those exports.
+
   *Settled (wave five lane W): the compiler-lib group will not ship, and O7's default stays
   `widen`.* Shipping `TypeScript.Lib` needs no code beyond lane S's group emission, and it
   does not terminate for a realistic entry package: one `EventTarget` reference resolves
@@ -1966,3 +1976,30 @@ boolean, numeric-literal, broad-string, object and unresolved shapes fail closed
 `projection-lab`, early contract tests, compiler rejection controls and companion goldens
 exercise the seam. The existing Fable RunGate executes null/undefined matching, non-finite
 numbers, hostile strings, equal/overlapping sets and the explicit raw echo boundary.
+
+### Operation contracts (2026-10-09)
+
+The same early snapshot now resolves selected instance-method parameter occurrences lazily,
+while the compiler session is alive. `Resolved.shape` carries bounded primitive, array, record
+and union facts; `Resolved.operation` carries argument order, optionality and optional selected
+field metadata. Resolve owns typed declaration keys and defining-source closure reads.
+Semantics owns validation and occurrence fingerprints. Missing facts, unsupported source forms,
+generic/overloaded calls, recursive/indexed/callable payloads and symbolic keys fail closed.
+
+`ProjectionCompanion.forOperation` adds a sealed receiver assertion. Pipeline verifies that
+assertion against the final qualified Shape/catalog mapping before compilation. The Myriad
+operation emitter consumes the preserved shape to generate closed input DUs and records, private
+encoders and public typed methods. Remaining parameters and results are inferred from the real
+SDK method call. Raw binding types and catalog ownership remain intact.
+
+Optional record properties preserve omission separately from present undefined, with null as
+its own value case. Required literal fields are automatic discriminators. Actual declaration
+keys and safe own-property writes preserve hostile string keys. `Operations.createShared`
+provides explicit coordination: the first selection owns the input types and later operations
+alias them after exact shape equality. Per-operation source authentication remains independent.
+
+The operation matrix extends `projection-lab` and the existing contract, compile and Fable gates.
+The real integration target is CloudEdge's Agents 0.27/Pi 1.1/Chord 1.1 bundle. Its closed generated
+dependency graph uses opt-in `recursiveGroups` placement. The configured namespace must be
+the immediate parent of every ordinary shipped module; compiler-library modules retain their
+separate owner. The existing namespace renderer owns the single-file recursive representation.

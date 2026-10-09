@@ -212,6 +212,11 @@ type GeneratorConfig =
         named under `groups` takes `<namespace>.<Leaf>`, so `@cloudedge/agents` under `FSharp.CloudEdge` reads \
         `FSharp.CloudEdge.Agents`. Both sides of a reference configure the same namespace.")>]
         Namespace: string option
+        /// Writes the entry and shipped dependency modules in one recursive namespace file.
+        /// Each module must be an immediate child of the configured namespace.
+        [<Description("Write the entry and shipped dependency modules in one recursive namespace file. \
+        Requires namespace and immediate child module names. Defaults to false.")>]
+        RecursiveGroups: bool
         /// Disposition per group, keyed as `xantham.json` spells them: npm name for a
         /// dependency, `typescript/lib` for the compiler lib.
         [<Description("What the generator does with each package boundary its declarations reach (decision O7), keyed \
@@ -292,6 +297,7 @@ type GeneratorConfig =
         {
             ModuleName = None
             Namespace = None
+            RecursiveGroups = false
             Groups = Map.empty
             Lib = None
             Types = None
@@ -603,6 +609,7 @@ module GeneratorConfig =
             {
                 ModuleName = field "module"
                 Namespace = field "namespace"
+                RecursiveGroups = boolField "recursiveGroups" GeneratorConfig.Default.RecursiveGroups
                 Groups = groups
                 Lib = lib
                 Types = types

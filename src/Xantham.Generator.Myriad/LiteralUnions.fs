@@ -17,7 +17,7 @@ type LiteralUnionSelection =
         TypeName: string
     }
 
-module private Source =
+module internal Source =
     let validateNames moduleName typeName =
         let writable name =
             not (String.IsNullOrWhiteSpace name)
@@ -220,6 +220,51 @@ type LiteralUnionGenerator() =
         member _.Generate context =
             Output.Source(Source.read context.InputFilename)
 
+module internal ProjectionRunner =
+    let generate
+        receiverType
+        workspace
+        (plugin: IMyriadGenerator)
+        (input: string)
+        source
+        moduleName
+        exportedTypes
+        snapshot
+        =
+        try
+            let directory = Path.Combine(workspace, Guid.NewGuid().ToString("N"))
+            Directory.CreateDirectory directory |> ignore
+
+            try
+                let inputFile = Path.Combine(directory, "projection.json")
+                File.WriteAllText(inputFile, input)
+
+                let context =
+                    GeneratorContext.Create(None, (fun _ -> Seq.empty), inputFile, None, Dictionary<string, string>())
+
+                match plugin.Generate context with
+                | Output.Source text ->
+                    match receiverType with
+                    | None -> Ok(ProjectionCompanion.create source (moduleName + ".fs") exportedTypes text snapshot)
+                    | Some receiver ->
+                        Ok(
+                            ProjectionCompanion.forOperation
+                                source
+                                receiver
+                                (moduleName + ".fs")
+                                exportedTypes
+                                text
+                                snapshot
+                        )
+                | Output.Ast _ -> invalidOp "The projection generator must return source text"
+            finally
+                Directory.Delete(directory, true)
+        with error ->
+            Error
+                [
+                    Diagnostic.create "myriad/generation-failed" error.Message (Some(Resolved.identity source snapshot))
+                ]
+
 module LiteralUnions =
     /// Selects declarations before Shape and invokes Myriad in a caller-owned workspace.
     let create (identity: ExtensionIdentity) workspace (selections: LiteralUnionSelection list) : ProjectionExtension =
@@ -270,50 +315,15 @@ module LiteralUnions =
                             match Resolved.union source snapshot with
                             | Error diagnostics -> Error diagnostics
                             | Ok arms ->
-                                try
-                                    let directory = Path.Combine(workspace, Guid.NewGuid().ToString("N"))
-                                    Directory.CreateDirectory directory |> ignore
-
-                                    try
-                                        let inputFile = Path.Combine(directory, "union.json")
-
-                                        File.WriteAllText(
-                                            inputFile,
-                                            Source.json selection.ModuleName selection.TypeName arms
-                                        )
-
-                                        let context =
-                                            GeneratorContext.Create(
-                                                None,
-                                                (fun _ -> Seq.empty),
-                                                inputFile,
-                                                None,
-                                                Dictionary<string, string>()
-                                            )
-
-                                        let plugin = LiteralUnionGenerator() :> IMyriadGenerator
-
-                                        match plugin.Generate context with
-                                        | Output.Source text ->
-                                            Ok(
-                                                ProjectionCompanion.create
-                                                    source
-                                                    (selection.ModuleName + ".fs")
-                                                    [ selection.ModuleName + "." + selection.TypeName ]
-                                                    text
-                                                    snapshot
-                                            )
-                                        | Output.Ast _ -> invalidOp "LiteralUnionGenerator must return source text"
-                                    finally
-                                        Directory.Delete(directory, true)
-                                with error ->
-                                    Error
-                                        [
-                                            Diagnostic.create
-                                                "myriad/generation-failed"
-                                                error.Message
-                                                (Some(Resolved.identity source snapshot))
-                                        ]
+                                ProjectionRunner.generate
+                                    None
+                                    workspace
+                                    (LiteralUnionGenerator() :> IMyriadGenerator)
+                                    (Source.json selection.ModuleName selection.TypeName arms)
+                                    source
+                                    selection.ModuleName
+                                    [ selection.ModuleName + "." + selection.TypeName ]
+                                    snapshot
 
                     let results = List.map generate selections
 

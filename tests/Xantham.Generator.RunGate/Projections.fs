@@ -7,6 +7,12 @@ module EqualA = ProjectionViews.EqualA
 module EqualB = ProjectionViews.EqualB
 module OverlapC = ProjectionViews.OverlapC
 module Weird = ProjectionViews.Weird
+module Input = ProjectionOperations.Input
+module Thinking = ProjectionOperations.Thinking
+module Queue = ProjectionOperations.Queue
+module Fields = ProjectionOperations.Fields
+module Shared = ProjectionOperations.Shared
+module SharedNext = ProjectionOperations.SharedNext
 
 type private Branch =
     | Left of EqualA.Value
@@ -160,3 +166,135 @@ let run check =
     check
         "an Undefined string remains separate from undefined"
         (Weird.decode (box "Undefined") = Ok Weird.Value.Undefined2)
+
+    let session = ProjectionLab.Exports.session ()
+    let send input = Input.submit session input None |> box
+
+    check
+        "typed operation sends text through the real method"
+        (emitJsExpr (send (Input.Value.Text "hello")) "$0 === 'hello'")
+
+    let text: Input.ValueItemsItemText = { Text = "hello"; TextSignature = None }
+
+    let image: Input.ValueItemsItemImage =
+        {
+            Data = "AQID"
+            MimeType = "image/png"
+        }
+
+    let contents =
+        Input.Value.Items [| Input.ValueItemsItem.Text text; Input.ValueItemsItem.Image image |]
+
+    let returned = send contents
+
+    check
+        "typed operation writes exact text and image tags and payloads"
+        (emitJsExpr
+            returned
+            "$0.length === 2 && $0[0].type === 'text' && $0[0].text === 'hello' && $0[1].type === 'image' && $0[1].data === 'AQID' && $0[1].mimeType === 'image/png'")
+
+    check
+        "typed operation omits absent optional properties"
+        (emitJsExpr returned "!Object.hasOwn($0[0], 'textSignature')")
+
+    let presentUndefined =
+        { text with
+            TextSignature = Some Input.ValueItemsItemTextTextSignature.Undefined
+        }
+
+    let presentText =
+        { text with
+            TextSignature = Some(Input.ValueItemsItemTextTextSignature.Text "signature")
+        }
+
+    let present =
+        send (
+            Input.Value.Items
+                [|
+                    Input.ValueItemsItem.Text presentUndefined
+                    Input.ValueItemsItem.Text presentText
+                |]
+        )
+
+    check
+        "typed operation preserves present undefined independently of omission"
+        (emitJsExpr
+            present
+            "Object.hasOwn($0[0], 'textSignature') && $0[0].textSignature === undefined && $0[1].textSignature === 'signature'")
+
+    check
+        "typed operation preserves empty content arrays"
+        (emitJsExpr (send (Input.Value.Items [||])) "Array.isArray($0) && $0.length === 0")
+
+    let nullStringRejected =
+        try
+            send (Input.Value.Text null) |> ignore
+            false
+        with _ ->
+            true
+
+    check "typed operation rejects F# null strings before the SDK call" nullStringRejected
+
+    for value, expected in
+        [
+            Thinking.Value.Auto, "auto"
+            Thinking.Value.Manual, "manual"
+            Thinking.Value.Number 4., "number"
+            Thinking.Value.Null, "null"
+            Thinking.Value.Undefined, "undefined"
+        ] do
+        let returned = Thinking.configure session (Some value) "context" |> box
+        check "typed field operation retains the original value kind" (classify returned = expected)
+
+    check
+        "typed field operation permits omission"
+        (Thinking.configure session None "context" |> box |> classify = "undefined")
+
+    Queue.submit session (Some Queue.Value.Steer) (Fable.Core.U2.Case1 "queue")
+    |> ignore
+
+    check
+        "typed optional object argument forwards its selected field"
+        (emitJsExpr session "$0.options.whenBusy === 'steer'")
+
+    Queue.submit session None (Fable.Core.U2.Case1 "queue") |> ignore
+
+    check
+        "typed field operation can omit the selected property"
+        (emitJsExpr session "!Object.hasOwn($0.options, 'whenBusy')")
+
+    Queue.submit session (Some Queue.Value.Undefined) (Fable.Core.U2.Case1 "queue")
+    |> ignore
+
+    check
+        "typed field operation can include an explicitly undefined property"
+        (emitJsExpr session "Object.hasOwn($0.options, 'whenBusy') && $0.options.whenBusy === undefined")
+
+    let hostile: Fields.Value =
+        {
+            Proto = "safe"
+            Constructor = "ctor"
+            Optional = None
+        }
+
+    check
+        "typed records preserve __proto__ as an own data property"
+        (Fields.inspect session hostile = "__proto__,constructor;safe;ctor;true")
+
+    check
+        "typed records retain present undefined and their ordinary prototype"
+        (Fields.inspect
+            session
+            { hostile with
+                Optional = Some Fields.ValueOptional.Undefined
+            }
+            =
+            "__proto__,constructor,optional;safe;ctor;true")
+
+    let shared = Shared.Value.Text "shared"
+    let first = Shared.submit session shared None |> box
+    let second = SharedNext.submit session shared None |> box
+
+    check
+        "one declared input contract composes across generated operations"
+        (emitJsExpr (first, second) "$0 === 'shared' && $1 === $0")
