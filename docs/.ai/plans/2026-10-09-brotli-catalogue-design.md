@@ -1,6 +1,6 @@
 # Brotli declaration catalogue file transport
 
-Status: design direction approved on 2026-10-09; written spec awaiting review.
+Status: written spec approved for implementation planning on 2026-10-09.
 Implements the explicit-file Brotli transport slice of
 [issue #110](https://github.com/shayanhabibi/Xantham/issues/110).
 
