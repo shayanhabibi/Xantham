@@ -1959,6 +1959,20 @@ Map<string, HTMLElement>;` under the same shipping profile is still rejected for
 `AudioWorkletNodeOptions` API mismatch. The OS-identity correction preserves that guard;
 entry-dependent API compatibility remains a separate investigation.
 
+Diagnosis (2026-10-10): `harvestGlobals` returns early when module exports are
+non-empty and there is no global entry file, even when `typescript/lib` is `ship`.
+The empty Core.TS producer therefore seeds all library declarations, including generic
+`Record`, while the exported-function consumer only reaches instantiated library types.
+The consumer emits `AudioWorkletNodeOptions.parameterData` as a bare `Record<string, float>`
+application without emitting the generic `Record` declaration. Canonical API hashing
+therefore retains the literal name `Record` instead of the producer's declaration identity.
+Captured API texts are otherwise identical; the producer hash is `471214c5bcb9bc1ba777792d18f4bc9149969076b3b419cbab7ac4d6dcf9650c`,
+the consumer hash is `9316f56c62f5670d77a863edc99076431fd54f63527bcf9d1ca553fa1c5b9534`.
+A controlled experiment bypassing only that early return for compiler-library shipping
+restored `Record` and allowed the original exported-function consumer to reuse the complete
+Core.TS catalogue with all authentication enabled. The experiment was reverted after diagnosis;
+the production fix needs harvest regression coverage and full gates, not relaxed API checks.
+
 Validation: the full `build.fsx -- test --run-gate` pipeline passed, including the
 Generator and Wire suites, Fable run gate and customization Partas gate. The 28 new
 library identity/reuse cases cover all eight package names, complete Core.TS semantic
