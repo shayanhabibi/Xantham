@@ -185,6 +185,11 @@ module CompilerLibLayout =
             DomQualifiedModule = $"{root}.{dom}"
         }
 
+[<RequireQualifiedAccess>]
+type CatalogCompression =
+    | Uncompressed
+    | Brotli
+
 /// Per-package generator configuration, read from `xantham.json` next to the package manifest
 /// when present (decision O4 in `docs/plans/generator-architecture.md`).
 type GeneratorConfig =
@@ -230,6 +235,8 @@ type GeneratorConfig =
         /// Emits declarations.json with the identity and final F# name of reusable declarations.
         [<Description("Emit declarations.json with stable TypeScript declaration identities and final F# names. Defaults to false.")>]
         DeclarationCatalog: bool
+        /// Compression applied when writing the catalogue to disk.
+        DeclarationCatalogCompression: CatalogCompression
         /// Producer catalogs, absolute or relative to the input package directory.
         [<Description("Producer declarations.json files, absolute or relative to the input package directory. \
         Matching types reuse their producer's F# identity; incompatible catalogs fail generation.")>]
@@ -289,6 +296,7 @@ type GeneratorConfig =
             Lib = None
             Types = None
             DeclarationCatalog = false
+            DeclarationCatalogCompression = CatalogCompression.Uncompressed
             DeclarationReferences = []
             Entry = None
             RuntimePackage = None
@@ -301,6 +309,30 @@ type GeneratorConfig =
         }
 
 module GeneratorConfig =
+    let private parseDeclarationCatalog (value: JsonElement) =
+        match value.ValueKind with
+        | JsonValueKind.True -> true, CatalogCompression.Uncompressed
+        | JsonValueKind.False -> false, CatalogCompression.Uncompressed
+        | JsonValueKind.Object ->
+            let enabled =
+                match value.TryGetProperty "enabled" with
+                | true, flag when flag.ValueKind = JsonValueKind.True -> true
+                | true, flag when flag.ValueKind = JsonValueKind.False -> false
+                | _ -> failwith "xantham.json: declarationCatalog.enabled is required and must be a boolean"
+
+            let compression =
+                match value.TryGetProperty "compression" with
+                | false, _ -> CatalogCompression.Uncompressed
+                | true, name when name.ValueKind = JsonValueKind.String ->
+                    match name.GetString() with
+                    | "none" -> CatalogCompression.Uncompressed
+                    | "brotli" -> CatalogCompression.Brotli
+                    | _ -> failwith "xantham.json: declarationCatalog.compression must be none or brotli"
+                | _ -> failwith "xantham.json: declarationCatalog.compression must be a string"
+
+            enabled, compression
+        | _ -> failwith "xantham.json: declarationCatalog must be a boolean or an options object"
+
     let private jsonOptions =
         JsonDocumentOptions(CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true)
 
@@ -449,6 +481,11 @@ module GeneratorConfig =
                 | true, _ -> failwith "xantham.json: declarationReferences must be an array of nonempty paths"
                 | _ -> []
 
+            let declarationCatalog, declarationCatalogCompression =
+                match doc.RootElement.TryGetProperty "declarationCatalog" with
+                | true, value -> parseDeclarationCatalog value
+                | _ -> false, CatalogCompression.Uncompressed
+
             let subpaths =
                 match doc.RootElement.TryGetProperty "subpaths" with
                 | true, value when value.ValueKind = JsonValueKind.Array ->
@@ -569,7 +606,8 @@ module GeneratorConfig =
                 Groups = groups
                 Lib = lib
                 Types = types
-                DeclarationCatalog = boolField "declarationCatalog" false
+                DeclarationCatalog = declarationCatalog
+                DeclarationCatalogCompression = declarationCatalogCompression
                 DeclarationReferences = declarationReferences
                 Entry = entry
                 RuntimePackage = runtime

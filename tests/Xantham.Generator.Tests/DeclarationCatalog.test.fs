@@ -12,7 +12,7 @@ open Xantham.Generator.Measure
 
 let private fixture = Path.GetFullPath(Path.Combine(__SOURCE_DIRECTORY__, "..", "fixtures", "declaration-identity-lab"))
 
-let private temporaryRoot = Path.Combine(__SOURCE_DIRECTORY__, "obj", "catalog-fixtures")
+let private temporaryRoot = Scratch.root
 
 let private configured (directory: string) name entry (references: string array) =
     let path = Path.Combine(directory, name + ".json")
@@ -331,15 +331,16 @@ let invalid (value: Identity.Adapter.Explicit<string>) : Identity.Root.ClassLab.
             finally
                 if Directory.Exists directory then Directory.Delete(directory, true)
 
-[<Tests>]
-let tests =
+let private authenticationTests compression =
+    let run config package output = Pipeline.run (CatalogFixtures.references compression config package) package output
+    let generate config package = Pipeline.generate (CatalogFixtures.references compression config package) package
     match Tsc.locate __SOURCE_DIRECTORY__ with
     | None ->
-        testList "declaration catalog" [
+        testList ("declaration catalog " + string compression) [
             testCase "skipped - no compiler" <| fun _ ->
                 skiptest "run `npm install` at the repository root, or set XANTHAM_TSGO_EXE" ]
     | Some _ ->
-        testList "declaration catalog" [
+        testList ("declaration catalog " + string compression) [
             testCase "generic result declarations preserve their own constraints across packages" <| fun _ ->
                 let directory = Path.Combine(temporaryRoot, "xantham-result-constraints-" + Guid.NewGuid().ToString "N")
                 Directory.CreateDirectory directory |> ignore
@@ -350,12 +351,12 @@ let tests =
                         { GeneratorConfig.loadFile (Path.Combine(package, "xantham.json")) with
                             ModuleName = Some "Identity.Root" }
                     let root = Path.Combine(directory, "root")
-                    Pipeline.run config dependency root |> Async.RunSynchronously |> ignore
+                    run config dependency root |> Async.RunSynchronously |> ignore
                     let adapter =
                         { config with
                             ModuleName = Some "Identity.Adapter"
                             DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
-                    Pipeline.run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
                     let sources = [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ]
                     let consumer = """module Identity.Consumer
 open Fable.Core
@@ -398,12 +399,12 @@ let invalid (reader: Identity.Root.Reader) = reader.read "text"
                             ModuleName = Some "Identity.Root" }
                     let dependency = Path.Combine(package, "node_modules", "generic-marker-owner-lab")
                     let root = Path.Combine(directory, "root")
-                    Pipeline.run config dependency root |> Async.RunSynchronously |> ignore
+                    run config dependency root |> Async.RunSynchronously |> ignore
                     let adapter =
                         { config with
                             ModuleName = Some "Identity.Adapter"
                             DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
-                    Pipeline.run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
                     let sources = [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ]
                     let consumer = """module Identity.Consumer
 let accept (value: Identity.Root.Options<string>) : Identity.Root.Options<string> = Identity.Adapter.Exports.accept value
@@ -421,7 +422,7 @@ let wrong (value: Identity.Root.Options<string>) (marker: Identity.Root.Marker<i
                     Expect.stringContains output "FS0001" "the wrong marker type is rejected without a cast"
                     File.AppendAllText(Path.Combine(dependency, "index.d.ts"), "\n")
                     Expect.throwsC
-                        (fun () -> Pipeline.run adapter package (Path.Combine(directory, "stale")) |> Async.RunSynchronously |> ignore)
+                        (fun () -> run adapter package (Path.Combine(directory, "stale")) |> Async.RunSynchronously |> ignore)
                         (fun error -> Expect.stringContains error.Message "input source hash mismatch" "marker declarations remain authenticated")
                 finally
                     if Directory.Exists directory then Directory.Delete(directory, true)
@@ -439,12 +440,12 @@ let wrong (value: Identity.Root.Options<string>) (marker: Identity.Root.Marker<i
                             ModuleName = Some "Identity.Root" }
                     let dependency = Path.Combine(package, "node_modules", "empty-union-owner-lab")
                     let root = Path.Combine(directory, "root")
-                    Pipeline.run config dependency root |> Async.RunSynchronously |> ignore
+                    run config dependency root |> Async.RunSynchronously |> ignore
                     let adapter =
                         { config with
                             ModuleName = Some "Identity.Adapter"
                             DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
-                    Pipeline.run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
                     let consumer = """module Identity.Consumer
 open Fable.Core
 let accept (value: Identity.Root.Value) : Identity.Root.Value = Identity.Adapter.Exports.accept value
@@ -463,7 +464,7 @@ let generic (value: Identity.Root.Controls) = match value.generic with U2.Case1 
                     Expect.stringContains symbols "TR035" "the producer reports the existing obj-union widening"
                     File.AppendAllText(Path.Combine(dependency, "index.d.ts"), "\n")
                     Expect.throwsC
-                        (fun () -> Pipeline.run adapter package (Path.Combine(directory, "stale")) |> Async.RunSynchronously |> ignore)
+                        (fun () -> run adapter package (Path.Combine(directory, "stale")) |> Async.RunSynchronously |> ignore)
                         (fun error -> Expect.stringContains error.Message "input source hash mismatch" "normalization does not weaken source authentication")
                 finally
                     if Directory.Exists directory then Directory.Delete(directory, true)
@@ -481,7 +482,7 @@ let generic (value: Identity.Root.Controls) = match value.generic with U2.Case1 
                             ModuleName = Some "Identity.Root" }
                     let dependency = Path.Combine(package, "node_modules", "literal-alias-owner-lab")
                     let root = Path.Combine(directory, "root")
-                    Pipeline.run config dependency root |> Async.RunSynchronously |> ignore
+                    run config dependency root |> Async.RunSynchronously |> ignore
                     let catalog = JsonSerializer.Deserialize<DeclarationCatalog.Catalog>(File.ReadAllText(Path.Combine(root, "declarations.json")), JsonSerializerOptions(PropertyNameCaseInsensitive = true))
                     let mode = catalog.Declarations |> Array.find (fun declaration -> declaration.FSharpName = "Identity.Root.Mode")
                     let reversed = catalog.Declarations |> Array.find (fun declaration -> declaration.FSharpName = "Identity.Root.ReversedMode")
@@ -492,7 +493,7 @@ let generic (value: Identity.Root.Controls) = match value.generic with U2.Case1 
                         { config with
                             ModuleName = Some "Identity.Adapter"
                             DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
-                    Pipeline.run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
                     let consumer = """module Identity.Consumer
 let accept (value: Identity.Root.Value) (mode: Identity.Root.Value.Kind) : Identity.Root.Value = Identity.Adapter.Exports.accept(value, mode)
 let property (value: Identity.Root.Value) : Identity.Root.Value.Kind option = value.kind
@@ -502,7 +503,7 @@ let nominal (value: Identity.Root.Nominal) : Identity.Root.Nominal = Identity.Ad
                     Expect.equal code 0 output
                     File.AppendAllText(Path.Combine(dependency, "index.d.ts"), "\n")
                     Expect.throwsC
-                        (fun () -> Pipeline.run adapter package (Path.Combine(directory, "stale")) |> Async.RunSynchronously |> ignore)
+                        (fun () -> run adapter package (Path.Combine(directory, "stale")) |> Async.RunSynchronously |> ignore)
                         (fun error -> Expect.stringContains error.Message "input source hash mismatch" "shared alias input remains authenticated")
                 finally
                     if Directory.Exists directory then Directory.Delete(directory, true)
@@ -517,12 +518,12 @@ let nominal (value: Identity.Root.Nominal) : Identity.Root.Nominal = Identity.Ad
                         { GeneratorConfig.loadFile (Path.Combine(package, "xantham.json")) with
                             ModuleName = Some "Identity.Root" }
                     let root = Path.Combine(directory, "root")
-                    Pipeline.run config dependency root |> Async.RunSynchronously |> ignore
+                    run config dependency root |> Async.RunSynchronously |> ignore
                     let adapter =
                         { config with
                             ModuleName = Some "Identity.Adapter"
                             DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
-                    Pipeline.run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
                     let consumer = """module Identity.Consumer
 open Fable.Core
 let accept (output: Identity.Root.Output) : Identity.Root.Output = Identity.Adapter.Exports.accept output
@@ -552,13 +553,13 @@ let array (values: Identity.Root.Value[]) : Identity.Root.Output =
                             ModuleName = Some "Identity.Root" }
                     let dependency = Path.Combine(package, "node_modules", "optional-array-shared-lab")
                     let root = Path.Combine(directory, "root")
-                    Pipeline.run config dependency root |> Async.RunSynchronously |> ignore
+                    run config dependency root |> Async.RunSynchronously |> ignore
                     let adapter =
                         { config with
                             ModuleName = Some "Identity.Adapter"
                             DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
                     let output = Path.Combine(directory, "adapter")
-                    Pipeline.run adapter package output |> Async.RunSynchronously |> ignore
+                    run adapter package output |> Async.RunSynchronously |> ignore
                     let consumer = """module Identity.Consumer
 let shared (value: Identity.Adapter.Container) : Identity.Root.Shared = value.cache
 let first (value: Identity.Root.Shared) : string option = value.values |> Option.map (fun values -> values.[0])
@@ -567,7 +568,7 @@ let first (value: Identity.Root.Shared) : string option = value.values |> Option
                     Expect.equal code 0 output
                     File.AppendAllText(Path.Combine(dependency, "index.d.ts"), "\n")
                     Expect.throwsC
-                        (fun () -> Pipeline.run adapter package (Path.Combine(directory, "stale")) |> Async.RunSynchronously |> ignore)
+                        (fun () -> run adapter package (Path.Combine(directory, "stale")) |> Async.RunSynchronously |> ignore)
                         (fun error -> Expect.stringContains error.Message "input source hash mismatch" "shared declaration sources remain authenticated")
                 finally
                     if Directory.Exists directory then Directory.Delete(directory, true)
@@ -582,12 +583,12 @@ let first (value: Identity.Root.Shared) : string option = value.values |> Option
                         { GeneratorConfig.loadFile (Path.Combine(package, "xantham.json")) with
                             ModuleName = Some "Identity.Root" }
                     let root = Path.Combine(directory, "root")
-                    Pipeline.run config dependency root |> Async.RunSynchronously |> ignore
+                    run config dependency root |> Async.RunSynchronously |> ignore
                     let adapter =
                         { config with
                             ModuleName = Some "Identity.Adapter"
                             DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
-                    Pipeline.run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
                     let consumer = """module Identity.Consumer
 open Fable.Core
 let accept (client: Identity.Adapter.Client) (part: Identity.Root.Part) : Identity.Root.Part =
@@ -621,7 +622,7 @@ let json (value: Identity.Root.Value) : Identity.Root.Output = Identity.Root.Out
                             Types = Some []
                             DeclarationCatalog = true }
                     let root = Path.Combine(directory, "root")
-                    Pipeline.run config package root |> Async.RunSynchronously |> ignore
+                    run config package root |> Async.RunSynchronously |> ignore
                     let catalog = JsonSerializer.Deserialize<DeclarationCatalog.Catalog>(File.ReadAllText(Path.Combine(root, "declarations.json")), JsonSerializerOptions(PropertyNameCaseInsensitive = true))
                     let record = catalog.Declarations |> Array.find (fun declaration -> declaration.FSharpName = "Identity.Root.PipelineRecord")
                     let modelRecord = catalog.Declarations |> Array.find (fun declaration -> declaration.FSharpName = "Identity.Root.ModelRecord")
@@ -633,7 +634,7 @@ let json (value: Identity.Root.Value) : Identity.Root.Output = Identity.Root.Out
                             ModuleName = Some "Identity.Adapter"
                             DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
                     let consumerPackage = Path.Combine(package, "consumer")
-                    Pipeline.run adapter consumerPackage (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    run adapter consumerPackage (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
                     let consumer = """module Identity.Consumer
 let echo (value: Identity.Root.PipelineRecord) : Identity.Root.PipelineRecord = Identity.Adapter.Exports.echo value
 let alias (value: Identity.Adapter.OutboundHandlerParams) : Identity.Root.PipelineRecord = value
@@ -647,12 +648,12 @@ let text (value: Identity.Adapter.TextParams) (key: string) : string = value.[ke
                     File.AppendAllText(aliasFile, "\n")
                     File.AppendAllText(Path.Combine(consumerPackage, "index.d.ts"), "\nimport '../index';\n")
                     Expect.throwsC
-                        (fun () -> Pipeline.run adapter consumerPackage (Path.Combine(directory, "stale-alias")) |> Async.RunSynchronously |> ignore)
+                        (fun () -> run adapter consumerPackage (Path.Combine(directory, "stale-alias")) |> Async.RunSynchronously |> ignore)
                         (fun error -> Expect.stringContains error.Message "input source hash mismatch" "reachable alias input changes still invalidate the producer")
                     File.WriteAllText(aliasFile, aliasSource)
                     writePackageFile package "node_modules/record-model-lab/index.d.ts" "export interface Model { value: number }\n"
                     Expect.throwsC
-                        (fun () -> Pipeline.run adapter consumerPackage (Path.Combine(directory, "stale-model")) |> Async.RunSynchronously |> ignore)
+                        (fun () -> run adapter consumerPackage (Path.Combine(directory, "stale-model")) |> Async.RunSynchronously |> ignore)
                         (fun error -> Expect.stringContains error.Message "input source hash mismatch" "changed semantic dependencies still invalidate the producer")
                 finally
                     if Directory.Exists directory then Directory.Delete(directory, true)
@@ -672,9 +673,9 @@ let text (value: Identity.Adapter.TextParams) (key: string) : string = value.[ke
                                                         declarationCatalog = true; declarationReferences = references |})
                         GeneratorConfig.loadFile path
                     let root = Path.Combine(directory, "root")
-                    Pipeline.run (configure "Root" ([||] : string array)) dependency root |> Async.RunSynchronously |> ignore
+                    run (configure "Root" ([||] : string array)) dependency root |> Async.RunSynchronously |> ignore
                     let adapter = configure "Adapter" [| Path.Combine(root, "declarations.json") |]
-                    Pipeline.run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
                     let consumer = """module Identity.Consumer
 let reuse (value: Identity.Root.Item) : Identity.Root.Item = Identity.Adapter.Exports.``use`` value
 let text (value: Identity.Root.Item) : string = value.nested.value
@@ -700,12 +701,12 @@ let booleanAlias (value: Identity.Root.BooleanAlias) : bool = value
                             Namespace = Some "Identity"
                             DeclarationCatalog = true }
                     let root = Path.Combine(directory, "root")
-                    Pipeline.run config package root |> Async.RunSynchronously |> ignore
+                    run config package root |> Async.RunSynchronously |> ignore
                     let adapterConfig =
                         { config with
                             ModuleName = Some "Identity.Adapter"
                             DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
-                    Pipeline.run adapterConfig package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    run adapterConfig package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
                     let consumer = """module Identity.Consumer
 open Identity.WorkerAugmentationLab
 let cache (request: Request) : RequestCache =
@@ -730,12 +731,12 @@ let metadata (request: Request) : string = request.cf
                             Types = Some []
                             DeclarationCatalog = true }
                     let root = Path.Combine(directory, "root")
-                    Pipeline.run config package root |> Async.RunSynchronously |> ignore
+                    run config package root |> Async.RunSynchronously |> ignore
                     let adapterConfig =
                         { config with
                             ModuleName = Some "Identity.Adapter"
                             DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
-                    Pipeline.run adapterConfig package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    run adapterConfig package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
                     let consumer = """module Identity.Consumer
 let reuse (value: Identity.Adapter.Handlers<obj, string>) : Identity.Root.Handlers<obj, string> = value
 let callback (value: Identity.Adapter.Handlers<obj, string>) : Identity.Root.BivarianceHack<string> option =
@@ -768,7 +769,7 @@ let invoke (value: Identity.Root.BivarianceHack<string>) = value.Invoke("environ
                             Types = Some []
                             DeclarationCatalog = true }
                     let root = Path.Combine(directory, "root")
-                    Pipeline.run config package root |> Async.RunSynchronously |> ignore
+                    run config package root |> Async.RunSynchronously |> ignore
                     let catalog = JsonSerializer.Deserialize<DeclarationCatalog.Catalog>(File.ReadAllText(Path.Combine(root, "declarations.json")), JsonSerializerOptions(PropertyNameCaseInsensitive = true))
                     let owners = catalog.Inputs |> Array.map (fun source -> source.Package, source.Version, source.File)
                     Expect.contains owners ("package-owner-lab", "1.2.3", "subpath/index.d.ts") "subpath belongs to its installed package"
@@ -778,14 +779,14 @@ let invoke (value: Identity.Root.BivarianceHack<string>) = value.Invoke("environ
                         { config with
                             ModuleName = Some "Identity.Adapter"
                             DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
-                    Pipeline.run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
                     File.AppendAllText(Path.Combine(package, "node_modules/package-owner-lab/subpath/package.json"), "\n")
                     Expect.throwsC
-                        (fun () -> Pipeline.run adapter package (Path.Combine(directory, "stale")) |> Async.RunSynchronously |> ignore)
+                        (fun () -> run adapter package (Path.Combine(directory, "stale")) |> Async.RunSynchronously |> ignore)
                         (fun error -> Expect.stringContains error.Message "package manifest mismatch" "nested resolution metadata is authenticated")
                     writePackageFile package "node_modules/package-owner-lab/package.json" """{"name":"package-owner-lab"}"""
                     Expect.throwsC
-                        (fun () -> Pipeline.run config package (Path.Combine(directory, "unversioned")) |> Async.RunSynchronously |> ignore)
+                        (fun () -> run config package (Path.Combine(directory, "unversioned")) |> Async.RunSynchronously |> ignore)
                         (fun error -> Expect.stringContains error.Message "must declare its version" "installed packages still require versions")
                 finally
                     if Directory.Exists directory then Directory.Delete(directory, true)
@@ -803,12 +804,12 @@ let invoke (value: Identity.Root.BivarianceHack<string>) = value.Invoke("environ
                             DeclarationCatalog = true }
                     let root = Path.Combine(directory, "root")
                     let adapter = Path.Combine(directory, "adapter")
-                    Pipeline.run config package root |> Async.RunSynchronously |> ignore
+                    run config package root |> Async.RunSynchronously |> ignore
                     let adapterConfig =
                         { config with
                             ModuleName = Some "Identity.Adapter"
                             DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
-                    Pipeline.run adapterConfig package adapter |> Async.RunSynchronously |> ignore
+                    run adapterConfig package adapter |> Async.RunSynchronously |> ignore
                     let consumer = """module Identity.Consumer
 let broad<'T when 'T :> Identity.Root.Base> (factory: Identity.Root.Factory<'T>) : 'T = factory.Create()
 let narrow<'T when 'T :> Identity.Root.Derived> (factory: Identity.Root.Create.FactoryConstructor<'T>) : 'T =
@@ -831,12 +832,12 @@ let narrow<'T when 'T :> Identity.Root.Derived> (factory: Identity.Root.Create.F
                             Types = Some []
                             DeclarationCatalog = true }
                     let root = Path.Combine(directory, "root")
-                    Pipeline.run config package root |> Async.RunSynchronously |> ignore
+                    run config package root |> Async.RunSynchronously |> ignore
                     let adapterConfig =
                         { config with
                             ModuleName = Some "Identity.Adapter"
                             DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
-                    Pipeline.run adapterConfig package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    run adapterConfig package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
                     let consumer = """module Identity.Consumer
 let view = Identity.Root.View.Create(Identity.Root.Permissions.Access.Allow, Identity.Root.Permissions.Waiting.Manual)
 let reuse (value: Identity.Adapter.View) : Identity.Root.View = value
@@ -856,7 +857,7 @@ let reuse (value: Identity.Adapter.View) : Identity.Root.View = value
                             ModuleName = Some "Identity.Root"
                             Lib = Some [ "esnext"; "dom" ]
                             Types = Some [] }
-                    Pipeline.run config package (Path.Combine(directory, "root")) |> Async.RunSynchronously |> ignore
+                    run config package (Path.Combine(directory, "root")) |> Async.RunSynchronously |> ignore
                     let consumer = """module Identity.Consumer
 open Fable.Core
 let value (request: Identity.Root.Request<string>) : string option = request.cf
@@ -883,10 +884,10 @@ let invoke (request: Identity.Root.Request<Identity.Root.Request.Value.Item>)
                             Types = Some []
                             DeclarationCatalog = true }
                     let producer = Path.Combine(directory, "root")
-                    Pipeline.run root package producer |> Async.RunSynchronously |> ignore
+                    run root package producer |> Async.RunSynchronously |> ignore
                     let reference = Path.Combine(producer, "declarations.json")
                     let adapter = { root with ModuleName = Some "Identity.Adapter"; DeclarationReferences = [ reference ] }
-                    Pipeline.run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
                     let consumer = """module Identity.Consumer
 open Fable.Core
 open Identity.Root.Chat.Create.Result
@@ -923,10 +924,10 @@ let options (value: Identity.Root.Chat.LegacyOptions) : Identity.Root.Chat.Optio
                             Types = Some []
                             DeclarationCatalog = true }
                     let producer = Path.Combine(directory, "root")
-                    Pipeline.run root directory producer |> Async.RunSynchronously |> ignore
+                    run root directory producer |> Async.RunSynchronously |> ignore
                     let reference = Path.Combine(producer, "declarations.json")
                     let adapter = { root with ModuleName = Some "Identity.Adapter"; DeclarationReferences = [ reference ] }
-                    Pipeline.run adapter directory (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    run adapter directory (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
                     let consumer = """module Identity.Consumer
 let construct () : Identity.Root.Client.Client = Identity.Adapter.Client.Client.Create "value"
 let create () : Identity.Root.Client.Client = Identity.Adapter.Client.Client.create "value"
@@ -949,11 +950,11 @@ let setCount () = Identity.Adapter.Client.Client.count <- 2.0
                             Types = Some []
                             DeclarationCatalog = true }
                     let producer = Path.Combine(directory, "root")
-                    Pipeline.run root package producer |> Async.RunSynchronously |> ignore
+                    run root package producer |> Async.RunSynchronously |> ignore
                     let reference = Path.Combine(producer, "declarations.json")
                     let adapter = { root with ModuleName = Some "Identity.Adapter"; DeclarationReferences = [ reference ] }
                     let consumerDir = Path.Combine(directory, "adapter")
-                    Pipeline.run adapter package consumerDir |> Async.RunSynchronously |> ignore
+                    run adapter package consumerDir |> Async.RunSynchronously |> ignore
                     let source = File.ReadAllText(Path.Combine(consumerDir, "Identity.Adapter.fs"))
                     for specifier in [ "subpath-lab"; "subpath-lab/client"; "subpath-lab/client/deep"; "subpath-lab/alias"; "subpath-lab/mirror" ] do
                         Expect.stringContains source ("\"" + specifier + "\"") "each value container retains its own runtime imports"
@@ -992,7 +993,7 @@ export type Numeric<T> = Parameters<Callback<T, number>>[0];
 """
                     writePackageFile directory "adapter.d.ts" """export { Result, Current, Alpha, Numeric, Forward, Reverse, Repeated } from "./index.js";"""
                     let root = configured directory "Root" "index.d.ts" [||]
-                    Pipeline.run root directory (Path.Combine(directory, "root")) |> Async.RunSynchronously |> ignore
+                    run root directory (Path.Combine(directory, "root")) |> Async.RunSynchronously |> ignore
                     let reference = Path.Combine(directory, "root", "declarations.json")
                     use catalog = JsonDocument.Parse(File.ReadAllText reference)
                     let alpha =
@@ -1002,7 +1003,7 @@ export type Numeric<T> = Parameters<Callback<T, number>>[0];
                     |> Seq.exists (fun source -> source.GetProperty("file").GetString() = "context.d.ts")
                     |> Flip.Expect.equal "the concrete default's source remains in the specialization closure" true
                     let adapter = configured directory "Adapter" "adapter.d.ts" [| reference |]
-                    Pipeline.run adapter directory (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    run adapter directory (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
                     let consumer = """module Identity.Consumer
 let alpha<'T> (value: Identity.Root.Current<'T>) : Identity.Root.Alpha<'T> = value
 let share<'T> (value: Identity.Root.Current<'T>) : Identity.Adapter.Current<'T> = value
@@ -1038,7 +1039,7 @@ export interface Reader {
 }
 """
                     let root = configured directory "Root" "index.d.ts" [||]
-                    Pipeline.run root directory (Path.Combine(directory, "root")) |> Async.RunSynchronously |> ignore
+                    run root directory (Path.Combine(directory, "root")) |> Async.RunSynchronously |> ignore
                     let consumer = """module Identity.Consumer
 let read<'T when 'T :> Identity.Root.Bound> (reader: Identity.Root.Reader) (value: 'T) : Identity.Root.Result<'T> =
     reader.read value
@@ -1065,9 +1066,9 @@ export interface Peer { send(message: Message): void; }
                     writePackageFile directory "index.d.ts" """export * from "./shared.js";"""
                     writePackageFile directory "adapter.d.ts" """export { Peer } from "./shared.js";"""
                     let root = configured directory "Root" "index.d.ts" [||]
-                    Pipeline.run root directory (Path.Combine(directory, "root")) |> Async.RunSynchronously |> ignore
+                    run root directory (Path.Combine(directory, "root")) |> Async.RunSynchronously |> ignore
                     let adapter = configured directory "Adapter" "adapter.d.ts" [| Path.Combine(directory, "root", "declarations.json") |]
-                    Pipeline.run adapter directory (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    run adapter directory (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
                     let consumer = """module Identity.Consumer
 open Fable.Core
 let send (peer: Identity.Adapter.Peer) (message: Identity.Root.Message) = peer.send message
@@ -1086,7 +1087,7 @@ let share (peer: Identity.Adapter.Peer) : Identity.Root.Peer = peer
                 try
                     let input = Path.GetFullPath(Path.Combine(fixture, "..", "default-intersection-lab"))
                     let root = configured directory "Root" "index.d.ts" [||]
-                    Pipeline.run root input (Path.Combine(directory, "root")) |> Async.RunSynchronously |> ignore
+                    run root input (Path.Combine(directory, "root")) |> Async.RunSynchronously |> ignore
                     let reference = Path.Combine(directory, "root", "declarations.json")
                     use catalog = JsonDocument.Parse(File.ReadAllText reference)
                     catalog.RootElement.GetProperty("declarations").EnumerateArray()
@@ -1094,7 +1095,7 @@ let share (peer: Identity.Adapter.Peer) : Identity.Root.Peer = peer
                     |> Seq.length
                     |> Flip.Expect.equal "one owner for the generic declaration and its default applications" 1
                     let adapter = configured directory "Adapter" "adapter.d.ts" [| reference |]
-                    Pipeline.run adapter input (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    run adapter input (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
                     let consumer = """module Identity.Consumer
 let connect (agent: Identity.Adapter.Agent) (connection: Identity.Root.Connection<obj>) =
     agent.onConnect connection
@@ -1110,13 +1111,13 @@ let share (agent: Identity.Adapter.Agent) : Identity.Root.Agent = agent
                 try
                     let root = configured directory "Root" "index.d.ts" [||]
                     let producer = Path.Combine(directory, "root")
-                    Pipeline.run root fixture producer |> Async.RunSynchronously |> ignore
+                    run root fixture producer |> Async.RunSynchronously |> ignore
                     let catalog = Path.Combine(producer, "declarations.json")
                     File.Exists catalog |> Flip.Expect.equal "producer emits its declaration catalog" true
                     let adapter = configured directory "Adapter" "adapter.d.ts" [| catalog |]
-                    Pipeline.run adapter fixture (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    run adapter fixture (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
                     let next = configured directory "Next" "next.d.ts" [| Path.GetRelativePath(fixture, Path.Combine(directory, "adapter", "declarations.json")) |]
-                    Pipeline.run next fixture (Path.Combine(directory, "next")) |> Async.RunSynchronously |> ignore
+                    run next fixture (Path.Combine(directory, "next")) |> Async.RunSynchronously |> ignore
                     use chained = JsonDocument.Parse(File.ReadAllText(Path.Combine(directory, "next", "declarations.json")))
                     chained.RootElement.GetProperty("owners").EnumerateArray()
                     |> Seq.map (fun owner -> owner.GetProperty("name").GetString())
@@ -1135,10 +1136,10 @@ let share (agent: Identity.Adapter.Agent) : Identity.Root.Agent = agent
                 Directory.CreateDirectory directory |> ignore
                 try
                     let root = configured directory "Root" "static-root.d.ts" [||]
-                    Pipeline.run root fixture (Path.Combine(directory, "root")) |> Async.RunSynchronously |> ignore
+                    run root fixture (Path.Combine(directory, "root")) |> Async.RunSynchronously |> ignore
                     let reference = Path.Combine(directory, "root", "declarations.json")
                     let adapter = configured directory "Adapter" "static-adapter.d.ts" [| reference |]
-                    Pipeline.run adapter fixture (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    run adapter fixture (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
                     let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] staticConsumer
                     code |> Flip.Expect.equal output 0
                 finally Directory.Delete(directory, true)
@@ -1158,10 +1159,10 @@ let share (agent: Identity.Adapter.Agent) : Identity.Root.Agent = agent
                     writePackageFile directory "node_modules/owner/node_modules/dep/index.d.ts" "export interface Two { two: number; }"
                     let groups = Map.ofList [ "dep" * uom<npmDependency>, Ship; "owner" * uom<npmDependency>, Ship ]
                     let root = { configured directory "Root" "index.d.ts" [||] with Groups = groups }
-                    Pipeline.run root directory (Path.Combine(directory, "root")) |> Async.RunSynchronously |> ignore
+                    run root directory (Path.Combine(directory, "root")) |> Async.RunSynchronously |> ignore
                     let reference = Path.Combine(directory, "root", "declarations.json")
                     let adapter = { configured directory "Adapter" "adapter.d.ts" [| reference |] with Groups = groups }
-                    Pipeline.run adapter directory (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    run adapter directory (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
                     use catalog = JsonDocument.Parse(File.ReadAllText reference)
                     catalog.RootElement.GetProperty("inputs").EnumerateArray()
                     |> Seq.filter (fun source -> source.GetProperty("package").GetString() = "dep")
@@ -1182,7 +1183,7 @@ let share (agent: Identity.Adapter.Agent) : Identity.Root.Agent = agent
                     writePackageFile directory "index.d.ts" (prefix + "import { Missing } from 'missing-catalog-provider'; export function use(value: Missing): void;")
                     let config = { configured directory "Root" "index.d.ts" [||] with Types = None }
                     let output = Path.Combine(directory, "output")
-                    let message = try Pipeline.run config directory output |> Async.RunSynchronously |> ignore; "" with error -> error.Message
+                    let message = try run config directory output |> Async.RunSynchronously |> ignore; "" with error -> error.Message
                     (Directory.Exists output, message.Contains "TS2307") |> Flip.Expect.equal message (succeeds, not succeeds)
                 finally Directory.Delete(directory, true)
 
@@ -1205,7 +1206,7 @@ let share (agent: Identity.Adapter.Agent) : Identity.Root.Agent = agent
                 try
                     let root = configured directory "Root" "index.d.ts" [||]
                     let producer = Path.Combine(directory, "root")
-                    Pipeline.run root fixture producer |> Async.RunSynchronously |> ignore
+                    run root fixture producer |> Async.RunSynchronously |> ignore
                     let path = Path.Combine(producer, "declarations.json")
                     let catalog = JsonNode.Parse(File.ReadAllText path)
                     let declarations = catalog["declarations"].AsArray()
@@ -1236,13 +1237,16 @@ let share (agent: Identity.Adapter.Agent) : Identity.Root.Agent = agent
                     let config = configured directory "Adapter" entry [| path |]
                     let output = Path.Combine(directory, "adapter")
                     let message =
-                        try Pipeline.run config fixture output |> Async.RunSynchronously |> ignore; ""
+                        try run config fixture output |> Async.RunSynchronously |> ignore; ""
                         with error -> error.Message
                     (message.Contains expected, Directory.Exists output)
                     |> Flip.Expect.equal message (true, false)
                 finally
                     Directory.Delete(directory, true)
         ]
+
+[<Tests>]
+let tests = testList "declaration catalog formats" [authenticationTests CatalogCompression.Uncompressed; authenticationTests CatalogCompression.Brotli]
 
 [<Tests>]
 let callableTests =

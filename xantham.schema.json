@@ -36,7 +36,31 @@
       "description": "The compiler's `types` option: installed ambient type packages required by this input. Omitted, automatic discovery applies; an empty array disables automatic inclusion. Missing named packages are reported before generation."
     },
     "declarationCatalog": {
-      "type": "boolean",
+      "oneOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "enabled"
+          ],
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "compression": {
+              "type": "string",
+              "enum": [
+                "none",
+                "brotli"
+              ],
+              "default": "none"
+            }
+          }
+        }
+      ],
       "description": "Emit declarations.json with stable TypeScript declaration identities and final F# names. Defaults to false."
     },
     "declarationReferences": {

@@ -80,6 +80,33 @@ Use separate configurations for browser and worker variants with different globa
 `groups` decides whether a dependency is generated, referenced, mapped to an existing
 F# type, or widened. See [Dependencies and shared types](dependencies.md) for examples.
 
+## Emit declaration catalogues
+
+`"declarationCatalog": true` emits `declarations.json`. The default is `false`.
+Use the object form for compressed output:
+
+```json title="Brotli catalogue output"
+{
+  "declarationCatalog": { "enabled": true, "compression": "brotli" }
+}
+```
+
+This writes `declarations.json.br`. The object requires a boolean `enabled`;
+`compression` accepts `none` or `brotli` and defaults to `none`. With
+`enabled: false`, neither catalogue format is emitted.
+
+The .NET generation API still returns JSON text under `declarations.json` in
+`RenderModel.Files`. `Pipeline.run` applies compression when writing to disk,
+and `RunReport.OutputFiles` contains the actual written filename.
+Switching formats preserves an existing alternate-format file; remove old output
+explicitly if needed.
+
+For .NET callers, `GeneratorConfig.DeclarationCatalog` remains a boolean.
+The new `DeclarationCatalogCompression` field defaults to
+`CatalogCompression.Uncompressed`; set `CatalogCompression.Brotli` for compressed
+disk output. Callers constructing every record field must add this field.
+Record updates from `GeneratorConfig.Default` keep their previous behavior.
+
 ## Resolve NoInfer
 
 `resolveNoInfer: true` maps TypeScript's `NoInfer<T>` directly to `T`.

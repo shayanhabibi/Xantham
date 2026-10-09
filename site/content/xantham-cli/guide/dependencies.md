@@ -77,6 +77,28 @@ The run writes `declarations.json` beside its F# output. Reference it from a lat
 Catalog paths are absolute or relative to the input package directory.
 Replace the example path with the producer's output path.
 
+For Brotli output, configure the producer with
+`"declarationCatalog": { "enabled": true, "compression": "brotli" }`
+and reference `declarations.json.br`:
+
+```json title="Compressed catalogue reference"
+{
+  "declarationReferences": ["/bindings/root/declarations.json.br"]
+}
+```
+
+A `.br` filename suffix selects Brotli, case-insensitively. Other filenames
+are read as JSON, including custom filenames. References may mix formats in
+their existing order. Invalid, incomplete or trailing compressed data fails
+generation before consumer files are written.
+
+Both formats have an inclusive limit of 128 MiB (134,217,728 bytes) of decoded
+JSON. This measures the uncompressed catalogue's UTF-8 bytes, regardless of its
+compressed size. The reader streams these bytes into the JSON decoder; the
+JSON document and authenticated catalogue model still occupy memory.
+Switching producer formats preserves any old alternate-format file in the
+output directory; reference the file selected for the current run.
+
 The consumer reuses the producer's F# identities while retaining its own imports.
 Compile producers first, following the catalog's ordered `owners` list.
 
@@ -100,6 +122,7 @@ explicit `declarationReferences` paths as shown above.
 Both schemas check declaration identity, package/source hashes, owner dependencies,
 generic arity and constraints, F# APIs, and customization variants. Schema 2 retains
 compiler and generator fingerprints as producer provenance.
+JSON and Brotli carry the same schema and pass the same authentication checks.
 If a catalog is rejected, regenerate the related bindings together and inspect
 the diagnostic. Some entry-dependent or generic shapes still cannot share an
 emitted identity; those combinations require separate bindings or a mapping change.

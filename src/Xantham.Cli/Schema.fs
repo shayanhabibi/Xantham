@@ -275,16 +275,49 @@ let private writeFieldType (w: Utf8JsonWriter) (name: string) (t: Type) =
     | t when t = typeof<UnionArmOverloadsConfig> -> writeUnionArmOverloads w
     | t -> failwith $"xantham.json: {name} has type {t.FullName}, which Schema.fs writes no JSON form for"
 
+let private writeDeclarationCatalog (w: Utf8JsonWriter) =
+    w.WriteStartArray "oneOf"
+    w.WriteStartObject()
+    w.WriteString("type", "boolean")
+    w.WriteEndObject()
+    w.WriteStartObject()
+    w.WriteString("type", "object")
+    w.WriteBoolean("additionalProperties", false)
+    w.WriteStartArray "required"
+    w.WriteStringValue "enabled"
+    w.WriteEndArray()
+    w.WriteStartObject "properties"
+    w.WriteStartObject "enabled"
+    w.WriteString("type", "boolean")
+    w.WriteEndObject()
+    w.WriteStartObject "compression"
+    w.WriteString("type", "string")
+    w.WriteStartArray "enum"
+    w.WriteStringValue "none"
+    w.WriteStringValue "brotli"
+    w.WriteEndArray()
+    w.WriteString("default", "none")
+    w.WriteEndObject()
+    w.WriteEndObject()
+    w.WriteEndObject()
+    w.WriteEndArray()
+
 let private writeConfigProperties (w: Utf8JsonWriter) =
     for field in FSharpType.GetRecordFields typeof<GeneratorConfig> do
-        match Map.tryFind field.Name configKeys with
-        | None ->
+        match field.Name, Map.tryFind field.Name configKeys with
+        | "DeclarationCatalogCompression", _ when field.PropertyType = typeof<CatalogCompression> -> ()
+        | _, None ->
             failwith
                 $"GeneratorConfig.{field.Name} needs an entry in Schema.fs's key table before the schema \
                   can describe it"
-        | Some(key, description) ->
+        | _, Some(key, description) ->
             w.WritePropertyName key
-            writeDescribed w description (fun w -> writeFieldType w field.Name field.PropertyType)
+
+            writeDescribed w description (fun w ->
+                if field.Name = "DeclarationCatalog" then
+                    writeDeclarationCatalog w
+                else
+                    writeFieldType w field.Name field.PropertyType)
 
 let private writeMappedProperties (w: Utf8JsonWriter) =
     for field in FSharpType.GetRecordFields typeof<MappedName> do

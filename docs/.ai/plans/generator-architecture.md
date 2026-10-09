@@ -1853,6 +1853,18 @@ portable provenance hashes. Contract negatives reject before output; customizati
 variants. Local focused results: declaration catalogues 58/58, portable integration 19/19,
 customization 22/22. Cross-platform artifact exchange evidence is recorded after CI runs.
 
+## Brotli catalogue file transport (2026-10-09)
+
+CatalogTransport owns synchronous stream decoding, strict Brotli completion and the inclusive
+134,217,728-byte decoded limit. DeclarationCatalog consumes its JsonDocument through the
+existing schema, compatibility, source, ownership, API, generic and variant checks.
+Case-insensitive .br suffixes select compression; other paths retain JSON semantics.
+GeneratorConfig keeps its emission boolean and adds explicit output compression. Pipeline.run
+writes declarations.json.br when selected and reports its actual name; RenderModel.Files
+retains JSON text. Existing alternate-format output is preserved. Transport does not change
+the inference profile or compatibility versions. Opposing Windows/Linux exchange retains both
+payloads; package discovery and NuGet descriptors remain later work.
+
 # Easy Nits 
 
 To include in scope when a phases implementation/attempt ends up being small/quick.

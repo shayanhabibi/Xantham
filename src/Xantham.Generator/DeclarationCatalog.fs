@@ -856,7 +856,7 @@ let private load producer (path: string) =
     if not (File.Exists path) then
         fail $"reference does not exist: {path}"
 
-    use document = JsonDocument.Parse(File.ReadAllText path)
+    use document = CatalogTransport.readJson path
     let root = document.RootElement
     let compatibility = CatalogCompatibility.read path root
     let catalog = JsonSerializer.Deserialize<Catalog>(root, options)

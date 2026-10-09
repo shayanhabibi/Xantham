@@ -5,6 +5,7 @@
 open System
 open System.Diagnostics
 open System.IO
+open System.IO.Compression
 open System.Security
 open System.Security.Cryptography
 open System.Text.Json
@@ -63,10 +64,19 @@ let requireFile artifact name =
 
     file
 
-let payloadFiles = [ "Portability.Root.fs"; "declarations.json" ]
+let payloadFiles =
+    [ "Portability.Root.fs"; "declarations.json"; "declarations.json.br" ]
 
 let requirePortable catalog =
-    use document = JsonDocument.Parse(File.ReadAllText catalog)
+    use file = File.OpenRead catalog
+
+    use decoded =
+        if catalog.EndsWith(".br", StringComparison.OrdinalIgnoreCase) then
+            new BrotliStream(file, CompressionMode.Decompress) :> Stream
+        else
+            file :> Stream
+
+    use document = JsonDocument.Parse decoded
 
     let metadata =
         document.RootElement.GetProperty("compatibility").GetProperty("compiler")
@@ -87,6 +97,27 @@ let produce artifact =
 
     Pipeline.run config dependency artifact |> Async.RunSynchronously |> ignore
     requirePortable (requireFile artifact "declarations.json")
+
+    let compressedOutput =
+        freshPath (Path.Combine(scratchRoot, "catalog-brotli-" + Guid.NewGuid().ToString "N"))
+
+    try
+        let compressedConfig =
+            { config with
+                DeclarationCatalogCompression = CatalogCompression.Brotli
+            }
+
+        Pipeline.run compressedConfig dependency compressedOutput
+        |> Async.RunSynchronously
+        |> ignore
+
+        let compressed = requireFile compressedOutput "declarations.json.br"
+        requirePortable compressed
+        File.Copy(compressed, Path.Combine(artifact, "declarations.json.br"))
+    finally
+        if Directory.Exists compressedOutput then
+            Directory.Delete(compressedOutput, true)
+
     writeHashes (Path.Combine(artifact, "sources.json")) (sourceHashes ())
 
     let payload =
@@ -182,23 +213,29 @@ let consume artifact directory =
     if payload <> (requireFile artifact "payload.json" |> readHashes) then
         fail "artifact payload hash mismatch"
 
-    let catalog = requireFile artifact "declarations.json"
-    requirePortable catalog
+    let catalogs =
+        [ "json", "declarations.json"; "brotli", "declarations.json.br" ]
+        |> List.map (fun (format, name) -> format, requireFile artifact name)
 
-    let config =
-        { GeneratorConfig.load fixture with
-            DeclarationReferences = [ catalog ]
-        }
+    for _, catalog in catalogs do
+        requirePortable catalog
 
-    let generated = Path.Combine(directory, "adapter")
-    let result = Pipeline.run config fixture generated |> Async.RunSynchronously
+    for format, catalog in catalogs do
+        let config =
+            { GeneratorConfig.load fixture with
+                DeclarationReferences = [ catalog ]
+            }
 
-    let files =
-        result.OutputFiles
-        |> List.filter (fun name -> name.EndsWith ".fs")
-        |> List.map (fun name -> Path.Combine(generated, name))
+        let consumerDirectory = Path.Combine(directory, format)
+        let generated = Path.Combine(consumerDirectory, "adapter")
+        let result = Pipeline.run config fixture generated |> Async.RunSynchronously
 
-    compile directory (requireFile artifact "Portability.Root.fs" :: files)
+        let files =
+            result.OutputFiles
+            |> List.filter (fun name -> name.EndsWith ".fs")
+            |> List.map (fun name -> Path.Combine(generated, name))
+
+        compile consumerDirectory (requireFile artifact "Portability.Root.fs" :: files)
 
 match fsi.CommandLineArgs |> Array.skip 1 |> Array.toList with
 | [ "produce"; artifact ] ->

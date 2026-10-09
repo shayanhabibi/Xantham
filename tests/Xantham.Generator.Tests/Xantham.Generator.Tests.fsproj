@@ -20,6 +20,8 @@
         <Compile Include="Ownership.test.fs" />
         <Compile Include="CatalogCompatibility.test.fs" />
         <Compile Include="CatalogCompiler.test.fs" />
+        <Compile Include="CatalogTransport.test.fs" />
+        <Compile Include="CatalogFixtures.fs" />
         <Compile Include="DeclarationCatalog.test.fs" />
         <Compile Include="CatalogPortability.test.fs" />
         <Compile Include="Pipeline.test.fs" />
