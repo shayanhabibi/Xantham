@@ -197,4 +197,49 @@ Recommended execution is native in this session with one fresh final reviewer: t
 
 ## Execution evidence
 
-No product implementation or validation results yet. Fill this section with actual RED/GREEN commands, full gate results, unchanged corpus measures, review resolutions, and separately observed cross-platform CI results during execution.
+Native execution approved on 2026-10-09. All four implementation tasks are complete;
+the independent whole-branch review is pending.
+
+- Transport: missing-module RED, then 11 focused tests GREEN; the later flushed-stream
+  characterization proves a complete JSON value before Brotli completion is rejected.
+  One-byte input reads, seven-byte output reads, zero-count reads, every strict prefix,
+  trailing/concatenated streams, UTF-8 byte boundaries and exclusive reopening are covered.
+- Configuration/output: missing enum/record-field RED, then 17 focused tests GREEN.
+  Independent decompression equals plain JSON bytes; F#/manifest output and the text
+  generation API remain unchanged. Different output compression preserves inference
+  authentication. Schema regeneration changed only declarationCatalog's forms.
+- Loading/authentication: actual Brotli input failed as invalid JSON with the old loader,
+  then 150 catalogue-focused tests passed with the shared reader. Existing source,
+  manifest, owner, API, arity and constraint checks plus customization variants exercise
+  both formats. Mixed chains, duplicate/malformed metadata, stale alternate output and
+  corruption in a later reference are covered.
+- Exchange: Node RED observed the missing compressed artifact, then actual produce/consume
+  tests passed. Both payload byte hashes and consumer DLLs are checked; changed source,
+  binding and compressed bytes fail before consumer output. All five Node tooling tests passed.
+- Full verification: dotnet build Xantham.slnx passed (15 projects, zero errors; existing
+  FSharp.Compiler.Service/FSharp.Core NU1608 warnings). build.fsx -- test --run-gate passed:
+  1,176 generator tests, 99 Wire tests, two expected skips, 468 Fable checks and the Partas
+  integration gate. Production formatting and git diff --check passed.
+- Corpus: all 244 pre-existing golden F#/manifest hashes and finding counts/tiers are
+  unchanged. Fresh FCS generator/test checks are clean; public API inspection confirms
+  the new public configuration field, whose source migration is documented.
+- Branch: PR #111 merged as ccd7d79. Its tree equals the old 2a0c801 base; only this wave's
+  six commits were rebased onto origin/develop, preserving the verified file tree.
+- Cross-platform evidence: opposing Windows/Linux CI now exchanges both formats.
+  Local exchange evidence is Windows only; remote CI has not run for this wave yet.
+
+Execution rulings:
+
+- CRLF Bash skill helpers fail under available WSL Bash; equivalent native bookkeeping
+  preserves task bases, briefs and results. Cost if wrong: bookkeeping repair.
+- Stream adapter types are visible inside the internal module for focused read-contract
+  tests. Cost if wrong: reduce internal type visibility.
+- Additional configuration object keys retain the existing parser's ignore policy; the
+  editor schema disallows them, matching other nested settings. Cost if wrong: add stricter
+  extra-key validation.
+- Large authentication tests prepare/mutate JSON and independently compress references
+  immediately before consumption. Cost if wrong: a missed wrapper leaves a case JSON-only;
+  semantic use-site review verifies the wrapper coverage.
+- Independent exchange tooling was prepared during the final Task 3 gate; the full gate
+  does not execute that tooling, and a final whole-wave gate followed. Cost if wrong: rerun
+  verification.
