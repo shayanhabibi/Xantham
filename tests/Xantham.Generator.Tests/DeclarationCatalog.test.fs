@@ -129,6 +129,78 @@ let second (value: Identity.Root.Second.SupportedLocalesOf.Options) : Identity.R
         finally Directory.Delete(directory, true)
 
 [<Tests>]
+let literalUnionOwnershipTests =
+    match Tsc.locate __SOURCE_DIRECTORY__ with
+    | None -> testCase "literal union ownership skipped - no compiler" <| fun _ -> skiptest "no tsc"
+    | Some _ ->
+        testCase "literal union ownership requires coordinated producer catalogs" <| fun _ ->
+            use scratch = Scratch.directory "literal-union-ownership"
+            let directory = scratch.Path
+            let source = Path.GetFullPath(Path.Combine(fixture, "..", "literal-union-ownership-lab"))
+            let package = Path.Combine(directory, "package")
+            for file in Directory.EnumerateFiles(source, "*", SearchOption.AllDirectories) do
+                writePackageFile package (Path.GetRelativePath(source, file)) (File.ReadAllText file)
+            let config = GeneratorConfig.loadFile (Path.Combine(package, "xantham.json"))
+            let producer name = Path.Combine(package, "node_modules", "literal-owner-" + name + "-lab")
+            let generate name input references =
+                let output = Path.Combine(directory, name)
+                let config =
+                    { config with
+                        ModuleName = Some ("Identity." + name)
+                        DeclarationReferences = references }
+                Pipeline.run config input output |> Async.RunSynchronously |> ignore
+                Path.Combine(output, "declarations.json")
+            let readCatalog path =
+                JsonSerializer.Deserialize<DeclarationCatalog.Catalog>(File.ReadAllText path,
+                    JsonSerializerOptions(PropertyNameCaseInsensitive = true))
+            let literal path = (readCatalog path).Declarations |> Array.find (fun declaration -> declaration.Role = "literal-union")
+            let a = generate "OwnerA" (producer "a") []
+            let b = generate "OwnerB" (producer "b") []
+            Expect.equal (literal a).Identity (literal b).Identity "opposite member orders share structural identity"
+            Expect.equal (literal a).Api (literal b).Api "the enum surfaces agree despite separate nominal ownership"
+            Expect.notEqual (literal a).FSharpName (literal b).FSharpName "independent producers emit distinct F# enum names"
+            for references in [ [ a; b ]; [ b; a ] ] do
+                Expect.throwsC (fun () -> generate "Consumer" package references |> ignore)
+                    (fun error -> Expect.stringContains error.Message "references disagree on declaration" "independent ownership is rejected in either order")
+            let b = generate "OwnerB" (producer "b") [ a ]
+            Expect.equal (literal b).FSharpName (literal a).FSharpName "producer B selects A as the shared owner"
+            let owner = (readCatalog b).Owners |> Array.find (fun owner -> owner.Name = "Identity.OwnerB")
+            Expect.equal owner.Dependencies [| "Identity.OwnerA" |] "the catalog records the generated F# dependency"
+            let named catalog name = (readCatalog catalog).Declarations |> Array.find (fun declaration -> declaration.FSharpName = name)
+            Expect.notEqual (named a "Identity.OwnerA.NamedA").Identity (named b "Identity.OwnerB.NamedB").Identity
+                "equal-valued named aliases retain their separate declaration identities"
+            generate "Consumer" package [ a; b ] |> ignore
+            let forward = File.ReadAllText(Path.Combine(directory, "Consumer", "Identity.Consumer.fs"))
+            generate "Consumer" package [ b; a ] |> ignore
+            Expect.equal (File.ReadAllText(Path.Combine(directory, "Consumer", "Identity.Consumer.fs"))) forward
+                "coordinated catalog order does not change the consumer API"
+            let sources = [ "OwnerA/Identity.OwnerA.fs"; "OwnerB/Identity.OwnerB.fs"; "Consumer/Identity.Consumer.fs" ]
+            let consumer = """module Identity.Usage
+let useBoth (a: Identity.OwnerA.AOptions) (b: Identity.OwnerB.BOptions) =
+    Identity.Consumer.Exports.accept(a, b)
+    Identity.Consumer.Exports.takeA(?value = a.maxTokensField)
+    Identity.Consumer.Exports.takeB(?value = b.maxTokensField)
+    b.maxTokensField <- a.maxTokensField
+"""
+            let code, output = compileConsumer directory sources consumer
+            Expect.equal code 0 output
+            let invalid = consumer + "\nlet invalid (value: Identity.OwnerA.NamedA) : Identity.OwnerB.NamedB = value\n"
+            let code, output = compileConsumer directory sources invalid
+            Expect.notEqual code 0 "coordinating anonymous unions does not merge named aliases"
+            Expect.stringContains output "FS0001" "the named aliases remain distinct F# enum types"
+            let stale = Path.Combine(directory, "stale-api.json")
+            let catalog = JsonNode.Parse(File.ReadAllText a)
+            for declaration in catalog["declarations"].AsArray() do
+                if declaration["role"].GetValue<string>() = "literal-union" then
+                    declaration["api"] <- JsonValue.Create("stale-api-hash")
+            File.WriteAllText(stale, catalog.ToJsonString())
+            Expect.throwsC (fun () -> generate "OwnerB" (producer "b") [ stale ] |> ignore)
+                (fun error -> Expect.stringContains error.Message "F# API mismatch" "selecting an owner retains API authentication")
+            File.AppendAllText(Path.Combine(producer "a", "index.d.ts"), "\n// Changed producer source.\n")
+            Expect.throwsC (fun () -> generate "Consumer" package [ a; b ] |> ignore)
+                (fun error -> Expect.stringContains error.Message "input source hash mismatch" "a changed producer input invalidates the coordinated catalog")
+
+[<Tests>]
 let classImplementsTests =
     match Tsc.locate __SOURCE_DIRECTORY__ with
     | None -> testCase "class implements catalog skipped - no compiler" <| fun _ -> skiptest "no tsc"
@@ -1219,7 +1291,7 @@ let share (agent: Identity.Adapter.Agent) : Identity.Root.Agent = agent
                         compiler["version"] <- JsonValue.Create "incompatible"
                     | "generator" ->
                         let compatibility = catalog["compatibility"]
-                        compatibility["identityVersion"] <- JsonValue.Create 2
+                        compatibility["identityVersion"] <- JsonValue.Create(compatibility["identityVersion"].GetValue<int>() + 1)
                     | "inferenceProfile" -> catalog[mutation] <- JsonValue.Create "incompatible"
                     | "manifest" -> (catalog["inputs"][0])["manifestSha256"] <- JsonValue.Create "changed"
                     | "input" -> (catalog["inputs"][0])["sha256"] <- JsonValue.Create "changed"
@@ -1302,6 +1374,91 @@ let sourceClosureTests =
                 skiptest "run `npm install` at the repository root, or set XANTHAM_TSGO_EXE" ]
     | Some _ ->
         testList "declaration catalog source closure" [
+            let projectionFixture = Path.GetFullPath(Path.Combine(fixture, "..", "catalog-source-projection-lab"))
+            let prepareProjection directory =
+                let package = Path.Combine(directory, "package")
+                Directory.CreateDirectory package |> ignore
+                for file in Directory.GetFiles projectionFixture do
+                    File.Copy(file, Path.Combine(package, Path.GetFileName file))
+                let producer = Path.Combine(directory, "root")
+                Pipeline.run (configured directory "Root" "model.d.ts" [||]) package producer
+                |> Async.RunSynchronously |> ignore
+                package, Path.Combine(producer, "declarations.json")
+
+            testCase "indexed exports do not enter the referenced type source closure" <| fun _ ->
+                use scratch = Scratch.directory "catalog-source-projection"
+                let directory = scratch.Path
+                let package, reference = prepareProjection directory
+                let adapter = Path.Combine(directory, "adapter")
+                Pipeline.run (configured directory "Adapter" "index.d.ts" [| reference |]) package adapter
+                |> Async.RunSynchronously |> ignore
+                use producerCatalog = JsonDocument.Parse(File.ReadAllText reference)
+                use catalog = JsonDocument.Parse(File.ReadAllText(Path.Combine(adapter, "declarations.json")))
+                let sources (document: JsonDocument) name =
+                    document.RootElement.GetProperty("declarations").EnumerateArray()
+                    |> Seq.find (fun entry -> entry.GetProperty("fSharpName").GetString() = name)
+                    |> fun entry -> entry.GetProperty("sources").EnumerateArray()
+                    |> Seq.toList
+                let packageSources name =
+                    sources catalog name
+                    |> List.filter (fun source -> source.GetProperty("package").GetString() = "catalog-source-projection-lab")
+                    |> Seq.map (fun source -> source.GetProperty("file").GetString())
+                    |> Seq.sort |> Seq.toList
+                for name in [ "Scalar"; "ArrayContent"; "Nullable"; "TupleContent"; "ObjectContent" ] do
+                    let name = "Identity.Root." + name
+                    sources catalog name |> List.map _.GetRawText()
+                    |> Flip.Expect.equal "all producer sources, including compiler libraries, remain unchanged"
+                        (sources producerCatalog name |> List.map _.GetRawText())
+                    packageSources name
+                    |> Flip.Expect.equal "the source closure retains the owner declaration" [ "model.d.ts" ]
+                for name in [ "ScalarProjection"; "ArrayProjection"; "NullableProjection" ] do
+                    packageSources ("Identity.Adapter." + name)
+                    |> Flip.Expect.equal "the projection retains its own declaration source" [ "index.d.ts" ]
+                packageSources "Identity.Root.Named"
+                |> Flip.Expect.equal "an explicitly referenced alias remains in the source closure" [ "model.d.ts"; "named.d.ts" ]
+                let consumer = """module Identity.Consumer
+let scalar (value: Identity.Root.Scalar) : Identity.Root.Scalar = Identity.Adapter.Exports.scalar value
+let array (value: Identity.Root.ArrayContent) : Identity.Root.ArrayContent = Identity.Adapter.Exports.array value
+let nullable (value: Identity.Root.Nullable) : Identity.Root.Nullable = Identity.Adapter.Exports.nullable value
+let tuple (value: Identity.Root.TupleContent) : Identity.Root.TupleContent = Identity.Adapter.Exports.tuple value
+let object (value: Identity.Root.ObjectContent) : Identity.Root.ObjectContent = Identity.Adapter.Exports.``object`` value
+let named (value: Identity.Root.Named) : Identity.Root.Named = Identity.Adapter.Exports.named value
+"""
+                File.WriteAllText(Path.Combine(directory, "Directory.Build.props"), "<Project />")
+                File.WriteAllText(Path.Combine(directory, "Directory.Build.targets"), "<Project />")
+                let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] consumer
+                code |> Flip.Expect.equal output 0
+
+            testTheory "projected exports retain source and API authentication" [ "source"; "api"; "input" ] <| fun mutation ->
+                use scratch = Scratch.directory "catalog-source-projection-mutation"
+                let directory = scratch.Path
+                let package, reference = prepareProjection directory
+                let catalog = JsonNode.Parse(File.ReadAllText reference)
+                let scalar =
+                    catalog["declarations"].AsArray()
+                    |> Seq.find (fun entry -> entry["fSharpName"].GetValue<string>() = "Identity.Root.Scalar")
+                let expected =
+                    match mutation with
+                    | "source" ->
+                        (scalar["sources"][0])["sha256"] <- JsonValue.Create "changed"
+                        "source hash mismatch"
+                    | "api" ->
+                        scalar["api"] <- JsonValue.Create "changed"
+                        "F# API mismatch"
+                    | _ ->
+                        File.AppendAllText(Path.Combine(package, "named.d.ts"), "\n// changed declaration source\n")
+                        "input source hash mismatch"
+                File.WriteAllText(reference, catalog.ToJsonString())
+                let output = Path.Combine(directory, "adapter")
+                let message =
+                    try
+                        Pipeline.run (configured directory "Adapter" "index.d.ts" [| reference |]) package output
+                        |> Async.RunSynchronously |> ignore
+                        ""
+                    with error -> error.Message
+                (message.Contains expected, Directory.Exists output)
+                |> Flip.Expect.equal message (true, false)
+
             let inline (==>) declaration scenario = declaration, scenario
             testTheory "value exports preserve referenced declaration ownership" [
                 "export declare const current: Client;" ==> "instance"
@@ -1543,3 +1700,92 @@ let wideSurfaceTests =
                     (catalog.Declarations |> Array.find (fun declaration -> declaration.FSharpName = "Identity.Root.Wide")).Api
                 Expect.notEqual (api "string") (api "number") "the 101st member participates in the API hash"
             finally Directory.Delete(directory, true)
+
+[<Tests>]
+let genericDefaultConstraintTests =
+    match Tsc.locate __SOURCE_DIRECTORY__ with
+    | None ->
+        testCase "declaration catalog generic defaults skipped - no compiler" <| fun _ -> skiptest "no tsc"
+    | Some _ ->
+        testList "declaration catalog generic defaults" [
+            testCase "never defaults retain shared constraints and compile concrete defaults" <| fun _ ->
+                use scratch = Scratch.directory "catalog-generic-defaults"
+                let directory = scratch.Path
+                let package = Path.GetFullPath(Path.Combine(fixture, "..", "catalog-generic-defaults-lab"))
+                let root = Path.Combine(directory, "root")
+                Pipeline.run (configured directory "Root" "index.d.ts" [||]) package root |> Async.RunSynchronously |> ignore
+                let reference = Path.Combine(root, "declarations.json")
+                let adapter = configured directory "Adapter" "index.d.ts" [| reference |]
+                Pipeline.run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                let sources = [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ]
+                let consumer = """module Identity.Consumer
+let project<'T when 'T :> Identity.Root.Def> (value: Identity.Root.Middleware<'T>) : Identity.Root.Result<'T> option =
+    value.callback |> Option.map (fun callback -> callback ())
+let share<'T when 'T :> Identity.Root.Def> (value: Identity.Adapter.Middleware<'T>) : Identity.Root.Middleware<'T> = value
+let defaults (value: Identity.Root.Defaults) : Identity.Root.Middleware<Identity.Root.Def> = value.middleware
+"""
+                let code, output = compileConsumer directory sources consumer
+                Expect.equal code 0 output
+                let code, output = compileConsumer directory sources (consumer + "\nlet invalid (value: Identity.Root.Middleware<string>) = value\n")
+                Expect.notEqual code 0 "the default does not remove the declared nominal bound"
+                Expect.stringContains output "FS0001" "string cannot satisfy the declaration's bound"
+                let catalog = JsonNode.Parse(File.ReadAllText reference)
+                let declaration =
+                    catalog["declarations"].AsArray()
+                    |> Seq.find (fun entry -> entry["fSharpName"].GetValue<string>() = "Identity.Root.Result")
+                declaration["constraints"] <- JsonNode.Parse """["none"]"""
+                File.WriteAllText(reference, catalog.ToJsonString())
+                Expect.throwsC
+                    (fun () -> Pipeline.run adapter package (Path.Combine(directory, "tampered")) |> Async.RunSynchronously |> ignore)
+                    (fun error -> Expect.stringContains error.Message "constraint mismatch" "catalog authentication still rejects different constraints")
+
+            testTheory "nullable and promised applications share the declaration's bound" [
+                for fallback in [ " = never"; " = Def"; "" ] do
+                    for nullable in [ false; true ] do yield fallback, nullable
+            ] <| fun (fallback, nullable) ->
+                use scratch = Scratch.directory "catalog-generic-default-shapes"
+                let directory = scratch.Path
+                writePackageFile directory "package.json" """{"name":"catalog-generic-default-shapes-lab","version":"1.0.0","types":"index.d.ts"}"""
+                let absence = if nullable then "undefined | " else ""
+                writePackageFile directory "index.d.ts"
+                    ("export interface Def { id: string; }\n"
+                     + "export type Result<T extends Def = Def> = " + absence + "{ definition: T };\n"
+                     + "export interface Middleware<U extends Def" + fallback + "> { callback?: () => Result<U> | Promise<Result<U>>; }\n")
+                Pipeline.run (configured directory "Root" "index.d.ts" [||]) directory (Path.Combine(directory, "root"))
+                |> Async.RunSynchronously |> ignore
+
+            testCase "applied bounds retain their arguments through any and never applications" <| fun _ ->
+                use scratch = Scratch.directory "catalog-applied-default-bound"
+                let directory = scratch.Path
+                let package = Path.GetFullPath(Path.Combine(fixture, "..", "catalog-generic-defaults-lab"))
+                let root = Path.Combine(directory, "root")
+                Pipeline.run (configured directory "Root" "index.d.ts" [||]) package root |> Async.RunSynchronously |> ignore
+                let consumer = """module Identity.Consumer
+let any (value: Identity.Root.AnyApplied) : Identity.Root.Applied<Identity.Root.Bound<string>> = value
+let never (value: Identity.Root.NeverApplied) : Identity.Root.Applied<Identity.Root.Bound<string>> = value
+let inherited (value: Identity.Root.InheritedApplied) : Identity.Root.Applied<Identity.Root.Bound<string>> = value :> _
+let nominal (value: Identity.Root.StringApplied) : Identity.Root.Applied<Identity.Root.StringBound> = value
+let distinctArguments (value: Identity.Root.ErasedString) : Identity.Root.Erased<Identity.Root.Bound<obj>> = value
+let recursive (value: Identity.Root.RecursiveUse) : Identity.Root.Recursive<Identity.Root.RecursiveValue> = value
+"""
+                let sources = [ "root/Identity.Root.fs" ]
+                let code, output = compileConsumer directory sources consumer
+                Expect.equal code 0 output
+                let invalid = consumer + "\nlet invalid (value: Identity.Root.Applied<Identity.Root.NumberBound>) = value\n"
+                let code, output = compileConsumer directory sources invalid
+                Expect.notEqual code 0 "a different application of Bound does not satisfy Bound<string>"
+                Expect.stringContains output "FS0001" "the generic arguments participate in the nominal constraint"
+
+            testCase "inhabited structural defaults keep the existing constraint mapping" <| fun _ ->
+                use scratch = Scratch.directory "catalog-structural-default"
+                let directory = scratch.Path
+                writePackageFile directory "package.json" """{"name":"catalog-structural-default-lab","version":"1.0.0","types":"index.d.ts"}"""
+                writePackageFile directory "index.d.ts" """export interface Def { id: string; }
+export interface Structural { id: string; extra: number; }
+export interface Holder<T extends Def = Structural> { value: T; }
+"""
+                let output = Path.Combine(directory, "root")
+                Pipeline.run (configured directory "Root" "index.d.ts" [||]) directory output |> Async.RunSynchronously |> ignore
+                let binding = File.ReadAllText(Path.Combine(output, "Identity.Root.fs"))
+                Expect.stringContains binding "type Holder<'T>" "structural default policy remains unconstrained"
+        ]

@@ -1,0 +1,17 @@
+{"name":"ScalarProjection","file":"index.d.ts","tier":"exact","findings":[]}
+{"name":"ArrayProjection","file":"index.d.ts","tier":"exact","findings":[]}
+{"name":"NullableProjection","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"TR.NullableHoistedToOption","key":"TR032","pass":"shape-aliases","tier":"ergonomic","symbol":"NullableProjection","fields":{"fromNull":false,"fromUndefined":true,"fromVoid":false},"message":"undefined union members hoisted to option"}]}
+{"name":"TupleProjection","file":"index.d.ts","tier":"exact","findings":[]}
+{"name":"ObjectProjection","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"ObjectProjection","message":"ParamObject Create synthesized (D3)"}]}
+{"name":"Scalar","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Scalar","message":"ParamObject Create synthesized (D3)"}]}
+{"name":"ArrayContent","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"ArrayContent","message":"ParamObject Create synthesized (D3)"}]}
+{"name":"Nullable","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"TR.NullableHoistedToOption","key":"TR032","pass":"shape-interfaces","tier":"ergonomic","symbol":"Nullable.content","fields":{"fromNull":false,"fromUndefined":true,"fromVoid":false},"message":"undefined union members hoisted to option"},{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Nullable","message":"ParamObject Create synthesized (D3)"}]}
+{"name":"TupleContent","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"TupleContent","message":"ParamObject Create synthesized (D3)"}]}
+{"name":"ObjectContent","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"ObjectContent","message":"ParamObject Create synthesized (D3)"}]}
+{"name":"Named","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Named","message":"ParamObject Create synthesized (D3)"}]}
+{"name":"Exports.scalar","tier":"exact","findings":[]}
+{"name":"Exports.array","tier":"exact","findings":[]}
+{"name":"Exports.nullable","tier":"exact","findings":[]}
+{"name":"Exports.tuple","tier":"exact","findings":[]}
+{"name":"Exports.object","tier":"exact","findings":[]}
+{"name":"Exports.named","tier":"exact","findings":[]}

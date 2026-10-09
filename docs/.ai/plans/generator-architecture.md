@@ -1898,3 +1898,42 @@ and methods, while property companion selection stays property-only. Attribute t
 use authenticated producer names; both interface and concrete entrypoint renderers consume the
 same annotations. Replacement signatures reject unbound type variables, and companion namespaces
 cannot enter occupied generated modules/types.
+
+## Catalog composition (2026-10-09)
+
+Schema 2 compatibility advances `identityVersion` to 2 for the source-closure correction
+and `apiVersion` to 2 for the emitted generic-constraint change. Producers from the
+preceding contract must be regenerated; their catalogs reject before substitution.
+Contract policy, inference-profile semantics and customization rules are unchanged, so
+their versions remain 1. This deliberate boundary avoids relying on a declaration-specific
+mismatch to identify an older producer. Catalog transport and the compiler source contract
+remain unchanged.
+
+The catalog's transitive source closure uses canonical entries with intrinsic type declarations.
+Export-only handles still anchor their own public aliases, but an exported indexed projection
+cannot add its consumer file to an upstream interface's source set through a compiler-interned
+anonymous type. `catalog-source-projection-lab` covers scalar, array, nullable, tuple and nested
+object projections, preserves explicit named-alias sources, and rejects source/API/input changes.
+Named-versus-anonymous tagged-union API drift remains a separate migration blocker.
+
+Binding families select a shared anonymous-literal owner through the producer catalog graph.
+Generate the selected owner first, then regenerate each dependent producer against its catalog.
+The dependent producer exposes the selected enum in its public F# API and records the owner
+dependency. Consumers may list the coordinated catalogs in either order. Independent producers
+with different F# owners for one structural identity remain incompatible; consumer ordering does
+not select an owner. Named aliases retain their declaration identities at equal literal values.
+`literal-union-ownership-lab` covers both independent rejection and coordinated typed field use,
+including source/API invalidation and distinct named aliases.
+
+Nominal generic constraints remain present when a TypeScript type parameter defaults to `never`.
+`Shape.Spec.constraintProvenNominal` preserves that declaration bound; concrete applications
+retain the existing argument check and `TR044` fallback when the F# argument cannot satisfy it.
+Applied bounds retain their full F# reference, including generic arguments, at both declaration
+and argument sites. Constraint equivalence compares emitted references instead of checker IDs;
+two checker instantiations of the same bound must not force different widening. Arguments such
+as `any` or `never` widen to the complete bound through the existing findings. Pure index
+signatures remain outside nominal constraint mapping.
+Other structurally incompatible defaults retain the existing `TP008` policy.
+`catalog-generic-defaults-lab` covers declaration and callback-result agreement, bare default
+applications, generic-bound arguments, nominal subclasses, recursive bounds and invalid concrete
+arguments. Catalog constraint authentication remains unchanged.
