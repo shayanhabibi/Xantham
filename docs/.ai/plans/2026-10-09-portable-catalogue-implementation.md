@@ -252,24 +252,24 @@ docs/.ai/plans/generator-architecture.md, docs/.ai/README.md, and this execution
 **Files:** create tools/catalog-portability.fsx and .github/workflows/catalog-portability.yml;
 use existing setup action, compileConsumer conventions, and the Task 3 lab.
 
-- [ ] Add a script with `produce <artifactDir>` and `consume <artifactDir> <scratchDir>` modes.
+- [x] Add a script with `produce <artifactDir>` and `consume <artifactDir> <scratchDir>` modes.
   Reference the built Generator and Wire assemblies from the checkout and use Pipeline.run;
   all outputs live under tests/.scratch. Producer mode writes the tiny binding, declarations.json,
   and a source-byte SHA-256 manifest. Consumer mode verifies all source hashes, loads the foreign
   catalogue, generates a consumer, and builds a scratch consumer project using the repository's
   pinned support assemblies. Fail if the compiler is absent or a generation/compile step fails.
-- [ ] Run local produce→consume as the same-platform smoke gate and corrupt the source manifest
+- [x] Run local produce→consume as the same-platform smoke gate and corrupt the source manifest
   once to verify the gate fails for the intended hash mismatch.
-- [ ] Add Windows/Linux producer jobs and opposing consumer jobs. Each uses checkout and setup,
+- [x] Add Windows/Linux producer jobs and opposing consumer jobs. Each uses checkout and setup,
   installs pinned npm dependencies, builds the required projects, uploads/downloads the small lab
   artifact, and invokes the script. Use immutable action pins; resolve an existing download-artifact
   pin `actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c` already used by release.yml.
   Configure LF for tracked source fixture
   checkout, and use recorded hashes to detect any byte changes in artifacts or inputs.
-- [ ] Trigger on the same PR/push branches as test.yml and workflow_dispatch. Keep read-only
+- [x] Trigger on the same PR/push branches as test.yml and workflow_dispatch. Keep read-only
   contents/actions permissions, bounded job timeouts, required artifact downloads, and both
   direction-specific job names. Run the repository's CI policy tests against the workflow.
-- [ ] Run required local gates once after the integrated change:
+- [x] Run required local gates once after the integrated change:
 
 ```powershell
 rtk dotnet fsi build.fsx -- test
@@ -280,13 +280,13 @@ rtk git diff --check
 rtk git diff --stat
 ```
 
-- [ ] Compare aggregate findings and golden source hashes with the pre-implementation baseline.
+- [x] Compare aggregate findings and golden source hashes with the pre-implementation baseline.
   Catalogue JSON changes and the new lab are expected; explain any other generated F# or finding
   changes using the fixture rules. Stop and report unexplained corpus movement.
 - [ ] Perform a whole-branch review through the selected execution skill's workflow, fix verified
   issues, and rerun only the affected checks. Record exact local results and distinguish pending
   remote Windows↔Linux jobs from completed local verification.
-- [ ] Commit the CI gate and report the branch, commits, tests, and any outstanding remote evidence.
+- [x] Commit the CI gate and report the branch, commits, tests, and any outstanding remote evidence.
 
 ## Execution readiness
 
@@ -299,3 +299,13 @@ Execution is on agent/portable-catalogue; the final cross-platform gate remains 
 Before code edits, record the catalogue test baseline and `rtk dotnet fsi build.fsx -- findings`
 output in the selected workspace. Run setup through build.fsx; a linked worktree borrows the main
 compiler install through tools/workspace.fsx and initializes its own fixture dependencies.
+
+## Execution evidence (2026-10-09)
+
+Local full setup/test/run-gate passed: 1,070 generator tests and 99 Wire tests,
+two ignored tests, 468 Fable runtime checks, and the Partas integration gate.
+Solution build compiled 15 projects with zero errors. Policy/tooling tests passed 27/27;
+the live exchange smoke test also rejects changed source hashes, changed payload bytes,
+and missing payload files. All 241 pre-existing golden source/manifest hashes are unchanged;
+the new lab adds Exact=2 and Ergonomic=1. Cross-platform CI artifact exchange is pending.
+Whole-branch review follows the gate commit.
