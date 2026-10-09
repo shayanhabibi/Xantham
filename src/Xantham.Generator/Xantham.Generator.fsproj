@@ -60,6 +60,7 @@
         <Compile Include="Render.fs" />
         <Compile Include="CatalogCompatibility.fs" />
         <Compile Include="CatalogCompiler.fs" />
+        <Compile Include="CatalogTransport.fs" />
         <Compile Include="DeclarationCatalog.fs" />
         <Compile Include="Customization\Contract.fsi" />
         <Compile Include="Customization\Contract.fs" />
