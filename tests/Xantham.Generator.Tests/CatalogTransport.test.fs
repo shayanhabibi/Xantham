@@ -65,6 +65,22 @@ let tests = testList "catalog transport" [
         for length in 0 .. bytes.Length - 1 do
             File.WriteAllBytes(path, bytes |> Array.take length)
             rejected "brotli" 1000L path
+    testCase "complete JSON before Brotli end marker rejects" <| fun () ->
+        use scratch = Scratch.directory "catalog-transport"
+        let path = Path.Combine(scratch.Path, "unfinished.json.br")
+        use encoded = new MemoryStream()
+        use writer = new BrotliStream(encoded, CompressionLevel.SmallestSize, true)
+        let json = Encoding.UTF8.GetBytes "{}"
+        writer.Write(json, 0, json.Length)
+        writer.Flush()
+        let partial = encoded.ToArray()
+        use input = new MemoryStream(partial)
+        use decoder = new BrotliStream(input, CompressionMode.Decompress)
+        let output = Array.zeroCreate<byte> 2
+        Expect.equal (decoder.Read(output, 0, 2)) 2 "fixture already contains complete JSON"
+        Expect.sequenceEqual output json "decoded complete value"
+        File.WriteAllBytes(path, partial)
+        rejected "truncated" 1000L path
     testCase "trailing bytes and concatenated streams reject" <| fun () ->
         use scratch = Scratch.directory "catalog-transport"
         let path = Path.Combine(scratch.Path, "trailing.json.br")

@@ -2,6 +2,8 @@ module Xantham.Generator.Tests.CatalogPortabilityTests
 
 open System
 open System.IO
+open System.IO.Compression
+open System.Text
 open System.Text.Json.Nodes
 open Expecto
 open Xantham.Generator
@@ -9,7 +11,7 @@ open Xantham.Generator.CatalogCompatibility
 
 let private fixture = Path.GetFullPath(Path.Combine(__SOURCE_DIRECTORY__, "..", "fixtures", "catalog-portability-lab"))
 
-let private withProducer run =
+let private withProducer compression run =
     use scratch = Scratch.directory "catalog-portability"
     let package = Path.Combine(scratch.Path, "package")
     for file in Directory.EnumerateFiles(fixture, "*", SearchOption.AllDirectories) do
@@ -17,25 +19,41 @@ let private withProducer run =
         Directory.CreateDirectory(Path.GetDirectoryName target) |> ignore
         File.Copy(file, target)
     let config = GeneratorConfig.load package
-    let producer = { config with ModuleName = Some "Portability.Root" }
+    let producer = { config with ModuleName = Some "Portability.Root"; DeclarationCatalogCompression = compression }
     let dependency = Path.Combine(package, "node_modules", "catalog-portability-owner-lab")
     let root = Path.Combine(scratch.Path, "root")
     Pipeline.run producer dependency root |> Async.RunSynchronously |> ignore
-    let catalog = Path.Combine(root, "declarations.json")
+    let catalog = Path.Combine(root, if compression = CatalogCompression.Brotli then "declarations.json.br" else "declarations.json")
     let consumer = { config with DeclarationReferences = [catalog] }
     run scratch.Path package dependency consumer catalog
 
+let private readText (path: string) =
+    if path.EndsWith(".br") then
+        use file = File.OpenRead path
+        use decoder = new BrotliStream(file, CompressionMode.Decompress)
+        use reader = new StreamReader(decoder, Encoding.UTF8)
+        reader.ReadToEnd()
+    else File.ReadAllText path
+
+let private writeText (path: string) (text: string) =
+    if path.EndsWith(".br") then
+        use file = File.Create path
+        use encoder = new BrotliStream(file, CompressionLevel.SmallestSize)
+        let bytes = Encoding.UTF8.GetBytes text
+        encoder.Write(bytes, 0, bytes.Length)
+    else File.WriteAllText(path, text)
+
 let private edit path mutate =
-    let document = JsonNode.Parse(File.ReadAllText path)
+    let document = JsonNode.Parse(readText path)
     mutate document
-    File.WriteAllText(path, document.ToJsonString())
+    writeText path (document.ToJsonString())
 
 let private declaration (document: JsonNode) =
     document["declarations"].AsArray()
     |> Seq.find (fun entry -> entry["fSharpName"].GetValue<string>().EndsWith ".Box")
 
-let private assertRejected part (mutate: JsonNode -> unit) =
-    withProducer (fun directory package _ config catalog ->
+let private assertRejected compression part (mutate: JsonNode -> unit) =
+    withProducer compression (fun directory package _ config catalog ->
         edit catalog mutate
         let output = Path.Combine(directory, "rejected")
         Expect.throwsC
@@ -43,9 +61,49 @@ let private assertRejected part (mutate: JsonNode -> unit) =
             (fun error -> Expect.stringContains error.Message part "catalogue guard remains active")
         Expect.isFalse (Directory.Exists output) "rejected catalogue writes no consumer output")
 
-[<Tests>]
-let tests =
-    testList "catalog portability" [
+let private testsFor compression =
+    let withProducer = withProducer compression
+    let assertRejected = assertRejected compression
+    testList ("catalog portability " + string compression) [
+        for key, replacement in [
+            "schemaVersion", "\"schemaVersion\":2,\"schemaVersion\":2"
+            "contractVersion", "\"contractVersion\":1,\"contractVersion\":1"
+            "apiVersion", "\"apiVersion\":1,\"apiVersion\":\"invalid\""
+        ] do
+            testCase ("duplicate or malformed metadata " + key) <| fun () ->
+                withProducer (fun directory package _ config catalog ->
+                    let text = readText catalog
+                    let original = if key = "schemaVersion" then "\"schemaVersion\": 2" else "\"" + key + "\": 1"
+                    let compact = text.Replace(": ", ":").Replace(":\r\n", ":")
+                    let originalCompact = original.Replace(": ", ":")
+                    Expect.stringContains compact originalCompact "mutation targets real metadata"
+                    writeText catalog (compact.Replace(originalCompact, replacement))
+                    let output = Path.Combine(directory, "duplicate")
+                    Expect.throws (fun () -> Pipeline.run config package output |> Async.RunSynchronously |> ignore) "metadata refused"
+                    Expect.isFalse (Directory.Exists output) "metadata failure writes no output")
+        testCase "later corrupt Brotli reference fails before all output" <| fun () ->
+            withProducer (fun directory package _ config _ ->
+                let corrupt = Path.Combine(directory, "corrupt.json.br")
+                File.WriteAllBytes(corrupt, [|0uy|])
+                let mixed = { config with DeclarationReferences = config.DeclarationReferences @ [corrupt] }
+                let output = Path.Combine(directory, "rejected-later")
+                Expect.throwsC
+                    (fun () -> Pipeline.run mixed package output |> Async.RunSynchronously |> ignore)
+                    (fun error -> Expect.stringContains error.Message corrupt "later reference identified")
+                Expect.isFalse (Directory.Exists output) "all generation happens before writes"
+                use reopened = new FileStream(corrupt, FileMode.Open, FileAccess.ReadWrite, FileShare.None)
+                ())
+        testCase "switching format retains alternate file and reports current output" <| fun () ->
+            withProducer (fun directory _ dependency config catalog ->
+                let root = Path.GetDirectoryName catalog
+                let original = File.ReadAllBytes catalog
+                let other = if compression = CatalogCompression.Brotli then CatalogCompression.Uncompressed else CatalogCompression.Brotli
+                let producer = { config with ModuleName = Some "Portability.Root"; DeclarationReferences = []; DeclarationCatalogCompression = other }
+                let report = Pipeline.run producer dependency root |> Async.RunSynchronously
+                let expected = if other = CatalogCompression.Brotli then "declarations.json.br" else "declarations.json"
+                Expect.contains report.OutputFiles expected "selected format"
+                Expect.isFalse (report.OutputFiles |> List.contains (Path.GetFileName catalog)) "alternate excluded from report"
+                Expect.sequenceEqual (File.ReadAllBytes catalog) original "alternate preserved")
         testCase "compression record copy preserves inference authentication" <| fun _ ->
             withProducer (fun directory package _ config _ ->
                 let compressedConsumer = { config with DeclarationCatalogCompression = CatalogCompression.Brotli }
@@ -65,7 +123,7 @@ let tests =
 
         testCase "schema two records portable compiler and contract metadata" <| fun _ ->
             withProducer (fun _ _ _ _ catalog ->
-                let document = JsonNode.Parse(File.ReadAllText catalog)
+                let document = JsonNode.Parse(readText catalog)
                 Expect.equal (document["schemaVersion"].GetValue<int>()) 2 "new catalogue schema"
                 let metadata = document["compatibility"]
                 let compiler = metadata["compiler"]
@@ -101,6 +159,9 @@ let tests =
         testCase "schema two cannot omit compatibility" <| fun _ ->
             assertRejected "compatibility" (fun document -> document.AsObject().Remove "compatibility" |> ignore)
 
+        testCase "malformed nested compiler metadata rejects" <| fun _ ->
+            assertRejected "compiler" (fun document -> document["compatibility"]["compiler"] <- JsonValue.Create 1)
+
         testCase "inference profile remains authenticated" <| fun _ ->
             assertRejected "inference profile" (fun document -> document["inferenceProfile"] <- JsonValue.Create "different")
 
@@ -131,10 +192,12 @@ let tests =
                         document["schemaVersion"] <- JsonValue.Create 1
                         document.AsObject().Remove "compatibility" |> ignore)
                 let adapter = Path.Combine(directory, "adapter")
-                Pipeline.run config package adapter |> Async.RunSynchronously |> ignore
+                let adapterCompression = if compression = CatalogCompression.Brotli then CatalogCompression.Uncompressed else CatalogCompression.Brotli
+                let adapterConfig = { config with DeclarationCatalogCompression = adapterCompression }
+                Pipeline.run adapterConfig package adapter |> Async.RunSynchronously |> ignore
                 let chained =
                     { config with ModuleName = Some "Portability.Next"
-                                  DeclarationReferences = [Path.Combine(adapter, "declarations.json")] }
+                                  DeclarationReferences = [Path.Combine(adapter, if adapterCompression = CatalogCompression.Brotli then "declarations.json.br" else "declarations.json")] }
                 Pipeline.run chained package (Path.Combine(directory, "next")) |> Async.RunSynchronously |> ignore
                 let code, output =
                     DeclarationCatalogTests.compileConsumer directory
@@ -152,3 +215,6 @@ let tests =
             [producer (); producer ()] |> Async.Parallel |> Async.RunSynchronously |> ignore
             Expect.equal runs 1 "preliminary and final consumers share one identity probe"
     ]
+
+[<Tests>]
+let tests = testList "catalog portability formats" [testsFor CatalogCompression.Uncompressed; testsFor CatalogCompression.Brotli]

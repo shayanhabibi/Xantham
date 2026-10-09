@@ -21,6 +21,14 @@ before a source name is recovered. `NonNullable<Value>` matched the members of t
 
 ## Declaration catalogs
 
+**Brotli completion requires the decoder's Done status.** Catalogue file transport accepts
+exactly one complete stream and checks buffered and subsequent bytes for trailing data.
+A complete JSON value can precede the Brotli end marker. The shared stream reader counts actual
+decoded UTF-8 bytes with an inclusive 128 MiB limit for JSON and Brotli. JsonDocument.Parse
+reads to logical EOF; compatibility, declarations and variants use that shared document.
+Compression belongs to Pipeline.run's disk boundary. Generation retains a declarations.json
+text entry, output reports the actual filename, and switching formats retains old output.
+
 **Schema 2 compatibility is an explicit maintenance contract.** Assess every change to
 catalogue identity, source closure or ownership (`identityVersion`), canonical API/constraint
 hashing or emitted ABI (`apiVersion`), inference/profile semantics (`inferenceVersion`), and
