@@ -878,6 +878,37 @@ let private deriveFacts
                         return None
                 }
 
+            // `getNonNullableType` returns the application a nullable union was written over
+            // (`Job<T> | undefined` -> `Job<T>`) where the union's origin retains it. Its arguments
+            // are what a reference to the application writes.
+            let! nonNullableApplication =
+                async {
+                    let others = members |> List.filter (isNullish >> not)
+
+                    if
+                        nonNullable.IsNone
+                        && others.Length >= 2
+                        && others.Length < members.Length
+                        && others
+                           |> List.exists (fun member_ ->
+                               member_.Flags.HasFlag TypeFlags.Object
+                               || member_.Flags.HasFlag TypeFlags.Intersection)
+                    then
+                        let! result = ctx.Session.getNonNullableType ty.Id
+
+                        if result.Id <> ty.Id && result.AliasSymbol.IsSome then
+                            let! arguments = ctx.Session.getAliasTypeArgumentsOfType result.Id
+
+                            match arguments with
+                            | ValueSome arguments when arguments.Length > 0 ->
+                                return Some(result, Array.toList arguments)
+                            | _ -> return None
+                        else
+                            return None
+                    else
+                        return None
+                }
+
             let! alias =
                 async {
                     if recoverAlias && ty.AliasSymbol.IsSome then
@@ -896,6 +927,7 @@ let private deriveFacts
                 { TypeFacts.shallow ty with
                     UnionMembers = members |> List.map _.TypeId
                     NonNullableAlias = nonNullable |> Option.map _.TypeId
+                    NonNullableApplication = nonNullableApplication |> Option.map (fst >> _.TypeId)
                     AliasTypeArguments = aliasTypeArguments |> List.map _.TypeId
                     SymbolName = alias |> ValueOption.map _.SymbolName |> ValueOption.toOption
                     SymbolParent = alias |> ValueOption.bind _.ParentSymbolId |> ValueOption.toOption
@@ -907,6 +939,12 @@ let private deriveFacts
                 channel trace "union-members" members
                 @ channel trace "alias-type-arguments" aliasTypeArguments
                 @ channel trace "nonnullable-alias" (Option.toList nonNullable)
+                @ channel
+                    trace
+                    "nonnullable-application"
+                    (nonNullableApplication
+                     |> Option.map (fun (application, arguments) -> application :: arguments)
+                     |> Option.defaultValue [])
         elif has TypeFlags.Intersection then
             // The constituents, followed into the table. A branding intersection (§4.6) is
             // decided by what its object operands *contain* - a marker property or a real
@@ -1290,7 +1328,9 @@ let private deriveFacts
                             Conditional = None
                             UnionMembers = []
                             NonNullableAlias = None
+                            NonNullableApplication = None
                             AliasIdentity = None
+                            UnresolvedName = None
                         },
                         discovered
         elif has TypeFlags.TypeParameter && ty.IsThisType <> ValueSome true then
@@ -1460,10 +1500,40 @@ let private deriveFacts
                 else
                     async.Return(None, [])
 
+            // An error type built for an unresolved reference carries the written name on its alias
+            // symbol (`isErrorType`: Any with an alias): the rightmost identifier, under one
+            // unresolved parent per qualifier.
+            let! unresolvedName =
+                if has TypeFlags.Any && ty.AliasSymbol.IsSome then
+                    async {
+                        let rec qualified (symbol: SymbolResponse) (name: string) =
+                            async {
+                                if symbol.CheckFlags.HasFlag CheckFlags.Unresolved && symbol.Parent.IsSome then
+                                    let! parent = ctx.Session.getParentOfSymbol symbol.Id
+
+                                    match parent with
+                                    | ValueSome parent -> return! qualified parent $"{parent.Name}.{name}"
+                                    | ValueNone -> return name
+                                else
+                                    return name
+                            }
+
+                        let! alias = ctx.Session.getAliasSymbolOfType ty.Id
+
+                        match alias with
+                        | ValueSome alias ->
+                            let! name = qualified alias alias.Name
+                            return Some(name * uom<symbolName>)
+                        | ValueNone -> return None
+                    }
+                else
+                    async.Return None
+
             return
                 { TypeFacts.shallow ty with
                     AliasTypeArguments = bound |> List.map _.TypeId
                     Conditional = fst conditional
+                    UnresolvedName = unresolvedName
                 },
                 bound @ snd conditional
     }

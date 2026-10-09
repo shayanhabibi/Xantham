@@ -1220,11 +1220,17 @@ type TypeFacts =
         UnionMembers: int<typeId> list
         /// Compiler-returned literal-union alias after removing nullish members; populated only for catalog generation or reuse.
         NonNullableAlias: int<typeId> option
+        /// The generic alias application a nullable union adds `null` or `undefined` to, as the
+        /// checker retains it: `Job<T> | undefined` -> `Job<T>`. Populated where the union keeps at
+        /// least two other members, one of them an object, and `NonNullableAlias` is absent.
+        NonNullableApplication: int<typeId> option
         /// The alias name and single argument an indexed-access reference was written through,
         /// where the checker has already expanded past it before the flags reach the shaper
         /// (§4.11's `NoInfer`). Populated only at an indexed-access reference site, never on a
         /// declaration - unrelated to `AliasTypeArguments`, which serves the declaration form.
         AliasIdentity: (string<symbolName> * int<typeId>) option
+        /// The name an error type's reference was written with, where the checker retains it.
+        UnresolvedName: string<symbolName> option
     }
 
 module TypeFacts =
@@ -1255,7 +1261,9 @@ module TypeFacts =
             Conditional = None
             UnionMembers = []
             NonNullableAlias = None
+            NonNullableApplication = None
             AliasIdentity = None
+            UnresolvedName = None
         }
 
 /// The type ids an export resolves to. A symbol can be both a type and a value (a class), so
@@ -1575,6 +1583,9 @@ type FsTaggedUnionDecl =
         Docs: string
         Tags: JSDocTagInfo list
         Order: DeclOrder option
+        /// The alias's own type parameters, then those the union reads from the scope it was
+        /// written in (§4.9): `type Scheduled<'T> = | Once of payload: 'T`.
+        TypeParameters: FsTypeParam list
         /// The discriminant property's name, as TypeScript spells it.
         Tag: string
         Cases: FsTaggedCase list

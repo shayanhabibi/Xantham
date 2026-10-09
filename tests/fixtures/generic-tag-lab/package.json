@@ -1,0 +1,1 @@
+{"name":"generic-tag-lab","version":"1.0.0","type":"module","types":"index.d.ts","description":"Lab: tagged unions over type parameters. The union declares the alias's parameters, or those it reads from the signature it is written in, and every reference applies them; an application of a generic tagged alias is written as that application."}

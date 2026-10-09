@@ -280,6 +280,7 @@ let private parameters =
     | FsAbbrev decl -> decl.TypeParameters
     | FsDelegateType decl -> decl.TypeParameters
     | FsPhantom decl -> decl.TypeParameters
+    | FsTaggedUnion decl -> decl.TypeParameters
     | _ -> []
 
 let private order =
@@ -407,6 +408,16 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
         else
             ""
 
+    let boundParameters id facts =
+        Shape.Spec.declParamIds facts @ Shape.Spec.freeParamsOf shape id
+        |> List.distinct
+        // Alias applications also carry concrete arguments in these tables. Only actual
+        // type parameters bind; normalizing `Outcome<string>` as `Outcome<'T>` collapses
+        // closed and open parent roles onto one catalog identity.
+        |> List.filter (fun parameter ->
+            Map.tryFind parameter shape.Types
+            |> Option.exists (fun parameter -> parameter.Response.Flags.HasFlag TypeFlags.TypeParameter))
+
     let rec typeIdentity visited bindings id =
         if List.contains id visited then
             None
@@ -416,8 +427,25 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
             | Some facts ->
                 let flags = facts.Response.ObjectFlags |> ValueOption.defaultValue ObjectFlags.None
 
+                // A namespace or module object, uninstantiated and declared only by namespace
+                // declarations and source files, is identified by that complete declaration set.
+                // A class, function or enum merged with a namespace keeps its structural identity.
+                let namespaceValue =
+                    not facts.Declarations.IsEmpty
+                    && facts.Declarations
+                       |> List.forall (fun declaration ->
+                           NodeHandle.parse (declaration / uom<_>)
+                           |> ValueOption.exists (fun handle ->
+                               handle.Kind = SyntaxKind.ModuleDeclaration
+                               || handle.Kind = SyntaxKind.SourceFile))
+                    && not (flags.HasFlag ObjectFlags.Mapped || flags.HasFlag ObjectFlags.Instantiated)
+                    && facts.TypeArguments.IsEmpty
+                    && facts.AliasTypeArguments.IsEmpty
+                    && facts.DeclarationArguments.IsEmpty
+
                 let structural =
-                    not (flags.HasFlag ObjectFlags.Reference)
+                    not namespaceValue
+                    && not (flags.HasFlag ObjectFlags.Reference)
                     && (flags.HasFlag ObjectFlags.Anonymous || flags.HasFlag ObjectFlags.Mapped)
 
                 let handles =
@@ -444,7 +472,33 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                                 Key = hashText (json ("nullable-alias", identity.Key, nullish))
                                 Role = "nullable-alias"
                             })
-                    | None -> literalUnionIdentity true facts
+                    | None ->
+                        if
+                            structural
+                            && facts.Response.Flags.HasFlag TypeFlags.Object
+                            && flags.HasFlag ObjectFlags.MembersResolved
+                            && not (Map.containsKey id shape.NotFollowed)
+                            && not (flags.HasFlag ObjectFlags.Mapped)
+                            && facts.Origin = Unclassified
+                            && facts.DeclFile.IsNone
+                            && facts.AliasDeclarations.IsEmpty
+                            && facts.DeclarationArguments.IsEmpty
+                            && facts.Members.IsEmpty
+                            && facts.IndexInfos.IsEmpty
+                            && facts.CallSignatures.IsEmpty
+                            && facts.ConstructSignatures.IsEmpty
+                            && facts.TypeArguments.IsEmpty
+                            && facts.AliasTypeArguments.IsEmpty
+                            && facts.Response.TypeParameters.IsNone
+                            && facts.Response.TargetTypeId.IsNone
+                        then
+                            // The checker's intrinsic `{}` has a synthetic symbol without a
+                            // source declaration (for example Object.keys' second overload).
+                            // It is distinct from `object`, unknown, and a declaration whose
+                            // members were not resolved.
+                            Some(identity "empty-object" [] [])
+                        else
+                            literalUnionIdentity true facts
                 else
                     let role =
                         if List.isEmpty facts.ConstructSignatures then
@@ -452,9 +506,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                         else
                             "constructor"
 
-                    let parameters =
-                        (Shape.Spec.declParamIds facts @ Shape.Spec.freeParamsOf shape id)
-                        |> List.distinct
+                    let parameters = boundParameters id facts
 
                     let bindings =
                         parameters
@@ -685,9 +737,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
         |> Map.filter (fun id _ -> not (List.isEmpty shape.Types[id].Declarations))
 
     let closure id =
-        let bound =
-            Shape.Spec.declParamIds shape.Types[id] @ Shape.Spec.freeParamsOf shape id
-            |> Set.ofList
+        let bound = boundParameters id shape.Types[id] |> Set.ofList
 
         let visited = Collections.Generic.HashSet<int<Measure.typeId>>()
         let sources = Collections.Generic.HashSet<Source>()
@@ -1236,11 +1286,11 @@ let internal applyWithProducer
             for catalog in catalogs do
                 for input in catalog.Inputs do
                     match Map.tryFind (sourceKey input) currentInputs with
-                    | Some candidates when not (List.contains input candidates) ->
-                        if candidates |> List.exists (fun current -> current.Sha256 = input.Sha256) then
-                            fail $"package manifest mismatch for {input.Package}"
-                        else
+                    | Some candidates when candidates |> List.exists ((<>) input) ->
+                        if candidates |> List.exists (fun current -> current.Sha256 <> input.Sha256) then
                             fail $"input source hash mismatch for {inputKey input}"
+                        else
+                            fail $"package manifest mismatch for {input.Package}"
                     | _ -> ()
 
             let identities = identities ctx shape sourceFiles
@@ -1258,7 +1308,27 @@ let internal applyWithProducer
                 |> List.choose (fun (name, identity) ->
                     match Map.tryFind identity.Key inherited with
                     | Some producer ->
-                        if producer.Sources |> Array.toList <> identity.Sources then
+                        // Closure traversal depends on which types the checker reached in this
+                        // program. Authenticate the producer's required sources against actual
+                        // inputs, including every installed copy of a source key. A matching
+                        // copy must not conceal a conflicting same-version installation.
+                        let authenticated =
+                            producer.Sources
+                            |> Array.forall (fun source ->
+                                match Map.tryFind (sourceKey source) currentInputs with
+                                | Some candidates -> candidates |> List.forall ((=) source)
+                                | None -> false)
+
+                        // A catalog cannot discard the sources anchoring its own handles.
+                        // Literal-union identities intentionally have no declaration handles.
+                        let anchored =
+                            producer.Handles
+                            |> Array.forall (fun handle ->
+                                producer.Sources
+                                |> Array.exists (fun source ->
+                                    handle.StartsWith(sourceKey source + "#", StringComparison.Ordinal)))
+
+                        if not authenticated || not anchored then
                             fail $"source hash mismatch for {name} ({producer.FSharpName})"
 
                         Some(name, producer)

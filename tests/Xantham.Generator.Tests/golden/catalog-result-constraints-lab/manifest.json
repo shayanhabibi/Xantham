@@ -4,8 +4,8 @@
   "module": "CatalogResultConstraintsLab",
   "counts": {
     "exact": 2,
-    "ergonomic": 6,
-    "widened": 0,
+    "ergonomic": 5,
+    "widened": 1,
     "escape": 0
   },
   "passes": [
@@ -21,8 +21,9 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 10,
-      "ergonomic": 10
+      "total": 13,
+      "ergonomic": 10,
+      "widened": 3
     },
     {
       "pass": "render-source",

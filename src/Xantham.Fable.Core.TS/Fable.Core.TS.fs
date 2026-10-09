@@ -8800,7 +8800,7 @@ module Es =
         /// <returns>A new Promise.</returns>
         /// <param name="values">An array of Promises.</param>
         /// <returns>A new Promise.</returns>
-        abstract allSettled<'T>: values: 'T -> Promise<PromiseConstructor.AllSettled.Result.Item.Item[]>
+        abstract allSettled<'T>: values: 'T -> Promise<PromiseSettledResult<obj>[]>
         /// <summary>
         /// Creates a Promise that is resolved with an array of results when all
         /// of the provided Promises resolve or reject.
@@ -8809,7 +8809,7 @@ module Es =
         /// <returns>A new Promise.</returns>
         /// <param name="values">An array of Promises.</param>
         /// <returns>A new Promise.</returns>
-        abstract allSettled<'T>: values: Iterable<U2<'T, PromiseLike<'T>>, obj, obj> -> Promise<PromiseConstructor.AllSettled.Result.Item.Item2[]>
+        abstract allSettled<'T>: values: Iterable<U2<'T, PromiseLike<'T>>, obj, obj> -> Promise<PromiseSettledResult<obj>[]>
         /// <summary>
         /// The any function returns a promise that is fulfilled by the first given promise to be fulfilled, or rejected with an AggregateError containing an array of rejection reasons if all of the given promises are rejected. It resolves all elements of the passed iterable to promises as it runs this algorithm.
         /// </summary>
@@ -10395,8 +10395,8 @@ module Es =
         static member Create (status: string, reason: obj) : PromiseRejectedResult = jsNative
 
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("status", CaseRules.None)>]
-    type PromiseSettledResult =
-        | [<CompiledName("fulfilled")>] Fulfilled of value: obj
+    type PromiseSettledResult<'T> =
+        | [<CompiledName("fulfilled")>] Fulfilled of value: 'T
         | [<CompiledName("rejected")>] Rejected of reason: obj
 
     type RegExpStringIterator<'T> =
@@ -19890,19 +19890,6 @@ module Es =
 
     module PromiseConstructor =
         type Executor<'T> = delegate of resolve: (U2<'T, PromiseLike<'T>> -> unit) * reject: (obj option -> unit) -> unit
-
-        module AllSettled =
-            module Result =
-                module Item =
-                    [<RequireQualifiedAccess; TypeScriptTaggedUnion("status", CaseRules.None)>]
-                    type Item =
-                        | [<CompiledName("fulfilled")>] Fulfilled of value: obj
-                        | [<CompiledName("rejected")>] Rejected of reason: obj
-
-                    [<RequireQualifiedAccess; TypeScriptTaggedUnion("status", CaseRules.None)>]
-                    type Item2 =
-                        | [<CompiledName("fulfilled")>] Fulfilled of value: obj
-                        | [<CompiledName("rejected")>] Rejected of reason: obj
 
     module PromiseConstructorLike =
         type Executor<'T> = delegate of resolve: (U2<'T, PromiseLike<'T>> -> unit) * reject: (obj option -> unit) -> unit

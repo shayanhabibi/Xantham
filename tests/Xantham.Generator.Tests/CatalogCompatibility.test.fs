@@ -35,6 +35,18 @@ let private encoded () =
 [<Tests>]
 let tests =
     testList "catalog compatibility" [
+        testCase "the current contract pins every version" <| fun _ ->
+            let contract = current identity
+
+            Expect.equal
+                (contract.ContractVersion,
+                 contract.IdentityVersion,
+                 contract.ApiVersion,
+                 contract.InferenceVersion,
+                 contract.CustomizationVersion)
+                (1, 3, 3, 1, 1)
+                "identity 3: namespace values, the intrinsic empty object and bound type parameters change catalog keys; API 3: tagged unions bind their type parameters"
+
         testCase "portable contract accepts rebuilt generator and platform binary" <| fun _ ->
             validateContract 2 "compiler-producer" "generator-producer" "profile" (Some expected.Contract)
 

@@ -1890,6 +1890,28 @@ let private mintedTaggedCases () =
     | SharedTagLab.Narrow.Event.Email -> check "a union claimed below the cap matches on its tag too" true
     | _ -> check "a JavaScript-built email reached another case" false
 
+/// A tagged union over a type parameter. The case fields read `'T`, and Fable erases a generic
+/// case to the same tagged object a closed one erases to; a JavaScript-built object reaches the
+/// case its tag names with the payload typed.
+let private genericTaggedCases () =
+    equal
+        "a generic case erases to the tagged object with its payload"
+        """{"kind":"once","payload":1}"""
+        (json (SharedTagLab.Scheduled.Once 1.0))
+
+    equal
+        "an absent optional payload omits its key"
+        """{"kind":"repeat","payload":"a"}"""
+        (json (SharedTagLab.Scheduled.Repeat("a", None)))
+
+    let built: SharedTagLab.Scheduled<float> =
+        emitJsExpr () """({ kind: "repeat", payload: 1, previous: 0 })"""
+
+    match built with
+    | SharedTagLab.Scheduled.Repeat(payload, Some previous) ->
+        equal "a JavaScript-built object reaches its case with both payloads" "1:0" $"{payload}:{previous}"
+    | _ -> check "a JavaScript-built repeat reached another case" false
+
 /// §4.10's pure index signatures, resolved to `Record`/`ReadonlyRecord`
 /// rather than a minted interface. Every property below is one of those types; reading and
 /// writing through the F# indexer (`.[key]` / `.[key] <- value`) round-trips against the
@@ -2116,6 +2138,7 @@ let main _ =
     taggedUnions ()
     foldedTaggedCases ()
     mintedTaggedCases ()
+    genericTaggedCases ()
     nestedNames ()
     optionalHooks ()
     renamedStatics ()

@@ -105,6 +105,7 @@ let private mapDeclRefs (f: FsTypeRef -> FsTypeRef) (decl: FsDecl) : FsDecl =
     | FsTaggedUnion d ->
         FsTaggedUnion
             { d with
+                TypeParameters = d.TypeParameters |> List.map typeParam
                 Cases =
                     d.Cases
                     |> List.map (fun case ->
@@ -189,6 +190,7 @@ let private repaired (model: ShapeModel) =
         | FsAbbrev d -> Some d.TypeParameters
         | FsDelegateType d -> Some d.TypeParameters
         | FsPhantom d -> Some d.TypeParameters
+        | FsTaggedUnion d -> Some d.TypeParameters
         | _ -> None
 
     let unwritableHead decl =
@@ -250,6 +252,7 @@ let private repaired (model: ShapeModel) =
             | FsAbbrev d -> Some(d.Name, d.TypeParameters.Length)
             | FsDelegateType d -> Some(d.Name, d.TypeParameters.Length)
             | FsPhantom d -> Some(d.Name, d.TypeParameters.Length)
+            | FsTaggedUnion d -> Some(d.Name, d.TypeParameters.Length)
             | _ -> None)
         |> Map.ofList
 

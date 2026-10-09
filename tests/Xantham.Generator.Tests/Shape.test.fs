@@ -74,6 +74,71 @@ let private arrayShaped (id: int) (name: string) (element: int) (extra: string l
 let private typeParam (id: int) (name: string) =
     { Build.facts (Build.typeResponse id TypeFlags.TypeParameter) with SymbolName = Some((fun value -> value * uom<symbolName>) name) }
 
+/// `type Scheduled<T> = { kind: "once"; payload: T } | { kind: "repeat"; payload: T } | { kind:
+/// "later"; payload: T }` as the declared union 10 named `Scheduled`, alias symbol 900 over `T`
+/// (30), and its application at `U` (31) as union 11 over arms 22, 23 and 26. The application
+/// is returned apart from the model.
+let private genericTagModel () =
+    let arm id tag payload =
+        { Build.facts (Build.typeResponse id TypeFlags.Object) with
+            Members =
+                [ Build.resolvedMember (Build.symbol (id * 10) "kind" SymbolFlags.Property) tag
+                  Build.resolvedMember (Build.symbol (id * 10 + 1) "payload" SymbolFlags.Property) payload ] }
+
+    let union id (arms: int list) argument =
+        { Build.facts
+            { Build.typeResponse id TypeFlags.Union with
+                AliasSymbol = ValueSome 900
+                AliasTypeArguments = ValueSome [| argument |] } with
+            UnionMembers = arms |> List.map (fun value -> value * uom<typeId>)
+            AliasTypeArguments = [ argument * uom<typeId> ] }
+
+    let model =
+        { Build.shapeModel (
+              union 10 [ 20; 21; 25 ] 30
+              :: arm 20 7 30
+              :: arm 21 8 30
+              :: arm 25 9 30
+              :: arm 22 7 31
+              :: arm 23 8 31
+              :: arm 26 9 31
+              :: stringLiteral 7 "once"
+              :: stringLiteral 8 "repeat"
+              :: stringLiteral 9 "later"
+              :: typeParam 30 "T"
+              :: typeParam 31 "U"
+              :: Build.primitives
+          ) with
+            DeclNames = Map.ofList [ 10<typeId>, "Scheduled" ] }
+
+    model, union 11 [ 22; 23; 26 ] 31
+
+/// `type Marker<T> = { kind: "on" } | { kind: "off" }` as the declared union 50 named `Marker`,
+/// alias symbol 901 over `T` (30), and `Marker<string>` as union 55. No arm reads `T`, so both
+/// carry the arms 51 and 52, which `synthesize-anonymous` named `Marker2` and `Marker3`.
+let private phantomTagModel () =
+    let arm id tag =
+        { Build.facts (Build.typeResponse id TypeFlags.Object) with
+            Members = [ Build.resolvedMember (Build.symbol (id * 10) "kind" SymbolFlags.Property) tag ] }
+
+    let union id argument =
+        Build.facts
+            { Build.typeResponse id TypeFlags.Union with
+                AliasSymbol = ValueSome 901
+                AliasTypeArguments = ValueSome [| argument |] }
+
+    { Build.shapeModel (
+          { union 50 30 with UnionMembers = [ 51<typeId>; 52<typeId> ]; AliasTypeArguments = [ 30<typeId> ] }
+          :: { union 55 1 with UnionMembers = [ 51<typeId>; 52<typeId> ] }
+          :: arm 51 53
+          :: arm 52 54
+          :: stringLiteral 53 "on"
+          :: stringLiteral 54 "off"
+          :: typeParam 30 "T"
+          :: Build.primitives
+      ) with
+        DeclNames = Map.ofList [ 50<typeId>, "Marker"; 51<typeId>, "Marker2"; 52<typeId>, "Marker3" ] }
+
 /// `keyof X`: an index type carrying its operand as its target, the way the checker hands one
 /// back when it cannot finish it.
 let private keyOf (id: int) (operand: int) =
@@ -238,6 +303,35 @@ let typeRefTests =
                 let reference, findings = Spec.typeRef Build.context model None "x" ((fun value -> value * uom<Measure.typeId>) typeId)
                 Expect.equal reference expected $"type {typeId}"
                 Expect.isEmpty findings $"type {typeId} findings"
+
+        // Four intrinsic names carry the Any flag: `any` (a written or omitted annotation, or a
+        // checker fallback), `error` and `unresolved` for a reference the program leaves
+        // unresolved, and `intrinsic` for the body of a compiler-implemented alias.
+        testCase "Any reads its provenance from the checker's intrinsic name" <| fun _ ->
+            let any id name =
+                Build.facts { Build.typeResponse id TypeFlags.Any with IntrinsicName = name }
+
+            let model =
+                Build.shapeModel
+                    [ any 10 (ValueSome "any")
+                      any 11 (ValueSome "error")
+                      any 12 (ValueSome "unresolved")
+                      { any 13 (ValueSome "error") with UnresolvedName = Some((fun value -> value * uom<symbolName>) "Schema") }
+                      any 14 (ValueSome "intrinsic")
+                      any 15 ValueNone
+                      Build.facts { Build.typeResponse 16 TypeFlags.Unknown with IntrinsicName = ValueSome "unknown" } ]
+
+            let read id =
+                let reference, findings = Spec.typeRef Build.context model None "x" id
+                reference, findings |> List.map (fun f -> f.Key, f.Tier, f.Payload |> Array.map (snd >> string) |> Array.toList)
+
+            Expect.equal (read 10<typeId>) (FsObj, [ "TR008", Escape, [] ]) "a written any"
+            Expect.equal (read 11<typeId>) (FsObj, [ "TR063", Escape, [ "" ] ]) "the checker's error type"
+            Expect.equal (read 12<typeId>) (FsObj, [ "TR063", Escape, [ "" ] ]) "an unresolved symbol's declared type"
+            Expect.equal (read 13<typeId>) (FsObj, [ "TR063", Escape, [ "Schema" ] ]) "the reference as written"
+            Expect.equal (read 14<typeId>) (FsObj, [ "TR064", Escape, [] ]) "a compiler-implemented alias body"
+            Expect.equal (read 15<typeId>) (FsObj, [ "TR063", Escape, [ "" ] ]) "an unnamed Any is not claimed as a written any"
+            Expect.equal (read 16<typeId>) (FsObj, [ "TR009", Widened, [] ]) "unknown is unchanged"
 
         // The flags the tier used to answer with a bare `TypeFlagsNotMapped`. Each is asserted
         // on its key as well as its tier, because half the point of the work was that the
@@ -3432,6 +3526,33 @@ let shapePassTests =
                 | overloads -> failtest $"expected one four-parameter overload, got %A{overloads}"
             | decls -> failtest $"expected the interface back, got %A{decls}"
 
+        // `settle<U>(value: U): Settled<U>`: the Create parameter reads `'U` free, so one call
+        // binds it once for a method the interface declares generic.
+        testCase "a generic method carried into Create reports the parameters bound per call" <| fun _ ->
+            let generic =
+                match paramObjectMethod "settle" [ FsTypeVar "U" ] (FsApp("Settled", [ FsTypeVar "U" ])) with
+                | FsMethod m -> FsMethod { m with TypeParameters = [ { Name = "U"; Constraint = None } ] }
+                | other -> other
+
+            let model =
+                { Build.shapeModel [] with
+                    Decls = [ paramObjectDecl "Queue" [ paramObjectMethod "play" [] FsUnit; generic ] ] }
+
+            let _, findings = Build.runPass ParamObjects.synthesizeParamObjects model
+
+            Expect.equal
+                (findings |> List.map (fun f -> f.Key, f.Symbol, f.Tier))
+                [ "SP001", "Queue", Ergonomic
+                  "SP002", "Queue.play", Ergonomic
+                  "SP002", "Queue.settle", Ergonomic
+                  "SP004", "Queue.settle", Widened ]
+                "only the generic method is graded for its bound parameters"
+
+            Expect.equal
+                (findings |> List.filter (fun f -> f.Key = "SP004") |> List.map _.Message)
+                [ "generic method's 'U bound once per Create call; the object holds one instantiation" ]
+                "naming the parameters"
+
         testCase "an interface that gets no Create says which shape refused it" <| fun _ ->
             let indexed =
                 paramObjectDecl "Bag" [
@@ -3928,6 +4049,351 @@ let shapePassTests =
                     "an Intersection-flagged arm discriminates the same way an Object-flagged one does"
 
             Expect.equal (findings |> List.map _.Tier) [ Exact ] "a tagged union costs no fidelity"
+
+        // A generic tagged union: `type Scheduled<T> = { kind: "once"; payload: T } | { kind:
+        // "repeat"; payload: T }`, or the same union written inline where a signature binds `T`.
+        testCase "detect-tagged-unions binds the alias's parameters and reads payloads under them" <| fun _ ->
+            let model, _ = genericTagModel ()
+
+            let shaped, findings = Build.runPass TaggedUnions.detectTaggedUnions model
+
+            match shaped.Decls |> List.choose (function FsTaggedUnion d -> Some d | _ -> None) with
+            | [ decl ] ->
+                Expect.equal decl.TypeParameters [ { Name = "T"; Constraint = None } ] "the head binds the alias's parameter"
+
+                Expect.equal
+                    (decl.Cases |> List.map (fun c -> c.Fields |> List.map (fun f -> f.Name, f.Type)))
+                    [ [ "payload", FsTypeVar "T" ]; [ "payload", FsTypeVar "T" ]; [ "payload", FsTypeVar "T" ] ]
+                    "every payload reads the bound parameter"
+            | decls -> failtest $"expected one tagged union, got %A{decls}"
+
+            Expect.equal (findings |> List.map _.Key) [ "DT002" ] "nothing widens out of scope"
+
+        testCase "detect-tagged-unions binds the parameters a hoisted union reads from its scope" <| fun _ ->
+            let model, _ = genericTagModel ()
+
+            let union =
+                { model.Types[10<typeId>] with
+                    AliasTypeArguments = []
+                    Response = { model.Types[10<typeId>].Response with AliasSymbol = ValueNone; AliasTypeArguments = ValueNone } }
+
+            let model =
+                { model with
+                    Types = Map.add 10<typeId> union model.Types
+                    DeclNames = Map.ofList [ 10<typeId>, "Scheduler.Current.Result" ]
+                    DeclParams = Map.ofList [ 10<typeId>, [ 30<typeId> ] ] }
+
+            let shaped, _ = Build.runPass TaggedUnions.detectTaggedUnions model
+
+            match shaped.Decls |> List.choose (function FsTaggedUnion d -> Some d | _ -> None) with
+            | [ decl ] ->
+                Expect.equal (decl.TypeParameters |> List.map _.Name) [ "T" ] "the free parameter is bound at the head"
+                Expect.equal decl.Cases.Head.Fields.Head.Type (FsTypeVar "T") "and read by the payload"
+            | decls -> failtest $"expected one tagged union, got %A{decls}"
+
+        testCase "detect-tagged-unions declares nothing for an alias application" <| fun _ ->
+            let model, application = genericTagModel ()
+
+            let shaped, _ = Build.runPass TaggedUnions.detectTaggedUnions { model with Types = Map.add 11<typeId> application model.Types; DeclNames = Map.add 11<typeId> "Scheduled" model.DeclNames; DeclParams = Map.ofList [ 11<typeId>, [ 31<typeId> ] ]; AliasApplications = Map.ofList [ 11<typeId>, 10<typeId> ] }
+
+            Expect.equal
+                (shaped.Decls |> List.choose (function FsTaggedUnion d -> Some d.Name | _ -> None))
+                [ "Scheduled" ]
+                "the application is a reference to the one declaration"
+
+        testCase "bind-free-type-params binds the parameters a hoisted tagged union reads" <| fun _ ->
+            let model, application = genericTagModel ()
+
+            let hoisted =
+                { model.Types[10<typeId>] with
+                    AliasTypeArguments = []
+                    Response = { model.Types[10<typeId>].Response with AliasSymbol = ValueNone; AliasTypeArguments = ValueNone } }
+
+            let model =
+                { model with
+                    Types = model.Types |> Map.add 10<typeId> hoisted |> Map.add 11<typeId> application
+                    DeclNames = Map.ofList [ 10<typeId>, "Scheduler.Current.Result"; 11<typeId>, "Scheduled" ]
+                    AliasApplications = Map.ofList [ 11<typeId>, 12<typeId> ] }
+
+            let bound, _ = Build.runPass FreeTypeParams.bindFreeTypeParams model
+
+            Expect.equal (Map.tryFind 10<typeId> bound.DeclParams) (Some [ 30<typeId> ]) "the union reads T free"
+            Expect.equal (Map.tryFind 11<typeId> bound.DeclParams) None "an application's arguments are its own"
+
+        testCase "a reference to a generic tagged union applies its parameters, never a string enum's" <| fun _ ->
+            let model, application = genericTagModel ()
+
+            // `Mode<T> = "fast" | "slow"`: a phantom alias parameter on a literal union.
+            let mode =
+                { Build.facts (Build.typeResponse 13 TypeFlags.Union) with
+                    UnionMembers = [ 14<typeId>; 15<typeId> ]
+                    AliasTypeArguments = [ 30<typeId> ] }
+
+            // `Scheduled<U> | undefined`: the application's arms beside undefined.
+            let nullable =
+                { Build.facts (Build.typeResponse 16 TypeFlags.Union) with
+                    UnionMembers = [ 22<typeId>; 23<typeId>; 26<typeId>; 5<typeId> ] }
+
+            let model =
+                { model with
+                    Types =
+                        model.Types
+                        |> Map.add 11<typeId> application
+                        |> Map.add 13<typeId> mode
+                        |> Map.add 14<typeId> (stringLiteral 14 "fast")
+                        |> Map.add 15<typeId> (stringLiteral 15 "slow")
+                        |> Map.add 16<typeId> nullable
+                    DeclNames = model.DeclNames |> Map.add 11<typeId> "Scheduled" |> Map.add 13<typeId> "Mode"
+                    DeclParams = Map.ofList [ 11<typeId>, [ 31<typeId> ] ]
+                    AliasApplications = Map.ofList [ 11<typeId>, 10<typeId> ]
+                    TypeVars = Map.ofList [ 30<typeId>, "T"; 31<typeId>, "U" ] }
+
+            let reference id = Spec.typeRef Build.context model None "x" id |> fst
+
+            Expect.equal (reference 10<typeId>) (FsApp("Scheduled", [ FsTypeVar "T" ])) "the declaration re-applies its own parameter"
+            Expect.equal (reference 11<typeId>) (FsApp("Scheduled", [ FsTypeVar "U" ])) "an application writes its arguments"
+            Expect.equal (reference 16<typeId>) (FsOption(FsApp("Scheduled", [ FsTypeVar "U" ]))) "beside undefined, the application under option"
+            Expect.equal (reference 13<typeId>) (FsNamed "Mode") "a string enum takes no arguments"
+
+        testCase "synthesize-anonymous names an application of a generic tagged alias by its declaration" <| fun _ ->
+            let model, application = genericTagModel ()
+
+            // The same alias symbol and arguments over two of the three arms: what a transformed
+            // union keeps, and not an application.
+            let subset =
+                { application with
+                    Response = { application.Response with Id = 12 }
+                    UnionMembers = [ 22<typeId>; 23<typeId> ] }
+
+            let holder =
+                { Build.facts (Build.typeResponse 40 TypeFlags.Object) with
+                    Members =
+                        [ Build.resolvedMember (Build.symbol 401 "applied" SymbolFlags.Property) 11
+                          Build.resolvedMember (Build.symbol 402 "subset" SymbolFlags.Property) 12 ] }
+
+            let model =
+                { model with
+                    Types = model.Types |> Map.add 11<typeId> application |> Map.add 12<typeId> subset |> Map.add 40<typeId> holder
+                    Harvest =
+                        { Exports = [ Build.export "holder" (Build.symbol 400 "holder" SymbolFlags.BlockScopedVariable) ]
+                          AmbientClasses = []
+                          Namespaces = Map.empty
+                          ShadowedByLib = 0 }
+                    ExportTypes = Map.ofList [ 400<symbolId>, { Declared = None; Value = Some 40<typeId> } ] }
+
+            let named, findings = Build.runPass Anonymous.synthesizeAnonymous model
+
+            Expect.equal (Map.tryFind 11<typeId> named.DeclNames) (Some "Scheduled") "the application reads the declaration's name"
+            Expect.equal (Map.tryFind 11<typeId> named.AliasApplications) (Some 10<typeId>) "as an application of it"
+            Expect.equal (Map.tryFind 11<typeId> named.DeclParams) (Some [ 31<typeId> ]) "carrying the arguments it was written with"
+            Expect.equal (Map.tryFind 12<typeId> named.DeclNames) (Some "Holder.Subset") "a different arm set is hoisted on its own"
+            Expect.isFalse (Map.containsKey 12<typeId> named.AliasApplications) "and is no application"
+            Expect.contains (findings |> List.map _.Key) "SY001" "the application is reported"
+
+        testCase "repair-arity widens a bare or mis-applied reference to a generic tagged union" <| fun _ ->
+            let property name reference =
+                FsProperty { Name = name; Docs = ""; Tags = []; ReadOnly = true; Type = reference }
+
+            let model =
+                { Build.shapeModel [] with
+                    Decls =
+                        [ FsTaggedUnion
+                              { Name = "Scheduled"
+                                Docs = ""
+                                Tags = []
+                                Order = None
+                                TypeParameters = [ { Name = "T"; Constraint = None } ]
+                                Tag = "kind"
+                                Cases = [ { Name = "Once"; CompiledName = Some "once"; Fields = [ { Name = "payload"; Type = FsTypeVar "T" } ] } ] }
+                          FsInterface
+                              { Name = "Holder"
+                                Docs = ""
+                                Tags = []
+                                Order = None
+                                TypeParameters = []
+                                Inherits = []
+                                Members =
+                                    [ property "bare" (FsNamed "Scheduled")
+                                      property "wide" (FsApp("Scheduled", [ FsString; FsFloat ]))
+                                      property "applied" (FsApp("Scheduled", [ FsString ])) ]
+                                Entrypoint = None
+                                CreateOverloads = []
+                                Statics = [] } ] }
+
+            let repaired, findings = Build.runPass Arity.repairArity model
+
+            match repaired.Decls with
+            | [ FsTaggedUnion _; FsInterface holder ] ->
+                Expect.equal
+                    (holder.Members |> List.choose (function FsProperty p -> Some(p.Name, p.Type) | _ -> None))
+                    [ "bare", FsObj; "wide", FsObj; "applied", FsApp("Scheduled", [ FsString ]) ]
+                    "only the application at the declared arity stands"
+            | decls -> failtest $"expected the union and the interface, got %A{decls}"
+
+            Expect.equal (findings |> List.map _.Key) [ "RA003"; "RA004" ] "each widening is reported"
+
+        // `marker?: Marker<string>` flattens to the declared form's arms beside undefined, so the
+        // member-set match lands on `Marker<T>` from outside its scope.
+        testCase "a member-set match outside its declaration's scope reads the site's application" <| fun _ ->
+            let model = phantomTagModel ()
+
+            let nullable id application =
+                { Build.facts (Build.typeResponse id TypeFlags.Union) with
+                    UnionMembers = [ 51<typeId>; 52<typeId>; 5<typeId> ]
+                    NonNullableApplication = application }
+
+            let model =
+                { model with
+                    Types =
+                        model.Types
+                        |> Map.add 56<typeId> (nullable 56 (Some 55<typeId>))
+                        |> Map.add 57<typeId> (nullable 57 None) }
+
+            let read model id =
+                let reference, findings = Spec.typeRef Build.context model None "x" id
+                reference, findings |> List.map _.Key
+
+            Expect.equal
+                (read model 56<typeId>)
+                (FsOption(FsApp("Marker", [ FsString ])), [ "TR032" ])
+                "the application's argument, under option"
+
+            Expect.equal
+                (read model 57<typeId>)
+                (FsOption(FsErasedUnion [ FsNamed "Marker2"; FsNamed "Marker3" ]), [ "TR032" ])
+                "without one, the arms rather than an argument out of scope"
+
+            Expect.equal
+                (read { model with TypeVars = Map.ofList [ 30<typeId>, "T" ] } 57<typeId>)
+                (FsOption(FsApp("Marker", [ FsTypeVar "T" ])), [ "TR032" ])
+                "inside the declaration, its own parameter"
+
+        testCase "a nullable union reads the application the checker keeps under it" <| fun _ ->
+            let model, application = genericTagModel ()
+
+            // `Scheduled<U> | undefined`, with the application registered under the declaration.
+            let nullable =
+                { Build.facts (Build.typeResponse 16 TypeFlags.Union) with
+                    UnionMembers = [ 22<typeId>; 23<typeId>; 26<typeId>; 5<typeId> ]
+                    NonNullableApplication = Some 11<typeId> }
+
+            let model =
+                { model with
+                    Types = model.Types |> Map.add 11<typeId> application |> Map.add 16<typeId> nullable
+                    DeclNames = model.DeclNames |> Map.add 11<typeId> "Scheduled"
+                    DeclParams = Map.ofList [ 11<typeId>, [ 31<typeId> ] ]
+                    AliasApplications = Map.ofList [ 11<typeId>, 10<typeId> ]
+                    TypeVars = Map.ofList [ 31<typeId>, "U" ] }
+
+            let reference, findings = Spec.typeRef Build.context model None "x" 16<typeId>
+
+            Expect.equal reference (FsOption(FsApp("Scheduled", [ FsTypeVar "U" ]))) "the application under option"
+            Expect.equal (findings |> List.map _.Key) [ "TR032" ] "and nothing widens"
+
+            // Two applications of a phantom alias share their arms, and the declared form is named
+            // elsewhere: the site's own application decides the argument.
+            let phantom = phantomTagModel ()
+
+            let numberApplication =
+                { Build.facts
+                    { Build.typeResponse 58 TypeFlags.Union with
+                        AliasSymbol = ValueSome 901
+                        AliasTypeArguments = ValueSome [| 2 |] } with
+                    UnionMembers = [ 51<typeId>; 52<typeId> ] }
+
+            let site =
+                { Build.facts (Build.typeResponse 59 TypeFlags.Union) with
+                    UnionMembers = [ 51<typeId>; 52<typeId>; 5<typeId> ]
+                    NonNullableApplication = Some 58<typeId> }
+
+            let phantom =
+                { phantom with
+                    Types = phantom.Types |> Map.add 58<typeId> numberApplication |> Map.add 59<typeId> site
+                    DeclNames =
+                        phantom.DeclNames
+                        |> Map.remove 50<typeId>
+                        |> Map.add 55<typeId> "Marker"
+                        |> Map.add 58<typeId> "Marker"
+                    DeclParams = Map.ofList [ 55<typeId>, [ 1<typeId> ]; 58<typeId>, [ 2<typeId> ] ]
+                    AliasApplications = Map.ofList [ 55<typeId>, 50<typeId>; 58<typeId>, 50<typeId> ] }
+
+            Expect.equal
+                (Spec.typeRef Build.context phantom None "x" 59<typeId> |> fst)
+                (FsOption(FsApp("Marker", [ FsFloat ])))
+                "the site's application, not a sibling application's argument"
+
+        testCase "synthesize-anonymous names a nullable union's application, not its arms" <| fun _ ->
+            let model, application = genericTagModel ()
+
+            let nullable =
+                { Build.facts (Build.typeResponse 16 TypeFlags.Union) with
+                    UnionMembers = [ 22<typeId>; 23<typeId>; 26<typeId>; 5<typeId> ]
+                    NonNullableApplication = Some 11<typeId> }
+
+            let holder =
+                { Build.facts (Build.typeResponse 40 TypeFlags.Object) with
+                    Members = [ Build.resolvedMember (Build.symbol 401 "later" SymbolFlags.Property) 16 ] }
+
+            let model =
+                { model with
+                    Types = model.Types |> Map.add 11<typeId> application |> Map.add 16<typeId> nullable |> Map.add 40<typeId> holder
+                    Harvest =
+                        { Exports = [ Build.export "holder" (Build.symbol 400 "holder" SymbolFlags.BlockScopedVariable) ]
+                          AmbientClasses = []
+                          Namespaces = Map.empty
+                          ShadowedByLib = 0 }
+                    ExportTypes = Map.ofList [ 400<symbolId>, { Declared = None; Value = Some 40<typeId> } ] }
+
+            let named, _ = Build.runPass Anonymous.synthesizeAnonymous model
+
+            Expect.equal (Map.tryFind 11<typeId> named.AliasApplications) (Some 10<typeId>) "the application is registered"
+            Expect.equal (Map.tryFind 11<typeId> named.DeclParams) (Some [ 31<typeId> ]) "with its arguments"
+
+            for arm in [ 22<typeId>; 23<typeId>; 26<typeId> ] do
+                Expect.isFalse (Map.containsKey arm named.DeclNames) $"arm {arm} claims no name"
+
+        // `type Wrap<T> = Base<T> & { tag: T }` applied to a union argument distributes into a union
+        // that keeps `Wrap`'s alias symbol. The union reads no intersection form.
+        testCase "synthesize-anonymous reads only a union form behind a union's alias symbol" <| fun _ ->
+            let model = Build.shapeModel (typeParam 30 "T" :: Build.primitives)
+
+            let objectWith id name =
+                { Build.facts (Build.typeResponse id TypeFlags.Object) with
+                    Members = [ Build.resolvedMember (Build.symbol (id * 10) name SymbolFlags.Property) 1 ] }
+
+            let declared =
+                { Build.facts
+                    { Build.typeResponse 60 TypeFlags.Intersection with
+                        AliasSymbol = ValueSome 902
+                        AliasTypeArguments = ValueSome [| 30 |] } with
+                    IntersectionMembers = [ 63<typeId>; 64<typeId> ]
+                    Members = (objectWith 63 "base").Members @ (objectWith 64 "tag").Members
+                    AliasTypeArguments = [ 30<typeId> ] }
+
+            let distributed =
+                { Build.facts { Build.typeResponse 61 TypeFlags.Union with AliasSymbol = ValueSome 902 } with
+                    UnionMembers = [ 65<typeId>; 66<typeId> ] }
+
+            let holder =
+                { Build.facts (Build.typeResponse 40 TypeFlags.Object) with
+                    Members = [ Build.resolvedMember (Build.symbol 401 "wrapped" SymbolFlags.Property) 61 ] }
+
+            let model =
+                { model with
+                    Types =
+                        [ declared; distributed; holder; objectWith 63 "base"; objectWith 64 "tag"; objectWith 65 "left"; objectWith 66 "right" ]
+                        |> List.fold (fun types facts -> Map.add (facts.Response.Id * uom<typeId>) facts types) model.Types
+                    Harvest =
+                        { Exports = [ Build.export "holder" (Build.symbol 400 "holder" SymbolFlags.BlockScopedVariable) ]
+                          AmbientClasses = []
+                          Namespaces = Map.empty
+                          ShadowedByLib = 0 }
+                    ExportTypes = Map.ofList [ 400<symbolId>, { Declared = None; Value = Some 40<typeId> } ] }
+
+            let named, _ = Build.runPass Anonymous.synthesizeAnonymous model
+
+            Expect.isFalse (Map.containsKey 60<typeId> named.DeclNames) "the intersection form is not declared from the union"
+            Expect.isTrue (Map.containsKey 65<typeId> named.DeclNames) "the union's own arms are walked"
 
         testCase "shape-aliases twin unions chain to the smallest id, never cycle" <| fun _ ->
             // Two declared unions over the same member set: only the smaller id is canonical.

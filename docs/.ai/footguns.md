@@ -14,10 +14,13 @@ argument, so `Model<string>` reads as two type arguments. Read heritage nodes an
 `getTypeFromTypeNode` for each contract. `TypeFacts.ImplementedTypes` records explicit
 `implements` contracts separately from `BaseTypes`.
 
-**Checker alias-symbol identity alone does not name a type.** A transformed type retains the
-symbol of the alias it came from, so the checker-declared type must equal the type being named
-before a source name is recovered. `NonNullable<Value>` matched the members of the nullable
-`Value` and reintroduced `null` on the strength of the shared symbol.
+**Checker alias-symbol identity alone does not name a type.** A transformed type retains the symbol of the alias it came from, so the checker-declared type must equal the type being named before a source name is recovered. `NonNullable<Value>` matched the members of the nullable `Value` and reintroduced `null` on the strength of the shared symbol. A union application of a generic tagged alias is recognised only where its arms correspond to the declared form's arm for arm. An arm that is an instantiation open over a signature parameter reaches the shape tier identity-only, with no members, so it corresponds by its target rather than by its tag.
+
+**`TypeFlags.Any` is four intrinsic names.** `any` covers a written or omitted annotation and the checker's own fallbacks (a circular alias, an inference placeholder), so `TR008` is not proof an author wrote `any`. `error` and `unresolved` stand for a reference the program leaves unresolved; `intrinsic` is the body of a compiler-implemented alias. Read `IntrinsicName`, never the flag alone. A union, an intersection or an optional position with an error constituent reduces to the nameless singleton error type, so its written name is lost; a qualified name survives only as the unresolved symbol's parent chain. Intrinsic type ids are singletons, and `shape-aliases` abbreviates every later alias of one to the first claimant: `NoInfer`, `Lowercase`, `Capitalize` and `Uncapitalize` read `= Uppercase` and carry its `TR064`.
+
+**A nullable union hides the application it was written over.** `x?: Job<string>` reaches the shape tier as `Job<string>`'s arms beside `undefined`, and arms no argument re-instantiates are the declared form's own, so a member-set match lands on `Job<T>` outside its scope. Read `TypeFacts.NonNullableApplication` (the union origin's application, from `getNonNullableType`) and apply its arguments; a declared form's own parameters apply only where they are in scope. An alias that already includes `null` (`Maybe<T> | undefined`) leaves no single application in the origin, and its reference depends on the member-set match.
+
+**Expecto's `--filter` is a hierarchy prefix.** A fixture's tests are named `generator e2e.<fixture> generates the committed goldens` and its extra cases `generator e2e.<case name>`, so a bare fixture name selects zero tests and reports success.
 
 ## Declaration catalogs
 
