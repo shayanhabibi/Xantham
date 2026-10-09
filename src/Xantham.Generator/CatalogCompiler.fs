@@ -97,102 +97,125 @@ let private platforms =
 
 let discoverWith (probe: string -> Async<string>) (resolve: string -> string) (executable: string) =
     async {
-        let executable = resolve executable
-        let lib = DirectoryInfo(Path.GetDirectoryName executable)
-        let package = lib.Parent
+        let selected = Path.GetFullPath executable
+        let executable = resolve selected
 
-        let recognized =
-            not (isNull package)
-            && lib.Name = "lib"
-            && Set.contains package.Name platforms
-            && not (isNull package.Parent)
-            && package.Parent.Name = "@typescript"
-            && not (isNull package.Parent.Parent)
-            && package.Parent.Parent.Name = "node_modules"
-            && Path.GetFileName executable = (if package.Name.Contains "-win32-" then "tsc.exe" else "tsc")
+        let packageAt path =
+            let lib = DirectoryInfo(Path.GetDirectoryName(path: string))
+            let package = lib.Parent
+
+            if
+                not (isNull package)
+                && lib.Name = "lib"
+                && Set.contains package.Name platforms
+                && not (isNull package.Parent)
+                && package.Parent.Name = "@typescript"
+                && not (isNull package.Parent.Parent)
+                && package.Parent.Parent.Name = "node_modules"
+                && Path.GetFileName path = (if package.Name.Contains "-win32-" then "tsc.exe" else "tsc")
+            then
+                Some package
+            else
+                None
+
+        let logicalPackage =
+            packageAt selected
+            |> Option.filter (fun package ->
+                let expected =
+                    Path.Combine(resolve package.FullName, "lib", Path.GetFileName selected)
+
+                let comparison =
+                    if OperatingSystem.IsWindows() then
+                        StringComparison.OrdinalIgnoreCase
+                    else
+                        StringComparison.Ordinal
+
+                String.Equals(expected, executable, comparison))
+
+        let pairing =
+            [ packageAt executable; logicalPackage ]
+            |> List.choose id
+            |> List.tryPick (fun package ->
+                let platformManifest = Path.Combine(resolve package.FullName, "package.json")
+
+                let wrapperManifest =
+                    Path.Combine(package.Parent.Parent.FullName, "typescript", "package.json")
+
+                if File.Exists platformManifest && File.Exists wrapperManifest then
+                    Some(package, platformManifest, wrapperManifest)
+                else
+                    None)
 
         let binary () = Binary Ast.ProtocolVersion
 
-        if not recognized then
-            return binary ()
-        else
-            let platformManifest = Path.Combine(package.FullName, "package.json")
+        match pairing with
+        | None -> return binary ()
+        | Some(package, platformManifest, wrapperManifest) ->
+            let readManifest path =
+                try
+                    JsonDocument.Parse(File.ReadAllText path)
+                with :? JsonException ->
+                    fail executable $"invalid package metadata: {path}"
 
-            let wrapperManifest =
-                Path.Combine(package.Parent.Parent.FullName, "typescript", "package.json")
+            use platform = readManifest platformManifest
+            use wrapper = readManifest (resolve wrapperManifest)
 
-            if not (File.Exists platformManifest && File.Exists wrapperManifest) then
-                return binary ()
-            else
-                let readManifest path =
-                    try
-                        JsonDocument.Parse(File.ReadAllText path)
-                    with :? JsonException ->
-                        fail executable $"invalid package metadata: {path}"
+            let text name (root: JsonElement) =
+                match root.TryGetProperty(name: string) with
+                | false, _ -> None
+                | true, value when value.ValueKind = JsonValueKind.String ->
+                    let text = value.GetString()
 
-                use platform = readManifest platformManifest
-                use wrapper = readManifest (resolve wrapperManifest)
+                    if String.IsNullOrWhiteSpace text || text <> text.Trim() then
+                        fail executable $"invalid package metadata {name}"
 
-                let text name (root: JsonElement) =
-                    match root.TryGetProperty(name: string) with
-                    | false, _ -> None
-                    | true, value when value.ValueKind = JsonValueKind.String ->
-                        let text = value.GetString()
+                    Some text
+                | _ -> fail executable $"invalid package metadata {name}"
 
-                        if String.IsNullOrWhiteSpace text || text <> text.Trim() then
-                            fail executable $"invalid package metadata {name}"
+            let metadata expectedName root =
+                match text "name" root with
+                | Some actual when actual <> expectedName ->
+                    fail executable $"package name mismatch: expected {expectedName}, actual {actual}"
+                | _ -> ()
 
-                        Some text
-                    | _ -> fail executable $"invalid package metadata {name}"
+                let revision = text "gitHead" root
 
-                let metadata expectedName root =
-                    match text "name" root with
-                    | Some actual when actual <> expectedName ->
-                        fail executable $"package name mismatch: expected {expectedName}, actual {actual}"
-                    | _ -> ()
+                revision
+                |> Option.iter (fun value ->
+                    if not (validRevision value) then
+                        fail executable "invalid gitHead; expected full hexadecimal revision")
 
-                    let revision = text "gitHead" root
+                match text "name" root, text "version" root, revision with
+                | Some _, Some version, Some revision -> Some(version, revision.ToLowerInvariant())
+                | _ -> None
 
-                    revision
-                    |> Option.iter (fun value ->
-                        if not (validRevision value) then
-                            fail executable "invalid gitHead; expected full hexadecimal revision")
+            let platformName = "@typescript/" + package.Name
 
-                    match text "name" root, text "version" root, revision with
-                    | Some _, Some version, Some revision -> Some(version, revision.ToLowerInvariant())
-                    | _ -> None
+            match metadata platformName platform.RootElement, metadata "typescript" wrapper.RootElement with
+            | Some(platformVersion, platformRevision), Some(wrapperVersion, wrapperRevision) ->
+                if platformVersion <> wrapperVersion then
+                    fail executable $"package version mismatch: platform {platformVersion}, wrapper {wrapperVersion}"
 
-                let platformName = "@typescript/" + package.Name
+                if platformRevision <> wrapperRevision then
+                    fail executable $"package revision mismatch: platform {platformRevision}, wrapper {wrapperRevision}"
 
-                match metadata platformName platform.RootElement, metadata "typescript" wrapper.RootElement with
-                | Some(platformVersion, platformRevision), Some(wrapperVersion, wrapperRevision) ->
-                    if platformVersion <> wrapperVersion then
-                        fail
-                            executable
-                            $"package version mismatch: platform {platformVersion}, wrapper {wrapperVersion}"
+                match wrapper.RootElement.TryGetProperty "optionalDependencies" with
+                | true, dependencies when dependencies.ValueKind = JsonValueKind.Object ->
+                    match text platformName dependencies with
+                    | Some version when version = platformVersion -> ()
+                    | _ -> fail executable $"wrapper dependency {platformName} must select {platformVersion}"
+                | _ -> fail executable $"wrapper dependency {platformName} is missing"
 
-                    if platformRevision <> wrapperRevision then
-                        fail
-                            executable
-                            $"package revision mismatch: platform {platformRevision}, wrapper {wrapperRevision}"
+                let! output = probe executable
 
-                    match wrapper.RootElement.TryGetProperty "optionalDependencies" with
-                    | true, dependencies when dependencies.ValueKind = JsonValueKind.Object ->
-                        match text platformName dependencies with
-                        | Some version when version = platformVersion -> ()
-                        | _ -> fail executable $"wrapper dependency {platformName} must select {platformVersion}"
-                    | _ -> fail executable $"wrapper dependency {platformName} is missing"
+                let lines =
+                    output.Trim().Split([| '\r'; '\n' |], StringSplitOptions.RemoveEmptyEntries)
 
-                    let! output = probe executable
+                if lines <> [| "Version " + platformVersion |] then
+                    fail executable $"executable version mismatch: expected Version {platformVersion}"
 
-                    let lines =
-                        output.Trim().Split([| '\r'; '\n' |], StringSplitOptions.RemoveEmptyEntries)
-
-                    if lines <> [| "Version " + platformVersion |] then
-                        fail executable $"executable version mismatch: expected Version {platformVersion}"
-
-                    return TypeScriptPackage(platformVersion, platformRevision, Ast.ProtocolVersion)
-                | _ -> return binary ()
+                return TypeScriptPackage(platformVersion, platformRevision, Ast.ProtocolVersion)
+            | _ -> return binary ()
     }
 
 let discover executable =

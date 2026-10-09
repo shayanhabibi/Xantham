@@ -1843,7 +1843,9 @@ platform binaries. Unidentified executables retain exact compiler-hash authentic
 schema 1 retains exact compiler/generator hashes. Schema 2 keeps those hashes as provenance.
 
 Bootstrap captures the actual launched executable in a weak context association. Pipeline caches
-producer discovery once across preliminary and final customization authentication. A reference
+producer discovery once across preliminary and final customization authentication.
+Compiler discovery retains verified logical wrapper pairing for symlinked platform directories,
+with physical executable identity taking precedence for file links into another install. A reference
 is decoded once for catalogue, compatibility and variant metadata; existing declaration and
 ownership checks follow compatibility validation. The catalog-portability lab compiles a
 producer, adapter and downstream consumer, including accepted schema-1 input and differing

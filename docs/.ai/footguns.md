@@ -35,6 +35,10 @@ wrapper/platform packages must agree on exact release and full gitHead, match th
 dependency, and match the bounded `--version` probe. Portable identity also includes the binary
 AST protocol. Missing package identity uses the executable hash; conflicting recognized metadata
 fails. Keep the captured path and cached per-run discovery shared across customization passes.
+Preserve the selected logical install path for linked platform packages; its expected executable
+must match the actual physical executable beneath the resolved package directory. A file link to
+another conventional install uses that physical install's metadata. An unrelated file link stays
+binary. Resolving away the install path before locating the wrapper loses valid package-store pairs.
 Decode compatibility and variants from the same JSON document and retain downstream source,
 manifest, API, arity, constraint, owner and variant authentication.
 

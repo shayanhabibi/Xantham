@@ -283,29 +283,29 @@ rtk git diff --stat
 - [x] Compare aggregate findings and golden source hashes with the pre-implementation baseline.
   Catalogue JSON changes and the new lab are expected; explain any other generated F# or finding
   changes using the fixture rules. Stop and report unexplained corpus movement.
-- [ ] Perform a whole-branch review through the selected execution skill's workflow, fix verified
+- [x] Perform a whole-branch review through the selected execution skill's workflow, fix verified
   issues, and rerun only the affected checks. Record exact local results and distinguish pending
   remote Windows↔Linux jobs from completed local verification.
 - [x] Commit the CI gate and report the branch, commits, tests, and any outstanding remote evidence.
 
-## Execution readiness
+## Execution status
 
-The spec and native isolated-worktree execution were approved on 2026-10-09. Native
-execution is recommended because the policy, compiler discovery, and pipeline integration share
-one small sequence of internal interfaces. The current checkout is on develop, with unrelated
-untracked user files; an isolated feature worktree is recommended before implementation.
-Execution is on agent/portable-catalogue; the final cross-platform gate remains in progress.
-
-Before code edits, record the catalogue test baseline and `rtk dotnet fsi build.fsx -- findings`
-output in the selected workspace. Run setup through build.fsx; a linked worktree borrows the main
-compiler install through tools/workspace.fsx and initializes its own fixture dependencies.
+The spec and native isolated-worktree execution were approved on 2026-10-09. Implementation
+and local verification are complete on agent/portable-catalogue. The main checkout and its
+unrelated user files are preserved. Remote cross-platform artifact exchange is pending CI.
+This plan remains while the branch is unlanded.
 
 ## Execution evidence (2026-10-09)
 
-Local full setup/test/run-gate passed: 1,070 generator tests and 99 Wire tests,
+Local full setup/test/run-gate passed after the review fix: 1,074 generator tests and 99 Wire tests,
 two ignored tests, 468 Fable runtime checks, and the Partas integration gate.
 Solution build compiled 15 projects with zero errors. Policy/tooling tests passed 27/27;
 the live exchange smoke test also rejects changed source hashes, changed payload bytes,
 and missing payload files. All 241 pre-existing golden source/manifest hashes are unchanged;
 the new lab adds Exact=2 and Ergonomic=1. Cross-platform CI artifact exchange is pending.
-Whole-branch review follows the gate commit.
+Fresh whole-branch review found one Important issue: resolving a linked platform package's path
+lost its corresponding wrapper. Actual directory junction/symlink tests reproduced the failure;
+discovery now verifies logical wrapper pairing against the selected physical executable.
+Conflicting wrapper metadata still rejects, a competing physical install retains its identity,
+and unrelated executable links remain binary. The compiler suite passes 26/26; the full gates
+above passed again after the fix. No Critical findings or deferred minors remain.

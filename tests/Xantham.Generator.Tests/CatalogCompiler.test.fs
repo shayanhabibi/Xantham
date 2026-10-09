@@ -36,6 +36,17 @@ let private probe _ = async.Return("Version " + version)
 let private rejects part action =
     Expect.throwsC action (fun error -> Expect.stringContains error.Message part "toolchain diagnostic identifies failure")
 
+let private linkDirectory link target =
+    if OperatingSystem.IsWindows() then
+        let start = ProcessStartInfo("cmd.exe", UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true)
+        for argument in ["/c"; "mklink"; "/J"; link; target] do start.ArgumentList.Add argument
+        use child = Process.Start start
+        let output = child.StandardOutput.ReadToEndAsync()
+        let errors = child.StandardError.ReadToEndAsync()
+        child.WaitForExit()
+        Expect.equal child.ExitCode 0 (output.Result + errors.Result)
+    else Directory.CreateSymbolicLink(link, target) |> ignore
+
 [<Tests>]
 let tests =
     testList "catalog compiler" [
@@ -65,6 +76,56 @@ let tests =
         testCase "physical path retains filesystem root" <| fun _ ->
             let root = Path.GetPathRoot(Path.GetFullPath __SOURCE_DIRECTORY__)
             Expect.equal (physicalPath root) root "root terminates ancestor resolution"
+
+        testCase "linked platform package retains its verified install wrapper" <| fun _ ->
+            use scratch = Scratch.directory "catalog-compiler-link"
+            let executable, platform, _ = install scratch.Path
+            let package = Path.GetDirectoryName platform
+            let stored = Path.Combine(scratch.Path, "store", "typescript-win32-x64")
+            Directory.CreateDirectory(Path.GetDirectoryName stored) |> ignore
+            Directory.Move(package, stored)
+            linkDirectory package stored
+            let selected = Path.Combine(stored, "lib", "tsc.exe")
+            let actualProbe path =
+                Expect.equal path selected "probe drives the actual physical compiler"
+                probe path
+            try
+                Expect.equal (discoverWith actualProbe physicalPath executable |> Async.RunSynchronously)
+                    (TypeScriptPackage(version, revision, Ast.ProtocolVersion)) "directory link preserves verifiable pairing"
+            finally Directory.Delete package
+
+        testCase "linked platform package still rejects conflicting wrapper metadata" <| fun _ ->
+            use scratch = Scratch.directory "catalog-compiler-link"
+            let executable, platform, wrapper = install scratch.Path
+            let package = Path.GetDirectoryName platform
+            let stored = Path.Combine(scratch.Path, "store", "typescript-win32-x64")
+            Directory.CreateDirectory(Path.GetDirectoryName stored) |> ignore
+            Directory.Move(package, stored)
+            linkDirectory package stored
+            edit wrapper "version" "\"7.2.0\""
+            try
+                rejects "version mismatch" (fun () -> discoverWith probe physicalPath executable |> Async.RunSynchronously |> ignore)
+            finally Directory.Delete package
+
+        testCase "executable link uses physical install rather than competing logical metadata" <| fun _ ->
+            use scratch = Scratch.directory "catalog-compiler-link"
+            let logical, _, _ = install (Path.Combine(scratch.Path, "logical"))
+            let selected, platform, wrapper = install (Path.Combine(scratch.Path, "selected"))
+            for manifest in [platform; wrapper] do edit manifest "version" "\"7.2.0\""
+            edit wrapper "optionalDependencies" "{\"@typescript/typescript-win32-x64\":\"7.2.0\"}"
+            let resolve path = if path = logical then selected else path
+            Expect.equal (discoverWith (fun _ -> async.Return "Version 7.2.0") resolve logical |> Async.RunSynchronously)
+                (TypeScriptPackage("7.2.0", revision, Ast.ProtocolVersion)) "physical install identity wins"
+
+        testCase "unrelated executable link cannot authenticate through logical package manifests" <| fun _ ->
+            use scratch = Scratch.directory "catalog-compiler-link"
+            let logical, _, _ = install scratch.Path
+            let selected = Path.Combine(scratch.Path, "custom.exe")
+            File.WriteAllText(selected, "custom compiler")
+            let resolve path = if path = logical then selected else path
+            let unexpectedProbe _ = async { return failwith "unrelated executable must remain binary" }
+            Expect.equal (discoverWith unexpectedProbe resolve logical |> Async.RunSynchronously)
+                (Binary Ast.ProtocolVersion) "logical install cannot lend identity to a different executable"
 
         testCase "missing package metadata falls back to exact binary" <| fun _ ->
             use scratch = Scratch.directory "catalog-compiler"
