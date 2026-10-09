@@ -100,6 +100,56 @@ let accept (client: Identity.Adapter.Client) = Identity.Root.Exports.``use`` cli
 """
 
 [<Tests>]
+let releaseIdentityTests =
+    testList "catalog release identity edge cases" [
+        testCase "identical declarations retain exact package releases across relocated installs" <| fun _ ->
+            use scratch = Scratch.directory "catalog-release-identity"
+            let versions = [ "1.0.0"; "1.0.1"; "1.0.0-beta.1"; "1.0.0-beta.2"; "1.0.0+build.1"; "1.0.0+build.2" ]
+            let source = "export interface Item { value: string; }\n"
+            let install name version =
+                let package = Path.Combine(scratch.Path, name)
+                writePackageFile package "package.json"
+                    (JsonSerializer.Serialize {| name = "release-identity-lab"; version = version; types = "index.d.ts" |})
+                writePackageFile package "index.d.ts" source
+                package
+            let config = configured scratch.Path "Root" "index.d.ts" [||]
+            let produce name version =
+                let package = install name version
+                let output = Path.Combine(scratch.Path, name + "-out")
+                Pipeline.run config package output |> Async.RunSynchronously |> ignore
+                let reference = Path.Combine(output, "declarations.json")
+                let catalog = JsonSerializer.Deserialize<DeclarationCatalog.Catalog>(File.ReadAllText reference,
+                    JsonSerializerOptions(PropertyNameCaseInsensitive = true))
+                let item = catalog.Declarations |> Array.find (fun declaration -> declaration.FSharpName = "Identity.Root.Item")
+                package, reference, item
+            let _, reference, original = produce "original" "1.0.0"
+            let relocated, _, copy = produce "relocated" "1.0.0"
+            Expect.equal copy.Identity original.Identity "install paths do not change declaration identity"
+            Expect.equal copy.Api original.Api "install paths do not change the emitted API"
+            let adapter = configured scratch.Path "Adapter" "index.d.ts" [| reference |]
+            Pipeline.run adapter relocated (Path.Combine(scratch.Path, "adapter")) |> Async.RunSynchronously |> ignore
+            let binding = File.ReadAllText(Path.Combine(scratch.Path, "adapter", "Identity.Adapter.fs"))
+            Expect.stringContains binding "Identity.Root.Item" "the reader selects the original nominal owner"
+            let identities = ResizeArray<string>()
+            identities.Add original.Identity
+            for index, version in versions.Tail |> List.indexed do
+                let package, _, item = produce ("release-" + string index) version
+                identities.Add item.Identity
+                Expect.equal item.Api original.Api "identical declarations keep the same F# API across releases"
+                let output = Path.Combine(scratch.Path, "independent-" + string index)
+                Pipeline.run adapter package output |> Async.RunSynchronously |> ignore
+                let binding = File.ReadAllText(Path.Combine(output, "Identity.Adapter.fs"))
+                Expect.stringContains binding "type Item" ("another release emits its own nominal declaration: " + version)
+                Expect.isFalse (binding.Contains "Identity.Root.Item") "another release must not alias the original nominal owner"
+                let catalog = JsonSerializer.Deserialize<DeclarationCatalog.Catalog>(File.ReadAllText(Path.Combine(output, "declarations.json")),
+                    JsonSerializerOptions(PropertyNameCaseInsensitive = true))
+                let emitted = catalog.Declarations |> Array.find (fun declaration -> declaration.FSharpName = "Identity.Adapter.Item")
+                Expect.equal emitted.Identity item.Identity "the reader preserves the new release's identity"
+            Expect.equal (identities |> Seq.distinct |> Seq.length) versions.Length
+                "patch, prerelease and build metadata differences remain separate declaration identities"
+    ]
+
+[<Tests>]
 let mappedOptionsTests =
     testCase "declaration catalog mapped options preserve named and anonymous literal references" <| fun _ ->
         let directory = Path.Combine(temporaryRoot, "xantham-mapped-options-" + Guid.NewGuid().ToString "N")
