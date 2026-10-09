@@ -82,11 +82,24 @@ Compile producers first, following the catalog's ordered `owners` list.
 
 ## Keep catalogs compatible
 
-Generate related bindings with the same Xantham build and compatible `lib`,
-`types`, group dispositions, and inference options.
-Keep separate catalogs for environments that need different globals.
+New catalogs use schema 2. Related bindings can reuse catalogs across Windows and Linux
+when the installed TypeScript packages have the exact same release and source revision,
+the AST protocol matches, and Xantham's identity, API, inference, customization, and policy
+contracts match. Rebuilding Xantham with the same contracts remains compatible.
+Custom compiler executables without verifiable package metadata require identical compiler
+binary hashes. Matching TypeScript major/minor versions alone is insufficient.
 
-Catalogs check declaration identity, package/source hashes, and F# API compatibility.
+Keep `lib`, `types`, group dispositions, and inference options compatible.
+Use separate catalogs for environments that need different globals.
+
+Upgrade consumers before regenerating producers: older Xantham builds reject schema 2.
+Schema 1 catalogs retain exact compiler and generator binary checks. Regenerate their
+producers with the upgraded generator to obtain portable catalogs. Continue supplying
+explicit `declarationReferences` paths as shown above.
+
+Both schemas check declaration identity, package/source hashes, owner dependencies,
+generic arity and constraints, F# APIs, and customization variants. Schema 2 retains
+compiler and generator fingerprints as producer provenance.
 If a catalog is rejected, regenerate the related bindings together and inspect
 the diagnostic. Some entry-dependent or generic shapes still cannot share an
 emitted identity; those combinations require separate bindings or a mapping change.
