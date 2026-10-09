@@ -1284,6 +1284,9 @@ let share (agent: Identity.Adapter.Agent) : Identity.Root.Agent = agent
                     let declarations = catalog["declarations"].AsArray()
                     let client = declarations |> Seq.find (fun entry -> entry["fSharpName"].GetValue<string>() = "Identity.Root.PublicClient")
                     let box = declarations |> Seq.find (fun entry -> entry["fSharpName"].GetValue<string>() = "Identity.Root.PublicBox")
+                    let sharedInput =
+                        catalog["inputs"].AsArray()
+                        |> Seq.find (fun input -> input["file"].GetValue<string>() = "lib/lib.es5.d.ts")
                     match mutation with
                     | "compiler" ->
                         let compatibility = catalog["compatibility"]
@@ -1293,8 +1296,8 @@ let share (agent: Identity.Adapter.Agent) : Identity.Root.Agent = agent
                         let compatibility = catalog["compatibility"]
                         compatibility["identityVersion"] <- JsonValue.Create(compatibility["identityVersion"].GetValue<int>() + 1)
                     | "inferenceProfile" -> catalog[mutation] <- JsonValue.Create "incompatible"
-                    | "manifest" -> (catalog["inputs"][0])["manifestSha256"] <- JsonValue.Create "changed"
-                    | "input" -> (catalog["inputs"][0])["sha256"] <- JsonValue.Create "changed"
+                    | "manifest" -> sharedInput["manifestSha256"] <- JsonValue.Create "changed"
+                    | "input" -> sharedInput["sha256"] <- JsonValue.Create "changed"
                     | "api" -> client["api"] <- JsonValue.Create "changed"
                     | "source" -> (client["sources"][0])["sha256"] <- JsonValue.Create "changed"
                     | "arity" ->

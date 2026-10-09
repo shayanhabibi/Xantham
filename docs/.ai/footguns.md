@@ -21,6 +21,17 @@ before a source name is recovered. `NonNullable<Value>` matched the members of t
 
 ## Declaration catalogs
 
+**TypeScript library ownership is logical, not a platform distribution.** Installed
+`lib/lib.*.d.ts` files from `typescript` and recognized `@typescript/typescript-<rid>`
+packages share package identity `typescript`, their package-relative library path and
+exact source-byte hash. Their root manifest fingerprint covers canonical name, exact
+version and normalized full gitHead; intervening manifests remain byte-authenticated.
+Recognized compiler release metadata must match the library metadata. Binary fallback
+permits an absent gitHead while retaining exact executable authentication. Other package
+sources retain raw manifest hashes. Identity contract 3 rejects earlier platform-coloured
+catalogs before reuse. Core.TS regeneration must match the committed semantic catalogue
+on both operating systems; compiler/generator binary provenance may differ.
+
 **Brotli completion requires the decoder's Done status.** Catalogue file transport accepts
 exactly one complete stream and checks buffered and subsequent bytes for trailing data.
 A complete JSON value can precede the Brotli end marker. The shared stream reader counts actual

@@ -194,13 +194,17 @@ let private packageOf (ctx: Context) (file: string) =
         | None -> find directory
 
 /// Hashes package ownership metadata and intervening module manifests.
-let private manifestHash (root: string) (file: string) =
+let private manifestHash (root: string) (file: string) rootHash =
     let rec collect directory manifests =
         let manifest = Path.Combine(directory, "package.json")
 
         let manifests =
             if File.Exists manifest then
-                (Path.GetRelativePath(root, manifest) |> slash, File.ReadAllBytes manifest |> hash)
+                (Path.GetRelativePath(root, manifest) |> slash,
+                 if directory = root then
+                     rootHash |> Option.defaultWith (fun () -> File.ReadAllBytes manifest |> hash)
+                 else
+                     File.ReadAllBytes manifest |> hash)
                 :: manifests
             else
                 manifests
@@ -216,7 +220,7 @@ let private manifestHash (root: string) (file: string) =
     | [ (_, value) ] -> value
     | values -> values |> List.sortBy fst |> json |> hashText
 
-let private sources (ctx: Context) (handles: string<Measure.declHandle> list) =
+let private sources compiler (ctx: Context) (handles: string<Measure.declHandle> list) =
     async {
         let paths =
             handles
@@ -233,6 +237,19 @@ let private sources (ctx: Context) (handles: string<Measure.declHandle> list) =
             |> List.map (fun file ->
                 async {
                     let root, package, version = packageOf ctx file
+
+                    let relative =
+                        if file.StartsWith "bundled:" then
+                            file
+                        else
+                            slash (Path.GetRelativePath(root, file))
+
+                    let library = CatalogLibrary.tryIdentity compiler root package version relative
+
+                    let package, rootHash =
+                        match library with
+                        | Some(package, fingerprint) -> package, Some fingerprint
+                        | None -> package, None
 
                     let! bytes =
                         if File.Exists file then
@@ -251,17 +268,13 @@ let private sources (ctx: Context) (handles: string<Measure.declHandle> list) =
                         {
                             Package = package
                             Version = version
-                            File =
-                                if file.StartsWith "bundled:" then
-                                    file
-                                else
-                                    slash (Path.GetRelativePath(root, file))
+                            File = relative
                             Sha256 = hash bytes
                             ManifestSha256 =
                                 if file.StartsWith "bundled:" then
                                     "bundled"
                                 else
-                                    manifestHash root file
+                                    manifestHash root file rootHash
                         }
                 })
             |> Async.Parallel
@@ -1216,6 +1229,7 @@ let internal applyWithProducer
 
             let! sourceFiles =
                 sources
+                    producer.Contract.Compiler
                     ctx
                     (rawHandles
                      @ (inputFiles

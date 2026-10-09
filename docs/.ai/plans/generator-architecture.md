@@ -1937,3 +1937,32 @@ Other structurally incompatible defaults retain the existing `TP008` policy.
 `catalog-generic-defaults-lab` covers declaration and callback-result agreement, bare default
 applications, generic-bound arguments, nominal subclasses, recursive bounds and invalid concrete
 arguments. Catalog constraint authentication remains unchanged.
+
+## TypeScript library catalogue identity (2026-10-09)
+
+Catalogue sources for installed TypeScript `lib/lib.*.d.ts` files use logical package
+ownership `typescript` across the wrapper and recognized platform distributions. Canonical
+root metadata hashes name, exact version and normalized gitHead, while source bytes and
+intervening manifests retain authentication. Library metadata must agree with the recognized
+compiler release; binary fallback retains exact executable authentication and permits missing
+gitHead. Ordinary package manifests and non-library files retain their previous hashes.
+Normalized source keys feed declaration handles, identities and canonical API references.
+Identity contract 3 requires regeneration of platform-coloured producers; API hashing,
+inference, customization, policy and transport versions remain unchanged. Core.TS emission
+is compared against the complete committed semantic catalogue on each CI OS, and a compiled
+consumer plus targeted mutations cover reuse and authentication.
+
+Full Core.TS reuse is covered with a compiler-only `export {}` program under the matching
+ES/DOM profile; its generated aliases compile against the original binding. An ordinary
+package probe containing `export function accept(value: Map<string, HTMLElement>):
+Map<string, HTMLElement>;` under the same shipping profile is still rejected for
+`AudioWorkletNodeOptions` API mismatch. The OS-identity correction preserves that guard;
+entry-dependent API compatibility remains a separate investigation.
+
+Validation: the full `build.fsx -- test --run-gate` pipeline passed, including the
+Generator and Wire suites, Fable run gate and customization Partas gate. The 28 new
+library identity/reuse cases cover all eight package names, complete Core.TS semantic
+re-emission, compiled aliases and reader rejection paths. Five Node portability and
+provenance checks passed. All 254 checked golden/Core.TS binding and manifest hashes
+remained unchanged. Independent review found no defects; actual Linux execution remains
+for CI, while the Windows regression authenticates the Linux-origin source-byte baseline.

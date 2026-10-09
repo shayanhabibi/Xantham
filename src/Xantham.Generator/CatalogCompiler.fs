@@ -95,6 +95,11 @@ let private platforms =
             "typescript-darwin-arm64"
         ]
 
+let isLibraryPackage (name: string) =
+    name = "typescript"
+    || (name.StartsWith("@typescript/", StringComparison.Ordinal)
+        && Set.contains (name.Substring "@typescript/".Length) platforms)
+
 let discoverWith (probe: string -> Async<string>) (resolve: string -> string) (executable: string) =
     async {
         let selected = Path.GetFullPath executable
