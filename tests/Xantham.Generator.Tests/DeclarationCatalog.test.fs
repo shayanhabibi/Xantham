@@ -27,7 +27,7 @@ let private coreTs =
     Path.Combine(__SOURCE_DIRECTORY__, "..", "..", "src", "Xantham.Fable.Core.TS", "Xantham.Fable.Core.TS.fsproj")
     |> Path.GetFullPath
 
-let private compileConsumer directory sources (consumer: string) =
+let internal compileConsumer directory sources (consumer: string) =
     // The consumer builds with the repository's SDK.
     File.Copy(Path.Combine(__SOURCE_DIRECTORY__, "..", "..", "global.json"), Path.Combine(directory, "global.json"), true)
     File.WriteAllText(Path.Combine(directory, "Consumer.fs"), consumer)
@@ -1188,8 +1188,8 @@ let share (agent: Identity.Adapter.Agent) : Identity.Root.Agent = agent
 
             let inline (=!>) mutation expected = mutation, expected
             testTheory "incompatible producers fail before output is written" [
-                "compiler" =!> "different compiler"
-                "generator" =!> "different generator"
+                "compiler" =!> "different compiler version"
+                "generator" =!> "different identity version"
                 "inferenceProfile" =!> "different inference profile"
                 "manifest" =!> "package manifest mismatch"
                 "input" =!> "input source hash mismatch"
@@ -1212,7 +1212,14 @@ let share (agent: Identity.Adapter.Agent) : Identity.Root.Agent = agent
                     let client = declarations |> Seq.find (fun entry -> entry["fSharpName"].GetValue<string>() = "Identity.Root.PublicClient")
                     let box = declarations |> Seq.find (fun entry -> entry["fSharpName"].GetValue<string>() = "Identity.Root.PublicBox")
                     match mutation with
-                    | "compiler" | "generator" | "inferenceProfile" -> catalog[mutation] <- JsonValue.Create "incompatible"
+                    | "compiler" ->
+                        let compatibility = catalog["compatibility"]
+                        let compiler = compatibility["compiler"]
+                        compiler["version"] <- JsonValue.Create "incompatible"
+                    | "generator" ->
+                        let compatibility = catalog["compatibility"]
+                        compatibility["identityVersion"] <- JsonValue.Create 2
+                    | "inferenceProfile" -> catalog[mutation] <- JsonValue.Create "incompatible"
                     | "manifest" -> (catalog["inputs"][0])["manifestSha256"] <- JsonValue.Create "changed"
                     | "input" -> (catalog["inputs"][0])["sha256"] <- JsonValue.Create "changed"
                     | "api" -> client["api"] <- JsonValue.Create "changed"

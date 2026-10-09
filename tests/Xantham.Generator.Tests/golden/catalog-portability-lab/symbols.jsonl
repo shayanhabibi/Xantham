@@ -1,0 +1,3 @@
+{"name":"Box","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Box","message":"ParamObject Create synthesized (D3)"}]}
+{"name":"Exports.accept","tier":"exact","findings":[]}
+{"name":"catalog-portability-owner-lab","tier":"exact","findings":[{"name":"GE.GroupShipped","key":"GE001","pass":"render-source","tier":"exact","symbol":"catalog-portability-owner-lab","fields":{"group":"catalog-portability-owner-lab","declarations":1},"message":"catalog-portability-owner-lab is shipped as its own module, carrying 1 declarations"}]}

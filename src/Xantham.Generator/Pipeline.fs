@@ -431,6 +431,9 @@ let private generateCore
         let! mailbox, ctx = Bootstrap.start config packageDir
         use _ = mailbox :> IDisposable
 
+        let catalogProducer =
+            DeclarationCatalog.createProducer ctx |> DeclarationCatalog.cacheProducer
+
         let! harvest, harvestFindings = runTier ctx Harvest.passes HarvestModel.Empty
         let! resolve, resolveFindings = runTier ctx Resolve.passes (toResolve harvest)
 
@@ -457,7 +460,8 @@ let private generateCore
                         Customization.Semantics.project ctx shape (harvestFindings @ resolveFindings @ shapeFindings)
 
                     let! _, _, referencedNames =
-                        DeclarationCatalog.applyWith
+                        DeclarationCatalog.applyWithProducer
+                            catalogProducer
                             extensionProfile
                             Map.empty
                             shape
@@ -503,7 +507,8 @@ let private generateCore
                 invalidOp "customization/compiler-required: raw replacements require generateValidatedWith"
 
         let! shape, catalog, referencedNames =
-            DeclarationCatalog.applyWith
+            DeclarationCatalog.applyWithProducer
+                catalogProducer
                 extensionProfile
                 annotations
                 originalShape

@@ -107,9 +107,24 @@ let private profile (config: GeneratorConfig) =
     |> hashText
 
 let private compiler (ctx: Context) =
-    match Tsc.locate (ctx.PackageDir / uom<dirPath>) with
-    | Some path -> File.ReadAllBytes path |> hash
-    | None -> fail "the compiler executable could not be identified"
+    Bootstrap.compilerPath ctx |> File.ReadAllBytes |> hash
+
+let internal createProducer (ctx: Context) : Async<CatalogCompatibility.Producer> =
+    async {
+        let! identity = Bootstrap.compilerPath ctx |> CatalogCompiler.discover
+
+        return
+            {
+                Compiler = compiler ctx
+                Generator = typeof<GeneratorConfig>.Assembly.Location |> File.ReadAllBytes |> hash
+                InferenceProfile = profile ctx.Config
+                Contract = CatalogCompatibility.current identity
+            }
+    }
+
+let internal cacheProducer (operation: Async<CatalogCompatibility.Producer>) =
+    let task = lazy (Async.StartAsTask operation)
+    fun () -> task.Value |> Async.AwaitTask
 
 let private packageOf (ctx: Context) (file: string) =
     let rec boundary directory =
@@ -830,23 +845,33 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
     |> List.map (fun decl -> Render.declName decl |> (fun name -> name, forDecl name decl))
     |> Map.ofList
 
-let private load profile compiler generator (path: string) =
+type private Loaded =
+    {
+        Catalog: Catalog
+        Compatibility: CatalogCompatibility.Contract option
+        Variants: Variant list
+    }
+
+let private load producer (path: string) =
     if not (File.Exists path) then
         fail $"reference does not exist: {path}"
 
-    let catalog = JsonSerializer.Deserialize<Catalog>(File.ReadAllText path, options)
+    use document = JsonDocument.Parse(File.ReadAllText path)
+    let root = document.RootElement
+    let compatibility = CatalogCompatibility.read path root
+    let catalog = JsonSerializer.Deserialize<Catalog>(root, options)
 
-    if isNull (box catalog) || catalog.SchemaVersion <> 1 then
+    if isNull (box catalog) then
         fail $"{path} has an unsupported schema"
 
-    if catalog.Compiler <> compiler then
-        fail $"{path} uses a different compiler"
-
-    if catalog.Generator <> generator then
-        fail $"{path} uses a different generator"
-
-    if catalog.InferenceProfile <> profile then
-        fail $"{path} uses a different inference profile"
+    CatalogCompatibility.validate
+        path
+        catalog.SchemaVersion
+        producer
+        catalog.Compiler
+        catalog.Generator
+        catalog.InferenceProfile
+        compatibility
 
     if
         isNull catalog.Declarations
@@ -870,7 +895,26 @@ let private load profile compiler generator (path: string) =
         then
             fail $"{path} has an invalid declaration"
 
-    catalog
+    let variants =
+        match root.TryGetProperty "variants" with
+        | true, variants ->
+            variants.EnumerateArray()
+            |> Seq.map (fun variant ->
+                {
+                    Identity = variant.GetProperty("identity").GetString()
+                    BaseApi = variant.GetProperty("baseApi").GetString()
+                    Api = variant.GetProperty("api").GetString()
+                    ContractChanged = variant.GetProperty("contractChanged").GetBoolean()
+                    Profile = variant.GetProperty("profile").GetString()
+                })
+            |> Seq.toList
+        | _ -> []
+
+    {
+        Catalog = catalog
+        Compatibility = compatibility
+        Variants = variants
+    }
 
 let private ownerOrder (owners: Owner list) =
     let owners =
@@ -1090,7 +1134,8 @@ module Canonical =
         | FsNamed name -> node "named" [ text name ]
 
 /// Redirects matching F# references, retains public aliases and value imports, and emits a catalog.
-let internal applyWith
+let internal applyWithProducer
+    (producer: unit -> Async<CatalogCompatibility.Producer>)
     customizationProfile
     annotations
     (originalShape: ShapeModel)
@@ -1107,11 +1152,10 @@ let internal applyWith
         else
             let originalShape, _, _ = classValues ctx originalShape groups
             let shape, groups, classValues = classValues ctx shape groups
-            let inferenceProfile = profile ctx.Config
-            let compiler = compiler ctx
-
-            let generator =
-                typeof<GeneratorConfig>.Assembly.Location |> File.ReadAllBytes |> hash
+            let! producer = producer ()
+            let inferenceProfile = producer.InferenceProfile
+            let compiler = producer.Compiler
+            let generator = producer.Generator
 
             let owner = Naming.groupModule ctx.Config ctx.PackageName EntryPackage
 
@@ -1119,9 +1163,9 @@ let internal applyWith
                 ctx.Config.DeclarationReferences
                 |> List.map (fun path -> Path.GetFullPath(Path.Combine(ctx.PackageDir / uom<dirPath>, path)))
 
-            let catalogs =
-                catalogPaths
-                |> List.map (fun path -> load inferenceProfile compiler generator path)
+            let loaded = catalogPaths |> List.map (load producer)
+
+            let catalogs = loaded |> List.map _.Catalog
 
             let inherited =
                 catalogs
@@ -1134,23 +1178,8 @@ let internal applyWith
                 |> Map.ofList
 
             let inheritedVariants =
-                catalogPaths
-                |> List.collect (fun path ->
-                    use document = JsonDocument.Parse(File.ReadAllText path)
-
-                    match document.RootElement.TryGetProperty "variants" with
-                    | true, variants ->
-                        variants.EnumerateArray()
-                        |> Seq.map (fun variant ->
-                            {
-                                Identity = variant.GetProperty("identity").GetString()
-                                BaseApi = variant.GetProperty("baseApi").GetString()
-                                Api = variant.GetProperty("api").GetString()
-                                ContractChanged = variant.GetProperty("contractChanged").GetBoolean()
-                                Profile = variant.GetProperty("profile").GetString()
-                            })
-                        |> Seq.toList
-                    | _ -> [])
+                loaded
+                |> List.collect _.Variants
                 |> List.groupBy _.Identity
                 |> List.map (fun (identity, variants) ->
                     match List.distinct variants with
@@ -1651,7 +1680,7 @@ let internal applyWith
 
             let catalog =
                 {
-                    SchemaVersion = 1
+                    SchemaVersion = 2
                     Compiler = compiler
                     Generator = generator
                     InferenceProfile = inferenceProfile
@@ -1668,12 +1697,10 @@ let internal applyWith
 
             let serialized =
                 let text = JsonSerializer.Serialize(catalog, options)
+                let document = JsonNode.Parse text
+                document["compatibility"] <- CatalogCompatibility.write producer.Contract
 
-                if variants.IsEmpty then
-                    text
-                else
-                    let document = JsonNode.Parse text
-
+                if not variants.IsEmpty then
                     let values =
                         variants
                         |> List.map (fun variant ->
@@ -1687,7 +1714,8 @@ let internal applyWith
                         |> List.toArray
 
                     document["variants"] <- JsonSerializer.SerializeToNode(values, options)
-                    document.ToJsonString options
+
+                document.ToJsonString options
 
             let outputCatalog =
                 if ctx.Config.DeclarationCatalog then
@@ -1697,6 +1725,16 @@ let internal applyWith
 
             return { shape with Decls = declarations }, outputCatalog, redirects
     }
+
+let internal applyWith customizationProfile annotations originalShape ctx shape groups =
+    applyWithProducer
+        (cacheProducer (createProducer ctx))
+        customizationProfile
+        annotations
+        originalShape
+        ctx
+        shape
+        groups
 
 let apply ctx shape groups =
     async {

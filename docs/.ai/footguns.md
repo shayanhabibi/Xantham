@@ -21,6 +21,23 @@ before a source name is recovered. `NonNullable<Value>` matched the members of t
 
 ## Declaration catalogs
 
+**Schema 2 compatibility is an explicit maintenance contract.** Assess every change to
+catalogue identity, source closure or ownership (`identityVersion`), canonical API/constraint
+hashing or emitted ABI (`apiVersion`), inference/profile semantics (`inferenceVersion`), and
+variant/customization semantics (`customizationVersion`). Bump the affected version in
+`CatalogCompatibility.current` when an earlier producer must be rejected; bump
+`contractVersion` for changes to the policy itself. All five versions require exact equality.
+An assembly rebuild alone remains compatible. Producer compiler/generator SHA-256 fields remain
+provenance; schema 1 still authenticates both hashes exactly.
+
+**Compiler identity belongs to the executable Bootstrap launched.** Recognized TypeScript
+wrapper/platform packages must agree on exact release and full gitHead, match the platform
+dependency, and match the bounded `--version` probe. Portable identity also includes the binary
+AST protocol. Missing package identity uses the executable hash; conflicting recognized metadata
+fails. Keep the captured path and cached per-run discovery shared across customization passes.
+Decode compatibility and variants from the same JSON document and retain downstream source,
+manifest, API, arity, constraint, owner and variant authentication.
+
 Each rule below was written against a catalog authentication failure between two real packages;
 the corresponding lab under `tests/fixtures/` is the reducer.
 

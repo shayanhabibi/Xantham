@@ -170,7 +170,9 @@ let write (contract: Contract) : JsonNode =
 let validate path schema (expected: Producer) compilerHash generatorHash inferenceProfile actual =
     let equal name expected actual =
         if actual <> expected then
-            fail path $"{name} mismatch: expected {expected}, actual {actual}; regenerate with a compatible toolchain"
+            fail
+                path
+                $"uses a different {name}: expected {expected}, actual {actual}; regenerate with a compatible toolchain"
 
     match schema, actual with
     | 1, _ ->
