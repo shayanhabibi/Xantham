@@ -94,7 +94,7 @@ actual diagnostic and keeps legacy message fragments where tests rely on them.
 **Files:** create CatalogCompatibility.fs and CatalogCompatibility.test.fs; modify both .fsproj
 compile lists. This task has no pipeline behavior change.
 
-- [ ] Write policy tests using JSON documents for schema 1 and schema 2, both compiler kinds,
+- [x] Write policy tests using JSON documents for schema 1 and schema 2, both compiler kinds,
   malformed/missing/duplicate metadata, unsupported schemas, and each mismatched component.
   Include acceptance when portable provenance hashes differ and rejection when binary hashes differ.
 
@@ -108,9 +108,9 @@ testCase "portable identity accepts different producer binaries" <| fun _ ->
         "profile" (Some(current identity))
 ```
 
-- [ ] Run `rtk dotnet fsi build.fsx -- test --quick --filter "catalog compatibility"` and
+- [x] Run `rtk dotnet fsi build.fsx -- test --quick --filter "catalog compatibility"` and
   record the intended missing-module/behavior failure.
-- [ ] Implement `current`, JSON encoding/decoding, duplicate-field checking, and `validate`.
+- [x] Implement `current`, JSON encoding/decoding, duplicate-field checking, and `validate`.
   Use explicit branches for schema 1 versus schema 2; match each component individually to
   retain actionable diagnostics. Emit compiler.kind as `typescript-package` or `binary`.
 
@@ -132,15 +132,15 @@ requireEqual "inference profile" expected.InferenceProfile inferenceProfile
   Here `requireEqual`, `compareContract`, `mismatch`, and `unsupportedOrMissingMetadata` are
   private helpers in this task: all raise `declaration catalog: <path>: <component> ...` with
   expected and actual values. Compare all five versions and all compiler identity fields.
-- [ ] Re-run the focused suite and check the Generator project semantically.
-- [ ] Commit only this task's files as `feat(generator): define portable catalogue compatibility policy`.
+- [x] Re-run the focused suite and check the Generator project semantically.
+- [x] Commit only this task's files as `feat(generator): define portable catalogue compatibility policy`.
 
 ### Task 2: Discover the compiler actually launched
 
 **Files:** create CatalogCompiler.fs and CatalogCompiler.test.fs; modify Bootstrap.fs,
 Bootstrap.test.fs, and both .fsproj files. Public Bootstrap.start remains unchanged.
 
-- [ ] Add discovery tests over scratch npm installs, using injected process probing and
+- [x] Add discovery tests over scratch npm installs, using injected process probing and
   physical-path resolution to avoid fake executables. Cover valid metadata, differing wrapper/
   platform releases and gitHeads, dependency disagreement, invalid revision, missing metadata,
   unrelated paths, recognized override paths, symlinks, nonzero probe exit, bad version output,
@@ -160,16 +160,16 @@ testCase "unrelated executable cannot inherit package identity" <| fun _ ->
   `discoverWith` is an internal
   test seam in CatalogCompiler: `(string -> Async<string>) -> (string -> string) -> string ->
   Async<CompilerIdentity>`. The probe returns the version output only on a successful exit.
-- [ ] Run `rtk dotnet fsi build.fsx -- test --quick --filter "catalog compiler"` and record red.
-- [ ] Implement metadata discovery from the executable path and wrapper/platform pairing.
+- [x] Run `rtk dotnet fsi build.fsx -- test --quick --filter "catalog compiler"` and record red.
+- [x] Implement metadata discovery from the executable path and wrapper/platform pairing.
   Validate recognized package names against supported TypeScript platform suffixes; compare exact
   versions and lowercase gitHeads. Missing identity information returns Binary; conflicting
   recognized metadata raises a toolchain diagnostic.
-- [ ] Implement the real probe with ProcessStartInfo.ArgumentList.Add("--version"), redirected
+- [x] Implement the real probe with ProcessStartInfo.ArgumentList.Add("--version"), redirected
   stdout/stderr, asynchronous draining, timeout cancellation, Kill(entireProcessTree=true),
   disposal, and successful-exit/output validation. Add a process-level timeout test using a
   repository scratch helper process rather than a system temp file.
-- [ ] Retain the captured executable for every successful Bootstrap.start using a private
+- [x] Retain the captured executable for every successful Bootstrap.start using a private
   `ConditionalWeakTable<Context, string>`. Register the final Context with the selected path
   before returning it. `compilerPath ctx` returns that path or raises an explicit missing-session-
   provenance error for an unregistered Context. Weak keys allow disposed runs to be collected.
@@ -181,9 +181,9 @@ compilerPaths.Add(ctx, exe)
 return mailbox, ctx
 ```
 
-- [ ] Verify Bootstrap tests, discovery tests, and Generator `check`. Confirm existing public
+- [x] Verify Bootstrap tests, discovery tests, and Generator `check`. Confirm existing public
   signatures are preserved; run impact analysis if implementation needs a public change.
-- [ ] Commit as `feat(generator): capture and identify catalogue compiler toolchains`.
+- [x] Commit as `feat(generator): capture and identify catalogue compiler toolchains`.
 
 ### Task 3: Integrate schema 2 without weakening reuse checks
 
@@ -192,11 +192,11 @@ Customization.test.fs; create `tests/fixtures/catalog-portability-lab/` with pac
 index.d.ts, xantham.json, and a tracked `node_modules/catalog-portability-owner-lab/` dependency;
 register the lab in Pipeline.test.fs.
 
-- [ ] Write the tiny fixture before implementation. The dependency exports
+- [x] Write the tiny fixture before implementation. The dependency exports
   `export interface Box<T> { readonly value: T; }`; the consumer imports Box and exports
   `export function accept(value: Box<string>): Box<string>;`. Both manifests have stable names
   and versions. The root config ships the dependency and enables declarationCatalog.
-- [ ] Add a producer/consumer test that changes only portable provenance hashes in the producer
+- [x] Add a producer/consumer test that changes only portable provenance hashes in the producer
   JSON, generates the consumer, and uses the existing compileConsumer helper to verify its API.
   Add schema 1 tests by removing metadata and setting schemaVersion=1 on a current producer.
   Test both legacy hash mismatch guards, all portable contract mismatch diagnostics, and absence
@@ -210,26 +210,26 @@ File.WriteAllText(catalogPath, document.ToJsonString())
 // Generate consumer with DeclarationReferences=[catalogPath], then compile producer and consumer.
 ```
 
-- [ ] Run the focused declaration-catalog suite to establish the expected strict-hash failure.
-- [ ] Implement DeclarationCatalog.createProducer using the existing profile function, compiler
+- [x] Run the focused declaration-catalog suite to establish the expected strict-hash failure.
+- [x] Implement DeclarationCatalog.createProducer using the existing profile function, compiler
   and generator SHA-256 helpers, Bootstrap.compilerPath, and CatalogCompiler.discover. Implement
   cacheProducer as a lazy task factory so the operation executes once when first requested.
-- [ ] Add a lazy per-run Producer context in Pipeline after Bootstrap.start, created only when
+- [x] Add a lazy per-run Producer context in Pipeline after Bootstrap.start, created only when
   catalogues are enabled/referenced. Cache its async discovery result once; both preliminary and
   final customization authentication use it. Avoid `Lazy<Async<_>>` alone, which can rerun the
   async body; force an Async.StartAsTask once and await the cached task.
-- [ ] Add the internal DeclarationCatalog.applyWithProducer entry point taking that cached operation.
+- [x] Add the internal DeclarationCatalog.applyWithProducer entry point taking that cached operation.
   Preserve existing apply/applyWith wrappers and signatures; their discovery uses Bootstrap's
   captured path. Catalogue-disabled calls return before evaluating the producer operation.
-- [ ] Decode Catalog, Contract, and Variant metadata from one JsonDocument per reference.
+- [x] Decode Catalog, Contract, and Variant metadata from one JsonDocument per reference.
   Retain the current private Variant record; remove the separate second file read for variants.
   Validate schema/policy before declaration merging. Leave downstream reuse checks in their
   existing order and emit compatibility metadata together with variants at schema 2.
-- [ ] Add a customization regression asserting a single probe/discovery per run and retained
+- [x] Add a customization regression asserting a single probe/discovery per run and retained
   variants after serialization. Exercise source/manifest/API/arity/constraint/owner failures
   under schema 2 using the existing tests and explicit focused negatives where coverage is absent.
-- [ ] Exercise producer→adapter→consumer ownership chaining, including an accepted schema 1 input.
-- [ ] Regenerate only the new lab golden using the fixture workflow, inspect its small diff, and
+- [x] Exercise producer→adapter→consumer ownership chaining, including an accepted schema 1 input.
+- [x] Regenerate only the new lab golden using the fixture workflow, inspect its small diff, and
   run catalogue/customization suites and compile gates before committing this coherent behavior.
 
 ### Task 4: Migration and contract maintenance
@@ -237,14 +237,14 @@ File.WriteAllText(catalogPath, document.ToJsonString())
 **Files:** modify site/content/xantham-cli/guide/dependencies.md, docs/.ai/footguns.md,
 docs/.ai/plans/generator-architecture.md, docs/.ai/README.md, and this execution checklist.
 
-- [ ] Document upgrading consumers before regenerating producers; schema 1 retains strict hashes
+- [x] Document upgrading consumers before regenerating producers; schema 1 retains strict hashes
   and schema 2 uses explicit contracts. Explain exact TypeScript release/revision compatibility,
   binary fallback for custom toolchains, and unchanged explicit file configuration.
-- [ ] Add the durable version-bump contract to footguns and the catalogue phase record. Describe
+- [x] Add the durable version-bump contract to footguns and the catalogue phase record. Describe
   identity/API/inference/customization changes that require assessment and retain producer
   fingerprint provenance. Record the implementation date and measured validation, rather than
   pre-claiming cross-platform results.
-- [ ] Review documentation links and `rtk git diff --check`. Commit the consumer and durable
+- [x] Review documentation links and `rtk git diff --check`. Commit the consumer and durable
   records with the behavior change; retain this plan while work is unlanded under the repo policy.
 
 ### Task 5: Real Windows/Linux portability gate and final verification
@@ -252,24 +252,24 @@ docs/.ai/plans/generator-architecture.md, docs/.ai/README.md, and this execution
 **Files:** create tools/catalog-portability.fsx and .github/workflows/catalog-portability.yml;
 use existing setup action, compileConsumer conventions, and the Task 3 lab.
 
-- [ ] Add a script with `produce <artifactDir>` and `consume <artifactDir> <scratchDir>` modes.
+- [x] Add a script with `produce <artifactDir>` and `consume <artifactDir> <scratchDir>` modes.
   Reference the built Generator and Wire assemblies from the checkout and use Pipeline.run;
   all outputs live under tests/.scratch. Producer mode writes the tiny binding, declarations.json,
   and a source-byte SHA-256 manifest. Consumer mode verifies all source hashes, loads the foreign
   catalogue, generates a consumer, and builds a scratch consumer project using the repository's
   pinned support assemblies. Fail if the compiler is absent or a generation/compile step fails.
-- [ ] Run local produce→consume as the same-platform smoke gate and corrupt the source manifest
+- [x] Run local produce→consume as the same-platform smoke gate and corrupt the source manifest
   once to verify the gate fails for the intended hash mismatch.
-- [ ] Add Windows/Linux producer jobs and opposing consumer jobs. Each uses checkout and setup,
+- [x] Add Windows/Linux producer jobs and opposing consumer jobs. Each uses checkout and setup,
   installs pinned npm dependencies, builds the required projects, uploads/downloads the small lab
   artifact, and invokes the script. Use immutable action pins; resolve an existing download-artifact
   pin `actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c` already used by release.yml.
   Configure LF for tracked source fixture
   checkout, and use recorded hashes to detect any byte changes in artifacts or inputs.
-- [ ] Trigger on the same PR/push branches as test.yml and workflow_dispatch. Keep read-only
+- [x] Trigger on the same PR/push branches as test.yml and workflow_dispatch. Keep read-only
   contents/actions permissions, bounded job timeouts, required artifact downloads, and both
   direction-specific job names. Run the repository's CI policy tests against the workflow.
-- [ ] Run required local gates once after the integrated change:
+- [x] Run required local gates once after the integrated change:
 
 ```powershell
 rtk dotnet fsi build.fsx -- test
@@ -280,22 +280,32 @@ rtk git diff --check
 rtk git diff --stat
 ```
 
-- [ ] Compare aggregate findings and golden source hashes with the pre-implementation baseline.
+- [x] Compare aggregate findings and golden source hashes with the pre-implementation baseline.
   Catalogue JSON changes and the new lab are expected; explain any other generated F# or finding
   changes using the fixture rules. Stop and report unexplained corpus movement.
-- [ ] Perform a whole-branch review through the selected execution skill's workflow, fix verified
+- [x] Perform a whole-branch review through the selected execution skill's workflow, fix verified
   issues, and rerun only the affected checks. Record exact local results and distinguish pending
   remote Windows↔Linux jobs from completed local verification.
-- [ ] Commit the CI gate and report the branch, commits, tests, and any outstanding remote evidence.
+- [x] Commit the CI gate and report the branch, commits, tests, and any outstanding remote evidence.
 
-## Execution readiness
+## Execution status
 
-The spec is approved. This plan is ready for user review and execution-method selection. Native
-execution is recommended because the policy, compiler discovery, and pipeline integration share
-one small sequence of internal interfaces. The current checkout is on develop, with unrelated
-untracked user files; an isolated feature worktree is recommended before implementation.
-Worktree consent and plan review remain prerequisites of the selected skill workflow.
+The spec and native isolated-worktree execution were approved on 2026-10-09. Implementation
+and local verification are complete on agent/portable-catalogue. The main checkout and its
+unrelated user files are preserved. Remote cross-platform artifact exchange is pending CI.
+This plan remains while the branch is unlanded.
 
-Before code edits, record the catalogue test baseline and `rtk dotnet fsi build.fsx -- findings`
-output in the selected workspace. Run setup through build.fsx; a linked worktree borrows the main
-compiler install through tools/workspace.fsx and initializes its own fixture dependencies.
+## Execution evidence (2026-10-09)
+
+Local full setup/test/run-gate passed after the review fix: 1,074 generator tests and 99 Wire tests,
+two ignored tests, 468 Fable runtime checks, and the Partas integration gate.
+Solution build compiled 15 projects with zero errors. Policy/tooling tests passed 27/27;
+the live exchange smoke test also rejects changed source hashes, changed payload bytes,
+and missing payload files. All 241 pre-existing golden source/manifest hashes are unchanged;
+the new lab adds Exact=2 and Ergonomic=1. Cross-platform CI artifact exchange is pending.
+Fresh whole-branch review found one Important issue: resolving a linked platform package's path
+lost its corresponding wrapper. Actual directory junction/symlink tests reproduced the failure;
+discovery now verifies logical wrapper pairing against the selected physical executable.
+Conflicting wrapper metadata still rejects, a competing physical install retains its identity,
+and unrelated executable links remain binary. The compiler suite passes 26/26; the full gates
+above passed again after the fix. No Critical findings or deferred minors remain.

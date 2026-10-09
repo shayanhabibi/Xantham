@@ -12,7 +12,7 @@ notes for the agents and people who come after them. It is not rendered to the s
 - `footguns.md` — facts that constrain future changes: compiler-API traps, declaration-catalog
   identity rules, pass invariants, and the threads left open when a lane closed.
 - `plans/2026-10-09-portable-catalogue-design.md` and
-  `plans/2026-10-09-portable-catalogue-implementation.md` — approved compatibility spec and proposed
+  `plans/2026-10-09-portable-catalogue-implementation.md` — approved compatibility spec and active
   implementation plan for issue #110; read before changing portable catalogue validation,
   compiler identity, or its migration.
 - `plans/2026-10-06-generator-customization-design.md`,

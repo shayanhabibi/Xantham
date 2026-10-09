@@ -1,0 +1,88 @@
+name: Catalogue portability
+on:
+  pull_request:
+    branches: [develop, master]
+  push:
+    branches: [develop, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  XANTHAM_REQUIRE_TSC: 1
+
+concurrency:
+  group: catalog-portability-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  produce:
+    name: Produce catalogue on ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: Windows
+            runner: windows-latest
+          - platform: Linux
+            runner: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install pinned compiler
+        run: npm ci
+      - name: Build generator
+        run: dotnet build src/Xantham.Generator/Xantham.Generator.fsproj --configuration Release
+      - name: Produce catalogue and byte manifests
+        run: dotnet fsi tools/catalog-portability.fsx -- produce tests/.scratch/catalog-artifact
+      - name: Upload producer artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: catalogue-${{ matrix.platform }}-${{ github.sha }}
+          path: tests/.scratch/catalog-artifact
+          if-no-files-found: error
+          retention-days: 7
+
+  consume:
+    name: Consume ${{ matrix.producer }} catalogue on ${{ matrix.consumer }}
+    needs: produce
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - producer: Windows
+            consumer: Linux
+            runner: ubuntu-latest
+          - producer: Linux
+            consumer: Windows
+            runner: windows-latest
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install pinned compiler
+        run: npm ci
+      - name: Build generator
+        run: dotnet build src/Xantham.Generator/Xantham.Generator.fsproj --configuration Release
+      - name: Build consumer support
+        run: dotnet build src/Xantham.Fable.Core.TS/Xantham.Fable.Core.TS.fsproj --configuration Release
+      - name: Verify exchange gate failure cases
+        run: node --test tools/catalog-portability.test.mjs
+      - name: Download foreign producer artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: catalogue-${{ matrix.producer }}-${{ github.sha }}
+          path: tests/.scratch/catalog-artifact
+      - name: Authenticate foreign catalogue and compile consumer
+        run: dotnet fsi tools/catalog-portability.fsx -- consume tests/.scratch/catalog-artifact tests/.scratch/catalog-consumer

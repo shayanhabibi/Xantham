@@ -4,10 +4,20 @@ module Xantham.Generator.Bootstrap
 
 open System
 open System.IO
+open System.Runtime.CompilerServices
 open System.Text.Json
 open Xantham.Generator.Measure
 open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
+
+let private compilerPaths = ConditionalWeakTable<Context, string>()
+
+let internal compilerPath (ctx: Context) =
+    match compilerPaths.TryGetValue ctx with
+    | true, path -> path
+    | _ ->
+        failwith
+            "declaration catalog: compiler session provenance is unavailable; start the session through Bootstrap.start"
 
 let private manifestOptions =
     JsonDocumentOptions(CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true)
@@ -348,8 +358,7 @@ let start (config: GeneratorConfig) (packageDir: string) : Async<TscMailbox * Co
 
                     failwith $"TypeScript program inputs could not be loaded:\n{messages}"
 
-            return
-                mailbox,
+            let ctx =
                 {
                     Session = session
                     Config = config
@@ -359,6 +368,9 @@ let start (config: GeneratorConfig) (packageDir: string) : Async<TscMailbox * Co
                     PublicPaths = paths
                     SkippedPaths = skipped
                 }
+
+            compilerPaths.Add(ctx, exe)
+            return mailbox, ctx
         with e ->
             (mailbox :> IDisposable).Dispose()
             return raise e

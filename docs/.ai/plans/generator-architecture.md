@@ -1833,6 +1833,26 @@ selected by shaping. Equal literal values remain distinct when their F# referenc
 different aliases. `catalog-mapped-options-lab` covers named versus anonymous locale options
 through `Pick`; the catalogue compatibility guard continues to reject conflicting APIs.
 
+## Portable catalogue compatibility (2026-10-09)
+
+Declaration catalogue emission uses schema 2 with an internal compatibility sidecar; the public
+Catalog and Context records retain their shapes. Contract, identity, API, inference and
+customization versions begin at 1 and compare exactly. The selected compiler's verified
+TypeScript release, full gitHead and AST protocol authenticate package toolchains across
+platform binaries. Unidentified executables retain exact compiler-hash authentication, and
+schema 1 retains exact compiler/generator hashes. Schema 2 keeps those hashes as provenance.
+
+Bootstrap captures the actual launched executable in a weak context association. Pipeline caches
+producer discovery once across preliminary and final customization authentication.
+Compiler discovery retains verified logical wrapper pairing for symlinked platform directories,
+with physical executable identity taking precedence for file links into another install. A reference
+is decoded once for catalogue, compatibility and variant metadata; existing declaration and
+ownership checks follow compatibility validation. The catalog-portability lab compiles a
+producer, adapter and downstream consumer, including accepted schema-1 input and differing
+portable provenance hashes. Contract negatives reject before output; customization retains
+variants. Local focused results: declaration catalogues 58/58, portable integration 19/19,
+customization 22/22. Cross-platform artifact exchange evidence is recorded after CI runs.
+
 # Easy Nits 
 
 To include in scope when a phases implementation/attempt ends up being small/quick.

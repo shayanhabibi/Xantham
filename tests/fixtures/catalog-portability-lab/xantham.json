@@ -1,0 +1,7 @@
+{
+  "module": "Portability.Adapter",
+  "lib": ["esnext"],
+  "types": [],
+  "declarationCatalog": true,
+  "groups": {"catalog-portability-owner-lab": "ship"}
+}

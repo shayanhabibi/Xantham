@@ -3,6 +3,7 @@ module Xantham.Generator.Tests.CustomizationTests
 open System.IO
 open System
 open System.Diagnostics
+open System.Text.Json.Nodes
 open Expecto
 open Xantham.Generator
 open Xantham.Generator.Customization
@@ -310,6 +311,9 @@ let tests =
             let generated = Pipeline.generateWith [extension "1"] catalogConfig producer |> Async.RunSynchronously
             let catalog = generated.Files |> List.find (fst >> ((=) "declarations.json")) |> snd
             Expect.stringContains catalog "variants" "catalog records variant"
+            let metadata = JsonNode.Parse catalog
+            Expect.equal (metadata["schemaVersion"].GetValue<int>()) 2 "customized catalogue uses portable schema"
+            Expect.isNotNull metadata["compatibility"] "customization preserves compatibility metadata"
             let companionOnly =
                 {Identity = {Id = "companion"; Version = "1"; Configuration = Map.empty}
                  Transform = fun model -> Ok (Edits.empty |> Edits.emitCompanion (Companion.create "Example" "ModelProperties" (requireType "custom-shared" ["Model"] model) model))}
@@ -318,8 +322,10 @@ let tests =
             Expect.isTrue (baseCatalog = companionCatalog) "companion-only output leaves producer base API bytes unchanged"
             let catalogPath = Path.Combine(scratch.Path, "declarations.json")
             File.WriteAllText(catalogPath, catalog)
-            let config = {GeneratorConfig.Default with DeclarationReferences = [catalogPath]}
+            let config = {GeneratorConfig.Default with DeclarationReferences = [catalogPath]; DeclarationCatalog = true}
             let reused = Pipeline.generate config consumer |> Async.RunSynchronously
+            let inherited = reused.Files |> List.find (fst >> ((=) "declarations.json")) |> snd |> JsonNode.Parse
+            Expect.equal (inherited["variants"].ToJsonString()) (metadata["variants"].ToJsonString()) "consumer catalogue preserves producer variants"
             Expect.isTrue (reused.Files |> List.exists (fun (name, _) -> name.EndsWith ".fs")) "consumer authenticates source/API"
             let combined = {reused with Files = (generated.Files |> List.filter (fst >> fun n -> n.EndsWith ".fs")) @ reused.Files}
             let code, errors = compileConsumer combined "module Consumer\nlet roundtrip (x: CustomShared.Model) : CustomShared.Model = CustomConsumer.Exports.accept x\n"

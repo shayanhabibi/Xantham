@@ -18,7 +18,10 @@
         <Compile Include="Findings.test.fs" />
         <Compile Include="MultiPackage.test.fs" />
         <Compile Include="Ownership.test.fs" />
+        <Compile Include="CatalogCompatibility.test.fs" />
+        <Compile Include="CatalogCompiler.test.fs" />
         <Compile Include="DeclarationCatalog.test.fs" />
+        <Compile Include="CatalogPortability.test.fs" />
         <Compile Include="Pipeline.test.fs" />
         <Compile Include="Customization.test.fs" />
         <Compile Include="ExportLayout.test.fs" />

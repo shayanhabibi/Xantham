@@ -561,6 +561,9 @@ let private noInferLab = handFixture "noinfer-lab"
 let pipelineTests =
     testList "generator e2e" [
         yield!
+            fixtureTests "catalog-portability-lab" (handFixture "catalog-portability-lab")
+                { handConfig (handFixture "catalog-portability-lab") with DeclarationCatalog = false } (fun _ -> [])
+        yield!
             fixtureTests "ansi-regex" (npmFixture "ansi-regex") GeneratorConfig.Default (fun package ->
                 [ testCase "no export of ansi-regex is silently dropped" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
