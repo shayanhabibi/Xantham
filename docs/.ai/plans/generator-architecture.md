@@ -1937,3 +1937,32 @@ Other structurally incompatible defaults retain the existing `TP008` policy.
 `catalog-generic-defaults-lab` covers declaration and callback-result agreement, bare default
 applications, generic-bound arguments, nominal subclasses, recursive bounds and invalid concrete
 arguments. Catalog constraint authentication remains unchanged.
+
+
+## Early union projections (2026-10-09)
+
+The customization owner now exposes a separate `ResolvedSnapshot` after Resolve and before
+Shape. It projects exported declaration handles, finite union arms and source fingerprints;
+checker type IDs never serve as public identity. Equal literal sets retain separate named
+source selections. Snapshot nonces seal both selected sources and returned companion plans.
+This does not move catalog ownership or change the ordinary shape passes.
+
+`ProjectionExtension` is additive to the existing `GeneratorExtension` record.
+`generateProjectedWith` / `runProjectedWith` take a required validation compiler, early
+projections and late customizations. Apply validates identities across both phases, current
+snapshot seals, paths and exported names. Compile checks all output and type witnesses before
+write. Projection provenance lives only in the manifest; raw catalog variant policy remains
+owned by existing late customization. Empty early registration preserves existing output.
+`CU006` reports the arbitrary-source projection boundary as Escape, retaining raw findings.
+
+The opt-in `Xantham.Generator.Myriad` project owns emission via the published Myriad.Core 1.1.0
+`IMyriadGenerator` source contract. Xantham owns resolution and source validation. Its first
+adapter emits ordinary DUs, strict JavaScript codecs and the scalable two-case
+`Decoded|Invalid` active pattern for selected string literal sets with number/null/undefined.
+Existing naming helpers allocate cases; reserved payload/absence cases win collisions.
+No signature replacement or overlapping-union provenance inference is attempted. Generic,
+boolean, numeric-literal, broad-string, object and unresolved shapes fail closed.
+
+`projection-lab`, early contract tests, compiler rejection controls and companion goldens
+exercise the seam. The existing Fable RunGate executes null/undefined matching, non-finite
+numbers, hostile strings, equal/overlapping sets and the explicit raw echo boundary.

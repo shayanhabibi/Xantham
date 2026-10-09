@@ -40,6 +40,87 @@ let private interop =
             "ParamObject"
         ]
 
+let validateIdentities (identities: ExtensionIdentity list) =
+    match identities |> List.countBy _.Id |> List.tryFind (fun (_, count) -> count > 1) with
+    | Some(id, _) -> invalidOp $"customization/duplicate-extension: {id}"
+    | None -> ()
+
+    for identity in identities do
+        if
+            String.IsNullOrWhiteSpace identity.Id
+            || String.IsNullOrWhiteSpace identity.Version
+        then
+            invalidOp "customization/invalid-identity: extension id and version are required"
+
+/// Evaluate while the original resolved facts are available; the plans cannot edit the raw ABI.
+let project (extensions: ProjectionExtension list) snapshot =
+    extensions
+    |> List.collect (fun extension ->
+        let plans =
+            try
+                match extension.Transform snapshot with
+                | Ok plans -> plans
+                | Error diagnostics ->
+                    invalidOp (
+                        diagnostics
+                        |> List.map (fun d -> Diagnostic.code d + ": " + Diagnostic.message d)
+                        |> String.concat "\n"
+                    )
+            with error ->
+                raise (InvalidOperationException($"projection/extension-failed: {extension.Identity.Id}", error))
+
+        plans
+        |> List.map (fun plan ->
+            if not (ContractData.projectionCompanionIsCurrent snapshot plan) then
+                invalidOp $"projection/stale-plan: {extension.Identity.Id}"
+
+            extension.Identity.Id, plan))
+
+/// Check names and paths against all emitted owners before the compiler validates the sources.
+let renderProjections occupied files plans =
+    let mutable paths =
+        ("Contracts.fs", "") :: files
+        |> List.map (fst >> fun (s: string) -> s.ToUpperInvariant())
+        |> Set.ofList
+
+    let mutable names = Set.ofList occupied
+
+    let under (parent: string) (child: string) =
+        child = parent || child.StartsWith(parent + ".", StringComparison.Ordinal)
+
+    plans
+    |> List.map (fun (_, plan) ->
+        let _, _, file, exported, source = ContractData.projectionCompanionInfo plan
+
+        if
+            String.IsNullOrWhiteSpace file
+            || file.Contains('\\')
+            || file.Contains(':')
+            || not (file.EndsWith(".fs", StringComparison.Ordinal))
+            || file.Split('/') |> Array.exists (fun p -> p = "" || p = "." || p = "..")
+        then
+            invalidOp $"projection/invalid-path: {file}"
+
+        let key = file.ToUpperInvariant()
+
+        if Set.contains key paths then
+            invalidOp $"projection/file-collision: {file}"
+
+        paths <- Set.add key paths
+
+        if List.isEmpty exported || String.IsNullOrWhiteSpace source then
+            invalidOp $"projection/empty-companion: {file}"
+
+        for name in exported do
+            qualified name |> ignore
+
+            if names |> Set.exists (fun existing -> under existing name || under name existing) then
+                invalidOp $"projection/name-collision: {name}"
+
+            names <- Set.add name names
+
+        file, source)
+
 let evaluate foreign (extensions: GeneratorExtension list) snapshot =
     let validTargets =
         Semantic.types snapshot
@@ -60,23 +141,11 @@ let evaluate foreign (extensions: GeneratorExtension list) snapshot =
     let mutable declarations = Map.empty
     let mutable findings = []
 
-    let duplicates =
-        extensions
-        |> List.groupBy _.Identity.Id
-        |> List.filter (fun (_, values) -> values.Length > 1)
-
-    if not duplicates.IsEmpty then
-        invalidOp $"customization/duplicate-extension: {fst duplicates.Head}"
+    validateIdentities (extensions |> List.map _.Identity)
 
     extensions
     |> List.fold
         (fun annotations extension ->
-            if
-                String.IsNullOrWhiteSpace extension.Identity.Id
-                || String.IsNullOrWhiteSpace extension.Identity.Version
-            then
-                invalidOp "customization/invalid-identity: extension id and version are required"
-
             let batch =
                 try
                     match extension.Transform snapshot with

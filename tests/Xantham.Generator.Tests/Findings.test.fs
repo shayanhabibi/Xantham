@@ -210,6 +210,7 @@ let findingsTests =
                     "CU.MemberOmitted CU003 widened"
                     "CU.InteropReplaced CU004 escape"
                     "CU.DeclarationReplaced CU005 escape"
+                    "CU.ProjectionEmitted CU006 escape"
                   ]
 
               Expect.equal

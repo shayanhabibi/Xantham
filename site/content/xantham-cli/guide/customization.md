@@ -236,6 +236,98 @@ and any referenced producer assemblies. Validation checks the complete output an
 the declared export before returning it. Raw replacements are rejected for catalog production.
 The validation directory is caller-owned scratch space; repository tests use `tests/.scratch`.
 
+## Project unions before widening
+
+Reference `Xantham.Generator.Myriad` to generate companion APIs from resolved TypeScript
+facts before Shape maps them to F# types. The adapter uses Myriad.Core 1.1.0; it does not
+need a sibling Myriad checkout. Select exported declarations explicitly:
+
+```fsharp
+open Xantham.Generator.Myriad
+
+let projections =
+    LiteralUnions.create
+        { Id = "example.choices"; Version = "1"; Configuration = Map.empty }
+        "tests/.scratch/myriad-inputs"
+        [{ Package = "projection-lab"
+           Path = ["Choice"]
+           ModuleName = "Projected.Choice"
+           TypeName = "Value" }]
+
+let compiler = Compiler.dotnet "tests/.scratch/myriad-compile" supportAssemblyPaths
+let report =
+    Pipeline.runProjectedWith compiler [projections] [] GeneratorConfig.Default input output
+    |> Async.RunSynchronously
+```
+
+Supply the current Xantham support DLLs and referenced producer DLLs in
+`supportAssemblyPaths`, as for raw replacement validation above. The runner compiles every
+output source plus witnesses for the declared companion types before returning or writing.
+Module and type names use unquoted ASCII identifiers; the type name starts with an uppercase letter.
+Existing `GeneratorExtension` registrations can be passed as the second extension list.
+An empty projection list leaves the ordinary output unchanged.
+
+For `"auto" | "manual" | number | null | undefined`, the companion contains a normal DU:
+
+```fsharp
+type Value = Auto | Manual | Number of float | Null | Undefined
+```
+
+The generated module provides `encode : Value -> obj`,
+`decode : obj -> Result<Value, string>`, and a two-case active pattern. Match a raw JavaScript
+value through the decoder:
+
+```fsharp
+open Projected.Choice
+
+let describe (raw: obj) =
+    match raw with
+    | Decoded Value.Null -> "explicit null"
+    | Decoded Value.Undefined -> "undefined"
+    | Decoded (Value.Number value) -> string value
+    | Decoded Value.Auto -> "automatic"
+    | Decoded Value.Manual -> "manual"
+    | Invalid reason -> reason
+```
+
+`null` and `undefined` use separate strict JavaScript predicates. Strings outside the literal
+set and values of other kinds return `Error`. The number arm preserves `NaN`, infinities and
+negative zero. These codecs target Fable; their JavaScript operations are not .NET runtime APIs.
+Decode before an `option` conversion can erase the distinction. An absent property read and a
+present property containing `undefined` both yield the same JavaScript value; this API does not
+inspect property presence.
+
+The generated DU is a companion representation. Call `encode` at an outgoing JavaScript boundary
+and `decode` on incoming raw values. Ordinary generated signatures retain their existing types;
+this increment does not automatically replace or wrap those signatures. Equal string sets still
+produce distinct F# types when selected separately. Convert through `encode`/`decode` when needed.
+Overlapping sets may accept the same primitive, so decoding proves membership, not which source
+union produced it. Preserve an outer application DU if that provenance matters.
+
+The first projection contract supports string literals with `number`, `null` and `undefined`.
+Boolean and numeric literals, generic aliases, broad strings, object arms and incomplete resolved
+facts return `projection/unsupported-union` or `projection/incomplete-union` diagnostics.
+No companion is produced for a rejected selection. Existing source widening findings remain in
+the manifest. `CU006` marks the raw-source extension boundary as Escape; the source, artifact
+hashes, extension identity and selection configuration are recorded under `projections`.
+Projection metadata does not change raw declaration catalogs or require ordinary consumers to
+register the same companion policy.
+
+The checked-in example accepts one selected union and caller-owned scratch/reference paths:
+
+```bash
+dotnet run --project tools/customization-example -- \
+  tests/fixtures/projection-lab tests/.scratch/projected-output \
+  --union Choice --workspace tests/.scratch/projected-work \
+  --reference src/Xantham.Fable.Core/bin/Release/net8.0/Xantham.Fable.Core.dll \
+  --reference src/Xantham.Fable.Core.TS/bin/Release/net8.0/Xantham.Fable.Core.TS.dll
+```
+
+It emits `Projected.Choice.Value`. To verify the early-source matrix and companion goldens,
+run `dotnet fsi build.fsx -- test --quick --filter projection`. The complete
+`--run-gate` acceptance command also executes the generated active patterns, codecs, equal and
+overlapping union cases, and an imported JavaScript echo function.
+
 ## Ownership, conflicts and provenance
 
 Referenced declarations remain available for semantic selection and companion generation.

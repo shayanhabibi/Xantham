@@ -7,6 +7,33 @@ type SourceMember = private SourceMember of string
 type OutputTarget = private OutputTarget of string * string * string option * bool
 type BindingType = private BindingType of FsTypeRef
 type ExtensionDiagnostic = private ExtensionDiagnostic of string * string * string option
+type ResolvedSource = private ResolvedSource of System.Guid * int
+
+/// The resolved value arms accepted by the first companion projection contract.
+[<RequireQualifiedAccess>]
+type ResolvedUnionArm =
+    | StringLiteral of string
+    | Number
+    | Null
+    | Undefined
+
+type internal ResolvedSourceInfo =
+    {
+        Package: string
+        Path: string list
+        Declaration: string option
+        Fingerprint: string option
+        Union: Result<ResolvedUnionArm list, ExtensionDiagnostic list>
+    }
+
+type ResolvedSnapshot =
+    private
+        {
+            Nonce: System.Guid
+            Sources: ResolvedSourceInfo list
+        }
+
+type ProjectionCompanion = private ProjectionCompanion of System.Guid * string * string * string * string list * string
 
 type AttributeValue =
     | String of string
@@ -77,6 +104,13 @@ type SemanticSnapshot =
             Diagnostics: ExtensionDiagnostic list
         }
 
+/// Produces companions from compiler facts before F# shaping can widen those facts.
+type ProjectionExtension =
+    {
+        Identity: ExtensionIdentity
+        Transform: ResolvedSnapshot -> Result<ProjectionCompanion list, ExtensionDiagnostic list>
+    }
+
 type GeneratorExtension =
     {
         Identity: ExtensionIdentity
@@ -119,7 +153,78 @@ module Diagnostic =
 module BindingType =
     let display (BindingType value) = Render.printType value
 
+module Resolved =
+    let private tryInfo (ResolvedSource(nonce, index)) snapshot =
+        if nonce = snapshot.Nonce then
+            List.tryItem index snapshot.Sources
+        else
+            None
+
+    let private info source snapshot =
+        tryInfo source snapshot
+        |> Option.defaultWith (fun () ->
+            invalidArg "source" "projection/stale-source: the source belongs to another snapshot")
+
+    let tryFind package path snapshot =
+        let matches =
+            snapshot.Sources
+            |> List.indexed
+            |> List.filter (fun (_, source) -> source.Package = package && source.Path = path)
+
+        match matches with
+        | [] -> None
+        | [ (index, _) ] -> Some(ResolvedSource(snapshot.Nonce, index))
+        | _ ->
+            let name = String.concat "." path
+            invalidOp $"projection/ambiguous-declaration: {package}/{name}"
+
+    let package source snapshot = (info source snapshot).Package
+    let path source snapshot = (info source snapshot).Path
+
+    let identity source snapshot =
+        (info source snapshot).Declaration
+        |> Option.defaultWith (fun () ->
+            invalidOp "projection/missing-source-metadata: no declaration identity is available")
+
+    let union source snapshot =
+        match tryInfo source snapshot with
+        | Some info -> info.Union
+        | None ->
+            Error
+                [
+                    Diagnostic.create "projection/stale-source" "The source belongs to another resolved snapshot" None
+                ]
+
+    let diagnostics snapshot =
+        snapshot.Sources
+        |> List.collect (fun source ->
+            match source.Union with
+            | Ok _ -> []
+            | Error diagnostics -> diagnostics)
+
+    let internal selected source snapshot = info source snapshot
+
+module ProjectionCompanion =
+    let create source fileName exportedTypeNames sourceText snapshot =
+        let info = Resolved.selected source snapshot
+
+        match info.Union, info.Declaration, info.Fingerprint with
+        | Ok _, Some identity, Some fingerprint ->
+            ProjectionCompanion(snapshot.Nonce, identity, fingerprint, fileName, exportedTypeNames, sourceText)
+        | _ -> invalidArg "source" "projection/unsupported-source: the selected union has unresolved diagnostics"
+
 module internal ContractData =
+    let resolvedSnapshot sources =
+        {
+            Nonce = System.Guid.NewGuid()
+            Sources = sources
+        }
+
+    let projectionCompanionInfo (ProjectionCompanion(_, identity, fingerprint, file, names, text)) =
+        identity, fingerprint, file, names, text
+
+    let projectionCompanionIsCurrent snapshot (ProjectionCompanion(nonce, _, _, _, _, _)) = snapshot.Nonce = nonce
+
     let edits (EditBatch edits) = edits
     let attributeInfo (AttributeSpec(name, arguments, target)) = name, arguments, target
     let companionInfo (CompanionSpec(ns, name, source, members, bases, mode)) = ns, name, source, members, bases, mode

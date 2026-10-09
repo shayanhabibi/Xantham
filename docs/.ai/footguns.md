@@ -206,3 +206,21 @@ Carried from lanes that closed without finishing these.
 - **Entrypoint subclassability.** Generated `Container`/`ContainerProxy` are not F# subclassable;
   direct subclassing goes through the ambient runtime base. The ordinary SDK class
   interface-and-constructor policy was retained rather than revisited.
+
+
+## Early projections must precede loss (2026-10-09)
+
+`Customization.Semantics.projectResolved` runs after Resolve, before Shape. Build companions
+from its original arms; an emitted `string` or `option` cannot recover source literal membership
+or the null/undefined distinction. Keep source tokens and companion plans snapshot-sealed;
+equal checker IDs or equal arm sets do not merge named declaration identity.
+A phantom alias such as `type Phantom<T> = "auto"` shares its checker type with a plain
+literal alias; inspect its declaration parameters through Resolve rather than tagging that type. Cached tokens and
+plans must fail on the next run, while nonces must never enter output provenance.
+
+Projection companions do not alter the raw ABI. Keep their manifest provenance separate from
+raw catalog variant policy and validate the complete emitted source before writing. The
+Myriad adapter's `Decoded|Invalid` matches through a strict raw-value decoder into a normal DU.
+It does not pattern-match an erased union or recover the originating alias from shared strings.
+An optional-property presence test requires separate object facts; decoding its read value
+cannot distinguish absence from an explicitly present `undefined` property.

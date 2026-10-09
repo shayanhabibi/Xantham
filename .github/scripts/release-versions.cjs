@@ -73,7 +73,7 @@ function run(base = process.env.XANTHAM_RELEASE_BASE || 'origin/master', root = 
       dependencies: [...xml.matchAll(/<ProjectReference\s+Include="([^"]+)"/g)].map(match => path.posix.basename(match[1].replaceAll('\\', '/'), '.fsproj')),
     });
   }
-  if (packages.length !== 6) throw new Error(`Expected all six published packages, found ${packages.length}. Update the release policy when adopting a package.`);
+  if (packages.length !== 7) throw new Error(`Expected all seven published packages, found ${packages.length}. Update the release policy when adopting a package.`);
   const affected = validateVersions(packages, files);
   console.log(`Release versions verified against ${base}: ${[...affected].join(', ') || 'no package payload changes'}.`);
 }

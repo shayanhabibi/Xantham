@@ -5259,3 +5259,8 @@ let catalogSourceProjectionTests =
     testList "catalog source projection fixture" [
         yield! fixtureTests "catalog-source-projection-lab" package config (fun _ -> [])
     ]
+
+[<Tests>]
+let projectionLab =
+    testList "projection-lab"
+        (fixtureTests "projection-lab" (handFixture "projection-lab") GeneratorConfig.Default (fun _ -> []))

@@ -8,5 +8,6 @@
     <Compile Include="PartasDom.fs" />
     <Compile Include="Program.fs" />
     <ProjectReference Include="../../src/Xantham.Generator/Xantham.Generator.fsproj" />
+    <ProjectReference Include="../../src/Xantham.Generator.Myriad/Xantham.Generator.Myriad.fsproj" />
   </ItemGroup>
 </Project>

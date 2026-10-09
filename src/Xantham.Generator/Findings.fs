@@ -246,6 +246,7 @@ module FindingCodes =
             "CU.MemberOmitted", "CU003"
             "CU.InteropReplaced", "CU004"
             "CU.DeclarationReplaced", "CU005"
+            "CU.ProjectionEmitted", "CU006"
         ]
 
     let private byName = Map.ofList table
@@ -1195,6 +1196,7 @@ type CustomizeOutput =
     | [<Widened>] MemberOmitted of extensionId: string * memberName: string
     | [<Escape>] InteropReplaced of extensionId: string
     | [<Escape>] DeclarationReplaced of extensionId: string
+    | [<Escape>] ProjectionEmitted of extensionId: string
 
     interface IFindingKind with
         member this.Message =
@@ -1204,6 +1206,8 @@ type CustomizeOutput =
             | MemberOmitted(id, memberName) -> $"{id} omitted companion member {memberName}"
             | InteropReplaced id -> $"interop behavior replaced by {id}"
             | DeclarationReplaced id -> $"declaration contract replaced by {id}"
+            | ProjectionEmitted id ->
+                $"early source companion emitted by {id}; runtime semantics supplied by the extension"
 
 module FindingCatalogue =
     /// Every finding union, in the order the manifest legend lists them. The snapshot test

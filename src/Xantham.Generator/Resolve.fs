@@ -348,6 +348,55 @@ let private sourceFile (ctx: Context) (path: string) : Async<Ast.SourceFile vopt
         .Value
     |> Async.AwaitTask
 
+/// A type alias can bind unused parameters that disappear from its resolved type. Read the
+/// declaring alias rather than attaching that fact to a type shared with nongeneric aliases.
+let internal declarationHasTypeParameters (ctx: Context) (symbol: SymbolResponse) =
+    async {
+        if not (symbol.Flags.HasFlag SymbolFlags.TypeAlias) then
+            return Ok false
+        else
+            let handles = symbol.Declarations |> ValueOption.defaultValue [||]
+
+            let! declarations =
+                handles
+                |> Array.map (fun declaration ->
+                    async {
+                        match NodeHandle.parse declaration with
+                        | ValueNone -> return Error "The alias has a malformed declaration handle"
+                        | ValueSome handle ->
+                            let! source = attempt (sourceFile ctx handle.Path)
+
+                            match source with
+                            | Error reason -> return Error reason
+                            | Ok ValueNone -> return Error "The alias declaration source is unavailable"
+                            | Ok(ValueSome source) ->
+                                let node = Node.ofIndex<AnyNode> source handle.Index
+
+                                if node.Kind <> SyntaxKind.TypeAliasDeclaration then
+                                    return Error "The alias handle does not identify a type alias declaration"
+                                else
+                                    return
+                                        Node.retag<AnyNode, TypeAliasDeclaration> node
+                                        |> TypeAliasDeclaration.typeParameters
+                                        |> Seq.isEmpty
+                                        |> not
+                                        |> Ok
+                    })
+                |> Async.Sequential
+
+            if Array.isEmpty declarations then
+                return Error "The alias has no declaration handles"
+            else
+                match
+                    declarations
+                    |> Array.tryPick (function
+                        | Error reason -> Some reason
+                        | Ok _ -> None)
+                with
+                | Some reason -> return Error reason
+                | None -> return Ok(declarations |> Array.exists ((=) (Ok true)))
+    }
+
 /// The instantiated interface contracts explicitly declared by a class's `implements` clauses.
 let private implementedTypes (ctx: Context) (symbol: SymbolResponse voption) : Async<TypeResponse list> =
     async {

@@ -85,6 +85,7 @@ module Spec =
                     "Xantham.Fable.Node"
                     "Xantham.Cli"
                     "Xantham.Generator"
+                    "Xantham.Generator.Myriad"
                 ]
 
         srcProjects |> List.filter (fun project -> names.Contains project.Name)

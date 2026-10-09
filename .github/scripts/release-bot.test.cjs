@@ -1,7 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
-const os = require('node:os');
 const path = require('node:path');
 const { execFileSync } = require('node:child_process');
 const bot = require('./release-bot.cjs');
@@ -36,21 +35,24 @@ test('closed, fork and feature PRs cannot publish release updates', () => {
   assert.throws(() => bot.verifyPullRequest(pr(), 'owner/repo', { head: 'head', base: 'old' }), /moved/);
 });
 test('release commits contain only known project versions and changelogs', () => {
-  bot.verifyChangedPaths(['src/Xantham.Cli/Xantham.Cli.fsproj', 'src/Xantham.Fable.Node/CHANGELOG.md']);
+  bot.verifyChangedPaths(['src/Xantham.Cli/Xantham.Cli.fsproj', 'src/Xantham.Fable.Node/CHANGELOG.md',
+    'src/Xantham.Generator.Myriad/Xantham.Generator.Myriad.fsproj', 'src/Xantham.Generator.Myriad/CHANGELOG.md']);
   for (const file of ['.github/workflows/test.yml', 'src/Xantham.Cli/Program.fs', 'src/Unknown/CHANGELOG.md']) {
     assert.throws(() => bot.verifyChangedPaths([file]), /outside/);
   }
 });
 
 function fixture(t) {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'xantham-release-bot-'));
+  const scratch = path.resolve(__dirname, '../../tests/.scratch');
+  fs.mkdirSync(scratch, { recursive: true });
+  const root = fs.mkdtempSync(path.join(scratch, 'xantham-release-bot-'));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
   git('init', '-b', 'develop');
   git('config', 'core.autocrlf', 'false');
   git('config', 'user.name', 'Test');
   git('config', 'user.email', 'test@example.test');
-  const names = ['Xantham.Cli', 'Xantham.TypeScript.Wire', 'Xantham.Generator', 'Xantham.Fable.Core', 'Xantham.Fable.Core.TS', 'Xantham.Fable.Node'];
+  const names = ['Xantham.Cli', 'Xantham.TypeScript.Wire', 'Xantham.Generator', 'Xantham.Generator.Myriad', 'Xantham.Fable.Core', 'Xantham.Fable.Core.TS', 'Xantham.Fable.Node'];
   for (const name of names) {
     fs.mkdirSync(path.join(root, 'src', name), { recursive: true });
     fs.writeFileSync(path.join(root, 'src', name, `${name}.fsproj`), '<Project><PropertyGroup><Version>1.0.0</Version></PropertyGroup></Project>\n');

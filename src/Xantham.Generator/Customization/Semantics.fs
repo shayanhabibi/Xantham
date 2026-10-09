@@ -2,6 +2,8 @@ module internal Xantham.Generator.Customization.Semantics
 
 open System
 open System.IO
+open System.Security.Cryptography
+open System.Text
 open System.Text.Json
 open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
@@ -55,6 +57,252 @@ let private normalizedHandle (ctx: Context) (handle: string<declHandle>) =
 
         String.concat ":" [ owner; path; kind; index ]
     | _ -> invalidOp "customization/missing-source-metadata: malformed declaration handle"
+
+let private declarationIdentity ctx handles =
+    handles
+    |> List.map (normalizedHandle ctx)
+    |> List.distinct
+    |> List.sort
+    |> JsonSerializer.Serialize
+
+let private declaredPath (harvest: HarvestModel) (symbol: SymbolResponse) =
+    let parent =
+        symbol.ParentSymbolId
+        |> ValueOption.toOption
+        |> Option.bind (fun id -> Map.tryFind id harvest.Namespaces)
+        |> Option.map (fun name -> (name / uom<symbolName>).Split '.' |> Array.toList)
+        |> Option.defaultValue []
+
+    parent @ [ symbol.Name ]
+
+/// Captures exported declarations separately from their checker type ids: two named aliases
+/// may resolve to the same union while retaining different source declarations.
+let projectResolved (ctx: Context) (model: ResolveModel) =
+    async {
+        let projectExport (export: HarvestedExport) =
+            let handles =
+                export.Symbol.DeclarationHandles
+                |> ValueOption.defaultValue [||]
+                |> Array.toList
+
+            let path =
+                declaredPath
+                    model.Harvest
+                    { export.Symbol with
+                        Name = export.ExportName
+                    }
+
+            let source = String.concat "." path
+            let origin = Grouping.classify ctx.PackageDir (ValueSome export.Symbol)
+            let package = sourcePackage ctx origin handles
+
+            let diagnostic code message =
+                Diagnostic.create ("projection/" + code) message (Some source)
+
+            let declaration =
+                if List.isEmpty handles then
+                    Error
+                        [
+                            diagnostic "missing-source-metadata" "The exported declaration has no source handles"
+                        ]
+                else
+                    try
+                        Ok(declarationIdentity ctx handles)
+                    with :? InvalidOperationException ->
+                        Error
+                            [
+                                diagnostic
+                                    "missing-source-metadata"
+                                    "The exported declaration has malformed source handles"
+                            ]
+
+            let rec arms visited id =
+                match Map.tryFind id model.NotFollowed, Map.tryFind id model.Types with
+                | Some reason, _ ->
+                    Error
+                        [
+                            diagnostic "incomplete-union" $"A selected union constituent was not resolved: {reason}"
+                        ]
+                | _, None ->
+                    Error
+                        [
+                            diagnostic
+                                "incomplete-union"
+                                "A selected union constituent is missing from the resolved type table"
+                        ]
+                | _, Some facts when Set.contains id visited ->
+                    Error
+                        [
+                            diagnostic "incomplete-union" "The selected union contains a recursive constituent"
+                        ]
+                | _, Some facts when not (List.isEmpty facts.AliasTypeArguments) ->
+                    Error
+                        [
+                            diagnostic
+                                "unsupported-union"
+                                "Generic aliases are outside the finite union projection contract"
+                        ]
+                | _, Some facts when facts.Response.Flags.HasFlag TypeFlags.Union ->
+                    if List.isEmpty facts.UnionMembers then
+                        Error
+                            [
+                                diagnostic "incomplete-union" "The selected union has no resolved constituents"
+                            ]
+                    else
+                        let results = facts.UnionMembers |> List.map (arms (Set.add id visited))
+
+                        let errors =
+                            results
+                            |> List.collect (function
+                                | Error errors -> errors
+                                | Ok _ -> [])
+
+                        if List.isEmpty errors then
+                            results
+                            |> List.collect (function
+                                | Ok values -> values
+                                | Error _ -> [])
+                            |> Ok
+                        else
+                            Error errors
+                | _, Some facts ->
+                    match facts.Response.Flags with
+                    | TypeFlags.StringLiteral ->
+                        try
+                            match Shape.Spec.literalOf facts with
+                            | Some(LitString value) -> Ok [ ResolvedUnionArm.StringLiteral value ]
+                            | _ ->
+                                Error
+                                    [
+                                        diagnostic
+                                            "incomplete-union"
+                                            "A string literal constituent has no literal value"
+                                    ]
+                        with :? InvalidOperationException ->
+                            Error
+                                [
+                                    diagnostic
+                                        "incomplete-union"
+                                        "A string literal constituent has an invalid literal value"
+                                ]
+                    | TypeFlags.Number -> Ok [ ResolvedUnionArm.Number ]
+                    | TypeFlags.Null -> Ok [ ResolvedUnionArm.Null ]
+                    | TypeFlags.Undefined -> Ok [ ResolvedUnionArm.Undefined ]
+                    | flags ->
+                        Error
+                            [
+                                diagnostic
+                                    "unsupported-union"
+                                    $"The selected constituent {flags} is outside the finite union projection contract"
+                            ]
+
+            let union =
+                match Map.tryFind export.Symbol.SymbolId model.ExportTypes |> Option.bind _.Declared with
+                | None -> Error [ diagnostic "incomplete-union" "The export has no resolved declared type" ]
+                | Some id -> arms Set.empty id |> Result.map (List.distinct >> List.sort)
+
+            let fingerprint =
+                match declaration, union with
+                | Ok identity, Ok union ->
+                    try
+                        let sources =
+                            handles
+                            |> List.map (fun handle ->
+                                let file = handleFile handle |> Option.get
+
+                                normalizedHandle ctx handle,
+                                File.ReadAllBytes file |> SHA256.HashData |> Convert.ToHexString)
+                            |> List.distinct
+                            |> List.sort
+
+                        let armKeys =
+                            union
+                            |> List.map (function
+                                | ResolvedUnionArm.StringLiteral value -> "string:" + JsonSerializer.Serialize value
+                                | ResolvedUnionArm.Number -> "number"
+                                | ResolvedUnionArm.Null -> "null"
+                                | ResolvedUnionArm.Undefined -> "undefined")
+
+                        JsonSerializer.Serialize(("resolved-union-v1", identity, sources, armKeys))
+                        |> Encoding.UTF8.GetBytes
+                        |> SHA256.HashData
+                        |> Convert.ToHexString
+                        |> fun value -> Ok(value.ToLowerInvariant())
+                    with
+                    | :? IOException
+                    | :? UnauthorizedAccessException ->
+                        Error
+                            [
+                                diagnostic
+                                    "missing-source-metadata"
+                                    "The selected declaration source cannot be read for authentication"
+                            ]
+                | Error errors, _ -> Error errors
+                | _, Error errors -> Error errors
+
+            {
+                Package = package
+                Path = path
+                Declaration = declaration |> Result.toOption
+                Fingerprint = fingerprint |> Result.toOption
+                Union =
+                    match fingerprint with
+                    | Ok _ -> union
+                    | Error errors -> Error errors
+            }
+
+        let! sources =
+            model.Harvest.Exports
+            |> List.map (fun export ->
+                async {
+                    let info = projectExport export
+
+                    match info.Union with
+                    | Error _ -> return info
+                    | Ok _ ->
+                        let! parameters = Resolve.declarationHasTypeParameters ctx export.Symbol
+
+                        let diagnostic message =
+                            Diagnostic.create
+                                "projection/unsupported-union"
+                                message
+                                (Some(String.concat "." info.Path))
+
+                        match parameters with
+                        | Ok false -> return info
+                        | Ok true ->
+                            return
+                                { info with
+                                    Fingerprint = None
+                                    Union =
+                                        Error
+                                            [
+                                                diagnostic
+                                                    "Generic aliases are outside the finite union projection contract"
+                                            ]
+                                }
+                        | Error reason ->
+                            return
+                                { info with
+                                    Fingerprint = None
+                                    Union =
+                                        Error
+                                            [
+                                                Diagnostic.create
+                                                    "projection/missing-source-metadata"
+                                                    reason
+                                                    (Some(String.concat "." info.Path))
+                                            ]
+                                }
+                })
+            |> Async.Sequential
+
+        return
+            sources
+            |> Array.toList
+            |> List.distinctBy (fun info -> info.Package, info.Path, info.Declaration)
+            |> ContractData.resolvedSnapshot
+    }
 
 let project (ctx: Context) (shape: ShapeModel) (findings: Finding list) =
     async {
@@ -116,15 +364,7 @@ let project (ctx: Context) (shape: ShapeModel) (findings: Finding list) =
 
         let projectionShape = { shape with Types = table }
 
-        let declaredPath (symbol: SymbolResponse) =
-            let parent =
-                symbol.ParentSymbolId
-                |> ValueOption.toOption
-                |> Option.bind (fun id -> Map.tryFind id shape.Harvest.Namespaces)
-                |> Option.map (fun name -> (name / uom<symbolName>).Split '.' |> Array.toList)
-                |> Option.defaultValue []
-
-            parent @ [ symbol.Name ]
+        let declaredPath = declaredPath shape.Harvest
 
         let declarationIds =
             symbols
@@ -144,14 +384,7 @@ let project (ctx: Context) (shape: ShapeModel) (findings: Finding list) =
 
                     None
                 else
-                    let declaration =
-                        handles
-                        |> List.map (normalizedHandle ctx)
-                        |> List.distinct
-                        |> List.sort
-                        |> JsonSerializer.Serialize
-
-                    Some(id, declaration))
+                    Some(id, declarationIdentity ctx handles))
             |> Map.ofList
 
         let keyOf id =

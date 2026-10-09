@@ -8,6 +8,17 @@ type OutputTarget
 type BindingType
 type SemanticSnapshot
 type ExtensionDiagnostic
+type ResolvedSource
+type ResolvedSnapshot
+type ProjectionCompanion
+
+/// The resolved value arms accepted by the first companion projection contract.
+[<RequireQualifiedAccess>]
+type ResolvedUnionArm =
+    | StringLiteral of string
+    | Number
+    | Null
+    | Undefined
 
 type AttributeValue =
     | String of string
@@ -31,11 +42,30 @@ type ExtensionIdentity =
         Configuration: Map<string, string>
     }
 
+/// Produces companions from compiler facts before F# shaping can widen those facts.
+type ProjectionExtension =
+    {
+        Identity: ExtensionIdentity
+        Transform: ResolvedSnapshot -> Result<ProjectionCompanion list, ExtensionDiagnostic list>
+    }
+
 type GeneratorExtension =
     {
         Identity: ExtensionIdentity
         Transform: SemanticSnapshot -> Result<EditBatch, ExtensionDiagnostic list>
     }
+
+module Resolved =
+    val tryFind: string -> string list -> ResolvedSnapshot -> ResolvedSource option
+    val package: ResolvedSource -> ResolvedSnapshot -> string
+    val path: ResolvedSource -> ResolvedSnapshot -> string list
+    val identity: ResolvedSource -> ResolvedSnapshot -> string
+    val union: ResolvedSource -> ResolvedSnapshot -> Result<ResolvedUnionArm list, ExtensionDiagnostic list>
+    val diagnostics: ResolvedSnapshot -> ExtensionDiagnostic list
+
+module ProjectionCompanion =
+    /// Seals the selected facts into a plan; a foreign source or unsupported union is rejected.
+    val create: ResolvedSource -> string -> string list -> string -> ResolvedSnapshot -> ProjectionCompanion
 
 module Attribute =
     val create: string -> AttributeValue list -> AttributeSpec
@@ -126,6 +156,15 @@ type internal SemanticMemberInfo =
         Targets: (string * string * bool) list
     }
 
+type internal ResolvedSourceInfo =
+    {
+        Package: string
+        Path: string list
+        Declaration: string option
+        Fingerprint: string option
+        Union: Result<ResolvedUnionArm list, ExtensionDiagnostic list>
+    }
+
 type internal Edit =
     | AddAttribute of OutputTarget * AttributeSpec
     | EmitCompanion of CompanionSpec
@@ -133,6 +172,9 @@ type internal Edit =
     | ReplaceDeclaration of OutputTarget * ReplacementSpec
 
 module internal ContractData =
+    val resolvedSnapshot: ResolvedSourceInfo list -> ResolvedSnapshot
+    val projectionCompanionInfo: ProjectionCompanion -> string * string * string * string list * string
+    val projectionCompanionIsCurrent: ResolvedSnapshot -> ProjectionCompanion -> bool
     val withReferences: Map<string, string> -> SemanticSnapshot -> SemanticSnapshot
     val edits: EditBatch -> Edit list
     val attributeInfo: AttributeSpec -> string * AttributeValue list * string

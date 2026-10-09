@@ -1,0 +1,6 @@
+{"name":"Choice","file":"index.d.ts","tier":"widened","findings":[{"name":"TR.StringLiteralToString","key":"TR006","pass":"shape-aliases","tier":"widened","symbol":"Choice","message":"string literal type widened to string (doc-noted, \u00A74.2)"},{"name":"TR.NullableHoistedToOption","key":"TR032","pass":"shape-aliases","tier":"ergonomic","symbol":"Choice","fields":{"fromNull":true,"fromUndefined":true,"fromVoid":false},"message":"null/undefined union members hoisted to option"}]}
+{"name":"EqualA","file":"index.d.ts","tier":"exact","findings":[]}
+{"name":"EqualB","file":"index.d.ts","tier":"exact","findings":[]}
+{"name":"OverlapC","file":"index.d.ts","tier":"exact","findings":[]}
+{"name":"Weird","file":"index.d.ts","tier":"widened","findings":[{"name":"TR.StringLiteralToString","key":"TR006","pass":"shape-aliases","tier":"widened","symbol":"Weird","message":"string literal type widened to string (doc-noted, \u00A74.2)"},{"name":"TR.NullableHoistedToOption","key":"TR032","pass":"shape-aliases","tier":"ergonomic","symbol":"Weird","fields":{"fromNull":true,"fromUndefined":true,"fromVoid":false},"message":"null/undefined union members hoisted to option"}]}
+{"name":"Exports.echo","tier":"exact","findings":[]}
