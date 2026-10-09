@@ -41,7 +41,7 @@ jobs:
         run: npm ci
       - name: Build generator
         run: dotnet build src/Xantham.Generator/Xantham.Generator.fsproj --configuration Release
-      - name: Produce catalogue and byte manifests
+      - name: Produce JSON and Brotli catalogues and byte manifests
         run: dotnet fsi tools/catalog-portability.fsx -- produce tests/.scratch/catalog-artifact
       - name: Upload producer artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
@@ -84,5 +84,5 @@ jobs:
         with:
           name: catalogue-${{ matrix.producer }}-${{ github.sha }}
           path: tests/.scratch/catalog-artifact
-      - name: Authenticate foreign catalogue and compile consumer
+      - name: Authenticate foreign JSON and Brotli catalogues and compile consumers
         run: dotnet fsi tools/catalog-portability.fsx -- consume tests/.scratch/catalog-artifact tests/.scratch/catalog-consumer
