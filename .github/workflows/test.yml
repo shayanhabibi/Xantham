@@ -29,7 +29,7 @@ jobs:
           persist-credentials: false
       - name: Detect source and build input changes
         id: scope
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const verificationScope = require('./.github/scripts/verification-scope.cjs');
@@ -39,7 +39,7 @@ jobs:
       - name: Reuse exact-commit develop tests for release PRs
         if: steps.scope.outputs.full == 'true'
         id: develop-tests
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const reuseDevelopTests = require('./.github/scripts/reuse-develop-tests.cjs');
