@@ -33,19 +33,17 @@ let private platforms = [
 
 let private coreCatalog = Path.Combine(repository, "src", "Xantham.Fable.Core.TS", "declarations.json")
 
-let private readerCatalog () =
-    use document = JsonDocument.Parse(File.ReadAllText coreCatalog)
-    let root = document.RootElement
-    let result = JsonObject()
-    for property in root.EnumerateObject() do
-        if property.Name <> "declarations" then
-            result[property.Name] <- JsonNode.Parse(property.Value.GetRawText())
-    let declarations = JsonArray()
-    for declaration in root.GetProperty("declarations").EnumerateArray() do
-        if ["Fable.Core.TS.Dom.HTMLElement"; "Fable.Core.TS.Es.Map"] |> List.contains (declaration.GetProperty("fSharpName").GetString()) then
-            declarations.Add(JsonNode.Parse(declaration.GetRawText()))
-    result["declarations"] <- declarations
-    result :> JsonNode
+let private readerCatalog reference = JsonNode.Parse(File.ReadAllText reference)
+
+let private withSmallConsumer run =
+    CatalogLibraryLab.withProducer (fun reference _ ->
+        use scratch = Scratch.directory "catalog-library-reader"
+        let package = Path.Combine(scratch.Path, "package")
+        Directory.CreateDirectory package |> ignore
+        File.WriteAllText(Path.Combine(package, "package.json"), """{"name":"catalog-library-reader-lab","version":"1.0.0","types":"index.d.ts"}""")
+        File.WriteAllText(Path.Combine(package, "index.d.ts"), "export function accept(value: TextStreamReader): TextStreamReader;\n")
+        let config = { CatalogLibraryLab.config with DeclarationReferences = [reference] }
+        run scratch.Path package config reference)
 
 let private withConsumer run =
     use scratch = Scratch.directory "catalog-library-reader"
@@ -106,18 +104,18 @@ let tests = testSequenced <| testList "catalog library identity" [
         Expect.throws (fun () -> CatalogLibrary.tryIdentity compiler scratch.Path "typescript" version "lib/lib.es5.d.ts" |> ignore)
             "recognized compiler requires matching release metadata"
     for label, part, mutate in [
-        "source bytes", "input source hash mismatch", fun (document: JsonNode) -> document["inputs"].AsArray() |> Seq.find (fun s -> s["file"].GetValue<string>() = "lib/lib.es5.d.ts") |> fun s -> s["sha256"] <- JsonValue.Create "changed"
-        "release fingerprint", "package manifest mismatch", fun document -> document["inputs"].AsArray() |> Seq.find (fun s -> s["file"].GetValue<string>() = "lib/lib.es5.d.ts") |> fun s -> s["manifestSha256"] <- JsonValue.Create "changed"
-        "API", "F# API mismatch", fun document -> document["declarations"].AsArray() |> Seq.find (fun d -> d["fSharpName"].GetValue<string>() = "Fable.Core.TS.Dom.HTMLElement") |> fun d -> d["api"] <- JsonValue.Create "changed"
-        "library source identity", "source hash mismatch", fun document -> document["declarations"].AsArray() |> Seq.find (fun d -> d["fSharpName"].GetValue<string>() = "Fable.Core.TS.Dom.HTMLElement") |> fun d -> d["sources"][0]["package"] <- JsonValue.Create "other-library"
+        "source bytes", "input source hash mismatch", fun (document: JsonNode) -> document["inputs"].AsArray() |> Seq.find (fun s -> s["file"].GetValue<string>() = "lib/lib.scripthost.d.ts") |> fun s -> s["sha256"] <- JsonValue.Create "changed"
+        "release fingerprint", "package manifest mismatch", fun document -> document["inputs"].AsArray() |> Seq.find (fun s -> s["file"].GetValue<string>() = "lib/lib.scripthost.d.ts") |> fun s -> s["manifestSha256"] <- JsonValue.Create "changed"
+        "API", "F# API mismatch", fun document -> document["declarations"].AsArray() |> Seq.find (fun d -> d["fSharpName"].GetValue<string>() = "Library.Owner.Dom.TextStreamReader") |> fun d -> d["api"] <- JsonValue.Create "changed"
+        "library source identity", "source hash mismatch", fun document -> document["declarations"].AsArray() |> Seq.find (fun d -> d["fSharpName"].GetValue<string>() = "Library.Owner.Dom.TextStreamReader") |> fun d -> d["sources"][0]["package"] <- JsonValue.Create "other-library"
         "compiler release", "compiler version", fun document -> document["compatibility"]["compiler"]["version"] <- JsonValue.Create "other-version"
         "compiler revision", "compiler revision", fun document -> document["compatibility"]["compiler"]["revision"] <- JsonValue.Create (String.replicate 40 "a")
         "AST protocol", "AST protocol", fun document -> document["compatibility"]["compiler"]["astProtocolVersion"] <- JsonValue.Create 9
         "old platform identity contract", "identity version", fun document -> document["compatibility"]["identityVersion"] <- JsonValue.Create 2
     ] do
         testCase ("reader rejects changed " + label) <| fun () ->
-            withConsumer (fun directory package config ->
-                let document = readerCatalog ()
+            withSmallConsumer (fun directory package config reference ->
+                let document = readerCatalog reference
                 mutate document
                 let reference = Path.Combine(directory, "changed.json")
                 File.WriteAllText(reference, document.ToJsonString())
@@ -126,7 +124,7 @@ let tests = testSequenced <| testList "catalog library identity" [
                     (fun () -> Pipeline.run { config with DeclarationReferences = [reference] } package output |> Async.RunSynchronously |> ignore)
                     (fun error -> Expect.stringContains error.Message part "reader authentication remains active")
                 Expect.isFalse (Directory.Exists output) "authentication precedes disk output")
-    testCase "Core.TS library emissions use logical TypeScript ownership" <| fun () ->
+    testCase "Core.TS generation and compiled reuse preserve logical TypeScript ownership" <| fun () ->
         use scratch = Scratch.directory "catalog-library-emission"
         let config = { GeneratorConfig.load input with DeclarationCatalog = true }
         Pipeline.run config input scratch.Path |> Async.RunSynchronously |> ignore
@@ -167,13 +165,14 @@ let tests = testSequenced <| testList "catalog library identity" [
                     failtest (sprintf "Core.TS declarations differ: %d changed entries; %A" changes.Length (List.truncate 5 changes))
                 Expect.isTrue (JsonElement.DeepEquals(property.Value, expected))
                     ("Core.TS " + property.Name + " matches the checked-in catalogue on every OS")
-]
-
-[<Tests>]
-let reuseTests = testSequenced <| testList "catalog library reuse" [
-    testCase "compiler-only reader reuses the full Core.TS catalogue in a compiled consumer" <| fun () ->
         withConsumer (fun directory package config ->
-            File.WriteAllText(Path.Combine(package, "index.d.ts"), "export {};\n")
+            File.WriteAllText(Path.Combine(package, "index.d.ts"), """export interface Record { local: string; }
+export interface ReadonlyRecord { local: string; }
+export interface Dictionary { readonly [key: string]: number; }
+export interface DictionaryConsumer { values: { readonly [key: string]: number; }; }
+export const options: AudioWorkletNodeOptions;
+export function accept(value: Map<string, HTMLElement>): Map<string, HTMLElement>;
+            """)
             let output = Path.Combine(directory, "consumer")
             Pipeline.run config package output |> Async.RunSynchronously |> ignore
             use document = JsonDocument.Parse(File.ReadAllText(Path.Combine(output, "declarations.json")))
@@ -181,6 +180,12 @@ let reuseTests = testSequenced <| testList "catalog library reuse" [
             Expect.equal (element.GetProperty("owner").GetString()) "FableCoreTsInput" "library identity resolves to the accepted owner"
             let code, errors =
                 DeclarationCatalogTests.compileConsumer directory ["consumer/groups/TypeScript.Lib.fs"; "consumer/Library.Consumer.fs"]
-                    "module Library.Check\nlet accept (value: TypeScript.Lib.Es.Map<string, TypeScript.Lib.Dom.HTMLElement>) : Fable.Core.TS.Es.Map<string, Fable.Core.TS.Dom.HTMLElement> = value\n"
+                    """module Library.Check
+let accept (value: TypeScript.Lib.Es.Map<string, TypeScript.Lib.Dom.HTMLElement>) : Fable.Core.TS.Es.Map<string, Fable.Core.TS.Dom.HTMLElement> = value
+let options (value: TypeScript.Lib.Dom.AudioWorkletNodeOptions) : Fable.Core.TS.Dom.AudioWorkletNodeOptions = value
+let record (value: TypeScript.Lib.Es.Record2<string, float>) : Fable.Core.TS.Es.Record<string, float> = value
+let parameterData (value: TypeScript.Lib.Dom.AudioWorkletNodeOptions) : Fable.Core.JS.JS.Record<string, float> option = value.parameterData
+let dictionary (value: Library.Consumer.DictionaryConsumer) : Fable.Core.JS.JS.ReadonlyRecord<string, float> = value.values
+                    """
             Expect.equal code 0 errors)
 ]

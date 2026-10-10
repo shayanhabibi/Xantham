@@ -1163,6 +1163,17 @@ module Canonical =
         | FsBranded(primitive, measure) -> node "branded" [ reference primitive; text measure ]
         | FsNamed name -> node "named" [ text name ]
 
+/// Rejects incompatible reference contracts before declaration traversal.
+let internal validateReferencesWithProducer producer (ctx: Context) =
+    async {
+        if not ctx.Config.DeclarationReferences.IsEmpty then
+            let! expected = producer ()
+
+            for reference in ctx.Config.DeclarationReferences do
+                let path = Path.GetFullPath(Path.Combine(ctx.PackageDir / uom<dirPath>, reference))
+                load expected path |> ignore
+    }
+
 /// Redirects matching F# references, retains public aliases and value imports, and emits a catalog.
 let internal applyWithProducer
     (producer: unit -> Async<CatalogCompatibility.Producer>)

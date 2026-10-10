@@ -7,25 +7,26 @@ open Xantham.Generator
 open Xantham.Generator.Measure
 
 let private repository = Path.GetFullPath(Path.Combine(__SOURCE_DIRECTORY__, "..", ".."))
-let private coreCatalog = Path.Combine(repository, "src", "Xantham.Fable.Core.TS", "declarations.json")
 
 [<Tests>]
 let tests = testSequenced <| testList "catalog library entry variants" [
     for label, entry in [
-        "function", "export function accept(value: Map<string, HTMLElement>): Map<string, HTMLElement>;"
-        "value", "export const options: AudioWorkletNodeOptions;"
-        "interface", "export interface Consumer { options: AudioWorkletNodeOptions; }"
-        "namespace", "export namespace Consumer { function accept(value: AudioWorkletNodeOptions): void; }"
-        "default", "export default function accept(value: AudioWorkletNodeOptions): void;"
+        "empty module", "export {};"
+        "function", "export function accept(value: TextStreamReader): TextStreamReader;"
+        "value", "export const options: TextStreamReader;"
+        "interface", "export interface Consumer { options: TextStreamReader; }"
+        "namespace", "export namespace Consumer { function accept(value: TextStreamReader): void; }"
+        "default", "export default function accept(value: TextStreamReader): void;"
         "re-export", "export { accept } from './api';"
         "unrelated value", "export const enabled: boolean;"
         "intrinsic aliases", "export type Enabled = boolean; export type Label = string; export type Count = number; export const enabled: boolean; export const label: string; export const count: number;"
-        "local library-name collision", "export interface Record { local: string; } export function accept(value: AudioWorkletNodeOptions): void;"
-        "local readonly support-name collision", "export interface ReadonlyRecord { local: string; } export interface Dictionary { readonly [key: string]: number; } export function accept(value: AudioWorkletNodeOptions): void;"
-        "global script", "interface ConsumerOptions { options: AudioWorkletNodeOptions; }"
+        "local library-name collision", "export interface TextStreamReader { local: string; }"
+        "local readonly support-name collision", "export interface ReadonlyRecord { local: string; } export interface Dictionary { readonly [key: string]: number; } export function accept(value: TextStreamReader): void;"
+        "global script", "interface ConsumerOptions { options: TextStreamReader; }"
         "mixed public paths", "export const enabled: boolean;"
     ] do
         testCase (label + " retains complete authenticated compiler library") <| fun () ->
+          CatalogLibraryLab.withProducer (fun reference library ->
             use scratch = Scratch.directory "catalog-library-entry-lab"
             let package = Path.Combine(scratch.Path, "package")
             Directory.CreateDirectory package |> ignore
@@ -33,58 +34,59 @@ let tests = testSequenced <| testList "catalog library entry variants" [
                 """{"name":"catalog-library-entry-lab","version":"1.0.0","types":"index.d.ts"}""")
             File.WriteAllText(Path.Combine(package, "index.d.ts"), entry + "\n")
             File.WriteAllText(Path.Combine(package, "api.d.ts"),
-                "export function accept(value: AudioWorkletNodeOptions): void;\n")
+                "export function accept(value: TextStreamReader): void;\n")
             File.WriteAllText(Path.Combine(package, "globals.d.ts"),
-                "interface ConsumerOptions { options: AudioWorkletNodeOptions; }\n")
+                "interface ConsumerOptions { options: TextStreamReader; }\n")
             let config =
-                { GeneratorConfig.load (Path.Combine(repository, "tools", "fable-core-ts-input")) with
+                { CatalogLibraryLab.config with
                     ModuleName = Some "Library.Consumer"
                     CompilerLib = CompilerLibConfig.Default
                     DeclarationCatalog = true
                     PublicInputs =
                         if label = "mixed public paths" then Some(Map.ofList [".", "index.d.ts"; "./globals", "globals.d.ts"])
                         else None
-                    DeclarationReferences = [coreCatalog] }
+                    DeclarationReferences = [reference] }
             let output = Path.Combine(scratch.Path, "consumer")
             Pipeline.run config package output |> Async.RunSynchronously |> ignore
             use actual = JsonDocument.Parse(File.ReadAllText(Path.Combine(output, "declarations.json")))
-            use producer = JsonDocument.Parse(File.ReadAllText coreCatalog)
+            use producer = JsonDocument.Parse(File.ReadAllText reference)
             let declarations = actual.RootElement.GetProperty("declarations").EnumerateArray() |> Seq.toArray
-            for name in ["Fable.Core.TS.Es.Record"; "Fable.Core.TS.Dom.AudioWorkletNodeOptions"] do
+            for name in ["Library.Owner.Dom.TextStreamReader"; "Library.Owner.Dom.TextStreamWriter"] do
                 let expected = producer.RootElement.GetProperty("declarations").EnumerateArray()
                                |> Seq.find (fun d -> d.GetProperty("fSharpName").GetString() = name)
                 let reused = declarations |> Array.find (fun d -> d.GetProperty("fSharpName").GetString() = name)
                 for field in ["identity"; "api"; "owner"] do
                     Expect.equal (reused.GetProperty(field).GetString()) (expected.GetProperty(field).GetString())
                         (name + " authenticates " + field + " independently of entry form")
-            let recordAlias = if label = "local library-name collision" then "Record2" else "Record"
+            let readerAlias = if label = "local library-name collision" then "TextStreamReader2" else "TextStreamReader"
             let code, errors =
                 DeclarationCatalogTests.compileConsumer scratch.Path
-                    ["consumer/groups/TypeScript.Lib.fs"; "consumer/Library.Consumer.fs"]
-                    ("module Library.Check\nlet accept (value: TypeScript.Lib.Dom.AudioWorkletNodeOptions) : Fable.Core.TS.Dom.AudioWorkletNodeOptions = value\nlet record (value: TypeScript.Lib.Es." + recordAlias + "<string, float>) : Fable.Core.TS.Es.Record<string, float> = value\nlet parameterData (value: TypeScript.Lib.Dom.AudioWorkletNodeOptions) : Fable.Core.JS.JS.Record<string, float> option = value.parameterData\n")
-            Expect.equal code 0 errors
+                    [library; "consumer/groups/TypeScript.Lib.fs"; "consumer/Library.Consumer.fs"]
+                    ("module Library.Check\nlet accept (value: TypeScript.Lib.Dom." + readerAlias + ") : Library.Owner.Dom.TextStreamReader = value\nlet writer (value: TypeScript.Lib.Dom.TextStreamWriter) : Library.Owner.Dom.TextStreamWriter = value\n")
+            Expect.equal code 0 errors)
 ]
 
 [<Tests>]
 let augmentationTests = testSequenced <| testList "catalog library ambient authentication" [
     testCase "global value augmentation cannot reuse an unchanged global-object catalogue" <| fun () ->
+      CatalogLibraryLab.withProducer (fun reference _ ->
         use scratch = Scratch.directory "catalog-library-augmentation-lab"
         let package = Path.Combine(scratch.Path, "package")
         Directory.CreateDirectory package |> ignore
         File.WriteAllText(Path.Combine(package, "package.json"),
             """{"name":"catalog-library-augmentation-lab","version":"1.0.0","types":"index.d.ts"}""")
         File.WriteAllText(Path.Combine(package, "index.d.ts"),
-            "declare function accept(value: AudioWorkletNodeOptions): void;")
+            "declare function accept(value: TextStreamReader): void;")
         let config =
-            { GeneratorConfig.load (Path.Combine(repository, "tools", "fable-core-ts-input")) with
+            { CatalogLibraryLab.config with
                 CompilerLib = CompilerLibConfig.Default
                 DeclarationCatalog = true
-                DeclarationReferences = [coreCatalog] }
+                DeclarationReferences = [reference] }
         let output = Path.Combine(scratch.Path, "rejected")
         Expect.throwsC
             (fun () -> Pipeline.run config package output |> Async.RunSynchronously |> ignore)
             (fun error -> Expect.stringContains error.Message "source hash mismatch" "changed globalThis closure remains authenticated")
-        Expect.isFalse (Directory.Exists output) "authentication happens before writing output"
+        Expect.isFalse (Directory.Exists output) "authentication happens before writing output")
 ]
 
 [<Tests>]

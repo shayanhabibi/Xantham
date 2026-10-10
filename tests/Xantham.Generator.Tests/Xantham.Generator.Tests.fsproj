@@ -24,6 +24,7 @@
         <Compile Include="CatalogFixtures.fs" />
         <Compile Include="DeclarationCatalog.test.fs" />
         <Compile Include="CatalogPortability.test.fs" />
+        <Compile Include="CatalogLibraryLab.fs" />
         <Compile Include="CatalogLibrary.test.fs" />
         <Compile Include="CatalogLibraryEntry.test.fs" />
         <Compile Include="CatalogMember.test.fs" />

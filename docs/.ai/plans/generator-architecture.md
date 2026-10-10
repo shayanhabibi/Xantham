@@ -2007,12 +2007,29 @@ arity repair qualified it only for some consumers, causing different emitted API
 contract advances to 2 and API contract to 3 for this emitted ABI correction. Core.TS and dependent producers require
 regeneration; source and API authentication remain strict.
 
-The full Core.TS matrix covers function, value, interface, namespace, default, re-export,
-unrelated export, primitive aliases, local Record/ReadonlyRecord collisions, type-only global
-and mixed public entries, with
-reader authentication and compiled Record/AudioWorkletNodeOptions aliases. A global function
-adds a genuine `typeof globalThis` member: its changed source closure must still reject reuse
-of the unaugmented Core.TS catalogue. This is distinct from the false entry-dependent hashes.
+The entry matrix covers empty module, function, value, interface, namespace, default, re-export,
+unrelated export, primitive aliases, local library-name/ReadonlyRecord collisions, type-only
+global and mixed public entries against a freshly produced ES5/worker/scripthost catalogue.
+Each entry authenticates and compiles reused TextStreamReader/TextStreamWriter aliases.
+The worker library supplies a declaration-backed path to the synthesized global object;
+scripthost alone cannot catalogue that object. A single full Core.TS smoke retains semantic
+re-emission, Map/HTMLElement and AudioWorkletNodeOptions reuse, and Record/ReadonlyRecord
+collision checks. A global function adds a genuine `typeof globalThis` member: its changed
+source closure must still reject reuse of the unaugmented catalogue. This is distinct from
+the false entry-dependent hashes.
+
+Reference transport, structure and compatibility checks now run immediately after bootstrap,
+before Harvest/Resolve/Shape, using the same cached compiler identity as final authentication.
+The later catalogue pass still checks source closures, F# APIs, owners and variants. This
+changes rejection order for incompatible inputs without accepting additional catalogues or
+changing contract versions. CI Expecto commands emit per-test timings so future repeated
+large-profile traversals can be identified in the job log.
+
+Runtime follow-up validation: the unfiltered Windows CI-mode `build.fsx -- test --run-gate`
+passed 1,258 Generator tests, 99 Wire tests (one existing ignored case per suite), 468 Fable
+checks and the Partas gate. The Generator suite took 8m42s and the complete pipeline 9m48s.
+All tracked goldens and Core.TS artefacts stayed unchanged. A full ESNext/DOM input with an
+incompatible compiler-release reference rejected in 0.55s before declaration traversal.
 
 Validation: the full Windows `build.fsx -- test --run-gate` pipeline passed: 1,249 Generator
 tests, 99 Wire tests (one existing ignored case in each suite), 468 Fable checks and the real
