@@ -1,10 +1,12 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
-const os = require('node:os');
 const path = require('node:path');
 const { execFileSync } = require('node:child_process');
 const bot = require('./release-bot.cjs');
+const { run: validateRelease } = require('./release-versions.cjs');
+const establishedPackages = ['Xantham.Cli', 'Xantham.TypeScript.Wire', 'Xantham.Generator',
+  'Xantham.Fable.Core', 'Xantham.Fable.Core.TS', 'Xantham.Fable.Node'];
 
 function pr() {
   return { state: 'open', head: { ref: 'develop', sha: 'head', repo: { full_name: 'owner/repo' } },
@@ -36,21 +38,23 @@ test('closed, fork and feature PRs cannot publish release updates', () => {
   assert.throws(() => bot.verifyPullRequest(pr(), 'owner/repo', { head: 'head', base: 'old' }), /moved/);
 });
 test('release commits contain only known project versions and changelogs', () => {
-  bot.verifyChangedPaths(['src/Xantham.Cli/Xantham.Cli.fsproj', 'src/Xantham.Fable.Node/CHANGELOG.md']);
+  bot.verifyChangedPaths(['src/Xantham.Cli/Xantham.Cli.fsproj', 'src/Xantham.Fable.Node/CHANGELOG.md',
+    'src/Xantham.Generator.Myriad/Xantham.Generator.Myriad.fsproj', 'src/Xantham.Generator.Myriad/CHANGELOG.md']);
   for (const file of ['.github/workflows/test.yml', 'src/Xantham.Cli/Program.fs', 'src/Unknown/CHANGELOG.md']) {
     assert.throws(() => bot.verifyChangedPaths([file]), /outside/);
   }
 });
 
-function fixture(t) {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'xantham-release-bot-'));
+function fixture(t, names = [...establishedPackages, 'Xantham.Generator.Myriad']) {
+  const scratch = path.resolve(__dirname, '../../tests/.scratch');
+  fs.mkdirSync(scratch, { recursive: true });
+  const root = fs.mkdtempSync(path.join(scratch, 'xantham-release-bot-'));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
   git('init', '-b', 'develop');
   git('config', 'core.autocrlf', 'false');
   git('config', 'user.name', 'Test');
   git('config', 'user.email', 'test@example.test');
-  const names = ['Xantham.Cli', 'Xantham.TypeScript.Wire', 'Xantham.Generator', 'Xantham.Fable.Core', 'Xantham.Fable.Core.TS', 'Xantham.Fable.Node'];
   for (const name of names) {
     fs.mkdirSync(path.join(root, 'src', name), { recursive: true });
     fs.writeFileSync(path.join(root, 'src', name, `${name}.fsproj`), '<Project><PropertyGroup><Version>1.0.0</Version></PropertyGroup></Project>\n');
@@ -83,6 +87,24 @@ test('preview validates versions but does not commit, push, or dispatch', async 
   assert.equal(f.git('rev-parse', 'HEAD'), f.head);
   assert.equal(f.git('ls-remote', 'origin', 'refs/heads/develop').split('\t')[0], f.head);
   assert.deepEqual(f.dispatched, []);
+});
+
+test('trusted policy still prepares the established six-package release', async t => {
+  const f = fixture(t, establishedPackages);
+  f.input.request.preview = true;
+  await bot.finish(f.input);
+  assert.equal(f.git('rev-parse', 'HEAD'), f.head);
+  assert.deepEqual(f.dispatched, []);
+});
+
+test('package counts cannot substitute an unknown package or omit an established one', t => {
+  for (const names of [[...establishedPackages, 'Unknown'],
+    [...establishedPackages.filter(name => name !== 'Xantham.TypeScript.Wire'), 'Xantham.Generator.Myriad']]) {
+    const f = fixture(t, names);
+    assert.throws(() => validateRelease(f.input.request.base, f.input.root), /Expected the six established packages/);
+    assert.equal(f.git('rev-parse', 'HEAD'), f.head);
+    assert.deepEqual(f.dispatched, []);
+  }
 });
 test('release pushes once with bot identity; retries dispatch checks without another version commit', async t => {
   const f = fixture(t);
