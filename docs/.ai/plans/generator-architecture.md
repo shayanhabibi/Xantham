@@ -2009,7 +2009,7 @@ regeneration; source and API authentication remain strict.
 
 The entry matrix covers empty module, function, value, interface, namespace, default, re-export,
 unrelated export, primitive aliases, local library-name/ReadonlyRecord collisions, type-only
-global and mixed public entries against a freshly produced ES5/worker/scripthost catalogue.
+global and mixed public entries against a shared ES5/worker/scripthost catalogue.
 Each entry authenticates and compiles reused TextStreamReader/TextStreamWriter aliases.
 The worker library supplies a declaration-backed path to the synthesized global object;
 scripthost alone cannot catalogue that object. A single full Core.TS smoke retains semantic
@@ -2017,6 +2017,12 @@ re-emission, Map/HTMLElement and AudioWorkletNodeOptions reuse, and Record/Reado
 collision checks. A global function adds a genuine `typeof globalThis` member: its changed
 source closure must still reject reuse of the unaugmented catalogue. This is distinct from
 the false entry-dependent hashes.
+
+The small producer is generated lazily once per test process. Every consumer still starts a
+fresh compiler session, and rejection tests mutate their own catalogue copies. The Expecto
+runner owns the producer's scratch-directory lifetime, including cleanup after failures;
+producer-generation failures clean up before propagating. This removes 21 repeated setup runs
+without dropping entry cases or sharing mutable consumer state.
 
 Reference transport, structure and compatibility checks now run immediately after bootstrap,
 before Harvest/Resolve/Shape, using the same cached compiler identity as final authentication.
@@ -2027,7 +2033,9 @@ large-profile traversals can be identified in the job log.
 
 Runtime follow-up validation: the unfiltered Windows CI-mode `build.fsx -- test --run-gate`
 passed 1,258 Generator tests, 99 Wire tests (one existing ignored case per suite), 468 Fable
-checks and the Partas gate. The Generator suite took 8m42s and the complete pipeline 9m48s.
+checks and the Partas gate. With the shared producer, the Generator suite took 7m11s and the
+complete pipeline 9m21s. The first CI run before producer sharing reduced the Test step from
+41m58s to 24m51s; the Generator suite fell from 37m45s to 19m41s on that Linux runner.
 All tracked goldens and Core.TS artefacts stayed unchanged. A full ESNext/DOM input with an
 incompatible compiler-release reference rejected in 0.55s before declaration traversal.
 
